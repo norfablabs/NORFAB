@@ -65,7 +65,6 @@ class NFPWorker(object):
     Args:
         address (str): Address to route to.
         socket: The socket object used for communication.
-        socket_lock: The lock object to synchronize socket access.
         multiplier (int): Multiplier value, e.g., 6 times.
         keepalive (int): Keepalive interval in milliseconds, e.g., 5000 ms.
         service (NFPService, optional): The service instance. Defaults to None.
@@ -75,7 +74,6 @@ class NFPWorker(object):
         self,
         address: str,
         socket: zmq.Socket,
-        socket_lock: threading.Lock,
         multiplier: int,  # e.g. 6 times
         keepalive: int,  # e.g. 5000 ms
         service: Optional[NFPService] = None,
@@ -87,20 +85,17 @@ class NFPWorker(object):
         self.exit_event = threading.Event()
         self.keepalive = keepalive
         self.multiplier = multiplier
-        self.socket_lock = socket_lock
         self.build_message = NFP.MessageBuilder()
 
     def start_keepalives(self) -> None:
         self.keepaliver = KeepAliver(
             address=self.address,
-            socket=self.socket,
             multiplier=self.multiplier,
             keepalive=self.keepalive,
             exit_event=self.exit_event,
             service=self.service.name,
             whoami=NFP.BROKER,
             name="NFPBroker",
-            socket_lock=self.socket_lock,
         )
         self.keepaliver.start()
 
@@ -137,8 +132,7 @@ class NFPWorker(object):
             msg = self.build_message.broker_to_worker_disconnect(
                 worker_address=self.address, service=self.service.name
             )
-            with self.socket_lock:
-                self.socket.send_multipart(msg)
+            self.socket.send_multipart(msg)
 
 
 class NFPBroker:
@@ -160,7 +154,6 @@ class NFPBroker:
         auth (ThreadAuthenticator): The authenticator for the ZeroMQ context.
         socket (zmq.Socket): The ZeroMQ socket.
         poller (zmq.Poller): The ZeroMQ poller.
-        socket_lock (threading.Lock): The lock to protect the socket object.
 
     Methods:
         mediate(self):
@@ -284,9 +277,6 @@ class NFPBroker:
         self.poller = zmq.Poller()
         self.poller.register(self.socket, zmq.POLLIN)
         self.socket.bind(endpoint)
-        self.socket_lock = (
-            threading.Lock()
-        )  # used for keepalives to protect socket object
 
         init_done_event.set()  # signal finished initializing broker
         log.debug(f"NFPBroker - is ready and listening on {endpoint}")
@@ -328,19 +318,14 @@ class NFPBroker:
         while True:
             try:
                 msg = None
-                # ZeroMQ sockets are not thread-safe. Keep polling and receiving
-                # under the same lock used by the worker keepalive threads so the
-                # ROUTER socket is never accessed concurrently. Use a short poll
-                # interval to avoid delaying keepalive sends for up to a second.
-                with self.socket_lock:
-                    items = self.poller.poll(100)
-                    if items:
-                        try:
-                            msg = self.socket.recv_multipart(zmq.NOBLOCK)
-                        except zmq.Again:
-                            # The readiness notification can become stale before
-                            # recv; resume polling instead of blocking the lock.
-                            pass
+                self.send_due_keepalives()
+                items = self.poller.poll(NFP.ZMQ_SEND_RECV_POLL_TIMEOUT_MS)
+                if items:
+                    try:
+                        msg = self.socket.recv_multipart(zmq.NOBLOCK)
+                    except zmq.Again:
+                        # The readiness notification can become stale before recv.
+                        pass
             except KeyboardInterrupt:
                 break  # Interrupted
 
@@ -422,7 +407,7 @@ class NFPBroker:
         Look for and delete expired workers.
 
         This method iterates through the list of workers and checks if each worker's
-        keepalive thread is still alive. If a worker's keepalive thread is not alive,
+        keepalive state is still alive. If a worker's keepalive state is not alive,
         the worker is considered expired and is deleted from the list of workers.
         Additionally, a log message is generated indicating that the worker's keepalive
         has expired.
@@ -443,6 +428,24 @@ class NFPBroker:
                     self.delete_worker(w, False)
                     log.info(
                         f"NFPBroker - {NFP.bytest_to_text(w.address)} worker keepalives expired"
+                    )
+
+    def send_due_keepalives(self) -> None:
+        """
+        Send broker-to-worker keepalives from the broker socket owner loop.
+        """
+        for worker in list(self.workers.values()):
+            if (
+                worker is not None
+                and hasattr(worker, "keepaliver")
+                and worker.keepaliver.due()
+            ):
+                try:
+                    self.socket.send_multipart(worker.keepaliver.make_message())
+                except Exception as e:
+                    log.error(
+                        f"NFPBroker - failed to send keepalive to "
+                        f"'{NFP.bytest_to_text(worker.address)}', error '{e}'"
                     )
 
     def send_to_worker(
@@ -482,11 +485,10 @@ class NFPBroker:
         else:
             log.error(f"NFPBroker - invalid worker command: {command}")
             return
-        with self.socket_lock:
-            log.debug(
-                f"NFPBroker - sending command '{command}' to worker '{worker.address}', job '{uuid}', from client '{sender}'"
-            )
-            self.socket.send_multipart(msg)
+        log.debug(
+            f"NFPBroker - sending command '{command}' to worker '{worker.address}', job '{uuid}', from client '{sender}'"
+        )
+        self.socket.send_multipart(msg)
 
     def send_to_client(
         self, client: str, command: str, service: str, message: list
@@ -521,11 +523,10 @@ class NFPBroker:
         else:
             log.error(f"NFPBroker - invalid client command: {command}")
             return
-        with self.socket_lock:
-            log.debug(
-                f"NFPBroker - sending to client '{client}', command '{command}', service '{service}'"
-            )
-            self.socket.send_multipart(msg)
+        log.debug(
+            f"NFPBroker - sending to client '{client}', command '{command}', service '{service}'"
+        )
+        self.socket.send_multipart(msg)
 
     def process_worker(self, sender: str, msg: list) -> None:
         """
@@ -600,7 +601,6 @@ class NFPBroker:
                 socket=self.socket,
                 multiplier=self.multiplier,
                 keepalive=self.keepalive,
-                socket_lock=self.socket_lock,
             )
             log.info(f"NFPBroker - registered new worker {NFP.bytest_to_text(address)}")
 

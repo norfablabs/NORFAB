@@ -5,7 +5,7 @@ This page documents how the Python client downloads files via the built-in **Fil
 The implementation is split across:
 
 - Client: `norfab/core/client.py`
-- Broker routing: `norfab/core/broker.py`](../../norfab/core/broker.py)`
+- Broker routing: `norfab/core/broker.py`
 - Worker core queues/threads: `norfab/core/worker.py`
 - File Sharing worker tasks: `norfab/workers/filesharing_worker/filesharing_worker.py`
 - Protocol constants/builders: `norfab/core/NFP.py`
@@ -34,7 +34,7 @@ This is implemented in `norfab/core/nfapi.py`:
    - and to pick a worker that has the file
 3. Client starts a `filesharing.fetch_file` job on the chosen worker with `offset=0` and `chunk_size=256000` (by default but can be adjusted using the `chunk_size` argument).
 4. Worker reads the file and pushes each chunk using `job.stream(chunk)` (NFP `STREAM`).
-5. Client receiver thread writes each chunk to disk, updates running MD5, and sends `PUT` messages to request the next offsets until complete.
+5. Client `zmq_send_recv` thread writes each chunk to disk, updates running MD5, and sends `PUT` messages to request the next offsets until complete.
 6. When total received bytes match `size_bytes`, client closes the file and verifies the MD5.
 
 ### Flow diagram
@@ -76,16 +76,16 @@ sequenceDiagram
 
 ### Client-side threads
 
-The client uses a dedicated receiver thread and a dispatcher thread.
+The client uses a dedicated ZeroMQ send/receive thread and a dispatcher thread.
 
-- **Receiver thread**: `recv(client)`
-  - The *only* reader of the ZeroMQ socket.
+- **ZeroMQ send/receive thread**: `zmq_send_recv(client)`
+  - The *only* owner of the ZeroMQ socket.
   - Parses incoming multipart frames.
   - For `NFP.STREAM`: calls `handle_stream()` and (importantly) sends `NFP.PUT` requests for further chunks.
   - For `NFP.RESPONSE`/`NFP.EVENT`: updates the client-side SQLite job DB and enqueues messages for synchronous consumers.
 
 - **Dispatcher thread**: `dispatcher(client)`
-  - Finds jobs in the local job DB and sends `POST` / `GET` to the broker.
+  - Finds jobs in the local job DB and queues `POST` / `GET` messages for the socket owner thread.
   - `fetch_file()` uses this job pipeline for:
     - `filesharing.file_details` (a standard JSON response)
     - `filesharing.fetch_file` (which primarily streams data)
@@ -94,7 +94,7 @@ The client uses a dedicated receiver thread and a dispatcher thread.
 
 Each worker runs a small set of queue-driven threads.
 
-- `recv(worker, destroy_event)`: reads from broker socket and fan-outs by command into queues
+- `zmq_send_recv(worker, destroy_event)`: owns the broker socket, sends queued outbound messages and keepalives, and fan-outs received commands into queues
 - `_post(...)`: handles `NFP.POST` (creates job record + ACK)
 - `_get(...)`: handles `NFP.GET` (status/result polling)
 - `_event(...)`: emits `NFP.EVENT`
@@ -114,7 +114,7 @@ This section describes the multipart frame layout as it appears to each endpoint
 
 The client is a `zmq.DEALER`. The broker is a `zmq.ROUTER`.
 
-From the client’s perspective (what `recv(client)` expects):
+From the client’s perspective (what `zmq_send_recv(client)` expects):
 
 - Incoming from broker:
 
@@ -141,7 +141,7 @@ Broker → worker (built by `NFP.MessageBuilder.broker_to_worker_put`):
 [ worker_id, empty, NFP.BROKER, NFP.PUT, sender_id, empty, uuid, request_json ]
 ```
 
-Worker-side `recv(worker, ...)` strips the initial `empty`, reads `header` + `command`, then pushes the remaining frames into `put_queue`.
+Worker-side `zmq_send_recv(worker, ...)` strips the initial `empty`, reads `header` + `command`, then pushes the remaining frames into `put_queue`.
 
 In `_put(...)`, the queued `work` list is treated as:
 

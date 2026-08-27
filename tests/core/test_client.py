@@ -1,12 +1,19 @@
 import pprint
-import shutil
+import queue
+import threading
 import time
 from pathlib import Path
 from uuid import uuid4
 
 import pytest
 
-from norfab.core.client import JobStatus
+from norfab.core import NFP
+from norfab.core.client import (
+    JobStatus,
+    NFPClient,
+    NFPJobFuture,
+    handle_response,
+)
 from norfab.core.nfapi import NorFab
 
 pytestmark = pytest.mark.core
@@ -1100,3 +1107,133 @@ class TestJobStatusTransitions:
 
         job = nfclient.job_db.get_job(job_uuid)
         assert len(job["workers_completed"]) == 2
+
+    def test_future_prefers_final_job_snapshot(self, nfclient):
+        """A completed snapshot remains authoritative over mutable database state."""
+        job_uuid = uuid4().hex
+        expected_result = {"nornir-worker-1": {"result": "success"}}
+        nfclient.job_db.add_job(
+            uuid=job_uuid,
+            service="nornir",
+            task="echo",
+            workers=["nornir-worker-1"],
+            args=[],
+            kwargs={},
+            timeout=600,
+            deadline=time.time() + 600,
+        )
+        nfclient.job_db.update_job(job_uuid, status=JobStatus.STARTED)
+
+        future = NFPJobFuture(
+            client=nfclient,
+            uuid=job_uuid,
+            service="nornir",
+            task="echo",
+            workers=["nornir-worker-1"],
+            timeout=600,
+            kwargs={},
+        )
+        final_job_snapshot = nfclient.job_db.get_job(job_uuid)
+        final_job_snapshot["status"] = JobStatus.COMPLETED
+        final_job_snapshot["result_data"] = expected_result
+        future.mark_done(final_job_snapshot)
+
+        assert future.result(timeout=1) == expected_result
+
+    @pytest.mark.parametrize(
+        ("terminal_status", "later_status"),
+        [
+            (JobStatus.COMPLETED, JobStatus.STARTED),
+            (JobStatus.COMPLETED, JobStatus.FAILED),
+            (JobStatus.FAILED, JobStatus.STARTED),
+            (JobStatus.FAILED, JobStatus.COMPLETED),
+            (JobStatus.STALE, JobStatus.STARTED),
+            (JobStatus.STALE, JobStatus.COMPLETED),
+        ],
+    )
+    def test_database_rejects_transition_from_terminal_status(
+        self, nfclient, terminal_status, later_status
+    ):
+        """Database updates cannot replace a terminal status."""
+        job_uuid = uuid4().hex
+        nfclient.job_db.add_job(
+            uuid=job_uuid,
+            service="nornir",
+            task="echo",
+            workers=["nornir-worker-1"],
+            args=[],
+            kwargs={},
+            timeout=600,
+            deadline=time.time() + 600,
+        )
+        nfclient.job_db.update_job(job_uuid, status=terminal_status)
+
+        nfclient.job_db.update_job(job_uuid, status=later_status)
+
+        assert nfclient.job_db.get_job(job_uuid)["status"] == terminal_status
+
+    @pytest.mark.parametrize(
+        "terminal_status", [JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.STALE]
+    )
+    @pytest.mark.parametrize(
+        ("response_status", "payload"),
+        [
+            ("202", {"workers": ["nornir-worker-1"]}),
+            ("201", {"worker": "nornir-worker-1"}),
+            ("102", {"worker": "nornir-worker-1"}),
+            ("300", {"worker": "nornir-worker-1"}),
+            ("200", {"nornir-worker-1": {"result": "late"}}),
+            ("500", {"error": "late error"}),
+        ],
+    )
+    def test_terminal_job_ignores_late_responses(
+        self, nfclient, terminal_status, response_status, payload
+    ):
+        """Late responses cannot transition a finished job to another state."""
+        job_uuid = uuid4().hex
+        original_result = {"nornir-worker-1": {"result": "original"}}
+        nfclient.job_db.add_job(
+            uuid=job_uuid,
+            service="nornir",
+            task="echo",
+            workers=["nornir-worker-1"],
+            args=[],
+            kwargs={},
+            timeout=600,
+            deadline=time.time() + 600,
+        )
+        nfclient.job_db.update_job(
+            job_uuid,
+            status=terminal_status,
+            workers_dispatched=["nornir-worker-1"],
+            workers_completed=["nornir-worker-1"],
+            result_data=original_result,
+            completed_ts=time.ctime(),
+        )
+
+        handle_response(nfclient, job_uuid, response_status, payload)
+
+        job = nfclient.job_db.get_job(job_uuid)
+        assert job["status"] == terminal_status
+        assert job["result_data"] == original_result
+
+
+def test_client_send_to_broker_queues_prepared_message() -> None:
+    client = NFPClient.__new__(NFPClient)
+    client.name = "test-client"
+    client.destroy_event = threading.Event()
+    client.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
+    client.build_message = NFP.MessageBuilder()
+
+    client.send_to_broker(
+        NFP.GET,
+        b"service",
+        b"worker",
+        b"uuid",
+        b'{"task":"show"}',
+    )
+
+    assert client.outbound_queue.qsize() == 1
+    msg = client.outbound_queue.get_nowait()
+    assert msg[1] == NFP.CLIENT
+    assert msg[2] == NFP.GET

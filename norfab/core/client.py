@@ -46,6 +46,13 @@ class JobStatus:
     STALE = "STALE"  # Job exceeded deadline without completion
 
 
+TERMINAL_JOB_STATUSES = (
+    JobStatus.COMPLETED,
+    JobStatus.FAILED,
+    JobStatus.STALE,
+)
+
+
 class ClientJobDatabase:
     """Lightweight client-side job and events store."""
 
@@ -252,10 +259,20 @@ class ClientJobDatabase:
         if not fields:
             return
 
+        where_clause = "uuid = ?"
+        where_values: List[Any] = [uuid]
+        if status is not None:
+            terminal_placeholders = ", ".join("?" for _ in TERMINAL_JOB_STATUSES)
+            where_clause += (
+                f" AND (status NOT IN ({terminal_placeholders}) OR status = ?)"
+            )
+            where_values.extend(TERMINAL_JOB_STATUSES)
+            where_values.append(status)
+
         with self._transaction(write=True) as conn:
             conn.execute(
-                f"UPDATE jobs SET {', '.join(fields)} WHERE uuid = ?",
-                (*values, uuid),
+                f"UPDATE jobs SET {', '.join(fields)} WHERE {where_clause}",
+                (*values, *where_values),
             )
 
     def fetch_jobs(
@@ -599,7 +616,7 @@ class NFPJobFuture:
         self.kwargs = kwargs or {}
         self.events_buffer = queue.Queue(maxsize=0)
         self.done_event = threading.Event()
-        self.terminal_job = None
+        self.final_job_snapshot = None
         self.input_request_ids = set()
 
     def add_event(self, event: dict) -> bool:
@@ -615,7 +632,7 @@ class NFPJobFuture:
         return True
 
     def mark_done(self, job: dict | None = None) -> None:
-        self.terminal_job = job
+        self.final_job_snapshot = job
         if not self.done_event.is_set():
             self.done_event.set()
             self.events_buffer.put(self.terminal_marker)
@@ -647,7 +664,7 @@ class NFPJobFuture:
 
             self.done_event.wait(wait_time)
 
-        job = self.client.job_db.get_job(self.uuid) or self.terminal_job
+        job = self.final_job_snapshot or self.client.job_db.get_job(self.uuid)
         result = None
         if job and job["status"] == JobStatus.COMPLETED:
             result = job.get("result_data")
@@ -682,39 +699,61 @@ class NFPJobFuture:
         )
 
 
-def recv(client) -> None:
+def zmq_send_recv(client: object) -> None:
     """
-    Receiver thread: processes all incoming messages from the broker and updates the database.
+    ZeroMQ send/receive thread.
 
-    This function continuously polls the client's broker socket for messages
-    until the client's exit event is set. It handles:
+    This function owns the client's broker socket. Other threads submit prepared
+    messages to the outbound queue instead of touching the socket directly.
+    It continuously drains outbound messages and polls the broker socket until
+    the client's exit event is set. It handles:
     - EVENT messages: stored in the events table
     - RESPONSE messages: updates job status in the database based on response type
 
-    The receiver thread is the ONLY thread that reads from the socket, eliminating
-    contention issues. All job state changes are persisted to the database.
+    This thread is the ONLY thread that sends, polls, or receives on the socket.
+    All job state changes are persisted to the database.
 
     Args:
         client (object): The client instance containing the broker socket,
                          poller, job_db, and configuration.
     """
+    last_poll_error_log = 0
     while not client.exit_event.is_set() and not client.destroy_event.is_set():
+        for _ in range(NFP.ZMQ_SEND_RECV_DRAIN_LIMIT):
+            try:
+                outbound = client.outbound_queue.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                if not client.destroy_event.is_set():
+                    client.broker_socket.send_multipart(outbound)
+                    client.stats_send_to_broker += 1
+            except Exception as e:
+                log.error(
+                    f"{client.name} - failed to send queued message to broker, "
+                    f"error '{e}'",
+                    exc_info=True,
+                )
+
         msg = None
         try:
-            # Serialize polling and receiving with sends performed by the
-            # dispatcher and API threads. ZeroMQ sockets are not thread-safe.
-            with client.socket_lock:
-                items = client.poller.poll(100)
-                if items:
-                    try:
-                        msg = client.broker_socket.recv_multipart(zmq.NOBLOCK)
-                    except zmq.Again:
-                        # Readiness can become stale; resume polling instead of
-                        # blocking while holding the socket lock.
-                        pass
+            items = client.poller.poll(NFP.ZMQ_SEND_RECV_POLL_TIMEOUT_MS)
+            if items:
+                try:
+                    msg = client.broker_socket.recv_multipart(zmq.NOBLOCK)
+                except zmq.Again:
+                    # Readiness can become stale; resume polling instead of blocking.
+                    pass
         except KeyboardInterrupt:
             break
-        except Exception:
+        except Exception as e:
+            if time.time() - last_poll_error_log > 10:
+                log.error(
+                    f"{client.name} - failed to poll broker socket, error '{e}'",
+                    exc_info=True,
+                )
+                last_poll_error_log = time.time()
+            time.sleep(0.1)
             continue
 
         if msg is None:
@@ -737,7 +776,14 @@ def recv(client) -> None:
 
         if command == NFP.STREAM:
             payload = msg[6]  # payload is a chunk of bytes
-            handle_stream(client, juuid, status, payload)
+            try:
+                handle_stream(client, juuid, status, payload)
+            except Exception as e:
+                log.error(
+                    f"{client.name} - failed to process stream for job {juuid}, "
+                    f"error '{e}'",
+                    exc_info=True,
+                )
             continue
 
         try:
@@ -803,6 +849,16 @@ def handle_response(client: object, juuid: str, status: str, payload: dict) -> N
     job = client.job_db.get_job(juuid)
     if not job:
         log.debug(f"{client.name} - received response for unknown job {juuid}")
+        return
+
+    # A finished job is immutable. Late acknowledgements and polling responses
+    # may still arrive after completion, but must not reopen or otherwise alter
+    # its final state.
+    if job["status"] in TERMINAL_JOB_STATUSES:
+        log.debug(
+            f"{client.name} - ignoring status {status} response for "
+            f"{job['status'].lower()} job {juuid}, job already finished"
+        )
         return
 
     # Broker accepted POST - contains dispatched workers list
@@ -1118,8 +1174,8 @@ def dispatcher(client) -> None:
     1. Finds NEW jobs and sends POST requests to broker
     2. Finds DISPATCHED/STARTED jobs and sends GET requests to poll for results
 
-    It does NOT wait for responses - the receiver thread handles all incoming
-    messages and updates the database.
+    It does NOT wait for responses - the zmq_send_recv thread handles all
+    incoming messages and updates the database.
 
     Args:
         client (object): The client instance containing job_db, exit_event, and configuration.
@@ -1215,7 +1271,6 @@ class NFPClient(object):
         )
         self.file_transfers = {}  # file transfers tracker
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
-        self.socket_lock = threading.Lock()  # used to protect socket object
         self.build_message = NFP.MessageBuilder()
 
         # create base directories
@@ -1252,6 +1307,7 @@ class NFPClient(object):
             threading.Event()
         )  # destroy event, used by worker to stop its client
         self.mmi_queue = queue.Queue(maxsize=0)
+        self.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
         self.job_futures = {}
 
         # Configuration for dispatcher
@@ -1259,9 +1315,12 @@ class NFPClient(object):
         self.dispatch_batch_size = 10  # Max jobs to process per dispatch cycle
         self.recover_job_futures()
 
-        # start receiver thread - handles all incoming messages
+        # start ZeroMQ owner thread - handles queued outgoing and incoming messages
         self.recv_thread = threading.Thread(
-            target=recv, daemon=True, name=f"{self.name}_recv_thread", args=(self,)
+            target=zmq_send_recv,
+            daemon=True,
+            name=f"{self.name}_zmq_send_recv_thread",
+            args=(self,),
         )
         self.recv_thread.start()
 
@@ -1387,13 +1446,18 @@ class NFPClient(object):
             )
             return
 
-        log.debug(f"{self.name} - sending '{msg}'")
+        log.debug(f"{self.name} - queueing '{msg}'")
 
-        with self.socket_lock:
-            if self.destroy_event.is_set():
-                return
-            self.broker_socket.send_multipart(msg)
-            self.stats_send_to_broker += 1
+        if self.destroy_event.is_set():
+            return
+
+        try:
+            self.outbound_queue.put_nowait(msg)
+        except queue.Full:
+            log.warning(
+                f"{self.name} - outbound queue is full, dropping '{command}' "
+                f"message to broker"
+            )
 
     def mmi(
         self,

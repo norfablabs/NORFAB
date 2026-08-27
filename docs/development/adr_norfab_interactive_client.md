@@ -64,7 +64,7 @@ The current implementation already has most pieces required for this design.
 `norfab/core/client.py` has:
 
 - Client-side SQLite job storage.
-- A receiver thread that is the only socket reader.
+- A `zmq_send_recv` thread that is the only socket owner.
 - A dispatcher thread that submits `NEW` jobs with `POST` and polls active jobs
   with `GET`.
 - `run_job()` that creates a job record and blocks by polling the client job
