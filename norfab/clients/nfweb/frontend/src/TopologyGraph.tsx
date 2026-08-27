@@ -83,6 +83,17 @@ interface TopologyGraphProps {
   bloomEnabled: boolean;
 }
 
+function formatBitsPerSecond(value: number): string {
+  if (!value) return "0 bps";
+  const units = ["bps", "Kbps", "Mbps", "Gbps", "Tbps"];
+  const unit = Math.min(
+    units.length - 1,
+    Math.floor(Math.log10(value) / 3),
+  );
+  const scaled = value / 1_000 ** unit;
+  return `${scaled >= 100 ? scaled.toFixed(0) : scaled.toFixed(1)} ${units[unit]}`;
+}
+
 export default function TopologyGraph({
   graphRef,
   width,
@@ -128,7 +139,7 @@ export default function TopologyGraph({
         const item = node as GraphNode;
         return item.searchMatch ? "#ffffff" : HEALTH_COLORS[item.health];
       }}
-      nodeOpacity={0.92}
+      nodeOpacity={1}
       nodeResolution={12}
       nodeRelSize={2.2}
       nodeVal={(node) => {
@@ -139,29 +150,68 @@ export default function TopologyGraph({
       nodeThreeObjectExtend
       linkLabel={(link) => {
         const item = link as RenderedTopologyLink;
+        if (item.trafficLane) {
+          const source = endpointId(item.source);
+          const target = endpointId(item.target);
+          const [from, to] =
+            item.trafficLane === "forward"
+              ? [source, target]
+              : [target, source];
+          return `<b>Traffic</b><br>${escapeHtml(from)} → ${escapeHtml(to)}<br>${escapeHtml(formatBitsPerSecond(item.trafficRateBps ?? 0))} / ${escapeHtml(`${(item.trafficUtilization ?? 0).toFixed(1)}%`)}`;
+        }
         const count = `${item.memberCount} ${item.memberCount === 1 ? "link" : "links"}`;
         return `<b>${escapeHtml(LAYER_LABELS[item.layer] ?? item.layer)}</b><br>${escapeHtml(endpointId(item.source))} ↔ ${escapeHtml(endpointId(item.target))}<br>${escapeHtml(count)} / ${escapeHtml(item.health)}`;
       }}
       linkColor={(link) => {
         const item = link as RenderedTopologyLink;
+        if (item.trafficColor) return item.trafficColor;
         return item.searchMatch
           ? "#ffffff"
           : LAYER_COLORS[item.layer] ?? HEALTH_COLORS.unknown;
       }}
       linkOpacity={0.72}
-      linkWidth={(link) =>
-        0.7 +
-        Math.min(numericMetric(link as RenderedTopologyLink), 100) / 22 +
-        ((link as RenderedTopologyLink).searchMatch ? 2.2 : 0)
-      }
+      linkWidth={(link) => {
+        const item = link as RenderedTopologyLink;
+        if (item.trafficLane) {
+          return 1 + Math.min(item.trafficUtilization ?? 0, 100) / 45;
+        }
+        return (
+          0.7 +
+          Math.min(numericMetric(item), 100) / 22 +
+          (item.searchMatch ? 2.2 : 0)
+        );
+      }}
       linkCurvature="curvature"
       linkCurveRotation="rotation"
+      linkDirectionalParticles={(link) => {
+        const item = link as RenderedTopologyLink;
+        if (!item.trafficLane) return 0;
+        const activity = item.trafficRateBps || item.trafficUtilization || 0;
+        if (!activity) return 0;
+        return 1 + Math.min(3, Math.floor(Math.log10(activity + 1) / 3));
+      }}
+      linkDirectionalParticleColor={(link) =>
+        (link as RenderedTopologyLink).trafficColor ?? "#ffffff"
+      }
+      linkDirectionalParticleSpeed={(link) =>
+        (link as RenderedTopologyLink).particleSpeed ?? 0
+      }
+      linkDirectionalParticleWidth={(link) => {
+        const item = link as RenderedTopologyLink;
+        return item.trafficLane
+          ? 1.4 + Math.min(item.trafficUtilization ?? 0, 100) / 80
+          : 0;
+      }}
       onNodeClick={(node) =>
         selectGraphItem({ kind: "node", value: node as GraphNode })
       }
-      onLinkClick={(link) =>
-        selectGraphItem({ kind: "link", value: link as RenderedTopologyLink })
-      }
+      onLinkClick={(link) => {
+        const item = link as RenderedTopologyLink;
+        selectGraphItem({
+          kind: "link",
+          value: item.selectionLink ?? item,
+        });
+      }}
       onNodeDragEnd={rememberNodePositions}
       onBackgroundClick={() => selectGraphItem(null)}
       onEngineStop={onEngineStop}

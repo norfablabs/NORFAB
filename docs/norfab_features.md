@@ -60,10 +60,13 @@ shell provides
 an inventory-configured footer message and quick links to FastAPI, documentation,
 and the NORFAB repository. Common controls use the maintained Mantine React
 component system with Tabler icons, color-matched L1 and BGP link selectors,
-toggleable 3D bloom, and Enter-submitted topology search that highlights matches
-without removing non-matching elements. It also provides nested application
-navigation and searchable, sortable inspector tables. The
-local runtime supports graceful Ctrl+C
+an L2 traffic overlay that renders telemetry-backed physical-link directions as
+shallow, independently colored and animated lanes without obscuring BGP peerings,
+fully opaque health-colored nodes with matching States-dropdown keys, toggleable
+3D bloom, and Enter-submitted topology
+search that highlights matches without removing non-matching elements. It also
+provides nested application navigation and searchable, sortable inspector tables.
+The local runtime supports graceful Ctrl+C
 shutdown with a second-interrupt forced-exit fallback. **Topology use cases:**
 weather-map dashboards, topology exploration, current-state windows, incident
 timelines, and intended-versus-observed context. **Current limitations:** the first

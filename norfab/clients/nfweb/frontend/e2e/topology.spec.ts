@@ -32,7 +32,12 @@ const snapshot = {
       target: "spine-01",
       layer: "lldp",
       health: "healthy",
-      metrics: {},
+      metrics: {
+        source_rate_bps_out: 2_500_000_000,
+        target_rate_bps_out: 850_000_000,
+        source_output_utilization: 62,
+        target_output_utilization: 24,
+      },
       attributes: {
         source_interface: "Ethernet1",
         target_interface: "Ethernet1",
@@ -44,7 +49,12 @@ const snapshot = {
       target: "leaf-01",
       layer: "lldp",
       health: "healthy",
-      metrics: {},
+      metrics: {
+        source_rate_bps_out: 900_000_000,
+        target_rate_bps_out: 1_400_000_000,
+        source_output_utilization: 27,
+        target_output_utilization: 48,
+      },
       attributes: {
         source_interface: "Ethernet2",
         target_interface: "Ethernet2",
@@ -298,10 +308,37 @@ test("uses working Mantine toolbar controls", async ({ page }) => {
   await expect(page.getByRole("radiogroup", { name: "Node size mode" })).toBeVisible();
   await expect(page.getByRole("button", { name: "3D controls" })).toHaveCount(0);
 
+  const healthFilter = page.getByRole("combobox", { name: "Health filter" });
+  await healthFilter.click();
+  const healthColors = [
+    ["Healthy", "rgb(34, 197, 94)"],
+    ["Warning", "rgb(250, 204, 21)"],
+    ["Critical", "rgb(239, 68, 68)"],
+    ["Unknown", "rgb(148, 163, 184)"],
+  ] as const;
+  for (const [state, color] of healthColors) {
+    await expect(
+      page.getByRole("option", { name: state }).locator(".health-color-key"),
+    ).toHaveCSS("background-color", color);
+  }
+  await healthFilter.press("Escape");
+
   const l1Selector = page.getByRole("button", { name: "Select L1 links" });
   const bgpSelector = page.getByRole("button", { name: "Select BGP links" });
+  const l2Selector = page.getByRole("button", { name: "Select L2 overlays" });
   await expect(l1Selector).toHaveText(/L1/);
   await expect(bgpSelector).toHaveText(/BGP/);
+  await expect(l2Selector).toHaveText(/L2/);
+
+  await l2Selector.click();
+  const trafficOverlay = page.getByRole("menuitemcheckbox", {
+    name: "Display directional traffic",
+  });
+  await expect(trafficOverlay).toHaveAttribute("aria-checked", "false");
+  await trafficOverlay.click();
+  await expect(trafficOverlay).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
+  await l2Selector.click();
 
   await l1Selector.click();
   const netboxLayer = page.getByRole("menuitemcheckbox", {

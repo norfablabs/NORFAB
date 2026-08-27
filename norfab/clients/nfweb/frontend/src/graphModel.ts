@@ -16,10 +16,10 @@ export const LAYER_COLORS: Record<string, string> = {
 };
 
 export const HEALTH_COLORS: Record<Health, string> = {
-  healthy: "#38d9c4",
-  warning: "#f6c453",
-  critical: "#ff5c7a",
-  unknown: "#667085",
+  healthy: "#22c55e",
+  warning: "#facc15",
+  critical: "#ef4444",
+  unknown: "#94a3b8",
 };
 
 export type GraphNode = TopologyNode & {
@@ -36,6 +36,10 @@ export type GraphNode = TopologyNode & {
   searchMatch?: boolean;
 };
 
+export const TRAFFIC_LANE_CURVATURE = 0.06;
+
+const TRAFFIC_LINK_LAYERS = new Set(["inventory", "lldp"]);
+
 export function selectableLayers(layers: string[]): string[] {
   return layers.filter((layer) => layer !== "interfaces");
 }
@@ -46,6 +50,13 @@ export type RenderedTopologyLink = TopologyLink & {
   memberCount: number;
   memberLinks: TopologyLink[];
   searchMatch?: boolean;
+  trafficLane?: "forward" | "reverse";
+  trafficRateBps?: number;
+  trafficUtilization?: number;
+  trafficColor?: string;
+  particleSpeed?: number;
+  visualOnly?: boolean;
+  selectionLink?: TopologyLink;
 };
 
 export type GraphData = { nodes: GraphNode[]; links: RenderedTopologyLink[] };
@@ -183,6 +194,149 @@ export function trafficMetric(
     const value = Number(link.metrics[`${side}_${metric}`]);
     return Number.isFinite(value) ? total + Math.max(0, value) : total;
   }, 0);
+}
+
+function metricNumber(value: unknown): number | undefined {
+  const parsed =
+    typeof value === "string"
+      ? Number(value.replaceAll(",", "").match(/-?\d+(?:\.\d+)?/)?.[0])
+      : Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : undefined;
+}
+
+function directionalMemberTraffic(
+  link: TopologyLink,
+  canonicalSource: string,
+): {
+  forwardRateBps: number;
+  reverseRateBps: number;
+  forwardUtilization: number;
+  reverseUtilization: number;
+  hasTelemetry: boolean;
+} {
+  const sourceIsCanonical = endpointId(link.source) === canonicalSource;
+  const rate = (key: string) => metricNumber(link.metrics[key]);
+  const maximum = (...values: Array<number | undefined>) =>
+    Math.max(0, ...values.filter((value): value is number => value !== undefined));
+  const sourceToTargetRate = maximum(
+    rate("source_rate_bps_out"),
+    rate("target_rate_bps_in"),
+  );
+  const targetToSourceRate = maximum(
+    rate("target_rate_bps_out"),
+    rate("source_rate_bps_in"),
+  );
+  const sourceToTargetUtilization = maximum(
+    rate("source_output_utilization"),
+    rate("target_input_utilization"),
+  );
+  const targetToSourceUtilization = maximum(
+    rate("target_output_utilization"),
+    rate("source_input_utilization"),
+  );
+  const hasTelemetry = Object.keys(link.metrics).some((key) =>
+    /_(?:rate_bps_(?:in|out)|(?:input|output)_utilization)$/.test(key),
+  );
+  return sourceIsCanonical
+    ? {
+        forwardRateBps: sourceToTargetRate,
+        reverseRateBps: targetToSourceRate,
+        forwardUtilization: sourceToTargetUtilization,
+        reverseUtilization: targetToSourceUtilization,
+        hasTelemetry,
+      }
+    : {
+        forwardRateBps: targetToSourceRate,
+        reverseRateBps: sourceToTargetRate,
+        forwardUtilization: targetToSourceUtilization,
+        reverseUtilization: sourceToTargetUtilization,
+        hasTelemetry,
+      };
+}
+
+export function directionalTraffic(link: RenderedTopologyLink) {
+  const canonicalSource = endpointId(link.source);
+  return link.memberLinks.reduce(
+    (traffic, member) => {
+      const memberTraffic = directionalMemberTraffic(member, canonicalSource);
+      traffic.forwardRateBps += memberTraffic.forwardRateBps;
+      traffic.reverseRateBps += memberTraffic.reverseRateBps;
+      traffic.forwardUtilization = Math.max(
+        traffic.forwardUtilization,
+        memberTraffic.forwardUtilization,
+      );
+      traffic.reverseUtilization = Math.max(
+        traffic.reverseUtilization,
+        memberTraffic.reverseUtilization,
+      );
+      traffic.hasTelemetry ||= memberTraffic.hasTelemetry;
+      return traffic;
+    },
+    {
+      forwardRateBps: 0,
+      reverseRateBps: 0,
+      forwardUtilization: 0,
+      reverseUtilization: 0,
+      hasTelemetry: false,
+    },
+  );
+}
+
+function trafficColor(utilization: number): string {
+  if (utilization >= 80) return "#ff5c7a";
+  if (utilization >= 50) return "#f6c453";
+  return "#38d9c4";
+}
+
+function trafficParticleSpeed(rateBps: number, utilization: number): number {
+  const normalized = rateBps
+    ? Math.min(1, Math.log10(rateBps + 1) / 11)
+    : Math.min(1, utilization / 100);
+  return 0.002 + normalized * 0.018;
+}
+
+export function addTrafficLanes(
+  links: RenderedTopologyLink[],
+): RenderedTopologyLink[] {
+  return links.flatMap((link) => {
+    const traffic = directionalTraffic(link);
+    if (!TRAFFIC_LINK_LAYERS.has(link.layer) || !traffic.hasTelemetry) {
+      return [link];
+    }
+    const selectionLink: TopologyLink = link;
+    const lane = (
+      direction: "forward" | "reverse",
+      rateBps: number,
+      utilization: number,
+    ): RenderedTopologyLink => ({
+      ...link,
+      id: `${link.id}:traffic:${direction}`,
+      curvature: TRAFFIC_LANE_CURVATURE,
+      rotation:
+        link.rotation + (direction === "reverse" ? Math.PI : 0),
+      trafficLane: direction,
+      trafficRateBps: rateBps,
+      trafficUtilization: utilization,
+      trafficColor: trafficColor(utilization),
+      particleSpeed:
+        trafficParticleSpeed(rateBps, utilization) *
+        (direction === "reverse" ? -1 : 1),
+      visualOnly: direction === "reverse",
+      selectionLink,
+    });
+    return [
+      lane(
+        "forward",
+        traffic.forwardRateBps,
+        traffic.forwardUtilization,
+      ),
+      lane(
+        "reverse",
+        traffic.reverseRateBps,
+        traffic.reverseUtilization,
+      ),
+    ];
+  });
 }
 
 export function addParallelCurves(links: TopologyLink[]): RenderedTopologyLink[] {

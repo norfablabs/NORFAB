@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import type { TopologyLink, TopologyNode } from "./types";
 import {
   addParallelCurves,
+  addTrafficLanes,
+  directionalTraffic,
   endpointId,
+  HEALTH_COLORS,
   linkMatchesSearch,
   nodeMatchesSearch,
   numericMetric,
   selectableLayers,
+  TRAFFIC_LANE_CURVATURE,
 } from "./graphModel";
 
 function link(
@@ -27,6 +31,15 @@ function link(
 }
 
 describe("topology graph helpers", () => {
+  it("uses the node-state colors shown by the health selector", () => {
+    expect(HEALTH_COLORS).toEqual({
+      healthy: "#22c55e",
+      warning: "#facc15",
+      critical: "#ef4444",
+      unknown: "#94a3b8",
+    });
+  });
+
   it("only exposes graph-producing layers as selectable controls", () => {
     expect(selectableLayers(["inventory", "lldp", "bgp", "interfaces"])).toEqual(
       ["inventory", "lldp", "bgp"],
@@ -138,5 +151,56 @@ describe("topology graph helpers", () => {
       ),
     ).toBe(31);
     expect(numericMetric(link("lldp:2", "spine-1", "spine-2"))).toBe(0);
+  });
+
+  it("renders directional telemetry as two independently animated lanes", () => {
+    const [bundled] = addParallelCurves([
+      link("lldp:1", "spine-1", "spine-2", {
+        source_rate_bps_out: 10_000_000,
+        target_rate_bps_out: 4_000_000,
+        source_output_utilization: 40,
+        target_output_utilization: 12,
+      }),
+      link("lldp:2", "spine-2", "spine-1", {
+        source_rate_bps_out: 6_000_000,
+        target_rate_bps_out: 8_000_000,
+        source_output_utilization: 22,
+        target_output_utilization: 55,
+      }),
+    ]);
+
+    expect(directionalTraffic(bundled)).toMatchObject({
+      forwardRateBps: 18_000_000,
+      reverseRateBps: 10_000_000,
+      forwardUtilization: 55,
+      reverseUtilization: 22,
+      hasTelemetry: true,
+    });
+    const lanes = addTrafficLanes([bundled]);
+    expect(lanes).toHaveLength(2);
+    expect(lanes.map((lane) => lane.trafficLane)).toEqual([
+      "forward",
+      "reverse",
+    ]);
+    expect(lanes[0].particleSpeed).toBeGreaterThan(0);
+    expect(lanes[1].particleSpeed).toBeLessThan(0);
+    expect(lanes[1].visualOnly).toBe(true);
+    expect(lanes.every((lane) => lane.curvature === TRAFFIC_LANE_CURVATURE)).toBe(
+      true,
+    );
+    expect(lanes[1].rotation - lanes[0].rotation).toBeCloseTo(Math.PI);
+  });
+
+  it("does not place the traffic overlay over BGP peerings", () => {
+    const [bgp] = addParallelCurves([
+      {
+        ...link("bgp:1", "spine-1", "spine-2", {
+          source_rate_bps_out: 10_000_000,
+        }),
+        layer: "bgp",
+      },
+    ]);
+
+    expect(addTrafficLanes([bgp])).toEqual([bgp]);
   });
 });

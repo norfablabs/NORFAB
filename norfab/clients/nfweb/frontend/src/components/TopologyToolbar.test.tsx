@@ -29,6 +29,7 @@ describe("TopologyToolbar", () => {
           layoutRunning={false}
           rotationEnabled
           bloomEnabled
+          trafficEnabled={false}
           rotationSpeed={1}
           nodeDistance={85}
           nodeSizeMode="fixed"
@@ -36,6 +37,7 @@ describe("TopologyToolbar", () => {
           onToggleLayout={() => undefined}
           onToggleRotation={() => undefined}
           onToggleBloom={() => undefined}
+          onToggleTraffic={() => undefined}
           onRotationSpeed={() => undefined}
           onNodeDistance={() => undefined}
           onNodeSizeMode={() => undefined}
@@ -45,7 +47,6 @@ describe("TopologyToolbar", () => {
           streamLabel="Live"
           streamColor="fabric"
           live
-          collectedAt="2026-08-25T10:15:30.000Z"
           history={[
             {
               snapshot_id: "snapshot-1",
@@ -69,6 +70,13 @@ describe("TopologyToolbar", () => {
     expect(markup).toContain("Link selectors");
     expect(markup).toContain('aria-label="Select L1 links"');
     expect(markup).toContain('aria-label="Select BGP links"');
+    expect(markup).toContain('aria-label="Select L2 overlays"');
+    expect(markup.indexOf('aria-label="Select L1 links"')).toBeLessThan(
+      markup.indexOf('aria-label="Select L2 overlays"'),
+    );
+    expect(markup.indexOf('aria-label="Select L2 overlays"')).toBeLessThan(
+      markup.indexOf('aria-label="Select BGP links"'),
+    );
     expect(markup).not.toContain('aria-label="NetBox layer"');
     expect(markup).toContain("Health filter");
     expect(markup).toContain("Pause rendering");
@@ -90,6 +98,10 @@ describe("TopologyToolbar", () => {
     expect(markup).toContain("Node size mode");
     expect(markup).toContain("Topology history controls");
     expect(markup).toContain("Topology snapshot");
+    expect(markup).not.toContain("tabler-icon-history");
+    expect(markup.indexOf('aria-label="Return to live topology"')).toBeLessThan(
+      markup.indexOf('aria-label="Topology stream: Live"'),
+    );
     expect(markup).not.toContain('aria-haspopup="dialog"');
     expect(markup).toContain('aria-haspopup="menu"');
   });

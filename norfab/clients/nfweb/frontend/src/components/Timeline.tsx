@@ -1,10 +1,9 @@
-import { ActionIcon, Group, Select, ThemeIcon, Tooltip } from "@mantine/core";
-import { IconBroadcast, IconHistory } from "@tabler/icons-react";
+import { ActionIcon, Group, Select, Tooltip } from "@mantine/core";
+import { IconBroadcast } from "@tabler/icons-react";
 import type { TopologyHistoryItem } from "../types";
 
 interface TimelineProps {
   live: boolean;
-  collectedAt?: string;
   history: TopologyHistoryItem[];
   snapshotId?: string;
   onSelect: (snapshotId: string) => void;
@@ -23,16 +22,11 @@ function formatSnapshotTimestamp(value: string): string {
 
 export default function Timeline({
   live,
-  collectedAt,
   history,
   snapshotId,
   onSelect,
   onLive,
 }: TimelineProps) {
-  const historyLabel = live
-    ? "Topology history: live now"
-    : `Topology history: ${new Date(collectedAt ?? 0).toLocaleTimeString()}`;
-
   return (
     <Group
       className="timeline-control toolbar-control"
@@ -41,11 +35,6 @@ export default function Timeline({
       role="region"
       wrap="nowrap"
     >
-      <Tooltip label={historyLabel}>
-        <ThemeIcon aria-label={historyLabel} color="gray" size="sm" variant="light">
-          <IconHistory size={14} />
-        </ThemeIcon>
-      </Tooltip>
       <Select
         aria-label="Topology snapshot"
         className="timeline-select"

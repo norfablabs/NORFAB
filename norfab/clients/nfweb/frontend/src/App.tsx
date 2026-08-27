@@ -33,6 +33,7 @@ import TopologyToolbar from "./components/TopologyToolbar";
 import type { NodeSizeMode } from "./components/TopologyToolbar";
 import {
   addParallelCurves,
+  addTrafficLanes,
   endpointId,
   numericMetric,
   linkMatchesSearch,
@@ -144,6 +145,7 @@ export default function App() {
   const [visualizationPaused, setVisualizationPaused] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
   const [bloomEnabled, setBloomEnabled] = useState(true);
+  const [trafficEnabled, setTrafficEnabled] = useState(false);
   const [rotationSpeed, setRotationSpeed] = useState(1);
   const [nodeDistance, setNodeDistance] = useState(85);
   const [nodeSizeMode, setNodeSizeMode] = useState<NodeSizeMode>("fixed");
@@ -368,11 +370,53 @@ export default function App() {
         Boolean(query) &&
         link.memberLinks.some((member) => matchingLinks.has(member.id)),
     }));
-    return { nodes, links: renderedLinks };
-  }, [snapshot, visibleLayers, activeSearch, health, layoutRunning, nodeSizeMode]);
+    return {
+      nodes,
+      links: trafficEnabled ? addTrafficLanes(renderedLinks) : renderedLinks,
+    };
+  }, [
+    snapshot,
+    visibleLayers,
+    activeSearch,
+    health,
+    layoutRunning,
+    nodeSizeMode,
+    trafficEnabled,
+  ]);
 
   useEffect(() => {
     renderedGraphData.current = graphData;
+  }, [graphData]);
+
+  useEffect(() => {
+    const linkForce = graphRef.current?.d3Force("link") as
+      | {
+          strength: (
+            accessor: (link: RenderedTopologyLink) => number,
+          ) => unknown;
+        }
+      | undefined;
+    if (!linkForce) return;
+    const degrees = new Map<string, number>();
+    graphData.links.forEach((link) => {
+      if (link.visualOnly) return;
+      [endpointId(link.source), endpointId(link.target)].forEach((nodeId) =>
+        degrees.set(nodeId, (degrees.get(nodeId) ?? 0) + 1),
+      );
+    });
+    linkForce.strength((link) => {
+      if (link.visualOnly) return 0;
+      return (
+        1 /
+        Math.max(
+          1,
+          Math.min(
+            degrees.get(endpointId(link.source)) ?? 1,
+            degrees.get(endpointId(link.target)) ?? 1,
+          ),
+        )
+      );
+    });
   }, [graphData]);
 
   const relatedConnections = useMemo(() => {
@@ -605,6 +649,7 @@ export default function App() {
             layoutRunning={layoutRunning}
             rotationEnabled={rotationEnabled}
             bloomEnabled={bloomEnabled}
+            trafficEnabled={trafficEnabled}
             rotationSpeed={rotationSpeed}
             nodeDistance={nodeDistance}
             nodeSizeMode={nodeSizeMode}
@@ -614,6 +659,7 @@ export default function App() {
             }
             onToggleRotation={toggleRotation}
             onToggleBloom={() => setBloomEnabled((enabled) => !enabled)}
+            onToggleTraffic={() => setTrafficEnabled((enabled) => !enabled)}
             onRotationSpeed={setRotationSpeed}
             onNodeDistance={changeNodeDistance}
             onNodeSizeMode={setNodeSizeMode}
@@ -623,7 +669,6 @@ export default function App() {
             streamLabel={streamLabel}
             streamColor={streamColor}
             live={live}
-            collectedAt={snapshot?.collected_at}
             history={history}
             snapshotId={snapshot?.snapshot_id}
             onSelectHistory={selectHistory}
@@ -661,8 +706,10 @@ export default function App() {
           <Text c="dimmed" size="xs">
             {graphData.nodes.length}{" "}
             {graphData.nodes.length === 1 ? "node" : "nodes"} /{" "}
-            {graphData.links.length}{" "}
-            {graphData.links.length === 1 ? "link" : "links"}
+            {graphData.links.filter((link) => !link.visualOnly).length}{" "}
+            {graphData.links.filter((link) => !link.visualOnly).length === 1
+              ? "link"
+              : "links"}
           </Text>
         </Group>
         {loading && webglSupported && (

@@ -386,12 +386,14 @@ out of the initial application bundle.
 
 The left navigation follows Mantine UI's nested-navbar pattern for generic NFWeb
 applications and remains a fixed-width shell column. Topology controls, including
-the live status and history selector, belong in one non-wrapping, horizontally
-scrollable application toolbar, not the navigation panel. Graph-producing layers
+the snapshot selector, return-to-live action, and trailing stream-status badge,
+belong in one non-wrapping, horizontally scrollable application toolbar, not the
+navigation panel. Graph-producing layers
 use compact Mantine checkbox menus grouped by network purpose. The **L1** selector
 contains independently selectable **NetBox** and **LLDP** links, while the **BGP**
-selector contains **Peerings**. Selector keys and menu items reuse the matching
-graph-link colors. The remaining
+selector contains **Peerings**. The **L2** selector controls the directional
+**Traffic** overlay. Selector keys and menu items reuse the matching graph-link
+colors. The remaining
 desktop content width is split 80% for the topology stage and 20% for the
 inspector, and the inspector spans into the top-right corner above its content.
 The graph-control group includes a bloom toggle implemented with Three.js
@@ -442,10 +444,19 @@ memory. The initial `/logs` request restores retained events after page reload.
 - Do not recreate the graph solely to update controls or a snapshot. Preserve the
   camera, selection, and saved coordinates.
 
-LLDP and physical cabling are displayed as undirected relationships. The graph
-library still requires `source` and `target` fields, but the UI uses bidirectional
-labels and does not render directional particles. Introduce directional cues only
-for a layer or metric whose contract actually defines direction.
+LLDP and physical cabling remain undirected topology relationships. When the L2
+Traffic overlay is enabled, a link with interface telemetry is rendered as two
+shallow curved visual lanes around that one relationship. The overlay applies to
+NetBox and LLDP links, leaving BGP peerings on their own layer paths. Forward
+traffic uses source output or target input telemetry; reverse traffic uses target
+output or source input telemetry. Particle speed is bounded and proportional to
+the reported bit rate, with utilization as a fallback. Lane color changes at
+warning and critical utilization thresholds. The reverse visual lane has zero D3
+link-force strength, so enabling traffic does not add another physical
+relationship to the layout. Links without directional telemetry remain single
+and are not animated; unknown traffic is never invented. Node spheres are fully
+opaque and use the same green, yellow, red, and gray health palette shown in the
+States dropdown. Traffic retains a separate teal, amber, and pink scale.
 
 ## Run a Development Environment
 

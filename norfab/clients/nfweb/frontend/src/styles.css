@@ -207,7 +207,22 @@ body,
 }
 
 .toolbar-control--health {
-  width: 96px;
+  width: 108px;
+}
+
+.health-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.health-color-key {
+  display: block;
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(230, 237, 243, 0.18);
 }
 
 .toolbar-distance {

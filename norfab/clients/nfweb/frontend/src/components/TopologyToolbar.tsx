@@ -27,11 +27,13 @@ import {
   IconTopologyStar3,
   IconX,
 } from "@tabler/icons-react";
-import { LAYER_COLORS } from "../graphModel";
+import { HEALTH_COLORS, LAYER_COLORS } from "../graphModel";
 import type { DeviceOption, Health, TopologyHistoryItem } from "../types";
 import Timeline from "./Timeline";
 
 export type NodeSizeMode = "fixed" | "connections" | "traffic";
+
+const TRAFFIC_COLOR = "#38d9c4";
 
 const LINK_SELECTOR_GROUPS = [
   {
@@ -69,6 +71,7 @@ interface TopologyToolbarProps {
   layoutRunning: boolean;
   rotationEnabled: boolean;
   bloomEnabled: boolean;
+  trafficEnabled: boolean;
   rotationSpeed: number;
   nodeDistance: number;
   nodeSizeMode: NodeSizeMode;
@@ -76,6 +79,7 @@ interface TopologyToolbarProps {
   onToggleLayout: () => void;
   onToggleRotation: () => void;
   onToggleBloom: () => void;
+  onToggleTraffic: () => void;
   onRotationSpeed: (speed: number) => void;
   onNodeDistance: (distance: number) => void;
   onNodeSizeMode: (mode: NodeSizeMode) => void;
@@ -85,7 +89,6 @@ interface TopologyToolbarProps {
   streamLabel: string;
   streamColor: string;
   live: boolean;
-  collectedAt?: string;
   history: TopologyHistoryItem[];
   snapshotId?: string;
   onSelectHistory: (snapshotId: string) => void;
@@ -114,6 +117,7 @@ export default function TopologyToolbar({
   layoutRunning,
   rotationEnabled,
   bloomEnabled,
+  trafficEnabled,
   rotationSpeed,
   nodeDistance,
   nodeSizeMode,
@@ -121,6 +125,7 @@ export default function TopologyToolbar({
   onToggleLayout,
   onToggleRotation,
   onToggleBloom,
+  onToggleTraffic,
   onRotationSpeed,
   onNodeDistance,
   onNodeSizeMode,
@@ -130,7 +135,6 @@ export default function TopologyToolbar({
   streamLabel,
   streamColor,
   live,
-  collectedAt,
   history,
   snapshotId,
   onSelectHistory,
@@ -355,7 +359,7 @@ export default function TopologyToolbar({
             const selectedValues = layerValues.filter((layer) =>
               visibleLayers.includes(layer),
             );
-            return (
+            const layerMenu = (
               <Menu
                 closeOnItemClick={false}
                 key={selector.label}
@@ -423,6 +427,55 @@ export default function TopologyToolbar({
                 </Menu.Dropdown>
               </Menu>
             );
+            if (selector.label !== "L1") return layerMenu;
+            return [
+              layerMenu,
+              <Menu
+                closeOnItemClick={false}
+                key="L2"
+                position="bottom-start"
+                shadow="md"
+                width={176}
+              >
+                <Menu.Target>
+                  <Button
+                    className="toolbar-control toolbar-link-selector"
+                    aria-label="Select L2 overlays"
+                    data-active={trafficEnabled || undefined}
+                    leftSection={
+                      <span aria-hidden="true" className="layer-color-key">
+                        <span
+                          className="layer-color-key__segment"
+                          style={{ backgroundColor: TRAFFIC_COLOR }}
+                        />
+                      </span>
+                    }
+                    rightSection={<IconChevronDown size={14} />}
+                    size="xs"
+                    variant="default"
+                  >
+                    L2
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>L2 overlays</Menu.Label>
+                  <Menu.CheckboxItem
+                    aria-label="Display directional traffic"
+                    checked={trafficEnabled}
+                    onClick={onToggleTraffic}
+                  >
+                    <span className="layer-menu-label">
+                      <span
+                        aria-hidden="true"
+                        className="layer-menu-label__line"
+                        style={{ backgroundColor: TRAFFIC_COLOR }}
+                      />
+                      Traffic
+                    </span>
+                  </Menu.CheckboxItem>
+                </Menu.Dropdown>
+              </Menu>,
+            ];
           })
         ) : (
           <Button disabled size="xs" variant="default">
@@ -444,6 +497,34 @@ export default function TopologyToolbar({
           { value: "critical", label: "Critical" },
           { value: "unknown", label: "Unknown" },
         ]}
+        leftSection={
+          <span
+            aria-hidden="true"
+            className="health-color-key"
+            style={{
+              backgroundColor:
+                health === "all" ? HEALTH_COLORS.unknown : HEALTH_COLORS[health],
+            }}
+          />
+        }
+        renderOption={({ option }) => {
+          const state = option.value as Health | "all";
+          return (
+            <span className="health-option">
+              <span
+                aria-hidden="true"
+                className="health-color-key"
+                style={{
+                  backgroundColor:
+                    state === "all"
+                      ? HEALTH_COLORS.unknown
+                      : HEALTH_COLORS[state],
+                }}
+              />
+              {option.label}
+            </span>
+          );
+        }}
         size="xs"
       />
 
@@ -561,8 +642,17 @@ export default function TopologyToolbar({
         />
       </Tooltip>
 
+      <Timeline
+        live={live}
+        history={history}
+        snapshotId={snapshotId}
+        onSelect={onSelectHistory}
+        onLive={onLive}
+      />
+
       <Tooltip label={`Topology stream: ${streamLabel}`}>
         <Badge
+          aria-label={`Topology stream: ${streamLabel}`}
           className="toolbar-control"
           variant="light"
           color={streamColor}
@@ -571,15 +661,6 @@ export default function TopologyToolbar({
           {streamLabel}
         </Badge>
       </Tooltip>
-
-      <Timeline
-        live={live}
-        collectedAt={collectedAt}
-        history={history}
-        snapshotId={snapshotId}
-        onSelect={onSelectHistory}
-        onLive={onLive}
-      />
     </Group>
   );
 }
