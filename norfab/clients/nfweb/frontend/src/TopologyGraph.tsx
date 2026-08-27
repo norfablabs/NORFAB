@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { MutableRefObject } from "react";
 import ForceGraph3D from "react-force-graph-3d";
 import {
@@ -6,8 +7,10 @@ import {
   Sprite,
   SpriteMaterial,
   SRGBColorSpace,
+  Vector2,
 } from "three";
-import type { SelectedItem, TopologyLink } from "./types";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import type { SelectedItem } from "./types";
 import {
   HEALTH_COLORS,
   LAYER_COLORS,
@@ -15,7 +18,12 @@ import {
   endpointId,
   numericMetric,
 } from "./graphModel";
-import type { GraphData, GraphHandle, GraphNode } from "./graphModel";
+import type {
+  GraphData,
+  GraphHandle,
+  GraphNode,
+  RenderedTopologyLink,
+} from "./graphModel";
 
 function escapeHtml(value: unknown): string {
   return String(value ?? "")
@@ -72,6 +80,7 @@ interface TopologyGraphProps {
   rememberNodePositions: () => void;
   selectGraphItem: (item: SelectedItem) => void;
   onEngineStop: () => void;
+  bloomEnabled: boolean;
 }
 
 export default function TopologyGraph({
@@ -82,14 +91,32 @@ export default function TopologyGraph({
   rememberNodePositions,
   selectGraphItem,
   onEngineStop,
+  bloomEnabled,
 }: TopologyGraphProps) {
+  useEffect(() => {
+    const composer = graphRef.current?.postProcessingComposer();
+    if (!composer) return;
+    const bloomPass = new UnrealBloomPass(
+      new Vector2(width, height),
+      1.15,
+      0.65,
+      0.08,
+    );
+    bloomPass.enabled = bloomEnabled;
+    composer.addPass(bloomPass);
+    return () => {
+      composer.removePass(bloomPass);
+      bloomPass.dispose();
+    };
+  }, [bloomEnabled, graphRef, height, width]);
+
   return (
-    <ForceGraph3D<GraphNode, TopologyLink>
+    <ForceGraph3D<GraphNode, RenderedTopologyLink>
       ref={graphRef}
       width={width}
       height={height}
       graphData={graphData}
-      backgroundColor="#070b12"
+      backgroundColor="#000003"
       showNavInfo={false}
       controlType="orbit"
       cooldownTicks={160}
@@ -97,24 +124,35 @@ export default function TopologyGraph({
         const item = node as GraphNode;
         return `<b>${escapeHtml(item.label)}</b><br>${escapeHtml(item.health)} / ${escapeHtml(item.kind)}`;
       }}
-      nodeColor={(node) => HEALTH_COLORS[(node as GraphNode).health]}
+      nodeColor={(node) => {
+        const item = node as GraphNode;
+        return item.searchMatch ? "#ffffff" : HEALTH_COLORS[item.health];
+      }}
       nodeOpacity={0.92}
       nodeResolution={12}
       nodeRelSize={2.2}
-      nodeVal={(node) => (node as GraphNode).displaySize ?? 5}
+      nodeVal={(node) => {
+        const item = node as GraphNode;
+        return (item.displaySize ?? 5) * (item.searchMatch ? 1.8 : 1);
+      }}
       nodeThreeObject={(node) => nodeLabelSprite(node as GraphNode)}
       nodeThreeObjectExtend
       linkLabel={(link) => {
-        const item = link as TopologyLink;
-        return `<b>${escapeHtml(LAYER_LABELS[item.layer] ?? item.layer)}</b><br>${escapeHtml(endpointId(item.source))} ↔ ${escapeHtml(endpointId(item.target))}<br>${escapeHtml(item.health)}`;
+        const item = link as RenderedTopologyLink;
+        const count = `${item.memberCount} ${item.memberCount === 1 ? "link" : "links"}`;
+        return `<b>${escapeHtml(LAYER_LABELS[item.layer] ?? item.layer)}</b><br>${escapeHtml(endpointId(item.source))} ↔ ${escapeHtml(endpointId(item.target))}<br>${escapeHtml(count)} / ${escapeHtml(item.health)}`;
       }}
       linkColor={(link) => {
-        const item = link as TopologyLink;
-        return LAYER_COLORS[item.layer] ?? HEALTH_COLORS.unknown;
+        const item = link as RenderedTopologyLink;
+        return item.searchMatch
+          ? "#ffffff"
+          : LAYER_COLORS[item.layer] ?? HEALTH_COLORS.unknown;
       }}
       linkOpacity={0.72}
       linkWidth={(link) =>
-        0.7 + Math.min(numericMetric(link as TopologyLink), 100) / 22
+        0.7 +
+        Math.min(numericMetric(link as RenderedTopologyLink), 100) / 22 +
+        ((link as RenderedTopologyLink).searchMatch ? 2.2 : 0)
       }
       linkCurvature="curvature"
       linkCurveRotation="rotation"
@@ -122,7 +160,7 @@ export default function TopologyGraph({
         selectGraphItem({ kind: "node", value: node as GraphNode })
       }
       onLinkClick={(link) =>
-        selectGraphItem({ kind: "link", value: link as TopologyLink })
+        selectGraphItem({ kind: "link", value: link as RenderedTopologyLink })
       }
       onNodeDragEnd={rememberNodePositions}
       onBackgroundClick={() => selectGraphItem(null)}

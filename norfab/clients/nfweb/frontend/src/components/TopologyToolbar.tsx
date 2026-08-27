@@ -3,7 +3,6 @@ import {
   ActionIcon,
   Badge,
   Button,
-  Chip,
   Group,
   Menu,
   ScrollArea,
@@ -17,20 +16,36 @@ import {
 import {
   IconChevronDown,
   IconCheck,
+  IconLoader2,
   IconPlayerPause,
   IconPlayerPlay,
   IconPointFilled,
   IconRefresh,
-  IconRotate,
   IconSearch,
+  IconSparkles,
   IconSnowflake,
+  IconTopologyStar3,
   IconX,
 } from "@tabler/icons-react";
-import { LAYER_LABELS } from "../graphModel";
+import { LAYER_COLORS } from "../graphModel";
 import type { DeviceOption, Health, TopologyHistoryItem } from "../types";
 import Timeline from "./Timeline";
 
 export type NodeSizeMode = "fixed" | "connections" | "traffic";
+
+const LINK_SELECTOR_GROUPS = [
+  {
+    label: "L1",
+    layers: [
+      { value: "inventory", label: "NetBox" },
+      { value: "lldp", label: "LLDP" },
+    ],
+  },
+  {
+    label: "BGP",
+    layers: [{ value: "bgp", label: "Peerings" }],
+  },
+] as const;
 
 interface TopologyToolbarProps {
   deviceOptions: DeviceOption[];
@@ -42,6 +57,8 @@ interface TopologyToolbarProps {
   onApplyDevices: () => void | Promise<void>;
   search: string;
   onSearch: (value: string) => void;
+  activeSearch: string;
+  onApplySearch: (value: string) => void;
   availableLayers: string[];
   visibleLayers: string[];
   onVisibleLayers: (layers: string[]) => void;
@@ -51,12 +68,14 @@ interface TopologyToolbarProps {
   visualizationPaused: boolean;
   layoutRunning: boolean;
   rotationEnabled: boolean;
+  bloomEnabled: boolean;
   rotationSpeed: number;
   nodeDistance: number;
   nodeSizeMode: NodeSizeMode;
   onToggleVisualization: () => void;
   onToggleLayout: () => void;
   onToggleRotation: () => void;
+  onToggleBloom: () => void;
   onRotationSpeed: (speed: number) => void;
   onNodeDistance: (distance: number) => void;
   onNodeSizeMode: (mode: NodeSizeMode) => void;
@@ -83,6 +102,8 @@ export default function TopologyToolbar({
   onApplyDevices,
   search,
   onSearch,
+  activeSearch,
+  onApplySearch,
   availableLayers,
   visibleLayers,
   onVisibleLayers,
@@ -92,12 +113,14 @@ export default function TopologyToolbar({
   visualizationPaused,
   layoutRunning,
   rotationEnabled,
+  bloomEnabled,
   rotationSpeed,
   nodeDistance,
   nodeSizeMode,
   onToggleVisualization,
   onToggleLayout,
   onToggleRotation,
+  onToggleBloom,
   onRotationSpeed,
   onNodeDistance,
   onNodeSizeMode,
@@ -129,9 +152,44 @@ export default function TopologyToolbar({
     setDeviceMenuOpened(false);
     setDeviceFilter("");
   };
+  const normalizedSearch = search.trim();
+  const searchIsApplied =
+    Boolean(activeSearch) &&
+    normalizedSearch.toLowerCase() === activeSearch.toLowerCase();
+  const toggleSearch = () => {
+    onApplySearch(searchIsApplied ? "" : normalizedSearch);
+  };
+
+  const changeVisibleLinkGroup = (
+    groupLayers: readonly string[],
+    selectedGroupLayers: string[],
+  ) => {
+    const group = new Set(groupLayers);
+    const nextLayers = new Set(
+      visibleLayers.filter((layer) => !group.has(layer)),
+    );
+    selectedGroupLayers.forEach((layer) => nextLayers.add(layer));
+    onVisibleLayers(
+      availableLayers.filter((layer) => nextLayers.has(layer)),
+    );
+  };
 
   return (
     <Group className="topology-controls" gap={8} wrap="nowrap">
+      <Tooltip label="Refresh topology">
+        <ActionIcon
+          className="toolbar-control"
+          aria-label="Refresh topology"
+          variant="subtle"
+          loading={refreshing}
+          disabled={!canRefresh}
+          onClick={onRefresh}
+          size="sm"
+        >
+          <IconRefresh size={15} />
+        </ActionIcon>
+      </Tooltip>
+
       <Menu
         opened={deviceMenuOpened}
         onChange={setDeviceMenuOpened}
@@ -242,16 +300,36 @@ export default function TopologyToolbar({
         aria-label="Find infrastructure"
         value={search}
         onChange={(event) => onSearch(event.currentTarget.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") onApplySearch(normalizedSearch);
+        }}
         placeholder="Find infrastructure…"
-        leftSection={<IconSearch size={14} />}
+        leftSectionPointerEvents="all"
+        leftSection={
+          <Tooltip label={searchIsApplied ? "Disable search highlight" : "Apply search highlight"}>
+            <ActionIcon
+              aria-label={searchIsApplied ? "Disable topology search" : "Apply topology search"}
+              color={searchIsApplied ? "fabric" : "gray"}
+              disabled={!searchIsApplied && !normalizedSearch}
+              onClick={toggleSearch}
+              size="sm"
+              variant={searchIsApplied ? "light" : "subtle"}
+            >
+              <IconSearch size={14} />
+            </ActionIcon>
+          </Tooltip>
+        }
         rightSection={
-          search ? (
+          search || activeSearch ? (
             <ActionIcon
               variant="subtle"
               color="gray"
               size="sm"
               aria-label="Clear search"
-              onClick={() => onSearch("")}
+              onClick={() => {
+                onSearch("");
+                onApplySearch("");
+              }}
             >
               <IconX size={13} />
             </ActionIcon>
@@ -262,36 +340,95 @@ export default function TopologyToolbar({
 
       <Group
         className="toolbar-control toolbar-layer-group"
-        aria-label="Network layers"
+        aria-label="Link selectors"
         gap={4}
         role="group"
         wrap="nowrap"
       >
-        <Chip.Group multiple value={visibleLayers} onChange={onVisibleLayers}>
-          {availableLayers.length ? (
-            availableLayers.map((layer) => {
-              const label = LAYER_LABELS[layer] ?? layer;
-              return (
-                <Tooltip key={layer} label={`Toggle ${label} layer`}>
-                  <Chip
-                    aria-label={`${label} layer`}
-                    color="fabric"
-                    radius="sm"
+        {availableLayers.length ? (
+          LINK_SELECTOR_GROUPS.map((selector) => {
+            const layers = selector.layers.filter((layer) =>
+              availableLayers.includes(layer.value),
+            );
+            if (!layers.length) return null;
+            const layerValues = layers.map((layer) => layer.value);
+            const selectedValues = layerValues.filter((layer) =>
+              visibleLayers.includes(layer),
+            );
+            return (
+              <Menu
+                closeOnItemClick={false}
+                key={selector.label}
+                position="bottom-start"
+                shadow="md"
+                width={176}
+              >
+                <Menu.Target>
+                  <Button
+                    className="toolbar-control toolbar-link-selector"
+                    aria-label={`Select ${selector.label} links`}
+                    data-active={selectedValues.length > 0 || undefined}
+                    leftSection={
+                      <span
+                        aria-hidden="true"
+                        className="layer-color-key"
+                      >
+                        {layers.map((layer) => (
+                          <span
+                            className="layer-color-key__segment"
+                            data-layer={layer.value}
+                            key={layer.value}
+                            style={{ backgroundColor: LAYER_COLORS[layer.value] }}
+                          />
+                        ))}
+                      </span>
+                    }
+                    rightSection={<IconChevronDown size={14} />}
                     size="xs"
-                    value={layer}
-                    variant="light"
+                    variant="default"
                   >
-                    {label}
-                  </Chip>
-                </Tooltip>
-              );
-            })
-          ) : (
-            <Button disabled size="xs" variant="default">
-              No layers
-            </Button>
-          )}
-        </Chip.Group>
+                    {selector.label}
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>{selector.label} links</Menu.Label>
+                  <Menu.CheckboxGroup
+                    value={selectedValues}
+                    onChange={(values) =>
+                      changeVisibleLinkGroup(layerValues, values)
+                    }
+                  >
+                    {layers.map((layer) => (
+                      <Menu.CheckboxItem
+                        aria-label={
+                          layer.value === "bgp"
+                            ? "BGP peerings"
+                            : `${layer.label} links`
+                        }
+                        key={layer.value}
+                        value={layer.value}
+                      >
+                        <span className="layer-menu-label">
+                          <span
+                            aria-hidden="true"
+                            className="layer-menu-label__line"
+                            data-layer={layer.value}
+                            style={{ backgroundColor: LAYER_COLORS[layer.value] }}
+                          />
+                          {layer.label}
+                        </span>
+                      </Menu.CheckboxItem>
+                    ))}
+                  </Menu.CheckboxGroup>
+                </Menu.Dropdown>
+              </Menu>
+            );
+          })
+        ) : (
+          <Button disabled size="xs" variant="default">
+            No links
+          </Button>
+        )}
       </Group>
 
       <Select
@@ -330,7 +467,22 @@ export default function TopologyToolbar({
             onClick={onToggleLayout}
             size="xs"
           >
-            {layoutRunning ? <IconSnowflake size={15} /> : <IconRefresh size={15} />}
+            {layoutRunning ? (
+              <IconSnowflake size={15} />
+            ) : (
+              <IconTopologyStar3 size={15} />
+            )}
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label={bloomEnabled ? "Disable bloom" : "Enable bloom"}>
+          <ActionIcon
+            variant={bloomEnabled ? "light" : "default"}
+            aria-label={bloomEnabled ? "Disable bloom" : "Enable bloom"}
+            disabled={!hasGraph}
+            onClick={onToggleBloom}
+            size="xs"
+          >
+            <IconSparkles size={15} />
           </ActionIcon>
         </Tooltip>
         <Tooltip label={rotationEnabled ? "Disable rotation" : "Enable rotation"}>
@@ -341,26 +493,40 @@ export default function TopologyToolbar({
             onClick={onToggleRotation}
             size="xs"
           >
-            <IconRotate size={15} />
+            <IconLoader2
+              className={rotationEnabled ? "toolbar-spinner toolbar-spinner--active" : "toolbar-spinner"}
+              size={15}
+            />
           </ActionIcon>
         </Tooltip>
+        <Menu position="bottom-start" shadow="md" width={128}>
+          <Menu.Target>
+            <ActionIcon
+              aria-label={`Select rotation speed, current ${rotationSpeed}x`}
+              className="rotation-speed-trigger"
+              disabled={!hasGraph}
+              size="xs"
+              title={`Rotation speed: ${rotationSpeed}×`}
+              variant="default"
+            >
+              <IconChevronDown size={12} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Rotation speed</Menu.Label>
+            <Menu.RadioGroup
+              value={String(rotationSpeed)}
+              onChange={(value) => onRotationSpeed(Number(value))}
+            >
+              {[0.5, 1, 2, 3].map((speed) => (
+                <Menu.RadioItem key={speed} value={String(speed)}>
+                  {speed}×
+                </Menu.RadioItem>
+              ))}
+            </Menu.RadioGroup>
+          </Menu.Dropdown>
+        </Menu>
       </Button.Group>
-
-      <Tooltip label="Rotation speed">
-        <Select
-          className="toolbar-control toolbar-control--rotation-speed"
-          aria-label="Rotation speed"
-          size="xs"
-          allowDeselect={false}
-          value={String(rotationSpeed)}
-          onChange={(value) => onRotationSpeed(Number(value))}
-          data={[
-            { value: "0.25", label: "Slow" },
-            { value: "0.7", label: "Normal" },
-            { value: "1.5", label: "Fast" },
-          ]}
-        />
-      </Tooltip>
 
       <Tooltip label={`Layout distance: ${nodeDistance}`}>
         <Group className="toolbar-control toolbar-distance" gap={6} wrap="nowrap">
@@ -393,20 +559,6 @@ export default function TopologyToolbar({
             { value: "traffic", label: "Traffic" },
           ]}
         />
-      </Tooltip>
-
-      <Tooltip label="Refresh topology">
-        <ActionIcon
-          className="toolbar-control"
-          aria-label="Refresh topology"
-          variant="subtle"
-          loading={refreshing}
-          disabled={!canRefresh}
-          onClick={onRefresh}
-          size="sm"
-        >
-          <IconRefresh size={15} />
-        </ActionIcon>
       </Tooltip>
 
       <Tooltip label={`Topology stream: ${streamLabel}`}>

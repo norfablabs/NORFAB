@@ -135,12 +135,6 @@ body,
   min-height: 32px;
 }
 
-.toolbar-layer-group .mantine-Chip-label {
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-}
-
 .toolbar-control--devices {
   width: 164px;
 }
@@ -149,16 +143,71 @@ body,
   width: 168px;
 }
 
+.toolbar-spinner--active {
+  animation: toolbar-spin 1.4s linear infinite;
+}
+
+.rotation-speed-trigger {
+  min-width: 24px;
+  width: 24px;
+}
+
+@keyframes toolbar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar-spinner--active {
+    animation: none;
+  }
+}
+
 .toolbar-layer-group {
   min-width: max-content;
 }
 
-.toolbar-control--health {
-  width: 96px;
+.toolbar-link-selector {
+  min-width: 76px;
 }
 
-.toolbar-control--rotation-speed {
-  width: 78px;
+.toolbar-link-selector[data-active] {
+  border-color: #405267;
+  background: #17212c;
+}
+
+.layer-color-key {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 12px;
+}
+
+.layer-color-key__segment,
+.layer-menu-label__line {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(230, 237, 243, 0.08);
+}
+
+.layer-color-key__segment {
+  width: 12px;
+}
+
+.layer-menu-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.layer-menu-label__line {
+  width: 18px;
+}
+
+.toolbar-control--health {
+  width: 96px;
 }
 
 .toolbar-distance {

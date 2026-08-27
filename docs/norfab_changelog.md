@@ -7,7 +7,7 @@
 
 ## ENHANCEMENTS
 
-1. Refactored broker socket I/O so each ZeroMQ socket is owned by one loop, with bounded client and worker outbound queues drained by `zmq_send_recv`.
+1. Refactored broker, client and worker socket I/O so each ZeroMQ socket is owned by one loop, with bounded client and worker outbound queues drained by `zmq_send_recv`.
 
 ---
 

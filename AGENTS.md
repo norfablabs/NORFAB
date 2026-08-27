@@ -1,4 +1,4 @@
-# CLAUDE.md - NorFab Repository Guide
+# AGENTS.md - NorFab Repository Guide
 
 ## Project Overview
 

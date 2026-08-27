@@ -266,18 +266,22 @@ change is incomplete until both sides and their tests are updated.
 - Exact normalization matters. `Ethernet1` and `Eth1`, or a short hostname and an
   FQDN, create different endpoint IDs. Add an explicit normalization policy and
   tests before trying to collapse those variants.
-- Layers intentionally remain separate. A NetBox cable and an LLDP observation of
-  that cable currently produce separate blue and gold links with different IDs.
-- Multiple real cables between the same devices remain distinct because interface
-  names are part of the ID.
+- Layers intentionally remain separate. NetBox, LLDP, and BGP relationships
+  between the same devices render as separate blue, orange, and purple links.
+- Multiple real connections between the same devices remain distinct in the
+  snapshot and inspector because interface names are part of their IDs.
 - The interfaces adapter creates observations, not standalone graph links. During
   merge, an observation decorates a matching link endpoint with health,
   attributes, and metrics. The frontend therefore excludes `interfaces` from the
   graph-layer visibility controls.
 
-The frontend currently groups all links between the same two node IDs and gives
-them parallel curves. Link colour represents the discovery layer. Node colour and
-the inspector carry health.
+For rendering, the frontend bundles links by unordered node pair and layer. All
+LLDP records between two nodes become one LLDP link, all NetBox records become one
+NetBox link, and all BGP records become one BGP link. Different layers receive
+parallel curves and remain independently selectable. Each rendered bundle keeps
+its raw member records for inspection, reports their count, uses their worst
+health, and uses their highest utilization for link width. Link colour represents
+the discovery layer. Node colour and the inspector carry health.
 
 ### Snapshot Rules
 
@@ -384,9 +388,19 @@ The left navigation follows Mantine UI's nested-navbar pattern for generic NFWeb
 applications and remains a fixed-width shell column. Topology controls, including
 the live status and history selector, belong in one non-wrapping, horizontally
 scrollable application toolbar, not the navigation panel. Graph-producing layers
-use Mantine button-style checkbox chips for direct multi-selection. The remaining
+use compact Mantine checkbox menus grouped by network purpose. The **L1** selector
+contains independently selectable **NetBox** and **LLDP** links, while the **BGP**
+selector contains **Peerings**. Selector keys and menu items reuse the matching
+graph-link colors. The remaining
 desktop content width is split 80% for the topology stage and 20% for the
 inspector, and the inspector spans into the top-right corner above its content.
+The graph-control group includes a bloom toggle implemented with Three.js
+`UnrealBloomPass`. Search text is a draft until the user presses Enter or clicks
+the magnifying-glass button. Applying a search keeps every node and link allowed
+by the layer and health filters visible, then enlarges and brightens only directly
+matching nodes or links. Node-name matches do not spread to adjacent links or
+neighbouring nodes. Clicking the active
+magnifying glass disables the highlight without discarding the typed query.
 Every inspector tab uses the same Mantine searchable, sortable table composition;
 add domain columns and row adapters instead of another details layout. A shared
 footer owns the configured message and external resource pictograms. Overview and
@@ -601,10 +615,11 @@ Check, in order:
 A successful job does not guarantee its payload matches the adapter's expected
 shape.
 
-### A Link Appears Twice
+### Multiple Connection Records Appear
 
-Inspect link `layer`, ID, both device names, and both interface names. Common valid
-cases are:
+Rendered links are bundled per device pair and layer, but the inspector continues
+to show raw connection records. Inspect each record's `layer`, ID, device names,
+and interface names. Common valid cases are:
 
 - NetBox and LLDP observations of the same cable;
 - separate data and management links;
@@ -613,8 +628,9 @@ cases are:
 For reverse LLDP advertisements, canonical IDs are identical when device aliases
 resolve uniquely to the selected scope and interfaces use a supported common short
 or long spelling. If they are not, compare hostname qualification, ambiguous
-aliases, and vendor-specific interface names. Do not deduplicate only by device
-pair because that would collapse real parallel cables.
+aliases, and vendor-specific interface names. Do not deduplicate the stored data
+by device pair. Rendering bundles additionally include the layer in their key so
+NetBox, LLDP, and BGP remain separate.
 
 ### The Graph Rearranges on Every Snapshot
 

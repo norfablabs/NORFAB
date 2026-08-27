@@ -6,7 +6,7 @@ const snapshot = {
   duration_ms: 42,
   status: "complete",
   devices: ["leaf-01", "spine-01"],
-  layers: ["lldp", "interfaces"],
+  layers: ["inventory", "lldp", "bgp", "interfaces"],
   nodes: [
     {
       id: "leaf-01",
@@ -36,6 +36,18 @@ const snapshot = {
       attributes: {
         source_interface: "Ethernet1",
         target_interface: "Ethernet1",
+      },
+    },
+    {
+      id: "leaf-01--spine-01--lldp-secondary",
+      source: "spine-01",
+      target: "leaf-01",
+      layer: "lldp",
+      health: "healthy",
+      metrics: {},
+      attributes: {
+        source_interface: "Ethernet2",
+        target_interface: "Ethernet2",
       },
     },
   ],
@@ -252,7 +264,21 @@ test("uses working Mantine toolbar controls", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Pause rendering" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Freeze layout" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Enable rotation" })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Rotation speed" })).toBeVisible();
+  const bloomToggle = page.getByRole("button", { name: "Disable bloom" });
+  await expect(bloomToggle).toBeVisible();
+  await bloomToggle.click();
+  await expect(page.getByRole("button", { name: "Enable bloom" })).toBeVisible();
+  await page.getByRole("button", { name: "Enable bloom" }).click();
+  const rotationSpeed = page.getByRole("button", {
+    name: "Select rotation speed, current 1x",
+  });
+  await expect(rotationSpeed).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Rotation speed" })).toHaveCount(0);
+  await rotationSpeed.click();
+  await page.getByRole("menuitemradio", { name: "2×" }).click();
+  await expect(
+    page.getByRole("button", { name: "Select rotation speed, current 2x" }),
+  ).toBeVisible();
   const squareToolbarButtons = await Promise.all(
     [
       page.getByRole("button", { name: "Pause rendering" }),
@@ -272,15 +298,43 @@ test("uses working Mantine toolbar controls", async ({ page }) => {
   await expect(page.getByRole("radiogroup", { name: "Node size mode" })).toBeVisible();
   await expect(page.getByRole("button", { name: "3D controls" })).toHaveCount(0);
 
-  const lldpLayer = page.getByRole("checkbox", { name: "LLDP layer" });
-  const lldpLayerButton = page.getByText("LLDP", { exact: true });
-  await expect(lldpLayer).toBeChecked();
-  await lldpLayerButton.click();
-  await expect(lldpLayer).not.toBeChecked();
+  const l1Selector = page.getByRole("button", { name: "Select L1 links" });
+  const bgpSelector = page.getByRole("button", { name: "Select BGP links" });
+  await expect(l1Selector).toHaveText(/L1/);
+  await expect(bgpSelector).toHaveText(/BGP/);
+
+  await l1Selector.click();
+  const netboxLayer = page.getByRole("menuitemcheckbox", {
+    name: "NetBox links",
+  });
+  const lldpLayer = page.getByRole("menuitemcheckbox", { name: "LLDP links" });
+  await expect(netboxLayer).toHaveAttribute("aria-checked", "true");
+  await expect(lldpLayer).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator('[data-layer="inventory"]').last()).toHaveCSS(
+    "background-color",
+    "rgb(59, 130, 246)",
+  );
+  await expect(page.locator('[data-layer="lldp"]').last()).toHaveCSS(
+    "background-color",
+    "rgb(249, 115, 22)",
+  );
+  await lldpLayer.click();
+  await expect(lldpLayer).toHaveAttribute("aria-checked", "false");
   await expect(page.getByText("0 nodes / 0 links", { exact: true })).toBeVisible();
-  await lldpLayerButton.click();
-  await expect(lldpLayer).toBeChecked();
+  await lldpLayer.click();
+  await expect(lldpLayer).toHaveAttribute("aria-checked", "true");
   await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
+
+  await l1Selector.click();
+  await bgpSelector.click();
+  const bgpPeerings = page.getByRole("menuitemcheckbox", {
+    name: "BGP peerings",
+  });
+  await expect(bgpPeerings).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator('[data-layer="bgp"]').last()).toHaveCSS(
+    "background-color",
+    "rgb(182, 124, 255)",
+  );
 
   const [topbarBox, distanceBox, nodeSizeBox] = await Promise.all([
     page.locator(".topbar").boundingBox(),
@@ -326,7 +380,14 @@ test("uses working Mantine toolbar controls", async ({ page }) => {
 
   const search = page.getByRole("textbox", { name: "Find infrastructure" });
   await search.fill("not-present");
-  await expect(page.getByText("0 nodes / 0 links", { exact: true })).toBeVisible();
+  await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
+  await search.press("Enter");
+  await expect(page.getByRole("button", { name: "Disable topology search" })).toBeVisible();
+  await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Disable topology search" }).click();
+  await expect(page.getByRole("button", { name: "Apply topology search" })).toBeVisible();
+  await page.getByRole("button", { name: "Apply topology search" }).click();
+  await expect(page.getByRole("button", { name: "Disable topology search" })).toBeVisible();
   await page.getByRole("button", { name: "Clear search" }).click();
   await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
 });

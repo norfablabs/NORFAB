@@ -17,21 +17,25 @@ describe("TopologyToolbar", () => {
           onApplyDevices={() => undefined}
           search=""
           onSearch={() => undefined}
-          availableLayers={["inventory", "lldp"]}
+          activeSearch=""
+          onApplySearch={() => undefined}
+          availableLayers={["inventory", "lldp", "bgp"]}
           visibleLayers={["inventory"]}
           onVisibleLayers={() => undefined}
           health="all"
           onHealth={() => undefined}
           hasGraph
           visualizationPaused={false}
-          layoutRunning
-          rotationEnabled={false}
-          rotationSpeed={0.7}
+          layoutRunning={false}
+          rotationEnabled
+          bloomEnabled
+          rotationSpeed={1}
           nodeDistance={85}
           nodeSizeMode="fixed"
           onToggleVisualization={() => undefined}
           onToggleLayout={() => undefined}
           onToggleRotation={() => undefined}
+          onToggleBloom={() => undefined}
           onRotationSpeed={() => undefined}
           onNodeDistance={() => undefined}
           onNodeSizeMode={() => undefined}
@@ -56,16 +60,32 @@ describe("TopologyToolbar", () => {
     );
 
     expect(markup).toContain('aria-label="Select topology devices"');
+    expect(markup.indexOf('aria-label="Refresh topology"')).toBeLessThan(
+      markup.indexOf('aria-label="Select topology devices"'),
+    );
     expect(markup).toContain("1 selected");
     expect(markup).toContain('aria-label="Find infrastructure"');
-    expect(markup).toContain("Network layers");
-    expect(markup).toContain('aria-label="NetBox layer"');
-    expect(markup).toContain('type="checkbox"');
+    expect(markup).toContain('aria-label="Apply topology search"');
+    expect(markup).toContain("Link selectors");
+    expect(markup).toContain('aria-label="Select L1 links"');
+    expect(markup).toContain('aria-label="Select BGP links"');
+    expect(markup).not.toContain('aria-label="NetBox layer"');
     expect(markup).toContain("Health filter");
     expect(markup).toContain("Pause rendering");
-    expect(markup).toContain("Freeze layout");
-    expect(markup).toContain("Enable rotation");
-    expect(markup).toContain("Rotation speed");
+    expect(markup).toContain("Recalculate layout");
+    expect(markup).toContain("tabler-icon-topology-star-3");
+    expect(markup).toContain("Disable rotation");
+    expect(markup).toContain("toolbar-spinner--active");
+    expect(markup).toContain("Disable bloom");
+    expect(markup).toContain(
+      'aria-label="Select rotation speed, current 1x"',
+    );
+    expect(markup.indexOf('aria-label="Disable bloom"')).toBeLessThan(
+      markup.indexOf('aria-label="Disable rotation"'),
+    );
+    expect(markup.indexOf('aria-label="Disable rotation"')).toBeLessThan(
+      markup.indexOf('aria-label="Select rotation speed, current 1x"'),
+    );
     expect(markup).toContain("Layout distance");
     expect(markup).toContain("Node size mode");
     expect(markup).toContain("Topology history controls");

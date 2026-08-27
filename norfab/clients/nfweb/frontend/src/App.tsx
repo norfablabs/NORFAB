@@ -35,6 +35,8 @@ import {
   addParallelCurves,
   endpointId,
   numericMetric,
+  linkMatchesSearch,
+  nodeMatchesSearch,
   selectableLayers,
   trafficMetric,
 } from "./graphModel";
@@ -134,13 +136,15 @@ export default function App() {
   const [openNavigation, setOpenNavigation] =
     useState<NavigationSection | null>("dashboards");
   const [search, setSearch] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
   const [health, setHealth] = useState<Health | "all">("all");
   const [selected, setSelected] = useState<SelectedItem>(null);
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("status");
   const [layoutRunning, setLayoutRunning] = useState(true);
   const [visualizationPaused, setVisualizationPaused] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
-  const [rotationSpeed, setRotationSpeed] = useState(0.7);
+  const [bloomEnabled, setBloomEnabled] = useState(true);
+  const [rotationSpeed, setRotationSpeed] = useState(1);
   const [nodeDistance, setNodeDistance] = useState(85);
   const [nodeSizeMode, setNodeSizeMode] = useState<NodeSizeMode>("fixed");
   const [live, setLive] = useState(true);
@@ -284,16 +288,10 @@ export default function App() {
   const graphData = useMemo(() => {
     if (!snapshot)
       return { nodes: [] as GraphNode[], links: [] as RenderedTopologyLink[] };
-    const query = search.trim().toLowerCase();
+    const query = activeSearch.trim().toLowerCase();
     const allowedNodeIds = new Set(
       snapshot.nodes
         .filter((node) => health === "all" || node.health === health)
-        .filter((node) => {
-          if (!query) return true;
-          return `${node.label} ${node.id} ${JSON.stringify(node.attributes)}`
-            .toLowerCase()
-            .includes(query);
-        })
         .map((node) => node.id),
     );
     const links = snapshot.links.filter(
@@ -308,6 +306,18 @@ export default function App() {
         endpointId(link.source),
         endpointId(link.target),
       ]),
+    );
+    const matchingLinks = new Set(
+      query
+        ? links.filter((link) => linkMatchesSearch(link, query)).map((link) => link.id)
+        : [],
+    );
+    const matchingNodeIds = new Set(
+      query
+        ? snapshot.nodes
+            .filter((node) => nodeMatchesSearch(node, query))
+            .map((node) => node.id)
+        : [],
     );
     const nodeStats = new Map<string, { connections: number; traffic: number }>();
     links.forEach((link) => {
@@ -349,10 +359,17 @@ export default function App() {
               }
             : {}),
           displaySize,
+          searchMatch: matchingNodeIds.has(node.id),
         };
       });
-    return { nodes, links: addParallelCurves(links) };
-  }, [snapshot, visibleLayers, search, health, layoutRunning, nodeSizeMode]);
+    const renderedLinks = addParallelCurves(links).map((link) => ({
+      ...link,
+      searchMatch:
+        Boolean(query) &&
+        link.memberLinks.some((member) => matchingLinks.has(member.id)),
+    }));
+    return { nodes, links: renderedLinks };
+  }, [snapshot, visibleLayers, activeSearch, health, layoutRunning, nodeSizeMode]);
 
   useEffect(() => {
     renderedGraphData.current = graphData;
@@ -576,6 +593,8 @@ export default function App() {
             onApplyDevices={applyDeviceSelection}
             search={search}
             onSearch={setSearch}
+            activeSearch={activeSearch}
+            onApplySearch={setActiveSearch}
             availableLayers={availableLayers}
             visibleLayers={[...visibleLayers]}
             onVisibleLayers={(layers) => setVisibleLayers(new Set(layers))}
@@ -585,6 +604,7 @@ export default function App() {
             visualizationPaused={visualizationPaused}
             layoutRunning={layoutRunning}
             rotationEnabled={rotationEnabled}
+            bloomEnabled={bloomEnabled}
             rotationSpeed={rotationSpeed}
             nodeDistance={nodeDistance}
             nodeSizeMode={nodeSizeMode}
@@ -593,6 +613,7 @@ export default function App() {
               layoutRunning ? pauseLayout() : startLayout()
             }
             onToggleRotation={toggleRotation}
+            onToggleBloom={() => setBloomEnabled((enabled) => !enabled)}
             onRotationSpeed={setRotationSpeed}
             onNodeDistance={changeNodeDistance}
             onNodeSizeMode={setNodeSizeMode}
@@ -736,6 +757,7 @@ export default function App() {
                   hasFramedGraph.current = true;
                 }
               }}
+              bloomEnabled={bloomEnabled}
             />
           </Suspense>
         )}

@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 26 August 2026*
+*Last updated: 27 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -53,11 +53,17 @@ troubleshooting, reporting, and guided workflows.
 The first built-in application is the **3D topology observatory**. Its persistent
 Vasturiano scene combines intended NetBox cabling with observed LLDP, BGP, and
 interface state, makes partial collection failures visible, and stores compressed
-snapshots in a rolling three-hour local SQLite history. Its shared shell provides
+snapshots in a rolling three-hour local SQLite history. Same-layer connections
+between a node pair render as one link while their interface-level records remain
+available in the inspector; NetBox, LLDP, and BGP links remain separate. Its shared
+shell provides
 an inventory-configured footer message and quick links to FastAPI, documentation,
 and the NORFAB repository. Common controls use the maintained Mantine React
-component system with Tabler icons, nested application navigation, and searchable,
-sortable inspector tables. The local runtime supports graceful Ctrl+C
+component system with Tabler icons, color-matched L1 and BGP link selectors,
+toggleable 3D bloom, and Enter-submitted topology search that highlights matches
+without removing non-matching elements. It also provides nested application
+navigation and searchable, sortable inspector tables. The
+local runtime supports graceful Ctrl+C
 shutdown with a second-interrupt forced-exit fallback. **Topology use cases:**
 weather-map dashboards, topology exploration, current-state windows, incident
 timelines, and intended-versus-observed context. **Current limitations:** the first
