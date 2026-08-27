@@ -20,6 +20,8 @@ from pathlib import Path
 from invoke import Collection, task
 
 ROOT = Path(__file__).resolve().parent
+NFWEB_FRONTEND_DIR = ROOT / "norfab" / "clients" / "nfweb" / "frontend"
+NFWEB_NODE_MODULES_DIR = NFWEB_FRONTEND_DIR / "node_modules"
 DOCKER_DIR = ROOT / "docker" / "norfab-docker-tests"
 COMPOSE_FILE = DOCKER_DIR / "compose.yaml"
 DISTRIBUTED_FILE = DOCKER_DIR / "compose.distributed.yaml"
@@ -92,6 +94,14 @@ def _run(args, *, env=None, check=True):
     if check:
         result.check_returncode()
     return result.returncode
+
+
+def _required_executable(name):
+    """Return an executable path or explain the missing build prerequisite."""
+    executable = shutil.which(name)
+    if executable is None:
+        raise RuntimeError(f"Required executable is not available on PATH: {name}")
+    return executable
 
 
 def _compose(compose_file=COMPOSE_FILE):
@@ -201,6 +211,19 @@ def docs_build(_context, strict=False):
 def docs_serve(_context, address="127.0.0.1:8000"):
     """Serve documentation until interrupted."""
     _run([sys.executable, "-m", "mkdocs", "serve", "--dev-addr", address])
+
+
+@task(name="package-build")
+def package_build(_context):
+    """Build NFWeb, remove its dependencies, then build Python packages."""
+    npm = _required_executable("npm")
+    if not NFWEB_NODE_MODULES_DIR.is_dir():
+        _run([npm, "--prefix", NFWEB_FRONTEND_DIR, "ci"])
+
+    _run([npm, "--prefix", NFWEB_FRONTEND_DIR, "run", "build"])
+    shutil.rmtree(NFWEB_NODE_MODULES_DIR)
+    print(f"Removed generated dependencies: {NFWEB_NODE_MODULES_DIR}", flush=True)
+    _run(["poetry", "build"])
 
 
 @task(name="format")
@@ -494,6 +517,7 @@ namespace = Collection()
 for invoke_task in (
     docs_build,
     docs_serve,
+    package_build,
     format_code,
     format_check,
     lint,

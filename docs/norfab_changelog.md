@@ -1,3 +1,23 @@
+# 0.21.1
+
+## FEATURES
+
+1. Added broker `ip_allowlist` inventory support using PyZMQ's native source-IP authentication filter. The allowlist accepts exact IP addresses only, applies when `zmq_auth` is enabled, and defaults to `["*"]` to allow connections from any source.
+2. Added Nornir errdisabled-host handling:
+   - Failed hosts now remain excluded from later tasks and recover automatically after `failed_hosts_recovery_timeout`, which defaults to 60 seconds.
+   - Added `reset_failed_hosts_before_task`, default `false`. Setting it to `true` enables the earlier always-reset compatibility mode and disables persistent errdisabled-host behavior, making watchdog timeout recovery unnecessary.
+   - Added the `on_failed` task argument, default `false`, exposed as `on-failed` in NFCLI, to include errdisabled hosts in one specific run without clearing their failed state.
+   - Added `errdisabled_hosts_list` and `errdisabled_hosts_clear` service tasks, exposed through NFCLI as `show nornir errdisabled-hosts` and `nornir clear errdisabled-hosts`. List results include the host, errdisabled timestamp, remaining recovery time, and failure reason when available.
+   - Nornir task results now report hosts executed during the job in `resources` and hosts that failed during that job in `resources_failed`.
+
+## ENHANCEMENTS
+
+1. Improved long-running broker, client, and worker reliability by serializing ZeroMQ socket polling and receiving with concurrent keepalive, dispatcher, API, and job-thread sends, using short non-blocking poll cycles to avoid delaying outbound traffic.
+2. Made worker broker reconnection thread-safe by serializing socket shutdown, replacement, registration, and keepalive retargeting so background threads cannot use a socket while it is being replaced.
+3. Enhanced NetBox `sync_device_interfaces` to supplement interface configuration parsing with operational interface status, filling MTU, duplex, and speed only when configuration parsing returns no value.
+
+---
+
 # 0.21.0
 
 ## FEATURES

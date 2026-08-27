@@ -85,6 +85,7 @@ class TestNornirRunTimeInventory:
             "cli",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "show version",
                 "FL": ["r1", "r2", "r3"],
             },

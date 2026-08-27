@@ -136,6 +136,7 @@ nav:
       - Runtime Inventory: workers/nornir/services_nornir_service_tasks_runtime_inventory.md
       - Create Host from NetBox: workers/nornir/services_nornir_service_tasks_create_host_from_netbox.md
       - SNMP: workers/nornir/services_nornir_service_tasks_snmp.md
+      - Errdisabled Hosts: workers/nornir/services_nornir_service_tasks_errdisabled_hosts.md
     - Jinja2 Filters: workers/nornir/services_nornir_service_jinja2_filters.md
   - Netbox:
     - Overview: workers/netbox/services_netbox_service.md

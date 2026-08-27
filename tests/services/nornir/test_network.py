@@ -14,7 +14,7 @@ class TestNornirNetwork:
             "nornir",
             "network",
             workers=["nornir-worker-1"],
-            kwargs={"fun": "ping", "FC": "ceos"},
+            kwargs={"on_failed": True, "fun": "ping", "FC": "ceos"},
         )
         pprint.pprint(ret)
 
@@ -31,7 +31,7 @@ class TestNornirNetwork:
             "nornir",
             "network",
             workers=["nornir-worker-1"],
-            kwargs={"fun": "ping", "FC": "ceos", "count": 2},
+            kwargs={"on_failed": True, "fun": "ping", "FC": "ceos", "count": 2},
         )
         pprint.pprint(ret)
 
@@ -52,7 +52,7 @@ class TestNornirNetwork:
             "nornir",
             "network",
             workers=["nornir-worker-1"],
-            kwargs={"fun": "resolve_dns", "FC": "ceos"},
+            kwargs={"on_failed": True, "fun": "resolve_dns", "FC": "ceos"},
         )
         pprint.pprint(ret)
 

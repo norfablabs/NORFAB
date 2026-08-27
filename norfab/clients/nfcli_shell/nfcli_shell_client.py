@@ -112,8 +112,13 @@ class ShowBrokerModel(BaseModel):
         reply = nfclient.mmi("mmi.service.broker", task)
         if reply["errors"]:
             return "\n".join(reply["errors"])
-        else:
-            return reply["results"]
+
+        results = reply["results"]
+        if task == "show_broker":
+            ip_allowlist = results.get("security", {}).get("ip-allowlist")
+            if isinstance(ip_allowlist, list):
+                results["security"]["ip-allowlist"] = ", ".join(ip_allowlist)
+        return results
 
 
 class ShowNorfabWorkersModel(BaseModel):

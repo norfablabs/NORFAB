@@ -168,8 +168,12 @@ class TestTask:
         # run dry run task
         if dry_run is True:
             result = filtered_nornir.run(
-                task=nr_test, name="tests_dry_run", ret_data_per_host=tests
+                task=nr_test,
+                name="tests_dry_run",
+                ret_data_per_host=tests,
+                on_failed=kwargs.get("on_failed", False),
             )
+            self.update_nornir_result(result, ret)
             ret.result = ResultSerializer(
                 result, to_dict=to_dict, add_details=add_details
             )
@@ -213,6 +217,10 @@ class TestTask:
                 result = getattr(self, nrtask)(
                     job=job, **function_kwargs
                 )  # returns Result object
+                ret.resources = sorted(set(ret.resources + result.resources))
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed + result.resources_failed)
+                )
                 # save test results into overall results
                 if to_dict == True:
                     for host_name, host_res in result.result.items():

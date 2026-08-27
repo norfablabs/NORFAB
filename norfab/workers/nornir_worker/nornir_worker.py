@@ -1,6 +1,7 @@
 import importlib.metadata
 import ipaddress
 import logging
+import math
 import os
 import sys
 import time
@@ -36,6 +37,9 @@ from .inventory_tasks import InventoryTasks
 from .netconf_task import NetconfTask
 from .network_task import NetworkTask
 from .nornir_models import (
+    ErrdisabledHostsClearResult,
+    ErrdisabledHostsInput,
+    ErrdisabledHostsListResult,
     GetVersionInput,
     GetVersionResult,
     GetWatchdogConnectionsInput,
@@ -73,7 +77,9 @@ class WatchDog(WorkerWatchDog):
     Attributes:
         worker (Worker): The worker instance being monitored.
         connections_idle_timeout (int): Timeout value for idle connections.
+        failed_hosts_recovery_timeout (int): Timeout before failed hosts recover.
         connections_data (dict): Dictionary to store connection use timestamps.
+        failed_hosts_data (dict): Errdisabled timestamps and available reasons.
         started_at (float): Timestamp when the watchdog was started.
         idle_connections_cleaned (int): Counter for idle connections cleaned.
         dead_connections_cleaned (int): Counter for dead connections cleaned.
@@ -86,14 +92,21 @@ class WatchDog(WorkerWatchDog):
         self.connections_idle_timeout = worker.nornir_worker_inventory.get(
             "connections_idle_timeout", None
         )
+        self.failed_hosts_recovery_timeout = worker.nornir_worker_inventory.get(
+            "failed_hosts_recovery_timeout", 60
+        )
         self.connections_data = {}  # store connections use timestamps
+        self.failed_hosts_data = {}
+        self.failed_hosts_lock = Lock()
 
         # stats attributes
         self.idle_connections_cleaned = 0
         self.dead_connections_cleaned = 0
+        self.failed_hosts_recovered = 0
 
         # list of tasks for watchdog to run in given order
         self.watchdog_tasks = [
+            self.failed_hosts_recover,
             self.connections_clean,
             self.connections_keepalive,
         ]
@@ -119,6 +132,8 @@ class WatchDog(WorkerWatchDog):
             "uptime_seconds": int(time.time() - self.started_at),
             "dead_connections_cleaned": self.dead_connections_cleaned,
             "idle_connections_cleaned": self.idle_connections_cleaned,
+            "failed_hosts_recovered": self.failed_hosts_recovered,
+            "errdisabled_hosts": len(self.worker.nr.data.failed_hosts),
             "worker_ram_usage_mbyte": self.get_ram_usage(),
             "nornir_hosts": (
                 len(self.worker.nr.inventory.hosts) if self.worker.nr else 0
@@ -141,11 +156,88 @@ class WatchDog(WorkerWatchDog):
 
                 - "watchdog_interval" (int): The interval for the watchdog timer.
                 - "connections_idle_timeout" (int): The timeout for idle connections.
+                - "failed_hosts_recovery_timeout" (int): The failed-host timeout.
         """
         return {
             "watchdog_interval": self.watchdog_interval,
             "connections_idle_timeout": self.connections_idle_timeout,
+            "failed_hosts_recovery_timeout": self.failed_hosts_recovery_timeout,
         }
+
+    def failed_hosts_update(self, result: Any = None) -> None:
+        """Track when hosts enter Nornir's shared failed-host state."""
+        now = time.time()
+        failed_results = getattr(result, "failed_hosts", {}) if result else {}
+
+        with self.failed_hosts_lock:
+            failed_hosts = set(self.worker.nr.data.failed_hosts)
+            for host_name in failed_hosts:
+                host_data = self.failed_hosts_data.setdefault(
+                    host_name, {"errdisabled_at": now}
+                )
+                host_result = failed_results.get(host_name)
+                if host_result:
+                    for task_result in reversed(host_result):
+                        if not task_result.failed:
+                            continue
+                        reason = task_result.exception or task_result.result
+                        if reason:
+                            host_data["reason"] = str(reason)
+                        break
+
+            for host_name in set(self.failed_hosts_data) - failed_hosts:
+                self.failed_hosts_data.pop(host_name)
+
+    def failed_hosts_list(self) -> list[dict]:
+        """Return tracked failed hosts and their remaining recovery time."""
+        self.failed_hosts_update()
+        now = time.time()
+
+        with self.failed_hosts_lock:
+            ret = []
+            for host_name, host_data in sorted(self.failed_hosts_data.items()):
+                age = now - host_data["errdisabled_at"]
+                recovery_time_left = max(
+                    0, math.ceil(self.failed_hosts_recovery_timeout - age)
+                )
+                item = {
+                    "host": host_name,
+                    "errdisabled_at": time.ctime(host_data["errdisabled_at"]),
+                    "recovery_time_left": recovery_time_left,
+                }
+                if host_data.get("reason"):
+                    item["reason"] = host_data["reason"]
+                ret.append(item)
+            return ret
+
+    def failed_hosts_clear(self) -> list[str]:
+        """Recover all hosts currently marked as failed by Nornir."""
+        with self.failed_hosts_lock:
+            recovered = sorted(self.worker.nr.data.failed_hosts)
+            self.worker.nr.data.reset_failed_hosts()
+            self.failed_hosts_data.clear()
+            self.failed_hosts_recovered += len(recovered)
+            return recovered
+
+    def failed_hosts_recover(self) -> None:
+        """Recover hosts after the configured errdisabled timeout expires."""
+        self.failed_hosts_update()
+        now = time.time()
+
+        with self.failed_hosts_lock:
+            for host_name, host_data in list(self.failed_hosts_data.items()):
+                if (
+                    now - host_data["errdisabled_at"]
+                    < self.failed_hosts_recovery_timeout
+                ):
+                    continue
+                self.worker.nr.data.recover_host(host_name)
+                self.failed_hosts_data.pop(host_name)
+                self.failed_hosts_recovered += 1
+                log.info(
+                    f"{self.worker.name} watchdog, recovered errdisabled host "
+                    f"'{host_name}'"
+                )
 
     def connections_get(self) -> Dict:
         """
@@ -430,7 +522,11 @@ class NornirWorker(
             tuple: (filtered_nornir, Result) where Result status set to
                 `no_match` if no hosts matched.
         """
-        self.nr.data.reset_failed_hosts()  # reset failed hosts before filtering
+        if self.nornir_worker_inventory.get("reset_failed_hosts_before_task", False):
+            self.nr.data.reset_failed_hosts()
+            if hasattr(self, "watchdog"):
+                self.watchdog.failed_hosts_update()
+
         filters = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in FFun_functions}
         filtered_nornir = FFun(self.nr, **filters)
 
@@ -443,6 +539,12 @@ class NornirWorker(
             ret.status = "no_match"
 
         return filtered_nornir, ret
+
+    def update_nornir_result(self, result: Any, ret: Result) -> None:
+        """Track failed hosts and add executed and failed hosts to the result."""
+        self.watchdog.failed_hosts_update(result)
+        ret.resources = sorted(result)
+        ret.resources_failed = sorted(result.failed_hosts)
 
     def _add_processors(self, nr: Any, kwargs: Dict[str, Any], job: Job) -> Any:
         """
@@ -874,6 +976,48 @@ class NornirWorker(
                 watchdog connections.
         """
         return Result(result=self.watchdog.connections_get())
+
+    @Task(
+        fastapi={"methods": ["GET"]},
+        input=ErrdisabledHostsInput,
+        output=ErrdisabledHostsListResult,
+        mcp={
+            "annotations": {
+                "title": "List Errdisabled Hosts",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
+    def errdisabled_hosts_list(self) -> Result:
+        """List hosts currently held in Nornir's failed-host state."""
+        return Result(
+            task=f"{self.name}:errdisabled_hosts_list",
+            result=self.watchdog.failed_hosts_list(),
+        )
+
+    @Task(
+        fastapi={"methods": ["POST"]},
+        input=ErrdisabledHostsInput,
+        output=ErrdisabledHostsClearResult,
+        mcp={
+            "annotations": {
+                "title": "Recover Errdisabled Hosts",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
+    def errdisabled_hosts_clear(self) -> Result:
+        """Recover all hosts currently held in Nornir's failed-host state."""
+        return Result(
+            task=f"{self.name}:errdisabled_hosts_clear",
+            result=self.watchdog.failed_hosts_clear(),
+        )
 
     @Task(
         fastapi={"methods": ["POST"]},

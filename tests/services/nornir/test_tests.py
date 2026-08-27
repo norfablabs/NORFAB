@@ -14,7 +14,7 @@ class TestNornirTest:
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/suite_1.txt"},
+            kwargs={"on_failed": True, "suite": "nf://nornir_test_suites/suite_1.txt"},
         )
         pprint.pprint(ret)
 
@@ -39,6 +39,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_suite_with_groups.txt",
                 "FC": "spine",
                 "groups": ["SYS"],
@@ -61,6 +62,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_suite_with_comments.txt",
                 "FC": "spine",
                 "add_details": True,
@@ -86,6 +88,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_empty_tests.txt",
                 "FC": "spine",
             },
@@ -110,6 +113,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "add_details": True,
             },
@@ -134,7 +138,11 @@ class TestNornirTest:
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/suite_1.txt", "to_dict": False},
+            kwargs={
+                "on_failed": True,
+                "suite": "nf://nornir_test_suites/suite_1.txt",
+                "to_dict": False,
+            },
         )
         pprint.pprint(ret)
 
@@ -159,6 +167,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "to_dict": False,
                 "add_details": True,
@@ -188,7 +197,7 @@ class TestNornirTest:
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/suite_2.txt"},
+            kwargs={"on_failed": True, "suite": "nf://nornir_test_suites/suite_2.txt"},
         )
         pprint.pprint(ret)
 
@@ -213,6 +222,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/{{ host.name }}_suite.txt",
                 "dry_run": True,
                 "FL": ["ceos-spine-1", "ceos-spine-2"],
@@ -241,6 +251,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "subset": "check*version",
             },
@@ -263,6 +274,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "dry_run": True,
             },
@@ -289,6 +301,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "to_dict": True,
             },
@@ -313,6 +326,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "to_dict": False,
             },
@@ -333,6 +347,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "remove_tasks": False,
             },
@@ -354,6 +369,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "failed_only": True,
             },
@@ -376,7 +392,10 @@ class TestNornirTest:
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/suite_non_existing.txt"},
+            kwargs={
+                "on_failed": True,
+                "suite": "nf://nornir_test_suites/suite_non_existing.txt",
+            },
         )
         pprint.pprint(ret)
 
@@ -390,7 +409,10 @@ class TestNornirTest:
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/suite_bad_yaml.txt"},
+            kwargs={
+                "on_failed": True,
+                "suite": "nf://nornir_test_suites/suite_bad_yaml.txt",
+            },
         )
         pprint.pprint(ret)
 
@@ -404,7 +426,10 @@ class TestNornirTest:
             "nornir",
             "test",
             workers=["nornir-worker-1"],
-            kwargs={"suite": "nf://nornir_test_suites/suite_bad_jinja2.txt"},
+            kwargs={
+                "on_failed": True,
+                "suite": "nf://nornir_test_suites/suite_bad_jinja2.txt",
+            },
         )
         pprint.pprint(ret)
 
@@ -419,6 +444,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_suite_custom_fun.txt",
                 "FC": "ceos-spine-",
             },
@@ -452,6 +478,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_nornir_test_with_nftask.txt",
                 "FC": "ceos-spine-",
                 "add_details": True,
@@ -472,6 +499,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_nornir_test_with_nftask.txt",
                 "FC": "ceos-spine-",
                 "add_details": True,
@@ -497,6 +525,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_suite_with_include.txt",
                 "FC": "ceos-spine-",
                 "dry_run": True,
@@ -520,6 +549,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_suite_with_include.txt",
                 "FC": "ceos-spine-",
             },
@@ -542,6 +572,7 @@ class TestNornirTest:
             "test",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_nornir_test_suite_with_job_data.txt",
                 "FC": "ceos-spine-",
                 "job_data": {"some_conditional": True},
@@ -569,6 +600,7 @@ class TestNornirTest:
             "nornir",
             "test",
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "FC": ["spine", "leaf"],
             },
@@ -586,6 +618,7 @@ class TestNornirTest:
             "nornir",
             "test",
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "FC": ["spine", "leaf"],
                 "extensive": True,
@@ -603,6 +636,7 @@ class TestNornirTest:
             "nornir",
             "test",
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/suite_1.txt",
                 "FC": ["spine", "leaf"],
                 "extensive": True,
@@ -627,6 +661,7 @@ class TestNornirTest:
             "nornir",
             "test",
             kwargs={
+                "on_failed": True,
                 "suite": "nf://nornir_test_suites/test_suite_with_comments.txt",
                 "FC": ["spine", "leaf"],
                 "extensive": True,

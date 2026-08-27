@@ -3,7 +3,7 @@ name = "norfab"
 
 [tool.poetry]
 name = "norfab"
-version = "0.21.0"
+version = "0.21.1"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
 authors = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
 maintainers = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
@@ -13,6 +13,7 @@ homepage = "https://github.com/norfablabs/NORFAB"
 repository = "https://github.com/norfablabs/NORFAB"
 documentation = "https://docs.norfablabs.com"
 keywords = ["Network", "Automation", "DevOps"]
+exclude = ["**/node_modules/**"]
 classifiers = [
     "Topic :: Utilities",
     "Programming Language :: Python :: 3.10",

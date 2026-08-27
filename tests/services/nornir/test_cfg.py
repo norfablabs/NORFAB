@@ -14,7 +14,10 @@ class TestNornirCfg:
             "nornir",
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
-            kwargs={"config": ["interface loopback 0", "description RID"]},
+            kwargs={
+                "on_failed": True,
+                "config": ["interface loopback 0", "description RID"],
+            },
         )
         pprint.pprint(ret)
 
@@ -33,6 +36,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "dry_run": True,
             },
@@ -52,6 +56,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "FL": ["ceos-leaf-1", "ceos-spine-1"],
                 "dry_run": True,
@@ -79,6 +84,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "dry_run": True,
             },
@@ -94,6 +100,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "add_details": True,
                 "dry_run": True,
@@ -126,6 +133,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "to_dict": False,
                 "dry_run": True,
@@ -151,6 +159,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "to_dict": False,
                 "dry_run": True,
@@ -188,6 +197,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "dry_run": True,
                 "plugin": "wrong_plugin",
@@ -206,6 +216,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_1.txt",
                 "dry_run": True,
             },
@@ -225,6 +236,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_non_existing.txt",
                 "dry_run": True,
             },
@@ -240,6 +252,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_2.txt",
                 "dry_run": True,
             },
@@ -262,6 +275,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/{{ host.name }}_config.j2",
                 "dry_run": True,
                 "FL": ["ceos-spine-1", "ceos-spine-2"],
@@ -285,6 +299,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": [
                     "interface loopback 123",
                     f"description RID {random.randint(0, 1000)}",
@@ -313,6 +328,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "plugin": "scrapli",
             },
@@ -334,6 +350,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": ["interface loopback 0", "description RID"],
                 "plugin": "netmiko",
             },
@@ -355,6 +372,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_with_includes.txt",
                 "dry_run": True,
             },
@@ -381,6 +399,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_with_includes_non_exist.txt",
                 "dry_run": True,
             },
@@ -397,6 +416,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_with_if_and_includes.txt",
                 "dry_run": True,
             },
@@ -417,6 +437,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_with_job_data.txt",
                 "dry_run": True,
                 "job_data": {
@@ -439,6 +460,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_with_job_data.txt",
                 "dry_run": True,
                 "job_data": "nf://cfg/config_job_data_1.txt",
@@ -459,6 +481,7 @@ class TestNornirCfg:
             "cfg",
             workers=["nornir-worker-1", "nornir-worker-2"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_with_job_data.txt",
                 "dry_run": True,
                 "job_data": "nf://cfg/config_job_data_non_exist.txt",

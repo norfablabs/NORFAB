@@ -104,6 +104,7 @@ class FileCopyTask:
         else:
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)
+        self.update_nornir_result(result, ret)
 
         ret.failed = result.failed  # failed is true if any of the hosts failed
         ret.result = ResultSerializer(result, to_dict=to_dict, add_details=add_details)

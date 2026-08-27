@@ -856,6 +856,23 @@ class TestSyncDeviceInterfaces:
             nb_lb11.type.value == "virtual"
         ), f"Loopback11 type mismatch: got {nb_lb11.type.value!r}"
 
+    def test_sync_device_interfaces_fills_missing_values_from_status(self, nfclient):
+        """Use FakeNOS operational output to fill values absent from config."""
+        device = "fn-ceos-sp-1"
+        interface = "Ethernet8"
+        delete_interfaces(nfclient, device, interface)
+
+        ret = self._sync(nfclient, [device], filter_by_name=interface)
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            assert interface in res["result"][device]["created"]
+
+        nb_interface = self._get_nb_intf(nfclient, device, interface)
+        assert nb_interface.mtu == 9214
+        assert nb_interface.speed == 1_000_000
+        assert nb_interface.duplex.value == "full"
+
     def test_sync_device_interfaces_create_child(self, nfclient):
         """Clean TEST_SYNC from spine-1 then verify sync creates Ethernet9.610
         (sub-interface, description TEST_SYNC_SUBINTERFACE) as a child of Ethernet9."""
@@ -882,6 +899,7 @@ class TestSyncDeviceInterfaces:
         assert (
             nb_subif.parent is not None and nb_subif.parent.name == "Ethernet9"
         ), f"Ethernet9.610 parent mismatch: got {nb_subif.parent!r}"
+        assert nb_subif.mtu is None, "Operational MTU 0 must not be synced to NetBox"
 
     def test_sync_device_interfaces_create_lag_with_members(self, nfclient):
         """Clean TEST_SYNC from spine-1 then verify sync creates Port-Channel41 (LAG)

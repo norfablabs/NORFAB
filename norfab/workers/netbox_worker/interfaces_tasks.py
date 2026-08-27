@@ -899,8 +899,9 @@ class NetboxInterfacesTasks:
         The task follows a four-step pipeline:
 
         1. **Fetch**: Pull current interface state from NetBox (source of truth).
-        2. **Collect live state**: Run a Nornir ``parse_ttp`` get interfaces job against
-           devices to collect live interface attributes (type, enabled, MTU, VLANs, VRF, etc.).
+        2. **Collect live state**: Run Nornir ``parse_ttp`` interface configuration
+           and status jobs against devices. Configuration is authoritative, while
+           status fills missing MTU, duplex, and speed values.
         3. **Diff**: Compare normalized NetBox state against normalized live state using
            DeepDiff to classify each interface as ``create``, ``update``, ``delete``, or
            ``in_sync``.
@@ -924,8 +925,8 @@ class NetboxInterfacesTasks:
 
         - Sync interfaces task does not handles IP Addresses
         - Sync interfaces task does not handles MAC Addresses
-        - Sync interfaces uses devices running configuration to pull interfaces data, interfaces
-          operational state data not used
+        - Sync interfaces uses device running configuration as the primary source;
+          operational state only fills missing MTU, duplex, and speed values
 
         **Dry-run mode** (``dry_run=True``): returns the raw diff plan without making
         any changes. Result is keyed by device name::
@@ -1167,6 +1168,27 @@ class NetboxInterfacesTasks:
             workers="all",
             timeout=timeout,
         )
+        job.event(f"retrieving live interface status for {len(devices)} devices")
+        parse_status_data = self.client.run_job(
+            "nornir",
+            "parse_ttp",
+            kwargs={"get": "interfaces_status", "FL": devices},
+            workers="all",
+            timeout=timeout,
+        )
+        interface_status = {}
+        for wname, wdata in parse_status_data.items():
+            if wdata.get("failed"):
+                msg = f"{wname} - failed to parse interface status data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+                continue
+            for device_name, host_interfaces in wdata["result"].items():
+                device_status = interface_status.setdefault(device_name, {})
+                for data in host_interfaces or []:
+                    if data.get("name"):
+                        device_status[data["name"]] = data
+
         # Normalize live interface data per device.
         job.event("normalising live interface data")
         normalised_live_all = {}
@@ -1188,6 +1210,9 @@ class NetboxInterfacesTasks:
                     )
                 ]
                 for data in host_interfaces or []:
+                    status = interface_status.get(device_name, {}).get(
+                        data.get("name"), {}
+                    )
                     mapped_names = {
                         field: data.get(field) for field in ("name", "parent", "lag")
                     }
@@ -1225,6 +1250,15 @@ class NetboxInterfacesTasks:
                         "qinq_svlan": data.get("qinq_svlan"),
                         "vrf": data.get("vrf"),
                     }
+                    interface = normalised_live_all[device_name][intf_name]
+                    status_mtu = status.get("mtu")
+                    if interface["mtu"] is None and status_mtu and status_mtu > 0:
+                        interface["mtu"] = status_mtu
+                    status_speed = status.get("speed_bps")
+                    if interface["speed"] is None and status_speed and status_speed > 0:
+                        interface["speed"] = status_speed // 1_000
+                    if interface["duplex"] is None:
+                        interface["duplex"] = status.get("duplex")
         live_interface_count = sum(len(v) for v in normalised_live_all.values())
         job.event(
             f"normalised {live_interface_count} live interface(s) after applying filters"

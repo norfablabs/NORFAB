@@ -170,6 +170,11 @@ class BrokerConfig(BaseModel):
         description="Enable ZMQ CURVE authentication",
         json_schema_extra={"presence": True},
     )
+    ip_allowlist: List[StrictStr] = Field(
+        default_factory=lambda: ["*"],
+        min_length=1,
+        description="Source IP addresses allowed to authenticate; '*' allows any IP",
+    )
 
 
 # ------------------------------------------------------

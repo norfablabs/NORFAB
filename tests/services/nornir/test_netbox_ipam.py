@@ -51,6 +51,7 @@ class TestNBCreateIp:
             "cfg",
             workers=["nornir-worker-5"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_netbox_get_next_ip_j2filter.txt",
                 "FC": "fceos5",
                 "dry_run": True,
@@ -73,6 +74,7 @@ class TestNBCreateIp:
             "cfg",
             workers=["nornir-worker-5"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_netbox_get_next_ip_j2set.txt",
                 "FC": "fceos5",
                 "dry_run": True,
@@ -129,6 +131,7 @@ class TestNBCreatePrefix:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_netbox_get_next_prefix_j2filter.txt",
                 "FC": "spine",
                 "dry_run": True,
@@ -155,6 +158,7 @@ class TestNBCreatePrefix:
             "cfg",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "config": "nf://cfg/config_netbox_get_next_prefix_j2set.txt",
                 "FC": "spine",
                 "dry_run": True,

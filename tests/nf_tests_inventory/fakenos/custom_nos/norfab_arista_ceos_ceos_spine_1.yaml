@@ -341,6 +341,16 @@ commands:
         Last clearing of "show interface" counters never
            0 packets input
            0 packets output
+      Ethernet8 is down, line protocol is down (notconnect)
+        Hardware is Ethernet, address is aac1.ab00.0008 (bia aac1.ab00.0008)
+        Description: TEST_SYNC_ACCESS_PORT
+        Ethernet MTU 9214 bytes, BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Last clearing of "show interface" counters never
+           0 packets input, 0 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 packets output, 0 bytes
+           0 output errors, 0 collisions
       Ethernet9.610 is down, line protocol is lowerlayerdown (notconnect)
         Hardware is Subinterface, address is 0000.0000.0000
         Description: TEST_SYNC_SUBINTERFACE

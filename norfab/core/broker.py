@@ -228,6 +228,13 @@ class NFPBroker:
         self.build_message = NFP.MessageBuilder()
         self.exit_event = exit_event
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
+        self.ip_allowlist = self.inventory.broker.get("ip_allowlist", ["*"])
+        if (
+            not isinstance(self.ip_allowlist, list)
+            or not self.ip_allowlist
+            or not all(isinstance(address, str) for address in self.ip_allowlist)
+        ):
+            raise ValueError("broker.ip_allowlist must be a non-empty list of strings")
 
         self.base_dir = self.inventory.base_dir
         self.broker_base_dir = os.path.join(
@@ -265,7 +272,8 @@ class NFPBroker:
             # Start an authenticator for this context.
             self.auth = ThreadAuthenticator(self.ctx)
             self.auth.start()
-            # self.auth.allow("0.0.0.0")
+            if "*" not in self.ip_allowlist:
+                self.auth.allow(*self.ip_allowlist)
             self.auth.allow_any = True
             # Tell the authenticator how to handle CURVE requests
             self.auth.configure_curve(location=zmq.auth.CURVE_ALLOW_ANY)
@@ -319,13 +327,24 @@ class NFPBroker:
         """
         while True:
             try:
-                items = self.poller.poll(1000)
+                msg = None
+                # ZeroMQ sockets are not thread-safe. Keep polling and receiving
+                # under the same lock used by the worker keepalive threads so the
+                # ROUTER socket is never accessed concurrently. Use a short poll
+                # interval to avoid delaying keepalive sends for up to a second.
+                with self.socket_lock:
+                    items = self.poller.poll(100)
+                    if items:
+                        try:
+                            msg = self.socket.recv_multipart(zmq.NOBLOCK)
+                        except zmq.Again:
+                            # The readiness notification can become stale before
+                            # recv; resume polling instead of blocking the lock.
+                            pass
             except KeyboardInterrupt:
                 break  # Interrupted
 
-            if items:
-                with self.socket_lock:
-                    msg = self.socket.recv_multipart()
+            if msg is not None:
                 log.debug(f"NFPBroker - received '{msg}'")
 
                 if len(msg) < 3:
@@ -863,6 +882,7 @@ class NFPBroker:
                     "broker-private-key-file": self.broker_private_key_file,
                     "broker-public-key-file": self.broker_public_key_file,
                     "zmq-auth": self.zmq_auth,
+                    "ip-allowlist": self.ip_allowlist,
                 },
             }
         elif task == "show_broker_version":

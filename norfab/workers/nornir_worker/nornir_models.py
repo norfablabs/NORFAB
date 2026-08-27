@@ -101,6 +101,12 @@ class NornirCommonArgs(
 ):
     """Common Nornir task arguments accepted by task serializers and processors."""
 
+    on_failed: StrictBool = Field(
+        False,
+        description="Run task on hosts currently marked as failed by Nornir",
+        alias="on-failed",
+        json_schema_extra={"presence": True},
+    )
     to_dict: StrictBool = Field(
         True,
         description="Return task results as a dictionary keyed by host",
@@ -1323,6 +1329,24 @@ class GetWatchdogConnectionsResult(Result):
     result: Dict[StrictStr, Any] = Field(
         {},
         description="Watchdog connection state keyed by host and plugin",
+    )
+
+
+class ErrdisabledHostsInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    pass
+
+
+class ErrdisabledHostsListResult(Result):
+    result: list[dict[StrictStr, Any]] = Field(
+        [],
+        description="Hosts currently errdisabled by Nornir and their recovery timing",
+    )
+
+
+class ErrdisabledHostsClearResult(Result):
+    result: list[StrictStr] = Field(
+        [],
+        description="Host names recovered from Nornir failed-host state",
     )
 
 

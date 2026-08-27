@@ -14,6 +14,7 @@ class TestNornirFileCopy:
             "file_copy",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "source_file": "nf://nornir/files/file_copy_test.txt",
                 "dry_run": True,
                 "FC": "spine",
@@ -39,6 +40,7 @@ class TestNornirFileCopy:
             "cli",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "commands": "delete file_copy_test.txt",
                 "FC": "spine",
                 "enable": True,
@@ -53,6 +55,7 @@ class TestNornirFileCopy:
             "file_copy",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "source_file": "nf://nornir/files/file_copy_test.txt",
                 "FC": "spine",
                 "FM": "arista_eos",
@@ -66,7 +69,12 @@ class TestNornirFileCopy:
             "nornir",
             "cli",
             workers=["nornir-worker-1"],
-            kwargs={"commands": "dir", "FC": "spine", "enable": True},
+            kwargs={
+                "on_failed": True,
+                "commands": "dir",
+                "FC": "spine",
+                "enable": True,
+            },
         )
         print("File dir result:")
         pprint.pprint(file_dir)
@@ -94,6 +102,7 @@ class TestNornirFileCopy:
             "file_copy",
             workers=["nornir-worker-1"],
             kwargs={
+                "on_failed": True,
                 "source_file": "nf://nornir/files/file_not_exist.txt",
                 "FC": "spine",
                 "FM": "arista_eos",
