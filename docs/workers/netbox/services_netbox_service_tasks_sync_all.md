@@ -56,6 +56,23 @@ inventory, interfaces, and BGP peerings.
 The shared `message` argument is used as the NetBox changelog message for both
 inventory and BGP write operations.
 
+## Interface Arguments
+
+Interface-specific options use an `interfaces_` prefix in the Python API and
+an `interfaces-` prefix in NFCLI:
+
+| Python argument | Purpose |
+|---|---|
+| `interfaces_filter_by_name` | Include only matching interface names. |
+| `interfaces_filter_by_description` | Include only matching interface descriptions. |
+| `interfaces_update_type` | Safely update existing logical interface types. Defaults to `True`. |
+| `interfaces_vlan_group` | Exact fallback VLAN group name for interface VLAN resolution. |
+
+Safe type updates allow `other` to become `virtual`, `bridge`, or `lag`, and
+allow transitions among those logical types. They do not overwrite specific
+physical types or change an existing interface to `other`. Interface creation
+continues to accept any parsed type.
+
 ## IP Arguments
 
 IP-specific options use an `ip_` prefix in the Python API and an `ip-` prefix in
@@ -222,6 +239,10 @@ root
             ├── inventory-filter-by-slot:    Glob patterns selecting normalized module bay names
             ├── inventory-ignore-modules:    Glob patterns excluding normalized module type names
             ├── inventory-ignore-slots:    Glob patterns excluding normalized module bay names
+            ├── interfaces-filter-by-name:    Include only matching interface names
+            ├── interfaces-filter-by-description:    Include only matching interface descriptions
+            ├── interfaces-update-type:    Safely update existing logical interface types, default 'True'
+            ├── interfaces-vlan-group:    Exact fallback VLAN group name for interface VLAN resolution
             ├── ip-ignore-vrf:    Ignore discovered interface VRFs during IP sync
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns

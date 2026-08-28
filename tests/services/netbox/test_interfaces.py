@@ -3,7 +3,10 @@ import pprint
 import pytest
 from pydantic import ValidationError
 
-from norfab.workers.netbox_worker.netbox_models import SyncDeviceInterfacesInput
+from norfab.workers.netbox_worker.netbox_models import (
+    SyncAllInput,
+    SyncDeviceInterfacesInput,
+)
 
 try:
     from tests.services.netbox.common import (
@@ -558,6 +561,8 @@ class TestSyncDeviceInterfaces:
         defaults = SyncDeviceInterfacesInput()
         assert defaults.ignore_vlans is False
         assert defaults.ignore_vrf is False
+        assert defaults.update_type is True
+        assert SyncAllInput().interfaces_update_type is True
 
         enabled = SyncDeviceInterfacesInput.model_validate(
             {"ignore-vlans": True, "ignore-vrf": True}
@@ -742,7 +747,8 @@ class TestSyncDeviceInterfaces:
 
     def test_sync_device_interfaces(self, nfclient):
         """Clean TEST_SYNC interfaces from spines then sync. All TEST_SYNC interfaces
-        must be created from live data; result must carry live-run keys."""
+        must be created from live data with their parsed types; result must carry
+        live-run keys."""
         self._cleanup(nfclient, self.SPINE_DEVICES)
 
         ret = self._sync(nfclient, self.SPINE_DEVICES)
@@ -760,6 +766,19 @@ class TestSyncDeviceInterfaces:
                 assert device_data[
                     "created"
                 ], f"{worker}:{device} no interfaces created after cleanup"
+
+        assert (
+            self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Loopback10").type.value
+            == "virtual"
+        )
+        assert (
+            self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Port-Channel41").type.value
+            == "lag"
+        )
+        assert (
+            self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Ethernet8").type.value
+            == "other"
+        )
 
     def test_sync_device_interfaces_all_devices(self, nfclient):
         """Clean TEST_SYNC from all 5 devices then sync. Each device must have
@@ -1150,6 +1169,83 @@ class TestSyncDeviceInterfaces:
     # ------------------------------------------------------------------ #
     # Update scenarios                                                   #
     # ------------------------------------------------------------------ #
+
+    def test_sync_device_interfaces_updates_other_to_virtual_by_default(self, nfclient):
+        """The default policy repairs a logical interface stored as ``other``."""
+        device = "fn-ceos-sp-2"
+        interface = "Loopback10"
+        self._cleanup(nfclient, [device])
+        setup = self._sync(nfclient, [device])
+        for worker, res in setup.items():
+            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
+
+        intf_id = self._get_intf_id(nfclient, device, interface)
+        self._patch_intf(nfclient, intf_id, {"type": "other"})
+
+        ret = self._sync(nfclient, [device])
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            type_diff = res["diff"][device]["update"][interface]["type"]
+            assert type_diff == {"old_value": "other", "new_value": "virtual"}
+            assert interface in res["result"][device]["updated"]
+
+        assert self._get_nb_intf(nfclient, device, interface).type.value == "virtual"
+
+    def test_sync_device_interfaces_does_not_replace_physical_type_with_other(
+        self, nfclient
+    ):
+        """A physical NetBox type survives the parser's ``other`` fallback."""
+        device = "fn-ceos-sp-1"
+        interface = "Ethernet2"
+        nb_interface = self._get_nb_intf(nfclient, device, interface)
+        self._patch_intf(nfclient, nb_interface.id, {"type": "1000base-t"})
+
+        ret = self._sync(
+            nfclient,
+            [device],
+            dry_run=True,
+            filter_by_name=interface,
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            field_diff = res["result"][device]["update"].get(interface, {})
+            assert "type" not in field_diff
+
+        assert self._get_nb_intf(nfclient, device, interface).type.value == "1000base-t"
+
+    def test_sync_device_interfaces_can_disable_safe_type_updates(self, nfclient):
+        """``update_type=False`` suppresses an otherwise safe type transition."""
+        device = "fn-ceos-sp-2"
+        interface = "Loopback10"
+        self._cleanup(nfclient, [device])
+        setup = self._sync(nfclient, [device])
+        for worker, res in setup.items():
+            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
+
+        intf_id = self._get_intf_id(nfclient, device, interface)
+        self._patch_intf(nfclient, intf_id, {"type": "other"})
+        try:
+            ret = self._sync(
+                nfclient,
+                [device],
+                dry_run=True,
+                filter_by_name=interface,
+                update_type=False,
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert not res["failed"], f"{worker} failed - {res}"
+                field_diff = res["result"][device]["update"].get(interface, {})
+                assert "type" not in field_diff
+            assert self._get_nb_intf(nfclient, device, interface).type.value == "other"
+        finally:
+            restore = self._sync(nfclient, [device], filter_by_name=interface)
+            for worker, res in restore.items():
+                assert not res[
+                    "failed"
+                ], f"Restore sync failed for {worker}: {res['errors']}"
 
     def test_sync_device_interfaces_update_description(self, nfclient):
         """Clean TEST_SYNC for spine-2, run sync to create Loopback10 with the

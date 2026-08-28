@@ -341,6 +341,7 @@ markers = [
     "netbox_create_ip: NetBox create_ip task tests",
     "netbox_create_ip_bulk: NetBox create_ip_bulk task tests",
     "netbox_create_prefix: NetBox create_prefix task tests",
+    "netbox_crud: NetBox CRUD task tests",
     "netbox_crud_create: NetBox crud_create task tests",
     "netbox_crud_delete: NetBox crud_delete task tests",
     "netbox_crud_get_changelogs: NetBox crud_get_changelogs task tests",

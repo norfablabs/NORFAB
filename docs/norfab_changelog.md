@@ -1,3 +1,12 @@
+# 0.21.3
+
+## ENHANCEMENTS
+
+1. Enabled safe NetBox interface type updates by default. Existing interfaces can transition from `other` to `virtual`, `bridge`, or `lag`, and between those logical types, while specific physical types and transitions to the `other` fallback remain protected. New interface creation continues to accept any parsed type.
+2. Added NetBox branching support to all CRUD tasks by forwarding the optional `branch` argument when creating the pynetbox client.
+
+---
+
 # 0.21.2
 
 ## BUGS

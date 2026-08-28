@@ -1031,9 +1031,9 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         description="Glob pattern to filter interfaces by description",
         alias="interfaces-filter-by-description",
     )
-    interfaces_update_type: Union[None, StrictBool] = Field(
-        False,
-        description="Update existing NetBox interface types",
+    interfaces_update_type: StrictBool = Field(
+        True,
+        description="Safely update existing NetBox logical interface types",
         json_schema_extra={"presence": True},
         alias="interfaces-update-type",
     )
@@ -1608,9 +1608,9 @@ class SyncDeviceInterfacesInput(
         description="Glob pattern to filter interfaces by description, e.g. 'uplink*'",
         alias="filter-by-description",
     )
-    update_type: Union[None, StrictBool] = Field(
-        None,
-        description="Update interface types or not",
+    update_type: StrictBool = Field(
+        True,
+        description="Safely update existing NetBox logical interface types",
         alias="update-type",
         json_schema_extra={"presence": True},
     )

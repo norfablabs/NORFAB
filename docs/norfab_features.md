@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 27 August 2026*
+*Last updated: 28 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -740,7 +740,10 @@ Collects live interface configuration and operational data through Nornir.
 Operational state fills MTU, duplex, and speed when absent from configuration
 parsing. The task computes a desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
-rename rules, and applies ordered create, update, and optional delete actions. **Use cases:**
+rename rules, and applies ordered create, update, and optional delete actions.
+New interfaces accept any parsed type; existing interfaces use safe logical
+type transitions that protect specific physical types and never downgrade to
+the `other` fallback. **Use cases:**
 source-of-truth maintenance and drift remediation. **Limitations:** parser
 coverage determines live-state quality; deletion is opt-in and should be
 reviewed with dry-run first.

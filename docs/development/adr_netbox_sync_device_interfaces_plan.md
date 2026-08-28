@@ -165,6 +165,10 @@ Create:
 Update:
 - Interface exists on both sides and `deepdiff` reports meaningful field changes.
 - Translate changed normalized keys to NetBox interface update payload keys.
+- Existing interface type updates use a safe logical transition policy. Allow
+  `other` to become `virtual`, `bridge`, or `lag`, and allow transitions among
+  those logical types. Protect specific physical types and never change an
+  existing interface to `other`. This restriction does not apply to creation.
 
 Delete:
 - Interface exists in NetBox normalized state but not in live normalized state.
@@ -241,6 +245,7 @@ Rationale:
 Keep existing signature where possible and add explicit safety toggles:
 
 - `delete`: bool = False
+- `update_type`: bool = True; enables safe existing-interface type transitions
 
 ---
 
@@ -360,8 +365,12 @@ Each test should:
 9. Should interface deletions be split into a separate explicit task for stronger
    operational safety, while sync defaults to create/update only? - no
 10. Should MAC replacement be always delete+create, or try update-in-place where
-   API supports it? - update in place API supports it fo sure
+   API supports it? - update in place; the API supports it
 11. Should IP reconciliation manage only primary assignments or all secondary
    addresses as well? - all IP addresses
 12. Should protected interface patterns (for example `mgmt`, `lo`, `vlan`) be
-   hardcoded defaults or inventory-configurable? - no harcoded protected patterns
+   hardcoded defaults or inventory-configurable? - no hardcoded protected patterns
+13. Create interfaces with any parsed type, including the `other` catch-all.
+    Update existing types safely by default: allow `other` to become a logical
+    type and allow transitions among `virtual`, `bridge`, and `lag`; protect
+    specific physical types and never transition an existing interface to `other`.

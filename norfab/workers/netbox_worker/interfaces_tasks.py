@@ -885,7 +885,7 @@ class NetboxInterfacesTasks:
         interface_map: Union[None, list] = None,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
-        update_type: Union[None, bool] = False,
+        update_type: bool = True,
         vlan_group: Union[None, str] = None,
         vlan_map: Union[None, list] = None,
         ignore_vlans: bool = False,
@@ -978,10 +978,12 @@ class NetboxInterfacesTasks:
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
                 interfaces are included by description, e.g. ``'uplink*'``.
-            update_type (str, boolean): update existing interfaces types or not,
-                sync interfaces task unable to fully resolve interface types and
-                defaults to interface type `other` for most interfaces, this knob
-                allows to keep existing Netbox interfaces type intact.
+            update_type (bool): Safely update existing interface types. Updates are
+                allowed from ``other`` to ``virtual``, ``bridge``, or ``lag``, and
+                between those logical types. Specific physical types are protected,
+                and transitions to ``other`` are ignored. Set to False to disable
+                all type updates. New interfaces can use any parsed type regardless
+                of this setting. Defaults to True.
             vlan_group (str, optional): Exact VLAN group name used for interface
                 VLANs not matched by ``vlan_map``. When omitted, unmatched VLANs
                 use the device site.
@@ -1296,15 +1298,37 @@ class NetboxInterfacesTasks:
         job.event("calculating interface sync diff")
         full_diff = self.make_diff(normalised_live_all, normalised_nb_all)
 
-        # remove interface type from updates
-        if update_type is False:
-            for dev_name, dev_diff in full_diff.items():
-                for intf_name in list(dev_diff["update"].keys()):
-                    intf_updates = dev_diff["update"][intf_name]
-                    _ = intf_updates.pop("type", None)
-                    # remove interface from updates if nothing to update
-                    if not intf_updates:
-                        _ = dev_diff["update"].pop(intf_name)
+        # Apply the existing-interface type update policy. Interface creation is
+        # intentionally unrestricted and continues to use any parsed type.
+        for dev_name, dev_diff in full_diff.items():
+            for intf_name in list(dev_diff["update"].keys()):
+                intf_updates = dev_diff["update"][intf_name]
+                type_change = intf_updates.get("type")
+                if type_change:
+                    old_type = type_change["old_value"]
+                    new_type = type_change["new_value"]
+                    safe_type_transition = old_type in (
+                        "other",
+                        "virtual",
+                        "bridge",
+                        "lag",
+                    ) and new_type in ("virtual", "bridge", "lag")
+
+                    # Remove all existing-interface type changes when disabled.
+                    if update_type is False:
+                        _ = intf_updates.pop("type")
+
+                    # Protect physical types and never transition to ``other``.
+                    elif safe_type_transition is False:
+                        _ = intf_updates.pop("type")
+                        job.event(
+                            f"skipping unsafe interface type transition for "
+                            f"{dev_name}:{intf_name}: {old_type} -> {new_type}",
+                            severity="WARNING",
+                        )
+                # remove interface from updates if nothing remains to update
+                if not intf_updates:
+                    _ = dev_diff["update"].pop(intf_name)
         create_count = sum(len(actions["create"]) for actions in full_diff.values())
         update_count = sum(len(actions["update"]) for actions in full_diff.values())
         delete_count = sum(len(actions["delete"]) for actions in full_diff.values())

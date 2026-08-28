@@ -31,6 +31,25 @@ The task follows a four-step pipeline:
 4. Nornir returns normalized interface data to the Netbox worker
 5. Netbox worker applies planned actions and returns per-device action summaries and field-level diffs
 
+## Interface Type Behavior
+
+New interfaces retain the type inferred from live data. Creation accepts any
+NetBox interface type, including `other`, which remains the catch-all when the
+parser cannot identify a more specific physical type.
+
+For existing interfaces, `update_type=True` is the default and enables safe
+logical type correction:
+
+- `other` can change to `virtual`, `bridge`, or `lag`.
+- `virtual`, `bridge`, and `lag` can change between one another.
+- A specific physical type is never replaced with another type.
+- No existing type is replaced with `other`.
+
+Loopback interfaces use NetBox type `virtual`; `loopback` is not submitted as
+an interface type. Set `update_type=False` to disable all type changes for
+existing interfaces. Unsafe transitions are omitted from the actionable diff
+and reported as warning events.
+
 ## Output
 
 **Dry-run mode** (`dry_run=True`) returns the diff plan without making any changes, keyed by device name:
@@ -369,6 +388,7 @@ root
             ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
+            ├── update-type:    Safely update existing NetBox logical interface types, default 'True'
             ├── vlan-group:    Fallback VLAN group exact name
             ├── vlan-map:    Ordered VLAN-to-group mapping rules
             ├── ignore-vlans:    Ignore discovered VLANs and leave interface VLAN associations unchanged

@@ -1,6 +1,6 @@
 import pytest
 
-pytestmark = pytest.mark.netbox
+pytestmark = [pytest.mark.netbox, pytest.mark.netbox_crud]
 
 """Integration tests for NetBox CRUD tasks (netbox_crud.py).
 
@@ -19,6 +19,18 @@ except ModuleNotFoundError as exc:
         raise
     from netbox_data import NB_API_TOKEN, NB_URL
 
+try:
+    from tests.services.netbox.common import delete_branch
+except ModuleNotFoundError as exc:
+    if exc.name not in {
+        "tests",
+        "tests.services",
+        "tests.services.netbox",
+        "tests.services.netbox.common",
+    }:
+        raise
+    from services.netbox.common import delete_branch
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -35,6 +47,15 @@ def clear_nb_cache(keys, nfclient):
         workers="all",
         kwargs={"keys": keys},
     )
+
+
+@pytest.fixture(scope="module")
+def crud_branch_name(nfclient):
+    """Provide an unused name; the first CRUD task creates the branch."""
+    branch = "norfab-crud-branch-test"
+    delete_branch(branch, nfclient)
+    yield branch
+    delete_branch(branch, nfclient)
 
 
 # ---------------------------------------------------------------------------
@@ -1114,3 +1135,133 @@ class TestCrudGetChangelogs:
             obj = nb.dcim.manufacturers.get(mfr_id)
             if obj:
                 obj.delete()
+
+
+# ---------------------------------------------------------------------------
+# CRUD branching
+# ---------------------------------------------------------------------------
+class TestCrudBranching:
+    @staticmethod
+    def _run(nfclient, task, branch, **kwargs):
+        ret = nfclient.run_job(
+            "netbox",
+            task,
+            workers="any",
+            kwargs={"branch": branch, **kwargs},
+        )
+        pprint.pprint(ret)
+
+        for worker, res in ret.items():
+            assert not res["errors"], f"{worker} - received error"
+
+        return next(iter(ret.values()))["result"]
+
+    @pytest.mark.netbox_crud_create
+    @pytest.mark.netbox_crud_read
+    @pytest.mark.netbox_crud_update
+    @pytest.mark.netbox_crud_delete
+    def test_create_read_update_delete_with_branch(self, nfclient, crud_branch_name):
+        """CRUD writes stay in the selected branch and are visible to branch reads."""
+        slug = "norfab-crud-branch-lifecycle"
+        nb = get_pynetbox()
+        assert nb.dcim.manufacturers.get(slug=slug) is None
+
+        created = self._run(
+            nfclient,
+            "crud_create",
+            crud_branch_name,
+            object_type="dcim.manufacturers",
+            data={"name": "NorFab CRUD Branch Lifecycle", "slug": slug},
+        )
+        object_id = created["objects"][0]["id"]
+        assert created["created"] == 1
+        assert nb.dcim.manufacturers.get(slug=slug) is None
+
+        read = self._run(
+            nfclient,
+            "crud_read",
+            crud_branch_name,
+            object_type="dcim.manufacturers",
+            filters={"slug": slug},
+        )
+        assert read["count"] == 1
+        assert read["results"][0]["id"] == object_id
+
+        updated = self._run(
+            nfclient,
+            "crud_update",
+            crud_branch_name,
+            object_type="dcim.manufacturers",
+            data={"id": object_id, "name": "NorFab CRUD Branch Updated"},
+        )
+        assert updated["updated"] == 1
+        assert updated["objects"][0]["name"] == "NorFab CRUD Branch Updated"
+        assert nb.dcim.manufacturers.get(slug=slug) is None
+
+        deleted = self._run(
+            nfclient,
+            "crud_delete",
+            crud_branch_name,
+            object_type="dcim.manufacturers",
+            object_id=object_id,
+        )
+        assert deleted["deleted"] == 1
+
+        read = self._run(
+            nfclient,
+            "crud_read",
+            crud_branch_name,
+            object_type="dcim.manufacturers",
+            filters={"slug": slug},
+        )
+        assert read["count"] == 0
+
+    @pytest.mark.netbox_crud_search
+    def test_search_with_branch(self, nfclient, crud_branch_name):
+        """Search returns an object created only in the selected branch."""
+        slug = "norfab-crud-branch-search"
+        self._run(
+            nfclient,
+            "crud_create",
+            crud_branch_name,
+            object_type="dcim.manufacturers",
+            data={"name": "NorFab CRUD Branch Search", "slug": slug},
+        )
+
+        result = self._run(
+            nfclient,
+            "crud_search",
+            crud_branch_name,
+            query="NorFab CRUD Branch Search",
+            object_types=["dcim.manufacturers"],
+        )
+        assert any(obj["slug"] == slug for obj in result["dcim.manufacturers"])
+        assert get_pynetbox().dcim.manufacturers.get(slug=slug) is None
+
+    @pytest.mark.netbox_crud_list_objects
+    @pytest.mark.netbox_crud_get_changelogs
+    def test_list_objects_and_changelogs_with_branch(self, nfclient, crud_branch_name):
+        """Object discovery and changelog retrieval accept a branch context."""
+        clear_nb_cache("netbox_*_openapi_objects", nfclient)
+        objects = self._run(nfclient, "crud_list_objects", crud_branch_name)
+        assert "manufacturers" in objects["dcim"]
+
+        created = self._run(
+            nfclient,
+            "crud_create",
+            crud_branch_name,
+            object_type="dcim.manufacturers",
+            data={
+                "name": "NorFab CRUD Branch Changelog",
+                "slug": "norfab-crud-branch-changelog",
+            },
+        )
+        object_id = created["objects"][0]["id"]
+
+        changelogs = self._run(
+            nfclient,
+            "crud_get_changelogs",
+            crud_branch_name,
+            filters={"changed_object_id": object_id, "action": "create"},
+        )
+        assert changelogs["count"] >= 1

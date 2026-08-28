@@ -105,6 +105,7 @@ class NetboxCrudTasks:
         self,
         job: Job,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         app_filter: Union[None, str, list] = None,
         include_metadata: bool = True,
     ) -> Result:
@@ -114,6 +115,7 @@ class NetboxCrudTasks:
         Args:
             job: NorFab Job object
             instance: NetBox instance name; uses default if omitted
+            branch: NetBox branching plugin branch name to use
             app_filter: str or list to filter by app(s) e.g. "dcim" or ["dcim", "ipam"]
             include_metadata: if False returns object names only; if True includes path,
                 methods (GET/POST/PATCH/PUT/DELETE), schema_name, description
@@ -139,7 +141,7 @@ class NetboxCrudTasks:
             job.event(
                 f"extracting object types from OpenAPI schema for instance '{instance}'"
             )
-            nb = self._get_pynetbox(instance, job=job)
+            nb = self._get_pynetbox(instance, branch=branch, job=job)
             schema = nb.openapi()
             schema_data: Dict[str, Dict[str, Any]] = {}
 
@@ -222,6 +224,7 @@ class NetboxCrudTasks:
         brief: bool = False,
         limit: int = 10,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
     ) -> Result:
         """
         Free-text search using the 'q' parameter across multiple object types.
@@ -238,6 +241,7 @@ class NetboxCrudTasks:
             brief: if True adds brief=1 to request
             limit: max results per object type (1-100)
             instance: NetBox instance name; uses default if omitted
+            branch: NetBox branching plugin branch name to use
 
         Returns:
             dict keyed by "app.resource" → list of matching objects
@@ -254,7 +258,7 @@ class NetboxCrudTasks:
 
         job.event(f"searching '{query}' across {len(object_types)} object type(s)")
 
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         for object_type in object_types:
             try:
@@ -306,6 +310,7 @@ class NetboxCrudTasks:
         offset: int = 0,
         ordering: Union[None, str, list] = None,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
     ) -> Result:
         """
         Retrieve NetBox objects by ID(s) or filter dict(s).
@@ -320,6 +325,8 @@ class NetboxCrudTasks:
             limit: page size (1-1000)
             offset: pagination skip count
             ordering: str or list[str]; prefix with '-' for descending
+            instance: NetBox instance name; uses default if omitted
+            branch: NetBox branching plugin branch name to use
 
         Returns:
             {count, next, previous, results: [...]}
@@ -331,7 +338,7 @@ class NetboxCrudTasks:
             resources=[instance],
         )
 
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         # build common params
@@ -413,6 +420,7 @@ class NetboxCrudTasks:
         object_type: str,
         data: Union[dict, list],
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         dry_run: bool = False,
     ) -> Result:
         """
@@ -423,6 +431,7 @@ class NetboxCrudTasks:
             object_type: "app.resource" e.g. "dcim.interfaces"
             data: dict (single) or list[dict] (bulk); normalized to list internally
             instance: NetBox instance name; uses default if omitted
+            branch: NetBox branching plugin branch name to use
             dry_run: if True returns input data without calling NetBox
 
         Returns:
@@ -457,7 +466,7 @@ class NetboxCrudTasks:
 
         job.event(f"creating {len(data_list)} {object_type}(s)")
 
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         created = accessor.create(data_list)
@@ -496,6 +505,7 @@ class NetboxCrudTasks:
         data: Union[dict, list],
         partial: bool = True,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         dry_run: bool = False,
     ) -> Result:
         """
@@ -507,6 +517,7 @@ class NetboxCrudTasks:
             data: dict (single) or list[dict]; each must contain "id" field
             partial: True → PATCH (only specified fields); False → PUT (full replace)
             instance: NetBox instance name; uses default if omitted
+            branch: NetBox branching plugin branch name to use
             dry_run: if True fetches current state, computes diffs, returns without modifying
 
         Returns:
@@ -533,7 +544,7 @@ class NetboxCrudTasks:
                     f"crud_update: each data item must contain 'id', got: {item}"
                 )
 
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         if dry_run is True:
@@ -613,6 +624,7 @@ class NetboxCrudTasks:
         object_type: str,
         object_id: Union[int, list],
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         dry_run: bool = False,
     ) -> Result:
         """
@@ -623,6 +635,7 @@ class NetboxCrudTasks:
             object_type: "app.resource"
             object_id: int (single) or list[int] (bulk)
             instance: NetBox instance name; uses default if omitted
+            branch: NetBox branching plugin branch name to use
             dry_run: if True fetches and returns objects that would be deleted
 
         Returns:
@@ -642,7 +655,7 @@ class NetboxCrudTasks:
         else:
             id_list = list(object_id)
 
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         accessor = _get_pynetbox_accessor(nb, object_type)
 
         if dry_run is True:
@@ -704,6 +717,7 @@ class NetboxCrudTasks:
         limit: int = 50,
         offset: int = 0,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
     ) -> Result:
         """
         Retrieve NetBox change history from the extras/object-changes endpoint.
@@ -717,6 +731,7 @@ class NetboxCrudTasks:
             limit: page size (1-1000)
             offset: pagination skip count
             instance: NetBox instance name; uses default if omitted
+            branch: NetBox branching plugin branch name to use
 
         Returns:
             {count, next, previous, results: [{id, user, user_name, request_id, action,
@@ -735,7 +750,7 @@ class NetboxCrudTasks:
         )
         job.event(f"retrieving changelogs with {filter_count} filter(s)")
 
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         # build base params
         base_params: Dict[str, Any] = {"limit": limit, "offset": offset}

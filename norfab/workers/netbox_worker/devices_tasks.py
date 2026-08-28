@@ -1410,7 +1410,7 @@ class NetboxDevicesTasks:
         inventory_ignore_slots: Union[None, list] = None,
         interfaces_filter_by_name: Union[None, str] = None,
         interfaces_filter_by_description: Union[None, str] = None,
-        interfaces_update_type: Union[None, bool] = False,
+        interfaces_update_type: bool = True,
         interfaces_vlan_group: Union[None, str] = None,
         mac_filter_by_name: Union[None, str] = None,
         mac_filter_by_description: Union[None, str] = None,
@@ -1475,7 +1475,8 @@ class NetboxDevicesTasks:
             inventory_ignore_slots (list, optional): Module bay ignore globs.
             interfaces_filter_by_name (str, optional): Glob pattern to filter interfaces by name.
             interfaces_filter_by_description (str, optional): Glob pattern to filter interfaces by description.
-            interfaces_update_type (bool, optional): Update existing NetBox interface types.
+            interfaces_update_type (bool): Safely update existing NetBox logical
+                interface types. Defaults to True.
             interfaces_vlan_group (str, optional): Exact VLAN group name for interface VLAN resolution.
             mac_filter_by_name (str, optional): Glob pattern to filter MAC sync interfaces by name.
             mac_filter_by_description (str, optional): Glob pattern to filter MAC sync interfaces by description.
