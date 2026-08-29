@@ -217,7 +217,7 @@ services:
     <<: *test-runner-common
     image: norfab:filesharing-service-tests-py${PYTHON_VERSION:-3.12}
     env_file:
-      - ./nornir-service-tests/.env
+      - ./filesharing-service-tests/.env
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/filesharing-service-junit.xml

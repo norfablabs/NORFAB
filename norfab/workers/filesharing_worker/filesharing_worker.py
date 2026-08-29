@@ -1,29 +1,26 @@
-import hashlib
 import importlib.metadata
 import logging
 import os
 import sys
+import threading
 from typing import Any
 
-from norfab.core.worker import Job, NFPWorker, Task
+from norfab.core.worker import NFPWorker, Task
 from norfab.models import Result
 
 from .filesharing_models import (
-    FetchFileInput,
-    FetchFileResult,
-    FileDetailsInput,
-    FileDetailsResult,
+    FileSharingInventory,
     GetInventoryInput,
     GetInventoryResult,
+    GetRemotesInput,
+    GetRemotesResult,
     GetStatusInput,
     GetStatusResult,
     GetVersionInput,
     GetVersionResult,
-    ListFilesInput,
-    ListFilesResult,
-    WalkInput,
-    WalkResult,
 )
+from .git_tasks import GitTasks
+from .local_files_tasks import LocalFilesTasks
 
 SERVICE = "filesharing"
 
@@ -31,12 +28,17 @@ log = logging.getLogger(__name__)
 
 
 # --------------------------------------------------------------------------
-# FILESHARING TASKS MODELS
+# FILE SHARING WORKER
 # --------------------------------------------------------------------------
 
 
-class FileSharingWorker(NFPWorker):
-    """ """
+class FileSharingWorker(NFPWorker, GitTasks, LocalFilesTasks):
+    """File Sharing worker providing Git-based remote synchronization and file access.
+
+    Supports managing multiple configured Git remotes with automatic periodic
+    synchronization. Provides tasks for listing, fetching, and walking published
+    remote content via a safe filesystem interface.
+    """
 
     def __init__(
         self,
@@ -51,45 +53,55 @@ class FileSharingWorker(NFPWorker):
         self.init_done_event = init_done_event
 
         # get inventory from broker
-        self.filesharing_inventory = self.load_inventory()
-        self.base_dir = self.filesharing_inventory.get("base_dir")
+        inventory_data = self.load_inventory()
+        validated_inventory = FileSharingInventory.model_validate(inventory_data)
+
+        self.runtime_dir = self.base_dir
+        self.filesharing_inventory = validated_inventory.model_dump()
+        self.base_dir = os.path.abspath(validated_inventory.base_dir)
+
+        self.setup_remotes(validated_inventory)
 
         self.init_done_event.set()
-        log.debug(f"{self.name} - Started, {self.filesharing_inventory}")
+        log.debug(f"{self.name} - Started")
 
-    def worker_exit(self) -> None:
-        pass
+    def setup_remotes(self, validated_inventory: FileSharingInventory) -> None:
+        """Set up all configured remotes and start synchronization thread.
 
-    def _safe_path(self, url: str) -> str:
-        """
-        Resolve a custom 'nf://' URL to a safe filesystem path within the base directory.
-
-        This method ensures that the resolved path:
-
-        - Is derived from a valid 'nf://' URL format.
-        - Does not allow absolute paths.
-        - Prevents directory traversal attacks by ensuring the resolved path remains
-          within the specified base directory.
+        Initializes remote locks, validates each remote's type, and starts the
+        automatic synchronization thread if any remotes have auto_sync enabled.
 
         Args:
-            url (str): The 'nf://' URL to be resolved into a filesystem path.
-
-        Returns:
-            str: The resolved and validated filesystem path.
+            validated_inventory: Validated FileSharingInventory instance.
 
         Raises:
-            ValueError: If the URL format is invalid or the resolved path is outside
-                        the base directory.
+            ValueError: If any remote has an unsupported type.
         """
-        if not url.startswith("nf://"):
-            raise ValueError(f"'{url}' - invalid URL format")
-        url_path = url.replace("nf://", "")
-        url_path = url_path.lstrip("/\\")
-        base_abs = os.path.abspath(self.base_dir)
-        candidate = os.path.abspath(os.path.join(base_abs, *url_path.split("/")))
-        if os.path.commonpath([base_abs, candidate]) != base_abs:
-            raise ValueError(f"'{url}' - invalid URL path")
-        return candidate
+        self.remotes = {}
+        self.remote_sync_stop = threading.Event()
+        self.remote_sync_thread = None
+        os.makedirs(self.base_dir, exist_ok=True)
+        os.makedirs(os.path.join(self.runtime_dir, "remotes"), exist_ok=True)
+
+        # Initialize each configured remote based on its type
+        for remote in validated_inventory.remotes:
+            if remote.type == "git":
+                result = self.create_remote_git(None, **remote.model_dump())
+                if result.failed:
+                    log.error(f"{self.name} - Failed to create remote '{remote.name}'")
+            else:
+                raise ValueError(
+                    f"Remote type '{remote.type}' is not supported. "
+                    f"Supported types: git"
+                )
+
+        if self.remote_sync_thread is None:
+            self.remote_sync_thread = self.start_git_sync()
+
+    def worker_exit(self) -> None:
+        self.remote_sync_stop.set()
+        if self.remote_sync_thread is not None:
+            self.remote_sync_thread.join()
 
     @Task(
         input=GetVersionInput,
@@ -107,6 +119,12 @@ class FileSharingWorker(NFPWorker):
         },
     )
     def get_version(self) -> Result:
+        """Return runtime versions reported by the File Sharing worker.
+
+        Returns:
+            A result mapping runtime component names to version strings. Python
+            and platform information are always included.
+        """
         libs = {
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
@@ -136,7 +154,63 @@ class FileSharingWorker(NFPWorker):
         },
     )
     def get_inventory(self) -> Result:
-        return Result(result=self.filesharing_inventory)
+        """Return the validated File Sharing worker inventory.
+
+        Remote definitions are returned in their configured order. Every
+        non-empty password or access token is replaced with ``***`` before the
+        inventory leaves the worker.
+
+        Returns:
+            A result containing the validated inventory with credentials
+            redacted.
+        """
+        inventory = self.filesharing_inventory.copy()
+        inventory["remotes"] = []
+        for configured_remote in self.filesharing_inventory.get("remotes", []):
+            remote = configured_remote.copy()
+            if remote.get("password") is not None:
+                remote["password"] = "***"
+            inventory["remotes"].append(remote)
+        return Result(result=inventory)
+
+    @Task(
+        input=GetRemotesInput,
+        output=GetRemotesResult,
+        fastapi={"methods": ["GET"]},
+        agent={"enabled": False},
+        mcp={
+            "annotations": {
+                "title": "Get File Sharing Remotes",
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            }
+        },
+    )
+    def get_remotes(self, name: str | None = None) -> Result:
+        """Return all runtime remotes or one remote selected by name.
+
+        Args:
+            name: Optional remote name used to filter the result.
+
+        Returns:
+            A result containing remote inventory dictionaries. Passwords and
+            access tokens are replaced with ``***``; public remotes retain a
+            ``None`` password.
+        """
+        remotes = []
+        for configured_remote in self.remotes.values():
+            if name is not None and configured_remote["name"] != name:
+                continue
+            remote = configured_remote.copy()
+            remote.pop("lock")
+            remote.pop("last_sync_timer")
+            remote.pop("repository")
+            if remote.get("password") is not None:
+                remote["password"] = "***"
+            remotes.append(remote)
+        return Result(result=remotes)
 
     @Task(
         input=GetStatusInput,
@@ -154,222 +228,9 @@ class FileSharingWorker(NFPWorker):
         },
     )
     def get_status(self) -> Result:
+        """Return the File Sharing worker health status.
+
+        Returns:
+            A result containing ``OK`` while the worker can process tasks.
+        """
         return Result(result="OK")
-
-    @Task(
-        input=ListFilesInput,
-        output=ListFilesResult,
-        fastapi={"methods": ["GET"]},
-        agent={"enabled": False},
-        mcp={
-            "annotations": {
-                "title": "List Files",
-                "readOnlyHint": True,
-                "destructiveHint": False,
-                "idempotentHint": True,
-                "openWorldHint": False,
-            }
-        },
-    )
-    def list_files(self, url: str) -> Result:
-        """
-        List files in a directory.
-
-        Args:
-            url: URL path starting with 'nf://' to list files from
-
-        Returns:
-            Result containing list of files or error message
-        """
-        ret = Result(result=None)
-        try:
-            full_path = self._safe_path(url)
-        except ValueError as e:
-            ret.failed = True
-            ret.errors = [str(e)]
-            return ret
-
-        if os.path.exists(full_path) and os.path.isdir(full_path):
-            ret.result = os.listdir(full_path)
-        else:
-            ret.errors = ["Directory Not Found"]
-            ret.failed = True
-        return ret
-
-    @Task(
-        input=FileDetailsInput,
-        output=FileDetailsResult,
-        fastapi={"methods": ["GET"]},
-        agent={"enabled": False},
-        mcp={
-            "annotations": {
-                "title": "Get File Details",
-                "readOnlyHint": True,
-                "destructiveHint": False,
-                "idempotentHint": True,
-                "openWorldHint": False,
-            }
-        },
-    )
-    def file_details(self, url: str) -> Result:
-        """
-        Get file details including md5 hash, size, and existence.
-
-        Args:
-            url: URL path starting with 'nf://' to get file details
-
-        Returns:
-            Result containing md5hash, size_bytes, and exists fields
-        """
-        ret = Result(result={"md5hash": None, "size_bytes": None, "exists": False})
-        try:
-            full_path = self._safe_path(url)
-        except ValueError as e:
-            ret.failed = True
-            ret.errors = [str(e)]
-            return ret
-        exists = os.path.exists(full_path) and os.path.isfile(full_path)
-
-        # calculate md5 hash
-        md5hash = None
-        if exists:
-            with open(full_path, "rb") as f:
-                file_hash = hashlib.md5()
-                chunk = f.read(8192)
-                while chunk:
-                    file_hash.update(chunk)
-                    chunk = f.read(8192)
-            md5hash = file_hash.hexdigest()
-            size = os.path.getsize(full_path)
-            ret.result = {
-                "md5hash": md5hash,
-                "size_bytes": size,
-                "exists": exists,
-            }
-        else:
-            ret.failed = True
-            ret.errors = [f"'{url}' file not found"]
-
-        return ret
-
-    @Task(
-        input=WalkInput,
-        output=WalkResult,
-        fastapi={"methods": ["GET"]},
-        agent={"enabled": False},
-        mcp={
-            "annotations": {
-                "title": "Walk Files",
-                "readOnlyHint": True,
-                "destructiveHint": False,
-                "idempotentHint": True,
-                "openWorldHint": False,
-            }
-        },
-    )
-    def walk(self, url: str) -> Result:
-        """
-        Recursively list all files from all subdirectories.
-
-        Args:
-            url: URL path starting with 'nf://' to walk directories
-
-        Returns:
-            Result containing list of all file paths or error message
-        """
-        ret = Result(result=None)
-        try:
-            full_path = self._safe_path(url)
-        except ValueError as e:
-            ret.failed = True
-            ret.errors = [str(e)]
-            return ret
-
-        if os.path.exists(full_path) and os.path.isdir(full_path):
-            files_list = []
-            for root, dirs, files in os.walk(full_path):
-                # skip path containing folders like __folders__
-                if root.count("__") >= 2:
-                    continue
-                root = root.replace(self.base_dir, "")
-                root = root.lstrip("\\")
-                root = root.replace("\\", "/")
-                for file in files:
-                    # skip hidden/system files
-                    if file.startswith("."):
-                        continue
-                    if root:
-                        files_list.append(f"nf://{root}/{file}")
-                    else:
-                        files_list.append(f"nf://{file}")
-            ret.result = files_list
-        else:
-            ret.failed = True
-            ret.errors = ["Directory Not Found"]
-        return ret
-
-    @Task(
-        input=FetchFileInput,
-        output=FetchFileResult,
-        fastapi={"methods": ["GET"]},
-        agent={"enabled": False},
-        mcp={
-            "annotations": {
-                "title": "Fetch File",
-                "readOnlyHint": True,
-                "destructiveHint": False,
-                "idempotentHint": True,
-                "openWorldHint": False,
-            }
-        },
-    )
-    def fetch_file(
-        self,
-        job: Job,
-        url: str,
-        chunk_size: int = 256000,
-        offset: int = 0,
-        chunk_timeout: int = 5,
-    ) -> Result:
-        """
-        Fetch a file in chunks with offset support.
-
-        Args:
-            url: URL path starting with 'nf://' to fetch file from
-            chunk_size: Size of chunk to read in bytes (default: 256KB)
-            offset: Number of bytes to offset (default: 0)
-
-        Returns:
-            Result containing file chunk bytes or error message
-        """
-        ret = Result(result=None)
-        try:
-            full_path = self._safe_path(url)
-        except ValueError as e:
-            ret.failed = True
-            ret.errors = [str(e)]
-            return ret
-
-        if os.path.exists(full_path):
-            size = os.path.getsize(full_path)
-            with open(full_path, "rb") as f:
-                while True:
-                    f.seek(offset, os.SEEK_SET)
-                    chunk = f.read(chunk_size)
-                    if chunk:
-                        job.stream(chunk)
-                    if f.tell() >= size:
-                        break
-                    client_response = job.wait_client_input(timeout=chunk_timeout)
-                    if not client_response:
-                        raise RuntimeError(
-                            f"{self.name}:fetch_file - {chunk_timeout}s chunk timeout reached before received next chunk request from client"
-                        )
-                    offset = client_response["offset"]
-
-            ret.result = True
-        else:
-            ret.failed = True
-            ret.errors = [f"'{url}' file not found"]
-
-        return ret

@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 28 August 2026*
+*Last updated: 29 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -1073,6 +1073,31 @@ software efficiently, resuming chunk flow, and avoiding duplicate downloads.
 **Limitations:** only `nf://` relative paths under the configured base directory
 are accepted.
 [Task details](workers/filesharing/services_filesharing_service_tasks_fetch_file.md)
+
+### Read-only Git remotes
+
+Uses GitPython to shallow-fetch configured Git repository branches into
+independent managed folders and serves each snapshot through its configurable,
+safe `nf://<mount>/...` path. Mounts default to the remote name. Configured
+local repositories are initialized on worker startup without fetching content;
+operators can list remotes, inspect synchronization state, explicitly create or
+delete runtime-registered remote definitions and local data, or enable
+interval-based refresh. NFCLI exposes these operations under `filesharing git
+create-remote`, `clone-remote`, and `delete-remote`.
+Public HTTPS repositories require no credentials. Authenticated remotes support
+username/password or username/token authentication, with credentials redacted
+from inventory, task results, errors, and logs. **Interfaces:**
+Python API, NFCLI, REST, and MCP tasks `get_remotes`, `create_remote_git`,
+`delete_remote_git`, and `git_clone`. **Use cases:**
+distributing version-controlled templates, playbooks, and automation assets
+without changing consuming workers.
+NFCLI renders `show filesharing remotes brief` as a table, `detail` with complete
+remote data, and `summary` as nested counts with per-remote last synchronization
+attempts. File metadata is exposed under `show filesharing files details`.
+**Limitations:** remotes are read-only; the system Git executable is required,
+SSH credential management is not provided, shared snapshots contain no Git
+history, refresh is polling-based, and each remote tracks one branch.
+[Design decision](development/adr_extensible_data_sources_and_git_sync.md)
 
 ## FastAPI REST service
 

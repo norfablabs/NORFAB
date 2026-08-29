@@ -294,9 +294,12 @@ class NorFab:
                 }
             ]
         }
-        self.inventory.workers.data.update(built_in_workers)
-        for name in built_in_workers.keys():
-            self.inventory.topology["workers"].insert(0, name)
+        for name, worker_inventory in built_in_workers.items():
+            self.inventory.workers.data[name] = (
+                worker_inventory + self.inventory.workers.data.get(name, [])
+            )
+            if name not in self.inventory.topology["workers"]:
+                self.inventory.topology["workers"].insert(0, name)
 
     def handle_ctrl_c(self, signum, frame) -> None:
         """

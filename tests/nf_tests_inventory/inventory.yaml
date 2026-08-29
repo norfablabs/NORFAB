@@ -85,6 +85,8 @@ workers:
   - fastapi/common.yaml
   fastmcp-worker-1:
   - fastmcp/common.yaml
+  filesharing-worker-1:
+  - filesharing/git.yaml
   netbox-worker-1.*:
   - netbox/common.yaml
   nornir-*:

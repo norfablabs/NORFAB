@@ -1,4 +1,8 @@
-# 0.21.3
+# 0.22.0
+
+## FEATURES
+
+1. Added File Sharing Git remote synchronization. Configure public or authenticated GitHub repositories in worker inventory, then clone a selected branch and make its files available to NorFab workers under an `nf://` mount automatically or on demand using the `create_remote_git`, `git_clone`, and `delete_remote_git` tasks and matching NFCLI commands.
 
 ## ENHANCEMENTS
 

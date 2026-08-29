@@ -1,0 +1,30 @@
+service: filesharing
+
+remotes:
+  - name: "norfab-gitsync-test-main"
+    mount: "norfab-gitsync-test-main"
+    description: "NORFAB File Sharing Git sync test repository"
+    url: "https://github.com/norfablabs/norfab-gitsync-test.git"
+    branch: "main"
+    type: "git"
+    username: '{{ env["GITHUB_USERNAME"] }}'
+    password: '{{ env["GITHUB_TOKEN"] }}'
+    auto_sync: false
+    sync_interval: 30
+  - name: "norfab-gitsync-test-secondary"
+    mount: "norfab-gitsync-test-secondary"
+    description: "NORFAB File Sharing second Git remote test"
+    url: "https://github.com/norfablabs/norfab-gitsync-test.git"
+    branch: "main"
+    type: "git"
+    username: '{{ env["GITHUB_USERNAME"] }}'
+    password: '{{ env["GITHUB_TOKEN"] }}'
+    auto_sync: false
+    sync_interval: 30
+  - name: "norfab-gitsync-test-public"
+    description: "NORFAB File Sharing public Git repository test"
+    url: "https://github.com/norfablabs/norfab-gitsync-test.git"
+    branch: "main"
+    type: "git"
+    auto_sync: true
+    sync_interval: 30

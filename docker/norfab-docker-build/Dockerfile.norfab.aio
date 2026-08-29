@@ -3,7 +3,7 @@ ARG PYTHON_VERSION=3.12
 FROM python:${PYTHON_VERSION}-slim-trixie
 
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y openssh-client procps && \
+    apt-get install --no-install-recommends -y git openssh-client procps && \
     apt-get clean && \
     pip install --no-cache-dir pip setuptools wheel poetry --upgrade
 

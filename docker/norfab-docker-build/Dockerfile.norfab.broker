@@ -4,6 +4,7 @@ FROM python:${PYTHON_VERSION}-slim-trixie
 
 RUN apt-get update && \
     apt-get clean && \
+    apt-get install --no-install-recommends -y git && \
     pip install --no-cache-dir pip setuptools wheel poetry --upgrade
 
 RUN pip install --no-cache-dir norfab --upgrade

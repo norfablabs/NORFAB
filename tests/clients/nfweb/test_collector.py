@@ -259,6 +259,7 @@ def test_lldp_normalizes_reverse_device_and_interface_names() -> None:
         devices=["r1", "r2"],
     )
     client = AliasClient()
+
     async def collect_layers() -> tuple[LayerPatch, LayerPatch]:
         lldp = await LLDPLayer().collect(client, context)
         interfaces = await InterfacesLayer().collect(client, context)

@@ -200,6 +200,9 @@ nav:
       - Walk: workers/filesharing/services_filesharing_service_tasks_walk.md
       - File Details: workers/filesharing/services_filesharing_service_tasks_file_details.md
       - Fetch File: workers/filesharing/services_filesharing_service_tasks_fetch_file.md
+      - Create Git Remote: workers/filesharing/services_filesharing_service_tasks_create_remote_git.md
+      - Clone Git Remote: workers/filesharing/services_filesharing_service_tasks_git_clone.md
+      - Delete Git Remote: workers/filesharing/services_filesharing_service_tasks_delete_remote_git.md
 
 - Clients:
   - Clients Overview: clients_overview.md

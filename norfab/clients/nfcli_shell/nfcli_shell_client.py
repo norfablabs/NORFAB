@@ -25,10 +25,6 @@ from rich.console import Console
 
 from norfab.core.nfapi import NorFab
 from norfab.models.norfab_configuration import NorFabInventory
-from norfab.workers.filesharing_worker.filesharing_models import (
-    FileDetailsInput,
-    ListFilesInput,
-)
 
 from .agent import agent_picle_shell
 from .client_agent import client_agent_picle_shell
@@ -37,6 +33,7 @@ from .containerlab import containerlab_picle_shell
 from .fakenos import fakenos_picle_shell
 from .fastapi import fastapi_picle_shell
 from .fastmcp import fastmcp_picle_shell
+from .filesharing import filesharing_picle_shell
 from .netbox import netbox_picle_shell
 from .norfab_jobs_shell import NorFabJobsShellCommands
 from .nornir import nornir_picle_shell
@@ -373,6 +370,9 @@ class ShowNorfabModel(BaseModel):
 
 class ShowCommandsModel(BaseModel):
     norfab: ShowNorfabModel = Field(None, description="Show NorFab platform")
+    filesharing: filesharing_picle_shell.ShowFileSharingModel = Field(
+        None, description="Show FileSharingWorker service"
+    )
     nornir: nornir_picle_shell.NornirShowCommandsModel = Field(
         None, description="Show Nornir service"
     )
@@ -404,189 +404,6 @@ class ShowCommandsModel(BaseModel):
         outputter_kwargs = {"absolute_indent": 2}
 
 
-# ---------------------------------------------------------------------------------------------
-# FILE SHELL SERVICE MODELS
-# ---------------------------------------------------------------------------------------------
-
-
-class ListFilesModel(ListFilesInput, use_enum_values=True, populate_by_name=True):
-    url: StrictStr = Field("nf://", description="Directory to list content for")
-
-    @staticmethod
-    def source_url() -> list:
-        broker_files = run_future_job(
-            "filesharing",
-            "walk",
-            workers="any",
-            kwargs={"url": "nf://"},
-        )
-        for w_name, wres in broker_files.items():
-            return wres["result"]
-
-    @staticmethod
-    def run(*args: object, **kwargs: object):
-        reply = run_future_job(
-            "filesharing",
-            "list_files",
-            args=args,
-            kwargs=kwargs,
-            workers="any",
-        )
-        for w_name, wres in reply.items():
-            return wres["result"]
-
-    class PicleConfig:
-        pipe = PipeFunctionsModel
-        outputter = Outputters.outputter_nested
-
-
-class CopyFileModel(BaseModel):
-    url: StrictStr = Field("nf://", description="File location")
-    destination: Optional[StrictStr] = Field(
-        None, description="File location to save downloaded content"
-    )
-    read: Optional[StrictBool] = Field(False, description="Print file content")
-
-    @staticmethod
-    def source_url() -> list:
-        broker_files = run_future_job(
-            "filesharing",
-            "walk",
-            kwargs={"url": "nf://"},
-            workers="any",
-        )
-        for w_name, wres in broker_files.items():
-            return wres["result"]
-
-    @staticmethod
-    def run(*args: object, **kwargs: object):
-        return NFCLIENT.fetch_file(**kwargs)
-
-    class PicleConfig:
-        outputter = Outputters.outputter_nested
-
-
-class ListFileDetails(FileDetailsInput, use_enum_values=True, populate_by_name=True):
-    url: StrictStr = Field("nf://", description="File location")
-
-    @staticmethod
-    def source_url() -> list:
-        broker_files = run_future_job(
-            "filesharing",
-            "walk",
-            kwargs={"url": "nf://"},
-            workers="any",
-        )
-        for w_name, wres in broker_files.items():
-            return wres["result"]
-
-    @staticmethod
-    def run(*args: object, **kwargs: object):
-        reply = run_future_job(
-            "filesharing",
-            "file_details",
-            args=args,
-            kwargs=kwargs,
-            workers="any",
-        )
-        for w_name, wres in reply.items():
-            return wres["result"]
-
-    class PicleConfig:
-        pipe = PipeFunctionsModel
-        outputter = Outputters.outputter_nested
-
-
-class DeleteFetchedFiles(ClientRunJobArgs):
-    filepath: StrictStr = Field("*", description="Files location glob pattern")
-
-    @staticmethod
-    def run(*args: object, **kwargs: object):
-        workers = kwargs.pop("workers", "all")
-        timeout = kwargs.pop("timeout", 600)
-        verbose_result = kwargs.pop("verbose_result", False)
-        nowait = kwargs.pop("nowait", False)
-
-        result = run_future_job(
-            "all",
-            "delete_fetched_files",
-            workers=workers,
-            args=args,
-            kwargs=kwargs,
-            timeout=timeout,
-            nowait=nowait,
-        )
-
-        if nowait:
-            return result, Outputters.outputter_nested
-
-        return log_error_or_result(result, verbose_result=verbose_result)
-
-    @staticmethod
-    def source_filepath() -> list:
-        broker_files = run_future_job(
-            "filesharing", "any", "walk", kwargs={"url": "nf://"}
-        )
-        for w_name, wres in broker_files.items():
-            return wres["result"]
-
-    @staticmethod
-    def source_workers() -> list:
-        NFCLIENT = builtins.NFCLIENT
-        reply = NFCLIENT.mmi("mmi.service.broker", "show_workers")
-        workers = [i["name"] for i in reply["results"]]
-
-        return ["all", "any"] + workers
-
-    class PicleConfig:
-        pipe = PipeFunctionsModel
-        outputter = Outputters.outputter_nested
-
-
-class FileServiceCommands(BaseModel):
-    """
-    # Sample Usage
-
-    ## copy
-
-    Copy to client's fetched files directory:
-
-    ``file copy_ url nf://cli/commands.txt``
-
-    Copy file to destination relative to current directory
-
-    ``file copy_ url nf://cli/commands.txt destination commands.txt``
-
-    ## list
-
-    List files at broker root directory:
-
-    ``
-    file list
-    file list url nf://
-    ``
-
-    List files details:
-
-    ```
-    file details
-    file details url nf://
-    ```
-    """
-
-    list_: ListFilesModel = Field(None, description="List files", alias="list")
-    copy_: CopyFileModel = Field(None, description="Copy files", alias="copy")
-    details: ListFileDetails = Field(None, description="Show file details")
-    delete_fetched_files: DeleteFetchedFiles = Field(
-        None, description="Delete local client files", alias="delete-fetched-files"
-    )
-
-
-# ---------------------------------------------------------------------------------------------
-# MAIN SHELL MODEL
-# ---------------------------------------------------------------------------------------------
-
-
 class NorfabCommands(BaseModel):
     configure: NorFabInventory = Field(None, description="Configure NorFab inventory")
     workers: NorfabWorkersCommands = Field(None, description="NorFab workers commands")
@@ -595,7 +412,9 @@ class NorfabCommands(BaseModel):
 class NorFabShell(BaseModel):
     norfab: NorfabCommands = Field(None, description="NorFab platform commands")
     show: ShowCommandsModel = Field(None, description="NorFab show commands")
-    file: FileServiceCommands = Field(None, description="File sharing service")
+    filesharing: filesharing_picle_shell.FileSharingServiceCommands = Field(
+        None, description="File sharing service"
+    )
     nornir: nornir_picle_shell.NornirServiceCommands = Field(
         None, description="Nornir service"
     )

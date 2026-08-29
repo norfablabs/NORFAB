@@ -1,12 +1,12 @@
-# ADR - File Sharing GitHub Remotes
+# ADR - File Sharing Git Remotes
 
 ## Status
 
-Proposed, 2026-08-29.
+Accepted, 2026-08-29.
 
 ## Decision
 
-The File Sharing service will mirror configured GitHub repository branches into
+The File Sharing service will mirror configured Git repository branches into
 local folders. Clients and workers remain unchanged and access mirrored files
 only through existing URLs:
 
@@ -14,9 +14,10 @@ only through existing URLs:
 nf://<remote-name>/<path/to/file>
 ```
 
-The initial implementation is read-only. It supports initial download and
-periodic refresh from GitHub to local storage. Remote write-back, client-side
-remote URLs, webhooks, non-GitHub remotes, and other providers are out of scope.
+The initial implementation is read-only. It supports startup creation, explicit
+creation and deletion, and periodic refresh from Git remotes to local storage.
+Remote write-back, client-side remote URLs, webhooks, and SSH credential
+management are out of scope.
 
 ## Remote Inventory
 
@@ -29,16 +30,13 @@ base_dir: "./shared"
 
 remotes:
   - name: "openclaw-main"
+    mount: "repositories/openclaw"
     description: "OpenClaw main branch"
     url: "https://github.com/openclaw/openclaw.git"
     branch: "main"
     type: "git"
     username: "octocat"
     password: '{{ env["GITHUB_TOKEN"] }}'
-    ignore_rules:
-      - ".github/*"
-      - "tests/*"
-      - "*.pyc"
     auto_sync: true
     sync_interval: 30
 ```
@@ -46,21 +44,23 @@ remotes:
 | Key | Requirement |
 | --- | --- |
 | `name` | Required unique local name matching `[A-Za-z0-9][A-Za-z0-9._-]*` |
+| `mount` | Optional relative publication path; defaults to `name` |
 | `description` | Optional text; defaults to an empty string |
-| `url` | Required standard GitHub HTTPS clone URL ending in `.git` |
-| `branch` | Required GitHub branch name |
-| `type` | Required; must be `git` |
-| `username` | Optional GitHub login; must be supplied with `password` |
-| `password` | Optional GitHub personal access token; must be supplied with `username` |
-| `ignore_rules` | Optional list of glob patterns; defaults to `[]` |
+| `url` | Required remote URL |
+| `branch` | Required for `type: git`; otherwise optional |
+| `type` | Required remote type; this ADR implements `git` |
+| `username` | Optional for public Git remotes; required when `password` is set |
+| `password` | Optional for public Git remotes; required when `username` is set |
 | `auto_sync` | Enable periodic refresh; defaults to `false` |
 | `sync_interval` | Periodic refresh interval in seconds; defaults to `30` |
 
-The model rejects unknown keys, empty required strings, and non-string
-`ignore_rules` entries.
+The remote model rejects unknown keys, empty required strings, path-like remote
+names, unsafe mount paths, and mount collisions. The worker also resolves every mount through the same safe path check
+used by local file tasks before creating or publishing content.
 
-`auto_sync: false` disables automatic download and refresh regardless of
-`sync_interval`. The explicit `github_clone` task remains available.
+Every configured remote is initialized during worker startup, but content is
+not fetched by `create_remote_git`. `auto_sync: false` disables periodic cloning
+regardless of `sync_interval`; clients can still call `git_clone` explicitly.
 
 During inventory loading, calculate the effective interval as
 `max(5, min(sync_interval, 86_400))`. Values below 5 become 5 seconds, values
@@ -68,47 +68,37 @@ above 86,400 become 86,400 seconds, and values within that range are accepted
 unchanged. Store and report the effective value. File Sharing logs one warning
 when it clamps a value. Non-integer values fail inventory validation.
 
-Inventory files may use Jinja2 to populate `username` and `password`. The
-remote model receives the rendered values and does not read environment
-variables itself. `username` and `password` must either both contain values or
-both be null or omitted.
+Inventory files may use Jinja2 to populate `username` and `password`. The remote
+model receives the rendered values and does not read environment variables
+itself. Public Git remotes may omit both fields; authenticated remotes must
+provide both fields together.
 
-Despite the field name, `password` must contain a GitHub personal access token,
-not the user's GitHub account password. GitHub no longer supports account
-passwords for Git or API authentication.
+The `password` field may contain a password, application password, or access
+token according to the configured Git server. The GitHub integration inventory
+uses a personal access token because GitHub does not accept account passwords
+for Git authentication.
 
-## Provider Detection and Authentication
+## Authentication
 
-`type: git` identifies the repository family. File Sharing detects the provider
-from `url`:
-
-1. Parse and normalize the URL.
-2. Require scheme `https`, host `github.com`, no embedded credentials, and a
-   path consisting of exactly two non-empty segments,
-   `<owner>/<repository>.git`. Reject ports, query parameters, and fragments.
-3. Select the GitHub driver in `github_tasks.py`.
-4. Reject every other host as an unsupported Git provider in the initial
-   implementation.
-
-When credentials are present, construct `github.Auth.Token(password)` and pass
-it to `github.Github(auth=auth)`. Verify that the authenticated user's login
-matches `username`; fail without downloading on mismatch. When both fields are
-absent, use an unauthenticated `github.Github()` client for a public repository.
-
-Never use `github.Auth.Login(username, password)`. Tokens and account passwords
-are not interchangeable even though the inventory key is named `password`.
+`type: git` selects the GitPython implementation in `git_tasks.py`. GitPython
+runs the system Git executable and fetches the configured branch over HTTPS.
+Public remotes use no authentication environment. For authenticated remotes,
+pass `username` and `password` as a temporary HTTP Basic authorization header
+through the Git process environment. Do not put credentials in the clone URL or
+persist them in Git configuration.
 
 ## Local Layout and URLs
 
-Each remote name owns one private state folder and one published folder:
+Each remote name owns one private Git repository and one staging folder. Its
+mount owns the published folder:
 
 ```text
 <worker-runtime>/remotes/<name>/
-  staging/<uuid>/ # one incomplete download and extraction attempt
-  state.json      # managed marker, URL, branch, SHA, status, timestamps; no credentials
+  repository/.git/          # private local repository and shallow history
+  staging/snapshot/         # incomplete publication snapshot
 
-<filesharing-base>/<name>/
-  ...             # files available through nf://<name>/...
+<filesharing-base>/<mount>/
+  ...             # files available through nf://<mount>/...
 ```
 
 Different branches of one repository use separate remote entries and names:
@@ -116,91 +106,71 @@ Different branches of one repository use separate remote entries and names:
 ```yaml
 remotes:
   - name: "openclaw-main"
+    mount: "openclaw-main"
     description: "Main branch"
     url: "https://github.com/openclaw/openclaw.git"
     branch: "main"
     type: "git"
-    username: null
-    password: null
-    ignore_rules: []
+    username: "octocat"
+    password: '{{ env["GITHUB_TOKEN"] }}'
     auto_sync: true
     sync_interval: 30
 
   - name: "openclaw-development"
+    mount: "openclaw-development"
     description: "Development branch"
     url: "https://github.com/openclaw/openclaw.git"
     branch: "development"
     type: "git"
-    username: null
-    password: null
-    ignore_rules: []
+    username: "octocat"
+    password: '{{ env["GITHUB_TOKEN"] }}'
     auto_sync: false
     sync_interval: 30
 ```
 
 Clients use `nf://openclaw-main/README.md` and
-`nf://openclaw-development/README.md`. Each entry has independent state,
+`nf://openclaw-development/README.md`. Each entry has independent repository,
 staging, locking, and publication. No checkout is shared between branches.
 
 Before replacing the `base_dir` inherited from `NFPWorker` with the configured
 File Sharing publication path, preserve the inherited value as
-`self.runtime_dir`. Private remote state is stored below `self.runtime_dir`.
+`self.runtime_dir`. Private Git repositories are stored below
+`self.runtime_dir`.
 
 Inventory validation rejects names that collide after platform path
-normalization or are unsafe on the current operating system. File Sharing must
-not adopt or overwrite a publication folder unless its private `state.json`
-contains the expected managed marker. If a managed remote keeps its name but
-changes `url` or `branch`, treat it as unsynchronized and replace its published
-folder only after the new snapshot succeeds.
+normalization or are unsafe on the current operating system. Inventory
+configuration remains authoritative and remote synchronization state is not
+persisted separately.
 
-Persist `name`, normalized `url`, `branch`, `ignore_rules`, snapshot fingerprint,
-last accepted SHA, status, last attempt completion time, last success time, and
-sanitized last error. Never persist `username` or `password`.
+## Git Clone Operation
 
-## GitHub Clone Operation
+`create_remote_git` accepts the complete remote inventory fields, registers the
+validated remote in worker memory, initializes its private repository, and
+configures the credential-free `origin` URL. It does not contact the remote Git
+server or publish content. Worker startup invokes this same task for every
+inventory remote. Runtime-created remotes are not persisted across restarts.
 
-For this ADR, clone means materializing a branch snapshot. Git history and a
-`.git` directory are not retained.
+The `git_clone(name)` task performs these steps under a per-remote lock:
 
-The internal `_clone_remote(name)` method performs these steps under a
-per-remote lock:
-
-1. Find the remote by `name` and select the GitHub driver.
-2. Authenticate with PyGithub.
-3. Resolve `<owner>/<repository>` from `url`.
-4. Read the configured branch with `repository.get_branch(branch)` and set
-   `sha = branch.commit.sha`.
-5. Build a deterministic fingerprint from normalized `url`, `branch`, and the
-   sorted `ignore_rules`; rule order is irrelevant because rules only exclude.
-6. Return unchanged only when the SHA and fingerprint match `state.json` and
-   the published folder exists.
-7. Obtain a tarball URL with `repository.get_archive_link("tarball", sha)`.
-8. Stream the archive into a unique staging folder using HTTPS with certificate
-   validation and finite connection and read timeouts. Send the token only to
-   `api.github.com` and `codeload.github.com`; reject redirects to other hosts.
-9. Validate every archive member before writing it, remove the archive's
-   single generated top-level directory, and apply `ignore_rules`. Reject an
-   archive without exactly one top-level directory.
-10. Validate all paths and replace `<filesharing-base>/<name>` only after the
+1. Find the remote by `name` and select the Git driver.
+2. Read the current local Git HEAD, then use GitPython to shallow-fetch the configured branch into the private local
+   repository, check it out, and read its commit SHA.
+3. Return unchanged only when the fetched SHA matches the previous local HEAD and
+   the configured mount exists.
+4. Copy working-tree content into the locked staging snapshot, excluding `.git`
+   and rejecting symbolic links.
+5. Replace `<filesharing-base>/<mount>` only after the
     complete snapshot is ready.
-11. Atomically record the SHA, success time, and status in `state.json`.
+A fetch, checkout, validation, or publication failure preserves the previous
+published folder and logs a sanitized error. Remove the staging folder
+after either success or failure.
 
-A download, extraction, validation, or publication failure preserves the
-previous published folder and records a sanitized error. Remove the unique
-staging folder after either success or failure.
+## Credential Handling
 
-## Ignore Rules
-
-Convert extracted paths to repository-relative POSIX form before matching.
-Match the full path and each parent directory with Python
-`fnmatch.fnmatchcase()`. Matching is case-sensitive. `fnmatchcase()` treats `/`
-as an ordinary character, so `*` may span directory levels. A matching file is
-omitted; a matching parent directory omits all of its children.
-
-Rules are exclusion-only. Negation and re-inclusion syntax are not supported.
-Always exclude `.git`, even if inventory does not list it. Reject symlinks,
-hard links, devices, absolute archive paths, and path traversal before applying
-ignore rules.
+The existing File Sharing inventory task must redact every remote `password`.
+Logs, events, task results, errors, and request headers must also exclude
+credentials. Always exclude `.git` from published content and reject symbolic
+links.
 
 ## Periodic Refresh
 
@@ -209,8 +179,13 @@ ignore rules.
 
 ```python
 while not self.remote_sync_stop.wait(1):
-    for remote in self.due_remotes():
-        self._clone_remote(remote.name)
+    now = time.monotonic()
+    for remote in self.remotes.values():
+        if remote.type == "git" and remote.auto_sync and (
+            remote._last_sync_timer is None
+            or now - remote._last_sync_timer >= remote.sync_interval
+        ):
+            self.git_clone(None, remote.name)
 ```
 
 Rules:
@@ -221,59 +196,70 @@ Rules:
 - Later runs are due after the effective, clamped `sync_interval` has elapsed
   since the previous attempt completed.
 - A failed attempt is retried only after the same interval.
+- Each entry in `self.remotes` is a plain dictionary holding validated
+  configuration, repository path, status, lock, last-attempt timestamp, and
+  monotonic timer; no parallel runtime-state dictionaries are maintained. The
+  runtime `mount` value is normalized once to its canonical `nf://` URL.
 - Remotes run sequentially in the first implementation.
 - The scheduler acquires a remote lock without waiting and skips a locked
   remote until the next due check. A manual task may wait for that lock until
   its job timeout.
 - One remote failure does not stop the thread.
 - `worker_exit()` sets `remote_sync_stop` and joins the thread.
-- `auto_sync: false` prevents all automatic activity for that remote.
+- `auto_sync: false` prevents periodic cloning after startup initialization.
 
-The `github_clone` task is a thin wrapper around `_clone_remote`. The scheduler
-calls `_clone_remote` directly, so manual and periodic operations share the
-same implementation without creating an internal NorFab job.
+The scheduler calls `git_clone` directly with no NorFab job object, so manual
+and periodic synchronization share the same implementation.
 
 ## Code Changes
 
 Keep changes confined to File Sharing:
 
 ```text
-filesharing_worker.py   # inventory loading, common tasks, scheduler, publication
+filesharing_worker.py   # inventory loading and common tasks
+local_files_tasks.py    # local listing, details, walking, and streaming tasks
 filesharing_models.py   # remote inventory and task result models
-github_tasks.py         # GitHub detection, authentication, and clone task
+git_tasks.py            # Git authentication, synchronization, and lifecycle tasks
 ```
 
-Add `PyGithub` and `requests` to the File Sharing optional dependencies. Do not
-change `NFPClient`, `NFPWorker`, the broker, NFP, or any consumer worker.
+Add `GitPython` to the File Sharing optional dependencies. The system Git
+executable must be installed; the all-in-one and test container images include
+it. Do not change
+`NFPClient`, `NFPWorker`, the broker, NFP, or any consumer worker.
 
-Expose only these new tasks initially:
+Expose these new tasks:
 
-- `remote_list`
-- `remote_status`
-- `github_clone`
+- `get_remotes`
+- `create_remote_git`
+- `delete_remote_git`
+- `git_clone`
 
-Periodic refresh invokes the same private clone helper as `github_clone`.
+Periodic refresh invokes the same `git_clone` implementation.
+
+NFCLI exposes the lifecycle tasks as `filesharing git create-remote`,
+`filesharing git clone-remote`, and `filesharing git delete-remote`.
 
 The existing File Sharing inventory task must redact every remote `password`.
-Logs, events, task results, errors, request headers, and `state.json` must also
-exclude credentials.
+Logs, events, task results, errors, and request headers must also exclude
+credentials.
 
 ## Acceptance Criteria
 
 Tests must prove that:
 
 - existing `nf://` behavior remains unchanged;
-- clients read a published remote with `nf://<name>/<path>`;
+- clients read a published remote with `nf://<mount>/<path>`;
 - inventory is a list with the exact fields and defaults defined above;
-- GitHub URLs select the PyGithub driver and other Git hosts are rejected;
-- public and token-authenticated private repositories can be downloaded;
-- an actual GitHub account password is never used as `Auth.Login`;
+- token-authenticated repositories can be downloaded;
+- public repositories can be downloaded without credentials;
+- configured local repositories are initialized during worker startup without
+  fetching content;
+- clients can explicitly delete and recreate local remote data;
+- create accepts a complete remote definition while clone and delete use its
+  registered name;
 - first synchronization publishes the selected branch;
 - an unchanged branch SHA causes no download or publication;
-- changing `url`, `branch`, or `ignore_rules` forces a new publication even
-  when the resolved SHA is unchanged;
 - two branches of one repository publish to separate folders;
-- ignored files and directories are absent from the published folder;
 - `auto_sync` defaults to `false` and prevents automatic refresh when disabled;
 - the interval defaults to 30 seconds, clamps lower values to 5, clamps higher
   values to 86,400, and preserves values within that range;
@@ -281,11 +267,10 @@ Tests must prove that:
 - shutdown interrupts the scheduler wait and joins the thread; and
 - credentials never appear in observable or persisted data.
 
-Use mocked PyGithub objects and an in-process HTTP archive server. Tests must
-not clone or modify a real GitHub repository.
+Use NorFab client integration tests against the dedicated read-only
+`norfablabs/norfab-gitsync-test` repository. Tests must not mock Git operations,
+use raw HTTP requests, or modify the repository.
 
 ## References
 
 - [GitHub remote authentication](https://docs.github.com/en/get-started/git-basics/about-remote-repositories)
-- [PyGithub authentication](https://pygithub.readthedocs.io/en/stable/examples/Authentication.html)
-- [PyGithub repository API](https://pygithub.readthedocs.io/en/stable/github_objects/Repository.html)
