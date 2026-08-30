@@ -8,8 +8,8 @@ tags:
 
 NFWeb is NORFAB's generic web client for applications that run locally on an
 operator's computer. It connects directly to an existing NORFAB broker through the
-native Python client and presents focused browser applications over a local,
-loopback-only web host.
+native Python client and presents focused browser applications to browsers on the
+operator's network.
 
 The application sidebar uses Mantine's nested-navbar pattern for Overview,
 Dashboards, and Admin. Topology is the first nested dashboard; the other sections
@@ -30,8 +30,8 @@ Future NFWeb applications can cover other visual operations, assurance,
 troubleshooting, reporting, inventory, workflow, and service-specific use cases.
 
 NFWeb does not require a FastAPI worker, Node.js, an internet connection, or a
-central web deployment at runtime. It listens only on `127.0.0.1` and does not
-start a broker or any workers.
+central web deployment at runtime. It listens on all IPv4 interfaces by default
+and does not start a broker or any workers.
 
 ## Client and Application Model
 
@@ -39,9 +39,9 @@ NFWeb separates the local client runtime from the applications presented through
 it:
 
 ```text
-Local browser
+Browser
     |
-    | HTTP / WebSocket on loopback
+    | HTTP / WebSocket over the local network
     v
 NFWeb client
     |-- local web host and packaged frontend
@@ -80,6 +80,7 @@ Add shared NFWeb settings below `client.nfweb` in `inventory.yaml`:
 ```yaml
 client:
   nfweb:
+    host: 0.0.0.0
     port: 9005
     open_browser: true
     footer:
@@ -107,8 +108,10 @@ applications separately. From the client computer, use NFCLI's web UI mode:
 nfcli --inventory inventory.yaml --web-ui
 ```
 
-The default address is `http://127.0.0.1:9005`. Configure `port` and
-`open_browser` under `client.nfweb`; NFWeb has no separate executable or
+By default, NFWeb binds to `0.0.0.0:9005`, accepts connections through every IPv4
+interface, and prints a browser URL containing the machine's preferred LAN IP.
+Configure `host`, `port`, and `open_browser` under `client.nfweb`; set `host` to
+`127.0.0.1` to restore local-only access. NFWeb has no separate executable or
 command-specific configuration overrides.
 
 Press Ctrl+C once to stop accepting connections and release application storage
@@ -132,22 +135,26 @@ NFWeb applications should follow a small set of boundaries:
    frontend rather than starting another local service.
 5. Keep collection, caching, and historical state application-owned so one
    application cannot silently change another application's behavior.
-6. Require a separate security decision before adding remote access or
-   change-capable operations.
+6. Require a separate authentication and authorization decision before adding
+   change-capable operations or deploying on an untrusted network.
 
 This model allows NFWeb to stay simple for operators while growing beyond the
 topology use case.
 
 ## Security Boundary
 
-NFWeb is a local client and binds only to IPv4 loopback. Browser requests and
-WebSocket upgrades are same-origin. The current browser API contains only
-topology-specific, read-only routes and cannot submit arbitrary NORFAB service or
-task names.
+NFWeb binds to every IPv4 interface by default and accepts connections from any
+source IP that can reach its port. HTTP routes and WebSocket upgrades do not
+restrict the browser origin. The current browser API contains only
+topology-specific routes and cannot submit arbitrary NORFAB service or task names.
 
-Do not place NFWeb behind a reverse proxy or expose its local port to another host.
-Remote access and change operations require explicit authentication,
-authorization, validation, and audit design.
+NFWeb does not currently provide authentication, authorization, origin filtering,
+or TLS. Any website reachable by an operator's browser can attempt requests to an
+accessible NFWeb instance. Expose it only on a trusted administrative network and
+use host firewall rules to restrict reachability where appropriate. Set
+`host: 127.0.0.1` when remote access is not required. A deployment on an untrusted
+network or behind a reverse proxy requires an explicit authentication,
+authorization, forwarding-header, TLS, validation, and audit design.
 
 ## Develop NFWeb
 

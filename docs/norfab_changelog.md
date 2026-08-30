@@ -10,6 +10,12 @@
 2. Added NetBox branching support to all CRUD tasks by forwarding the optional `branch` argument when creating the pynetbox client.
 3. Added `nf://` YAML file support for NetBox `interface_map` and `vlan_map` synchronization inputs, including use inside the `sync_all` per-task configuration. Downloaded mappings use the same Pydantic validation as inline rules.
 4. Expanded NetBox `sync_all` to run inventory, VLAN, prefix, VRF, interface, MAC address, IP address, and BGP peering synchronization in dependency order. Task-specific options now use the inline or `nf://` YAML `sync_kwargs` mapping, and setting any task key to `false` skips that stage while later stages continue.
+5. Consolidated the Docker development Compose environment into one all-in-one container that installs the full dependency set and mounts the local NorFab package over the installed source.
+6. Exposed NFWeb on all IPv4 interfaces by default, advertised its preferred LAN address, and allowed HTTP and WebSocket access from any browser origin.
+
+## BUGS
+
+1. Reduced idle CPU usage in broker, client, and worker ZeroMQ owner loops by restoring the poll timeout from 10 ms to 100 ms. Outbound messages can wait up to 100 ms for an idle owner loop, while active socket traffic still wakes the poller immediately.
 
 ---
 

@@ -1,10 +1,13 @@
 """Shared configuration for the local NFWeb client."""
 
+from ipaddress import IPv4Address
+
 from pydantic import (
     AnyHttpUrl,
     BaseModel,
     ConfigDict,
     Field,
+    IPvAnyAddress,
     StrictBool,
     StrictInt,
     StrictStr,
@@ -27,8 +30,9 @@ class NFWebFooterConfig(BaseModel):
 class NFWebConfig(BaseModel):
     """Configuration loaded from ``client.nfweb`` in inventory.yaml."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", validate_default=True)
 
+    host: IPvAnyAddress = IPv4Address("0.0.0.0")
     port: StrictInt = Field(9005, ge=1, le=65535)
     open_browser: StrictBool = True
     footer: NFWebFooterConfig = Field(default_factory=NFWebFooterConfig)

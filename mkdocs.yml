@@ -259,6 +259,7 @@ nav:
   - Task Pydantic Models Guide: development/adr_tasks_pydantic_models_guide.md
   - File Streaming (fetch_file): development/file_streaming_fetch_file.md
   - Architecture Design Records:
+    - Hermes Agent Runtime and Autonomous Network Operations: development/adr_hermes_agent_runtime_and_autonomous_network_operations.md
     - Netbox BGP Create/Update Tasks Plan: development/adr_netbox_bgp_create_update_tasks_plan.md
     - Netbox Sync devices interfaces Task plan: development/adr_netbox_sync_device_interfaces_plan.md
     - Netbox Device Check Sync Task Plan: development/adr_netbox_check_sync_plan.md

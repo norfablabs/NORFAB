@@ -18,6 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from invoke import Collection, task
+from invoke.exceptions import Exit
 
 ROOT = Path(__file__).resolve().parent
 NFWEB_FRONTEND_DIR = ROOT / "norfab" / "clients" / "nfweb" / "frontend"
@@ -84,15 +85,25 @@ def _run(args, *, env=None, check=True):
     Args:
         args: Command and arguments, passed directly without a shell.
         env: Optional complete subprocess environment.
-        check: Raise ``CalledProcessError`` for a non-zero status when true.
+        check: End the Invoke task with the command's status when true.
     """
     command = [str(arg) for arg in args]
     # list2cmdline is used only for readable output; subprocess receives the
     # original argument list and does not evaluate it through a shell.
     print(f"+ {subprocess.list2cmdline(command)}", flush=True)
-    result = subprocess.run(command, cwd=ROOT, env=env, check=False)
-    if check:
-        result.check_returncode()
+    try:
+        result = subprocess.run(command, cwd=ROOT, env=env, check=False)
+    except OSError as exc:
+        # Convert process-launch failures into an Invoke-friendly message
+        # instead of exposing an implementation traceback to task users.
+        raise Exit(f"Unable to run {command[0]}: {exc}", code=1) from None
+
+    if check and result.returncode:
+        raise Exit(
+            f"Command failed with exit status {result.returncode}: "
+            f"{subprocess.list2cmdline(command)}",
+            code=result.returncode,
+        )
     return result.returncode
 
 

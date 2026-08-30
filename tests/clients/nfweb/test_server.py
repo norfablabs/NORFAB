@@ -16,7 +16,10 @@ from norfab.clients.nfweb.topology.models import (
     TopologyCollectionEvent,
     TopologySnapshot,
 )
-from norfab.clients.nfweb.topology.web import TopologySnapshotBroadcaster
+from norfab.clients.nfweb.topology.web import (
+    TopologySnapshotBroadcaster,
+    TopologyWebSocket,
+)
 
 
 class FakeCollector:
@@ -131,10 +134,6 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         response = self.fetch(
             "/api/v1/topology/refresh",
             method="POST",
-            headers={
-                "Origin": self.get_url("/").rstrip("/"),
-                "X-NFWeb-Request": "topology-refresh",
-            },
             body=b"",
         )
 
@@ -142,27 +141,35 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         assert json.loads(response.body)["snapshot_id"] == self.snapshot.snapshot_id
         assert self.collector.force_values == [True]
 
-    def test_refresh_route_rejects_cross_origin_request(self) -> None:
+    def test_refresh_route_accepts_cross_origin_request(self) -> None:
         response = self.fetch(
             "/api/v1/topology/refresh",
             method="POST",
-            headers={
-                "Origin": "http://example.com",
-                "X-NFWeb-Request": "topology-refresh",
-            },
+            headers={"Origin": "http://example.com"},
             body=b"",
         )
 
-        assert response.code == 403
-        assert self.collector.force_values == []
+        assert response.code == 200
+        assert self.collector.force_values == [True]
 
-    def test_api_rejects_non_loopback_host_header(self) -> None:
+    def test_api_accepts_remote_interface_host_header(self) -> None:
         response = self.fetch(
             "/api/v1/health",
-            headers={"Host": "attacker.example"},
+            headers={"Host": "192.0.2.10:9005"},
         )
 
-        assert response.code == 403
+        assert response.code == 200
+
+    def test_refresh_accepts_without_origin_or_request_marker(self) -> None:
+        response = self.fetch(
+            "/api/v1/topology/refresh",
+            method="POST",
+            headers={"Host": "192.0.2.10:9005"},
+            body=b"",
+        )
+
+        assert response.code == 200
+        assert self.collector.force_values == [True]
 
     def test_devices_route_returns_combined_inventory(self) -> None:
         response = self.fetch("/api/v1/topology/devices")
@@ -199,11 +206,7 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         response = self.fetch(
             "/api/v1/topology/selection",
             method="POST",
-            headers={
-                "Origin": self.get_url("/").rstrip("/"),
-                "X-NFWeb-Request": "topology-selection",
-                "Content-Type": "application/json",
-            },
+            headers={"Content-Type": "application/json"},
             body=json.dumps({"devices": ["r2"]}),
         )
 
@@ -217,10 +220,6 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         response = self.fetch(
             "/api/v1/topology/refresh",
             method="POST",
-            headers={
-                "Origin": self.get_url("/").rstrip("/"),
-                "X-NFWeb-Request": "topology-refresh",
-            },
             body=b"",
         )
 
@@ -253,3 +252,7 @@ def test_application_requires_built_frontend(tmp_path: Path) -> None:
 
     with pytest.raises(FileNotFoundError, match="frontend is not built"):
         make_nfweb_application([EmptyApplication()], static_path=tmp_path)
+
+
+def test_websocket_accepts_any_origin() -> None:
+    assert TopologyWebSocket.check_origin(object(), "http://example.com") is True

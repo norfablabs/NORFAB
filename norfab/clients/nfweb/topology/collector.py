@@ -45,6 +45,7 @@ class TopologyCollector:
         adapters: list[TopologyLayerAdapter] | None = None,
         on_snapshot: SnapshotCallback | None = None,
     ) -> None:
+        """Configure collection state, persistence, and snapshot publication."""
         self.client = client
         self.config = config
         self.history = history
@@ -208,6 +209,7 @@ class TopologyCollector:
     def _merge(
         patches: list[LayerPatch],
     ) -> tuple[dict[str, TopologyNode], dict[str, TopologyLink]]:
+        """Merge layer patches into de-duplicated nodes and enriched links."""
         nodes: dict[str, TopologyNode] = {}
         links: dict[str, TopologyLink] = {}
         observations: dict[str, dict[str, Any]] = {}

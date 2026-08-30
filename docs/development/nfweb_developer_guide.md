@@ -43,14 +43,13 @@ explicitly replaces them:
   another dedicated command-line utility.
 - NFWeb connects through the native Python `NFPClient` to an existing broker. It
   does not start a broker or workers.
-- NFWeb does not depend on the FastAPI worker. Do not route local browser requests
+- NFWeb does not depend on the FastAPI worker. Do not route browser requests
   through a FastAPI service just to reach the fabric.
 - The browser API exposes focused application operations. It must not expose a
   generic `service`, `task`, and `kwargs` job-execution endpoint.
-- The listener remains fixed to `127.0.0.1`. Remote access requires a separate
-  authentication, authorization, audit, and deployment design.
-- State-changing requests require exact same-origin validation and an
-  operation-specific `X-NFWeb-Request` marker.
+- The listener binds to `0.0.0.0` by default and accepts reachable remote clients.
+  It has no built-in authentication, authorization, or TLS.
+- Browser HTTP routes and WebSocket upgrades currently accept every origin.
 - Production requires Python only. Node.js is a frontend development and release
   build tool.
 - Frontend dependencies are pinned and bundled. Do not add runtime CDN assets.
@@ -141,6 +140,7 @@ nested configuration model:
 ```yaml
 client:
   nfweb:
+    host: 0.0.0.0
     port: 9005
     open_browser: true
     footer:
@@ -333,9 +333,8 @@ Current routes are:
 | `GET` | `/api/v1/topology/logs` | Up to 300 retained terminal entries |
 | WebSocket | `/api/v1/topology/stream` | Latest and newly completed snapshots |
 
-POST routes validate both the browser `Origin` and an operation-specific request
-marker. WebSocket upgrades accept only the exact local HTTP origin. Static assets
-receive a restrictive content security policy.
+POST routes and WebSocket upgrades do not validate the browser origin. Static
+assets receive a restrictive content security policy.
 
 Add new endpoints under an application namespace. Add the Python handler, route,
 frontend method, TypeScript response type, and server test in one change.
@@ -467,8 +466,9 @@ Start those processes separately, then run from the repository root:
 poetry run nfcli --inventory tests/nf_tests_inventory/inventory.yaml --web-ui
 ```
 
-NFWeb normally opens `http://127.0.0.1:9005`. Use `open_browser: false` while
-restarting the backend frequently.
+NFWeb binds to `0.0.0.0:9005` by default and normally opens a URL containing the
+machine's preferred LAN IP. Use `open_browser: false` while restarting the backend
+frequently, or set `host: 127.0.0.1` for loopback-only development.
 
 For frontend dependencies and a production-style build:
 
@@ -590,7 +590,7 @@ application responsibilities.
 
 1. Confirm the operation is narrowly scoped to one application.
 2. Add a Tornado handler under `/api/v1/<application>/...`.
-3. For a state change, require exact origin plus a unique request marker.
+3. Validate the operation's input and return a presentation-oriented response.
 4. Add the matching method and type in `api.ts` and `types.ts`.
 5. Add success, invalid input, conflict, and cross-origin tests as applicable.
 
@@ -598,7 +598,7 @@ application responsibilities.
 
 1. Create an application-owned Python package, models, configuration, and state.
 2. Add namespaced routes and contracts; do not expose raw worker results.
-3. Reuse the shared native client, loopback listener, database location, browser
+3. Reuse the shared native client, network listener, database location, browser
    policy, and lifecycle.
 4. Give the application its own tables and retention behavior where required.
 5. Add a frontend view and navigation entry without forcing its domain into
@@ -657,9 +657,8 @@ served with `no-cache`.
 
 ### The WebSocket Disconnects
 
-Verify the exact scheme and host in the `Origin`, confirm the backend is running,
-and inspect the browser network panel. The frontend reconnects with exponential
-backoff up to ten seconds.
+Confirm the backend is running and inspect the browser network panel. The frontend
+reconnects with exponential backoff up to ten seconds.
 
 ## Known Gaps
 

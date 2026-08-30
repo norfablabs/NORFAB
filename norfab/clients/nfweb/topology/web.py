@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-from urllib.parse import urlparse
 
 import orjson
 import tornado.websocket
 
-from norfab.clients.nfweb.server import NFWebJSONHandler, _json, is_loopback_host
+from norfab.clients.nfweb.server import NFWebJSONHandler, _json
 from norfab.clients.nfweb.topology.collector import TopologyCollector
 from norfab.clients.nfweb.topology.history import TopologyHistoryStore
 from norfab.clients.nfweb.topology.models import TopologySnapshot
@@ -21,6 +20,7 @@ class TopologySnapshotBroadcaster:
     """Publish completed topology snapshots to connected browsers."""
 
     def __init__(self) -> None:
+        """Initialize the set of active topology WebSocket connections."""
         self.connections: set[TopologyWebSocket] = set()
 
     async def publish(self, snapshot: TopologySnapshot) -> None:
@@ -38,11 +38,13 @@ class TopologyAPIHandler(NFWebJSONHandler):
     """Base class for topology history routes."""
 
     def initialize(self, topology_history: TopologyHistoryStore) -> None:
+        """Attach the topology history store used by this request handler."""
         self.topology_history = topology_history
 
 
 class TopologySnapshotHandler(TopologyAPIHandler):
     def get(self, snapshot_id: str) -> None:
+        """Return one stored snapshot or a not-found response."""
         snapshot = self.topology_history.get(snapshot_id)
         if snapshot is None:
             self.write_json({"error": "topology snapshot was not found"}, status=404)
@@ -56,10 +58,12 @@ class TopologyHistoryHandler(TopologyAPIHandler):
         topology_history: TopologyHistoryStore,
         topology_collector: TopologyCollector,
     ) -> None:
+        """Attach history and the collector that defines the active scope."""
         self.topology_history = topology_history
         self.topology_collector = topology_collector
 
     def get(self) -> None:
+        """Return snapshot history for the active device selection."""
         if not self.topology_collector.selected_devices:
             self.write_json([])
             return
@@ -72,6 +76,7 @@ class TopologyLogsHandler(TopologyHistoryHandler):
     """Return the bounded persistent log for the active topology scope."""
 
     def get(self) -> None:
+        """Return recent collection events and errors for the active scope."""
         if not self.topology_collector.selected_devices:
             self.write_json([])
             return
@@ -86,12 +91,11 @@ class TopologyRefreshHandler(NFWebJSONHandler):
     """Trigger one cache-bypassing topology collection."""
 
     def initialize(self, topology_collector: TopologyCollector) -> None:
+        """Attach the collector that handles manual refresh requests."""
         self.topology_collector = topology_collector
 
     async def post(self) -> None:
-        if not self.is_local_post("topology-refresh"):
-            self.write_json({"error": "invalid NFWeb request"}, status=403)
-            return
+        """Force a topology collection unless one is already running."""
         if self.topology_collector.collecting:
             self.write_json(
                 {"error": "topology collection is already in progress"}, status=409
@@ -116,9 +120,11 @@ class TopologyDevicesHandler(NFWebJSONHandler):
     """Return the combined NetBox and Nornir device inventory."""
 
     def initialize(self, topology_collector: TopologyCollector) -> None:
+        """Attach the collector that discovers selectable devices."""
         self.topology_collector = topology_collector
 
     async def get(self) -> None:
+        """Return devices available from NetBox and Nornir."""
         self.write_json(await self.topology_collector.device_inventory())
 
 
@@ -126,12 +132,11 @@ class TopologySelectionHandler(NFWebJSONHandler):
     """Apply the topology device scope and collect it when non-empty."""
 
     def initialize(self, topology_collector: TopologyCollector) -> None:
+        """Attach the collector whose device selection may be changed."""
         self.topology_collector = topology_collector
 
     async def post(self) -> None:
-        if not self.is_local_post("topology-selection"):
-            self.write_json({"error": "invalid NFWeb request"}, status=403)
-            return
+        """Validate and apply a new device selection, then collect it."""
         if self.topology_collector.collecting:
             self.write_json(
                 {"error": "topology collection is already in progress"}, status=409
@@ -157,7 +162,7 @@ class TopologySelectionHandler(NFWebJSONHandler):
 
 
 class TopologyWebSocket(tornado.websocket.WebSocketHandler):
-    """Push snapshots from the local collector to the local browser."""
+    """Push snapshots from the local collector to connected browsers."""
 
     def initialize(
         self,
@@ -165,22 +170,17 @@ class TopologyWebSocket(tornado.websocket.WebSocketHandler):
         topology_history: TopologyHistoryStore,
         topology_collector: TopologyCollector,
     ) -> None:
+        """Attach publication, history, and active-scope dependencies."""
         self.topology_broadcaster = topology_broadcaster
         self.topology_history = topology_history
         self.topology_collector = topology_collector
 
-    def check_origin(self, origin: str) -> bool:
-        """Allow only the exact loopback origin that opened this socket."""
-        if not origin or not is_loopback_host(self.request.host):
-            return False
-        parsed = urlparse(origin)
-        return (
-            parsed.scheme == "http"
-            and is_loopback_host(parsed.netloc)
-            and parsed.netloc == self.request.host
-        )
+    def check_origin(self, _origin: str) -> bool:
+        """Accept WebSocket connections from any browser origin."""
+        return True
 
     async def open(self) -> None:
+        """Register the browser and immediately send its latest snapshot."""
         self.topology_broadcaster.connections.add(self)
         latest = self.topology_history.latest(self.topology_collector.selected_devices)
         if latest is not None and self.topology_collector.selected_devices:
@@ -189,6 +189,7 @@ class TopologyWebSocket(tornado.websocket.WebSocketHandler):
             )
 
     def on_close(self) -> None:
+        """Remove the closed browser connection from publication targets."""
         self.topology_broadcaster.connections.discard(self)
 
 

@@ -36,6 +36,6 @@ docker build \
 ```
 
 Use [the development Compose variant](../norfab-docker-dev/README.md) to build
-the role-specific images and run them together with the local NorFab source
-mounted into each container.
+the all-in-one image and run the broker and configured workers in one container
+with the local NorFab source mounted over the installed package.
 

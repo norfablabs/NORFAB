@@ -2,6 +2,7 @@
 # broker settings
 broker:
   endpoint: "tcp://10.0.0.100:5555"
+  zmq_auth: false
   
 # workers inventory section
 workers:
@@ -27,3 +28,14 @@ logging:
       level: {{ env.get("TERMINAL_LOGGING_LEVEL", "WARNING") }}
     file: 
       level: {{ env.get("FILE_LOGGING_LEVEL", "INFO") }}
+
+# Start the broker and all development workers in the all-in-one container.
+topology:
+  broker: true
+  workers:
+    - netbox-worker-1
+    - fastapi-worker-1
+    - workflow-worker-1
+    - fastmcp-worker-1
+    - fakenos-worker-1
+    - nornir-worker-1

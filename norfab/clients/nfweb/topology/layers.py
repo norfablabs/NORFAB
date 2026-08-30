@@ -40,6 +40,7 @@ class TopologyLayerAdapter(Protocol):
 
 
 def _as_dict(value: Any) -> Any:
+    """Convert Pydantic-like values to dictionaries and leave others unchanged."""
     if hasattr(value, "model_dump"):
         return value.model_dump(mode="json")
     return value
@@ -92,6 +93,7 @@ async def _submit_job(
 def _worker_payloads(
     result: Any, layer: str
 ) -> tuple[list[Any], list[TopologyCollectionError]]:
+    """Separate successful worker payloads from normalized topology errors."""
     payloads: list[Any] = []
     errors: list[TopologyCollectionError] = []
     if not isinstance(result, Mapping):
@@ -181,6 +183,7 @@ async def discover_device_options(
 
 
 def _health_from_state(value: Any) -> TopologyHealth:
+    """Map a service state value to the shared topology health vocabulary."""
     state = str(value or "").strip().lower()
     if state in {"up", "active", "connected", "established", "ok", "healthy"}:
         return "healthy"
@@ -261,6 +264,7 @@ def _known_device(value: str, devices: list[str]) -> str:
 
 
 def _endpoint(device: str, interface: str | None) -> str:
+    """Build a normalized identity for one device interface endpoint."""
     return f"{_device_identity(device)}:{_interface_identity(interface)}"
 
 
@@ -271,6 +275,7 @@ def _link_id(
     source_interface: str | None = None,
     target_interface: str | None = None,
 ) -> str:
+    """Build a direction-independent link identifier from two endpoints."""
     endpoints = sorted(
         [
             _endpoint(source, source_interface),
@@ -281,6 +286,7 @@ def _link_id(
 
 
 def _string(value: Any) -> str:
+    """Return an empty string for null values and stringify everything else."""
     return "" if value is None else str(value)
 
 
@@ -290,9 +296,11 @@ class InventoryLayer:
     name = "inventory"
 
     def __init__(self, refresh_interval: int = 300) -> None:
+        """Set how long inventory data may remain cached."""
         self.refresh_interval = refresh_interval
 
     async def collect(self, client: Any, context: CollectionContext) -> LayerPatch:
+        """Collect NetBox devices and cables as an inventory layer patch."""
         patch = LayerPatch(name=self.name)
         scope: dict[str, Any] = {"device_regex": ".*"}
         if context.devices:
@@ -381,9 +389,11 @@ class LLDPLayer:
     name = "lldp"
 
     def __init__(self, refresh_interval: int = 30) -> None:
+        """Set how long LLDP observations may remain cached."""
         self.refresh_interval = refresh_interval
 
     async def collect(self, client: Any, context: CollectionContext) -> LayerPatch:
+        """Collect LLDP neighbors as discovered nodes and physical links."""
         patch = LayerPatch(name=self.name)
         if not context.devices:
             return patch
@@ -472,9 +482,11 @@ class BGPLayer:
     name = "bgp"
 
     def __init__(self, refresh_interval: int = 30) -> None:
+        """Set how long BGP observations may remain cached."""
         self.refresh_interval = refresh_interval
 
     async def collect(self, client: Any, context: CollectionContext) -> LayerPatch:
+        """Collect BGP peers and resolve known peer addresses to devices."""
         patch = LayerPatch(name=self.name)
         if not context.devices:
             return patch
@@ -567,6 +579,7 @@ class BGPLayer:
         peer_ips: list[str],
         patch: LayerPatch,
     ) -> None:
+        """Resolve peer IP addresses through NetBox into the collection context."""
         result = await _submit_job(
             client,
             context,
@@ -628,9 +641,11 @@ class InterfacesLayer:
     )
 
     def __init__(self, refresh_interval: int = 30) -> None:
+        """Set how long interface observations may remain cached."""
         self.refresh_interval = refresh_interval
 
     async def collect(self, client: Any, context: CollectionContext) -> LayerPatch:
+        """Collect interface state and metrics used to enrich topology links."""
         patch = LayerPatch(name=self.name)
         if not context.devices:
             return patch

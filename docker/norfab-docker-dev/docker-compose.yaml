@@ -1,184 +1,34 @@
 services:
-
-  norfab-broker:
-    container_name: "norfab-broker"
-    hostname: 'norfab-broker'
+  norfab:
+    container_name: norfab-dev
+    hostname: norfab-dev
+    image: norfab:aio-dev
     build:
       context: ../../
-      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.broker
+      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.aio
       args:
         PYTHON_VERSION: ${PYTHON_VERSION}
+    init: true
+    env_file:
+      - ./.env
     volumes:
-      # bind folder with norfab files
+      # Bind the development inventory and runtime files.
       - type: bind
         source: ./norfab/
         target: /etc/norfab/
-      # bind NorFab packages for development
+      # Override the installed package with the local working tree.
       - type: bind
         source: ../../norfab/
         target: /usr/local/lib/python${PYTHON_VERSION}/site-packages/norfab/
     networks:
       net0:
         ipv4_address: 10.0.0.100
-    # expose ZeroMQ port
     ports:
       - "5555:5555/tcp"
-        
-  norfab-service-nornir:
-    container_name: "norfab-service-nornir"
-    hostname: 'norfab-service-nornir'
-    build:
-      context: ../../
-      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.nornir
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION}
-    environment:
-      WORKERS_LIST: nornir-worker-1
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-      # bind NorFab packages for development
-      - type: bind
-        source: ../../norfab/
-        target: /usr/local/lib/python${PYTHON_VERSION}/site-packages/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.101
-    depends_on:
-      - norfab-broker
-      - norfab-service-netbox
-
-  norfab-service-netbox:
-    container_name: "norfab-service-netbox"
-    hostname: 'norfab-service-netbox'
-    build:
-      context: ../../
-      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.netbox
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION}
-    environment:
-      WORKERS_LIST: netbox-worker-1
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-      # bind NorFab packages for development
-      - type: bind
-        source: ../../norfab/
-        target: /usr/local/lib/python${PYTHON_VERSION}/site-packages/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.102
-    depends_on:
-      - norfab-broker
-
-  norfab-service-fastapi:
-    container_name: "norfab-service-fastapi"
-    hostname: 'norfab-service-fastapi'
-    build:
-      context: ../../
-      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.fastapi
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION}
-    environment:
-      WORKERS_LIST: fastapi-worker-1
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-      # bind NorFab packages for development
-      - type: bind
-        source: ../../norfab/
-        target: /usr/local/lib/python${PYTHON_VERSION}/site-packages/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.103
-    depends_on:
-      - norfab-broker
-    ports:
       - "8000:8000/tcp"
-      
-  norfab-service-fastmcp:
-    container_name: "norfab-service-fastmcp"
-    hostname: 'norfab-service-fastmcp'
-    build:
-      context: ../../
-      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.fastmcp
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION}
-    environment:
-      WORKERS_LIST: fastmcp-worker-1
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-      # bind NorFab packages for development
-      - type: bind
-        source: ../../norfab/
-        target: /usr/local/lib/python${PYTHON_VERSION}/site-packages/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.104
-    depends_on:
-      - norfab-broker
-    ports:
       - "8001:8001/tcp"
-      
-  norfab-service-workflow:
-    container_name: "norfab-service-workflow"
-    hostname: 'norfab-service-workflow'
-    build:
-      context: ../../
-      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.workflow
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION}
-    environment:
-      WORKERS_LIST: workflow-worker-1
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-      # bind NorFab packages for development
-      - type: bind
-        source: ../../norfab/
-        target: /usr/local/lib/python${PYTHON_VERSION}/site-packages/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.105
-    depends_on:
-      - norfab-broker
-  
-  norfab-service-fakenos:
-    container_name: "norfab-service-fakenos"
-    hostname: 'norfab-service-fakenos'
-    build:
-      context: ../../
-      dockerfile: docker/norfab-docker-build/Dockerfile.norfab.fakenos
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION}
-    environment:
-      WORKERS_LIST: fakenos-worker-1
-    volumes:
-      # bind folder with norfab files
-      - type: bind
-        source: ./norfab/
-        target: /etc/norfab/
-      # bind NorFab packages for development
-      - type: bind
-        source: ../../norfab/
-        target: /usr/local/lib/python${PYTHON_VERSION}/site-packages/norfab/
-    networks:
-      net0:
-        ipv4_address: 10.0.0.106
-    depends_on:
-      - norfab-broker
-      
+      - "9005:9005/tcp"
+
 networks:
   net0:
     ipam:

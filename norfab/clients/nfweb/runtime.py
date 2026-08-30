@@ -6,7 +6,9 @@ import asyncio
 import logging
 import os
 import signal
+import socket
 import webbrowser
+from ipaddress import ip_address
 from pathlib import Path
 from types import FrameType
 from typing import Callable
@@ -22,6 +24,32 @@ from norfab.core.nfapi import NorFab
 log = logging.getLogger(__name__)
 
 
+def _local_ip_address() -> str:
+    """Return the preferred local IPv4 address without sending network traffic."""
+    probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        probe.connect(("192.0.2.1", 9))
+        address = probe.getsockname()[0]
+    except OSError:
+        try:
+            address = socket.gethostbyname(socket.gethostname())
+        except OSError:
+            address = "127.0.0.1"
+    finally:
+        probe.close()
+    return address
+
+
+def _access_url(bind_host: str, port: int) -> str:
+    """Build a browser URL for a concrete interface behind a wildcard bind."""
+    bind_address = ip_address(bind_host)
+    access_host = _local_ip_address() if bind_address.is_unspecified else bind_host
+    url_host = (
+        f"[{access_host}]" if ip_address(access_host).version == 6 else access_host
+    )
+    return f"http://{url_host}:{port}"
+
+
 class _ShutdownSignals:
     """Coordinate graceful shutdown followed by a forced second interrupt."""
 
@@ -31,6 +59,7 @@ class _ShutdownSignals:
         stop_event: asyncio.Event,
         force_exit: Callable[[int], object] = os._exit,
     ) -> None:
+        """Store the event-loop controls used by the signal handlers."""
         self.loop = loop
         self.stop_event = stop_event
         self.force_exit = force_exit
@@ -123,7 +152,8 @@ async def serve(
         )
         web_application = make_nfweb_application(applications, footer=config.footer)
         server = tornado.httpserver.HTTPServer(web_application)
-        server.listen(config.port, address="127.0.0.1")
+        bind_host = str(config.host)
+        server.listen(config.port, address=bind_host)
 
         stop_event = asyncio.Event()
         loop = asyncio.get_running_loop()
@@ -133,9 +163,14 @@ async def serve(
         for application in applications:
             await application.start()
 
-        url = f"http://127.0.0.1:{config.port}"
-        log.info("NFWeb client listening on %s", url)
-        print(f"NFWeb client listening on {url}")
+        url = _access_url(bind_host, config.port)
+        log.info(
+            "NFWeb client listening on %s, bound to %s:%s",
+            url,
+            bind_host,
+            config.port,
+        )
+        print(f"NFWeb client listening on {url} (bound to {bind_host}:{config.port})")
         if config.open_browser:
             webbrowser.open(url)
         await stop_event.wait()

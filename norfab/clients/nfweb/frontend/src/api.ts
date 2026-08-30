@@ -11,14 +11,12 @@ async function request<T>(
   path: string,
   method = "GET",
   body?: unknown,
-  marker?: string,
 ): Promise<T> {
   const response = await fetch(path, {
     method,
     headers: {
       Accept: "application/json",
       ...(body !== undefined && { "Content-Type": "application/json" }),
-      ...(marker && { "X-NFWeb-Request": marker }),
     },
     ...(body !== undefined && { body: JSON.stringify(body) }),
     cache: "no-store",
@@ -46,14 +44,11 @@ export const api = {
       "/api/v1/topology/selection",
       "POST",
       { devices },
-      "topology-selection",
     ),
   refresh: () =>
     request<TopologySnapshot>(
       "/api/v1/topology/refresh",
       "POST",
-      undefined,
-      "topology-refresh",
     ),
 };
 

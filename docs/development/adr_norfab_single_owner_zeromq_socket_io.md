@@ -8,6 +8,10 @@ Date: 2026-08-27.
 
 Implemented in 0.21.2.
 
+Amended on 2026-08-30 for 0.22.0: increased the owner-loop poll timeout from
+10 ms to 100 ms after idle CPU measurements showed that the original interval
+caused excessive wake-ups across multi-worker deployments.
+
 ## Problem
 
 NorFab currently shares the same ZeroMQ socket between multiple Python threads:
@@ -124,9 +128,10 @@ while running:
   reconnect or stop if required
 ```
 
-Use a short poll timeout, for example 10 ms. A Python queue cannot wake a
-thread blocked in `zmq.Poller.poll()`, and this ADR intentionally does not add
-an in-process wake socket.
+Use a 100 ms poll timeout. A Python queue cannot wake a thread blocked in
+`zmq.Poller.poll()`, and this ADR intentionally does not add an in-process wake
+socket. The 100 ms interval limits idle wake-ups while keeping the maximum
+initial outbound-message delay at 100 ms.
 
 Do not derive this timeout from the keepalive interval. Jobs, events, stream
 chunks, MMI calls, and client input need a much smaller response bound than the
@@ -184,14 +189,14 @@ default keepalive interval.
   broker is offline.
 - Shutdown destroys the ZeroMQ context while another thread is trying to enqueue
   a send.
-- The 10 ms owner tick increases idle CPU too much on Windows or Linux.
+- The periodic owner tick trades idle CPU usage against outbound-message latency.
 
 The first implementation should keep this simple:
 
 - keep queued sends during reconnect and drain them after reconnect;
 - use a bounded outbound queue and fail sender calls when the queue stays full;
 - fail new queue submissions during shutdown;
-- keep the 10 ms tick as an internal constant, not inventory;
+- keep the 100 ms tick as an internal constant, not inventory;
 - add tests for owner-only socket access, keepalive timing, reconnect ordering,
   and normal job result collection.
 

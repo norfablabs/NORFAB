@@ -18,6 +18,7 @@ class TopologyHistoryStore:
     """Persist and query a rolling window of compressed topology snapshots."""
 
     def __init__(self, database_path: str | Path, retention_minutes: int = 180) -> None:
+        """Open the snapshot database and initialize its schema and retention."""
         database_path = Path(database_path)
         self.retention_minutes = retention_minutes
         database_path.parent.mkdir(parents=True, exist_ok=True)
@@ -166,11 +167,13 @@ class TopologyHistoryStore:
 
     @staticmethod
     def _decode(row: sqlite3.Row) -> TopologySnapshot:
+        """Decode one compressed database row into a validated snapshot."""
         payload = orjson.loads(zlib.decompress(row["payload"]))
         return TopologySnapshot.model_validate(payload)
 
     @staticmethod
     def _history_entry(row: sqlite3.Row) -> TopologyHistoryEntry:
+        """Convert snapshot metadata from a database row to a history entry."""
         return TopologyHistoryEntry(
             snapshot_id=row["snapshot_id"],
             collected_at=datetime.fromtimestamp(row["collected_ts"], timezone.utc),

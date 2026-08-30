@@ -23,6 +23,7 @@ class TopologyApplication:
         history: TopologyHistoryStore,
         broadcaster: TopologySnapshotBroadcaster,
     ) -> None:
+        """Store the runtime components owned by the topology application."""
         self.collector = collector
         self.history = history
         self.broadcaster = broadcaster

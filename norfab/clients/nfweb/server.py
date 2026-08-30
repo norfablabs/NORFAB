@@ -1,10 +1,9 @@
-"""Loopback-only Tornado host shared by NFWeb applications."""
+"""Tornado host shared by NFWeb applications."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Iterable
-from urllib.parse import urlparse
 
 import orjson
 import tornado.web
@@ -12,29 +11,20 @@ import tornado.web
 from norfab.clients.nfweb.application import NFWebApplicationModule
 from norfab.clients.nfweb.config import NFWebFooterConfig
 
-_LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
-
 
 def _json(value: Any) -> bytes:
+    """Serialize NFWeb values, including Pydantic models, to JSON bytes."""
     return orjson.dumps(
         value,
         default=lambda item: item.model_dump(mode="json"),
     )
 
 
-def is_loopback_host(host: str) -> bool:
-    """Return whether an HTTP host value names NFWeb's loopback listener."""
-    return (urlparse(f"//{host}").hostname or "").casefold() in _LOOPBACK_HOSTS
-
-
 class NFWebJSONHandler(tornado.web.RequestHandler):
     """Base class for NFWeb JSON routes."""
 
-    def prepare(self) -> None:
-        if not is_loopback_host(self.request.host):
-            raise tornado.web.HTTPError(403, reason="invalid NFWeb host")
-
     def set_default_headers(self) -> None:
+        """Apply JSON content and browser-safety headers to every response."""
         self.set_header("Cache-Control", "no-store")
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.set_header("X-Content-Type-Options", "nosniff")
@@ -45,25 +35,14 @@ class NFWebJSONHandler(tornado.web.RequestHandler):
         self.set_status(status)
         self.finish(_json(value))
 
-    def is_local_post(self, marker: str) -> bool:
-        """Validate NFWeb's same-origin marker for a state-changing request."""
-        origin = self.request.headers.get("Origin")
-        parsed = urlparse(origin) if origin else None
-        return bool(
-            is_loopback_host(self.request.host)
-            and self.request.headers.get("X-NFWeb-Request") == marker
-            and parsed is not None
-            and parsed.scheme == "http"
-            and is_loopback_host(parsed.netloc)
-            and parsed.netloc == self.request.host
-        )
-
 
 class NFWebHealthHandler(NFWebJSONHandler):
     def initialize(self, applications: tuple[NFWebApplicationModule, ...]) -> None:
+        """Attach the NFWeb application modules whose health is reported."""
         self.applications = applications
 
     def get(self) -> None:
+        """Return aggregate and per-application health status."""
         health = {
             application.name: application.health() for application in self.applications
         }
@@ -79,20 +58,19 @@ class NFWebConfigHandler(NFWebJSONHandler):
     """Expose only display-safe shared configuration to the browser."""
 
     def initialize(self, footer: NFWebFooterConfig) -> None:
+        """Attach the display-safe footer configuration."""
         self.footer = footer
 
     def get(self) -> None:
+        """Return configuration that the browser is allowed to consume."""
         self.write_json({"footer": self.footer})
 
 
 class NFWebStaticHandler(tornado.web.StaticFileHandler):
-    """Serve locally bundled assets with a restrictive browser policy."""
-
-    def prepare(self) -> None:
-        if not is_loopback_host(self.request.host):
-            raise tornado.web.HTTPError(403, reason="invalid NFWeb host")
+    """Serve bundled assets with a restrictive browser policy."""
 
     def set_extra_headers(self, path: str) -> None:
+        """Apply security and asset-specific caching headers."""
         websocket_source = f"ws://{self.request.host}"
         self.set_header("X-Content-Type-Options", "nosniff")
         self.set_header("Referrer-Policy", "no-referrer")
@@ -120,7 +98,7 @@ def make_nfweb_application(
     static_path: str | Path | None = None,
     footer: NFWebFooterConfig | None = None,
 ) -> tornado.web.Application:
-    """Build NFWeb without starting its loopback listener."""
+    """Build NFWeb without starting its network listener."""
     installed = tuple(applications)
     names = [application.name for application in installed]
     if len(names) != len(set(names)):

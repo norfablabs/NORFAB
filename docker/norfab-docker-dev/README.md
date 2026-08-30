@@ -1,17 +1,16 @@
 # NorFab Docker Development Environment
 
-Run a multi-container NorFab environment for local development.
-It builds role-specific images and mounts the repository's `norfab` Python
-package into each container, so the containers import the code in your working
-tree.
+Run the broker and all configured workers in one all-in-one container for local
+development. The image installs NorFab's `full` dependency set, while a bind
+mount replaces the installed `norfab` package with the repository's local
+source code.
 
-The Compose stack starts:
+The container starts:
 
-- `norfab-broker` at `10.0.0.100`
-- `norfab-service-nornir` at `10.0.0.101`
-- `norfab-service-netbox` at `10.0.0.102`
-
-Host port `5555` is forwarded to the broker.
+- the NorFab broker on port `5555`;
+- Nornir, NetBox, FastAPI, Workflow, FastMCP, and FakeNOS workers;
+- the built-in File Sharing worker;
+- FastAPI on port `8000` and FastMCP on port `8001`.
 
 ## Start the environment
 
@@ -21,7 +20,13 @@ From the repository root:
 docker compose -f docker/norfab-docker-dev/docker-compose.yaml up --build
 ```
 
-Run it in the background by adding `-d`. Stop and remove the containers with:
+Add `-d` to run in the background. Follow the logs with:
+
+```bash
+docker compose -f docker/norfab-docker-dev/docker-compose.yaml logs -f norfab
+```
+
+Stop and remove the container with:
 
 ```bash
 docker compose -f docker/norfab-docker-dev/docker-compose.yaml down
@@ -29,31 +34,46 @@ docker compose -f docker/norfab-docker-dev/docker-compose.yaml down
 
 ## Work on the code
 
-The local `norfab/` package is mounted at `/opt/norfab/norfab`, and
-`PYTHONPATH=/opt/norfab` makes it take precedence over the package installed in
-the image.
+The local `norfab/` package is mounted directly over the package installed in
+the container's Python `site-packages` directory. Source edits are immediately
+visible in the container, but restart it to reload the running processes:
 
-Confirm the active import path with:
+```bash
+docker compose -f docker/norfab-docker-dev/docker-compose.yaml restart norfab
+```
+
+Confirm the active import path and the current poll timeout with:
 
 ```bash
 docker compose -f docker/norfab-docker-dev/docker-compose.yaml \
-  exec norfab-service-nornir \
-  python -c "import norfab; print(norfab.__file__)"
+  exec norfab \
+  python -c "import norfab; from norfab.core import NFP; print(norfab.__file__); print(NFP.ZMQ_SEND_RECV_POLL_TIMEOUT_MS)"
 ```
 
-Restart the affected service after changing Python code:
+The package path should be under `/usr/local/lib/pythonX.Y/site-packages/norfab`.
 
-```bash
-docker compose -f docker/norfab-docker-dev/docker-compose.yaml \
-  restart norfab-service-nornir
-```
-
-Rebuild the images when a Dockerfile or Python dependency changes:
+Rebuild the image after changing a Dockerfile or Python dependency:
 
 ```bash
 docker compose -f docker/norfab-docker-dev/docker-compose.yaml build
+docker compose -f docker/norfab-docker-dev/docker-compose.yaml up -d
 ```
 
-The files under `norfab-docker-dev/norfab/` provide the broker and worker
-inventory mounted at `/etc/norfab`.
+## Configure the environment
 
+The Compose project reads `docker/norfab-docker-dev/.env` for the Python
+version, logging levels, and service credentials, and injects those values into
+the container. Files under `docker/norfab-docker-dev/norfab/` are mounted at
+`/etc/norfab`:
+
+- `inventory.yaml` defines the broker, workers, and all-in-one topology;
+- service subdirectories contain worker settings;
+- `__norfab__/` stores runtime databases, certificates, and logs.
+
+Restart the container after changing inventory files.
+
+## Open a container shell
+
+```bash
+docker compose -f docker/norfab-docker-dev/docker-compose.yaml exec norfab sh
+```

@@ -37,6 +37,7 @@ section. Only the listener and browser behavior are configured at the NFWeb leve
 ```yaml
 client:
   nfweb:
+    host: 0.0.0.0
     port: 9005
     open_browser: true
     footer:
@@ -127,8 +128,9 @@ operational data for an unavailable source.
 
 The application is currently read-only and polling-based. Its browser API contains
 only namespaced topology routes and cannot submit arbitrary NORFAB service or task
-names. It binds through the shared NFWeb loopback listener and is not intended for
-remote exposure.
+names. It binds through the shared NFWeb listener and is remotely reachable when
+the host network and firewall permit it. NFWeb has no authentication, origin
+filtering, or TLS, so limit that access to trusted administrative networks.
 
 Adding topology layers such as OSPF, IS-IS, tunnels, paths, alarms, or streaming
 telemetry should extend the topology graph contract and adapter protocol. A use
