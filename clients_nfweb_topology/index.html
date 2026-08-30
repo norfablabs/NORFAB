@@ -3988,6 +3988,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5912,6 +5996,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6736,6 +6848,7 @@ frequently than live operational layers.</p>
 section. Only the listener and browser behavior are configured at the NFWeb level:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">client</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nfweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9005</span>
 <span class="w">    </span><span class="nt">open_browser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">footer</span><span class="p">:</span>
@@ -6815,8 +6928,9 @@ operational data for an unavailable source.</p>
 <h2 id="operational-boundary">Operational Boundary<a class="headerlink" href="#operational-boundary" title="Permanent link">¤</a></h2>
 <p>The application is currently read-only and polling-based. Its browser API contains
 only namespaced topology routes and cannot submit arbitrary NORFAB service or task
-names. It binds through the shared NFWeb loopback listener and is not intended for
-remote exposure.</p>
+names. It binds through the shared NFWeb listener and is remotely reachable when
+the host network and firewall permit it. NFWeb has no authentication, origin
+filtering, or TLS, so limit that access to trusted administrative networks.</p>
 <p>Adding topology layers such as OSPF, IS-IS, tunnels, paths, alarms, or streaming
 telemetry should extend the topology graph contract and adapter protocol. A use
 case with a different domain model should be introduced as another NFWeb

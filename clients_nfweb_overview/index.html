@@ -3988,6 +3988,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5934,6 +6018,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6728,8 +6840,8 @@
 <h1 id="nfweb-local-web-client">NFWeb Local Web Client<a class="headerlink" href="#nfweb-local-web-client" title="Permanent link">¤</a></h1>
 <p>NFWeb is NORFAB's generic web client for applications that run locally on an
 operator's computer. It connects directly to an existing NORFAB broker through the
-native Python client and presents focused browser applications over a local,
-loopback-only web host.</p>
+native Python client and presents focused browser applications to browsers on the
+operator's network.</p>
 <p>The application sidebar uses Mantine's nested-navbar pattern for Overview,
 Dashboards, and Admin. Topology is the first nested dashboard; the other sections
 are intentionally empty until additional NFWeb applications are introduced.
@@ -6746,14 +6858,14 @@ safe browser boundary, but topology does not define the long-term scope of NFWeb
 Future NFWeb applications can cover other visual operations, assurance,
 troubleshooting, reporting, inventory, workflow, and service-specific use cases.</p>
 <p>NFWeb does not require a FastAPI worker, Node.js, an internet connection, or a
-central web deployment at runtime. It listens only on <code>127.0.0.1</code> and does not
-start a broker or any workers.</p>
+central web deployment at runtime. It listens on all IPv4 interfaces by default
+and does not start a broker or any workers.</p>
 <h2 id="client-and-application-model">Client and Application Model<a class="headerlink" href="#client-and-application-model" title="Permanent link">¤</a></h2>
 <p>NFWeb separates the local client runtime from the applications presented through
 it:</p>
-<div class="highlight"><pre><span></span><code>Local browser
+<div class="highlight"><pre><span></span><code>Browser
     |
-    | HTTP / WebSocket on loopback
+    | HTTP / WebSocket over the local network
     v
 NFWeb client
     |-- local web host and packaged frontend
@@ -6784,6 +6896,7 @@ sources, configuration, storage, controls, and operational behavior.</p>
 <p>Add shared NFWeb settings below <code>client.nfweb</code> in <code>inventory.yaml</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">client</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nfweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9005</span>
 <span class="w">    </span><span class="nt">open_browser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">footer</span><span class="p">:</span>
@@ -6804,8 +6917,10 @@ database.</p>
 applications separately. From the client computer, use NFCLI's web UI mode:</p>
 <div class="highlight"><pre><span></span><code>nfcli<span class="w"> </span>--inventory<span class="w"> </span>inventory.yaml<span class="w"> </span>--web-ui
 </code></pre></div>
-<p>The default address is <code>http://127.0.0.1:9005</code>. Configure <code>port</code> and
-<code>open_browser</code> under <code>client.nfweb</code>; NFWeb has no separate executable or
+<p>By default, NFWeb binds to <code>0.0.0.0:9005</code>, accepts connections through every IPv4
+interface, and prints a browser URL containing the machine's preferred LAN IP.
+Configure <code>host</code>, <code>port</code>, and <code>open_browser</code> under <code>client.nfweb</code>; set <code>host</code> to
+<code>127.0.0.1</code> to restore local-only access. NFWeb has no separate executable or
 command-specific configuration overrides.</p>
 <p>Press Ctrl+C once to stop accepting connections and release application storage
 and the native NORFAB client. If cleanup becomes stuck, press Ctrl+C a second time
@@ -6825,19 +6940,23 @@ production runtime.</p>
    frontend rather than starting another local service.</li>
 <li>Keep collection, caching, and historical state application-owned so one
    application cannot silently change another application's behavior.</li>
-<li>Require a separate security decision before adding remote access or
-   change-capable operations.</li>
+<li>Require a separate authentication and authorization decision before adding
+   change-capable operations or deploying on an untrusted network.</li>
 </ol>
 <p>This model allows NFWeb to stay simple for operators while growing beyond the
 topology use case.</p>
 <h2 id="security-boundary">Security Boundary<a class="headerlink" href="#security-boundary" title="Permanent link">¤</a></h2>
-<p>NFWeb is a local client and binds only to IPv4 loopback. Browser requests and
-WebSocket upgrades are same-origin. The current browser API contains only
-topology-specific, read-only routes and cannot submit arbitrary NORFAB service or
-task names.</p>
-<p>Do not place NFWeb behind a reverse proxy or expose its local port to another host.
-Remote access and change operations require explicit authentication,
-authorization, validation, and audit design.</p>
+<p>NFWeb binds to every IPv4 interface by default and accepts connections from any
+source IP that can reach its port. HTTP routes and WebSocket upgrades do not
+restrict the browser origin. The current browser API contains only
+topology-specific routes and cannot submit arbitrary NORFAB service or task names.</p>
+<p>NFWeb does not currently provide authentication, authorization, origin filtering,
+or TLS. Any website reachable by an operator's browser can attempt requests to an
+accessible NFWeb instance. Expose it only on a trusted administrative network and
+use host firewall rules to restrict reachability where appropriate. Set
+<code>host: 127.0.0.1</code> when remote access is not required. A deployment on an untrusted
+network or behind a reverse proxy requires an explicit authentication,
+authorization, forwarding-header, TLS, validation, and audit design.</p>
 <h2 id="develop-nfweb">Develop NFWeb<a class="headerlink" href="#develop-nfweb" title="Permanent link">¤</a></h2>
 <p>All NFWeb backend, frontend, and compiled assets live below
 <code>norfab/clients/nfweb</code>. The compiled frontend is included in the Python package.

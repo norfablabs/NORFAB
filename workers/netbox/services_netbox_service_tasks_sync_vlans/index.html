@@ -4201,6 +4201,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -6019,6 +6103,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6938,7 +7050,7 @@ synchronization.</p>
 <tr>
 <td><code>vlan_map</code></td>
 <td><code>None</code></td>
-<td>Ordered rules mapping live VLANs to existing groups.</td>
+<td>Ordered rules mapping live VLANs to existing groups, inline or in an <code>nf://</code> YAML file.</td>
 </tr>
 <tr>
 <td><code>filter_by_vlan_ids</code></td>
@@ -6979,6 +7091,10 @@ task resolves groups by exact name and does not create or update groups. Mapping
 rules are constrained by their group's configured VID ranges. The scalar
 <code>vlan_group</code> is an unconditional fallback and does not filter live VLANs by the
 group's configured ranges; NetBox validates the resulting writes.</p>
+<p>Store the same YAML list in the File Sharing service and pass its URL when the
+rules are reused or maintained separately:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">vlan_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/vlan_map.yaml</span>
+</code></pre></div>
 <h2 id="live-data">Live data<a class="headerlink" href="#live-data" title="Permanent link">¤</a></h2>
 <p>The task runs Nornir <code>parse_ttp</code> with <code>get="vlans"</code>, which returns:</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">vid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
@@ -7294,11 +7410,12 @@ records have no interface context. VLANs which match no rule use
                 <code>vlan_map</code>
             </td>
             <td>
-                  <code><span title="typing.Union">Union</span>[None, <span title="list">list</span>]</code>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>, <span title="list">list</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Ordered VLAN-to-group mapping rules.</p>
+                <p>Ordered VLAN-to-group mapping rules, or an <code>nf://</code> YAML
+file containing them.</p>
               </div>
             </td>
             <td>
@@ -7366,11 +7483,7 @@ records have no interface context. VLANs which match no rule use
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\vlan_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 28</span>
 <span class="normal"> 29</span>
 <span class="normal"> 30</span>
 <span class="normal"> 31</span>
@@ -7762,7 +7875,16 @@ records have no interface context. VLANs which match no rule use
 <span class="normal">417</span>
 <span class="normal">418</span>
 <span class="normal">419</span>
-<span class="normal">420</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncVlansInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncVlansResult</span><span class="p">,</span>
@@ -7786,7 +7908,7 @@ records have no interface context. VLANs which match no rule use
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">vlan_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vlan_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
@@ -7807,7 +7929,8 @@ records have no interface context. VLANs which match no rule use
 <span class="sd">        devices: Explicit NetBox and Nornir device names.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
 <span class="sd">        vlan_group: Group for VLANs not matched by ``vlan_map``.</span>
-<span class="sd">        vlan_map: Ordered VLAN-to-group mapping rules.</span>
+<span class="sd">        vlan_map: Ordered VLAN-to-group mapping rules, or an ``nf://`` YAML</span>
+<span class="sd">            file containing them.</span>
 <span class="sd">        filter_by_vlan_ids: VLAN IDs or inclusive ranges to reconcile.</span>
 <span class="sd">        **kwargs: Nornir FFun host filters.</span>
 
@@ -7871,6 +7994,10 @@ records have no interface context. VLANs which match no rule use
         <span class="k">for</span> <span class="n">vlan_range</span> <span class="ow">in</span> <span class="n">filter_by_vlan_ids</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">vlan_id</span> <span class="ow">in</span> <span class="n">expand_alphanumeric_range</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">vlan_range</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">vlan_map</span><span class="p">):</span>
+        <span class="n">vlan_map</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">VlanMapRule</span><span class="p">])</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">vlan_map</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="p">)</span>
     <span class="n">rules</span> <span class="o">=</span> <span class="n">prepare_vlan_map</span><span class="p">(</span><span class="n">vlan_map</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span><span class="si">}</span><span class="s2"> VLAN map rule(s) and &quot;</span>

@@ -3821,6 +3821,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -3837,6 +3855,47 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configure-git-remotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Git remotes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understand-synchronization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understand synchronization
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -3989,6 +4048,90 @@
     
   
     Fetch File
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
   
 
     
@@ -5820,6 +5963,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6490,6 +6661,36 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configure-git-remotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Git remotes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understand-synchronization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understand synchronization
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -6527,6 +6728,127 @@
 <span class="w">  </span><span class="nt">workers</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesharing-worker-1</span>
 </code></pre></div>
+<h2 id="configure-git-remotes">Configure Git remotes<a class="headerlink" href="#configure-git-remotes" title="Permanent link">¤</a></h2>
+<p>Extend the built-in worker by associating an additional inventory file with
+<code>filesharing-worker-1</code>:</p>
+<div class="highlight"><span class="filename">inventory.yaml</span><pre><span></span><code><span class="nt">workers</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">filesharing-worker-1</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesharing/remotes.yaml</span>
+</code></pre></div>
+<p>Define remotes as a list in that file:</p>
+<div class="highlight"><span class="filename">filesharing/remotes.yaml</span><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesharing</span>
+
+<span class="nt">remotes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">automation-assets</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Shared automation templates</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/example/automation-assets.git</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">    </span><span class="nt">mount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">repositories/automation-assets</span>
+<span class="w">    </span><span class="nt">auto_sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">private-runbooks</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Authenticated runbooks repository</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/example/private-runbooks.git</span>
+<span class="w">    </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">env[&quot;GITHUB_USERNAME&quot;]</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">env[&quot;GITHUB_TOKEN&quot;]</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">    </span><span class="nt">auto_sync</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
+<p>The first remote is available at <code>nf://repositories/automation-assets/</code>. The
+second omits <code>mount</code>, so it uses its name and is available at
+<code>nf://private-runbooks/</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th style="text-align: right;">Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td style="text-align: right;">Yes</td>
+<td>—</td>
+<td>Unique runtime name used by clone and delete tasks</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td style="text-align: right;">Yes</td>
+<td>—</td>
+<td>Remote driver; currently <code>git</code></td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td style="text-align: right;">Yes</td>
+<td>—</td>
+<td>Git repository URL</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">For Git</td>
+<td>—</td>
+<td>Branch fetched by GitPython</td>
+</tr>
+<tr>
+<td><code>mount</code></td>
+<td style="text-align: right;">No</td>
+<td><code>name</code></td>
+<td>Safe relative path made available under <code>nf://</code></td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td style="text-align: right;">No</td>
+<td>Empty</td>
+<td>Operator-facing description</td>
+</tr>
+<tr>
+<td><code>username</code></td>
+<td style="text-align: right;">No</td>
+<td><code>null</code></td>
+<td>HTTPS username; must be supplied with <code>password</code></td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td style="text-align: right;">No</td>
+<td><code>null</code></td>
+<td>HTTPS password or token; must be supplied with <code>username</code></td>
+</tr>
+<tr>
+<td><code>auto_sync</code></td>
+<td style="text-align: right;">No</td>
+<td><code>false</code></td>
+<td>Enable periodic synchronization</td>
+</tr>
+<tr>
+<td><code>sync_interval</code></td>
+<td style="text-align: right;">No</td>
+<td><code>30</code></td>
+<td>Seconds between attempts, clamped to 5–86,400</td>
+</tr>
+</tbody>
+</table>
+<p>Mounts cannot be absolute, contain traversal components, or overlap another
+remote mount. Task and inventory output redact non-empty passwords.</p>
+<h2 id="understand-synchronization">Understand synchronization<a class="headerlink" href="#understand-synchronization" title="Permanent link">¤</a></h2>
+<p>At startup, the worker calls <code>create_remote_git</code> for every inventory remote.
+This initializes a private repository and registers the remote in memory, but
+does not contact the Git server or make repository content available.</p>
+<p>Call <code>git_clone</code> to make a remote available manually. For <code>auto_sync: true</code>, the worker
+also calls it when <code>sync_interval</code> elapses. Synchronization shallow-fetches the
+configured branch, checks it out, and compares the fetched commit with the
+previous local Git HEAD. Changed content is copied into a locked staging folder
+and atomically moved to the configured mount. The task returns <code>unchanged</code> when
+Git reports the same commit and the mount already exists.</p>
+<p>Runtime status is kept in the live remote registry rather than a database.
+<code>show filesharing remotes detail</code> displays each status and last attempt;
+<code>show filesharing remotes summary</code> provides the corresponding nested summary.
+Remotes created through the task API exist until deletion or worker restart;
+place a remote in inventory when it must be recreated automatically.</p>
 
 
 

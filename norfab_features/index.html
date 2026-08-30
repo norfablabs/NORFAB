@@ -1715,6 +1715,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#read-only-git-remotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read-only Git remotes
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5490,6 +5501,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -7300,6 +7395,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -9299,6 +9422,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#read-only-git-remotes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read-only Git remotes
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -9476,7 +9610,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 27 August 2026</em></p>
+<p><em>Last updated: 30 August 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -9622,6 +9756,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 <li><a href="#file-discovery">File discovery</a></li>
 <li><a href="#file-metadata-and-integrity">File metadata and integrity</a></li>
 <li><a href="#streamed-file-retrieval">Streamed file retrieval</a></li>
+<li><a href="#read-only-git-remotes">Read-only Git remotes</a></li>
 </ul>
 </li>
 <li><a href="#fastapi-rest-service">FastAPI REST service</a><ul>
@@ -9661,7 +9796,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 </tr>
 <tr>
 <td><strong>NFWeb</strong></td>
-<td>Generic local browser client using native NORFAB access; the first application is live and historical 3D topology</td>
+<td>Generic browser client using native NORFAB access; the first application is live and historical 3D topology</td>
 <td>Visual operations, observability, troubleshooting, reporting, and future web-based tools</td>
 </tr>
 <tr>
@@ -9720,8 +9855,9 @@ The local runtime supports graceful Ctrl+C
 shutdown with a second-interrupt forced-exit fallback. <strong>Topology use cases:</strong>
 weather-map dashboards, topology exploration, current-state windows, incident
 timelines, and intended-versus-observed context. <strong>Current limitations:</strong> the first
-release contains only the topology application and is read-only, local-only, and
-polling-based. Unknown telemetry is not inferred.
+release contains only the topology application, has no authentication, origin
+filtering, or TLS, and is polling-based. Restrict remote access to trusted
+administrative networks. Unknown telemetry is not inferred.
 <a href="../clients_nfweb_overview/">NFWeb client details</a> ·
 <a href="../clients_nfweb_topology/">Topology application details</a></p>
 <h2 id="core-platform">Core platform<a class="headerlink" href="#core-platform" title="Permanent link">¤</a></h2>
@@ -10244,7 +10380,12 @@ inputs must match the NetBox model.
 Operational state fills MTU, duplex, and speed when absent from configuration
 parsing. The task computes a desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
-rename rules, and applies ordered create, update, and optional delete actions. <strong>Use cases:</strong>
+rename rules, and applies ordered create, update, and optional delete actions.
+Interface-name and VLAN-group mapping rules can be supplied inline or loaded
+from YAML through <code>nf://</code> URLs.
+New interfaces accept any parsed type; existing interfaces use safe logical
+type transitions that protect specific physical types and never downgrade to
+the <code>other</code> fallback. <strong>Use cases:</strong>
 source-of-truth maintenance and drift remediation. <strong>Limitations:</strong> parser
 coverage determines live-state quality; deletion is opt-in and should be
 reviewed with dry-run first.
@@ -10252,7 +10393,8 @@ reviewed with dry-run first.
 <h3 id="live-vlan-reconciliation">Live VLAN reconciliation<a class="headerlink" href="#live-vlan-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
 NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
-an optional scalar VLAN-group fallback. VLANs are identified by VID per scope;
+an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
+loaded from YAML through <code>nf://</code> URLs. VLANs are identified by VID per scope;
 the first device supplies values when later devices report a conflict.
 <strong>Use cases:</strong> correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. <strong>Limitations:</strong> parser coverage determines
@@ -10304,10 +10446,12 @@ validated in dry-run mode.
 <h3 id="drift-assessment-and-coordinated-synchronization">Drift assessment and coordinated synchronization<a class="headerlink" href="#drift-assessment-and-coordinated-synchronization" title="Permanent link">¤</a></h3>
 <p>Runs selected synchronizers in read-only dry-run mode for drift reporting,
 including inventory, interface, MAC, IP, and BGP peering state, or executes the
-supported synchronizers in a fixed sequence. <strong>Use cases:</strong> audit evidence,
-change planning, and scheduled source-of-truth maintenance. <strong>Limitations:</strong>
-assessment is limited to implemented sync domains; <code>sync_all</code> can make broad
-changes and requires careful deletion/filter policy.
+supported synchronizers in a fixed inventory, VLAN, prefix, VRF, interface,
+MAC, IP, and BGP sequence. <code>sync_all</code> accepts per-task keyword arguments inline
+or from an <code>nf://</code> YAML file and can skip individual stages. <strong>Use cases:</strong> audit
+evidence, change planning, and scheduled source-of-truth maintenance.
+<strong>Limitations:</strong> assessment is limited to implemented sync domains; <code>sync_all</code>
+can make broad changes and requires careful deletion/filter policy.
 <a href="../workers/netbox/services_netbox_service_tasks_check_device_sync/">Check sync</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_sync_all/">Sync all</a></p>
 <h2 id="containerlab-service">Containerlab service<a class="headerlink" href="#containerlab-service" title="Permanent link">¤</a></h2>
@@ -10498,6 +10642,29 @@ software efficiently, resuming chunk flow, and avoiding duplicate downloads.
 <strong>Limitations:</strong> only <code>nf://</code> relative paths under the configured base directory
 are accepted.
 <a href="../workers/filesharing/services_filesharing_service_tasks_fetch_file/">Task details</a></p>
+<h3 id="read-only-git-remotes">Read-only Git remotes<a class="headerlink" href="#read-only-git-remotes" title="Permanent link">¤</a></h3>
+<p>Uses GitPython to shallow-fetch configured Git repository branches into
+independent managed folders and serves each snapshot through its configurable,
+safe <code>nf://&lt;mount&gt;/...</code> path. Mounts default to the remote name. Configured
+local repositories are initialized on worker startup without fetching content;
+operators can list remotes, inspect synchronization state, explicitly create or
+delete runtime-registered remote definitions and local data, or enable
+interval-based refresh. NFCLI exposes these operations under <code>filesharing git
+create-remote</code>, <code>clone-remote</code>, and <code>delete-remote</code>.
+Public HTTPS repositories require no credentials. Authenticated remotes support
+username/password or username/token authentication, with credentials redacted
+from inventory, task results, errors, and logs. <strong>Interfaces:</strong>
+Python API, NFCLI, REST, and MCP tasks <code>get_remotes</code>, <code>create_remote_git</code>,
+<code>delete_remote_git</code>, and <code>git_clone</code>. <strong>Use cases:</strong>
+distributing version-controlled templates, playbooks, and automation assets
+without changing consuming workers.
+NFCLI renders <code>show filesharing remotes brief</code> as a table, <code>detail</code> with complete
+remote data, and <code>summary</code> as nested counts with per-remote last synchronization
+attempts. File metadata is exposed under <code>show filesharing files details</code>.
+<strong>Limitations:</strong> remotes are read-only; the system Git executable is required,
+SSH credential management is not provided, shared snapshots contain no Git
+history, refresh is polling-based, and each remote tracks one branch.
+<a href="../development/adr_extensible_data_sources_and_git_sync/">Design decision</a></p>
 <h2 id="fastapi-rest-service">FastAPI REST service<a class="headerlink" href="#fastapi-rest-service" title="Permanent link">¤</a></h2>
 <p>The <a href="../workers/fastapi/services_fastapi_service/">FastAPI service</a> is NORFAB's
 HTTP/JSON gateway.</p>

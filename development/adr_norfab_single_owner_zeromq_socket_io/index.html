@@ -3988,6 +3988,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5810,6 +5894,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6878,6 +6990,9 @@
 <p>Accepted.</p>
 <p>Date: 2026-08-27.</p>
 <p>Implemented in 0.21.2.</p>
+<p>Amended on 2026-08-30 for 0.22.0: increased the owner-loop poll timeout from
+10 ms to 100 ms after idle CPU measurements showed that the original interval
+caused excessive wake-ups across multi-worker deployments.</p>
 <h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">¤</a></h2>
 <p>NorFab currently shares the same ZeroMQ socket between multiple Python threads:</p>
 <ul>
@@ -6993,9 +7108,10 @@ due.</p>
   receive and process inbound message if available
   reconnect or stop if required
 </code></pre></div>
-<p>Use a short poll timeout, for example 10 ms. A Python queue cannot wake a
-thread blocked in <code>zmq.Poller.poll()</code>, and this ADR intentionally does not add
-an in-process wake socket.</p>
+<p>Use a 100 ms poll timeout. A Python queue cannot wake a thread blocked in
+<code>zmq.Poller.poll()</code>, and this ADR intentionally does not add an in-process wake
+socket. The 100 ms interval limits idle wake-ups while keeping the maximum
+initial outbound-message delay at 100 ms.</p>
 <p>Do not derive this timeout from the keepalive interval. Jobs, events, stream
 chunks, MMI calls, and client input need a much smaller response bound than the
 default keepalive interval.</p>
@@ -7050,14 +7166,14 @@ default keepalive interval.</p>
   broker is offline.</li>
 <li>Shutdown destroys the ZeroMQ context while another thread is trying to enqueue
   a send.</li>
-<li>The 10 ms owner tick increases idle CPU too much on Windows or Linux.</li>
+<li>The periodic owner tick trades idle CPU usage against outbound-message latency.</li>
 </ul>
 <p>The first implementation should keep this simple:</p>
 <ul>
 <li>keep queued sends during reconnect and drain them after reconnect;</li>
 <li>use a bounded outbound queue and fail sender calls when the queue stays full;</li>
 <li>fail new queue submissions during shutdown;</li>
-<li>keep the 10 ms tick as an internal constant, not inventory;</li>
+<li>keep the 100 ms tick as an internal constant, not inventory;</li>
 <li>add tests for owner-only socket access, keepalive timing, reconnect ordering,
   and normal job result collection.</li>
 </ul>

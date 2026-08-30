@@ -3988,6 +3988,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5810,6 +5894,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -7111,7 +7223,11 @@ stable ordering for list fields (<code>tagged_vlans</code>, <code>ipv4_addresses
 - Create payload includes canonical fields accepted by NetBox.</p>
 <p>Update:
 - Interface exists on both sides and <code>deepdiff</code> reports meaningful field changes.
-- Translate changed normalized keys to NetBox interface update payload keys.</p>
+- Translate changed normalized keys to NetBox interface update payload keys.
+- Existing interface type updates use a safe logical transition policy. Allow
+  <code>other</code> to become <code>virtual</code>, <code>bridge</code>, or <code>lag</code>, and allow transitions among
+  those logical types. Protect specific physical types and never change an
+  existing interface to <code>other</code>. This restriction does not apply to creation.</p>
 <p>Delete:
 - Interface exists in NetBox normalized state but not in live normalized state.
 - Controlled by explicit delete flag (safe default is no delete).</p>
@@ -7165,6 +7281,7 @@ stable ordering for list fields (<code>tagged_vlans</code>, <code>ipv4_addresses
 <p>Keep existing signature where possible and add explicit safety toggles:</p>
 <ul>
 <li><code>delete</code>: bool = False</li>
+<li><code>update_type</code>: bool = True; enables safe existing-interface type transitions</li>
 </ul>
 <hr />
 <h2 id="dry-run-behavior">Dry-Run Behavior<a class="headerlink" href="#dry-run-behavior" title="Permanent link">¤</a></h2>
@@ -7268,11 +7385,15 @@ stable ordering for list fields (<code>tagged_vlans</code>, <code>ipv4_addresses
 <li>Should interface deletions be split into a separate explicit task for stronger
    operational safety, while sync defaults to create/update only? - no</li>
 <li>Should MAC replacement be always delete+create, or try update-in-place where
-   API supports it? - update in place API supports it fo sure</li>
+   API supports it? - update in place; the API supports it</li>
 <li>Should IP reconciliation manage only primary assignments or all secondary
    addresses as well? - all IP addresses</li>
 <li>Should protected interface patterns (for example <code>mgmt</code>, <code>lo</code>, <code>vlan</code>) be
-   hardcoded defaults or inventory-configurable? - no harcoded protected patterns</li>
+   hardcoded defaults or inventory-configurable? - no hardcoded protected patterns</li>
+<li>Create interfaces with any parsed type, including the <code>other</code> catch-all.
+    Update existing types safely by default: allow <code>other</code> to become a logical
+    type and allow transitions among <code>virtual</code>, <code>bridge</code>, and <code>lag</code>; protect
+    specific physical types and never transition an existing interface to <code>other</code>.</li>
 </ol>
 
 

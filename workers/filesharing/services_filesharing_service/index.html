@@ -4061,6 +4061,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5879,6 +5963,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6622,6 +6734,7 @@
 <li>Store templates, playbooks, golden configs, and other "assets" next to your inventory.</li>
 <li>Let workers download an input file (for example: Nornir <code>file_copy</code> can accept <code>nf://...</code> sources).</li>
 <li>Browse what files are available and fetch them locally.</li>
+<li>Make read-only Git repository snapshots available in the <code>nf://</code> namespace.</li>
 </ul>
 <p>For protocol-level streaming details, see <a href="../../../development/file_streaming_fetch_file/">development/file_streaming_fetch_file.md</a>.</p>
 <h2 id="url-format-and-path-rules">URL format and path rules<a class="headerlink" href="#url-format-and-path-rules" title="Permanent link">¤</a></h2>
@@ -6648,7 +6761,13 @@
 <li><strong><a href="../services_filesharing_service_tasks_walk/">walk</a></strong> — recursively list files under a directory (returns a list of <code>nf://...</code> file URLs)</li>
 <li><strong><a href="../services_filesharing_service_tasks_file_details/">file_details</a></strong> — returns file metadata including existence, size in bytes, and MD5 hash</li>
 <li><strong><a href="../services_filesharing_service_tasks_fetch_file/">fetch_file</a></strong> — streams the file to the client with chunking and offset support</li>
+<li><strong><a href="../services_filesharing_service_tasks_create_remote_git/">create_remote_git</a></strong> — registers a Git remote and initializes its private local repository</li>
+<li><strong><a href="../services_filesharing_service_tasks_git_clone/">git_clone</a></strong> — fetches a registered Git remote and makes its current branch available under <code>nf://</code></li>
+<li><strong><a href="../services_filesharing_service_tasks_delete_remote_git/">delete_remote_git</a></strong> — deletes and unregisters a runtime Git remote</li>
 </ul>
+<p>The <code>get_remotes</code> task returns the live remote registry, including mount URLs,
+status, and the last synchronization attempt. NFCLI exposes it through
+<code>show filesharing remotes</code>.</p>
 <p>For detailed information about each task, see the individual task documentation pages linked above.</p>
 
 

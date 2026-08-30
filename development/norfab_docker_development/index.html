@@ -3988,6 +3988,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5932,6 +6016,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6706,9 +6818,8 @@
 
 
 <h1 id="develop-norfab-with-docker">Develop NorFab with Docker<a class="headerlink" href="#develop-norfab-with-docker" title="Permanent link">¤</a></h1>
-<p>Use the Docker development environment to run the broker and service workers
-in separate containers while importing the NorFab source from your local
-working tree.</p>
+<p>Use the Docker development environment to run the broker and all configured
+workers in one container while importing NorFab from your local working tree.</p>
 <p>The environment is defined in
 <a href="https://github.com/norfablabs/NORFAB/tree/master/docker/norfab-docker-dev"><code>docker/norfab-docker-dev</code></a>.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¤</a></h2>
@@ -6716,77 +6827,72 @@ working tree.</p>
 <li>Docker Engine or Docker Desktop</li>
 <li>Docker Compose v2 (<code>docker compose</code>)</li>
 <li>A local clone of the NorFab repository</li>
-<li>Host TCP port <code>5555</code> available for the broker</li>
+<li>Host TCP ports <code>5555</code>, <code>8000</code>, and <code>8001</code> available</li>
 </ul>
 <h2 id="start-the-environment">Start the environment<a class="headerlink" href="#start-the-environment" title="Permanent link">¤</a></h2>
-<p>From the repository root, build the images and start the stack:</p>
+<p>From the repository root, build the all-in-one image and start the stack:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span>up<span class="w"> </span>--build
 </code></pre></div>
-<p>Add <code>-d</code> to run the containers in the background. The stack starts:</p>
+<p>Add <code>-d</code> to run the container in the background. The <code>norfab</code> service contains
+the broker, configured service workers, and built-in File Sharing worker.</p>
 <table>
 <thead>
 <tr>
-<th>Service</th>
-<th>Role</th>
+<th>Interface</th>
 <th>Address</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>norfab-broker</code></td>
-<td>NorFab broker</td>
-<td><code>10.0.0.100:5555</code></td>
+<td>Broker</td>
+<td><code>tcp://10.0.0.100:5555</code></td>
 </tr>
 <tr>
-<td><code>norfab-service-nornir</code></td>
-<td>Nornir worker</td>
-<td><code>10.0.0.101</code></td>
+<td>FastAPI</td>
+<td><code>http://localhost:8000</code></td>
 </tr>
 <tr>
-<td><code>norfab-service-netbox</code></td>
-<td>NetBox workers</td>
-<td><code>10.0.0.102</code></td>
+<td>FastMCP</td>
+<td><code>http://localhost:8001/mcp/</code></td>
 </tr>
 </tbody>
 </table>
-<p>Follow all logs with:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span>logs<span class="w"> </span>-f
+<p>Follow the logs with:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>norfab
 </code></pre></div>
 <h2 id="verify-the-source-mount">Verify the source mount<a class="headerlink" href="#verify-the-source-mount" title="Permanent link">¤</a></h2>
-<p>The Compose file mounts the repository's <code>norfab/</code> package at
-<code>/opt/norfab/norfab</code> and sets <code>PYTHONPATH=/opt/norfab</code>. This makes the local
-source take precedence over the NorFab package installed in each image.</p>
+<p>The Compose file mounts the repository's <code>norfab/</code> package directly over the
+installed package in the container's Python <code>site-packages</code> directory. This
+makes the local source take precedence while retaining all dependencies and
+entry points installed by the image.</p>
 <p>Confirm the import path:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="nb">exec</span><span class="w"> </span>norfab-service-nornir<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="nb">exec</span><span class="w"> </span>norfab<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import norfab; print(norfab.__file__)&quot;</span>
 </code></pre></div>
-<p>The printed path should start with <code>/opt/norfab/norfab</code>.</p>
+<p>The printed path should be under
+<code>/usr/local/lib/pythonX.Y/site-packages/norfab</code>.</p>
 <h2 id="apply-code-changes">Apply code changes<a class="headerlink" href="#apply-code-changes" title="Permanent link">¤</a></h2>
-<p>Python source changes are immediately visible inside the containers, but the
-running worker process must be restarted to load them:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>restart<span class="w"> </span>norfab-service-nornir
+<p>Python source changes are immediately visible inside the container, but the
+running broker and worker processes must be restarted to load them:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span>restart<span class="w"> </span>norfab
 </code></pre></div>
-<p>Restart <code>norfab-broker</code> or <code>norfab-service-netbox</code> instead when a change
-affects those components.</p>
-<p>Rebuild the images after changing a Dockerfile or project dependencies:</p>
+<p>Rebuild the image after changing a Dockerfile or project dependency:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span>build
 docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <h2 id="change-the-development-inventory">Change the development inventory<a class="headerlink" href="#change-the-development-inventory" title="Permanent link">¤</a></h2>
-<p>Files under <code>docker/norfab-docker-dev/norfab/</code> are mounted at <code>/etc/norfab</code> in
-every container:</p>
+<p>Files under <code>docker/norfab-docker-dev/norfab/</code> are mounted at <code>/etc/norfab</code>:</p>
 <ul>
-<li><code>inventory.yaml</code> defines the broker, workers, and topology.</li>
-<li><code>nornir/</code> contains Nornir worker settings.</li>
-<li><code>netbox/</code> contains NetBox worker settings.</li>
+<li><code>inventory.yaml</code> defines the broker, workers, and all-in-one topology.</li>
+<li>Service subdirectories contain worker settings.</li>
+<li><code>__norfab__/</code> contains development runtime data and logs.</li>
 </ul>
-<p>Restart the affected containers after changing inventory files.</p>
+<p>The Compose project loads <code>docker/norfab-docker-dev/.env</code> into the container so
+inventory templates can read the configured logging levels and credentials.
+Restart the container after changing inventory files.</p>
 <h2 id="open-a-container-shell">Open a container shell<a class="headerlink" href="#open-a-container-shell" title="Permanent link">¤</a></h2>
-<p>Use <code>docker compose exec</code> to inspect a running service:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="nb">exec</span><span class="w"> </span>norfab-service-nornir<span class="w"> </span>sh
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>norfab<span class="w"> </span>sh
 </code></pre></div>
 <h2 id="stop-the-environment">Stop the environment<a class="headerlink" href="#stop-the-environment" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker/norfab-docker-dev/docker-compose.yaml<span class="w"> </span>down

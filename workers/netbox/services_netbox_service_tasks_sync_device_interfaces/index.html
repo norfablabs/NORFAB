@@ -2598,6 +2598,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#interface-type-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Type Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4149,6 +4160,90 @@
     
   
     Fetch File
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../filesharing/services_filesharing_service_tasks_create_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../filesharing/services_filesharing_service_tasks_git_clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clone Git Remote
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delete Git Remote
   
 
     
@@ -5980,6 +6075,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_hermes_agent_runtime_and_autonomous_network_operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent Runtime and Autonomous Network Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_netbox_bgp_create_update_tasks_plan/" class="md-nav__link">
         
   
@@ -6668,6 +6791,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#interface-type-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Type Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6836,6 +6970,22 @@
 <li>Nornir returns normalized interface data to the Netbox worker</li>
 <li>Netbox worker applies planned actions and returns per-device action summaries and field-level diffs</li>
 </ol>
+<h2 id="interface-type-behavior">Interface Type Behavior<a class="headerlink" href="#interface-type-behavior" title="Permanent link">¤</a></h2>
+<p>New interfaces retain the type inferred from live data. Creation accepts any
+NetBox interface type, including <code>other</code>, which remains the catch-all when the
+parser cannot identify a more specific physical type.</p>
+<p>For existing interfaces, <code>update_type=True</code> is the default and enables safe
+logical type correction:</p>
+<ul>
+<li><code>other</code> can change to <code>virtual</code>, <code>bridge</code>, or <code>lag</code>.</li>
+<li><code>virtual</code>, <code>bridge</code>, and <code>lag</code> can change between one another.</li>
+<li>A specific physical type is never replaced with another type.</li>
+<li>No existing type is replaced with <code>other</code>.</li>
+</ul>
+<p>Loopback interfaces use NetBox type <code>virtual</code>; <code>loopback</code> is not submitted as
+an interface type. Set <code>update_type=False</code> to disable all type changes for
+existing interfaces. Unsafe transitions are omitted from the actionable diff
+and reported as warning events.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) returns the diff plan without making any changes, keyed by device name:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -6875,7 +7025,8 @@
 </ul>
 <p>Both filters are applied before the diff, so interfaces that do not match are completely ignored by the sync — they are neither created, updated, nor deleted.</p>
 <h2 id="interface-name-mapping">Interface Name Mapping<a class="headerlink" href="#interface-name-mapping" title="Permanent link">¤</a></h2>
-<p><code>interface_map</code> accepts an ordered list of rename rules:</p>
+<p><code>interface_map</code> accepts an ordered list of rename rules inline or as an
+<code>nf://</code> URL to a YAML file:</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">device_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">leaf-*</span>
 <span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cEOS-*-CA</span>
 <span class="w">  </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet</span>
@@ -6889,6 +7040,8 @@ Rules are evaluated in list order and the first match wins. Interfaces that do
 not match a rule keep their live names.</p>
 <p>Mapping is also applied to live parent and LAG interface references before
 name filtering and DeepDiff comparison.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">interface_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/interface_map.yaml</span>
+</code></pre></div>
 <h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
 <p>By default <code>process_deletions=False</code> — interfaces present in NetBox but absent in live data are left untouched. Set <code>process_deletions=True</code> to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.</p>
 <h2 id="ignoring-vlans-and-vrfs">Ignoring VLANs and VRFs<a class="headerlink" href="#ignoring-vlans-and-vrfs" title="Permanent link">¤</a></h2>
@@ -6897,7 +7050,8 @@ name filtering and DeepDiff comparison.</p>
 <p><code>vlan_group</code> accepts one exact VLAN group name and acts as the fallback for
 VLANs not matched by <code>vlan_map</code>. Slugs and numeric IDs are not resolved. When
 neither argument selects a group, the device site is used.</p>
-<p><code>vlan_map</code> accepts the same ordered list of rules as VLAN sync:</p>
+<p><code>vlan_map</code> accepts the same ordered list of rules as VLAN sync, inline or as an
+<code>nf://</code> URL to a YAML file:</p>
 <div class="highlight"><pre><span></span><code><span class="p">[</span>
     <span class="p">{</span>
         <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;ACCESS_VLANS&quot;</span><span class="p">,</span>
@@ -6941,6 +7095,9 @@ narrow those group ranges. A rule containing only <code>vlan_group</code> is val
 </code></pre></div>
 <p>Map a live interface name to the preferred NetBox name:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>sync<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>leaf-1<span class="w"> </span>interface-map<span class="w"> </span><span class="s1">&#39;[{&quot;device_name&quot;:&quot;leaf-*&quot;,&quot;device_type&quot;:&quot;cEOS-*-CA&quot;,&quot;match&quot;:&quot;Ethernet&quot;,&quot;replace&quot;:&quot;Et&quot;}]&#39;</span>
+</code></pre></div>
+<p>Download interface and VLAN mapping rules from YAML files:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>sync<span class="w"> </span>interfaces<span class="w"> </span>devices<span class="w"> </span>leaf-1<span class="w"> </span>interface-map<span class="w"> </span>nf://netbox/interface_map.yaml<span class="w"> </span>vlan-map<span class="w"> </span>nf://netbox/vlan_map.yaml
 </code></pre></div>
 <p>Restrict sync to interfaces whose description matches a glob pattern:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync interfaces devices ceos-spine-1 filter-by-description &quot;TEST_SYNC_*&quot;
@@ -7113,6 +7270,7 @@ root
             ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Loopback*&#39;
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
+            ├── update-type:    Safely update existing NetBox logical interface types, default &#39;True&#39;
             ├── vlan-group:    Fallback VLAN group exact name
             ├── vlan-map:    Ordered VLAN-to-group mapping rules
             ├── ignore-vlans:    Ignore discovered VLANs and leave interface VLAN associations unchanged
@@ -7347,13 +7505,14 @@ not exist.</p>
                 <code>interface_map</code>
             </td>
             <td>
-                  <code><span title="list">list</span></code>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>, <span title="list">list</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Ordered interface rename rules matched
-by device name glob, device type model glob, and a literal live
-interface name substring. The first matching rule wins.</p>
+                <p>Ordered interface rename rules, or an <code>nf://</code> YAML
+file containing them. Rules match by device name glob, device
+type model glob, and a literal live interface name substring.
+The first matching rule wins.</p>
               </div>
             </td>
             <td>
@@ -7399,18 +7558,20 @@ interfaces are included by description, e.g. <code>'uplink*'</code>.</p>
                 <code>update_type</code>
             </td>
             <td>
-                  <code>(<span title="str">str</span>, <span title="boolean">boolean</span>)</code>
+                  <code><span title="bool">bool</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>update existing interfaces types or not,
-sync interfaces task unable to fully resolve interface types and
-defaults to interface type <code>other</code> for most interfaces, this knob
-allows to keep existing Netbox interfaces type intact.</p>
+                <p>Safely update existing interface types. Updates are
+allowed from <code>other</code> to <code>virtual</code>, <code>bridge</code>, or <code>lag</code>, and
+between those logical types. Specific physical types are protected,
+and transitions to <code>other</code> are ignored. Set to False to disable
+all type updates. New interfaces can use any parsed type regardless
+of this setting. Defaults to True.</p>
               </div>
             </td>
             <td>
-                  <code>False</code>
+                  <code>True</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7436,13 +7597,14 @@ use the device site.</p>
                 <code>vlan_map</code>
             </td>
             <td>
-                  <code><span title="list">list</span></code>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>, <span title="list">list</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Ordered VLAN group mapping rules using VLAN
-ID, device name, and interface name criteria. VLAN name criteria
-are ignored because interface parsing does not supply VLAN names.</p>
+                <p>Ordered VLAN group mapping rules, or an <code>nf://</code> YAML file
+containing them. Rules use VLAN ID, device name, and interface
+name criteria. VLAN name criteria are ignored because interface
+parsing does not supply VLAN names.</p>
               </div>
             </td>
             <td>
@@ -7531,12 +7693,7 @@ dry-run mode.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 861</span>
-<span class="normal"> 862</span>
-<span class="normal"> 863</span>
-<span class="normal"> 864</span>
-<span class="normal"> 865</span>
-<span class="normal"> 866</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 866</span>
 <span class="normal"> 867</span>
 <span class="normal"> 868</span>
 <span class="normal"> 869</span>
@@ -8272,7 +8429,46 @@ dry-run mode.</p>
 <span class="normal">1599</span>
 <span class="normal">1600</span>
 <span class="normal">1601</span>
-<span class="normal">1602</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span>
+<span class="normal">1612</span>
+<span class="normal">1613</span>
+<span class="normal">1614</span>
+<span class="normal">1615</span>
+<span class="normal">1616</span>
+<span class="normal">1617</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -8296,12 +8492,12 @@ dry-run mode.</p>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">process_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">interface_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">interface_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">update_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">vlan_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vlan_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_vlans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">ignore_vrf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -8385,23 +8581,27 @@ dry-run mode.</p>
 <span class="sd">        branch (str, optional): NetBox branch name to use. The branching plugin</span>
 <span class="sd">            must be installed. The branch is created automatically if it does</span>
 <span class="sd">            not exist.</span>
-<span class="sd">        interface_map (list, optional): Ordered interface rename rules matched</span>
-<span class="sd">            by device name glob, device type model glob, and a literal live</span>
-<span class="sd">            interface name substring. The first matching rule wins.</span>
+<span class="sd">        interface_map: Ordered interface rename rules, or an ``nf://`` YAML</span>
+<span class="sd">            file containing them. Rules match by device name glob, device</span>
+<span class="sd">            type model glob, and a literal live interface name substring.</span>
+<span class="sd">            The first matching rule wins.</span>
 <span class="sd">        filter_by_name (str, optional): Glob pattern to restrict which interfaces</span>
 <span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
 <span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
 <span class="sd">            interfaces are included by description, e.g. ``&#39;uplink*&#39;``.</span>
-<span class="sd">        update_type (str, boolean): update existing interfaces types or not,</span>
-<span class="sd">            sync interfaces task unable to fully resolve interface types and</span>
-<span class="sd">            defaults to interface type `other` for most interfaces, this knob</span>
-<span class="sd">            allows to keep existing Netbox interfaces type intact.</span>
+<span class="sd">        update_type (bool): Safely update existing interface types. Updates are</span>
+<span class="sd">            allowed from ``other`` to ``virtual``, ``bridge``, or ``lag``, and</span>
+<span class="sd">            between those logical types. Specific physical types are protected,</span>
+<span class="sd">            and transitions to ``other`` are ignored. Set to False to disable</span>
+<span class="sd">            all type updates. New interfaces can use any parsed type regardless</span>
+<span class="sd">            of this setting. Defaults to True.</span>
 <span class="sd">        vlan_group (str, optional): Exact VLAN group name used for interface</span>
 <span class="sd">            VLANs not matched by ``vlan_map``. When omitted, unmatched VLANs</span>
 <span class="sd">            use the device site.</span>
-<span class="sd">        vlan_map (list, optional): Ordered VLAN group mapping rules using VLAN</span>
-<span class="sd">            ID, device name, and interface name criteria. VLAN name criteria</span>
-<span class="sd">            are ignored because interface parsing does not supply VLAN names.</span>
+<span class="sd">        vlan_map: Ordered VLAN group mapping rules, or an ``nf://`` YAML file</span>
+<span class="sd">            containing them. Rules use VLAN ID, device name, and interface</span>
+<span class="sd">            name criteria. VLAN name criteria are ignored because interface</span>
+<span class="sd">            parsing does not supply VLAN names.</span>
 <span class="sd">        ignore_vlans (bool, optional): If True, ignore discovered VLANs and</span>
 <span class="sd">            leave interface VLAN associations unchanged. Defaults to False.</span>
 <span class="sd">        ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave</span>
@@ -8415,6 +8615,14 @@ dry-run mode.</p>
 <span class="sd">            dry-run mode.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">interface_map</span><span class="p">):</span>
+        <span class="n">interface_map</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">InterfaceMapRule</span><span class="p">])</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">interface_map</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">vlan_map</span><span class="p">):</span>
+        <span class="n">vlan_map</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">VlanMapRule</span><span class="p">])</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">vlan_map</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="p">)</span>
     <span class="n">interface_map</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">rule</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">interface_map</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -8710,15 +8918,37 @@ dry-run mode.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating interface sync diff&quot;</span><span class="p">)</span>
     <span class="n">full_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span><span class="n">normalised_live_all</span><span class="p">,</span> <span class="n">normalised_nb_all</span><span class="p">)</span>
 
-    <span class="c1"># remove interface type from updates</span>
-    <span class="k">if</span> <span class="n">update_type</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">dev_name</span><span class="p">,</span> <span class="n">dev_diff</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">intf_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">dev_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-                <span class="n">intf_updates</span> <span class="o">=</span> <span class="n">dev_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">][</span><span class="n">intf_name</span><span class="p">]</span>
-                <span class="n">_</span> <span class="o">=</span> <span class="n">intf_updates</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                <span class="c1"># remove interface from updates if nothing to update</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">intf_updates</span><span class="p">:</span>
-                    <span class="n">_</span> <span class="o">=</span> <span class="n">dev_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
+    <span class="c1"># Apply the existing-interface type update policy. Interface creation is</span>
+    <span class="c1"># intentionally unrestricted and continues to use any parsed type.</span>
+    <span class="k">for</span> <span class="n">dev_name</span><span class="p">,</span> <span class="n">dev_diff</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">intf_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">dev_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">intf_updates</span> <span class="o">=</span> <span class="n">dev_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">][</span><span class="n">intf_name</span><span class="p">]</span>
+            <span class="n">type_change</span> <span class="o">=</span> <span class="n">intf_updates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">type_change</span><span class="p">:</span>
+                <span class="n">old_type</span> <span class="o">=</span> <span class="n">type_change</span><span class="p">[</span><span class="s2">&quot;old_value&quot;</span><span class="p">]</span>
+                <span class="n">new_type</span> <span class="o">=</span> <span class="n">type_change</span><span class="p">[</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span>
+                <span class="n">safe_type_transition</span> <span class="o">=</span> <span class="n">old_type</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="s2">&quot;other&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;virtual&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;bridge&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;lag&quot;</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">and</span> <span class="n">new_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;virtual&quot;</span><span class="p">,</span> <span class="s2">&quot;bridge&quot;</span><span class="p">,</span> <span class="s2">&quot;lag&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Remove all existing-interface type changes when disabled.</span>
+                <span class="k">if</span> <span class="n">update_type</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="n">intf_updates</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Protect physical types and never transition to ``other``.</span>
+                <span class="k">elif</span> <span class="n">safe_type_transition</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="n">intf_updates</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+                    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;skipping unsafe interface type transition for &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dev_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">old_type</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">new_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="c1"># remove interface from updates if nothing remains to update</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">intf_updates</span><span class="p">:</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">dev_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
     <span class="n">create_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">update_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">delete_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
