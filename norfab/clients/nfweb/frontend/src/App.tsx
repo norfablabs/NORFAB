@@ -26,7 +26,10 @@ import {
 import { api, openTopologyStream } from "./api";
 import AppFooter from "./components/AppFooter";
 import ApplicationNavigation from "./components/ApplicationNavigation";
-import type { NavigationSection } from "./components/ApplicationNavigation";
+import type {
+  ApplicationView,
+  NavigationSection,
+} from "./components/ApplicationNavigation";
 import InspectorPanel from "./components/InspectorPanel";
 import type { InspectorTab } from "./components/InspectorPanel";
 import TopologyToolbar from "./components/TopologyToolbar";
@@ -61,6 +64,7 @@ type NodeCoordinates = { x: number; y: number; z: number };
 type HistoryResponseItem = TopologyHistoryItem | string;
 
 const TopologyGraph = lazy(() => import("./TopologyGraph"));
+const MonitoringView = lazy(() => import("./monitoring/MonitoringView"));
 
 function supportsWebGL(): boolean {
   try {
@@ -136,6 +140,9 @@ export default function App() {
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
   const [openNavigation, setOpenNavigation] =
     useState<NavigationSection | null>("dashboards");
+  const [activeView, setActiveView] = useState<ApplicationView>(
+    window.location.hash === "#monitoring" ? "monitoring" : "topology",
+  );
   const [search, setSearch] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   const [health, setHealth] = useState<Health | "all">("all");
@@ -170,6 +177,15 @@ export default function App() {
   }, [live]);
 
   useEffect(() => {
+    const selectView = () =>
+      setActiveView(
+        window.location.hash === "#monitoring" ? "monitoring" : "topology",
+      );
+    window.addEventListener("hashchange", selectView);
+    return () => window.removeEventListener("hashchange", selectView);
+  }, []);
+
+  useEffect(() => {
     const graph = graphRef.current;
     graph?.d3Force("charge")?.strength(-220);
     graph?.d3Force("link")?.distance(nodeDistance);
@@ -195,7 +211,7 @@ export default function App() {
     });
     observer.observe(stage);
     return () => observer.disconnect();
-  }, []);
+  }, [activeView]);
 
   const rememberNodePositions = useCallback(() => {
     renderedGraphData.current.nodes.forEach((node) => {
@@ -601,7 +617,10 @@ export default function App() {
         : "red";
 
   return (
-    <main className="app-shell" id="topology">
+    <main
+      className={`app-shell${activeView === "monitoring" ? " monitoring-shell" : ""}`}
+      id={activeView}
+    >
       <header className="topbar">
         <Group className="brand" gap="sm" wrap="nowrap">
           <Avatar color="fabric" radius="sm">
@@ -616,18 +635,19 @@ export default function App() {
             </Text>
           </div>
         </Group>
-        <ScrollArea
-          className="topbar-title toolbar-scroll"
-          offsetScrollbars="present"
-          scrollbarSize={5}
-          scrollbars="x"
-          type="auto"
-          viewportProps={{
-            "aria-label": "Topology toolbar",
-            role: "region",
-          }}
-        >
-          <TopologyToolbar
+        {activeView === "topology" ? (
+          <ScrollArea
+            className="topbar-title toolbar-scroll"
+            offsetScrollbars="present"
+            scrollbarSize={5}
+            scrollbars="x"
+            type="auto"
+            viewportProps={{
+              "aria-label": "Topology toolbar",
+              role: "region",
+            }}
+          >
+            <TopologyToolbar
             deviceOptions={deviceOptions}
             selectedDevices={selectedDevices}
             draftDevices={draftDevices}
@@ -673,20 +693,44 @@ export default function App() {
             snapshotId={snapshot?.snapshot_id}
             onSelectHistory={selectHistory}
             onLive={returnToLive}
-          />
-        </ScrollArea>
+            />
+          </ScrollArea>
+        ) : (
+          <Group className="monitoring-topbar-title" gap="sm">
+            <Text fw={700} size="sm">
+              Monitoring
+            </Text>
+            <Text c="dimmed" size="xs">
+              Live fabric runtime health
+            </Text>
+          </Group>
+        )}
       </header>
 
       <ApplicationNavigation
         open={openNavigation}
+        active={activeView}
         onToggle={setOpenNavigation}
       />
 
-      <section
-        className="graph-stage"
-        aria-label="3D network topology"
-        ref={graphStageRef}
-      >
+      {activeView === "monitoring" ? (
+        <Suspense
+          fallback={
+            <Stack className="monitoring-loading" align="center" gap="xs">
+              <Loader size="sm" />
+              <Text size="sm">Loading monitoring dashboard</Text>
+            </Stack>
+          }
+        >
+          <MonitoringView />
+        </Suspense>
+      ) : (
+        <>
+          <section
+            className="graph-stage"
+            aria-label="3D network topology"
+            ref={graphStageRef}
+          >
         <Group className="graph-summary" gap={6} wrap="nowrap">
           <Badge
             color={
@@ -818,16 +862,18 @@ export default function App() {
             <IconHelpHexagon size={16} />
           </ActionIcon>
         </Tooltip>
-      </section>
+          </section>
 
-      <InspectorPanel
-        selected={selected}
-        tab={inspectorTab}
-        relatedConnections={relatedConnections}
-        collectionLog={collectionLog}
-        onTab={setInspectorTab}
-        onClose={() => setSelected(null)}
-      />
+          <InspectorPanel
+            selected={selected}
+            tab={inspectorTab}
+            relatedConnections={relatedConnections}
+            collectionLog={collectionLog}
+            onTab={setInspectorTab}
+            onClose={() => setSelected(null)}
+          />
+        </>
+      )}
 
       <AppFooter config={footerConfig} />
     </main>

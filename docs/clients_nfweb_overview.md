@@ -12,22 +12,21 @@ native Python client and presents focused browser applications to browsers on th
 operator's network.
 
 The application sidebar uses Mantine's nested-navbar pattern for Overview,
-Dashboards, and Admin. Topology is the first nested dashboard; the other sections
-are intentionally empty until additional NFWeb applications are introduced.
-Dashboard-specific controls belong to the center application header rather than
-the application sidebar.
+Dashboards, and Admin. The Dashboards section contains runtime Monitoring and 3D
+Topology. Dashboard-specific controls belong to the center application header
+rather than the application sidebar.
 
 NFWeb uses Mantine's maintained React components and Tabler icons for its common
 interface controls. Selects, buttons, filters, accordions, sliders, tabs, badges,
 tooltips, and alerts therefore share one accessible component system. Custom CSS
-is reserved for the application grid, 3D topology stage, inspector data, and
-terminal event presentation.
+is reserved for the application grid, charts, 3D topology stage, inspector data,
+and terminal event presentation. Monitoring charts use the maintained
+`echarts-for-react` integration instead of an NFWeb-specific chart wrapper.
 
-The 3D network topology dashboard is NFWeb's **first application**. It proves the
-local runtime, frontend packaging, live updates, bounded application storage, and
-safe browser boundary, but topology does not define the long-term scope of NFWeb.
-Future NFWeb applications can cover other visual operations, assurance,
-troubleshooting, reporting, inventory, workflow, and service-specific use cases.
+The 3D network topology dashboard is NFWeb's first application. Runtime Monitoring
+is the second built-in application. It shows the broker, NFWeb client, and workers
+using existing NORFAB management and watchdog interfaces, with live charts and a
+non-persistent three-hour history.
 
 NFWeb does not require a FastAPI worker, Node.js, an internet connection, or a
 central web deployment at runtime. It listens on all IPv4 interfaces by default
@@ -48,7 +47,8 @@ NFWeb client
     |-- native NFPClient connection
     |-- shared lifecycle, configuration, and browser policy
     |-- applications
-        |-- topology (first built-in application)
+        |-- monitoring (live runtime state and in-memory history)
+        |-- topology (live and historical 3D network view)
         |-- future focused applications
     |
     v
@@ -61,7 +61,23 @@ local state. This prevents the browser from becoming a generic passthrough for
 arbitrary NORFAB jobs while allowing new capabilities to use the full native
 client inside the trusted local Python process.
 
-## Current Application: 3D Network Topology
+## Built-in Applications
+
+### Runtime Monitoring
+
+The Monitoring dashboard polls the broker's `show_broker` and `show_workers`
+management operations and each worker's `get_watchdog_stats` task. It displays
+component health, CPU and resident memory, uptime, worker keepalive transmit and
+receive counts, and the local NFWeb client's message, reconnect, and queue
+counters. ECharts provides gauges and time-series/bar charts, while a WebSocket
+pushes each completed sample to every open dashboard.
+
+Monitoring keeps at most three hours of samples in Python process memory. It does
+not create a telemetry journal or database table, and all monitoring history is
+lost when NFWeb restarts. See
+[Runtime Monitoring Dashboard](clients_nfweb_monitoring.md) for details.
+
+### 3D Network Topology
 
 The first release opens directly into a live and historical 3D network topology
 application. It combines intended and observed network layers into a persistent
@@ -88,6 +104,10 @@ client:
       fastapi_url: "http://127.0.0.1:8000/docs"
       docs_url: "https://docs.norfablabs.com/"
       github_url: "https://github.com/norfablabs/NORFAB"
+    monitoring:
+      collection_interval: 5
+      retention_minutes: 180
+      request_timeout: 10
 ```
 
 The shared footer displays the optional `message` and pictogram links for the
@@ -95,9 +115,10 @@ configured FastAPI service, NORFAB documentation, and repository. Set any footer
 URL to `null` to hide that link.
 
 Application settings are grouped by application below `client.nfweb`; see each
-application's documentation for its fields. NFWeb runtime data uses
+application's documentation for its fields. Persistent applications use
 `__norfab__/nfweb/nfweb.sqlite`, with application-owned tables inside that local
-database.
+database. Monitoring deliberately uses memory only and never writes its samples
+to this database.
 
 ## Run NFWeb
 
@@ -118,9 +139,8 @@ Press Ctrl+C once to stop accepting connections and release application storage
 and the native NORFAB client. If cleanup becomes stuck, press Ctrl+C a second time
 to force the NFWeb process to exit with status 130.
 
-The current release routes the root page to the topology application. As more
-applications are added, NFWeb can introduce a local application home and
-application-specific navigation without changing its broker connection or
+The current release opens Topology by default. The dashboard navigation switches
+between Monitoring and Topology without changing the broker connection or
 production runtime.
 
 ## Adding Future Applications
@@ -145,7 +165,7 @@ topology use case.
 
 NFWeb binds to every IPv4 interface by default and accepts connections from any
 source IP that can reach its port. HTTP routes and WebSocket upgrades do not
-restrict the browser origin. The current browser API contains only
+restrict the browser origin. The current browser API contains only monitoring- and
 topology-specific routes and cannot submit arbitrary NORFAB service or task names.
 
 NFWeb does not currently provide authentication, authorization, origin filtering,

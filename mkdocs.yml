@@ -208,6 +208,7 @@ nav:
   - Clients Overview: clients_overview.md
   - NFWeb Local Web Client:
     - Overview: clients_nfweb_overview.md
+    - Runtime Monitoring Dashboard: clients_nfweb_monitoring.md
     - 3D Network Topology Application: clients_nfweb_topology.md
   - NFCLI Shell Client: clients_nfcli_overview.md
   - Python API Client: clients_python_api_overview.md

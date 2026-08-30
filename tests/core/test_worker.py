@@ -76,7 +76,7 @@ class TestWorkersListTasks:
         with pytest.raises(ValidationError, match="duplicate MCP prompt names"):
             Task(mcp={"prompts": [prompt, copy.deepcopy(prompt)]})
 
-    def test_list_tasks(self, nfclient):
+    def test_list_tasks_and_watchdog_stats(self, nfclient):
         ret = nfclient.run_job("nornir", "list_tasks", workers="any")
 
         pprint.pprint(ret, width=200)
@@ -95,6 +95,22 @@ class TestWorkersListTasks:
                         "mcp",
                     ]
                 )
+
+        ret = nfclient.run_job(
+            "all",
+            "get_watchdog_stats",
+            workers="all",
+            timeout=30,
+        )
+
+        assert ret, "No worker watchdog statistics returned"
+        for worker, response in ret.items():
+            assert response["failed"] is False, worker
+            stats = response["result"]
+            assert isinstance(stats["worker_cpu_percent"], (int, float)), worker
+            assert stats["worker_cpu_percent"] >= 0, worker
+            assert stats["worker_ram_usage_mbyte"] > 0, worker
+            assert stats["uptime_seconds"] >= 0, worker
 
     def test_list_tasks_brief(self, nfclient):
         ret = nfclient.run_job(

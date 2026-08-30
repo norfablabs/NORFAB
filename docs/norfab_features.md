@@ -27,7 +27,7 @@ NORFAB service tasks use the same brokered job model across these interfaces:
 | Interface | Support | Best suited to |
 |-----------|---------|----------------|
 | **NFCLI** | Interactive commands for supported service tasks, inventory, workers, jobs, and results | Operators, troubleshooting, and ad-hoc changes |
-| **NFWeb** | Generic browser client using native NORFAB access; the first application is live and historical 3D topology | Visual operations, observability, troubleshooting, reporting, and future web-based tools |
+| **NFWeb** | Generic browser client with runtime monitoring and live/historical 3D topology using native NORFAB access | Visual operations, observability, troubleshooting, reporting, and future web-based tools |
 | **Python API** | Direct task submission, synchronous results, futures, events, and worker input | Applications, scripts, and custom integrations |
 | **REST API** | FastAPI-generated endpoints for tasks that declare REST exposure | OSS/BSS integration, portals, and language-neutral automation |
 | **MCP** | FastMCP-generated tools and task-authored prompts for tasks that declare MCP exposure | AI assistants and agentic automation |
@@ -50,6 +50,16 @@ requiring a FastAPI worker or a central web deployment. It is intended to grow i
 a collection of focused web applications for visual operations, observability,
 troubleshooting, reporting, and guided workflows.
 
+The **runtime monitoring dashboard** polls existing broker management and worker
+watchdog interfaces to show broker, local NFWeb client, and worker health; CPU and
+resident memory; uptime; keepalive counters and hold time; and local-client
+message, reconnect, and queue counters. ECharts supplies gauges, resource and
+message-counter trends, data zoom, and worker comparisons. Samples are pushed to
+browsers over WebSocket and retained
+only in process memory for up to three hours; restart clears them and no monitoring
+database or telemetry journal is created. **Monitoring use cases:** live fabric
+health, worker availability, resource trend inspection, and keepalive diagnosis.
+
 The first built-in application is the **3D topology observatory**. Its persistent
 Vasturiano scene combines intended NetBox cabling with observed LLDP, BGP, and
 interface state, makes partial collection failures visible, and stores compressed
@@ -69,11 +79,12 @@ provides nested application navigation and searchable, sortable inspector tables
 The local runtime supports graceful Ctrl+C
 shutdown with a second-interrupt forced-exit fallback. **Topology use cases:**
 weather-map dashboards, topology exploration, current-state windows, incident
-timelines, and intended-versus-observed context. **Current limitations:** the first
-release contains only the topology application, has no authentication, origin
-filtering, or TLS, and is polling-based. Restrict remote access to trusted
-administrative networks. Unknown telemetry is not inferred.
+timelines, and intended-versus-observed context. **Current limitations:** NFWeb has
+no authentication, origin filtering, or TLS, and both applications are polling-based.
+Restrict remote access to trusted administrative networks. Unknown telemetry is
+not inferred and monitoring does not capture message payloads.
 [NFWeb client details](clients_nfweb_overview.md) ·
+[Monitoring dashboard details](clients_nfweb_monitoring.md) ·
 [Topology application details](clients_nfweb_topology.md)
 
 ## Core platform

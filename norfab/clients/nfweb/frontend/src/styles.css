@@ -245,6 +245,91 @@ body,
   z-index: 5;
 }
 
+.monitoring-shell .topbar {
+  grid-column: 1 / -1;
+}
+
+.monitoring-topbar-title {
+  min-width: 0;
+  padding: 0 18px;
+}
+
+.monitoring-dashboard,
+.monitoring-loading {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+  background:
+    linear-gradient(rgba(105, 123, 145, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(105, 123, 145, 0.035) 1px, transparent 1px),
+    #0a1017;
+  background-size: 36px 36px;
+}
+
+.monitoring-loading {
+  justify-content: center;
+}
+
+.monitoring-summary-card,
+.monitoring-chart-card,
+.monitoring-table-card {
+  border-color: var(--line);
+  background: rgba(17, 24, 33, 0.96);
+  box-shadow: 0 14px 34px rgba(2, 8, 14, 0.14);
+}
+
+.monitoring-summary-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.monitoring-summary-card::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  content: "";
+  opacity: 0.58;
+}
+
+.monitoring-chart-card--wide {
+  grid-column: span 2;
+}
+
+.monitoring-metric {
+  padding: 11px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--mantine-radius-sm);
+  background: #0f1720;
+}
+
+.monitoring-table-card {
+  overflow: hidden;
+}
+
+.monitoring-table-card thead th {
+  border-color: var(--line);
+  background: #141d27;
+  color: #b8c4d2;
+}
+
+.monitoring-table-card tbody td {
+  border-color: var(--line-soft);
+  color: #aeb9c7;
+  white-space: nowrap;
+}
+
+.monitoring-worker-row {
+  cursor: pointer;
+}
+
+.monitoring-worker-row:hover td {
+  background: rgba(75, 187, 173, 0.055);
+}
+
 .control-panel {
   grid-column: 1;
   grid-row: 2;
@@ -559,6 +644,12 @@ body,
 
 }
 
+@media (max-width: 1180px) {
+  .monitoring-chart-card--wide {
+    grid-column: span 1;
+  }
+}
+
 @media (max-width: 680px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -606,6 +697,11 @@ body,
   }
 
   .graph-stage {
+    grid-column: 1;
+  }
+
+  .monitoring-dashboard,
+  .monitoring-loading {
     grid-column: 1;
   }
 

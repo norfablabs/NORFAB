@@ -13,11 +13,14 @@ def test_nfweb_config_separates_runtime_and_topology_settings() -> None:
     assert str(config.footer.fastapi_url) == "http://127.0.0.1:8000/docs"
     assert config.topology.retention_minutes == 180
     assert config.topology.layers.inventory is True
+    assert config.monitoring.collection_interval == 5
+    assert config.monitoring.retention_minutes == 180
     assert set(NFWebConfig.model_fields) == {
         "host",
         "port",
         "open_browser",
         "footer",
+        "monitoring",
         "topology",
     }
 

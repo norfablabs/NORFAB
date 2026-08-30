@@ -1,6 +1,7 @@
 import type {
   DeviceInventory,
   DeviceSelection,
+  MonitoringSnapshot,
   NFWebBrowserConfig,
   TopologyHistoryItem,
   TopologyLogEntry,
@@ -32,6 +33,12 @@ async function request<T>(
 
 export const api = {
   config: () => request<NFWebBrowserConfig>("/api/v1/config"),
+  monitoringSnapshot: () =>
+    request<MonitoringSnapshot>("/api/v1/monitoring/snapshot"),
+  monitoringHistory: () =>
+    request<MonitoringSnapshot[]>("/api/v1/monitoring/history"),
+  refreshMonitoring: () =>
+    request<MonitoringSnapshot>("/api/v1/monitoring/refresh", "POST"),
   snapshot: (id: string) =>
     request<TopologySnapshot>(
       `/api/v1/topology/snapshots/${encodeURIComponent(id)}`,
@@ -51,6 +58,49 @@ export const api = {
       "POST",
     ),
 };
+
+export function openMonitoringStream(
+  onSnapshot: (snapshot: MonitoringSnapshot) => void,
+  onState: (state: "connecting" | "connected" | "disconnected") => void,
+): () => void {
+  let socket: WebSocket | null = null;
+  let stopped = false;
+  let retry = 500;
+  let reconnectTimer: number | undefined;
+
+  const connect = () => {
+    if (stopped) return;
+    onState("connecting");
+    socket = new WebSocket(
+      `ws://${window.location.host}/api/v1/monitoring/stream`,
+    );
+    socket.onopen = () => {
+      retry = 500;
+      onState("connected");
+    };
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data) as {
+        type: string;
+        data?: MonitoringSnapshot;
+      };
+      if (message.type === "snapshot" && message.data) onSnapshot(message.data);
+    };
+    socket.onclose = () => {
+      onState("disconnected");
+      if (!stopped) {
+        reconnectTimer = window.setTimeout(connect, retry);
+        retry = Math.min(retry * 2, 10_000);
+      }
+    };
+  };
+
+  connect();
+  return () => {
+    stopped = true;
+    if (reconnectTimer) window.clearTimeout(reconnectTimer);
+    socket?.close();
+  };
+}
 
 export function openTopologyStream(
   onSnapshot: (snapshot: TopologySnapshot) => void,

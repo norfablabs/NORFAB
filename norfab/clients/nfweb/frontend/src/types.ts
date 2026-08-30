@@ -12,6 +12,45 @@ export interface NFWebBrowserConfig {
   footer: NFWebFooterConfig;
 }
 
+export type MonitoringRole = "broker" | "client" | "worker";
+export type MonitoringStatus =
+  | "active"
+  | "alive"
+  | "dead"
+  | "degraded"
+  | "unreachable"
+  | "unknown";
+
+export interface MonitoringComponent {
+  id: string;
+  name: string;
+  role: MonitoringRole;
+  status: MonitoringStatus;
+  service: string | null;
+  cpu_percent: number | null;
+  memory_mbyte: number | null;
+  uptime_seconds: number | null;
+  holdtime_seconds: number | null;
+  keepalives_sent: number | null;
+  keepalives_received: number | null;
+  messages_sent: number | null;
+  messages_received: number | null;
+  reconnects: number | null;
+  queue_depth: number | null;
+  worker_count: number | null;
+  service_count: number | null;
+}
+
+export interface MonitoringSnapshot {
+  collected_at: string;
+  duration_ms: number;
+  status: "complete" | "partial" | "failed";
+  broker: MonitoringComponent;
+  client: MonitoringComponent;
+  workers: MonitoringComponent[];
+  errors: string[];
+}
+
 export interface TopologyNode {
   id: string;
   label: string;

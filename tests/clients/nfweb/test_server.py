@@ -9,6 +9,12 @@ from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application
 
 from norfab.clients.nfweb.config import NFWebFooterConfig
+from norfab.clients.nfweb.monitoring.application import MonitoringApplication
+from norfab.clients.nfweb.monitoring.models import (
+    MonitoringComponent,
+    MonitoringSnapshot,
+)
+from norfab.clients.nfweb.monitoring.web import MonitoringBroadcaster
 from norfab.clients.nfweb.server import make_nfweb_application
 from norfab.clients.nfweb.topology.application import TopologyApplication
 from norfab.clients.nfweb.topology.history import TopologyHistoryStore
@@ -56,6 +62,21 @@ class FakeCollector:
         return self.snapshot if devices else None
 
 
+class FakeMonitoringCollector:
+    def __init__(self, snapshot: MonitoringSnapshot) -> None:
+        self.latest = snapshot
+        self.history = [snapshot]
+        self.collecting = False
+        self.collect_count = 0
+
+    def health(self) -> dict[str, Any]:
+        return {"status": "ok", "collector_running": True, "sample_count": 1}
+
+    async def collect(self) -> MonitoringSnapshot:
+        self.collect_count += 1
+        return self.latest
+
+
 class TestNFWebApplication(AsyncHTTPTestCase):
     def setUp(self) -> None:
         self._temporary_directory = TemporaryDirectory(prefix="nfweb-test-")
@@ -80,6 +101,22 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         )
         self.topology_history.insert(self.snapshot)
         self.collector = FakeCollector(self.snapshot)
+        self.monitoring_snapshot = MonitoringSnapshot(
+            status="complete",
+            broker=MonitoringComponent(
+                id="broker",
+                name="NFPBroker",
+                role="broker",
+                status="active",
+            ),
+            client=MonitoringComponent(
+                id="client:nfweb",
+                name="nfweb",
+                role="client",
+                status="active",
+            ),
+        )
+        self.monitoring_collector = FakeMonitoringCollector(self.monitoring_snapshot)
         super().setUp()
 
     def get_app(self) -> Application:
@@ -88,8 +125,12 @@ class TestNFWebApplication(AsyncHTTPTestCase):
             self.topology_history,
             TopologySnapshotBroadcaster(),
         )
+        monitoring = MonitoringApplication(
+            self.monitoring_collector,
+            MonitoringBroadcaster(),
+        )
         return make_nfweb_application(
-            [topology],
+            [topology, monitoring],
             static_path=self.static_path,
             footer=NFWebFooterConfig(
                 message="Test fabric",
@@ -201,6 +242,21 @@ class TestNFWebApplication(AsyncHTTPTestCase):
                 ),
             }
         ]
+
+    def test_monitoring_routes_return_memory_samples_and_refresh(self) -> None:
+        latest = self.fetch("/api/v1/monitoring/snapshot")
+        history = self.fetch("/api/v1/monitoring/history")
+        refresh = self.fetch(
+            "/api/v1/monitoring/refresh",
+            method="POST",
+            body=b"",
+        )
+
+        assert latest.code == 200
+        assert json.loads(latest.body)["broker"]["status"] == "active"
+        assert len(json.loads(history.body)) == 1
+        assert refresh.code == 200
+        assert self.monitoring_collector.collect_count == 1
 
     def test_selection_route_applies_scope(self) -> None:
         response = self.fetch(

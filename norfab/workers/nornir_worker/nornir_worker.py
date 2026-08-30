@@ -130,6 +130,7 @@ class WatchDog(WorkerWatchDog):
             "timestamp": time.ctime(),
             "uptime": format_duration(int(time.time() - self.started_at)),
             "uptime_seconds": int(time.time() - self.started_at),
+            "worker_cpu_percent": self.worker_process.cpu_percent(interval=None),
             "dead_connections_cleaned": self.dead_connections_cleaned,
             "idle_connections_cleaned": self.idle_connections_cleaned,
             "failed_hosts_recovered": self.failed_hosts_recovered,

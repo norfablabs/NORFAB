@@ -3,6 +3,10 @@ from importlib.resources import files
 from pathlib import Path
 
 from norfab.clients.nfweb.config import NFWebFooterConfig
+from norfab.clients.nfweb.monitoring.models import (
+    MonitoringComponent,
+    MonitoringSnapshot,
+)
 from norfab.clients.nfweb.topology.models import (
     TopologyCollectionError,
     TopologyCollectionEvent,
@@ -35,6 +39,8 @@ def test_typescript_contract_fields_match_pydantic_models() -> None:
     source = (FRONTEND / "src" / "types.ts").read_text(encoding="utf-8")
     contracts = {
         "NFWebFooterConfig": NFWebFooterConfig,
+        "MonitoringComponent": MonitoringComponent,
+        "MonitoringSnapshot": MonitoringSnapshot,
         "TopologyNode": TopologyNode,
         "TopologyLink": TopologyLink,
         "CollectionError": TopologyCollectionError,

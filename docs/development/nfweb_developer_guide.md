@@ -4,6 +4,7 @@ tags:
   - clients
   - web
   - topology
+  - monitoring
 ---
 
 # NFWeb Developer Guide
@@ -13,18 +14,19 @@ it before editing `norfab/clients/nfweb`. It describes the current implementatio
 the boundaries that must remain true, and the shortest safe workflows for extending
 the client.
 
-NFWeb is NORFAB's generic local web client. Topology is its first application; it
-is not the definition or final scope of NFWeb.
+NFWeb is NORFAB's generic local web client. Its built-in applications are runtime
+Monitoring and 3D Topology; neither defines the final scope of NFWeb.
 
 ## Start Here
 
 For a new development session:
 
-1. Read `CLAUDE.md` for repository-wide commands and conventions.
+1. Read `AGENTS.md` for repository-wide commands and conventions.
 2. Read the
    [NFWeb architecture decision](adr_web_ui_topology_architecture.md) for accepted
    product and security boundaries.
-3. Read the user-facing [NFWeb overview](../clients_nfweb_overview.md) and
+3. Read the user-facing [NFWeb overview](../clients_nfweb_overview.md),
+   [monitoring dashboard guide](../clients_nfweb_monitoring.md), and
    [topology application guide](../clients_nfweb_topology.md).
 4. Inspect the current working tree before editing. NFWeb may be under active
    development, and uncommitted files belong to the developer.
@@ -37,8 +39,8 @@ For a new development session:
 Every NFWeb change must preserve these rules unless a new architecture decision
 explicitly replaces them:
 
-- NFWeb is a generic client and local application host. Topology remains a
-  namespaced application.
+- NFWeb is a generic client and local application host. Monitoring and Topology
+  remain namespaced applications.
 - `nfcli --web-ui` is the only NFWeb launcher. Do not add an `nfweb` executable or
   another dedicated command-line utility.
 - NFWeb connects through the native Python `NFPClient` to an existing broker. It
@@ -56,13 +58,17 @@ explicitly replaces them:
 - Use Mantine components and Tabler icons for general-purpose controls. Do not
   create bespoke buttons, selects, dropdowns, tabs, sliders, badges, or tooltips.
   Keep custom CSS focused on NFWeb layout and domain-specific visualization.
+- Use ECharts through `echarts-for-react` for Monitoring charts. Do not build a
+  separate React chart wrapper or use Sigma.js/Graphology for time-series and
+  gauges; those libraries solve graph-network visualization, not dashboard charts.
 - The topology application uses Vasturiano 3D visualization only. Do not add a 2D
   renderer or a 2D/3D mode.
 - An empty device selection performs no topology collection.
 - Operational failures remain visible. Do not fabricate topology, health, or
   metrics when a worker does not return data.
 - Local application history is bounded. Topology defaults to a maximum three-hour
-  retention window.
+  retention window. Monitoring has the same maximum but keeps samples only in
+  process memory and loses them on restart.
 
 ## Repository Map
 
@@ -81,25 +87,33 @@ norfab/clients/nfweb/
 |   |-- collector.py          Scheduling, caching, merge, publication
 |   |-- history.py            Compressed SQLite snapshots and derived logs
 |   `-- web.py                Topology HTTP, WebSocket, and broadcaster
+|-- monitoring/
+|   |-- application.py        Monitoring lifecycle and route composition
+|   |-- config.py             Polling and in-memory retention configuration
+|   |-- models.py             Presentation-oriented monitoring contracts
+|   |-- collector.py          Existing-interface polling and bounded deque
+|   `-- web.py                Monitoring HTTP, WebSocket, and broadcaster
 |-- frontend/
 |   |-- package.json          Pinned frontend tools and runtime dependencies
 |   |-- package-lock.json     Reproducible dependency lock
 |   |-- vite.config.ts        Development proxy and static build destination
 |   `-- src/
 |       |-- main.tsx          React entry point
-|       |-- App.tsx           Topology state and dashboard composition
+|       |-- App.tsx           Shared shell, view selection, topology composition
 |       |-- TopologyGraph.tsx Lazy-loaded Vasturiano/Three.js graph
 |       |-- api.ts            Typed HTTP and WebSocket client
 |       |-- graphModel.ts     Graph identities, styling, and curve helpers
 |       |-- types.ts          Manual TypeScript mirror of Python contracts
 |       |-- components/       Mantine toolbar, navigation, inspector, timeline
-|       `-- styles.css        NFWeb layout, topology stage, inspector, event log
+|       |-- monitoring/       ECharts runtime monitoring view
+|       `-- styles.css        NFWeb layout and domain presentation
 `-- static/                   Generated production assets served by Tornado
 
 tests/clients/nfweb/
 |-- test_config.py            Strict configuration and safety defaults
 |-- test_collector.py         Worker payloads, adapters, merge, failures, events
 |-- test_history.py           Retention, scope filtering, persistent logs
+|-- test_monitoring.py        Status merging and in-memory retention
 |-- test_server.py            Routes, request policy, static assets
 `-- test_frontend_contracts.py Python/TypeScript fields and packaged assets
 ```
@@ -120,10 +134,10 @@ nfcli --web-ui
   -> validate client.nfweb with NFWebConfig
   -> create the native client named "nfweb"
   -> open __norfab__/nfweb/nfweb.sqlite
-  -> compose NFWeb application modules
+  -> compose Topology and Monitoring application modules
   -> validate and create the Tornado application
-  -> listen on 127.0.0.1 only
-  -> start periodic collection when a scope exists
+  -> listen on the configured host (0.0.0.0 by default)
+  -> start Monitoring polling and scoped Topology collection
   -> optionally open the browser
   -> on first Ctrl+C: stop HTTP, modules, SQLite, and native client
   -> on second Ctrl+C: force process exit if graceful cleanup is stuck
@@ -148,6 +162,10 @@ client:
       fastapi_url: "http://127.0.0.1:8000/docs"
       docs_url: "https://docs.norfablabs.com/"
       github_url: "https://github.com/norfablabs/NORFAB"
+    monitoring:
+      collection_interval: 5
+      retention_minutes: 180
+      request_timeout: 10
     topology:
       devices: []
       collection_interval: 30
@@ -164,7 +182,7 @@ client:
 ```
 
 All configuration models use `extra="forbid"`. Do not silently accept unknown
-settings. The listener host is intentionally not configurable.
+settings.
 
 `footer` is shared shell configuration. Only these display-safe fields are
 returned by `/api/v1/config`; application configuration and broker details must
@@ -317,6 +335,34 @@ For a future application, add application-owned tables inside the same generic
 database. Do not name the database after topology, and do not reuse the topology
 snapshot table for an unrelated domain model.
 
+## Follow Monitoring Data Through the System
+
+Monitoring is deliberately smaller than Topology and does not use the database:
+
+```text
+broker show_broker + show_workers and worker get_watchdog_stats
+  -> MonitoringCollector creates one MonitoringSnapshot
+  -> bounded deque retains at most the configured three-hour window
+  -> MonitoringBroadcaster publishes the sample over WebSocket
+  -> ReactECharts redraws gauges, trends, and worker comparisons
+```
+
+The collector also reads process resources and message counters directly from the
+local NFWeb process and native client. Collection runs in `asyncio.to_thread()` so
+the synchronous native calls do not block Tornado. One `asyncio.Lock` prevents
+overlapping cycles. Keep the polling sequential and direct unless measurements
+show a real need for more scheduling complexity.
+
+`MonitoringComponent` and `MonitoringSnapshot` in `monitoring/models.py` are the
+authoritative browser contracts. `frontend/src/types.ts` mirrors them. Missing
+worker watchdog data must stay `null`; the broker registration row remains useful
+and should not be discarded or filled with invented values.
+
+History is a bounded `deque`, pruned both by sample count and exact timestamp. It
+must remain non-persistent: do not add a monitoring table, journal, log replay, or
+restart restoration. The dashboard shows message and keepalive counters available
+from existing interfaces; it does not inspect or retain protocol payloads.
+
 ## Use the Browser API Deliberately
 
 Current routes are:
@@ -325,6 +371,10 @@ Current routes are:
 | --- | --- | --- |
 | `GET` | `/api/v1/health` | Shared runtime and application health |
 | `GET` | `/api/v1/config` | Display-safe shared footer configuration |
+| `GET` | `/api/v1/monitoring/snapshot` | Latest in-memory monitoring sample |
+| `GET` | `/api/v1/monitoring/history` | Retained in-memory samples |
+| `POST` | `/api/v1/monitoring/refresh` | Request an immediate sample |
+| WebSocket | `/api/v1/monitoring/stream` | Latest and newly completed samples |
 | `GET` | `/api/v1/topology/devices` | Combined device discovery and active scope |
 | `POST` | `/api/v1/topology/selection` | Apply a scope and collect when non-empty |
 | `POST` | `/api/v1/topology/refresh` | Force a cache-bypassing collection |
@@ -347,8 +397,10 @@ The current frontend has one shared component system:
   and behind a fatal error boundary.
 - `api.ts` owns JSON requests and WebSocket reconnection.
 - `types.ts` mirrors the Pydantic browser contracts.
-- `App.tsx` owns topology state and composes the shell, graph, inspector, timeline,
-  navigation, and `TopologyToolbar` components.
+- `App.tsx` owns the shared shell and hash-selected application view, and composes
+  the existing Topology state, graph, inspector, timeline, and toolbar.
+- `monitoring/MonitoringView.tsx` owns Monitoring history, component selection,
+  refresh state, and direct `ReactECharts` chart options.
 - `TopologyGraph.tsx` isolates the imperative Vasturiano/Three.js integration and
   is loaded only when the topology view is rendered.
 - `graphModel.ts` contains renderer-independent graph identities and calculations.
@@ -369,6 +421,7 @@ for frontend versions. The current stack is:
 | Icons | Tabler Icons React `3.46.0` | Consistent application and footer pictograms |
 | Topology renderer | React Force Graph 3D `1.29.1` | React integration for the interactive 3D topology |
 | 3D engine | Three.js `0.185.1` | WebGL rendering and graph scene objects |
+| Monitoring charts | ECharts `6.1.0` and ECharts for React `3.0.6` | Gauges, time series, data zoom, and worker comparisons |
 | Build tooling | Vite `8.2.2` with the React plugin `6.1.0` | Development server, module bundling, and hashed production assets |
 | Unit tests | Vitest `4.1.11` | Component, graph-model, and regression tests without a browser |
 | Browser tests | Playwright `1.62.1` | Chromium end-to-end tests for the rendered application and its controls |
@@ -380,11 +433,12 @@ components for NFWeb-specific layout, topology, inspector, and terminal behavior
 
 Vite writes the production bundle to `norfab/clients/nfweb/static`. The Python
 server serves those committed assets directly, so production does not require
-Node.js or a CDN. The topology renderer is lazy-loaded to keep its Three.js code
-out of the initial application bundle.
+Node.js or a CDN. The topology renderer and Monitoring view are lazy-loaded so
+their visualization libraries remain outside the initial application bundle.
 
 The left navigation follows Mantine UI's nested-navbar pattern for generic NFWeb
-applications and remains a fixed-width shell column. Topology controls, including
+applications and remains a fixed-width shell column. Topology remains the default;
+the URL hash selects Monitoring. Topology controls, including
 the snapshot selector, return-to-live action, and trailing stream-status badge,
 belong in one non-wrapping, horizontally scrollable application toolbar, not the
 navigation panel. Graph-producing layers
@@ -406,6 +460,12 @@ Every inspector tab uses the same Mantine searchable, sortable table composition
 add domain columns and row adapters instead of another details layout. A shared
 footer owns the configured message and external resource pictograms. Overview and
 Admin are intentionally empty placeholders.
+
+Monitoring uses Mantine for cards, tables, alerts, selects, buttons, and badges.
+It passes ECharts options directly to `ReactECharts`; avoid a local abstraction
+until more than one monitoring view has concrete shared requirements. CPU and
+memory time series use the same retained sample array, and component selection
+drives both gauges and the details panel.
 
 ### Live and Historical State
 
@@ -483,7 +543,7 @@ npm run build
 ```
 
 Playwright starts an isolated Vite server on `127.0.0.1:4173`. Its checked-in
-fixtures mock the browser API and topology WebSocket, so browser tests do not
+fixtures mock the browser API and application WebSockets, so browser tests do not
 require a running broker or worker. Run `npm run test:e2e:headed` to observe the
 same tests in a visible Chromium window.
 
@@ -498,8 +558,8 @@ cd norfab/clients/nfweb/frontend
 npm run dev
 ```
 
-When changing live delivery, verify both HTTP requests and the topology WebSocket;
-do not assume that a working HTTP proxy proves WebSocket upgrades work.
+When changing live delivery, verify both HTTP requests and the relevant application
+WebSocket; do not assume that a working HTTP proxy proves WebSocket upgrades work.
 
 ## Verify Changes
 
@@ -552,6 +612,7 @@ NFWeb-focused test suite.
 | Adapter or worker payload | Collector fixture with success, missing data, and worker error |
 | Merge or identity rule | Forward/reverse and multi-link tests with exact IDs |
 | History schema or retention | Round trip, scope filtering, cleanup, and restart behavior |
+| Monitoring sample or retention | Existing-interface payload merge, missing data, exact cutoff, and no persistence |
 | HTTP or WebSocket contract | Server test plus matching TypeScript type |
 | React calculation or formatting | Vitest, type-check, and production build |
 | WebGL graph lifecycle | Production build and browser validation |
@@ -594,21 +655,35 @@ application responsibilities.
 4. Add the matching method and type in `api.ts` and `types.ts`.
 5. Add success, invalid input, conflict, and cross-origin tests as applicable.
 
+### Add or Change a Monitoring Metric
+
+1. Confirm the value already exists on `show_broker`, `show_workers`, the worker
+   watchdog response, or the local native client.
+2. Add the field to `monitoring/models.py` and `frontend/src/types.ts`.
+3. Merge it in `MonitoringCollector.collect_once()` without inventing fallbacks.
+4. Add it directly to the existing ECharts options, details, or worker table.
+5. Extend collector, server, and contract-parity tests.
+
+Do not introduce broker instrumentation, payload capture, a telemetry journal, or
+a database merely to add a dashboard metric. Such work requires a separate design
+decision because it changes the deliberately lightweight monitoring boundary.
+
 ### Add Another NFWeb Application
 
 1. Create an application-owned Python package, models, configuration, and state.
 2. Add namespaced routes and contracts; do not expose raw worker results.
-3. Reuse the shared native client, network listener, database location, browser
-   policy, and lifecycle.
-4. Give the application its own tables and retention behavior where required.
+3. Reuse the shared native client, network listener, optional database location,
+   browser policy, and lifecycle.
+4. Give the application its own persistence only where required; in-memory state
+   is sufficient for disposable monitoring history.
 5. Add a frontend view and navigation entry without forcing its domain into
    topology models.
 6. Register the module in `runtime.py`; the shared server discovers its routes,
    health, startup, and shutdown behavior through `NFWebApplicationModule`.
 
-The Python host is application-neutral. The current frontend opens Topology as its
-only implemented view; add a view registry only when a second application provides
-concrete requirements for one.
+The Python host is application-neutral. The current frontend uses a small hash-based
+view selection between Monitoring and Topology. Keep it direct until additional
+applications require a more general registry or router.
 
 ## Troubleshoot Efficiently
 
@@ -664,8 +739,8 @@ reconnects with exponential backoff up to ten seconds.
 
 Keep these visible when planning work:
 
-- The frontend has one implemented application view. A generic view registry is
-  intentionally deferred until a second application establishes its requirements.
+- View selection is intentionally a small hash-based switch rather than a routing
+  dependency; revisit it only when navigation requirements become more complex.
 - TypeScript contracts remain manually authored, although an automated field-level
   parity test now prevents silent drift from the authoritative Pydantic models.
 - Graph calculations have focused Vitest coverage, but there is no automated
@@ -680,7 +755,7 @@ NetBox intent and LLDP observations intentionally remain separate edges. This
 preserves independent layer visibility, source-specific properties, and the
 requested layer colors; combining them would require an explicit multi-source edge
 contract. Empty Overview and Admin navigation sections are reserved extension
-points, not incomplete topology behavior.
+points, not incomplete application behavior.
 
 Do not solve these gaps incidentally during an unrelated change. Make the smallest
 coherent change, add tests for the intended behavior, and update this list when a

@@ -32,6 +32,9 @@ def test_serve_binds_all_interfaces_from_default_config() -> None:
     application = Mock(name="topology")
     application.start = AsyncMock()
     application.stop = AsyncMock()
+    monitoring = Mock(name="monitoring")
+    monitoring.start = AsyncMock()
+    monitoring.stop = AsyncMock()
     server = Mock()
     server.close_all_connections = AsyncMock()
     stop_event = Mock()
@@ -43,6 +46,10 @@ def test_serve_binds_all_interfaces_from_default_config() -> None:
         patch(
             "norfab.clients.nfweb.runtime.TopologyApplication.create",
             return_value=application,
+        ),
+        patch(
+            "norfab.clients.nfweb.runtime.MonitoringApplication.create",
+            return_value=monitoring,
         ),
         patch(
             "norfab.clients.nfweb.runtime.make_nfweb_application",
@@ -66,9 +73,11 @@ def test_serve_binds_all_interfaces_from_default_config() -> None:
 
     server.listen.assert_called_once_with(9005, address="0.0.0.0")
     application.start.assert_awaited_once()
+    monitoring.start.assert_awaited_once()
     server.stop.assert_called_once()
     server.close_all_connections.assert_awaited_once()
     application.stop.assert_awaited_once()
+    monitoring.stop.assert_awaited_once()
     client.destroy.assert_called_once()
 
 

@@ -1181,6 +1181,7 @@ class WorkerWatchDog(threading.Thread):
         super().__init__()
         self.worker = worker
         self.worker_process = psutil.Process(os.getpid())
+        self.worker_process.cpu_percent(interval=None)
         self.started_at = time.time()
 
         # extract inventory attributes
@@ -1213,6 +1214,7 @@ class WorkerWatchDog(threading.Thread):
             "timestamp": time.ctime(),
             "uptime": format_duration(int(time.time() - self.started_at)),
             "uptime_seconds": int(time.time() - self.started_at),
+            "worker_cpu_percent": self.worker_process.cpu_percent(interval=None),
             "worker_ram_usage_mbyte": self.get_ram_usage(),
         }
         stats.update(self.worker.status)

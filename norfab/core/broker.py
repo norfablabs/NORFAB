@@ -5,10 +5,12 @@ import random
 import signal
 import sys
 import threading
+import time
 from multiprocessing import Event
 from typing import List, Optional, Union
 
 import orjson
+import psutil
 import zmq
 import zmq.auth
 from zmq.auth.thread import ThreadAuthenticator
@@ -219,6 +221,9 @@ class NFPBroker:
         self.services = {}
         self.workers = {}
         self.build_message = NFP.MessageBuilder()
+        self.started_at = time.time()
+        self.process = psutil.Process(os.getpid())
+        self.process.cpu_percent(interval=None)
         self.exit_event = exit_event
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.ip_allowlist = self.inventory.broker.get("ip_allowlist", ["*"])
@@ -864,9 +869,13 @@ class NFPBroker:
             else:
                 ret = [{"name": "", "service": "", "status": ""}]
         elif task == "show_broker":
+            memory = self.process.memory_info()
             ret = {
                 "endpoint": self.socket.getsockopt_string(zmq.LAST_ENDPOINT),
                 "status": "active",
+                "cpu_percent": self.process.cpu_percent(interval=None),
+                "memory_rss_mbyte": memory.rss / 1024 / 1024,
+                "uptime_seconds": int(time.time() - self.started_at),
                 "keepalives": {
                     "interval": self.keepalive,
                     "multiplier": self.multiplier,

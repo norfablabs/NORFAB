@@ -17,6 +17,7 @@ import tornado.httpserver
 
 from norfab.clients.nfweb.application import NFWebApplicationModule
 from norfab.clients.nfweb.config import NFWebConfig
+from norfab.clients.nfweb.monitoring.application import MonitoringApplication
 from norfab.clients.nfweb.server import make_nfweb_application
 from norfab.clients.nfweb.topology.application import TopologyApplication
 from norfab.core.nfapi import NorFab
@@ -150,6 +151,7 @@ async def serve(
         applications.append(
             TopologyApplication.create(client, config.topology, database_path)
         )
+        applications.append(MonitoringApplication.create(client, config.monitoring))
         web_application = make_nfweb_application(applications, footer=config.footer)
         server = tornado.httpserver.HTTPServer(web_application)
         bind_host = str(config.host)

@@ -13,6 +13,7 @@ from pydantic import (
     StrictStr,
 )
 
+from norfab.clients.nfweb.monitoring.config import MonitoringConfig
 from norfab.clients.nfweb.topology.config import TopologyConfig
 
 
@@ -36,4 +37,5 @@ class NFWebConfig(BaseModel):
     port: StrictInt = Field(9005, ge=1, le=65535)
     open_browser: StrictBool = True
     footer: NFWebFooterConfig = Field(default_factory=NFWebFooterConfig)
+    monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
     topology: TopologyConfig = Field(default_factory=TopologyConfig)

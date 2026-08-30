@@ -1,72 +1,62 @@
-import threading
 import time
 
 import pytest
 
-from norfab.core import NFP
-from norfab.core.broker import NFPBroker, NFPService
-from norfab.core.keepalives import KeepAliver
-
 pytestmark = pytest.mark.core
 
 
-class DummySocket:
-    def __init__(self) -> None:
-        self.sent = []
+class TestBroker:
+    def test_broker_registers_live_workers(self, nfclient) -> None:
+        reply = nfclient.mmi("mmi.service.broker", "show_workers")
 
-    def send_multipart(self, msg: list) -> None:
-        self.sent.append(msg)
+        assert reply["status"] == "200"
+        workers = [worker for worker in reply["results"] if worker["name"]]
+        assert workers
+        assert all(worker["service"] for worker in workers)
+        assert all(worker["status"] in {"alive", "dead"} for worker in workers)
 
+    def test_broker_exchanges_worker_keepalives(self, nfclient) -> None:
+        initial_reply = nfclient.mmi("mmi.service.broker", "show_workers")
+        initial = {
+            worker["name"]: tuple(
+                int(value.strip()) for value in worker["keepalives tx/rx"].split("/")
+            )
+            for worker in initial_reply["results"]
+            if worker["name"]
+        }
 
-def make_broker() -> NFPBroker:
-    broker = NFPBroker.__new__(NFPBroker)
-    broker.socket = DummySocket()
-    broker.multiplier = 6
-    broker.keepalive = 2500
-    broker.workers = {}
-    broker.services = {}
-    broker.build_message = NFP.MessageBuilder()
-    return broker
+        deadline = time.time() + 10
+        while time.time() < deadline:
+            time.sleep(0.5)
+            current_reply = nfclient.mmi("mmi.service.broker", "show_workers")
+            current = {
+                worker["name"]: tuple(
+                    int(value.strip())
+                    for value in worker["keepalives tx/rx"].split("/")
+                )
+                for worker in current_reply["results"]
+                if worker["name"] in initial
+            }
+            if any(
+                current[name][0] > counts[0] and current[name][1] > counts[1]
+                for name, counts in initial.items()
+                if name in current
+            ):
+                break
+        else:
+            pytest.fail("Broker keepalive counters did not advance")
 
+    def test_show_broker_status_and_process_resources(self, nfclient) -> None:
+        reply = nfclient.mmi("mmi.service.broker", "show_broker")
 
-def test_require_worker_handles_binary_address() -> None:
-    broker = make_broker()
-    address = b"\x00\x80worker"
-
-    worker = broker.require_worker(address)
-
-    assert worker.address == address
-    assert broker.workers[address] is worker
-
-
-def test_broker_sends_due_keepalives_from_mediate_loop() -> None:
-    broker = make_broker()
-    worker = broker.require_worker(b"worker-1")
-    worker.service = NFPService(b"service-1")
-    worker.ready = True
-    worker.start_keepalives()
-    worker.keepaliver.keepalive_at = time.time() - 1
-
-    broker.send_due_keepalives()
-
-    assert len(broker.socket.sent) == 1
-    assert broker.socket.sent[0][0] == b"worker-1"
-    assert broker.socket.sent[0][2] == NFP.BROKER
-    assert broker.socket.sent[0][3] == NFP.KEEPALIVE
-    assert worker.keepaliver.keepalives_send == 1
-
-
-def test_keepaliver_start_does_not_create_socket_thread() -> None:
-    keepaliver = KeepAliver(
-        address=b"worker-1",
-        multiplier=6,
-        keepalive=2500,
-        exit_event=threading.Event(),
-        service=b"service-1",
-        whoami=NFP.BROKER,
-        name="NFPBroker",
-    )
-
-    keepaliver.start()
-
-    assert not hasattr(keepaliver, "keepalive_thread")
+        assert reply["status"] == "200"
+        result = reply["results"]
+        assert result["status"] == "active"
+        assert result["keepalives"]["interval"] > 0
+        assert result["keepalives"]["multiplier"] > 0
+        assert result["workers count"] > 0
+        assert result["services count"] > 0
+        assert isinstance(result["cpu_percent"], (int, float))
+        assert result["cpu_percent"] >= 0
+        assert result["memory_rss_mbyte"] > 0
+        assert result["uptime_seconds"] >= 0

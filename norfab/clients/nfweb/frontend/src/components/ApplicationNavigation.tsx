@@ -1,6 +1,7 @@
 import { NavLink, ScrollArea, Stack, Text } from "@mantine/core";
 import {
   IconGauge,
+  IconHeartbeat,
   IconLayoutDashboard,
   IconSettings,
   IconTopologyStar3,
@@ -14,6 +15,13 @@ const NAVIGATION = [
     icon: IconLayoutDashboard,
     items: [
       {
+        id: "monitoring",
+        label: "Monitoring",
+        href: "#monitoring",
+        icon: IconHeartbeat,
+      },
+      {
+        id: "topology",
         label: "Topology",
         href: "#topology",
         icon: IconTopologyStar3,
@@ -24,14 +32,17 @@ const NAVIGATION = [
 ] as const;
 
 export type NavigationSection = (typeof NAVIGATION)[number]["id"];
+export type ApplicationView = "monitoring" | "topology";
 
 interface ApplicationNavigationProps {
   open: NavigationSection | null;
+  active: ApplicationView;
   onToggle: (section: NavigationSection | null) => void;
 }
 
 export default function ApplicationNavigation({
   open,
+  active,
   onToggle,
 }: ApplicationNavigationProps) {
   return (
@@ -70,7 +81,7 @@ export default function ApplicationNavigation({
                       key={item.href}
                       label={item.label}
                       leftSection={<ItemIcon size={16} />}
-                      active
+                      active={active === item.id}
                       variant="light"
                     />
                   );
