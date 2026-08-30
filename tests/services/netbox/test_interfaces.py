@@ -1,4 +1,5 @@
 import pprint
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -569,6 +570,25 @@ class TestSyncDeviceInterfaces:
         )
         assert enabled.ignore_vlans is True
         assert enabled.ignore_vrf is True
+
+    def test_sync_device_interfaces_models_accept_mapping_urls(self) -> None:
+        model = SyncDeviceInterfacesInput.model_validate(
+            {
+                "interface-map": "nf://netbox/interface_map.yaml",
+                "vlan-map": "nf://netbox/vlan_map.yaml",
+            }
+        )
+        assert model.interface_map == "nf://netbox/interface_map.yaml"
+        assert model.vlan_map == "nf://netbox/vlan_map.yaml"
+
+        sync_all = SyncAllInput.model_validate(
+            {
+                "interfaces-interface-map": "nf://netbox/interface_map.yaml",
+                "interfaces-vlan-map": "nf://netbox/vlan_map.yaml",
+            }
+        )
+        assert sync_all.interfaces_interface_map == "nf://netbox/interface_map.yaml"
+        assert sync_all.interfaces_vlan_map == "nf://netbox/vlan_map.yaml"
 
     @pytest.mark.parametrize(
         "criteria",
@@ -1694,6 +1714,26 @@ class TestSyncDeviceInterfaces:
                 assert mapped_name in res["result"][device]["in_sync"]
         finally:
             delete_interfaces(nfclient, device, mapped_name)
+
+    def test_sync_device_interfaces_interface_map_from_nf_url(
+        self, nfclient: Any
+    ) -> None:
+        """Download interface rename rules from the test inventory."""
+        device = "fn-ceos-sp-1"
+        self._cleanup(nfclient, [device])
+
+        ret = self._sync(
+            nfclient,
+            [device],
+            dry_run=True,
+            interface_map="nf://netbox/interface_map.yaml",
+            filter_by_name="NetBoxLoopback*",
+            filter_by_description="TEST_SYNC_LOOPBACK_IPV4",
+        )
+
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed - {res}"
+            assert res["errors"] == [], f"{worker} returned errors - {res}"
 
     def test_sync_device_interfaces_filter_by_description(self, nfclient):
         """Clean TEST_SYNC from spine-1 then run dry_run with filter_by_description='TEST_SYNC_*'.

@@ -2,6 +2,9 @@ import fnmatch
 import logging
 from typing import Any, Union
 
+import yaml
+from pydantic import TypeAdapter
+
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import expand_alphanumeric_range
@@ -11,6 +14,7 @@ from .netbox_models import (
     CreateDeviceInterfacesResult,
     GetInterfacesInput,
     GetInterfacesResult,
+    InterfaceMapRule,
     NetboxFastApiArgs,
     SyncDeviceInterfacesInput,
     SyncDeviceInterfacesResult,
@@ -18,6 +22,7 @@ from .netbox_models import (
     SyncMacAddressesResult,
     UpdateInterfacesDescriptionInput,
     UpdateInterfacesDescriptionResult,
+    VlanMapRule,
 )
 from .netbox_worker_utilities import (
     match_vlan_map,
@@ -882,12 +887,12 @@ class NetboxInterfacesTasks:
         devices: Union[None, list] = None,
         process_deletions: bool = False,
         branch: str = None,
-        interface_map: Union[None, list] = None,
+        interface_map: Union[None, str, list] = None,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         update_type: bool = True,
         vlan_group: Union[None, str] = None,
-        vlan_map: Union[None, list] = None,
+        vlan_map: Union[None, str, list] = None,
         ignore_vlans: bool = False,
         ignore_vrf: bool = False,
         **kwargs: Any,
@@ -971,9 +976,10 @@ class NetboxInterfacesTasks:
             branch (str, optional): NetBox branch name to use. The branching plugin
                 must be installed. The branch is created automatically if it does
                 not exist.
-            interface_map (list, optional): Ordered interface rename rules matched
-                by device name glob, device type model glob, and a literal live
-                interface name substring. The first matching rule wins.
+            interface_map: Ordered interface rename rules, or an ``nf://`` YAML
+                file containing them. Rules match by device name glob, device
+                type model glob, and a literal live interface name substring.
+                The first matching rule wins.
             filter_by_name (str, optional): Glob pattern to restrict which interfaces
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
@@ -987,9 +993,10 @@ class NetboxInterfacesTasks:
             vlan_group (str, optional): Exact VLAN group name used for interface
                 VLANs not matched by ``vlan_map``. When omitted, unmatched VLANs
                 use the device site.
-            vlan_map (list, optional): Ordered VLAN group mapping rules using VLAN
-                ID, device name, and interface name criteria. VLAN name criteria
-                are ignored because interface parsing does not supply VLAN names.
+            vlan_map: Ordered VLAN group mapping rules, or an ``nf://`` YAML file
+                containing them. Rules use VLAN ID, device name, and interface
+                name criteria. VLAN name criteria are ignored because interface
+                parsing does not supply VLAN names.
             ignore_vlans (bool, optional): If True, ignore discovered VLANs and
                 leave interface VLAN associations unchanged. Defaults to False.
             ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave
@@ -1003,6 +1010,14 @@ class NetboxInterfacesTasks:
                 dry-run mode.
         """
         devices = devices or []
+        if self.is_url(interface_map):
+            interface_map = TypeAdapter(list[InterfaceMapRule]).validate_python(
+                yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True))
+            )
+        if self.is_url(vlan_map):
+            vlan_map = TypeAdapter(list[VlanMapRule]).validate_python(
+                yaml.safe_load(self.fetch_file(vlan_map, raise_on_fail=True))
+            )
         interface_map = [
             rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
             for rule in interface_map or []

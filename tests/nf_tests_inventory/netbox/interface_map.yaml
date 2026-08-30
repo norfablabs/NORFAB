@@ -1,0 +1,16 @@
+- device_name: fn-ceos-lf-*
+  device_type: Arista *
+  match: Loopback
+  replace: WrongDevice
+- device_name: fn-ceos-sp-*
+  device_type: Wrong Model
+  match: Loopback
+  replace: WrongDeviceType
+- device_name: fn-ceos-sp-*
+  device_type: Arista *
+  match: Loopback
+  replace: NetBoxLoopback
+- device_name: fn-ceos-sp-*
+  device_type: Arista *
+  match: Loopback
+  replace: LaterRule

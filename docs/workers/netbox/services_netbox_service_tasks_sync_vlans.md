@@ -28,7 +28,7 @@ synchronization.
 | `devices` | `None` | Explicit NetBox and Nornir device names. |
 | `branch` | `None` | NetBox Branching plugin branch name. |
 | `vlan_group` | `None` | Existing group for live VLANs not matched by `vlan_map`. |
-| `vlan_map` | `None` | Ordered rules mapping live VLANs to existing groups. |
+| `vlan_map` | `None` | Ordered rules mapping live VLANs to existing groups, inline or in an `nf://` YAML file. |
 | `filter_by_vlan_ids` | `None` | VLAN IDs or inclusive ranges such as `100` and `200-299`. |
 | Nornir filters | `None` | `FO`, `FB`, `FH`, `FC`, `FR`, `FG`, `FP`, `FL`, `FM`, `FX`, and `FN`. |
 
@@ -65,6 +65,13 @@ task resolves groups by exact name and does not create or update groups. Mapping
 rules are constrained by their group's configured VID ranges. The scalar
 `vlan_group` is an unconditional fallback and does not filter live VLANs by the
 group's configured ranges; NetBox validates the resulting writes.
+
+Store the same YAML list in the File Sharing service and pass its URL when the
+rules are reused or maintained separately:
+
+```yaml
+vlan_map: nf://netbox/vlan_map.yaml
+```
 
 ## Live data
 

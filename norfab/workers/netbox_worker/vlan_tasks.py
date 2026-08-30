@@ -1,6 +1,9 @@
 import logging
 from typing import Any, Union
 
+import yaml
+from pydantic import TypeAdapter
+
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import expand_alphanumeric_range
@@ -9,6 +12,7 @@ from .netbox_models import (
     NetboxFastApiArgs,
     SyncVlansInput,
     SyncVlansResult,
+    VlanMapRule,
 )
 from .netbox_worker_utilities import (
     build_vlan_payload,
@@ -45,7 +49,7 @@ class NetboxVlansTasks:
         devices: Union[None, list] = None,
         branch: Union[None, str] = None,
         vlan_group: Union[None, str] = None,
-        vlan_map: Union[None, list] = None,
+        vlan_map: Union[None, str, list] = None,
         filter_by_vlan_ids: Union[None, list[str]] = None,
         **kwargs: Any,
     ) -> Result:
@@ -66,7 +70,8 @@ class NetboxVlansTasks:
             devices: Explicit NetBox and Nornir device names.
             branch: NetBox Branching plugin branch name.
             vlan_group: Group for VLANs not matched by ``vlan_map``.
-            vlan_map: Ordered VLAN-to-group mapping rules.
+            vlan_map: Ordered VLAN-to-group mapping rules, or an ``nf://`` YAML
+                file containing them.
             filter_by_vlan_ids: VLAN IDs or inclusive ranges to reconcile.
             **kwargs: Nornir FFun host filters.
 
@@ -130,6 +135,10 @@ class NetboxVlansTasks:
             for vlan_range in filter_by_vlan_ids or []
             for vlan_id in expand_alphanumeric_range(f"[{vlan_range}]")
         }
+        if self.is_url(vlan_map):
+            vlan_map = TypeAdapter(list[VlanMapRule]).validate_python(
+                yaml.safe_load(self.fetch_file(vlan_map, raise_on_fail=True))
+            )
         rules = prepare_vlan_map(vlan_map)
         job.event(
             f"prepared {len(rules)} VLAN map rule(s) and "

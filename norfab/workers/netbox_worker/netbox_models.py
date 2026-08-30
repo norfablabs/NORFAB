@@ -1042,6 +1042,18 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         description="Exact VLAN group name for interface VLAN resolution",
         alias="interfaces-vlan-group",
     )
+    interfaces_interface_map: Union[None, StrictStr, List[Dict[StrictStr, Any]]] = (
+        Field(
+            None,
+            description="Interface name mapping rules or nf:// YAML file reference",
+            alias="interfaces-interface-map",
+        )
+    )
+    interfaces_vlan_map: Union[None, StrictStr, List[Dict[StrictStr, Any]]] = Field(
+        None,
+        description="Interface VLAN mapping rules or nf:// YAML file reference",
+        alias="interfaces-vlan-map",
+    )
     mac_filter_by_name: Union[None, StrictStr] = Field(
         None,
         description="Glob pattern to filter MAC sync interfaces by name",
@@ -1593,9 +1605,9 @@ class SyncDeviceInterfacesInput(
         json_schema_extra={"presence": True},
         alias="process-deletions",
     )
-    interface_map: Union[None, List[InterfaceMapRule]] = Field(
+    interface_map: Union[None, StrictStr, List[InterfaceMapRule]] = Field(
         None,
-        description="Ordered rules mapping live interface names to preferred NetBox names",
+        description="Ordered interface name mapping rules or nf:// YAML file reference",
         alias="interface-map",
     )
     filter_by_name: Union[None, StrictStr] = Field(
@@ -1619,9 +1631,9 @@ class SyncDeviceInterfacesInput(
         description="Exact VLAN group name used for interface VLANs not matched by vlan-map",
         alias="vlan-group",
     )
-    vlan_map: Union[None, List[VlanMapRule]] = Field(
+    vlan_map: Union[None, StrictStr, List[VlanMapRule]] = Field(
         None,
-        description="Ordered rules mapping interface VLANs to NetBox VLAN groups",
+        description="Ordered interface VLAN mapping rules or nf:// YAML file reference",
         alias="vlan-map",
     )
     ignore_vlans: StrictBool = Field(
@@ -2382,9 +2394,9 @@ class SyncVlansInput(
         description="Exact group name for live VLANs not matched by vlan-map",
         alias="vlan-group",
     )
-    vlan_map: Union[None, List[VlanMapRule]] = Field(
+    vlan_map: Union[None, StrictStr, List[VlanMapRule]] = Field(
         None,
-        description="Ordered rules mapping live VLANs to NetBox VLAN groups",
+        description="Ordered live VLAN mapping rules or nf:// YAML file reference",
         alias="vlan-map",
     )
     filter_by_vlan_ids: Union[None, List[StrictStr]] = Field(

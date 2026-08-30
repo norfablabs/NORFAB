@@ -1412,6 +1412,8 @@ class NetboxDevicesTasks:
         interfaces_filter_by_description: Union[None, str] = None,
         interfaces_update_type: bool = True,
         interfaces_vlan_group: Union[None, str] = None,
+        interfaces_interface_map: Union[None, str, list] = None,
+        interfaces_vlan_map: Union[None, str, list] = None,
         mac_filter_by_name: Union[None, str] = None,
         mac_filter_by_description: Union[None, str] = None,
         mac_filter_by_mac: Union[None, str] = None,
@@ -1478,6 +1480,10 @@ class NetboxDevicesTasks:
             interfaces_update_type (bool): Safely update existing NetBox logical
                 interface types. Defaults to True.
             interfaces_vlan_group (str, optional): Exact VLAN group name for interface VLAN resolution.
+            interfaces_interface_map: Interface name mapping rules or an
+                ``nf://`` YAML file containing them.
+            interfaces_vlan_map: Interface VLAN mapping rules or an ``nf://``
+                YAML file containing them.
             mac_filter_by_name (str, optional): Glob pattern to filter MAC sync interfaces by name.
             mac_filter_by_description (str, optional): Glob pattern to filter MAC sync interfaces by description.
             mac_filter_by_mac (str, optional): Glob pattern to filter MAC addresses.
@@ -1579,6 +1585,8 @@ class NetboxDevicesTasks:
             filter_by_description=interfaces_filter_by_description,
             update_type=interfaces_update_type,
             vlan_group=interfaces_vlan_group,
+            interface_map=interfaces_interface_map,
+            vlan_map=interfaces_vlan_map,
         )
         if intf_result.errors:
             job.event("interface sync completed with errors", severity="WARNING")

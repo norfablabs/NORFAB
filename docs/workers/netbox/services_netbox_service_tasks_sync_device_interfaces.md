@@ -101,7 +101,8 @@ Both filters are applied before the diff, so interfaces that do not match are co
 
 ## Interface Name Mapping
 
-`interface_map` accepts an ordered list of rename rules:
+`interface_map` accepts an ordered list of rename rules inline or as an
+`nf://` URL to a YAML file:
 
 ```yaml
 - device_name: leaf-*
@@ -120,6 +121,10 @@ not match a rule keep their live names.
 Mapping is also applied to live parent and LAG interface references before
 name filtering and DeepDiff comparison.
 
+```yaml
+interface_map: nf://netbox/interface_map.yaml
+```
+
 ## Deletion Behavior
 
 By default `process_deletions=False` — interfaces present in NetBox but absent in live data are left untouched. Set `process_deletions=True` to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.
@@ -134,7 +139,8 @@ By default, discovered VLANs and VRFs are resolved or created in NetBox and asso
 VLANs not matched by `vlan_map`. Slugs and numeric IDs are not resolved. When
 neither argument selects a group, the device site is used.
 
-`vlan_map` accepts the same ordered list of rules as VLAN sync:
+`vlan_map` accepts the same ordered list of rules as VLAN sync, inline or as an
+`nf://` URL to a YAML file:
 
 ```python
 [
@@ -201,6 +207,12 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
 
     ```bash
     nf#netbox sync interfaces devices leaf-1 interface-map '[{"device_name":"leaf-*","device_type":"cEOS-*-CA","match":"Ethernet","replace":"Et"}]'
+    ```
+
+    Download interface and VLAN mapping rules from YAML files:
+
+    ```bash
+    nf#netbox sync interfaces devices leaf-1 interface-map nf://netbox/interface_map.yaml vlan-map nf://netbox/vlan_map.yaml
     ```
 
     Restrict sync to interfaces whose description matches a glob pattern:

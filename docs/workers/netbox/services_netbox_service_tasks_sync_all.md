@@ -67,6 +67,8 @@ an `interfaces-` prefix in NFCLI:
 | `interfaces_filter_by_description` | Include only matching interface descriptions. |
 | `interfaces_update_type` | Safely update existing logical interface types. Defaults to `True`. |
 | `interfaces_vlan_group` | Exact fallback VLAN group name for interface VLAN resolution. |
+| `interfaces_interface_map` | Interface rename rules inline or in an `nf://` YAML file. |
+| `interfaces_vlan_map` | Interface VLAN mapping rules inline or in an `nf://` YAML file. |
 
 Safe type updates allow `other` to become `virtual`, `bridge`, or `lag`, and
 allow transitions among those logical types. They do not overwrite specific
@@ -166,6 +168,12 @@ When `dry_run=True` the same structure is returned but no changes are written to
     nf#netbox sync all devices iosxr1 inventory-map nf://netbox/inventory_maps/iosxr.yaml inventory-transform nf://netbox/inventory_transformers/iosxr.py dry-run
     ```
 
+    Load interface mapping rules from YAML files:
+
+    ```bash
+    nf#netbox sync all devices leaf-1 interfaces-interface-map nf://netbox/interface_map.yaml interfaces-vlan-map nf://netbox/vlan_map.yaml dry-run
+    ```
+
     Limit inventory sync to selected normalized modules and slots:
 
     ```
@@ -200,6 +208,8 @@ When `dry_run=True` the same structure is returned but no changes are written to
             "inventory_transform": (
                 "nf://netbox/inventory_transformers/iosxr.py"
             ),
+            "interfaces_interface_map": "nf://netbox/interface_map.yaml",
+            "interfaces_vlan_map": "nf://netbox/vlan_map.yaml",
             "inventory_filter_by_module": ["A9K-*"],
             "inventory_filter_by_slot": ["module 0/*"],
             "inventory_ignore_modules": ["SFP-*"],
@@ -243,6 +253,8 @@ root
             ├── interfaces-filter-by-description:    Include only matching interface descriptions
             ├── interfaces-update-type:    Safely update existing logical interface types, default 'True'
             ├── interfaces-vlan-group:    Exact fallback VLAN group name for interface VLAN resolution
+            ├── interfaces-interface-map:    Interface name mapping rules or nf:// YAML file reference
+            ├── interfaces-vlan-map:    Interface VLAN mapping rules or nf:// YAML file reference
             ├── ip-ignore-vrf:    Ignore discovered interface VRFs during IP sync
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns

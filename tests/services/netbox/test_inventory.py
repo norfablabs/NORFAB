@@ -385,6 +385,7 @@ class TestSyncAllInput:
         assert data.inventory_create_module_bays is True
         assert data.inventory_filter_by_module == ["A9K-*"]
         assert data.inventory_ignore_slots == ["power-module *"]
+        assert data.inventory_map == "nf://netbox/inventory_map.yaml"
         assert data.message == "sync all changes"
 
     def test_rejects_inventory_filter_string(self):

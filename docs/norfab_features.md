@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 29 August 2026*
+*Last updated: 30 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -741,6 +741,8 @@ Operational state fills MTU, duplex, and speed when absent from configuration
 parsing. The task computes a desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
+Interface-name and VLAN-group mapping rules can be supplied inline or loaded
+from YAML through `nf://` URLs.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the `other` fallback. **Use cases:**
@@ -753,7 +755,8 @@ reviewed with dry-run first.
 
 Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
 NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
-an optional scalar VLAN-group fallback. VLANs are identified by VID per scope;
+an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
+loaded from YAML through `nf://` URLs. VLANs are identified by VID per scope;
 the first device supplies values when later devices report a conflict.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines

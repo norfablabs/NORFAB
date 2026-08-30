@@ -155,6 +155,18 @@ class TestSyncVlans:
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._site_vlan(210).name == "TEST_L1_ACCESS"
 
+    def test_vlan_map_from_nf_url(self, nfclient: Any) -> None:
+        response = self._sync(
+            nfclient,
+            [self.DEVICE_1],
+            dry_run=True,
+            filter_by_vlan_ids=["110"],
+            vlan_map="nf://netbox/vlan_map.yaml",
+        )
+
+        for result in self._successful_results(response):
+            assert self._group_scope(self.group_1) in result["result"]
+
     def test_explicit_vlan_ids_narrow_group_ranges(self, nfclient: Any) -> None:
         response = self._sync(
             nfclient,

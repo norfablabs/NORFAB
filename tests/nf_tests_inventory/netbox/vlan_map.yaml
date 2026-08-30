@@ -1,0 +1,5 @@
+- vlan_group: SYNC_VLANS_GROUP_1
+  vlan_ids:
+    - "110"
+  device_names:
+    - fn-ceos-lf-1
