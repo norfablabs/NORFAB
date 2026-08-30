@@ -311,7 +311,10 @@ class SyncCommands(BaseModel):
     )
     all: SyncAllDevicesShell = Field(
         None,
-        description="Sync all device data: interfaces, MAC addresses, IP addresses and BGP peerings",
+        description=(
+            "Sync all device data: inventory, VLANs, prefixes, VRFs, interfaces, "
+            "MAC addresses, IP addresses and BGP peerings"
+        ),
     )
 
     class PicleConfig:

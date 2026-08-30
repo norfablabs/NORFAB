@@ -820,10 +820,12 @@ validated in dry-run mode.
 
 Runs selected synchronizers in read-only dry-run mode for drift reporting,
 including inventory, interface, MAC, IP, and BGP peering state, or executes the
-supported synchronizers in a fixed sequence. **Use cases:** audit evidence,
-change planning, and scheduled source-of-truth maintenance. **Limitations:**
-assessment is limited to implemented sync domains; `sync_all` can make broad
-changes and requires careful deletion/filter policy.
+supported synchronizers in a fixed inventory, VLAN, prefix, VRF, interface,
+MAC, IP, and BGP sequence. `sync_all` accepts per-task keyword arguments inline
+or from an `nf://` YAML file and can skip individual stages. **Use cases:** audit
+evidence, change planning, and scheduled source-of-truth maintenance.
+**Limitations:** assessment is limited to implemented sync domains; `sync_all`
+can make broad changes and requires careful deletion/filter policy.
 [Check sync](workers/netbox/services_netbox_service_tasks_check_device_sync.md) ·
 [Sync all](workers/netbox/services_netbox_service_tasks_sync_all.md)
 

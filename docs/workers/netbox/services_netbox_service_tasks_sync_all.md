@@ -11,14 +11,17 @@ The `sync_all` task synchronizes device data from live devices into NetBox in a
 fixed sequence:
 
 1. **inventory** — calls `sync_device_inventory`
-2. **interfaces** — calls `sync_device_interfaces`
-3. **mac_addresses** — calls `sync_mac_addresses`
-4. **ip_addresses** — calls `sync_device_ip`
-5. **bgp_peerings** — calls `sync_bgp_peerings`
+2. **vlans** — calls `sync_vlans`
+3. **prefixes** — calls `sync_device_prefixes`
+4. **vrfs** — calls `sync_vrfs`
+5. **interfaces** — calls `sync_device_interfaces`
+6. **mac_addresses** — calls `sync_mac_addresses`
+7. **ip_addresses** — calls `sync_device_ip`
+8. **bgp_peerings** — calls `sync_bgp_peerings`
 
 ## How It Works
 
-The `sync_all` task orchestrates five subordinate sync tasks in sequence. Each task collects live device data,
+The `sync_all` task orchestrates eight subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When `dry_run=True`, all tasks preview changes
 without writing. When `with_approval=True`, each stage waits for user confirmation before applying changes.
 
@@ -34,69 +37,69 @@ without writing. When `with_approval=True`, each stage waits for user confirmati
 
 **Live-run mode** (`dry_run=False`, default) applies all changes to NetBox.
 
-## Inventory Arguments
+## Sync Task Arguments
 
-Inventory-specific options use an `inventory_` prefix in the Python API and an
-`inventory-` prefix in NFCLI:
+Use `sync_kwargs` to pass arguments to individual sync tasks. It accepts an
+inline dictionary, an `nf://` URL to a YAML file containing that dictionary, or
+`None`. The dictionary keys are task API names and each value is passed to that
+task as keyword arguments:
 
-| Python argument | Purpose |
-|---|---|
-| `inventory_create_module_types` | Create missing NetBox module types. |
-| `inventory_create_module_bays` | Create missing NetBox module bays. |
-| `inventory_map` | Inline mapping or `nf://` YAML mapping file. |
-| `inventory_transform` | `nf://` Python transformer file. |
-| `inventory_filter_by_module` | Include normalized module types matching glob patterns. |
-| `inventory_filter_by_slot` | Include normalized module bays matching glob patterns. |
-| `inventory_ignore_modules` | Exclude normalized module types matching glob patterns. |
-| `inventory_ignore_slots` | Exclude normalized module bays matching glob patterns. |
+```yaml
+sync_device_inventory:
+  create_module_types: true
+  create_module_bays: true
+  inventory_map: nf://netbox/inventory_maps/iosxr.yaml
+  message: sync all device data
 
-The shared `process_deletions` argument controls deletion behavior for
-inventory, interfaces, and BGP peerings.
+sync_vlans:
+  filter_by_vlan_ids:
+    - 100-299
 
-The shared `message` argument is used as the NetBox changelog message for both
-inventory and BGP write operations.
+sync_device_prefixes:
+  ignore_vrf: true
+  ignore_site: true
 
-## Interface Arguments
+sync_vrfs:
+  device_custom_field: devices
 
-Interface-specific options use an `interfaces_` prefix in the Python API and
-an `interfaces-` prefix in NFCLI:
+sync_device_interfaces:
+  process_deletions: true
+  interface_map: nf://netbox/interface_map.yaml
+  vlan_map: nf://netbox/vlan_map.yaml
 
-| Python argument | Purpose |
-|---|---|
-| `interfaces_filter_by_name` | Include only matching interface names. |
-| `interfaces_filter_by_description` | Include only matching interface descriptions. |
-| `interfaces_update_type` | Safely update existing logical interface types. Defaults to `True`. |
-| `interfaces_vlan_group` | Exact fallback VLAN group name for interface VLAN resolution. |
-| `interfaces_interface_map` | Interface rename rules inline or in an `nf://` YAML file. |
-| `interfaces_vlan_map` | Interface VLAN mapping rules inline or in an `nf://` YAML file. |
+sync_mac_addresses:
+  filter_by_name: Ethernet*
 
-Safe type updates allow `other` to become `virtual`, `bridge`, or `lag`, and
-allow transitions among those logical types. They do not overwrite specific
-physical types or change an existing interface to `other`. Interface creation
-continues to accept any parsed type.
+sync_device_ip:
+  ignore_vrf: false
+  ignore_ranges:
+    - 192.0.2.0/24
 
-## IP Arguments
+sync_bgp_peerings:
+  process_deletions: true
+  status: active
+  message: sync all device data
+```
 
-IP-specific options use an `ip_` prefix in the Python API and an `ip-` prefix in
-NFCLI:
+The supported keys are `sync_device_inventory`, `sync_vlans`,
+`sync_device_prefixes`, `sync_vrfs`, `sync_device_interfaces`,
+`sync_mac_addresses`, `sync_device_ip`, and `sync_bgp_peerings`. Refer to each
+task's documentation for its accepted arguments. Missing keys run with the
+subordinate task's defaults. Set a key to `false` to skip that task and continue
+with the next stage:
 
-| Python argument | Purpose |
-|---|---|
-| `ip_anycast_ranges` | Prefixes used to classify IP addresses as anycast. |
-| `ip_ignore_ranges` | Prefixes excluded from IP sync. |
-| `ip_ignore_vrf` | Ignore discovered interface VRFs during IP sync. Defaults to `True`. |
-| `ip_filter_by_name` | Include only matching interface names during IP sync. |
-| `ip_filter_by_description` | Include only matching interface descriptions during IP sync. |
-| `ip_filter_by_prefix` | Include only IP addresses within a CIDR prefix. |
-| `ip_filter_by_ip` | Include only IP host addresses matching a glob pattern. |
+```yaml
+sync_device_interfaces: false
+```
 
-Set `ip_ignore_vrf=False` to associate discovered IP addresses with interface
-VRFs. Prefix synchronization is intentionally independent from `sync_all`; run
-`sync_device_prefixes` separately when required.
+Skipped tasks are omitted from each device's result categories.
+
+Keep `instance`, `timeout`, `devices`, `branch`, `dry_run`, and `with_approval`
+at the `sync_all` level rather than repeating them inside a task dictionary.
 
 ## Output
 
-The result structure aggregates the outcomes of all five subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox.
+The result structure aggregates the outcomes of all eight subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device.
 
 ```python
 {
@@ -108,6 +111,27 @@ The result structure aggregates the outcomes of all five subordinate sync tasks.
                 "updated": [ ... ],
                 "deleted": [ ... ],
                 "in_sync": [ ... ],
+            },
+            "vlans": {
+                "site:DC1": {
+                    "create": [ ... ],
+                    "update": { ... },
+                    "delete": [],
+                    "in_sync": [ ... ],
+                },
+            },
+            "prefixes": {
+                "created": [ ... ],
+                "updated": [ ... ],
+                "in_sync": [ ... ],
+            },
+            "vrfs": {
+                "global": {
+                    "create": [ ... ],
+                    "update": { ... },
+                    "delete": [],
+                    "in_sync": [ ... ],
+                },
             },
             "interfaces": {
                 "create":  { ... },
@@ -144,7 +168,7 @@ When `dry_run=True` the same structure is returned but no changes are written to
 
 === "CLI"
 
-    Preview all five sync categories:
+    Preview all eight sync categories:
 
     ```
     nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
@@ -156,40 +180,10 @@ When `dry_run=True` the same structure is returned but no changes are written to
     nf#netbox sync all devices ceos-spine-1 ceos-spine-2 with-approval
     ```
 
-    Create missing module bays and module types during inventory sync:
+    Load per-task arguments from the File Sharing service:
 
     ```
-    nf#netbox sync all devices iosxr1 inventory-create-module-bays inventory-create-module-types
-    ```
-
-    Use mapping and transformer files:
-
-    ```
-    nf#netbox sync all devices iosxr1 inventory-map nf://netbox/inventory_maps/iosxr.yaml inventory-transform nf://netbox/inventory_transformers/iosxr.py dry-run
-    ```
-
-    Load interface mapping rules from YAML files:
-
-    ```bash
-    nf#netbox sync all devices leaf-1 interfaces-interface-map nf://netbox/interface_map.yaml interfaces-vlan-map nf://netbox/vlan_map.yaml dry-run
-    ```
-
-    Limit inventory sync to selected normalized modules and slots:
-
-    ```
-    nf#netbox sync all devices iosxr1 inventory-filter-by-module "A9K-*" inventory-filter-by-slot "module 0/*" inventory-ignore-modules "SFP-*"
-    ```
-
-    Enable deletions for inventory, interfaces, and BGP peerings:
-
-    ```
-    nf#netbox sync all devices iosxr1 process-deletions
-    ```
-
-    Sync IP addresses with discovered interface VRFs:
-
-    ```
-    nf#netbox sync all devices ceos-spine-1 ip-ignore-vrf false
+    nf#netbox sync all devices iosxr1 sync-kwargs nf://netbox/sync_all_kwargs.yaml dry-run
     ```
 
 === "Python"
@@ -202,23 +196,28 @@ When `dry_run=True` the same structure is returned but no changes are written to
         kwargs={
             "devices": ["iosxr1"],
             "dry_run": True,
-            "inventory_create_module_bays": True,
-            "inventory_create_module_types": True,
-            "inventory_map": "nf://netbox/inventory_maps/iosxr.yaml",
-            "inventory_transform": (
-                "nf://netbox/inventory_transformers/iosxr.py"
-            ),
-            "interfaces_interface_map": "nf://netbox/interface_map.yaml",
-            "interfaces_vlan_map": "nf://netbox/vlan_map.yaml",
-            "inventory_filter_by_module": ["A9K-*"],
-            "inventory_filter_by_slot": ["module 0/*"],
-            "inventory_ignore_modules": ["SFP-*"],
-            "inventory_ignore_slots": ["power-module *"],
-            "ip_ignore_vrf": False,
-            "message": "sync all device data",
+            "sync_kwargs": {
+                "sync_device_inventory": {
+                    "create_module_bays": True,
+                    "create_module_types": True,
+                    "inventory_map": "nf://netbox/inventory_maps/iosxr.yaml",
+                },
+                "sync_vlans": {"filter_by_vlan_ids": ["100-299"]},
+                "sync_device_prefixes": {"ignore_vrf": True},
+                "sync_vrfs": {"device_custom_field": "devices"},
+                "sync_device_interfaces": {
+                    "interface_map": "nf://netbox/interface_map.yaml",
+                    "vlan_map": "nf://netbox/vlan_map.yaml",
+                },
+                "sync_device_ip": {"ignore_vrf": False},
+                "sync_bgp_peerings": False,
+            },
         },
     )
     ```
+
+    The same configuration can be stored in YAML and referenced with
+    `"sync_kwargs": "nf://netbox/sync_all_kwargs.yaml"`.
 
 ## NORFAB Netbox Sync All Command Shell Reference
 
@@ -229,7 +228,7 @@ nf# man tree netbox.sync.all
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync device inventory, interfaces, MAC addresses, IP addresses and BGP peerings
+        └── all:    Sync inventory, VLANs, prefixes, VRFs, interfaces, MAC addresses, IP addresses and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'
@@ -239,23 +238,7 @@ root
             ├── devices:    List of NetBox devices to sync all data for
             ├── dry-run:    Return diff without writing to NetBox, default 'False'
             ├── with-approval:    Preview each sync stage and ask for review before writing to NetBox
-            ├── process-deletions:    Process deletions for inventory, interfaces and BGP peerings
-            ├── message:    Changelog message for inventory and BGP operations
-            ├── inventory-create-module-types:    Create missing module types during inventory sync
-            ├── inventory-create-module-bays:    Create missing module bays during inventory sync
-            ├── inventory-map:    Inventory pattern mappings or nf:// YAML file reference
-            ├── inventory-transform:    nf:// Python inventory transformer file
-            ├── inventory-filter-by-module:    Glob patterns selecting normalized module type names
-            ├── inventory-filter-by-slot:    Glob patterns selecting normalized module bay names
-            ├── inventory-ignore-modules:    Glob patterns excluding normalized module type names
-            ├── inventory-ignore-slots:    Glob patterns excluding normalized module bay names
-            ├── interfaces-filter-by-name:    Include only matching interface names
-            ├── interfaces-filter-by-description:    Include only matching interface descriptions
-            ├── interfaces-update-type:    Safely update existing logical interface types, default 'True'
-            ├── interfaces-vlan-group:    Exact fallback VLAN group name for interface VLAN resolution
-            ├── interfaces-interface-map:    Interface name mapping rules or nf:// YAML file reference
-            ├── interfaces-vlan-map:    Interface VLAN mapping rules or nf:// YAML file reference
-            ├── ip-ignore-vrf:    Ignore discovered interface VRFs during IP sync
+            ├── sync-kwargs:    Per-task sync arguments or nf:// YAML file
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
             ├── FH:    Filter hosts by hostname

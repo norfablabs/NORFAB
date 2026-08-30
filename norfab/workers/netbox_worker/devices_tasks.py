@@ -1398,45 +1398,13 @@ class NetboxDevicesTasks:
         branch: str = None,
         dry_run: bool = False,
         with_approval: bool = False,
-        process_deletions: bool = False,
-        message: Union[None, str] = None,
-        inventory_create_module_types: bool = False,
-        inventory_create_module_bays: bool = False,
-        inventory_map: Union[None, str, dict, InventoryPatternMap] = None,
-        inventory_transform: Union[None, str] = None,
-        inventory_filter_by_module: Union[None, list] = None,
-        inventory_filter_by_slot: Union[None, list] = None,
-        inventory_ignore_modules: Union[None, list] = None,
-        inventory_ignore_slots: Union[None, list] = None,
-        interfaces_filter_by_name: Union[None, str] = None,
-        interfaces_filter_by_description: Union[None, str] = None,
-        interfaces_update_type: bool = True,
-        interfaces_vlan_group: Union[None, str] = None,
-        interfaces_interface_map: Union[None, str, list] = None,
-        interfaces_vlan_map: Union[None, str, list] = None,
-        mac_filter_by_name: Union[None, str] = None,
-        mac_filter_by_description: Union[None, str] = None,
-        mac_filter_by_mac: Union[None, str] = None,
-        ip_anycast_ranges: Union[None, list] = None,
-        ip_ignore_ranges: Union[None, list] = None,
-        ip_ignore_vrf: bool = True,
-        ip_filter_by_name: Union[None, str] = None,
-        ip_filter_by_description: Union[None, str] = None,
-        ip_filter_by_prefix: Union[None, str] = None,
-        ip_filter_by_ip: Union[None, str] = None,
-        bgp_status: str = "active",
-        bgp_rir: Union[None, str] = None,
-        bgp_name_template: str = "{device}_{name}",
-        bgp_filter_by_remote_as: Union[None, list] = None,
-        bgp_filter_by_peer_group: Union[None, list] = None,
-        bgp_filter_by_description: Union[None, str] = None,
-        bgp_ignore_peer_ranges: Union[None, list] = None,
-        bgp_vrf_custom_field: str = "vrf",
+        sync_kwargs: Union[None, dict, str] = None,
         **kwargs: Any,
     ) -> Result:
         """
         Synchronize all device data from live devices into NetBox in sequence:
-        inventory → interfaces → MAC addresses → IP addresses → BGP peerings.
+        inventory → VLANs → prefixes → VRFs → interfaces → MAC addresses →
+        IP addresses → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
         Pass ``with_approval=True`` to have each sync stage run a dry-run preview,
@@ -1447,6 +1415,9 @@ class NetboxDevicesTasks:
             {
                 "<device>": {
                     "inventory":     {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
+                    "vlans":         {"<scope>": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
+                    "prefixes":      {"created": [...], "updated": [...], "in_sync": [...]},
+                    "vrfs":          {"global": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
                     "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
                     "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
                     "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
@@ -1463,45 +1434,9 @@ class NetboxDevicesTasks:
             dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
             with_approval (bool): Preview and ask for review before applying
                 each sync stage. Defaults to False.
-            process_deletions (bool): Process deletions for inventory,
-                interfaces, and BGP peerings. Defaults to False.
-            message (str, optional): Changelog message for inventory and BGP
-                operations.
-            inventory_create_module_types (bool): Create missing module types.
-            inventory_create_module_bays (bool): Create missing module bays.
-            inventory_map: Inventory mappings or ``nf://`` YAML file reference.
-            inventory_transform (str, optional): ``nf://`` Python transformer.
-            inventory_filter_by_module (list, optional): Module type glob filters.
-            inventory_filter_by_slot (list, optional): Module bay glob filters.
-            inventory_ignore_modules (list, optional): Module type ignore globs.
-            inventory_ignore_slots (list, optional): Module bay ignore globs.
-            interfaces_filter_by_name (str, optional): Glob pattern to filter interfaces by name.
-            interfaces_filter_by_description (str, optional): Glob pattern to filter interfaces by description.
-            interfaces_update_type (bool): Safely update existing NetBox logical
-                interface types. Defaults to True.
-            interfaces_vlan_group (str, optional): Exact VLAN group name for interface VLAN resolution.
-            interfaces_interface_map: Interface name mapping rules or an
-                ``nf://`` YAML file containing them.
-            interfaces_vlan_map: Interface VLAN mapping rules or an ``nf://``
-                YAML file containing them.
-            mac_filter_by_name (str, optional): Glob pattern to filter MAC sync interfaces by name.
-            mac_filter_by_description (str, optional): Glob pattern to filter MAC sync interfaces by description.
-            mac_filter_by_mac (str, optional): Glob pattern to filter MAC addresses.
-            ip_anycast_ranges (list, optional): IP prefixes to classify as anycast.
-            ip_ignore_ranges (list, optional): IP prefixes to exclude from IP sync.
-            ip_ignore_vrf (bool): Ignore discovered interface VRFs during IP sync.
-            ip_filter_by_name (str, optional): Glob pattern to filter IP sync interfaces by name.
-            ip_filter_by_description (str, optional): Glob pattern to filter IP sync interfaces by description.
-            ip_filter_by_prefix (str, optional): IP prefix to restrict synced IP addresses.
-            ip_filter_by_ip (str, optional): Glob pattern to restrict synced IP addresses.
-            bgp_status (str): Status to set on created/updated BGP sessions.
-            bgp_rir (str, optional): RIR name to use when creating new ASNs.
-            bgp_name_template (str): Template string for BGP session names.
-            bgp_filter_by_remote_as (list, optional): Only sync sessions matching remote AS numbers.
-            bgp_filter_by_peer_group (list, optional): Only sync sessions matching peer groups.
-            bgp_filter_by_description (str, optional): Only sync sessions matching description glob.
-            bgp_ignore_peer_ranges (list, optional): Prefixes to ignore BGP peers.
-            bgp_vrf_custom_field (str): BGP session custom field name used to store VRF reference.
+            sync_kwargs: Per-task arguments keyed by sync task name, or an
+                ``nf://`` YAML file containing that dictionary. Set a task key
+                to ``False`` to skip that task.
             **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
@@ -1509,6 +1444,11 @@ class NetboxDevicesTasks:
         """
         devices = devices or []
         instance = instance or self.default_instance
+        if isinstance(sync_kwargs, str):
+            sync_kwargs = yaml.safe_load(
+                self.fetch_file(sync_kwargs, raise_on_fail=True)
+            )
+        sync_kwargs = sync_kwargs or {}
         ret = Result(
             task=f"{self.name}:sync_all",
             result={},
@@ -1532,158 +1472,221 @@ class NetboxDevicesTasks:
         log.info(
             f"{self.name} - Sync all for {len(devices)} device(s) in '{instance}', dry_run={dry_run}"
         )
-        job.event(f"SYNCING all data for {len(devices)} device(s), dry_run={dry_run}")
+        job.event(f"syncing all data for {len(devices)} device(s), dry_run={dry_run}")
 
         # initialize per-device result structure
         for device in devices:
             ret.result[device] = {}
 
         # --- sync device inventory ---
-        job.event("SYNCING device inventory")
-        inventory_result = self.sync_device_inventory(
-            job=job,
-            instance=instance,
-            dry_run=dry_run,
-            timeout=timeout,
-            devices=list(devices),
-            branch=branch,
-            with_approval=with_approval,
-            process_deletions=process_deletions,
-            create_module_types=inventory_create_module_types,
-            create_module_bays=inventory_create_module_bays,
-            inventory_map=inventory_map,
-            inventory_transform=inventory_transform,
-            filter_by_module=inventory_filter_by_module,
-            filter_by_slot=inventory_filter_by_slot,
-            ignore_modules=inventory_ignore_modules,
-            ignore_slots=inventory_ignore_slots,
-            message=message,
-        )
-        if inventory_result.errors:
-            job.event("inventory sync completed with errors", severity="WARNING")
-            ret.errors.extend(inventory_result.errors)
-        for device, data in inventory_result.result.items():
-            ret.result.setdefault(device, {})["inventory"] = data
-        if inventory_result.status == "skipped" and inventory_result.dry_run:
-            ret.status = "skipped"
-            ret.dry_run = True
-            job.event("sync all stopped because device inventory review was declined")
-            return ret
+        if sync_kwargs.get("sync_device_inventory") is False:
+            job.event("skipping device inventory sync")
+        else:
+            job.event("syncing device inventory")
+            inventory_result = self.sync_device_inventory(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_device_inventory") or {}),
+            )
+            if inventory_result.errors:
+                job.event("inventory sync completed with errors", severity="WARNING")
+                ret.errors.extend(inventory_result.errors)
+            for device, data in inventory_result.result.items():
+                ret.result.setdefault(device, {})["inventory"] = data
+            if inventory_result.status == "skipped" and inventory_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event(
+                    "sync all stopped because device inventory review was declined"
+                )
+                return ret
+
+        # --- sync VLANs ---
+        if sync_kwargs.get("sync_vlans") is False:
+            job.event("skipping VLAN sync")
+        else:
+            job.event("syncing VLANs")
+            vlan_result = self.sync_vlans(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_vlans") or {}),
+            )
+            if vlan_result.errors:
+                job.event("VLAN sync completed with errors", severity="WARNING")
+                ret.errors.extend(vlan_result.errors)
+            for device in devices:
+                ret.result[device]["vlans"] = vlan_result.result
+            if vlan_result.status == "skipped" and vlan_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because VLAN review was declined")
+                return ret
+
+        # --- sync prefixes ---
+        if sync_kwargs.get("sync_device_prefixes") is False:
+            job.event("skipping prefix sync")
+        else:
+            job.event("syncing prefixes")
+            prefix_result = self.sync_device_prefixes(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_device_prefixes") or {}),
+            )
+            if prefix_result.errors:
+                job.event("prefix sync completed with errors", severity="WARNING")
+                ret.errors.extend(prefix_result.errors)
+            for device in devices:
+                ret.result[device]["prefixes"] = prefix_result.result
+            if prefix_result.status == "skipped" and prefix_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because prefix review was declined")
+                return ret
+
+        # --- sync VRFs ---
+        if sync_kwargs.get("sync_vrfs") is False:
+            job.event("skipping VRF sync")
+        else:
+            job.event("syncing VRFs")
+            vrf_result = self.sync_vrfs(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_vrfs") or {}),
+            )
+            if vrf_result.errors:
+                job.event("VRF sync completed with errors", severity="WARNING")
+                ret.errors.extend(vrf_result.errors)
+            for device in devices:
+                ret.result[device]["vrfs"] = vrf_result.result
+            if vrf_result.status == "skipped" and vrf_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because VRF review was declined")
+                return ret
 
         # --- sync interfaces ---
-        job.event("SYNCING interfaces")
-        intf_result = self.sync_device_interfaces(
-            job=job,
-            instance=instance,
-            dry_run=dry_run,
-            timeout=timeout,
-            devices=list(devices),
-            branch=branch,
-            process_deletions=process_deletions,
-            with_approval=with_approval,
-            filter_by_name=interfaces_filter_by_name,
-            filter_by_description=interfaces_filter_by_description,
-            update_type=interfaces_update_type,
-            vlan_group=interfaces_vlan_group,
-            interface_map=interfaces_interface_map,
-            vlan_map=interfaces_vlan_map,
-        )
-        if intf_result.errors:
-            job.event("interface sync completed with errors", severity="WARNING")
-            ret.errors.extend(intf_result.errors)
-        for device, data in intf_result.result.items():
-            ret.result.setdefault(device, {})["interfaces"] = data
-        if intf_result.status == "skipped" and intf_result.dry_run:
-            ret.status = "skipped"
-            ret.dry_run = True
-            job.event("sync all stopped because interface review was declined")
-            return ret
+        if sync_kwargs.get("sync_device_interfaces") is False:
+            job.event("skipping interface sync")
+        else:
+            job.event("syncing interfaces")
+            intf_result = self.sync_device_interfaces(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_device_interfaces") or {}),
+            )
+            if intf_result.errors:
+                job.event("interface sync completed with errors", severity="WARNING")
+                ret.errors.extend(intf_result.errors)
+            for device, data in intf_result.result.items():
+                ret.result.setdefault(device, {})["interfaces"] = data
+            if intf_result.status == "skipped" and intf_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because interface review was declined")
+                return ret
 
         # --- sync MAC addresses ---
-        job.event("SYNCING MAC addresses")
-        mac_result = self.sync_mac_addresses(
-            job=job,
-            instance=instance,
-            dry_run=dry_run,
-            timeout=timeout,
-            devices=list(devices),
-            branch=branch,
-            with_approval=with_approval,
-            filter_by_name=mac_filter_by_name,
-            filter_by_description=mac_filter_by_description,
-            filter_by_mac=mac_filter_by_mac,
-        )
-        if mac_result.errors:
-            job.event("MAC address sync completed with errors", severity="WARNING")
-            ret.errors.extend(mac_result.errors)
-        for device, data in mac_result.result.items():
-            ret.result.setdefault(device, {})["mac_addresses"] = data
-        if mac_result.status == "skipped" and mac_result.dry_run:
-            ret.status = "skipped"
-            ret.dry_run = True
-            job.event("sync all stopped because MAC address review was declined")
-            return ret
+        if sync_kwargs.get("sync_mac_addresses") is False:
+            job.event("skipping MAC address sync")
+        else:
+            job.event("syncing MAC addresses")
+            mac_result = self.sync_mac_addresses(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_mac_addresses") or {}),
+            )
+            if mac_result.errors:
+                job.event("MAC address sync completed with errors", severity="WARNING")
+                ret.errors.extend(mac_result.errors)
+            for device, data in mac_result.result.items():
+                ret.result.setdefault(device, {})["mac_addresses"] = data
+            if mac_result.status == "skipped" and mac_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because MAC address review was declined")
+                return ret
 
         # --- sync IP addresses ---
-        job.event("SYNCING IP addresses")
-        ip_result = self.sync_device_ip(
-            job=job,
-            instance=instance,
-            dry_run=dry_run,
-            timeout=timeout,
-            devices=list(devices),
-            branch=branch,
-            with_approval=with_approval,
-            anycast_ranges=ip_anycast_ranges,
-            ignore_ranges=ip_ignore_ranges,
-            ignore_vrf=ip_ignore_vrf,
-            filter_by_name=ip_filter_by_name,
-            filter_by_description=ip_filter_by_description,
-            filter_by_prefix=ip_filter_by_prefix,
-            filter_by_ip=ip_filter_by_ip,
-        )
-        if ip_result.errors:
-            job.event("IP address sync completed with errors", severity="WARNING")
-            ret.errors.extend(ip_result.errors)
-        for device, data in ip_result.result.items():
-            ret.result.setdefault(device, {})["ip_addresses"] = data
-        if ip_result.status == "skipped" and ip_result.dry_run:
-            ret.status = "skipped"
-            ret.dry_run = True
-            job.event("sync all stopped because IP address review was declined")
-            return ret
+        if sync_kwargs.get("sync_device_ip") is False:
+            job.event("skipping IP address sync")
+        else:
+            job.event("syncing IP addresses")
+            ip_result = self.sync_device_ip(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_device_ip") or {}),
+            )
+            if ip_result.errors:
+                job.event("IP address sync completed with errors", severity="WARNING")
+                ret.errors.extend(ip_result.errors)
+            for device, data in ip_result.result.items():
+                ret.result.setdefault(device, {})["ip_addresses"] = data
+            if ip_result.status == "skipped" and ip_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because IP address review was declined")
+                return ret
 
         # --- sync BGP peerings ---
-        job.event("SYNCING BGP peerings")
-        bgp_result = self.sync_bgp_peerings(
-            job=job,
-            instance=instance,
-            status=bgp_status,
-            dry_run=dry_run,
-            timeout=timeout,
-            devices=list(devices),
-            branch=branch,
-            process_deletions=process_deletions,
-            with_approval=with_approval,
-            rir=bgp_rir,
-            message=message,
-            name_template=bgp_name_template,
-            filter_by_remote_as=bgp_filter_by_remote_as,
-            filter_by_peer_group=bgp_filter_by_peer_group,
-            filter_by_description=bgp_filter_by_description,
-            ignore_peer_ranges=bgp_ignore_peer_ranges,
-            vrf_custom_field=bgp_vrf_custom_field,
-        )
-        if bgp_result.errors:
-            job.event("BGP peerings sync completed with errors", severity="WARNING")
-            ret.errors.extend(bgp_result.errors)
-        for device, data in bgp_result.result.items():
-            ret.result.setdefault(device, {})["bgp_peerings"] = data
-        if bgp_result.status == "skipped" and bgp_result.dry_run:
-            ret.status = "skipped"
-            ret.dry_run = True
-            job.event("sync all stopped because BGP peerings review was declined")
-            return ret
+        if sync_kwargs.get("sync_bgp_peerings") is False:
+            job.event("skipping BGP peering sync")
+        else:
+            job.event("syncing BGP peerings")
+            bgp_result = self.sync_bgp_peerings(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_bgp_peerings") or {}),
+            )
+            if bgp_result.errors:
+                job.event("BGP peerings sync completed with errors", severity="WARNING")
+                ret.errors.extend(bgp_result.errors)
+            for device, data in bgp_result.result.items():
+                ret.result.setdefault(device, {})["bgp_peerings"] = data
+            if bgp_result.status == "skipped" and bgp_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because BGP peerings review was declined")
+                return ret
 
         log.info(f"{self.name} - Sync all complete for {len(ret.result)} device(s)")
         job.event(f"sync all complete for {len(ret.result)} device(s)")

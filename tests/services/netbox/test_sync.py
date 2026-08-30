@@ -1,6 +1,10 @@
 import pprint
+from types import SimpleNamespace
 
 import pytest
+
+from norfab.models import Result
+from norfab.workers.netbox_worker.devices_tasks import NetboxDevicesTasks
 
 try:
     from tests.services.netbox.common import (
@@ -23,6 +27,83 @@ except ModuleNotFoundError as exc:
     )
 
 pytestmark = pytest.mark.netbox
+
+
+class TestSyncAllOrchestration:
+    TASKS = [
+        ("sync_device_inventory", {"device-1": {}}),
+        ("sync_vlans", {"site:test": {}}),
+        ("sync_device_prefixes", {"created": [], "updated": [], "in_sync": []}),
+        ("sync_vrfs", {"global": {}}),
+        ("sync_device_interfaces", {"device-1": {}}),
+        ("sync_mac_addresses", {"device-1": {}}),
+        ("sync_device_ip", {"device-1": {}}),
+        ("sync_bgp_peerings", {"device-1": {}}),
+    ]
+    RESULT_CATEGORIES = {
+        "sync_device_inventory": "inventory",
+        "sync_vlans": "vlans",
+        "sync_device_prefixes": "prefixes",
+        "sync_vrfs": "vrfs",
+        "sync_device_interfaces": "interfaces",
+        "sync_mac_addresses": "mac_addresses",
+        "sync_device_ip": "ip_addresses",
+        "sync_bgp_peerings": "bgp_peerings",
+    }
+
+    @classmethod
+    def _worker(cls, calls: list[str]) -> SimpleNamespace:
+        worker = SimpleNamespace(
+            name="netbox-test",
+            default_instance="test",
+            get_nornir_hosts=lambda kwargs, timeout: [],
+        )
+        for task_name, task_result in cls.TASKS:
+            setattr(
+                worker,
+                task_name,
+                lambda _task_name=task_name, _result=task_result, **kwargs: (
+                    calls.append(_task_name) or Result(task=_task_name, result=_result)
+                ),
+            )
+        return worker
+
+    @staticmethod
+    def _job() -> SimpleNamespace:
+        return SimpleNamespace(event=lambda *args, **kwargs: None)
+
+    def test_sync_all_task_order(self) -> None:
+        calls = []
+
+        NetboxDevicesTasks.sync_all(
+            self._worker(calls),
+            self._job(),
+            devices=["device-1"],
+            dry_run=True,
+        )
+
+        assert calls == [task_name for task_name, _ in self.TASKS]
+
+    @pytest.mark.parametrize("skipped_task", RESULT_CATEGORIES)
+    def test_false_sync_kwarg_skips_task_and_continues(self, skipped_task: str) -> None:
+        calls = []
+
+        result = NetboxDevicesTasks.sync_all(
+            self._worker(calls),
+            self._job(),
+            devices=["device-1"],
+            dry_run=True,
+            sync_kwargs={skipped_task: False},
+        )
+
+        assert calls == [
+            task_name for task_name, _ in self.TASKS if task_name != skipped_task
+        ]
+        assert self.RESULT_CATEGORIES[skipped_task] not in result.result["device-1"]
+        assert set(result.result["device-1"]) == (
+            set(self.RESULT_CATEGORIES.values())
+            - {self.RESULT_CATEGORIES[skipped_task]}
+        )
 
 
 @pytest.mark.netbox_sync_mac_addresses
@@ -844,7 +925,7 @@ class TestCheckDeviceSync:
 
 @pytest.mark.netbox_sync_all
 class TestSyncAll:
-    """Verify sync_all calls all five sync tasks in sequence.
+    """Verify sync_all calls all eight sync tasks in sequence.
 
     Each test performs a full cleanup before and after via setup_method/teardown_method
     and uses out-of-band pynetbox queries to verify NetBox state directly.
@@ -853,6 +934,9 @@ class TestSyncAll:
     SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
     ALL_CATEGORIES = {
         "inventory",
+        "vlans",
+        "prefixes",
+        "vrfs",
         "interfaces",
         "mac_addresses",
         "ip_addresses",
@@ -965,7 +1049,7 @@ class TestSyncAll:
     # ------------------------------------------------------------------ #
 
     def test_sync_all_result_structure(self, nfclient):
-        """All five categories are present per device in dry-run mode."""
+        """All eight categories are present per device in dry-run mode."""
         ret = self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
         pprint.pprint(ret, width=200)
 
@@ -985,7 +1069,7 @@ class TestSyncAll:
                     )
 
     def test_sync_all_dry_run_no_writes(self, nfclient):
-        """dry_run=True must not write inventory, interfaces, MACs, or IPs."""
+        """dry_run=True must not write any sync-all stage changes."""
         self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
 
         nb = get_pynetbox(None)
@@ -1168,6 +1252,40 @@ class TestSyncAll:
                 assert (
                     device in res["result"]
                 ), f"{worker} device {device!r} missing from filter-resolved result"
+
+    @pytest.mark.parametrize(
+        "sync_kwargs",
+        [
+            {
+                "sync_vlans": False,
+                "sync_device_prefixes": False,
+                "sync_vrfs": False,
+                "sync_device_interfaces": {"filter_by_name": "Loopback10"},
+            },
+            "nf://netbox/sync_all_kwargs.yaml",
+        ],
+    )
+    def test_sync_all_accepts_inline_or_file_sync_kwargs(self, nfclient, sync_kwargs):
+        """Per-task arguments can be supplied inline or through File Sharing."""
+        ret = self._sync(
+            nfclient,
+            ["ceos-spine-1"],
+            dry_run=True,
+            sync_kwargs=sync_kwargs,
+        )
+        pprint.pprint(ret, width=200)
+
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            interfaces = res["result"]["ceos-spine-1"]["interfaces"]
+            interface_changes = (
+                list(interfaces.get("create", []))
+                + list(interfaces.get("update", {}))
+                + list(interfaces.get("delete", []))
+                + list(interfaces.get("in_sync", []))
+            )
+            assert interface_changes
+            assert all(name == "Loopback10" for name in interface_changes)
 
     # ------------------------------------------------------------------ #
     # Error cases                                                          #

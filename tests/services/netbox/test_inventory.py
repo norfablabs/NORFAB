@@ -366,31 +366,27 @@ class TestSyncDeviceInventoryInput:
 
 
 class TestSyncAllInput:
-    def test_validates_inventory_arguments(self):
+    def test_accepts_sync_kwargs_dictionary(self):
+        sync_kwargs = {
+            "sync_device_inventory": {
+                "create_module_types": True,
+                "inventory_map": "nf://netbox/inventory_map.yaml",
+            },
+            "sync_device_interfaces": False,
+        }
+        data = SyncAllInput.model_validate({"sync-kwargs": sync_kwargs})
+
+        assert data.sync_kwargs == sync_kwargs
+
+    def test_accepts_sync_kwargs_url_and_none(self):
+        defaults = SyncAllInput()
+        assert defaults.sync_kwargs is None
+        assert defaults.timeout == 600
         data = SyncAllInput.model_validate(
-            {
-                "inventory-create-module-types": True,
-                "inventory-create-module-bays": True,
-                "inventory-map": "nf://netbox/inventory_map.yaml",
-                "inventory-transform": "nf://netbox/inventory_transform.py",
-                "inventory-filter-by-module": ["A9K-*"],
-                "inventory-filter-by-slot": ["module 0/*"],
-                "inventory-ignore-modules": ["SFP-*"],
-                "inventory-ignore-slots": ["power-module *"],
-                "message": "sync all changes",
-            }
+            {"sync_kwargs": "nf://netbox/sync_all_kwargs.yaml"}
         )
 
-        assert data.inventory_create_module_types is True
-        assert data.inventory_create_module_bays is True
-        assert data.inventory_filter_by_module == ["A9K-*"]
-        assert data.inventory_ignore_slots == ["power-module *"]
-        assert data.inventory_map == "nf://netbox/inventory_map.yaml"
-        assert data.message == "sync all changes"
-
-    def test_rejects_inventory_filter_string(self):
-        with pytest.raises(ValidationError):
-            SyncAllInput.model_validate({"inventory-filter-by-module": "A9K-*"})
+        assert data.sync_kwargs == "nf://netbox/sync_all_kwargs.yaml"
 
 
 class TestInventoryRecordFilters:

@@ -954,7 +954,7 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         description="List of NetBox devices to sync",
     )
     timeout: StrictInt = Field(
-        60,
+        600,
         description="Timeout in seconds for Nornir parse_ttp jobs",
     )
     dry_run: StrictBool = Field(
@@ -969,180 +969,13 @@ class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True
         alias="with-approval",
         json_schema_extra={"presence": True},
     )
-    process_deletions: StrictBool = Field(
-        False,
-        description="Process deletions for inventory, interfaces, and BGP peerings",
-        json_schema_extra={"presence": True},
-        alias="process-deletions",
-    )
-    message: Union[None, StrictStr] = Field(
+    sync_kwargs: Union[None, StrictStr, Dict] = Field(
         None,
-        description="Changelog message for inventory and BGP operations",
-    )
-    inventory_create_module_types: StrictBool = Field(
-        False,
-        description="Create missing module types during inventory sync",
-        json_schema_extra={"presence": True},
-        alias="inventory-create-module-types",
-    )
-    inventory_create_module_bays: StrictBool = Field(
-        False,
-        description="Create missing module bays during inventory sync",
-        json_schema_extra={"presence": True},
-        alias="inventory-create-module-bays",
-    )
-    inventory_map: Union[None, StrictStr, InventoryPatternMap] = Field(
-        None,
-        description="Inventory pattern mappings or nf:// YAML file reference",
-        alias="inventory-map",
-    )
-    inventory_transform: Union[None, StrictStr] = Field(
-        None,
-        description="nf:// Python inventory transformer file",
-        alias="inventory-transform",
-    )
-    inventory_filter_by_module: Union[None, List[StrictStr]] = Field(
-        None,
-        description="Glob patterns selecting normalized module type names",
-        alias="inventory-filter-by-module",
-    )
-    inventory_filter_by_slot: Union[None, List[StrictStr]] = Field(
-        None,
-        description="Glob patterns selecting normalized module bay names",
-        alias="inventory-filter-by-slot",
-    )
-    inventory_ignore_modules: Union[None, List[StrictStr]] = Field(
-        None,
-        description="Glob patterns excluding normalized module type names",
-        alias="inventory-ignore-modules",
-    )
-    inventory_ignore_slots: Union[None, List[StrictStr]] = Field(
-        None,
-        description="Glob patterns excluding normalized module bay names",
-        alias="inventory-ignore-slots",
-    )
-    interfaces_filter_by_name: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to filter interfaces by name",
-        alias="interfaces-filter-by-name",
-    )
-    interfaces_filter_by_description: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to filter interfaces by description",
-        alias="interfaces-filter-by-description",
-    )
-    interfaces_update_type: StrictBool = Field(
-        True,
-        description="Safely update existing NetBox logical interface types",
-        json_schema_extra={"presence": True},
-        alias="interfaces-update-type",
-    )
-    interfaces_vlan_group: Union[None, StrictStr] = Field(
-        None,
-        description="Exact VLAN group name for interface VLAN resolution",
-        alias="interfaces-vlan-group",
-    )
-    interfaces_interface_map: Union[None, StrictStr, List[Dict[StrictStr, Any]]] = (
-        Field(
-            None,
-            description="Interface name mapping rules or nf:// YAML file reference",
-            alias="interfaces-interface-map",
-        )
-    )
-    interfaces_vlan_map: Union[None, StrictStr, List[Dict[StrictStr, Any]]] = Field(
-        None,
-        description="Interface VLAN mapping rules or nf:// YAML file reference",
-        alias="interfaces-vlan-map",
-    )
-    mac_filter_by_name: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to filter MAC sync interfaces by name",
-        alias="mac-filter-by-name",
-    )
-    mac_filter_by_description: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to filter MAC sync interfaces by description",
-        alias="mac-filter-by-description",
-    )
-    mac_filter_by_mac: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to filter MAC addresses",
-        alias="mac-filter-by-mac",
-    )
-    ip_anycast_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
-        None,
-        description="IP prefix(es) to classify as anycast",
-        alias="ip-anycast-ranges",
-    )
-    ip_ignore_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
-        None,
-        description="IP prefix(es) to exclude from IP sync",
-        alias="ip-ignore-ranges",
-    )
-    ip_ignore_vrf: StrictBool = Field(
-        True,
-        description="Ignore discovered interface VRFs during IP sync",
-        alias="ip-ignore-vrf",
-    )
-    ip_filter_by_name: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to filter IP sync interfaces by name",
-        alias="ip-filter-by-name",
-    )
-    ip_filter_by_description: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to filter IP sync interfaces by description",
-        alias="ip-filter-by-description",
-    )
-    ip_filter_by_prefix: Union[None, StrictStr] = Field(
-        None,
-        description="IP prefix to restrict synced IP addresses",
-        alias="ip-filter-by-prefix",
-    )
-    ip_filter_by_ip: Union[None, StrictStr] = Field(
-        None,
-        description="Glob pattern to restrict synced IP addresses",
-        alias="ip-filter-by-ip",
-    )
-    bgp_status: BgpSessionStatusEnum = Field(
-        "active",
-        description="Status to set on created/updated BGP sessions",
-        alias="bgp-status",
-    )
-    bgp_rir: Union[None, StrictStr] = Field(
-        None,
-        description="RIR name to use when creating new ASNs",
-        alias="bgp-rir",
-    )
-    bgp_name_template: StrictStr = Field(
-        "{{device}}_{{name}}",
-        description="Jinja2 template string for BGP session names",
-        alias="bgp-name-template",
-    )
-    bgp_filter_by_remote_as: Union[None, List[int]] = Field(
-        None,
-        description="Only sync BGP sessions matching remote AS numbers",
-        alias="bgp-filter-by-remote-as",
-    )
-    bgp_filter_by_peer_group: Union[None, List[StrictStr]] = Field(
-        None,
-        description="Only sync BGP sessions matching peer groups",
-        alias="bgp-filter-by-peer-group",
-    )
-    bgp_filter_by_description: Union[None, StrictStr] = Field(
-        None,
-        description="Only sync BGP sessions matching description glob",
-        alias="bgp-filter-by-description",
-    )
-    bgp_ignore_peer_ranges: Union[None, List[StrictStr]] = Field(
-        None,
-        description="Prefix(es) to ignore BGP peers",
-        alias="bgp-ignore-peer-ranges",
-    )
-    bgp_vrf_custom_field: Union[StrictBool, StrictStr] = Field(
-        "vrf",
-        description="BGP session custom field name used to store VRF reference",
-        alias="bgp-vrf-custom-field",
+        description=(
+            "Per-task sync arguments keyed by sync task name, or an nf:// YAML "
+            "file containing them; use False as a task value to skip that task"
+        ),
+        alias="sync-kwargs",
     )
 
 

@@ -563,7 +563,6 @@ class TestSyncDeviceInterfaces:
         assert defaults.ignore_vlans is False
         assert defaults.ignore_vrf is False
         assert defaults.update_type is True
-        assert SyncAllInput().interfaces_update_type is True
 
         enabled = SyncDeviceInterfacesInput.model_validate(
             {"ignore-vlans": True, "ignore-vrf": True}
@@ -581,14 +580,14 @@ class TestSyncDeviceInterfaces:
         assert model.interface_map == "nf://netbox/interface_map.yaml"
         assert model.vlan_map == "nf://netbox/vlan_map.yaml"
 
-        sync_all = SyncAllInput.model_validate(
-            {
-                "interfaces-interface-map": "nf://netbox/interface_map.yaml",
-                "interfaces-vlan-map": "nf://netbox/vlan_map.yaml",
+        sync_kwargs = {
+            "sync_device_interfaces": {
+                "interface_map": "nf://netbox/interface_map.yaml",
+                "vlan_map": "nf://netbox/vlan_map.yaml",
             }
-        )
-        assert sync_all.interfaces_interface_map == "nf://netbox/interface_map.yaml"
-        assert sync_all.interfaces_vlan_map == "nf://netbox/vlan_map.yaml"
+        }
+        sync_all = SyncAllInput.model_validate({"sync-kwargs": sync_kwargs})
+        assert sync_all.sync_kwargs == sync_kwargs
 
     @pytest.mark.parametrize(
         "criteria",

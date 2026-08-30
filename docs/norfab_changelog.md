@@ -8,7 +8,8 @@
 
 1. Enabled safe NetBox interface type updates by default. Existing interfaces can transition from `other` to `virtual`, `bridge`, or `lag`, and between those logical types, while specific physical types and transitions to the `other` fallback remain protected. New interface creation continues to accept any parsed type.
 2. Added NetBox branching support to all CRUD tasks by forwarding the optional `branch` argument when creating the pynetbox client.
-3. Added `nf://` YAML file support for NetBox `interface_map` and `vlan_map` synchronization inputs, including their `sync_all` interface-prefixed variants. Downloaded mappings use the same Pydantic validation as inline rules.
+3. Added `nf://` YAML file support for NetBox `interface_map` and `vlan_map` synchronization inputs, including use inside the `sync_all` per-task configuration. Downloaded mappings use the same Pydantic validation as inline rules.
+4. Expanded NetBox `sync_all` to run inventory, VLAN, prefix, VRF, interface, MAC address, IP address, and BGP peering synchronization in dependency order. Task-specific options now use the inline or `nf://` YAML `sync_kwargs` mapping, and setting any task key to `false` skips that stage while later stages continue.
 
 ---
 

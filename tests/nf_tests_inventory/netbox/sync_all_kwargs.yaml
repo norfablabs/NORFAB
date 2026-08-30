@@ -1,0 +1,5 @@
+sync_vlans: false
+sync_device_prefixes: false
+sync_vrfs: false
+sync_device_interfaces:
+  filter_by_name: Loopback10
