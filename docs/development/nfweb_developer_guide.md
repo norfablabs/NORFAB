@@ -347,8 +347,13 @@ broker show_broker + show_workers and worker get_watchdog_stats
   -> ReactECharts redraws gauges, trends, and worker comparisons
 ```
 
-The collector also reads process resources and message counters directly from the
-local NFWeb process and native client. Collection runs in `asyncio.to_thread()` so
+Worker selection separately calls the existing worker `job_list` task through a
+namespaced NFWeb endpoint. NFWeb aggregates its bounded result for the horizontal
+worker database card; no worker implementation or worker database schema is
+changed.
+
+The collector also reads process resources, message counters, and aggregate job
+statistics directly from the local NFWeb process and native client. Collection runs in `asyncio.to_thread()` so
 the synchronous native calls do not block Tornado. One `asyncio.Lock` prevents
 overlapping cycles. Keep the polling sequential and direct unless measurements
 show a real need for more scheduling complexity.
@@ -374,6 +379,7 @@ Current routes are:
 | `GET` | `/api/v1/monitoring/snapshot` | Latest in-memory monitoring sample |
 | `GET` | `/api/v1/monitoring/history` | Retained in-memory samples |
 | `POST` | `/api/v1/monitoring/refresh` | Request an immediate sample |
+| `GET` | `/api/v1/monitoring/workers/{name}/database` | Summarize the selected worker's recent `job_list` result |
 | WebSocket | `/api/v1/monitoring/stream` | Latest and newly completed samples |
 | `GET` | `/api/v1/topology/devices` | Combined device discovery and active scope |
 | `POST` | `/api/v1/topology/selection` | Apply a scope and collect when non-empty |
@@ -461,11 +467,23 @@ add domain columns and row adapters instead of another details layout. A shared
 footer owns the configured message and external resource pictograms. Overview and
 Admin are intentionally empty placeholders.
 
-Monitoring uses Mantine for cards, tables, alerts, selects, buttons, and badges.
+Monitoring uses Mantine for cards, alerts, selects, buttons, and badges.
 It passes ECharts options directly to `ReactECharts`; avoid a local abstraction
-until more than one monitoring view has concrete shared requirements. CPU and
-memory time series use the same retained sample array, and component selection
-drives both gauges and the details panel.
+until more than one monitoring view has concrete shared requirements. Aligned
+worker CPU and memory comparisons use the same worker order. The bottom worker
+selection drives separate CPU and memory time series, while the adjacent job bar
+chart stacks positive `FAILED`, `STARTED`, `COMPLETED`, and `STALE` count changes
+between retained native-client database samples. It must not infer exact job
+transitions because the aggregate database statistics do not contain a transition
+journal.
+The selected worker also drives a full-width database status card below those
+charts. Its request is independent of periodic snapshot collection and failures
+remain local to the card.
+Comparison charts rank workers by CPU percentage plus memory relative to the
+largest current worker, show ten rows at a time, and use an ECharts connection
+group so vertical data zoom stays synchronized. The dashboard refresh selector
+requests a shared sample every 5, 10, 30, or 60 seconds without changing the
+server's configured collection interval.
 
 ### Live and Historical State
 

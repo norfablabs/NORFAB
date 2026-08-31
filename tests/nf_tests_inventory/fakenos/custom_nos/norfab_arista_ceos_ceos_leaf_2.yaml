@@ -30,6 +30,11 @@ commands:
     alias: show run section vlan
   show running-config section vrf:
     alias: show run section vrf
+  show running-config | include community-list:
+    output: |
+      ip community-list CUSTOMER_EXPORT permit 65000:100
+      ip extcommunity-list TENANT_BLUE permit rt 65000:200
+      ip extcommunity-list ORIGIN_SITE permit soo 65000:300
   configure terminal:
     output: null
     new_prompt: '{base_prompt}(config)#'

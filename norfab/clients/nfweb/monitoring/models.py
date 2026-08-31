@@ -16,6 +16,38 @@ MonitoringStatus = Literal[
 ]
 
 
+class MonitoringDatabaseStats(BaseModel):
+    """Current aggregate statistics from a NORFAB job database."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    total_jobs: int = 0
+    jobs_last_24h: int = 0
+    total_events: int = 0
+    avg_completion_seconds: float | None = None
+    oldest_job_ts: str | None = None
+    newest_job_ts: str | None = None
+    jobs_by_status: dict[str, int] = Field(default_factory=dict)
+    jobs_by_service: dict[str, int] = Field(default_factory=dict)
+    events_by_severity: dict[str, int] = Field(default_factory=dict)
+
+
+class MonitoringWorkerDatabaseStats(BaseModel):
+    """Summary of an existing worker ``job_list`` task response."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    worker: str
+    service: str | None = None
+    returned_jobs: int = 0
+    window_limit: int = 1000
+    potentially_truncated: bool = False
+    oldest_job_ts: str | None = None
+    newest_job_ts: str | None = None
+    jobs_by_status: dict[str, int] = Field(default_factory=dict)
+    jobs_by_task: dict[str, int] = Field(default_factory=dict)
+
+
 class MonitoringComponent(BaseModel):
     """Current state and resource use for one NORFAB process."""
 
@@ -51,4 +83,5 @@ class MonitoringSnapshot(BaseModel):
     broker: MonitoringComponent
     client: MonitoringComponent
     workers: list[MonitoringComponent] = Field(default_factory=list)
+    database: MonitoringDatabaseStats = Field(default_factory=MonitoringDatabaseStats)
     errors: list[str] = Field(default_factory=list)

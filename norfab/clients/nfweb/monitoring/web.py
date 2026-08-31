@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -64,6 +65,24 @@ class MonitoringRefreshHandler(MonitoringSnapshotHandler):
         self.write_json(snapshot)
 
 
+class MonitoringWorkerDatabaseHandler(MonitoringSnapshotHandler):
+    async def get(self, worker_name: str) -> None:
+        """Return recent job database statistics for one selected worker."""
+        try:
+            statistics = await asyncio.to_thread(
+                self.monitoring_collector.worker_database_stats,
+                worker_name,
+            )
+        except LookupError as exc:
+            self.write_json({"error": str(exc)}, status=404)
+            return
+        except Exception as exc:
+            log.warning("Worker job database statistics unavailable: %s", exc)
+            self.write_json({"error": str(exc)}, status=502)
+            return
+        self.write_json(statistics)
+
+
 class MonitoringWebSocket(tornado.websocket.WebSocketHandler):
     """Push live monitoring samples to connected browsers."""
 
@@ -111,6 +130,11 @@ def monitoring_routes(
         (
             r"/api/v1/monitoring/refresh",
             MonitoringRefreshHandler,
+            dependencies,
+        ),
+        (
+            r"/api/v1/monitoring/workers/([^/]+)/database",
+            MonitoringWorkerDatabaseHandler,
             dependencies,
         ),
         (

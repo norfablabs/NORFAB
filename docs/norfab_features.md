@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 30 August 2026*
+*Last updated: 31 August 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -52,9 +52,15 @@ troubleshooting, reporting, and guided workflows.
 
 The **runtime monitoring dashboard** polls existing broker management and worker
 watchdog interfaces to show broker, local NFWeb client, and worker health; CPU and
-resident memory; uptime; keepalive counters and hold time; and local-client
-message, reconnect, and queue counters. ECharts supplies gauges, resource and
-message-counter trends, data zoom, and worker comparisons. Samples are pushed to
+resident memory; worker resource comparisons and selected-worker trends; and
+local-client job totals and interval status activity from the existing client job
+database. Selecting a worker also shows a full-width status card summarizing its
+recent jobs, statuses, and tasks through the existing worker `job_list` task.
+ECharts supplies resource trends, stacked job-status activity bars,
+data zoom, and
+worker comparisons. Worker comparisons rank combined CPU and relative-memory
+demand on each refresh, show ten workers at once with synchronized scrolling, and
+offer 5, 10, 30, or 60-second dashboard refresh requests. Samples are pushed to
 browsers over WebSocket and retained
 only in process memory for up to three hours; restart clears them and no monitoring
 database or telemetry journal is created. **Monitoring use cases:** live fabric
@@ -818,6 +824,16 @@ consistent IP/ASN/VRF modelling.
 [Create](workers/netbox/services_netbox_service_tasks_create_bgp_peering.md) ·
 [Update](workers/netbox/services_netbox_service_tasks_update_bgp_peering.md) ·
 [Synchronize](workers/netbox/services_netbox_service_tasks_sync_bgp_peerings.md)
+
+### Live BGP community reconciliation
+
+Collects named BGP communities from supported live devices, stores route
+targets in NetBox IPAM and other types in the NetBox BGP plugin, and aggregates
+different live names for the same value into an optional custom field. **Use
+cases:** community inventory, naming audits, and source-of-truth onboarding.
+**Limitations:** parser and NetBox plugin value support determine coverage;
+objects are never deleted.
+[Task details](workers/netbox/services_netbox_service_tasks_bgp_community_sync.md)
 
 ### Interface description updates
 

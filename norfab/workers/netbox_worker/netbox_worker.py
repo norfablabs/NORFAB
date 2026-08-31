@@ -19,6 +19,7 @@ from urllib3.util.retry import Retry
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
+from .bgp_community_tasks import NetboxBgpCommunityTasks
 from .bgp_peerings_tasks import NetboxBgpPeeringsTasks
 from .branch_tasks import NetboxBranchTasks
 from .circuits_tasks import NetboxCircuitsTasks
@@ -69,6 +70,7 @@ class NetboxWorker(
     NetboxConnectionsTasks,
     NetboxCircuitsTasks,
     NetboxNornirInventoryTasks,
+    NetboxBgpCommunityTasks,
     NetboxBgpPeeringsTasks,
     NetboxPrefixTasks,
     NetboxTopologyTasks,

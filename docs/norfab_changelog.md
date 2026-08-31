@@ -1,3 +1,16 @@
+# 0.22.1
+
+## FEATURES
+
+1. Added the NetBox `bgp_community_sync` task and `netbox sync bgp-communities` NFCLI command. The task uses the TTP Templates BGP communities getter, stores route targets in IPAM and other community types in the NetBox BGP plugin, and aggregates live community-set names by value into an optional custom field.
+
+## ENHANCEMENTS
+
+1. Adding `gitpython` to filesharing service version output
+2. Enhancing NFWeb NorFab monitoring dasboard
+
+---
+
 # 0.22.0
 
 ## FEATURES

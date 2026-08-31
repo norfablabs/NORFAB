@@ -128,6 +128,7 @@ class FileSharingWorker(NFPWorker, GitTasks, LocalFilesTasks):
         libs = {
             "python": sys.version.split(" ")[0],
             "platform": sys.platform,
+            "gitpython": "",
         }
         # get version of packages installed
         for pkg in libs.keys():

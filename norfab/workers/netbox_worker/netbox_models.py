@@ -2314,6 +2314,52 @@ class SyncVrfsResult(Result):
 
 
 # --------------------------------------------------------------------------
+# BGP COMMUNITY TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class BgpCommunitySyncInput(
+    NetboxNornirHostsFilters,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    dry_run: StrictBool = Field(
+        False,
+        description="Calculate the BGP community diff without writing to NetBox",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox device names to collect BGP communities from",
+    )
+    timeout: StrictInt = Field(
+        600,
+        gt=0,
+        description="Timeout in seconds for host resolution and community parsing",
+    )
+    with_approval: StrictBool = Field(
+        False,
+        description="Preview BGP community changes before writing to NetBox",
+        alias="with-approval",
+        json_schema_extra={"presence": True},
+    )
+    community_name_field: Union[StrictBool, StrictStr] = Field(
+        "community_name",
+        description="Optional custom field used to store live community-set names",
+        alias="community-name-field",
+    )
+
+
+class BgpCommunitySyncResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="BGP community synchronization actions keyed by NetBox model",
+    )
+
+
+# --------------------------------------------------------------------------
 # PREFIX TASKS MODELS
 # --------------------------------------------------------------------------
 

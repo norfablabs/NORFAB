@@ -5,7 +5,9 @@ from pathlib import Path
 from norfab.clients.nfweb.config import NFWebFooterConfig
 from norfab.clients.nfweb.monitoring.models import (
     MonitoringComponent,
+    MonitoringDatabaseStats,
     MonitoringSnapshot,
+    MonitoringWorkerDatabaseStats,
 )
 from norfab.clients.nfweb.topology.models import (
     TopologyCollectionError,
@@ -40,6 +42,8 @@ def test_typescript_contract_fields_match_pydantic_models() -> None:
     contracts = {
         "NFWebFooterConfig": NFWebFooterConfig,
         "MonitoringComponent": MonitoringComponent,
+        "MonitoringDatabaseStats": MonitoringDatabaseStats,
+        "MonitoringWorkerDatabaseStats": MonitoringWorkerDatabaseStats,
         "MonitoringSnapshot": MonitoringSnapshot,
         "TopologyNode": TopologyNode,
         "TopologyLink": TopologyLink,

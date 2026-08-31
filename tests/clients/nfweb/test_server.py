@@ -13,6 +13,7 @@ from norfab.clients.nfweb.monitoring.application import MonitoringApplication
 from norfab.clients.nfweb.monitoring.models import (
     MonitoringComponent,
     MonitoringSnapshot,
+    MonitoringWorkerDatabaseStats,
 )
 from norfab.clients.nfweb.monitoring.web import MonitoringBroadcaster
 from norfab.clients.nfweb.server import make_nfweb_application
@@ -76,6 +77,17 @@ class FakeMonitoringCollector:
         self.collect_count += 1
         return self.latest
 
+    def worker_database_stats(self, worker_name: str) -> MonitoringWorkerDatabaseStats:
+        if worker_name != "nornir-worker-1":
+            raise LookupError(f"worker '{worker_name}' is not in the latest sample")
+        return MonitoringWorkerDatabaseStats(
+            worker=worker_name,
+            service="nornir",
+            returned_jobs=7,
+            jobs_by_status={"COMPLETED": 6, "PENDING": 1},
+            jobs_by_task={"cli": 5, "parse": 2},
+        )
+
 
 class TestNFWebApplication(AsyncHTTPTestCase):
     def setUp(self) -> None:
@@ -115,6 +127,15 @@ class TestNFWebApplication(AsyncHTTPTestCase):
                 role="client",
                 status="active",
             ),
+            workers=[
+                MonitoringComponent(
+                    id="worker:nornir-worker-1",
+                    name="nornir-worker-1",
+                    role="worker",
+                    service="nornir",
+                    status="alive",
+                )
+            ],
         )
         self.monitoring_collector = FakeMonitoringCollector(self.monitoring_snapshot)
         super().setUp()
@@ -257,6 +278,22 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         assert len(json.loads(history.body)) == 1
         assert refresh.code == 200
         assert self.monitoring_collector.collect_count == 1
+
+    def test_monitoring_worker_database_route_returns_selected_worker_stats(
+        self,
+    ) -> None:
+        response = self.fetch("/api/v1/monitoring/workers/nornir-worker-1/database")
+
+        assert response.code == 200
+        statistics = json.loads(response.body)
+        assert statistics["worker"] == "nornir-worker-1"
+        assert statistics["returned_jobs"] == 7
+        assert statistics["jobs_by_status"] == {"COMPLETED": 6, "PENDING": 1}
+
+    def test_monitoring_worker_database_route_rejects_unknown_worker(self) -> None:
+        response = self.fetch("/api/v1/monitoring/workers/missing/database")
+
+        assert response.code == 404
 
     def test_selection_route_applies_scope(self) -> None:
         response = self.fetch(

@@ -41,6 +41,30 @@ export interface MonitoringComponent {
   service_count: number | null;
 }
 
+export interface MonitoringDatabaseStats {
+  total_jobs: number;
+  jobs_last_24h: number;
+  total_events: number;
+  avg_completion_seconds: number | null;
+  oldest_job_ts: string | null;
+  newest_job_ts: string | null;
+  jobs_by_status: Record<string, number>;
+  jobs_by_service: Record<string, number>;
+  events_by_severity: Record<string, number>;
+}
+
+export interface MonitoringWorkerDatabaseStats {
+  worker: string;
+  service: string | null;
+  returned_jobs: number;
+  window_limit: number;
+  potentially_truncated: boolean;
+  oldest_job_ts: string | null;
+  newest_job_ts: string | null;
+  jobs_by_status: Record<string, number>;
+  jobs_by_task: Record<string, number>;
+}
+
 export interface MonitoringSnapshot {
   collected_at: string;
   duration_ms: number;
@@ -48,6 +72,7 @@ export interface MonitoringSnapshot {
   broker: MonitoringComponent;
   client: MonitoringComponent;
   workers: MonitoringComponent[];
+  database: MonitoringDatabaseStats;
   errors: string[];
 }
 

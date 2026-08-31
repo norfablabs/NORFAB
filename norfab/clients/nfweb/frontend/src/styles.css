@@ -267,20 +267,41 @@ body,
   background-size: 36px 36px;
 }
 
+.monitoring-dashboard {
+  overflow: hidden;
+}
+
+.monitoring-dashboard-content {
+  height: 100%;
+  padding: 8px 12px;
+}
+
+.monitoring-dashboard-toolbar {
+  min-height: 28px;
+}
+
 .monitoring-loading {
   justify-content: center;
 }
 
 .monitoring-summary-card,
 .monitoring-chart-card,
-.monitoring-table-card {
+.monitoring-detail-card,
+.monitoring-worker-db-card {
   border-color: var(--line);
   background: rgba(17, 24, 33, 0.96);
-  box-shadow: 0 14px 34px rgba(2, 8, 14, 0.14);
+  box-shadow: 0 8px 22px rgba(2, 8, 14, 0.12);
+}
+
+.monitoring-summary-grid {
+  display: grid;
+  grid-template-columns: 1.45fr 1.45fr 0.9fr 1fr;
+  gap: 6px;
 }
 
 .monitoring-summary-card {
   position: relative;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -295,39 +316,129 @@ body,
   opacity: 0.58;
 }
 
-.monitoring-chart-card--wide {
-  grid-column: span 2;
+.monitoring-inline-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  gap: 4px 12px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.25;
 }
 
-.monitoring-metric {
-  padding: 11px 12px;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--mantine-radius-sm);
-  background: #0f1720;
+.monitoring-inline-metrics b {
+  display: block;
+  color: #e6edf3;
+  font-size: 12px;
 }
 
-.monitoring-table-card {
+.monitoring-compact-stat {
+  display: grid;
+  justify-items: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.monitoring-compact-stat b {
+  color: #e6edf3;
+  font-size: 13px;
+}
+
+.monitoring-comparison-grid {
+  min-height: 0;
+}
+
+.monitoring-chart-card {
+  min-width: 0;
   overflow: hidden;
 }
 
-.monitoring-table-card thead th {
-  border-color: var(--line);
-  background: #141d27;
-  color: #b8c4d2;
+.monitoring-detail-card {
+  min-height: 0;
+  overflow: hidden;
 }
 
-.monitoring-table-card tbody td {
-  border-color: var(--line-soft);
-  color: #aeb9c7;
+.monitoring-detail-toolbar {
+  min-height: 32px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.monitoring-detail-grid {
+  padding-top: 6px;
+}
+
+.monitoring-mini-chart {
+  min-width: 0;
+  padding: 2px 6px 0;
+  border-right: 1px solid var(--line-soft);
+}
+
+.monitoring-mini-chart-header {
+  height: 34px;
+  flex: 0 0 34px;
+  align-items: flex-start;
+}
+
+.monitoring-mini-chart:last-child {
+  border-right: 0;
+}
+
+.monitoring-worker-db-card {
+  min-height: 56px;
+  overflow: hidden;
+}
+
+.monitoring-worker-db-layout {
+  height: 100%;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.monitoring-worker-db-title {
+  min-width: 190px;
+}
+
+.monitoring-worker-db-stats {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+.monitoring-worker-db-metric {
+  display: grid;
+  min-width: 62px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.monitoring-worker-db-metric b {
+  color: #e6edf3;
+  font-size: 13px;
+}
+
+.monitoring-worker-db-tasks {
+  min-width: 180px;
+  max-width: 300px;
+}
+
+.monitoring-worker-db-tasks span {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.monitoring-worker-row {
-  cursor: pointer;
+.monitoring-job-status-completed {
+  color: #4bbbad !important;
 }
 
-.monitoring-worker-row:hover td {
-  background: rgba(75, 187, 173, 0.055);
+.monitoring-job-status-pending {
+  color: #6ea8fe !important;
+}
+
+.monitoring-job-status-failed {
+  color: #f06565 !important;
 }
 
 .control-panel {
@@ -645,8 +756,12 @@ body,
 }
 
 @media (max-width: 1180px) {
-  .monitoring-chart-card--wide {
-    grid-column: span 1;
+  .monitoring-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .monitoring-dashboard {
+    overflow: auto;
   }
 }
 
@@ -703,6 +818,19 @@ body,
   .monitoring-dashboard,
   .monitoring-loading {
     grid-column: 1;
+  }
+
+  .monitoring-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .monitoring-dashboard-content {
+    height: auto;
+  }
+
+  .monitoring-detail-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .app-footer {

@@ -6,7 +6,7 @@ import asyncio
 import logging
 import os
 import time
-from collections import deque
+from collections import Counter, deque
 from datetime import datetime, timedelta
 from typing import Any, Awaitable, Callable
 
@@ -16,7 +16,9 @@ from tornado.ioloop import PeriodicCallback
 from norfab.clients.nfweb.monitoring.config import MonitoringConfig
 from norfab.clients.nfweb.monitoring.models import (
     MonitoringComponent,
+    MonitoringDatabaseStats,
     MonitoringSnapshot,
+    MonitoringWorkerDatabaseStats,
 )
 
 log = logging.getLogger(__name__)
@@ -181,6 +183,14 @@ class MonitoringCollector:
             queue_depth=self.client.outbound_queue.qsize(),
         )
 
+        database = MonitoringDatabaseStats()
+        try:
+            job_stats = self.client.job_db.jobs_stats()
+            if isinstance(job_stats, dict):
+                database = MonitoringDatabaseStats.model_validate(job_stats)
+        except Exception as exc:
+            errors.append(f"local client job statistics unavailable: {exc}")
+
         workers: list[MonitoringComponent] = []
         for row in worker_rows:
             name = row.get("name")
@@ -233,7 +243,72 @@ class MonitoringCollector:
             broker=broker,
             client=client,
             workers=sorted(workers, key=lambda worker: worker.name),
+            database=database,
             errors=errors,
+        )
+
+    def worker_database_stats(
+        self, worker_name: str, window_limit: int = 1000
+    ) -> MonitoringWorkerDatabaseStats:
+        """Summarize recent jobs returned by a worker's existing ``job_list`` task."""
+        worker = next(
+            (
+                item
+                for item in (self.latest.workers if self.latest is not None else [])
+                if item.name == worker_name
+            ),
+            None,
+        )
+        if worker is None:
+            raise LookupError(f"worker '{worker_name}' is not in the latest sample")
+
+        response = self.client.run_job(
+            service=worker.service or "all",
+            workers=[worker_name],
+            task="job_list",
+            kwargs={"last": window_limit},
+            timeout=self.config.request_timeout,
+        )
+        worker_response = (response or {}).get(worker_name)
+        if not isinstance(worker_response, dict):
+            raise RuntimeError(f"worker '{worker_name}' did not return job data")
+        if worker_response.get("failed"):
+            error = worker_response.get("errors") or worker_response.get("result")
+            raise RuntimeError(str(error or "worker job database query failed"))
+
+        jobs = worker_response.get("result") or []
+        if not isinstance(jobs, list):
+            raise RuntimeError(f"worker '{worker_name}' returned invalid job data")
+
+        statuses = Counter(
+            str(job.get("status") or "UNKNOWN").upper()
+            for job in jobs
+            if isinstance(job, dict)
+        )
+        tasks = Counter(
+            str(job.get("task") or "unknown") for job in jobs if isinstance(job, dict)
+        )
+        timestamps = sorted(
+            str(timestamp)
+            for job in jobs
+            if isinstance(job, dict)
+            for timestamp in [
+                job.get("received_timestamp")
+                or job.get("started_timestamp")
+                or job.get("completed_timestamp")
+            ]
+            if timestamp
+        )
+        return MonitoringWorkerDatabaseStats(
+            worker=worker_name,
+            service=worker.service,
+            returned_jobs=len(jobs),
+            window_limit=window_limit,
+            potentially_truncated=len(jobs) >= window_limit,
+            oldest_job_ts=timestamps[0] if timestamps else None,
+            newest_job_ts=timestamps[-1] if timestamps else None,
+            jobs_by_status=dict(statuses),
+            jobs_by_task=dict(tasks.most_common()),
         )
 
     def health(self) -> dict[str, Any]:

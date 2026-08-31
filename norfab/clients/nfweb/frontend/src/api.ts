@@ -2,6 +2,7 @@ import type {
   DeviceInventory,
   DeviceSelection,
   MonitoringSnapshot,
+  MonitoringWorkerDatabaseStats,
   NFWebBrowserConfig,
   TopologyHistoryItem,
   TopologyLogEntry,
@@ -39,6 +40,10 @@ export const api = {
     request<MonitoringSnapshot[]>("/api/v1/monitoring/history"),
   refreshMonitoring: () =>
     request<MonitoringSnapshot>("/api/v1/monitoring/refresh", "POST"),
+  workerDatabaseStats: (workerName: string) =>
+    request<MonitoringWorkerDatabaseStats>(
+      `/api/v1/monitoring/workers/${encodeURIComponent(workerName)}/database`,
+    ),
   snapshot: (id: string) =>
     request<TopologySnapshot>(
       `/api/v1/topology/snapshots/${encodeURIComponent(id)}`,

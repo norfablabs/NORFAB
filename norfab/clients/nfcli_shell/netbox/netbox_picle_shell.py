@@ -20,6 +20,7 @@ from rich.console import Console
 from norfab.workers.netbox_worker.netbox_models import GraphqlInput, NetboxCommonArgs
 
 from ..common import log_error_or_result, run_future_job
+from .netbox_picle_shell_bgp_community_sync import BgpCommunitySyncShell
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_check_sync import CheckSyncCommands
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -273,6 +274,11 @@ class CreateCommands(BaseModel):
 
 
 class SyncCommands(BaseModel):
+    bgp_communities: BgpCommunitySyncShell = Field(
+        None,
+        description="Sync live BGP communities with NetBox",
+        alias="bgp-communities",
+    )
     device_inventory: SyncDeviceInventoryShell = Field(
         None,
         description="Sync device inventory facts e.g. serial number",
