@@ -1,7 +1,11 @@
+import hashlib
 import os
 import pprint
+from typing import Any
 
 import pytest
+
+from norfab.core.client import NFPClient
 
 pytestmark = [
     pytest.mark.filesharing,
@@ -69,6 +73,14 @@ class TestFetchFile:
         assert ret["content"] == None, "content should be empty"
         assert ret["error"], "expected error"
 
+    def test_fetch_file_invalid_git_url_format(self, nfclient):
+        """Test that a Git URL includes both a remote and file path."""
+        ret = nfclient.fetch_file(url="git://filesharing")
+
+        assert ret["status"] == "404", "file fetch status is wrong"
+        assert ret["content"] is None, "content should be empty"
+        assert ret["error"] == "Git URL resolution failed"
+
     def test_fetch_file_nested_file(self, nfclient):
         """Test fetching a file from a subdirectory"""
         nfclient.delete_fetched_files(filepath="*nested_file.txt")
@@ -96,14 +108,79 @@ class TestFetchFile:
             "nf://..\\pyproject.toml",
             "nf://filesharing/../../pyproject.toml",
             "nf://filesharing/..\\..\\pyproject.toml",
+            "git://filesharing/../../pyproject.toml",
+            "git://filesharing/..\\..\\pyproject.toml",
         ],
     )
     def test_fetch_file_rejects_path_traversal(self, nfclient, url):
-        """Client should reject nf:// paths that escape fetchedfiles root."""
+        """Client should reject file URLs that escape fetchedfiles root."""
         ret = nfclient.fetch_file(url=url)
         pprint.pprint(ret)
 
-        assert ret["status"] == "500", "expected client-side rejection"
+        expected_status = "404" if url.startswith("git://") else "500"
+        assert ret["status"] == expected_status, "expected unsafe path rejection"
         assert ret["content"] is None, "content should be empty"
         assert ret["error"], "expected error"
-        assert "Invalid url path" in ret["error"], "wrong error message"
+        if url.startswith("git://"):
+            assert ret["error"] == "Git URL resolution failed"
+        else:
+            assert "Invalid url path" in ret["error"], "wrong error message"
+
+
+class TestFetchFileGitUrl:
+    def test_fetch_git_url_resolves_custom_mount(self, tmp_path: Any) -> None:
+        """Client should sync a remote and fetch from its owning worker and mount."""
+        client = NFPClient.__new__(NFPClient)
+        client.base_dir = str(tmp_path)
+        client.file_transfers = {}
+        destination = (
+            tmp_path / "fetchedfiles" / "repositories" / "network-assets" / "README.md"
+        )
+        destination.parent.mkdir(parents=True)
+        content = "Git-backed file content"
+        destination.write_text(content, encoding="utf-8")
+        md5hash = hashlib.md5(content.encode()).hexdigest()
+        calls = []
+
+        class JobDatabase:
+            @staticmethod
+            def get_job(_uuid: str) -> None:
+                return None
+
+        def run_job(**kwargs: Any) -> dict[str, Any]:
+            calls.append(kwargs)
+            worker = "filesharing-worker-1"
+            if kwargs["task"] == "resolve_git_url":
+                return {
+                    worker: {
+                        "failed": False,
+                        "result": "nf://repositories/network-assets/README.md",
+                    }
+                }
+            if kwargs["task"] == "file_details":
+                return {
+                    worker: {
+                        "failed": False,
+                        "result": {
+                            "md5hash": md5hash,
+                            "size_bytes": len(content),
+                            "exists": True,
+                        },
+                    }
+                }
+            raise AssertionError(f"Unexpected task {kwargs['task']}")
+
+        client.job_db = JobDatabase()
+        client.run_job = run_job
+
+        result = client.fetch_file("git://network-assets/README.md", read=True)
+
+        assert result == {"status": "200", "content": content, "error": None}
+        assert [call["task"] for call in calls] == [
+            "resolve_git_url",
+            "file_details",
+        ]
+        assert calls[-1]["workers"] == ["filesharing-worker-1"]
+        assert calls[-1]["kwargs"]["url"] == (
+            "nf://repositories/network-assets/README.md"
+        )

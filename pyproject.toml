@@ -3,7 +3,7 @@ name = "norfab"
 
 [tool.poetry]
 name = "norfab"
-version = "0.22.1"
+version = "0.22.2"
 description = "Network Automations Fabric [NorFab] - communication networks automations"
 authors = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
 maintainers = ["Denis Mulyalin <d.mulyalin@gmail.com>"]
@@ -325,6 +325,7 @@ markers = [
     "filesharing_create_remote_git: FileSharing create_remote_git task tests",
     "filesharing_delete_remote_git: FileSharing delete_remote_git task tests",
     "filesharing_git_clone: FileSharing git_clone task tests",
+    "filesharing_resolve_git_url: FileSharing resolve_git_url task tests",
     "workflow: Workflow service tests",
     "dummy: dummy plugin service tests",
     "clientagent: Client agent tests",

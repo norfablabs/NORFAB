@@ -2,13 +2,14 @@
 
 ## Status
 
-Accepted, 2026-08-29.
+Accepted, 2026-08-29. Amended, 2026-09-01, to add first-class on-demand
+`git://` file retrieval.
 
 ## Decision
 
 The File Sharing service will mirror configured Git repository branches into
-local folders. Clients and workers remain unchanged and access mirrored files
-only through existing URLs:
+local folders. Clients and workers can access already mirrored files through
+existing URLs:
 
 ```text
 nf://<remote-name>/<path/to/file>
@@ -16,8 +17,12 @@ nf://<remote-name>/<path/to/file>
 
 The initial implementation is read-only. It supports startup creation, explicit
 creation and deletion, and periodic refresh from Git remotes to local storage.
-Remote write-back, client-side remote URLs, webhooks, and SSH credential
-management are out of scope.
+Remote write-back, webhooks, and SSH credential management are out of scope.
+The client-side `git://<remote-name>/<path>` URL synchronizes a configured
+remote on demand before retrieving the file from its published `nf://` mount.
+`NFPClient` delegates the complete resolution to the File Sharing
+`resolve_git_url` task; the task validates the remote and path, synchronizes the
+repository, and returns the corresponding `nf://` URL.
 
 ## Remote Inventory
 
@@ -82,10 +87,12 @@ for Git authentication.
 
 `type: git` selects the GitPython implementation in `git_tasks.py`. GitPython
 runs the system Git executable and fetches the configured branch over HTTPS.
-Public remotes use no authentication environment. For authenticated remotes,
+Public remotes use no authentication header. For authenticated remotes,
 pass `username` and `password` as a temporary HTTP Basic authorization header
 through the Git process environment. Do not put credentials in the clone URL or
-persist them in Git configuration.
+persist them in Git configuration. Every Git fetch disables terminal prompts,
+Git Credential Manager interaction and GUI prompts, and configured credential
+helpers. Authentication failures fail the task without requesting user input.
 
 ## Local Layout and URLs
 
@@ -224,8 +231,10 @@ git_tasks.py            # Git authentication, synchronization, and lifecycle tas
 
 Add `GitPython` to the File Sharing optional dependencies. The system Git
 executable must be installed; the all-in-one and test container images include
-it. Do not change
-`NFPClient`, `NFPWorker`, the broker, NFP, or any consumer worker.
+it. The 2026-09-01 amendment adds surgical changes to `NFPClient` and
+`NFPWorker` for `git://` URL recognition and resolution. The broker, NFP, and
+consumer workers remain unchanged. Git operations continue to run only as File
+Sharing tasks.
 
 Expose these new tasks:
 
@@ -233,6 +242,7 @@ Expose these new tasks:
 - `create_remote_git`
 - `delete_remote_git`
 - `git_clone`
+- `resolve_git_url`
 
 Periodic refresh invokes the same `git_clone` implementation.
 

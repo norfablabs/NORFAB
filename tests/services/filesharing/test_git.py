@@ -3,6 +3,9 @@ from typing import Any
 
 import pytest
 
+from norfab.models import Result
+from norfab.workers.filesharing_worker.filesharing_worker import FileSharingWorker
+
 pytestmark = [
     pytest.mark.filesharing,
     pytest.mark.filesharing_git,
@@ -12,6 +15,63 @@ WORKER = "filesharing-worker-1"
 REMOTE = "norfab-gitsync-test-main"
 SECONDARY_REMOTE = "norfab-gitsync-test-secondary"
 PUBLIC_REMOTE = "norfab-gitsync-test-public"
+
+
+@pytest.mark.filesharing_resolve_git_url
+class TestResolveGitUrl:
+    def test_resolve_git_url_validates_and_resolves_custom_mount(
+        self, tmp_path: Any
+    ) -> None:
+        worker = FileSharingWorker.__new__(FileSharingWorker)
+        worker.base_dir = str(tmp_path)
+        worker.remotes = {
+            "network-assets": {
+                "type": "git",
+                "mount": "nf://repositories/network-assets",
+            }
+        }
+        published_file = (
+            tmp_path / "repositories" / "network-assets" / "templates" / "base.j2"
+        )
+        published_file.parent.mkdir(parents=True)
+        published_file.write_text("template", encoding="utf-8")
+        synchronized = []
+
+        def git_clone(_job: Any, name: str) -> Result:
+            synchronized.append(name)
+            return Result(result={"status": "unchanged"})
+
+        worker.git_clone = git_clone
+
+        resolved = worker.resolve_git_url(
+            None, "git://network-assets/templates/base.j2"
+        )
+        unsafe = worker.resolve_git_url(None, "git://network-assets/../../outside.txt")
+
+        assert resolved.failed is False
+        assert resolved.result == "nf://repositories/network-assets/templates/base.j2"
+        assert unsafe.failed is True
+        assert unsafe.errors == [
+            "'git://network-assets/../../outside.txt' - invalid Git URL path"
+        ]
+        assert synchronized == ["network-assets"]
+
+    def test_resolve_git_url_supports_client_fetch(self, nfclient: Any) -> None:
+        fetched = nfclient.fetch_file(url=f"git://{REMOTE}/README.md", read=True)
+
+        assert fetched["status"] == "200"
+        assert "norfab-gitsync-test" in fetched["content"]
+
+    def test_resolve_git_url_returns_published_url(self, nfclient: Any) -> None:
+        ret = nfclient.run_job(
+            "filesharing",
+            "resolve_git_url",
+            workers=[WORKER],
+            kwargs={"url": f"git://{REMOTE}/README.md"},
+        )[WORKER]
+
+        assert ret["failed"] is False
+        assert ret["result"] == f"nf://{REMOTE}/README.md"
 
 
 @pytest.mark.filesharing_get_remotes

@@ -203,6 +203,7 @@ nav:
       - Fetch File: workers/filesharing/services_filesharing_service_tasks_fetch_file.md
       - Create Git Remote: workers/filesharing/services_filesharing_service_tasks_create_remote_git.md
       - Clone Git Remote: workers/filesharing/services_filesharing_service_tasks_git_clone.md
+      - Resolve Git URL: workers/filesharing/services_filesharing_service_tasks_resolve_git_url.md
       - Delete Git Remote: workers/filesharing/services_filesharing_service_tasks_delete_remote_git.md
 
 - Clients:

@@ -1082,7 +1082,8 @@ root and should be disabled for analysis-only profiles.
 ## File Sharing service
 
 The [File Sharing service](workers/filesharing/services_filesharing_service.md)
-distributes controlled inventory assets through `nf://` URLs.
+distributes controlled inventory assets through `nf://` URLs and synchronizes
+configured Git remotes on demand through `git://` URLs.
 
 ### File discovery
 
@@ -1108,8 +1109,10 @@ verifies the completed stream, and can return a path or decoded text.
 **Interfaces:** Python API is preferred; direct NFCLI, REST, or MCP calls expose
 lower-level chunk-oriented results. **Use cases:** distributing templates and
 software efficiently, resuming chunk flow, and avoiding duplicate downloads.
-**Limitations:** only `nf://` relative paths under the configured base directory
-are accepted.
+`git://<remote-name>/<path>` first synchronizes the named remote through the
+File Sharing service, then streams the file from its configured `nf://` mount.
+**Limitations:** only `nf://` paths under the configured base directory and
+paths from configured `git://` remotes are accepted.
 [Task details](workers/filesharing/services_filesharing_service_tasks_fetch_file.md)
 
 ### Read-only Git remotes
@@ -1117,6 +1120,10 @@ are accepted.
 Uses GitPython to shallow-fetch configured Git repository branches into
 independent managed folders and serves each snapshot through its configurable,
 safe `nf://<mount>/...` path. Mounts default to the remote name. Configured
+clients and workers can use `git://<remote-name>/<path>` to synchronize a
+remote on demand and retrieve a file in one operation. Git access and
+credentials remain isolated to the File Sharing worker, whose
+`resolve_git_url` task returns the published `nf://` URL. Configured
 local repositories are initialized on worker startup without fetching content;
 operators can list remotes, inspect synchronization state, explicitly create or
 delete runtime-registered remote definitions and local data, or enable
@@ -1124,9 +1131,11 @@ interval-based refresh. NFCLI exposes these operations under `filesharing git
 create-remote`, `clone-remote`, and `delete-remote`.
 Public HTTPS repositories require no credentials. Authenticated remotes support
 username/password or username/token authentication, with credentials redacted
-from inventory, task results, errors, and logs. **Interfaces:**
+from inventory, task results, errors, and logs. Git authentication is fully
+non-interactive; rejected credentials fail the task without opening terminal,
+browser, credential-helper, or GUI prompts. **Interfaces:**
 Python API, NFCLI, REST, and MCP tasks `get_remotes`, `create_remote_git`,
-`delete_remote_git`, and `git_clone`. **Use cases:**
+`delete_remote_git`, `git_clone`, and `resolve_git_url`. **Use cases:**
 distributing version-controlled templates, playbooks, and automation assets
 without changing consuming workers.
 NFCLI renders `show filesharing remotes brief` as a table, `detail` with complete

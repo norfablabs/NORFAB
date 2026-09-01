@@ -141,6 +141,14 @@ class RemoteNameInput(BaseModel, use_enum_values=True, populate_by_name=True):
     name: StrictStr = Field(..., min_length=1, description="Configured remote name")
 
 
+class ResolveGitUrlInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    url: StrictStr = Field(
+        ...,
+        min_length=1,
+        description="Git file URL in git://<remote-name>/<path> format",
+    )
+
+
 class CreateRemoteGitInput(RemoteInventory):
     """Complete configuration used to register and initialize a Git remote."""
 
@@ -175,6 +183,13 @@ class DeleteRemoteGitResult(Result):
 class GitCloneResult(Result):
     result: Union[RemoteState, None] = Field(
         None, description="Remote state after Git synchronization"
+    )
+
+
+class ResolveGitUrlResult(Result):
+    result: Union[StrictStr, None] = Field(
+        None,
+        description="Resolved nf:// URL after successful Git synchronization",
     )
 
 

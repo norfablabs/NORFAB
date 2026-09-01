@@ -1643,6 +1643,28 @@ class NFPClient(object):
         uuid = uuid4().hex
         result = {"status": "200", "content": None, "error": None}
         downloaded = False
+        filesharing_worker = None
+
+        # Ask File Sharing to synchronize and resolve Git-backed URLs, then use
+        # the existing nf:// transfer path against the worker that owns the remote.
+        if url.startswith("git://"):
+            resolved_urls = self.run_job(
+                service="filesharing",
+                workers="all",
+                task="resolve_git_url",
+                kwargs={"url": url},
+                timeout=timeout,
+            )
+            for worker_name, worker_result in resolved_urls.items():
+                if worker_result["failed"]:
+                    continue
+                url = worker_result["result"]
+                filesharing_worker = worker_name
+                break
+            else:
+                result["status"] = "404"
+                result["error"] = "Git URL resolution failed"
+                return result
 
         # run sanity checks
         if not url.startswith("nf://"):
@@ -1651,7 +1673,7 @@ class NFPClient(object):
             return result
 
         # prevent path traversal / absolute paths
-        url_path = url.replace("nf://", "")
+        url_path = url.replace("nf://", "").replace("\\", "/")
         url_path = url_path.lstrip("/\\")
         destination = os.path.abspath(
             os.path.join(self.base_dir, "fetchedfiles", *url_path.split("/"))
@@ -1675,7 +1697,7 @@ class NFPClient(object):
         # get file details
         file_details = self.run_job(
             service="filesharing",
-            workers="all",
+            workers=[filesharing_worker] if filesharing_worker else "all",
             task="file_details",
             kwargs={"url": url},
             timeout=timeout,

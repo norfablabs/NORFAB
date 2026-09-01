@@ -2003,7 +2003,7 @@ class NFPWorker:
         Returns:
             bool: True if the URL supported by NorFab File Service, False otherwise.
         """
-        return any(str(url).startswith(k) for k in ["nf://"])
+        return any(str(url).startswith(k) for k in ["nf://", "git://"])
 
     def fetch_file(
         self, url: str, raise_on_fail: bool = False, read: bool = True
@@ -2012,8 +2012,9 @@ class NFPWorker:
         Function to download file from broker File Sharing Service
 
         Args:
-            url: file location string in ``nf://<filepath>`` format
-            raise_on_fail: raise FIleNotFoundError if download fails
+            url: file location string in ``nf://<filepath>`` or
+                ``git://<remote-name>/<filepath>`` format
+            raise_on_fail: raise FileNotFoundError if download fails
             read: if True returns file content, return OS path to saved file otherwise
 
         Returns:
@@ -2069,7 +2070,7 @@ class NFPWorker:
                 renderer = j2env.from_string(template)
                 template = renderer.render(**context)
             # download template file and render it again
-            if template.startswith("nf://"):
+            if self.is_url(template):
                 renderer = template_cache.get(template)
                 if renderer is None:
                     filepath = self.jinja2_fetch_template(template)
@@ -2091,7 +2092,7 @@ class NFPWorker:
         other templates referenced using "include" statements.
 
         Args:
-            url (str): A URL in the format ``nf://file/path`` to download the file.
+            url (str): An ``nf://`` or ``git://`` URL to download.
 
         Returns:
             str: The file path of the downloaded Jinja2 template.
@@ -2118,8 +2119,8 @@ class NFPWorker:
         # run recursion on include statements
         for node in parsed_content.find_all(Include):
             include_file = node.template.value
-            base_path = os.path.split(url)[0]
-            self.jinja2_fetch_template(os.path.join(base_path, include_file))
+            base_url = url.rsplit("/", 1)[0]
+            self.jinja2_fetch_template(f"{base_url}/{include_file}")
 
         return filepath
 
