@@ -18,14 +18,14 @@
         <link rel="prev" href="../clients_overview/">
       
       
-        <link rel="next" href="../clients_nfweb_topology/">
+        <link rel="next" href="../clients_nfweb_monitoring/">
       
       
         
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2605,6 +2605,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4051,6 +4079,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -4299,13 +4355,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#current-application-3d-network-topology" class="md-nav__link">
+  <a href="#built-in-applications" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Current Application: 3D Network Topology
+        Built-in Applications
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Built-in Applications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d-network-topology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3D Network Topology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4368,6 +4452,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -6734,13 +6846,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#current-application-3d-network-topology" class="md-nav__link">
+  <a href="#built-in-applications" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Current Application: 3D Network Topology
+        Built-in Applications
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Built-in Applications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d-network-topology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3D Network Topology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -6843,20 +6983,19 @@ operator's computer. It connects directly to an existing NORFAB broker through t
 native Python client and presents focused browser applications to browsers on the
 operator's network.</p>
 <p>The application sidebar uses Mantine's nested-navbar pattern for Overview,
-Dashboards, and Admin. Topology is the first nested dashboard; the other sections
-are intentionally empty until additional NFWeb applications are introduced.
-Dashboard-specific controls belong to the center application header rather than
-the application sidebar.</p>
+Dashboards, and Admin. The Dashboards section contains runtime Monitoring and 3D
+Topology. Dashboard-specific controls belong to the center application header
+rather than the application sidebar.</p>
 <p>NFWeb uses Mantine's maintained React components and Tabler icons for its common
 interface controls. Selects, buttons, filters, accordions, sliders, tabs, badges,
 tooltips, and alerts therefore share one accessible component system. Custom CSS
-is reserved for the application grid, 3D topology stage, inspector data, and
-terminal event presentation.</p>
-<p>The 3D network topology dashboard is NFWeb's <strong>first application</strong>. It proves the
-local runtime, frontend packaging, live updates, bounded application storage, and
-safe browser boundary, but topology does not define the long-term scope of NFWeb.
-Future NFWeb applications can cover other visual operations, assurance,
-troubleshooting, reporting, inventory, workflow, and service-specific use cases.</p>
+is reserved for the application grid, charts, 3D topology stage, inspector data,
+and terminal event presentation. Monitoring charts use the maintained
+<code>echarts-for-react</code> integration instead of an NFWeb-specific chart wrapper.</p>
+<p>The 3D network topology dashboard is NFWeb's first application. Runtime Monitoring
+is the second built-in application. It shows the broker, NFWeb client, and workers
+using existing NORFAB management and watchdog interfaces, with live charts and a
+non-persistent three-hour history.</p>
 <p>NFWeb does not require a FastAPI worker, Node.js, an internet connection, or a
 central web deployment at runtime. It listens on all IPv4 interfaces by default
 and does not start a broker or any workers.</p>
@@ -6872,7 +7011,8 @@ NFWeb client
     |-- native NFPClient connection
     |-- shared lifecycle, configuration, and browser policy
     |-- applications
-        |-- topology (first built-in application)
+        |-- monitoring (live runtime state and in-memory history)
+        |-- topology (live and historical 3D network view)
         |-- future focused applications
     |
     v
@@ -6883,7 +7023,19 @@ domain model, narrowly scoped browser API, collection or execution behavior, and
 local state. This prevents the browser from becoming a generic passthrough for
 arbitrary NORFAB jobs while allowing new capabilities to use the full native
 client inside the trusted local Python process.</p>
-<h2 id="current-application-3d-network-topology">Current Application: 3D Network Topology<a class="headerlink" href="#current-application-3d-network-topology" title="Permanent link">¤</a></h2>
+<h2 id="built-in-applications">Built-in Applications<a class="headerlink" href="#built-in-applications" title="Permanent link">¤</a></h2>
+<h3 id="runtime-monitoring">Runtime Monitoring<a class="headerlink" href="#runtime-monitoring" title="Permanent link">¤</a></h3>
+<p>The Monitoring dashboard polls the broker's <code>show_broker</code> and <code>show_workers</code>
+management operations and each worker's <code>get_watchdog_stats</code> task. It displays
+component health, CPU and resident memory, uptime, worker keepalive transmit and
+receive counts, and the local NFWeb client's message, reconnect, and queue
+counters. ECharts provides gauges and time-series/bar charts, while a WebSocket
+pushes each completed sample to every open dashboard.</p>
+<p>Monitoring keeps at most three hours of samples in Python process memory. It does
+not create a telemetry journal or database table, and all monitoring history is
+lost when NFWeb restarts. See
+<a href="../clients_nfweb_monitoring/">Runtime Monitoring Dashboard</a> for details.</p>
+<h3 id="3d-network-topology">3D Network Topology<a class="headerlink" href="#3d-network-topology" title="Permanent link">¤</a></h3>
 <p>The first release opens directly into a live and historical 3D network topology
 application. It combines intended and observed network layers into a persistent
 Vasturiano scene, provides weather-map status and utilization styling, and retains
@@ -6904,14 +7056,19 @@ sources, configuration, storage, controls, and operational behavior.</p>
 <span class="w">      </span><span class="nt">fastapi_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8000/docs&quot;</span>
 <span class="w">      </span><span class="nt">docs_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://docs.norfablabs.com/&quot;</span>
 <span class="w">      </span><span class="nt">github_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/norfablabs/NORFAB&quot;</span>
+<span class="w">    </span><span class="nt">monitoring</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">collection_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">retention_minutes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">180</span>
+<span class="w">      </span><span class="nt">request_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 </code></pre></div>
 <p>The shared footer displays the optional <code>message</code> and pictogram links for the
 configured FastAPI service, NORFAB documentation, and repository. Set any footer
 URL to <code>null</code> to hide that link.</p>
 <p>Application settings are grouped by application below <code>client.nfweb</code>; see each
-application's documentation for its fields. NFWeb runtime data uses
+application's documentation for its fields. Persistent applications use
 <code>__norfab__/nfweb/nfweb.sqlite</code>, with application-owned tables inside that local
-database.</p>
+database. Monitoring deliberately uses memory only and never writes its samples
+to this database.</p>
 <h2 id="run-nfweb">Run NFWeb<a class="headerlink" href="#run-nfweb" title="Permanent link">¤</a></h2>
 <p>Start the broker and the service workers required by the installed NFWeb
 applications separately. From the client computer, use NFCLI's web UI mode:</p>
@@ -6925,9 +7082,8 @@ command-specific configuration overrides.</p>
 <p>Press Ctrl+C once to stop accepting connections and release application storage
 and the native NORFAB client. If cleanup becomes stuck, press Ctrl+C a second time
 to force the NFWeb process to exit with status 130.</p>
-<p>The current release routes the root page to the topology application. As more
-applications are added, NFWeb can introduce a local application home and
-application-specific navigation without changing its broker connection or
+<p>The current release opens Topology by default. The dashboard navigation switches
+between Monitoring and Topology without changing the broker connection or
 production runtime.</p>
 <h2 id="adding-future-applications">Adding Future Applications<a class="headerlink" href="#adding-future-applications" title="Permanent link">¤</a></h2>
 <p>NFWeb applications should follow a small set of boundaries:</p>
@@ -6948,7 +7104,7 @@ topology use case.</p>
 <h2 id="security-boundary">Security Boundary<a class="headerlink" href="#security-boundary" title="Permanent link">¤</a></h2>
 <p>NFWeb binds to every IPv4 interface by default and accepts connections from any
 source IP that can reach its port. HTTP routes and WebSocket upgrades do not
-restrict the browser origin. The current browser API contains only
+restrict the browser origin. The current browser API contains only monitoring- and
 topology-specific routes and cannot submit arbitrary NORFAB service or task names.</p>
 <p>NFWeb does not currently provide authentication, authorization, origin filtering,
 or TLS. Any website reachable by an operator's browser can attempt requests to an
@@ -7024,13 +7180,13 @@ runtime, application contracts, or frontend.</p>
         
         
           
-          <a href="../clients_nfweb_topology/" class="md-footer__link md-footer__link--next" aria-label="Next: 3D Network Topology Application">
+          <a href="../clients_nfweb_monitoring/" class="md-footer__link md-footer__link--next" aria-label="Next: Runtime Monitoring Dashboard">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                3D Network Topology Application
+                Runtime Monitoring Dashboard
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -7099,7 +7255,7 @@ runtime, application contracts, or frontend.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

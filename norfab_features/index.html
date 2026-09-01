@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1310,6 +1310,17 @@
     <span class="md-ellipsis">
       
         BGP peering lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-bgp-community-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live BGP community reconciliation
       
     </span>
   </a>
@@ -4118,6 +4129,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -5564,6 +5603,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../workers/filesharing/services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -5745,6 +5812,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
   
 
     
@@ -9024,6 +9119,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#live-bgp-community-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live BGP community reconciliation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#interface-description-updates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -9610,7 +9716,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 30 August 2026</em></p>
+<p><em>Last updated: 1 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -9711,6 +9817,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 <li><a href="#live-ip-and-mac-reconciliation">Live IP and MAC reconciliation</a></li>
 <li><a href="#hardware-inventory-reconciliation">Hardware inventory reconciliation</a></li>
 <li><a href="#bgp-peering-lifecycle">BGP peering lifecycle</a></li>
+<li><a href="#live-bgp-community-reconciliation">Live BGP community reconciliation</a></li>
 <li><a href="#interface-description-updates">Interface description updates</a></li>
 <li><a href="#drift-assessment-and-coordinated-synchronization">Drift assessment and coordinated synchronization</a></li>
 </ul>
@@ -9796,7 +9903,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 </tr>
 <tr>
 <td><strong>NFWeb</strong></td>
-<td>Generic browser client using native NORFAB access; the first application is live and historical 3D topology</td>
+<td>Generic browser client with runtime monitoring and live/historical 3D topology using native NORFAB access</td>
 <td>Visual operations, observability, troubleshooting, reporting, and future web-based tools</td>
 </tr>
 <tr>
@@ -9835,6 +9942,22 @@ packaged frontend, browser boundary, and application-specific services without
 requiring a FastAPI worker or a central web deployment. It is intended to grow into
 a collection of focused web applications for visual operations, observability,
 troubleshooting, reporting, and guided workflows.</p>
+<p>The <strong>runtime monitoring dashboard</strong> polls existing broker management and worker
+watchdog interfaces to show broker, local NFWeb client, and worker health; CPU and
+resident memory; worker resource comparisons; stacked fabric-wide broker and
+worker CPU and memory consumption; selected-worker trends; and
+local-client job totals and interval status activity from the existing client job
+database. Selecting a worker also shows a full-width status card summarizing its
+recent jobs, statuses, and tasks through the existing worker <code>job_list</code> task.
+ECharts supplies resource trends, stacked job-status activity bars,
+data zoom, and
+worker comparisons. Worker comparisons rank combined CPU and relative-memory
+demand on each refresh, show ten workers at once with synchronized scrolling, and
+offer 5, 10, 30, or 60-second reads of the latest shared sample. Samples are pushed to
+browsers over WebSocket and retained
+only in process memory for up to three hours; restart clears them and no monitoring
+database or telemetry journal is created. <strong>Monitoring use cases:</strong> live fabric
+health, worker availability, resource trend inspection, and keepalive diagnosis.</p>
 <p>The first built-in application is the <strong>3D topology observatory</strong>. Its persistent
 Vasturiano scene combines intended NetBox cabling with observed LLDP, BGP, and
 interface state, makes partial collection failures visible, and stores compressed
@@ -9854,11 +9977,12 @@ provides nested application navigation and searchable, sortable inspector tables
 The local runtime supports graceful Ctrl+C
 shutdown with a second-interrupt forced-exit fallback. <strong>Topology use cases:</strong>
 weather-map dashboards, topology exploration, current-state windows, incident
-timelines, and intended-versus-observed context. <strong>Current limitations:</strong> the first
-release contains only the topology application, has no authentication, origin
-filtering, or TLS, and is polling-based. Restrict remote access to trusted
-administrative networks. Unknown telemetry is not inferred.
+timelines, and intended-versus-observed context. <strong>Current limitations:</strong> NFWeb has
+no authentication, origin filtering, or TLS, and both applications are polling-based.
+Restrict remote access to trusted administrative networks. Unknown telemetry is
+not inferred and monitoring does not capture message payloads.
 <a href="../clients_nfweb_overview/">NFWeb client details</a> ·
+<a href="../clients_nfweb_monitoring/">Monitoring dashboard details</a> ·
 <a href="../clients_nfweb_topology/">Topology application details</a></p>
 <h2 id="core-platform">Core platform<a class="headerlink" href="#core-platform" title="Permanent link">¤</a></h2>
 <p>NORFAB's <a href="../reference_architecture_norfab/">broker, clients, and workers</a> provide
@@ -10375,10 +10499,13 @@ external allocators require operational coordination.
 creates interfaces but does not discover live state; device and interface type
 inputs must match the NetBox model.
 <a href="../workers/netbox/services_netbox_service_tasks_create_device_interfaces/">Task details</a></p>
+<p>Live-state synchronization tasks report per-device Nornir collection failures
+in their NetBox task errors while retaining usable results from other devices.</p>
 <h3 id="live-interface-reconciliation">Live interface reconciliation<a class="headerlink" href="#live-interface-reconciliation" title="Permanent link">¤</a></h3>
 <p>Collects live interface configuration and operational data through Nornir.
 Operational state fills MTU, duplex, and speed when absent from configuration
-parsing. The task computes a desired/current diff, optionally maps live
+parsing. Missing or zero live MTU and speed values preserve existing NetBox
+values. The task computes a desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
 Interface-name and VLAN-group mapping rules can be supplied inline or loaded
@@ -10436,6 +10563,14 @@ consistent IP/ASN/VRF modelling.
 <a href="../workers/netbox/services_netbox_service_tasks_create_bgp_peering/">Create</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_update_bgp_peering/">Update</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/">Synchronize</a></p>
+<h3 id="live-bgp-community-reconciliation">Live BGP community reconciliation<a class="headerlink" href="#live-bgp-community-reconciliation" title="Permanent link">¤</a></h3>
+<p>Collects named BGP communities from supported live devices, stores route
+targets in NetBox IPAM and other types in the NetBox BGP plugin, and appends
+missing live names for the same value into an optional custom field. <strong>Use
+cases:</strong> community inventory, naming audits, and source-of-truth onboarding.
+<strong>Limitations:</strong> parser and NetBox plugin value support determine coverage;
+objects are never deleted.
+<a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_community/">Task details</a></p>
 <h3 id="interface-description-updates">Interface description updates<a class="headerlink" href="#interface-description-updates" title="Permanent link">¤</a></h3>
 <p>Writes static or Jinja2-rendered descriptions using interface and connection
 context. <strong>Use cases:</strong> circuit labels, neighbour descriptions, and
@@ -10619,7 +10754,8 @@ inputs. <strong>Limitations:</strong> write/edit tools still modify files inside
 root and should be disabled for analysis-only profiles.</p>
 <h2 id="file-sharing-service">File Sharing service<a class="headerlink" href="#file-sharing-service" title="Permanent link">¤</a></h2>
 <p>The <a href="../workers/filesharing/services_filesharing_service/">File Sharing service</a>
-distributes controlled inventory assets through <code>nf://</code> URLs.</p>
+distributes controlled inventory assets through <code>nf://</code> URLs and synchronizes
+configured Git remotes on demand through <code>git://</code> URLs.</p>
 <h3 id="file-discovery">File discovery<a class="headerlink" href="#file-discovery" title="Permanent link">¤</a></h3>
 <p>Lists one directory level or recursively walks files beneath the configured
 base directory. <strong>Use cases:</strong> locating templates, playbooks, golden configs,
@@ -10639,13 +10775,19 @@ verifies the completed stream, and can return a path or decoded text.
 <strong>Interfaces:</strong> Python API is preferred; direct NFCLI, REST, or MCP calls expose
 lower-level chunk-oriented results. <strong>Use cases:</strong> distributing templates and
 software efficiently, resuming chunk flow, and avoiding duplicate downloads.
-<strong>Limitations:</strong> only <code>nf://</code> relative paths under the configured base directory
-are accepted.
+<code>git://&lt;remote-name&gt;/&lt;path&gt;</code> first synchronizes the named remote through the
+File Sharing service, then streams the file from its configured <code>nf://</code> mount.
+<strong>Limitations:</strong> only <code>nf://</code> paths under the configured base directory and
+paths from configured <code>git://</code> remotes are accepted.
 <a href="../workers/filesharing/services_filesharing_service_tasks_fetch_file/">Task details</a></p>
 <h3 id="read-only-git-remotes">Read-only Git remotes<a class="headerlink" href="#read-only-git-remotes" title="Permanent link">¤</a></h3>
 <p>Uses GitPython to shallow-fetch configured Git repository branches into
 independent managed folders and serves each snapshot through its configurable,
 safe <code>nf://&lt;mount&gt;/...</code> path. Mounts default to the remote name. Configured
+clients and workers can use <code>git://&lt;remote-name&gt;/&lt;path&gt;</code> to synchronize a
+remote on demand and retrieve a file in one operation. Git access and
+credentials remain isolated to the File Sharing worker, whose
+<code>resolve_git_url</code> task returns the published <code>nf://</code> URL. Configured
 local repositories are initialized on worker startup without fetching content;
 operators can list remotes, inspect synchronization state, explicitly create or
 delete runtime-registered remote definitions and local data, or enable
@@ -10653,9 +10795,11 @@ interval-based refresh. NFCLI exposes these operations under <code>filesharing g
 create-remote</code>, <code>clone-remote</code>, and <code>delete-remote</code>.
 Public HTTPS repositories require no credentials. Authenticated remotes support
 username/password or username/token authentication, with credentials redacted
-from inventory, task results, errors, and logs. <strong>Interfaces:</strong>
+from inventory, task results, errors, and logs. Git authentication is fully
+non-interactive; rejected credentials fail the task without opening terminal,
+browser, credential-helper, or GUI prompts. <strong>Interfaces:</strong>
 Python API, NFCLI, REST, and MCP tasks <code>get_remotes</code>, <code>create_remote_git</code>,
-<code>delete_remote_git</code>, and <code>git_clone</code>. <strong>Use cases:</strong>
+<code>delete_remote_git</code>, <code>git_clone</code>, and <code>resolve_git_url</code>. <strong>Use cases:</strong>
 distributing version-controlled templates, playbooks, and automation assets
 without changing consuming workers.
 NFCLI renders <code>show filesharing remotes brief</code> as a table, <code>detail</code> with complete
@@ -10876,7 +11020,7 @@ protection must be designed as part of deployment.
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

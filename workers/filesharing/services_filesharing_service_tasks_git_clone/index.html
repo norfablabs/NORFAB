@@ -18,14 +18,14 @@
         <link rel="prev" href="../services_filesharing_service_tasks_create_remote_git/">
       
       
-        <link rel="next" href="../services_filesharing_service_tasks_delete_remote_git/">
+        <link rel="next" href="../services_filesharing_service_tasks_resolve_git_url/">
       
       
         
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2607,6 +2607,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4170,6 +4198,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -4351,6 +4407,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
   
 
     
@@ -7014,35 +7098,7 @@ operation when another task holds the remote lock.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\filesharing_worker\git_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
@@ -7213,7 +7269,26 @@ operation when another task holds the remote lock.</p>
 <span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
-<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RemoteNameInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GitCloneResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
@@ -7308,19 +7383,10 @@ operation when another task holds the remote lock.</p>
                 <span class="k">if</span> <span class="n">repository</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">credentials</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">remote</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
-                <span class="n">git_environment</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;GIT_CONFIG_COUNT&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;GIT_CONFIG_KEY_0&quot;</span><span class="p">:</span> <span class="s2">&quot;http.extraHeader&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;GIT_CONFIG_VALUE_0&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Authorization: Basic </span><span class="si">{</span><span class="n">credentials</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">git_environment</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">fetched</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">remotes</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span>
-                <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">],</span> <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">git_environment</span>
+                <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">],</span>
+                <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_git_fetch_environment</span><span class="p">(</span><span class="n">remote</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">sha</span> <span class="o">=</span> <span class="n">fetched</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">commit</span><span class="o">.</span><span class="n">hexsha</span>
             <span class="n">repository</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="s2">&quot;-B&quot;</span><span class="p">,</span> <span class="n">remote</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">],</span> <span class="n">sha</span><span class="p">)</span>
@@ -7467,13 +7533,13 @@ operation when another task holds the remote lock.</p>
         
         
           
-          <a href="../services_filesharing_service_tasks_delete_remote_git/" class="md-footer__link md-footer__link--next" aria-label="Next: Delete Git Remote">
+          <a href="../services_filesharing_service_tasks_resolve_git_url/" class="md-footer__link md-footer__link--next" aria-label="Next: Resolve Git URL">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Delete Git Remote
+                Resolve Git URL
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -7542,7 +7608,7 @@ operation when another task holds the remote lock.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

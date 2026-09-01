@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2607,6 +2607,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4159,6 +4187,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -4340,6 +4396,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
   
 
     
@@ -6792,7 +6876,10 @@
 <blockquote>
 <p>task api name: <code>fetch_file</code></p>
 </blockquote>
-<p>The <code>fetch_file</code> task streams a file from the File Sharing worker to the client in chunks with offset support. In most user code, prefer the client helper method <code>NFPClient.fetch_file()</code> because it handles streaming, caching, and local file management.</p>
+<p>The <code>fetch_file</code> task streams a file from the File Sharing worker to the client
+in chunks with offset support. In most user code, prefer the client helper
+method <code>NFPClient.fetch_file()</code> because it handles streaming, caching, local
+file management, and on-demand Git remote synchronization.</p>
 <h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
 <table>
 <thead>
@@ -6806,7 +6893,7 @@
 <tr>
 <td><code>url</code></td>
 <td style="text-align: right;">Yes</td>
-<td>File URL to fetch</td>
+<td><code>nf://</code> file URL, or <code>git://&lt;remote-name&gt;/&lt;path&gt;</code> when using the client or worker helper</td>
 </tr>
 <tr>
 <td><code>chunk_size</code></td>
@@ -6842,6 +6929,9 @@
 <p>Print file content:</p>
 <div class="highlight"><pre><span></span><code>nf#file<span class="w"> </span>copy<span class="w"> </span>url<span class="w"> </span>nf://filesharing/test_file_1.txt<span class="w"> </span><span class="nb">read</span>
 </code></pre></div>
+<p>Synchronize a configured Git remote and print a file:</p>
+<div class="highlight"><pre><span></span><code>nf#file<span class="w"> </span>copy<span class="w"> </span>url<span class="w"> </span>git://network-assets/README.md<span class="w"> </span><span class="nb">read</span>
+</code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Context manager - helper method:</p>
@@ -6862,6 +6952,17 @@
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span>
         <span class="n">url</span><span class="o">=</span><span class="s2">&quot;nf://filesharing/test_file_1.txt&quot;</span><span class="p">,</span>
+        <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>Context manager - synchronize and read a Git-backed file:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
+
+<span class="k">with</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./inventory.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span>
+        <span class="n">url</span><span class="o">=</span><span class="s2">&quot;git://network-assets/templates/base.j2&quot;</span><span class="p">,</span>
         <span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>
@@ -6892,6 +6993,9 @@
 </div>
 </div>
 <h2 id="filesharing-fetch-file-command-shell-reference">Filesharing Fetch File Command Shell Reference<a class="headerlink" href="#filesharing-fetch-file-command-shell-reference" title="Permanent link">¤</a></h2>
+<p>Direct task invocation requires the resolved <code>nf://</code> URL. The client helper
+calls the File Sharing <code>resolve_git_url</code> task for <code>git://</code> inputs before
+invoking the streaming task against the matching worker.</p>
 <p>NorFab shell supports these command options for Filesharing <code>fetch_file</code> task:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>file.copy
 root
@@ -6936,7 +7040,8 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>file location string in <code>nf://&lt;filepath&gt;</code> format</p>
+                <p>file location string in <code>nf://&lt;filepath&gt;</code> or
+<code>git://&lt;remote-name&gt;/&lt;filepath&gt;</code> format</p>
               </div>
             </td>
             <td>
@@ -6952,7 +7057,7 @@ nf#
             </td>
             <td>
               <div class="doc-md-description">
-                <p>raise FIleNotFoundError if download fails</p>
+                <p>raise FileNotFoundError if download fails</p>
               </div>
             </td>
             <td>
@@ -7027,9 +7132,7 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\core\worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2006</span>
-<span class="normal">2007</span>
-<span class="normal">2008</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2008</span>
 <span class="normal">2009</span>
 <span class="normal">2010</span>
 <span class="normal">2011</span>
@@ -7058,15 +7161,19 @@ nf#
 <span class="normal">2034</span>
 <span class="normal">2035</span>
 <span class="normal">2036</span>
-<span class="normal">2037</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
+<span class="normal">2037</span>
+<span class="normal">2038</span>
+<span class="normal">2039</span>
+<span class="normal">2040</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_file</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">read</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to download file from broker File Sharing Service</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        url: file location string in ``nf://&lt;filepath&gt;`` format</span>
-<span class="sd">        raise_on_fail: raise FIleNotFoundError if download fails</span>
+<span class="sd">        url: file location string in ``nf://&lt;filepath&gt;`` or</span>
+<span class="sd">            ``git://&lt;remote-name&gt;/&lt;filepath&gt;`` format</span>
+<span class="sd">        raise_on_fail: raise FileNotFoundError if download fails</span>
 <span class="sd">        read: if True returns file content, return OS path to saved file otherwise</span>
 
 <span class="sd">    Returns:</span>
@@ -7219,7 +7326,7 @@ nf#
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2607,6 +2607,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../netbox/services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4124,6 +4152,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -4305,6 +4361,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
   
 
     
@@ -6728,19 +6812,23 @@
 
 
 <h1 id="norfab-file-service-file-sharing">NORFAB File Service (File Sharing)<a class="headerlink" href="#norfab-file-service-file-sharing" title="Permanent link">¤</a></h1>
-<p>NORFAB includes a built-in <strong>File Sharing</strong> service (<code>service="filesharing"</code>) that lets clients and workers access files by an <code>nf://...</code> URL.</p>
+<p>NORFAB includes a built-in <strong>File Sharing</strong> service (<code>service="filesharing"</code>)
+that lets clients and workers access published files by an <code>nf://...</code> URL or
+synchronize and fetch a configured Git remote with a <code>git://...</code> URL.</p>
 <p>Common uses:</p>
 <ul>
 <li>Store templates, playbooks, golden configs, and other "assets" next to your inventory.</li>
 <li>Let workers download an input file (for example: Nornir <code>file_copy</code> can accept <code>nf://...</code> sources).</li>
 <li>Browse what files are available and fetch them locally.</li>
-<li>Make read-only Git repository snapshots available in the <code>nf://</code> namespace.</li>
+<li>Make read-only Git repository snapshots available in the <code>nf://</code> namespace
+  and synchronize them on demand through <code>git://</code>.</li>
 </ul>
 <p>For protocol-level streaming details, see <a href="../../../development/file_streaming_fetch_file/">development/file_streaming_fetch_file.md</a>.</p>
 <h2 id="url-format-and-path-rules">URL format and path rules<a class="headerlink" href="#url-format-and-path-rules" title="Permanent link">¤</a></h2>
 <p>File Sharing uses URLs in the form:</p>
 <ul>
 <li><code>nf://&lt;path&gt;</code></li>
+<li><code>git://&lt;remote-name&gt;/&lt;path&gt;</code></li>
 </ul>
 <p>Where <code>&lt;path&gt;</code> is resolved <strong>relative to the File Sharing worker <code>base_dir</code></strong>.</p>
 <p>Examples (assuming <code>base_dir</code> is your inventory folder):</p>
@@ -6748,12 +6836,13 @@
 <li><code>nf://filesharing/test_file_1.txt</code> → <code>&lt;base_dir&gt;/filesharing/test_file_1.txt</code></li>
 <li><code>nf://cli/commands.txt</code> → <code>&lt;base_dir&gt;/cli/commands.txt</code></li>
 </ul>
-<p>The service rejects:</p>
-<ul>
-<li>Non-<code>nf://</code> URLs</li>
-<li>Absolute paths</li>
-<li>Directory traversal (paths that would escape <code>base_dir</code>)</li>
-</ul>
+<p>For example, <code>git://network-assets/templates/base.j2</code> synchronizes the
+configured <code>network-assets</code> remote, resolves its mount, and fetches
+<code>templates/base.j2</code>.</p>
+<p>The service rejects unsupported schemes, absolute paths, directory traversal,
+and <code>git://</code> URLs that do not identify a configured remote and file path.</p>
+<p>Only the client and worker fetch helpers accept <code>git://</code>; low-level File Sharing
+tasks continue to operate on the resolved <code>nf://</code> mount.</p>
 <h2 id="what-the-service-provides">What the service provides<a class="headerlink" href="#what-the-service-provides" title="Permanent link">¤</a></h2>
 <p>The File Sharing worker exposes these tasks:</p>
 <ul>
@@ -6768,6 +6857,10 @@
 <p>The <code>get_remotes</code> task returns the live remote registry, including mount URLs,
 status, and the last synchronization attempt. NFCLI exposes it through
 <code>show filesharing remotes</code>.</p>
+<p>The <code>resolve_git_url</code> task synchronizes the remote named by a <code>git://</code> file URL
+and returns its published <code>nf://</code> URL. Client and worker file-fetch helpers call
+this task automatically and continue the transfer against the same File Sharing
+worker.</p>
 <p>For detailed information about each task, see the individual task documentation pages linked above.</p>
 
 
@@ -6893,7 +6986,7 @@ status, and the last synchronization attempt. NFCLI exposes it through
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

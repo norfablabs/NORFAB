@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2601,6 +2601,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4047,6 +4075,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -4228,6 +4284,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
   
 
     
@@ -6733,17 +6817,22 @@
 
 <h1 id="adr-file-sharing-git-remotes">ADR - File Sharing Git Remotes<a class="headerlink" href="#adr-file-sharing-git-remotes" title="Permanent link">¤</a></h1>
 <h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">¤</a></h2>
-<p>Accepted, 2026-08-29.</p>
+<p>Accepted, 2026-08-29. Amended, 2026-09-01, to add first-class on-demand
+<code>git://</code> file retrieval.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">¤</a></h2>
 <p>The File Sharing service will mirror configured Git repository branches into
-local folders. Clients and workers remain unchanged and access mirrored files
-only through existing URLs:</p>
+local folders. Clients and workers can access already mirrored files through
+existing URLs:</p>
 <div class="highlight"><pre><span></span><code>nf://&lt;remote-name&gt;/&lt;path/to/file&gt;
 </code></pre></div>
 <p>The initial implementation is read-only. It supports startup creation, explicit
 creation and deletion, and periodic refresh from Git remotes to local storage.
-Remote write-back, client-side remote URLs, webhooks, and SSH credential
-management are out of scope.</p>
+Remote write-back, webhooks, and SSH credential management are out of scope.
+The client-side <code>git://&lt;remote-name&gt;/&lt;path&gt;</code> URL synchronizes a configured
+remote on demand before retrieving the file from its published <code>nf://</code> mount.
+<code>NFPClient</code> delegates the complete resolution to the File Sharing
+<code>resolve_git_url</code> task; the task validates the remote and path, synchronizes the
+repository, and returns the corresponding <code>nf://</code> URL.</p>
 <h2 id="remote-inventory">Remote Inventory<a class="headerlink" href="#remote-inventory" title="Permanent link">¤</a></h2>
 <p>File Sharing inventory contains a <code>remotes</code> list. Each item has the same fixed
 schema:</p>
@@ -6834,10 +6923,12 @@ for Git authentication.</p>
 <h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">¤</a></h2>
 <p><code>type: git</code> selects the GitPython implementation in <code>git_tasks.py</code>. GitPython
 runs the system Git executable and fetches the configured branch over HTTPS.
-Public remotes use no authentication environment. For authenticated remotes,
+Public remotes use no authentication header. For authenticated remotes,
 pass <code>username</code> and <code>password</code> as a temporary HTTP Basic authorization header
 through the Git process environment. Do not put credentials in the clone URL or
-persist them in Git configuration.</p>
+persist them in Git configuration. Every Git fetch disables terminal prompts,
+Git Credential Manager interaction and GUI prompts, and configured credential
+helpers. Authentication failures fail the task without requesting user input.</p>
 <h2 id="local-layout-and-urls">Local Layout and URLs<a class="headerlink" href="#local-layout-and-urls" title="Permanent link">¤</a></h2>
 <p>Each remote name owns one private Git repository and one staging folder. Its
 mount owns the published folder:</p>
@@ -6952,14 +7043,17 @@ git_tasks.py            # Git authentication, synchronization, and lifecycle tas
 </code></pre></div>
 <p>Add <code>GitPython</code> to the File Sharing optional dependencies. The system Git
 executable must be installed; the all-in-one and test container images include
-it. Do not change
-<code>NFPClient</code>, <code>NFPWorker</code>, the broker, NFP, or any consumer worker.</p>
+it. The 2026-09-01 amendment adds surgical changes to <code>NFPClient</code> and
+<code>NFPWorker</code> for <code>git://</code> URL recognition and resolution. The broker, NFP, and
+consumer workers remain unchanged. Git operations continue to run only as File
+Sharing tasks.</p>
 <p>Expose these new tasks:</p>
 <ul>
 <li><code>get_remotes</code></li>
 <li><code>create_remote_git</code></li>
 <li><code>delete_remote_git</code></li>
 <li><code>git_clone</code></li>
+<li><code>resolve_git_url</code></li>
 </ul>
 <p>Periodic refresh invokes the same <code>git_clone</code> implementation.</p>
 <p>NFCLI exposes the lifecycle tasks as <code>filesharing git create-remote</code>,
@@ -7080,7 +7174,7 @@ use raw HTTP requests, or modify the repository.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

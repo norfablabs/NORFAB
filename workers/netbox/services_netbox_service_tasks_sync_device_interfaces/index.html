@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2790,6 +2790,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4236,6 +4264,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../filesharing/services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -4417,6 +4473,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
   
 
     
@@ -6951,7 +7035,9 @@
 <p>The task follows a four-step pipeline:</p>
 <ol>
 <li><strong>Fetch</strong> — Pull current interface state from NetBox for the target devices.</li>
-<li><strong>Collect live state</strong> — Run Nornir <a href="../../nornir/services_nornir_service_tasks_parse/"><code>parse_ttp</code></a> jobs using the <code>interfaces</code> configuration getter first, followed by the <code>interfaces_status</code> operational getter. Configuration remains authoritative; operational state fills only MTU, duplex, and speed values that configuration parsing returned as <code>null</code>. Operational <code>speed_bps</code> is converted to the Kbit/s value expected by NetBox.</li>
+<li><strong>Collect live state</strong> — Run Nornir <a href="../../nornir/services_nornir_service_tasks_parse/"><code>parse_ttp</code></a> jobs using the <code>interfaces</code> configuration getter first, followed by the <code>interfaces_status</code> operational getter. Configuration remains authoritative; operational state fills only MTU, duplex, and speed values that configuration parsing returned as <code>null</code>. Operational <code>speed_bps</code> is converted to the Kbit/s value expected by NetBox.
+    For existing interfaces, live MTU or speed values of <code>null</code> or <code>0</code> do not
+    overwrite a value already set in NetBox.</li>
 <li><strong>Diff</strong> — Normalize both sides to a common schema, apply <code>interface_map</code> to live interface names, and compare using DeepDiff to classify each interface as <code>create</code>, <code>update</code>, <code>delete</code>, or <code>in_sync</code>.</li>
 <li><strong>Reconcile</strong> — Apply changes to NetBox in dependency order to avoid constraint errors:<ol>
 <li>Create LAG interfaces first</li>
@@ -7305,7 +7391,8 @@ normalized state model and DeepDiff-based reconciliation.</p>
 <li><strong>Fetch</strong>: Pull current interface state from NetBox (source of truth).</li>
 <li><strong>Collect live state</strong>: Run Nornir <code>parse_ttp</code> interface configuration
    and status jobs against devices. Configuration is authoritative, while
-   status fills missing MTU, duplex, and speed values.</li>
+   status fills missing MTU, duplex, and speed values. Existing NetBox MTU
+   and speed values are preserved when live values are <code>None</code> or <code>0</code>.</li>
 <li><strong>Diff</strong>: Compare normalized NetBox state against normalized live state using
    DeepDiff to classify each interface as <code>create</code>, <code>update</code>, <code>delete</code>, or
    <code>in_sync</code>.</li>
@@ -8468,7 +8555,32 @@ dry-run mode.</p>
 <span class="normal">1638</span>
 <span class="normal">1639</span>
 <span class="normal">1640</span>
-<span class="normal">1641</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
+<span class="normal">1660</span>
+<span class="normal">1661</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span>
+<span class="normal">1666</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -8511,7 +8623,8 @@ dry-run mode.</p>
 <span class="sd">    1. **Fetch**: Pull current interface state from NetBox (source of truth).</span>
 <span class="sd">    2. **Collect live state**: Run Nornir ``parse_ttp`` interface configuration</span>
 <span class="sd">       and status jobs against devices. Configuration is authoritative, while</span>
-<span class="sd">       status fills missing MTU, duplex, and speed values.</span>
+<span class="sd">       status fills missing MTU, duplex, and speed values. Existing NetBox MTU</span>
+<span class="sd">       and speed values are preserved when live values are ``None`` or ``0``.</span>
 <span class="sd">    3. **Diff**: Compare normalized NetBox state against normalized live state using</span>
 <span class="sd">       DeepDiff to classify each interface as ``create``, ``update``, ``delete``, or</span>
 <span class="sd">       ``in_sync``.</span>
@@ -8805,6 +8918,15 @@ dry-run mode.</p>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
+        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources_failed&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">resources_failed</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> failed to fetch interface status data from devices &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_interfaces</span> <span class="ow">in</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">device_status</span> <span class="o">=</span> <span class="n">interface_status</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span>
             <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">host_interfaces</span> <span class="ow">or</span> <span class="p">[]:</span>
@@ -8820,6 +8942,15 @@ dry-run mode.</p>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
+        <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">wdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources_failed&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">resources_failed</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wname</span><span class="si">}</span><span class="s2"> failed to fetch interface data from devices &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">host_interfaces</span> <span class="ow">in</span> <span class="n">wdata</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">normalised_live_all</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span>
             <span class="n">device_interface_map</span> <span class="o">=</span> <span class="p">[</span>
@@ -8881,6 +9012,12 @@ dry-run mode.</p>
                     <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status_speed</span> <span class="o">//</span> <span class="mi">1_000</span>
                 <span class="k">if</span> <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;duplex&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;duplex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duplex&quot;</span><span class="p">)</span>
+                <span class="c1"># Preserve existing NetBox values when live data has no usable value.</span>
+                <span class="n">nb_interface</span> <span class="o">=</span> <span class="n">normalised_nb_all</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nb_interface</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;mtu&quot;</span><span class="p">,</span> <span class="s2">&quot;speed&quot;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">interface</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nb_interface</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span>
+                            <span class="n">interface</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
     <span class="n">live_interface_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">normalised_live_all</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;normalised </span><span class="si">{</span><span class="n">live_interface_count</span><span class="si">}</span><span class="s2"> live interface(s) after applying filters&quot;</span>
@@ -9373,7 +9510,7 @@ dry-run mode.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2605,6 +2605,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP Communities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../workers/netbox/services_netbox_service_tasks_sync_mac_addresses/" class="md-nav__link">
         
   
@@ -4051,6 +4079,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../workers/filesharing/services_filesharing_service_tasks_resolve_git_url/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resolve Git URL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../workers/filesharing/services_filesharing_service_tasks_delete_remote_git/" class="md-nav__link">
         
   
@@ -4232,6 +4288,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clients_nfweb_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Monitoring Dashboard
   
 
     
@@ -5937,6 +6021,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#follow-monitoring-data-through-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow Monitoring Data Through the System
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#use-the-browser-api-deliberately" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6075,6 +6170,17 @@
     <span class="md-ellipsis">
       
         Add a Browser Operation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-or-change-a-monitoring-metric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add or Change a Monitoring Metric
       
     </span>
   </a>
@@ -7243,6 +7349,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#follow-monitoring-data-through-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow Monitoring Data Through the System
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#use-the-browser-api-deliberately" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7381,6 +7498,17 @@
     <span class="md-ellipsis">
       
         Add a Browser Operation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-or-change-a-monitoring-metric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add or Change a Monitoring Metric
       
     </span>
   </a>
@@ -7532,6 +7660,13 @@
       
       
       
+        <a href="../../tags/#tag:monitoring" class="md-tag">monitoring</a>
+      
+    
+      
+      
+      
+      
         <a href="../../tags/#tag:topology" class="md-tag">topology</a>
       
     
@@ -7554,16 +7689,17 @@
 it before editing <code>norfab/clients/nfweb</code>. It describes the current implementation,
 the boundaries that must remain true, and the shortest safe workflows for extending
 the client.</p>
-<p>NFWeb is NORFAB's generic local web client. Topology is its first application; it
-is not the definition or final scope of NFWeb.</p>
+<p>NFWeb is NORFAB's generic local web client. Its built-in applications are runtime
+Monitoring and 3D Topology; neither defines the final scope of NFWeb.</p>
 <h2 id="start-here">Start Here<a class="headerlink" href="#start-here" title="Permanent link">¤</a></h2>
 <p>For a new development session:</p>
 <ol>
-<li>Read <code>CLAUDE.md</code> for repository-wide commands and conventions.</li>
+<li>Read <code>AGENTS.md</code> for repository-wide commands and conventions.</li>
 <li>Read the
    <a href="../adr_web_ui_topology_architecture/">NFWeb architecture decision</a> for accepted
    product and security boundaries.</li>
-<li>Read the user-facing <a href="../../clients_nfweb_overview/">NFWeb overview</a> and
+<li>Read the user-facing <a href="../../clients_nfweb_overview/">NFWeb overview</a>,
+   <a href="../../clients_nfweb_monitoring/">monitoring dashboard guide</a>, and
    <a href="../../clients_nfweb_topology/">topology application guide</a>.</li>
 <li>Inspect the current working tree before editing. NFWeb may be under active
    development, and uncommitted files belong to the developer.</li>
@@ -7575,8 +7711,8 @@ is not the definition or final scope of NFWeb.</p>
 <p>Every NFWeb change must preserve these rules unless a new architecture decision
 explicitly replaces them:</p>
 <ul>
-<li>NFWeb is a generic client and local application host. Topology remains a
-  namespaced application.</li>
+<li>NFWeb is a generic client and local application host. Monitoring and Topology
+  remain namespaced applications.</li>
 <li><code>nfcli --web-ui</code> is the only NFWeb launcher. Do not add an <code>nfweb</code> executable or
   another dedicated command-line utility.</li>
 <li>NFWeb connects through the native Python <code>NFPClient</code> to an existing broker. It
@@ -7594,13 +7730,17 @@ explicitly replaces them:</p>
 <li>Use Mantine components and Tabler icons for general-purpose controls. Do not
   create bespoke buttons, selects, dropdowns, tabs, sliders, badges, or tooltips.
   Keep custom CSS focused on NFWeb layout and domain-specific visualization.</li>
+<li>Use ECharts through <code>echarts-for-react</code> for Monitoring charts. Do not build a
+  separate React chart wrapper or use Sigma.js/Graphology for time-series and
+  gauges; those libraries solve graph-network visualization, not dashboard charts.</li>
 <li>The topology application uses Vasturiano 3D visualization only. Do not add a 2D
   renderer or a 2D/3D mode.</li>
 <li>An empty device selection performs no topology collection.</li>
 <li>Operational failures remain visible. Do not fabricate topology, health, or
   metrics when a worker does not return data.</li>
 <li>Local application history is bounded. Topology defaults to a maximum three-hour
-  retention window.</li>
+  retention window. Monitoring has the same maximum but keeps samples only in
+  process memory and loses them on restart.</li>
 </ul>
 <h2 id="repository-map">Repository Map<a class="headerlink" href="#repository-map" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code>norfab/clients/nfweb/
@@ -7617,25 +7757,33 @@ explicitly replaces them:</p>
 |   |-- collector.py          Scheduling, caching, merge, publication
 |   |-- history.py            Compressed SQLite snapshots and derived logs
 |   `-- web.py                Topology HTTP, WebSocket, and broadcaster
+|-- monitoring/
+|   |-- application.py        Monitoring lifecycle and route composition
+|   |-- config.py             Polling and in-memory retention configuration
+|   |-- models.py             Presentation-oriented monitoring contracts
+|   |-- collector.py          Existing-interface polling and bounded deque
+|   `-- web.py                Monitoring HTTP, WebSocket, and broadcaster
 |-- frontend/
 |   |-- package.json          Pinned frontend tools and runtime dependencies
 |   |-- package-lock.json     Reproducible dependency lock
 |   |-- vite.config.ts        Development proxy and static build destination
 |   `-- src/
 |       |-- main.tsx          React entry point
-|       |-- App.tsx           Topology state and dashboard composition
+|       |-- App.tsx           Shared shell, view selection, topology composition
 |       |-- TopologyGraph.tsx Lazy-loaded Vasturiano/Three.js graph
 |       |-- api.ts            Typed HTTP and WebSocket client
 |       |-- graphModel.ts     Graph identities, styling, and curve helpers
 |       |-- types.ts          Manual TypeScript mirror of Python contracts
 |       |-- components/       Mantine toolbar, navigation, inspector, timeline
-|       `-- styles.css        NFWeb layout, topology stage, inspector, event log
+|       |-- monitoring/       ECharts runtime monitoring view
+|       `-- styles.css        NFWeb layout and domain presentation
 `-- static/                   Generated production assets served by Tornado
 
 tests/clients/nfweb/
 |-- test_config.py            Strict configuration and safety defaults
 |-- test_collector.py         Worker payloads, adapters, merge, failures, events
 |-- test_history.py           Retention, scope filtering, persistent logs
+|-- test_monitoring.py        Status merging and in-memory retention
 |-- test_server.py            Routes, request policy, static assets
 `-- test_frontend_contracts.py Python/TypeScript fields and packaged assets
 </code></pre></div>
@@ -7650,10 +7798,10 @@ regenerates that directory from <code>frontend/src</code>.</p>
   -&gt; validate client.nfweb with NFWebConfig
   -&gt; create the native client named &quot;nfweb&quot;
   -&gt; open __norfab__/nfweb/nfweb.sqlite
-  -&gt; compose NFWeb application modules
+  -&gt; compose Topology and Monitoring application modules
   -&gt; validate and create the Tornado application
-  -&gt; listen on 127.0.0.1 only
-  -&gt; start periodic collection when a scope exists
+  -&gt; listen on the configured host (0.0.0.0 by default)
+  -&gt; start Monitoring polling and scoped Topology collection
   -&gt; optionally open the browser
   -&gt; on first Ctrl+C: stop HTTP, modules, SQLite, and native client
   -&gt; on second Ctrl+C: force process exit if graceful cleanup is stuck
@@ -7673,6 +7821,10 @@ nested configuration model:</p>
 <span class="w">      </span><span class="nt">fastapi_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8000/docs&quot;</span>
 <span class="w">      </span><span class="nt">docs_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://docs.norfablabs.com/&quot;</span>
 <span class="w">      </span><span class="nt">github_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/norfablabs/NORFAB&quot;</span>
+<span class="w">    </span><span class="nt">monitoring</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">collection_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">retention_minutes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">180</span>
+<span class="w">      </span><span class="nt">request_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="w">    </span><span class="nt">topology</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">devices</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="w">      </span><span class="nt">collection_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
@@ -7688,7 +7840,7 @@ nested configuration model:</p>
 <span class="w">        </span><span class="nt">interfaces</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <p>All configuration models use <code>extra="forbid"</code>. Do not silently accept unknown
-settings. The listener host is intentionally not configurable.</p>
+settings.</p>
 <p><code>footer</code> is shared shell configuration. Only these display-safe fields are
 returned by <code>/api/v1/config</code>; application configuration and broker details must
 not be exposed to the browser. A <code>null</code> footer URL hides its pictogram link.</p>
@@ -7848,6 +8000,37 @@ prevents retention beyond 180 minutes.</p>
 <p>For a future application, add application-owned tables inside the same generic
 database. Do not name the database after topology, and do not reuse the topology
 snapshot table for an unrelated domain model.</p>
+<h2 id="follow-monitoring-data-through-the-system">Follow Monitoring Data Through the System<a class="headerlink" href="#follow-monitoring-data-through-the-system" title="Permanent link">¤</a></h2>
+<p>Monitoring is deliberately smaller than Topology and does not use the database:</p>
+<div class="highlight"><pre><span></span><code>broker show_broker + show_workers and worker get_watchdog_stats
+  -&gt; MonitoringCollector creates one MonitoringSnapshot
+  -&gt; bounded deque retains at most the configured three-hour window
+  -&gt; MonitoringBroadcaster publishes the sample over WebSocket
+  -&gt; ReactECharts redraws gauges, trends, and worker comparisons
+</code></pre></div>
+<p>Worker selection separately calls the existing worker <code>job_list</code> task through a
+namespaced NFWeb endpoint. NFWeb aggregates its bounded result for the horizontal
+worker database card; no worker implementation or worker database schema is
+changed.</p>
+<p>The collector also reads process resources, message counters, and aggregate job
+statistics directly from the local NFWeb process and native client. Collection runs in <code>asyncio.to_thread()</code> so
+the synchronous native calls do not block Tornado. One <code>asyncio.Lock</code> prevents
+overlapping cycles. Keep the polling sequential and direct unless measurements
+show a real need for more scheduling complexity.</p>
+<p><code>MonitoringComponent</code> and <code>MonitoringSnapshot</code> in <code>monitoring/models.py</code> are the
+authoritative browser contracts. <code>frontend/src/types.ts</code> mirrors them. Missing
+worker watchdog data must stay <code>null</code>; the broker registration row remains useful
+and should not be discarded or filled with invented values. Add a snapshot error
+that names every worker with an absent, failed, or incomplete resource response;
+the frontend displays these errors in the Fabric observability toolbar.</p>
+<p>History is a bounded <code>deque</code>, pruned both by sample count and exact timestamp. It
+must remain non-persistent: do not add a monitoring table, journal, log replay, or
+restart restoration. The dashboard shows message and keepalive counters available
+from existing interfaces; it does not inspect or retain protocol payloads.
+The browser merges HTTP history, interval reads, and WebSocket samples by
+<code>collected_at</code>, deduplicates them, and never replaces the latest sample with an
+older response. WebSocket URLs follow the page scheme (<code>ws://</code> for HTTP and
+<code>wss://</code> for HTTPS).</p>
 <h2 id="use-the-browser-api-deliberately">Use the Browser API Deliberately<a class="headerlink" href="#use-the-browser-api-deliberately" title="Permanent link">¤</a></h2>
 <p>Current routes are:</p>
 <table>
@@ -7868,6 +8051,31 @@ snapshot table for an unrelated domain model.</p>
 <td><code>GET</code></td>
 <td><code>/api/v1/config</code></td>
 <td>Display-safe shared footer configuration</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/monitoring/snapshot</code></td>
+<td>Latest in-memory monitoring sample</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/monitoring/history</code></td>
+<td>Retained in-memory samples</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/monitoring/refresh</code></td>
+<td>Request an immediate sample</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/monitoring/workers/{name}/database</code></td>
+<td>Summarize the selected worker's recent <code>job_list</code> result</td>
+</tr>
+<tr>
+<td>WebSocket</td>
+<td><code>/api/v1/monitoring/stream</code></td>
+<td>Latest and newly completed samples</td>
 </tr>
 <tr>
 <td><code>GET</code></td>
@@ -7917,8 +8125,10 @@ frontend method, TypeScript response type, and server test in one change.</p>
   and behind a fatal error boundary.</li>
 <li><code>api.ts</code> owns JSON requests and WebSocket reconnection.</li>
 <li><code>types.ts</code> mirrors the Pydantic browser contracts.</li>
-<li><code>App.tsx</code> owns topology state and composes the shell, graph, inspector, timeline,
-  navigation, and <code>TopologyToolbar</code> components.</li>
+<li><code>App.tsx</code> owns the shared shell and hash-selected application view, and composes
+  the existing Topology state, graph, inspector, timeline, and toolbar.</li>
+<li><code>monitoring/MonitoringView.tsx</code> owns Monitoring history, component selection,
+  refresh state, and direct <code>ReactECharts</code> chart options.</li>
 <li><code>TopologyGraph.tsx</code> isolates the imperative Vasturiano/Three.js integration and
   is loaded only when the topology view is rendered.</li>
 <li><code>graphModel.ts</code> contains renderer-independent graph identities and calculations.</li>
@@ -7969,6 +8179,11 @@ for frontend versions. The current stack is:</p>
 <td>WebGL rendering and graph scene objects</td>
 </tr>
 <tr>
+<td>Monitoring charts</td>
+<td>ECharts <code>6.1.0</code> and ECharts for React <code>3.0.6</code></td>
+<td>Gauges, time series, data zoom, and worker comparisons</td>
+</tr>
+<tr>
 <td>Build tooling</td>
 <td>Vite <code>8.2.2</code> with the React plugin <code>6.1.0</code></td>
 <td>Development server, module bundling, and hashed production assets</td>
@@ -7991,10 +8206,11 @@ controls. Use Tabler icons for application actions. Reserve custom CSS and React
 components for NFWeb-specific layout, topology, inspector, and terminal behavior.</p>
 <p>Vite writes the production bundle to <code>norfab/clients/nfweb/static</code>. The Python
 server serves those committed assets directly, so production does not require
-Node.js or a CDN. The topology renderer is lazy-loaded to keep its Three.js code
-out of the initial application bundle.</p>
+Node.js or a CDN. The topology renderer and Monitoring view are lazy-loaded so
+their visualization libraries remain outside the initial application bundle.</p>
 <p>The left navigation follows Mantine UI's nested-navbar pattern for generic NFWeb
-applications and remains a fixed-width shell column. Topology controls, including
+applications and remains a fixed-width shell column. Topology remains the default;
+the URL hash selects Monitoring. Topology controls, including
 the snapshot selector, return-to-live action, and trailing stream-status badge,
 belong in one non-wrapping, horizontally scrollable application toolbar, not the
 navigation panel. Graph-producing layers
@@ -8016,6 +8232,32 @@ Every inspector tab uses the same Mantine searchable, sortable table composition
 add domain columns and row adapters instead of another details layout. A shared
 footer owns the configured message and external resource pictograms. Overview and
 Admin are intentionally empty placeholders.</p>
+<p>Monitoring uses Mantine for cards, alerts, selects, buttons, and badges.
+It passes ECharts options directly to <code>ReactECharts</code>; avoid a local abstraction
+until more than one monitoring view has concrete shared requirements. Aligned
+worker CPU and memory comparisons use the same worker order. The bottom worker
+selection drives separate CPU and memory time series, while the adjacent job bar
+chart stacks positive <code>FAILED</code>, <code>STARTED</code>, <code>COMPLETED</code>, and <code>STALE</code> count changes
+between retained native-client database samples. It must not infer exact job
+transitions because the aggregate database statistics do not contain a transition
+journal.
+The selected worker also drives a full-width database status card below those
+charts. Its request is independent of periodic snapshot collection and failures
+remain local to the card.
+Comparison charts rank workers by CPU percentage plus memory relative to the
+largest current worker and show ten rows at a time. React owns one shared worker
+window for both charts so vertical scrolling stays synchronized; each new sample
+resets that window to the newly ranked top ten instead of retaining stale,
+chart-local ECharts zoom state. The dashboard refresh selector
+reads the latest shared sample every 5, 10, 30, or 60 seconds without changing the
+server's configured collection interval or starting another collection. Manual
+refresh requests that overlap the server collector are coalesced onto the latest
+completed sample and must not return a routine <code>409</code> warning.
+The fabric consumption row derives stacked broker and per-worker CPU and memory
+series entirely from retained <code>MonitoringSnapshot</code> history. React owns their
+shared time-axis zoom so chart-local ECharts state cannot drift; it must not issue
+additional worker requests. Historical series retain workers that disappear from
+the latest sample and render a gap after their final observation.</p>
 <h3 id="live-and-historical-state">Live and Historical State<a class="headerlink" href="#live-and-historical-state" title="Permanent link">¤</a></h3>
 <p>The frontend retains the newest WebSocket snapshot separately from the frame being
 displayed. In live mode, new frames update the graph. Selecting history from the
@@ -8079,7 +8321,7 @@ npm<span class="w"> </span>run<span class="w"> </span>typecheck
 npm<span class="w"> </span>run<span class="w"> </span>build
 </code></pre></div>
 <p>Playwright starts an isolated Vite server on <code>127.0.0.1:4173</code>. Its checked-in
-fixtures mock the browser API and topology WebSocket, so browser tests do not
+fixtures mock the browser API and application WebSockets, so browser tests do not
 require a running broker or worker. Run <code>npm run test:e2e:headed</code> to observe the
 same tests in a visible Chromium window.</p>
 <p>The build output goes directly to <code>../static</code>. A backend restart is required for
@@ -8089,8 +8331,8 @@ frontend build.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>norfab/clients/nfweb/frontend
 npm<span class="w"> </span>run<span class="w"> </span>dev
 </code></pre></div>
-<p>When changing live delivery, verify both HTTP requests and the topology WebSocket;
-do not assume that a working HTTP proxy proves WebSocket upgrades work.</p>
+<p>When changing live delivery, verify both HTTP requests and the relevant application
+WebSocket; do not assume that a working HTTP proxy proves WebSocket upgrades work.</p>
 <h2 id="verify-changes">Verify Changes<a class="headerlink" href="#verify-changes" title="Permanent link">¤</a></h2>
 <p>Run focused checks from the repository root:</p>
 <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/clients/nfweb<span class="w"> </span>-q
@@ -8142,6 +8384,10 @@ NFWeb-focused test suite.</p>
 <tr>
 <td>History schema or retention</td>
 <td>Round trip, scope filtering, cleanup, and restart behavior</td>
+</tr>
+<tr>
+<td>Monitoring sample or retention</td>
+<td>Existing-interface payload merge, missing data, exact cutoff, and no persistence</td>
 </tr>
 <tr>
 <td>HTTP or WebSocket contract</td>
@@ -8198,21 +8444,34 @@ application responsibilities.</p>
 <li>Add the matching method and type in <code>api.ts</code> and <code>types.ts</code>.</li>
 <li>Add success, invalid input, conflict, and cross-origin tests as applicable.</li>
 </ol>
+<h3 id="add-or-change-a-monitoring-metric">Add or Change a Monitoring Metric<a class="headerlink" href="#add-or-change-a-monitoring-metric" title="Permanent link">¤</a></h3>
+<ol>
+<li>Confirm the value already exists on <code>show_broker</code>, <code>show_workers</code>, the worker
+   watchdog response, or the local native client.</li>
+<li>Add the field to <code>monitoring/models.py</code> and <code>frontend/src/types.ts</code>.</li>
+<li>Merge it in <code>MonitoringCollector.collect_once()</code> without inventing fallbacks.</li>
+<li>Add it directly to the existing ECharts options, details, or worker table.</li>
+<li>Extend collector, server, and contract-parity tests.</li>
+</ol>
+<p>Do not introduce broker instrumentation, payload capture, a telemetry journal, or
+a database merely to add a dashboard metric. Such work requires a separate design
+decision because it changes the deliberately lightweight monitoring boundary.</p>
 <h3 id="add-another-nfweb-application">Add Another NFWeb Application<a class="headerlink" href="#add-another-nfweb-application" title="Permanent link">¤</a></h3>
 <ol>
 <li>Create an application-owned Python package, models, configuration, and state.</li>
 <li>Add namespaced routes and contracts; do not expose raw worker results.</li>
-<li>Reuse the shared native client, network listener, database location, browser
-   policy, and lifecycle.</li>
-<li>Give the application its own tables and retention behavior where required.</li>
+<li>Reuse the shared native client, network listener, optional database location,
+   browser policy, and lifecycle.</li>
+<li>Give the application its own persistence only where required; in-memory state
+   is sufficient for disposable monitoring history.</li>
 <li>Add a frontend view and navigation entry without forcing its domain into
    topology models.</li>
 <li>Register the module in <code>runtime.py</code>; the shared server discovers its routes,
    health, startup, and shutdown behavior through <code>NFWebApplicationModule</code>.</li>
 </ol>
-<p>The Python host is application-neutral. The current frontend opens Topology as its
-only implemented view; add a view registry only when a second application provides
-concrete requirements for one.</p>
+<p>The Python host is application-neutral. The current frontend uses a small hash-based
+view selection between Monitoring and Topology. Keep it direct until additional
+applications require a more general registry or router.</p>
 <h2 id="troubleshoot-efficiently">Troubleshoot Efficiently<a class="headerlink" href="#troubleshoot-efficiently" title="Permanent link">¤</a></h2>
 <h3 id="collection-finishes-but-the-graph-is-empty">Collection Finishes but the Graph Is Empty<a class="headerlink" href="#collection-finishes-but-the-graph-is-empty" title="Permanent link">¤</a></h3>
 <p>Check, in order:</p>
@@ -8255,8 +8514,8 @@ reconnects with exponential backoff up to ten seconds.</p>
 <h2 id="known-gaps">Known Gaps<a class="headerlink" href="#known-gaps" title="Permanent link">¤</a></h2>
 <p>Keep these visible when planning work:</p>
 <ul>
-<li>The frontend has one implemented application view. A generic view registry is
-  intentionally deferred until a second application establishes its requirements.</li>
+<li>View selection is intentionally a small hash-based switch rather than a routing
+  dependency; revisit it only when navigation requirements become more complex.</li>
 <li>TypeScript contracts remain manually authored, although an automated field-level
   parity test now prevents silent drift from the authoritative Pydantic models.</li>
 <li>Graph calculations have focused Vitest coverage, but there is no automated
@@ -8271,7 +8530,7 @@ reconnects with exponential backoff up to ten seconds.</p>
 preserves independent layer visibility, source-specific properties, and the
 requested layer colors; combining them would require an explicit multi-source edge
 contract. Empty Overview and Admin navigation sections are reserved extension
-points, not incomplete topology behavior.</p>
+points, not incomplete application behavior.</p>
 <p>Do not solve these gaps incidentally during an unrelated change. Make the smallest
 coherent change, add tests for the intended behavior, and update this list when a
 gap is deliberately resolved.</p>
@@ -8412,7 +8671,7 @@ gap is deliberately resolved.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
