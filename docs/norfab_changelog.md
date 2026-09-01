@@ -1,8 +1,21 @@
+# 0.22.2
+
+## ENHANCEMENTS
+
+1. Enhanced the NetBox `sync_device_inventory`, `sync_vlans`, `sync_device_prefixes`, `sync_vrfs`, `sync_device_interfaces`, `sync_mac_addresses`, `sync_device_ip`, `sync_bgp_peerings`, and `sync_bgp_community` tasks to surface per-device Nornir `resources_failed` entries in task errors, error events, and logs while retaining usable results from successful devices without failing the overall NetBox task.
+2. Enhanced `sync_bgp_community` community-name custom-field handling to normalize comma-separated strings, trim empty or padded entries, preserve existing names, append only missing live names, and store the resulting names in stable sorted order for idempotent synchronization.
+3. Enhanced `sync_device_interfaces` MTU and speed handling to preserve existing NetBox values when both live configuration and operational status return missing or zero values, preventing incomplete parsing data from producing unwanted updates.
+4. Enhanced the NFWeb monitoring dashboard with stacked fabric-wide broker and worker CPU and memory history, current fabric totals, synchronized time zoom, synchronized top-ten worker comparison scrolling, and selected-worker job status and task summaries.
+5. Improved NFWeb monitoring refresh behavior by reading the latest shared sample at the selected interval, coalescing manual refreshes with active collection, and merging and deduplicating HTTP and WebSocket samples without allowing older responses to replace newer data.
+6. Improved NFWeb partial-sample diagnostics by validating broker and worker monitoring responses, identifying workers with missing resource data, and presenting collection warnings in the compact Fabric observability toolbar.
+
+---
+
 # 0.22.1
 
 ## FEATURES
 
-1. Added the NetBox `bgp_community_sync` task and `netbox sync bgp-communities` NFCLI command. The task uses the TTP Templates BGP communities getter, stores route targets in IPAM and other community types in the NetBox BGP plugin, and aggregates live community-set names by value into an optional custom field.
+1. Added the NetBox `sync_bgp_community` task and `netbox sync bgp-communities` NFCLI command. The task uses the TTP Templates BGP communities getter, stores route targets in IPAM and other community types in the NetBox BGP plugin, and appends missing live community-set names by value into an optional custom field.
 
 ## ENHANCEMENTS
 

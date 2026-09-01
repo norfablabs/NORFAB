@@ -5,20 +5,40 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .netbox_models import (
-    BgpCommunitySyncInput,
-    BgpCommunitySyncResult,
     NetboxFastApiArgs,
+    SyncBgpCommunityInput,
+    SyncBgpCommunityResult,
 )
 from .netbox_worker_utilities import review_sync_task_result
 
 log = logging.getLogger(__name__)
 
 
+def normalise_community_name_field(
+    current_value: str,
+    community_name_field: Union[str, bool],
+    live_value: str,
+) -> dict:
+    """Append missing live names to the current NetBox custom-field value."""
+    if not community_name_field:
+        return {}
+
+    current_names = [name.strip() for name in current_value.split(",") if name.strip()]
+    current_names_set = set(current_names)
+    for name in live_value.split(","):
+        name = name.strip()
+        if name and name not in current_names_set:
+            current_names.append(name)
+            current_names_set.add(name)
+
+    return {community_name_field: ", ".join(sorted(current_names))}
+
+
 class NetboxBgpCommunityTasks:
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
-        input=BgpCommunitySyncInput,
-        output=BgpCommunitySyncResult,
+        input=SyncBgpCommunityInput,
+        output=SyncBgpCommunityResult,
         mcp={
             "annotations": {
                 "title": "Sync BGP Communities",
@@ -29,7 +49,7 @@ class NetboxBgpCommunityTasks:
             }
         },
     )
-    def bgp_community_sync(
+    def sync_bgp_community(
         self,
         job: Job,
         instance: Union[None, str] = None,
@@ -66,7 +86,7 @@ class NetboxBgpCommunityTasks:
         devices = list(devices or [])
         instance = instance or self.default_instance
         ret = Result(
-            task=f"{self.name}:bgp_community_sync",
+            task=f"{self.name}:sync_bgp_community",
             result={},
             resources=[instance],
             dry_run=dry_run,
@@ -157,6 +177,7 @@ class NetboxBgpCommunityTasks:
         if has_bgp_plugin:
             normalised_live["communities"] = {}
         result_devices = set()
+        failed_devices = set()
         parsed_count = 0
         for worker_name, worker_data in parse_data.items():
             if worker_data.get("failed"):
@@ -165,6 +186,17 @@ class NetboxBgpCommunityTasks:
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
                 continue
+            resources_failed = worker_data.get("resources_failed") or []
+            if resources_failed:
+                failed_devices.update(resources_failed)
+                msg = (
+                    f"{worker_name} failed to fetch BGP community data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
+
             worker_result = worker_data.get("result")
             if not isinstance(worker_result, dict):
                 msg = f"worker '{worker_name}' returned malformed community data"
@@ -205,7 +237,7 @@ class NetboxBgpCommunityTasks:
                     parsed_count += 1
 
         for device_name in devices:
-            if device_name not in result_devices:
+            if device_name not in result_devices and device_name not in failed_devices:
                 msg = f"device '{device_name}' is missing a live community result"
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
@@ -245,16 +277,22 @@ class NetboxBgpCommunityTasks:
         )
         for nb_community in nb_communities_result:
             sname = str(nb_community.name)
-            normalised_nb["route_targets"][sname] = (
-                {
-                    community_name_field: str(
-                        (nb_community.custom_fields or {}).get(community_name_field)
-                        or ""
-                    )
+            normalised_nb["route_targets"][sname] = {}
+            if community_name_field:
+                custom_fields = nb_community.custom_fields or {}
+                current_value = str(custom_fields.get(community_name_field, ""))
+                normalised_nb["route_targets"][sname] = {
+                    community_name_field: current_value
                 }
-                if community_name_field
-                else {}
-            )
+                normalised_live["route_targets"][sname] = (
+                    normalise_community_name_field(
+                        current_value,
+                        community_name_field,
+                        normalised_live["route_targets"][sname].get(
+                            community_name_field, ""
+                        ),
+                    )
+                )
             nb_community_objects["route_targets"][sname] = nb_community
 
         if has_bgp_plugin:
@@ -272,16 +310,22 @@ class NetboxBgpCommunityTasks:
             )
             for nb_community in nb_communities_result:
                 sname = str(nb_community.value)
-                normalised_nb["communities"][sname] = (
-                    {
-                        community_name_field: str(
-                            (nb_community.custom_fields or {}).get(community_name_field)
-                            or ""
-                        )
+                normalised_nb["communities"][sname] = {}
+                if community_name_field:
+                    custom_fields = nb_community.custom_fields or {}
+                    current_value = str(custom_fields.get(community_name_field, ""))
+                    normalised_nb["communities"][sname] = {
+                        community_name_field: current_value
                     }
-                    if community_name_field
-                    else {}
-                )
+                    normalised_live["communities"][sname] = (
+                        normalise_community_name_field(
+                            current_value,
+                            community_name_field,
+                            normalised_live["communities"][sname].get(
+                                community_name_field, ""
+                            ),
+                        )
+                    )
                 nb_community_objects["communities"][sname] = nb_community
 
         communities_diff = self.make_diff(normalised_live, normalised_nb)

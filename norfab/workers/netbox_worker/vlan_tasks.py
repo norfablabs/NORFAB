@@ -198,6 +198,7 @@ class NetboxVlansTasks:
         )
         job.event(f"received VLAN data from {len(parse_data)} Nornir worker(s)")
         live_by_device = {}
+        failed_devices = set()
         for worker_name, worker_data in parse_data.items():
             if worker_data.get("failed"):
                 msg = f"worker '{worker_name}' failed to collect live VLAN data"
@@ -205,6 +206,16 @@ class NetboxVlansTasks:
                 log.error(f"{self.name} - Sync VLANs: {msg}")
                 ret.errors.append(msg)
                 continue
+            resources_failed = worker_data.get("resources_failed") or []
+            if resources_failed:
+                failed_devices.update(resources_failed)
+                msg = (
+                    f"{worker_name} failed to fetch VLAN data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - Sync VLANs: {msg}")
+                ret.errors.append(msg)
             worker_result = worker_data.get("result")
             if not isinstance(worker_result, dict):
                 msg = f"worker '{worker_name}' returned a malformed Nornir VLAN result"
@@ -234,7 +245,7 @@ class NetboxVlansTasks:
                     )
 
         for device_name in devices:
-            if device_name not in live_by_device:
+            if device_name not in live_by_device and device_name not in failed_devices:
                 msg = f"device '{device_name}' is missing a live VLAN result"
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - Sync VLANs: {msg}")

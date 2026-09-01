@@ -3,16 +3,16 @@ from typing import Any, List, Union
 from picle.models import Outputters, PipeFunctionsModel
 from pydantic import Field, StrictStr
 
-from norfab.workers.netbox_worker.netbox_models import BgpCommunitySyncInput
+from norfab.workers.netbox_worker.netbox_models import SyncBgpCommunityInput
 
 from ..common import log_error_or_result, run_future_job
 from ..nornir.nornir_picle_shell_common import NorniHostsFilters
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
 
 
-class BgpCommunitySyncShell(
+class SyncBgpCommunityShell(
     NetboxClientRunJobArgs,
-    BgpCommunitySyncInput,
+    SyncBgpCommunityInput,
     use_enum_values=True,
     populate_by_name=True,
 ):
@@ -40,7 +40,7 @@ class BgpCommunitySyncShell(
 
         result = run_future_job(
             "netbox",
-            "bgp_community_sync",
+            "sync_bgp_community",
             workers=workers,
             kwargs=kwargs,
             timeout=timeout,

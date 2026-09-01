@@ -354,7 +354,7 @@ commands:
       Ethernet9.610 is down, line protocol is lowerlayerdown (notconnect)
         Hardware is Subinterface, address is 0000.0000.0000
         Description: TEST_SYNC_SUBINTERFACE
-        IP MTU 0 bytes (default)
+        IP MTU 0 bytes (default), BW 0 kbit
         Down 1 day, 10 minutes, 21 seconds
         Last clearing of "show interface" counters never
            0 packets input
@@ -574,7 +574,7 @@ commands:
       Ethernet9.610 is down, line protocol is lowerlayerdown (notconnect)
         Hardware is Subinterface, address is 0000.0000.0000
         Description: TEST_SYNC_SUBINTERFACE
-        IP MTU 0 bytes (default)
+        IP MTU 0 bytes (default), BW 0 kbit
         Down 1 day, 10 minutes, 24 seconds
         Last clearing of "show interface" counters never
            0 packets input

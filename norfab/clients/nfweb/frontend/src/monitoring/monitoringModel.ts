@@ -1,5 +1,19 @@
 import type { MonitoringComponent, MonitoringSnapshot } from "../types";
 
+export const maximumMonitoringSamples = 2161;
+
+export type MonitoringResourceField = "memory_mbyte" | "cpu_percent";
+
+function compareComponentNames(
+  left: MonitoringComponent,
+  right: MonitoringComponent,
+) {
+  return left.name.localeCompare(right.name, undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
+
 export const trackedJobStatuses = [
   "FAILED",
   "STARTED",
@@ -12,6 +26,69 @@ export type TrackedJobStatus = (typeof trackedJobStatuses)[number];
 export interface JobStatusActivityPoint {
   collected_at: string;
   counts: Record<TrackedJobStatus, number>;
+}
+
+function collectedAtMillis(snapshot: Pick<MonitoringSnapshot, "collected_at">) {
+  return Date.parse(snapshot.collected_at);
+}
+
+export function newerMonitoringSnapshot(
+  current: MonitoringSnapshot | null,
+  candidate: MonitoringSnapshot | null,
+): MonitoringSnapshot | null {
+  if (!current) return candidate;
+  if (!candidate) return current;
+  return collectedAtMillis(candidate) >= collectedAtMillis(current)
+    ? candidate
+    : current;
+}
+
+export function mergeMonitoringHistory(
+  current: MonitoringSnapshot[],
+  incoming: MonitoringSnapshot[],
+  limit = maximumMonitoringSamples,
+): MonitoringSnapshot[] {
+  const byTimestamp = new Map(
+    [...current, ...incoming].map((snapshot) => [snapshot.collected_at, snapshot]),
+  );
+  return [...byTimestamp.values()]
+    .sort((left, right) => collectedAtMillis(left) - collectedAtMillis(right))
+    .slice(-limit);
+}
+
+export function monitoringComponentAt(
+  sample: MonitoringSnapshot,
+  id: string,
+): MonitoringComponent | undefined {
+  if (sample.broker.id === id) return sample.broker;
+  if (sample.client.id === id) return sample.client;
+  return sample.workers.find((component) => component.id === id);
+}
+
+export function fabricComponentsInHistory(
+  history: MonitoringSnapshot[],
+): MonitoringComponent[] {
+  const components = new Map<string, MonitoringComponent>();
+  history.forEach((sample) => {
+    components.set(sample.broker.id, sample.broker);
+    sample.workers.forEach((worker) => components.set(worker.id, worker));
+  });
+  return [...components.values()].sort((left, right) => {
+    if (left.role === "broker") return -1;
+    if (right.role === "broker") return 1;
+    return compareComponentNames(left, right);
+  });
+}
+
+export function componentResourceSeries(
+  history: MonitoringSnapshot[],
+  id: string,
+  field: MonitoringResourceField,
+): Array<[string, number | null]> {
+  return history.map((sample) => [
+    sample.collected_at,
+    monitoringComponentAt(sample, id)?.[field] ?? null,
+  ]);
 }
 
 export function jobStatusActivity(
@@ -48,6 +125,6 @@ export function rankWorkersByUtilization(
 
   return [...workers].sort(
     (left, right) =>
-      score(right) - score(left) || left.name.localeCompare(right.name),
+      score(right) - score(left) || compareComponentNames(left, right),
   );
 }

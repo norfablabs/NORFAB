@@ -1,5 +1,7 @@
 import pprint
+from collections.abc import Iterator
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
@@ -104,6 +106,61 @@ class TestSyncAllOrchestration:
             set(self.RESULT_CATEGORIES.values())
             - {self.RESULT_CATEGORIES[skipped_task]}
         )
+
+
+class TestSyncResourcesFailed:
+    DEVICE = "cisco_ios_xr1"
+    SUCCESS_DEVICE = "fn-ceos-lf-1"
+
+    @pytest.fixture(autouse=True)
+    def failed_device(self, nfclient: Any) -> Iterator[None]:
+        nb = get_pynetbox(nfclient)
+        device = nb.dcim.devices.get(name=self.DEVICE)
+        if device is not None:
+            device.delete()
+        device = nb.dcim.devices.create(
+            name=self.DEVICE,
+            device_type=nb.dcim.device_types.get(model="XVR9000").id,
+            role=nb.dcim.device_roles.get(name="VirtualRouter").id,
+            site=nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
+            status="active",
+        )
+        yield
+        device.delete()
+
+    @pytest.mark.parametrize(
+        ("task", "error_text"),
+        [
+            ("sync_device_inventory", "failed to fetch inventory data"),
+            ("sync_vlans", "failed to fetch VLAN data"),
+            ("sync_device_prefixes", "failed to fetch interface data"),
+            ("sync_vrfs", "failed to fetch VRF data"),
+            ("sync_device_interfaces", "failed to fetch interface data"),
+            ("sync_mac_addresses", "failed to fetch interface data"),
+            ("sync_device_ip", "failed to fetch interface data"),
+            ("sync_bgp_peerings", "failed to fetch BGP session data"),
+        ],
+    )
+    def test_failed_nornir_resources_are_reported(
+        self, nfclient: Any, task: str, error_text: str
+    ) -> None:
+        response = nfclient.run_job(
+            "netbox",
+            task,
+            workers="any",
+            kwargs={
+                "devices": [self.SUCCESS_DEVICE, self.DEVICE],
+                "dry_run": True,
+            },
+        )
+
+        assert response
+        for result in response.values():
+            assert any(
+                error_text in error and self.DEVICE in error
+                for error in result["errors"]
+            )
+            assert result["failed"] is False
 
 
 @pytest.mark.netbox_sync_mac_addresses

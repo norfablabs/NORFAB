@@ -2318,7 +2318,7 @@ class SyncVrfsResult(Result):
 # --------------------------------------------------------------------------
 
 
-class BgpCommunitySyncInput(
+class SyncBgpCommunityInput(
     NetboxNornirHostsFilters,
     NetboxCommonArgs,
     use_enum_values=True,
@@ -2352,7 +2352,7 @@ class BgpCommunitySyncInput(
     )
 
 
-class BgpCommunitySyncResult(Result):
+class SyncBgpCommunityResult(Result):
     result: Dict[StrictStr, Any] = Field(
         {},
         description="BGP community synchronization actions keyed by NetBox model",

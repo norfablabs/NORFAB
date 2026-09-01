@@ -279,6 +279,20 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         assert refresh.code == 200
         assert self.monitoring_collector.collect_count == 1
 
+    def test_monitoring_refresh_coalesces_with_active_collection(self) -> None:
+        self.monitoring_collector.collecting = True
+
+        response = self.fetch(
+            "/api/v1/monitoring/refresh",
+            method="POST",
+            body=b"",
+        )
+
+        assert response.code == 200
+        assert response.headers["X-NFWeb-Monitoring-Refresh"] == "coalesced"
+        assert json.loads(response.body)["broker"]["status"] == "active"
+        assert self.monitoring_collector.collect_count == 0
+
     def test_monitoring_worker_database_route_returns_selected_worker_stats(
         self,
     ) -> None:

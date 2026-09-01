@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 31 August 2026*
+*Last updated: 1 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -52,7 +52,8 @@ troubleshooting, reporting, and guided workflows.
 
 The **runtime monitoring dashboard** polls existing broker management and worker
 watchdog interfaces to show broker, local NFWeb client, and worker health; CPU and
-resident memory; worker resource comparisons and selected-worker trends; and
+resident memory; worker resource comparisons; stacked fabric-wide broker and
+worker CPU and memory consumption; selected-worker trends; and
 local-client job totals and interval status activity from the existing client job
 database. Selecting a worker also shows a full-width status card summarizing its
 recent jobs, statuses, and tasks through the existing worker `job_list` task.
@@ -60,7 +61,7 @@ ECharts supplies resource trends, stacked job-status activity bars,
 data zoom, and
 worker comparisons. Worker comparisons rank combined CPU and relative-memory
 demand on each refresh, show ten workers at once with synchronized scrolling, and
-offer 5, 10, 30, or 60-second dashboard refresh requests. Samples are pushed to
+offer 5, 10, 30, or 60-second reads of the latest shared sample. Samples are pushed to
 browsers over WebSocket and retained
 only in process memory for up to three hours; restart clears them and no monitoring
 database or telemetry journal is created. **Monitoring use cases:** live fabric
@@ -752,11 +753,15 @@ creates interfaces but does not discover live state; device and interface type
 inputs must match the NetBox model.
 [Task details](workers/netbox/services_netbox_service_tasks_create_device_interfaces.md)
 
+Live-state synchronization tasks report per-device Nornir collection failures
+in their NetBox task errors while retaining usable results from other devices.
+
 ### Live interface reconciliation
 
 Collects live interface configuration and operational data through Nornir.
 Operational state fills MTU, duplex, and speed when absent from configuration
-parsing. The task computes a desired/current diff, optionally maps live
+parsing. Missing or zero live MTU and speed values preserve existing NetBox
+values. The task computes a desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
 Interface-name and VLAN-group mapping rules can be supplied inline or loaded
@@ -828,12 +833,12 @@ consistent IP/ASN/VRF modelling.
 ### Live BGP community reconciliation
 
 Collects named BGP communities from supported live devices, stores route
-targets in NetBox IPAM and other types in the NetBox BGP plugin, and aggregates
-different live names for the same value into an optional custom field. **Use
+targets in NetBox IPAM and other types in the NetBox BGP plugin, and appends
+missing live names for the same value into an optional custom field. **Use
 cases:** community inventory, naming audits, and source-of-truth onboarding.
 **Limitations:** parser and NetBox plugin value support determine coverage;
 objects are never deleted.
-[Task details](workers/netbox/services_netbox_service_tasks_bgp_community_sync.md)
+[Task details](workers/netbox/services_netbox_service_tasks_sync_bgp_community.md)
 
 ### Interface description updates
 

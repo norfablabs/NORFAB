@@ -1,20 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Badge, Button, Card, Group, Loader, Select, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
-import { IconActivityHeartbeat, IconAlertCircle, IconBriefcase, IconCpu, IconDatabase, IconRefresh, IconServer } from "@tabler/icons-react";
-import { connect } from "echarts";
-import type { EChartsOption, EChartsType } from "echarts";
+import { ActionIcon, Badge, Button, Card, Group, Loader, Select, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
+import { IconActivityHeartbeat, IconAlertCircle, IconBriefcase, IconCpu, IconDatabase, IconRefresh, IconServer, IconX } from "@tabler/icons-react";
+import type { EChartsOption } from "echarts";
 import ReactECharts from "echarts-for-react";
 import { api, openMonitoringStream } from "../api";
 import type { MonitoringSnapshot, MonitoringWorkerDatabaseStats } from "../types";
 import {
+  componentResourceSeries,
+  fabricComponentsInHistory,
   jobStatusActivity,
+  mergeMonitoringHistory,
+  newerMonitoringSnapshot,
   rankWorkersByUtilization,
   trackedJobStatuses,
 } from "./monitoringModel";
 
 const statusColor: Record<string, string> = { active: "fabric", alive: "fabric", complete: "fabric", degraded: "yellow", partial: "yellow", dead: "red", failed: "red", unreachable: "red", unknown: "gray" };
 const jobStatusColors: Record<string, string> = { COMPLETED: "#4bbbad", FAILED: "#f06565", STALE: "#f5a65b", STARTED: "#6ea8fe", DISPATCHED: "#8b7cf6", SUBMITTING: "#d07cf2", NEW: "#7f8da0" };
-const workerComparisonGroup = "monitoring-worker-comparisons";
+const fabricSeriesColors = ["#f5a65b", "#4bbbad", "#6ea8fe", "#d07cf2", "#8b7cf6", "#f06565", "#76c893", "#f4d35e", "#4cc9f0", "#b8c0ff", "#ff8fab", "#90be6d", "#c77dff"];
 const refreshIntervals = [5, 10, 30, 60].map((seconds) => ({ value: String(seconds), label: `${seconds} seconds` }));
 
 function metric(value: number | null | undefined, suffix: string, digits = 1) {
@@ -23,10 +26,6 @@ function metric(value: number | null | undefined, suffix: string, digits = 1) {
 
 function compactNumber(value: number) {
   return new Intl.NumberFormat(undefined, { notation: "compact" }).format(value);
-}
-
-function componentAt(sample: MonitoringSnapshot, id: string) {
-  return [sample.broker, sample.client, ...sample.workers].find((component) => component.id === id);
 }
 
 export default function MonitoringView() {
@@ -41,20 +40,27 @@ export default function MonitoringView() {
   const [workerDatabase, setWorkerDatabase] = useState<MonitoringWorkerDatabaseStats | null>(null);
   const [workerDatabaseError, setWorkerDatabaseError] = useState<string | null>(null);
   const [workerDatabaseLoading, setWorkerDatabaseLoading] = useState(false);
+  const [workerWindowStart, setWorkerWindowStart] = useState(0);
+  const [fabricZoom, setFabricZoom] = useState({ start: 0, end: 100 });
   const refreshInFlight = useRef(false);
 
   const acceptSnapshot = useCallback((snapshot: MonitoringSnapshot) => {
-    setLatest(snapshot);
-    setHistory((current) => [...current.filter((item) => item.collected_at !== snapshot.collected_at), snapshot].slice(-2161));
+    setLatest((current) => newerMonitoringSnapshot(current, snapshot));
+    setHistory((current) => mergeMonitoringHistory(current, [snapshot]));
+    setError(null);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
     api.monitoringHistory().then((samples) => {
       if (cancelled) return;
-      setHistory(samples);
-      setLatest(samples.at(-1) ?? null);
-    }).catch((reason: Error) => setError(reason.message)).finally(() => setLoading(false));
+      setHistory((current) => mergeMonitoringHistory(current, samples));
+      setLatest((current) => newerMonitoringSnapshot(current, samples.at(-1) ?? null));
+    }).catch((reason: Error) => {
+      if (!cancelled) setError(reason.message);
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
     const closeStream = openMonitoringStream(acceptSnapshot, setConnection);
     return () => { cancelled = true; closeStream(); };
   }, [acceptSnapshot]);
@@ -66,6 +72,24 @@ export default function MonitoringView() {
     [latest],
   );
   const workerScrollEnabled = rankedWorkers.length > 10;
+  const workerWindowEnd = Math.min(
+    workerWindowStart + 9,
+    Math.max(rankedWorkers.length - 1, 0),
+  );
+  const currentFabricComponents = useMemo(
+    () => latest ? [latest.broker, ...latest.workers] : [],
+    [latest],
+  );
+  const historicalFabricComponents = useMemo(
+    () => fabricComponentsInHistory(history),
+    [history],
+  );
+  const fabricMemoryTotal = currentFabricComponents.reduce((total, component) => total + (component.memory_mbyte ?? 0), 0);
+  const fabricCpuTotal = currentFabricComponents.reduce((total, component) => total + (component.cpu_percent ?? 0), 0);
+
+  useEffect(() => {
+    setWorkerWindowStart(0);
+  }, [latest?.collected_at]);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,11 +114,6 @@ export default function MonitoringView() {
     return () => { cancelled = true; };
   }, [selected?.name]);
 
-  const connectWorkerChart = useCallback((chart: EChartsType) => {
-    chart.group = workerComparisonGroup;
-    connect(workerComparisonGroup);
-  }, []);
-
   const comparisonOption = useCallback((field: "memory_mbyte" | "cpu_percent", unit: string, color: string): EChartsOption => ({
     backgroundColor: "transparent",
     aria: { enabled: true },
@@ -103,15 +122,72 @@ export default function MonitoringView() {
     xAxis: { type: "value", name: unit, min: 0, axisLabel: { color: "#7f8da0", fontSize: 10 }, splitLine: { lineStyle: { color: "#202b38" } } },
     yAxis: { type: "category", inverse: true, data: rankedWorkers.map((worker) => worker.name), axisLabel: { color: "#9aa8b8", fontSize: 10, width: 112, overflow: "truncate", interval: 0, hideOverlap: false }, axisTick: { show: false } },
     dataZoom: workerScrollEnabled ? [
-      { type: "inside", yAxisIndex: 0, startValue: 0, endValue: 9, zoomLock: true, filterMode: "none" },
-      { type: "slider", yAxisIndex: 0, startValue: 0, endValue: 9, right: 3, width: 10, showDetail: false, showDataShadow: false, brushSelect: false, zoomLock: true, borderColor: "#334155", fillerColor: "rgba(75,187,173,.2)" },
+      { type: "inside", yAxisIndex: 0, startValue: workerWindowStart, endValue: workerWindowEnd, zoomLock: true, filterMode: "none" },
+      { type: "slider", yAxisIndex: 0, startValue: workerWindowStart, endValue: workerWindowEnd, right: 3, width: 10, showDetail: false, showDataShadow: false, brushSelect: false, zoomLock: true, borderColor: "#334155", fillerColor: "rgba(75,187,173,.2)" },
     ] : [],
     tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, backgroundColor: "#151e29", borderColor: "#334155", textStyle: { color: "#e6edf3" } },
     series: [{ type: "bar", data: rankedWorkers.map((worker) => worker[field]), itemStyle: { color, borderRadius: [0, 3, 3, 0] }, barMaxWidth: 13 }],
-  }), [rankedWorkers, workerScrollEnabled]);
+  }), [rankedWorkers, workerScrollEnabled, workerWindowEnd, workerWindowStart]);
+
+  const handleWorkerDataZoom = useCallback((event: { batch?: Array<{ start?: number; startValue?: number }>; start?: number; startValue?: number }) => {
+    const zoom = event.batch?.[0] ?? event;
+    const maximumStart = Math.max(rankedWorkers.length - 10, 0);
+    const requestedStart = Number.isFinite(zoom.startValue)
+      ? Number(zoom.startValue)
+      : Math.round(((zoom.start ?? 0) / 100) * Math.max(rankedWorkers.length - 1, 0));
+    setWorkerWindowStart(
+      Math.max(0, Math.min(Math.round(requestedStart), maximumStart)),
+    );
+  }, [rankedWorkers.length]);
+
+  const workerChartEvents = useMemo(
+    () => ({ datazoom: handleWorkerDataZoom }),
+    [handleWorkerDataZoom],
+  );
 
   const workerMemoryOption = useMemo(() => comparisonOption("memory_mbyte", "MiB", "#4bbbad"), [comparisonOption]);
   const workerCpuOption = useMemo(() => comparisonOption("cpu_percent", "%", "#6ea8fe"), [comparisonOption]);
+
+  const fabricConsumptionOption = useCallback((field: "memory_mbyte" | "cpu_percent", unit: string): EChartsOption => ({
+    backgroundColor: "transparent",
+    aria: { enabled: true },
+    animationDuration: 250,
+    color: fabricSeriesColors,
+    legend: { type: "scroll", top: 0, left: 4, right: 4, itemWidth: 10, itemHeight: 7, textStyle: { color: "#9aa8b8", fontSize: 9 }, pageTextStyle: { color: "#9aa8b8" } },
+    grid: { left: 48, right: 18, top: 30, bottom: 30 },
+    xAxis: { type: "time", splitNumber: 4, axisLabel: { color: "#7f8da0", fontSize: 9, hideOverlap: true }, axisLine: { lineStyle: { color: "#334155" } } },
+    yAxis: { type: "value", name: unit, min: 0, axisLabel: { color: "#7f8da0", fontSize: 9 }, splitLine: { lineStyle: { color: "#202b38" } } },
+    dataZoom: [{ type: "inside", xAxisIndex: 0, start: fabricZoom.start, end: fabricZoom.end }],
+    tooltip: { trigger: "axis", order: "valueDesc", backgroundColor: "#151e29", borderColor: "#334155", textStyle: { color: "#e6edf3" } },
+    series: historicalFabricComponents.map((component, index) => ({
+      name: component.role === "broker" ? "Broker" : component.name,
+      type: "line",
+      stack: `fabric-${field}`,
+      smooth: true,
+      showSymbol: false,
+      connectNulls: false,
+      lineStyle: { width: 1.4, color: fabricSeriesColors[index % fabricSeriesColors.length] },
+      areaStyle: { opacity: 0.16, color: fabricSeriesColors[index % fabricSeriesColors.length] },
+      emphasis: { focus: "series" },
+      data: componentResourceSeries(history, component.id, field),
+    })),
+  }), [fabricZoom.end, fabricZoom.start, historicalFabricComponents, history]);
+
+  const handleFabricDataZoom = useCallback((event: { batch?: Array<{ start?: number; end?: number }>; start?: number; end?: number }) => {
+    const zoom = event.batch?.[0] ?? event;
+    setFabricZoom((current) => ({
+      start: Math.max(0, Math.min(zoom.start ?? current.start, 100)),
+      end: Math.max(0, Math.min(zoom.end ?? current.end, 100)),
+    }));
+  }, []);
+
+  const fabricChartEvents = useMemo(
+    () => ({ datazoom: handleFabricDataZoom }),
+    [handleFabricDataZoom],
+  );
+
+  const fabricMemoryOption = useMemo(() => fabricConsumptionOption("memory_mbyte", "MiB"), [fabricConsumptionOption]);
+  const fabricCpuOption = useMemo(() => fabricConsumptionOption("cpu_percent", "%"), [fabricConsumptionOption]);
 
   const selectedTrendOption = useCallback((field: "memory_mbyte" | "cpu_percent", unit: string, color: string): EChartsOption => ({
     backgroundColor: "transparent",
@@ -122,7 +198,7 @@ export default function MonitoringView() {
     xAxis: { type: "time", axisLabel: { color: "#7f8da0", fontSize: 10 }, axisLine: { lineStyle: { color: "#334155" } } },
     yAxis: { type: "value", name: unit, min: 0, axisLabel: { color: "#7f8da0", fontSize: 10 }, splitLine: { lineStyle: { color: "#202b38" } } },
     dataZoom: [{ type: "inside" }],
-    series: [{ type: "line", smooth: true, showSymbol: false, connectNulls: false, lineStyle: { color, width: 2 }, areaStyle: { color, opacity: 0.08 }, data: history.map((sample) => [sample.collected_at, componentAt(sample, selected?.id ?? "")?.[field] ?? null]) }],
+    series: [{ type: "line", smooth: true, showSymbol: false, connectNulls: false, lineStyle: { color, width: 2 }, areaStyle: { color, opacity: 0.08 }, data: componentResourceSeries(history, selected?.id ?? "", field) }],
   }), [history, selected?.id]);
 
   const selectedMemoryOption = useMemo(() => selectedTrendOption("memory_mbyte", "MiB", "#4bbbad"), [selectedTrendOption]);
@@ -152,39 +228,54 @@ export default function MonitoringView() {
     };
   }, [history]);
 
-  const refresh = useCallback(async (showIndicator = true) => {
+  const refresh = useCallback(async () => {
     if (refreshInFlight.current) return;
     refreshInFlight.current = true;
-    if (showIndicator) setRefreshing(true);
+    setRefreshing(true);
     setError(null);
     try { acceptSnapshot(await api.refreshMonitoring()); }
     catch (reason) { setError((reason as Error).message); }
     finally {
       refreshInFlight.current = false;
-      if (showIndicator) setRefreshing(false);
+      setRefreshing(false);
+    }
+  }, [acceptSnapshot]);
+
+  const readLatestSnapshot = useCallback(async () => {
+    if (refreshInFlight.current) return;
+    refreshInFlight.current = true;
+    try {
+      acceptSnapshot(await api.monitoringSnapshot());
+      setError(null);
+    } catch (reason) {
+      setError((reason as Error).message);
+    } finally {
+      refreshInFlight.current = false;
     }
   }, [acceptSnapshot]);
 
   useEffect(() => {
-    const timer = window.setInterval(() => void refresh(false), refreshInterval * 1000);
+    const timer = window.setInterval(() => void readLatestSnapshot(), refreshInterval * 1000);
     return () => window.clearInterval(timer);
-  }, [refresh, refreshInterval]);
+  }, [readLatestSnapshot, refreshInterval]);
 
   if (loading && !latest) return <Stack className="monitoring-loading" align="center"><Loader size="sm" /><Text size="sm">Collecting fabric status</Text></Stack>;
 
   const chartHeight = Math.max(138, Math.min(218, rankedWorkers.length * 18 + 38));
   const database = latest?.database;
+  const warningMessage = error ?? (latest?.errors.length ? latest.errors.join("; ") : null);
+  const warningSeverity = error ? "error" : "warning";
 
   return (
     <div className="monitoring-dashboard">
       <Stack className="monitoring-dashboard-content" gap="xs">
         <Group className="monitoring-dashboard-toolbar" justify="space-between" wrap="nowrap">
           <Group gap="sm" wrap="nowrap"><Text c="fabric" fw={700} size="xs" tt="uppercase">Fabric observability</Text><Text c="dimmed" size="xs">{latest ? `${latest.duration_ms} ms · ${new Date(latest.collected_at).toLocaleTimeString()}` : "Waiting for data"}</Text></Group>
+          <div className="monitoring-toolbar-message" data-severity={warningSeverity} role="status" aria-live="polite">
+            {warningMessage ? <><IconAlertCircle size={13} /><Text size="xs" title={warningMessage}>{warningMessage}</Text>{error ? <ActionIcon aria-label="Dismiss monitoring warning" color="red" onClick={() => setError(null)} size="xs" variant="subtle"><IconX size={11} /></ActionIcon> : null}</> : null}
+          </div>
           <Group gap="xs" wrap="nowrap"><Select aria-label="Monitoring refresh interval" data={refreshIntervals} value={String(refreshInterval)} onChange={(value) => value && setRefreshInterval(Number(value))} allowDeselect={false} size="xs" w={116} /><Badge color={connection === "connected" ? "fabric" : connection === "connecting" ? "yellow" : "red"} variant="light">{connection}</Badge><Button leftSection={<IconRefresh size={14} />} loading={refreshing} onClick={() => void refresh()} size="compact-sm" variant="light">Refresh</Button></Group>
         </Group>
-
-        {error && <Alert color="red" icon={<IconAlertCircle size={16} />} title="Monitoring warning" withCloseButton onClose={() => setError(null)}>{error}</Alert>}
-        {latest?.errors.length ? <Alert color="yellow" icon={<IconAlertCircle size={16} />} title="Partial sample">{latest.errors.join("; ")}</Alert> : null}
 
         <div className="monitoring-summary-grid">
           <Card className="monitoring-summary-card" padding="sm" radius="md" withBorder><Group justify="space-between" wrap="nowrap"><Group gap="xs" wrap="nowrap"><ThemeIcon color="fabric" size="md" variant="light"><IconServer size={16} /></ThemeIcon><div><Text c="dimmed" size="xs" fw={700}>BROKER</Text><Badge color={statusColor[latest?.broker.status ?? "unknown"]} size="xs" variant="light">{latest?.broker.status ?? "unknown"}</Badge></div></Group><div className="monitoring-inline-metrics"><span>CPU <b>{metric(latest?.broker.cpu_percent, "%")}</b></span><span>MEM <b>{metric(latest?.broker.memory_mbyte, " MiB")}</b></span><span>WORKERS <b>{latest?.broker.worker_count ?? 0}</b></span></div></Group></Card>
@@ -194,8 +285,13 @@ export default function MonitoringView() {
         </div>
 
         <SimpleGrid className="monitoring-comparison-grid" cols={{ base: 1, md: 2 }} spacing="xs">
-          <Card className="monitoring-chart-card" padding="xs" radius="md" withBorder><Group justify="space-between" px={4}><div><Text fw={700} size="sm">Worker memory</Text><Text c="dimmed" size="xs">Ranked by CPU + relative memory · top 10 shown</Text></div><IconDatabase color="#4bbbad" size={17} /></Group><ReactECharts option={workerMemoryOption} style={{ height: chartHeight }} onChartReady={connectWorkerChart} notMerge lazyUpdate /></Card>
-          <Card className="monitoring-chart-card" padding="xs" radius="md" withBorder><Group justify="space-between" px={4}><div><Text fw={700} size="sm">Worker CPU</Text><Text c="dimmed" size="xs">Ranked by CPU + relative memory · top 10 shown</Text></div><IconCpu color="#6ea8fe" size={17} /></Group><ReactECharts option={workerCpuOption} style={{ height: chartHeight }} onChartReady={connectWorkerChart} notMerge lazyUpdate /></Card>
+          <Card className="monitoring-chart-card" padding="xs" radius="md" withBorder><Group justify="space-between" px={4}><div><Text fw={700} size="sm">Worker memory</Text><Text c="dimmed" size="xs">Ranked by CPU + relative memory · top 10 shown</Text></div><IconDatabase color="#4bbbad" size={17} /></Group><ReactECharts option={workerMemoryOption} style={{ height: chartHeight }} onEvents={workerChartEvents} notMerge /></Card>
+          <Card className="monitoring-chart-card" padding="xs" radius="md" withBorder><Group justify="space-between" px={4}><div><Text fw={700} size="sm">Worker CPU</Text><Text c="dimmed" size="xs">Ranked by CPU + relative memory · top 10 shown</Text></div><IconCpu color="#6ea8fe" size={17} /></Group><ReactECharts option={workerCpuOption} style={{ height: chartHeight }} onEvents={workerChartEvents} notMerge /></Card>
+        </SimpleGrid>
+
+        <SimpleGrid className="monitoring-fabric-grid" cols={{ base: 1, md: 2 }} spacing="xs">
+          <Card className="monitoring-chart-card monitoring-fabric-chart-card" padding="xs" radius="md" withBorder><Group justify="space-between" px={4}><div><Text fw={700} size="sm">Total fabric memory</Text><Text c="dimmed" size="xs">Broker + all workers · stacked by process</Text></div><Text c="fabric" fw={800} size="sm">{metric(fabricMemoryTotal, " MiB")}</Text></Group><ReactECharts option={fabricMemoryOption} style={{ height: 134 }} onEvents={fabricChartEvents} notMerge /></Card>
+          <Card className="monitoring-chart-card monitoring-fabric-chart-card" padding="xs" radius="md" withBorder><Group justify="space-between" px={4}><div><Text fw={700} size="sm">Total fabric CPU</Text><Text c="dimmed" size="xs">Broker + all workers · stacked by process</Text></div><Text c="blue" fw={800} size="sm">{metric(fabricCpuTotal, "%")}</Text></Group><ReactECharts option={fabricCpuOption} style={{ height: 134 }} onEvents={fabricChartEvents} notMerge /></Card>
         </SimpleGrid>
 
         <Card className="monitoring-detail-card" padding="xs" radius="md" withBorder>

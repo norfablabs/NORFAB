@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import os
 import time
 from collections import Counter, deque
@@ -24,6 +25,21 @@ from norfab.clients.nfweb.monitoring.models import (
 log = logging.getLogger(__name__)
 
 SnapshotCallback = Callable[[MonitoringSnapshot], Awaitable[None] | None]
+
+
+def _optional_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        number = float(value)
+        return number if math.isfinite(number) else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _optional_int(value: Any) -> int | None:
+    number = _optional_float(value)
+    return int(number) if number is not None and number.is_integer() else None
 
 
 class MonitoringCollector:
@@ -117,11 +133,18 @@ class MonitoringCollector:
             "show_broker",
             timeout=self.config.request_timeout,
         )
+        if not isinstance(broker_reply, dict):
+            broker_reply = {
+                "status": "500",
+                "errors": ["broker returned an invalid status response"],
+            }
         broker_data = (
             broker_reply.get("results", {})
             if broker_reply.get("status") == "200"
             else {}
         )
+        if not isinstance(broker_data, dict):
+            broker_data = {}
         if not broker_data:
             errors.extend(broker_reply.get("errors") or ["broker status unavailable"])
 
@@ -130,12 +153,18 @@ class MonitoringCollector:
             "show_workers",
             timeout=self.config.request_timeout,
         )
+        if not isinstance(workers_reply, dict):
+            workers_reply = {
+                "status": "500",
+                "errors": ["broker returned an invalid worker response"],
+            }
         worker_rows = (
             workers_reply.get("results", [])
             if workers_reply.get("status") == "200"
             else []
         )
         if not isinstance(worker_rows, list):
+            errors.append("broker returned invalid worker status data")
             worker_rows = []
         if workers_reply.get("status") != "200":
             errors.extend(workers_reply.get("errors") or ["worker status unavailable"])
@@ -147,11 +176,23 @@ class MonitoringCollector:
             timeout=self.config.request_timeout,
         )
         stats_by_name: dict[str, dict[str, Any]] = {}
-        for worker_name, job in (worker_stats or {}).items():
-            if job.get("failed"):
-                errors.append(f"{worker_name}: watchdog statistics unavailable")
+        unavailable_worker_names: set[str] = set()
+        if not isinstance(worker_stats, dict):
+            errors.append("worker watchdog statistics returned an invalid response")
+            worker_stats = {}
+        for worker_name, job in worker_stats.items():
+            worker_name = str(worker_name)
+            if not isinstance(job, dict):
+                unavailable_worker_names.add(worker_name)
                 continue
-            stats_by_name[str(worker_name)] = job.get("result") or {}
+            if job.get("failed"):
+                unavailable_worker_names.add(worker_name)
+                continue
+            result = job.get("result") or {}
+            if not isinstance(result, dict):
+                unavailable_worker_names.add(worker_name)
+                continue
+            stats_by_name[worker_name] = result
 
         broker = MonitoringComponent(
             id="broker",
@@ -193,11 +234,34 @@ class MonitoringCollector:
 
         workers: list[MonitoringComponent] = []
         for row in worker_rows:
-            name = row.get("name")
-            if not name:
+            if not isinstance(row, dict):
+                errors.append("broker returned an invalid worker status row")
                 continue
+            worker_name = row.get("name")
+            if not worker_name:
+                continue
+            name = str(worker_name)
             stats = stats_by_name.get(name, {})
+            if (
+                not stats
+                or stats.get("worker_cpu_percent") is None
+                or stats.get("worker_ram_usage_mbyte") is None
+            ):
+                unavailable_worker_names.add(name)
             keepalives = str(row.get("keepalives tx/rx", "")).split("/")
+            holdtime = _optional_float(row.get("holdtime"))
+            keepalives_sent = (
+                _optional_int(keepalives[0].strip()) if len(keepalives) == 2 else None
+            )
+            keepalives_received = (
+                _optional_int(keepalives[1].strip()) if len(keepalives) == 2 else None
+            )
+            if row.get("holdtime") not in (None, "") and holdtime is None:
+                errors.append(f"{name}: invalid holdtime value")
+            if row.get("keepalives tx/rx") and (
+                keepalives_sent is None or keepalives_received is None
+            ):
+                errors.append(f"{name}: invalid keepalive counters")
             workers.append(
                 MonitoringComponent(
                     id=f"worker:{name}",
@@ -208,15 +272,9 @@ class MonitoringCollector:
                     cpu_percent=stats.get("worker_cpu_percent"),
                     memory_mbyte=stats.get("worker_ram_usage_mbyte"),
                     uptime_seconds=stats.get("uptime_seconds"),
-                    holdtime_seconds=(
-                        float(row["holdtime"]) if row.get("holdtime") else None
-                    ),
-                    keepalives_sent=(
-                        int(keepalives[0].strip()) if len(keepalives) == 2 else None
-                    ),
-                    keepalives_received=(
-                        int(keepalives[1].strip()) if len(keepalives) == 2 else None
-                    ),
+                    holdtime_seconds=holdtime,
+                    keepalives_sent=keepalives_sent,
+                    keepalives_received=keepalives_received,
                 )
             )
 
@@ -235,6 +293,11 @@ class MonitoringCollector:
                         uptime_seconds=stats.get("uptime_seconds"),
                     )
                 )
+
+        errors.extend(
+            f"{name}: worker did not respond during this sample interval"
+            for name in sorted(unavailable_worker_names)
+        )
 
         status = "complete" if not errors else "partial" if broker_data else "failed"
         return MonitoringSnapshot(
@@ -269,7 +332,9 @@ class MonitoringCollector:
             kwargs={"last": window_limit},
             timeout=self.config.request_timeout,
         )
-        worker_response = (response or {}).get(worker_name)
+        if not isinstance(response, dict):
+            raise RuntimeError(f"worker '{worker_name}' returned an invalid response")
+        worker_response = response.get(worker_name)
         if not isinstance(worker_response, dict):
             raise RuntimeError(f"worker '{worker_name}' did not return job data")
         if worker_response.get("failed"):

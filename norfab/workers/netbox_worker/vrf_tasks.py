@@ -123,6 +123,7 @@ class NetboxVrfsTasks:
         job.event(f"received VRF data from {len(parse_data)} Nornir worker(s)")
         observations = {}
         result_devices = set()
+        failed_devices = set()
         parsed_count = 0
         for worker_name, worker_data in parse_data.items():
             if worker_data["failed"]:
@@ -131,6 +132,16 @@ class NetboxVrfsTasks:
                 log.error(f"{self.name} - Sync VRFs: {msg}")
                 ret.errors.append(msg)
                 continue
+            resources_failed = worker_data.get("resources_failed") or []
+            if resources_failed:
+                failed_devices.update(resources_failed)
+                msg = (
+                    f"{worker_name} failed to fetch VRF data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - Sync VRFs: {msg}")
+                ret.errors.append(msg)
             for device_name, records in worker_data["result"].items():
                 if device_name not in nb_devices:
                     continue
@@ -147,7 +158,7 @@ class NetboxVrfsTasks:
                     )
 
         for device_name in devices:
-            if device_name not in result_devices:
+            if device_name not in result_devices and device_name not in failed_devices:
                 msg = f"device '{device_name}' is missing a live VRF result"
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - Sync VRFs: {msg}")

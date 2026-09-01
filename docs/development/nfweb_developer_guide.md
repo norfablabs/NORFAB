@@ -361,12 +361,18 @@ show a real need for more scheduling complexity.
 `MonitoringComponent` and `MonitoringSnapshot` in `monitoring/models.py` are the
 authoritative browser contracts. `frontend/src/types.ts` mirrors them. Missing
 worker watchdog data must stay `null`; the broker registration row remains useful
-and should not be discarded or filled with invented values.
+and should not be discarded or filled with invented values. Add a snapshot error
+that names every worker with an absent, failed, or incomplete resource response;
+the frontend displays these errors in the Fabric observability toolbar.
 
 History is a bounded `deque`, pruned both by sample count and exact timestamp. It
 must remain non-persistent: do not add a monitoring table, journal, log replay, or
 restart restoration. The dashboard shows message and keepalive counters available
 from existing interfaces; it does not inspect or retain protocol payloads.
+The browser merges HTTP history, interval reads, and WebSocket samples by
+`collected_at`, deduplicates them, and never replaces the latest sample with an
+older response. WebSocket URLs follow the page scheme (`ws://` for HTTP and
+`wss://` for HTTPS).
 
 ## Use the Browser API Deliberately
 
@@ -480,10 +486,19 @@ The selected worker also drives a full-width database status card below those
 charts. Its request is independent of periodic snapshot collection and failures
 remain local to the card.
 Comparison charts rank workers by CPU percentage plus memory relative to the
-largest current worker, show ten rows at a time, and use an ECharts connection
-group so vertical data zoom stays synchronized. The dashboard refresh selector
-requests a shared sample every 5, 10, 30, or 60 seconds without changing the
-server's configured collection interval.
+largest current worker and show ten rows at a time. React owns one shared worker
+window for both charts so vertical scrolling stays synchronized; each new sample
+resets that window to the newly ranked top ten instead of retaining stale,
+chart-local ECharts zoom state. The dashboard refresh selector
+reads the latest shared sample every 5, 10, 30, or 60 seconds without changing the
+server's configured collection interval or starting another collection. Manual
+refresh requests that overlap the server collector are coalesced onto the latest
+completed sample and must not return a routine `409` warning.
+The fabric consumption row derives stacked broker and per-worker CPU and memory
+series entirely from retained `MonitoringSnapshot` history. React owns their
+shared time-axis zoom so chart-local ECharts state cannot drift; it must not issue
+additional worker requests. Historical series retain workers that disappear from
+the latest sample and render a gap after their final observation.
 
 ### Live and Historical State
 

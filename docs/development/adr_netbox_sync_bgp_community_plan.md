@@ -1,4 +1,4 @@
-# ADR - NetBox `bgp_community_sync` Task Plan
+# ADR - NetBox `sync_bgp_community` Task Plan
 
 ## Status
 
@@ -6,20 +6,20 @@ Accepted on 31 August 2026.
 
 ## Goal
 
-Add a small standalone NetBox task named `bgp_community_sync`. It collects live
+Add a small standalone NetBox task named `sync_bgp_community`. It collects live
 BGP communities with the TTP Templates `bgp_communities` getter, groups records
 by community value, and reconciles:
 
 - `rt` values with NetBox IPAM route targets;
 - every non-`rt` value with NetBox BGP plugin communities.
 
-Different community-set names observed for the same value are stored as one
-sorted, comma-separated string in the `community_name` custom field.
+Different community-set names observed for the same value are stored in the
+`community_name` custom field as a comma-separated string.
 
 ## Design
 
 1. Add `bgp_community_tasks.py` with a `NetboxBgpCommunityTasks` mixin and a
-   decorated `bgp_community_sync` task.
+   decorated `sync_bgp_community` task.
 2. Reuse the common NetBox and Nornir arguments: `instance`, `branch`,
    `devices`, host filters, `timeout`, `dry_run`, and `with_approval`.
 3. Run Nornir `parse_ttp` once with `get="bgp_communities"` and the selected
@@ -32,9 +32,9 @@ sorted, comma-separated string in the `community_name` custom field.
 6. Compare live and NetBox state through the existing `self.make_diff()` helper,
    which uses DeepDiff. Return separate `route_targets` and `communities`
    actions.
-7. On write runs, bulk-create missing objects and bulk-update only the
-   `community_name` custom field. Do not rename route targets or modify other
-   fields.
+7. On write runs, bulk-create missing objects and append missing live names to
+   the `community_name` custom field. Existing custom-field values are
+   preserved. Do not rename route targets or modify other fields.
 8. Report malformed records without making writes for them.
 
 The first implementation will not delete NetBox objects. A missing live record
@@ -42,7 +42,7 @@ does not prove that a globally shared community is stale.
 
 ## Models and Interfaces
 
-- Add `BgpCommunitySyncInput` and `BgpCommunitySyncResult` to
+- Add `SyncBgpCommunityInput` and `SyncBgpCommunityResult` to
   `netbox_models.py`.
 - Register the mixin in `netbox_worker.py`.
 - Add the NFCLI command `netbox sync bgp-communities` using the same thin shell
@@ -55,7 +55,7 @@ does not prove that a globally shared community is stale.
   in `mkdocs.yml`.
 - Update `docs/norfab_features.md`, its Last updated date, and the 0.22.0
   changelog entry.
-- Add a focused `tests/services/netbox/test_bgp_communities.py` suite covering
+- Add a focused `tests/services/netbox/test_sync_bgp_community.py` suite covering
   dry-run, create, alias aggregation across devices, update, idempotency,
   branch forwarding, malformed results, and no deletions.
 - Add minimal FakeNOS command output to two existing simulated devices so the
@@ -68,9 +68,9 @@ does not prove that a globally shared community is stale.
 - `norfab/workers/netbox_worker/bgp_community_tasks.py`
 - `norfab/workers/netbox_worker/netbox_models.py`
 - `norfab/workers/netbox_worker/netbox_worker.py`
-- `norfab/clients/nfcli_shell/netbox/netbox_picle_shell_bgp_community_sync.py`
+- `norfab/clients/nfcli_shell/netbox/netbox_picle_shell_sync_bgp_community.py`
 - `norfab/clients/nfcli_shell/netbox/netbox_picle_shell.py`
-- `tests/services/netbox/test_bgp_communities.py`
+- `tests/services/netbox/test_sync_bgp_community.py`
 - two existing FakeNOS device YAML files
 - `pyproject.toml`, `mkdocs.yml`, the task documentation, feature catalogue, and
   changelog
@@ -83,3 +83,6 @@ does not prove that a globally shared community is stale.
 4. Use optional argument `community_name_field`, defaulting to
    `community_name`. If the configured field does not exist, continue without
    synchronizing community names.
+5. When an object already exists, split the current custom-field value by
+   comma, strip spaces, append missing live names, and skip updates when all
+   live names are already present.

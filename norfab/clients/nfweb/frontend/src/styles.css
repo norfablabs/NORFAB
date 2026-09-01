@@ -280,6 +280,29 @@ body,
   min-height: 28px;
 }
 
+.monitoring-toolbar-message {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 620px;
+  gap: 4px;
+  padding: 2px 8px;
+  color: #f5a65b;
+}
+
+.monitoring-toolbar-message[data-severity="error"] {
+  color: #f06565;
+}
+
+.monitoring-toolbar-message p {
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .monitoring-loading {
   justify-content: center;
 }

@@ -19,6 +19,8 @@ The dashboard provides:
 - compact broker and local-client CPU and resident-memory summaries;
 - aligned worker CPU and resident-memory comparisons, ranked on every sample by
   CPU plus memory relative to the largest worker;
+- stacked fabric-wide CPU and resident-memory time series that show the broker
+  and every worker's contribution to the combined totals;
 - separate CPU and memory trends for the selected worker;
 - broker worker and service totals;
 - worker keepalive transmit/receive totals and current hold time;
@@ -29,8 +31,10 @@ The dashboard provides:
   status, and task counts returned by that worker's existing `job_list` task.
 
 The browser receives new samples over a WebSocket. The Refresh button requests an
-immediate sample. A dashboard selector can request refreshes every 5, 10, 30, or
-60 seconds; periodic server collection remains shared by all browser tabs. Worker
+immediate sample; if shared collection is already running, the request reuses the
+latest completed sample instead of returning a conflict. A dashboard selector
+reads the latest shared sample every 5, 10, 30, or 60 seconds without starting a
+second collection. Periodic server collection remains shared by all browser tabs. Worker
 comparison charts show ten workers at a time and share one vertical scroll/zoom
 position when more workers are available.
 
@@ -96,6 +100,10 @@ If a worker does not return watchdog data, it remains visible with the registrat
 state provided by the broker and unknown resource values. A sample is marked
 `partial` when some calls fail and `failed` when broker state is unavailable.
 Unknown values are shown as unknown rather than inferred.
+Collection warnings are shown in the compact Fabric observability toolbar rather
+than expanding the dashboard with alert cards. When a worker response is absent
+or omits CPU or memory data, the warning names that worker and states that it did
+not respond during the sample interval.
 
 Monitoring is polling-based and read-only, has no persistence, and shares NFWeb's
 existing security boundary. Restrict NFWeb to a trusted administrative network as

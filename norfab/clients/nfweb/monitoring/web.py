@@ -54,9 +54,13 @@ class MonitoringRefreshHandler(MonitoringSnapshotHandler):
     async def post(self) -> None:
         """Collect and return one fresh sample."""
         if self.monitoring_collector.collecting:
-            self.write_json(
-                {"error": "monitoring collection is already in progress"}, status=409
-            )
+            if self.monitoring_collector.latest is None:
+                self.write_json(
+                    {"error": "monitoring data is not available"}, status=503
+                )
+                return
+            self.set_header("X-NFWeb-Monitoring-Refresh", "coalesced")
+            self.write_json(self.monitoring_collector.latest)
             return
         snapshot = await self.monitoring_collector.collect()
         if snapshot is None:

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { MonitoringComponent, MonitoringDatabaseStats } from "../types";
+import type { MonitoringComponent, MonitoringDatabaseStats, MonitoringSnapshot } from "../types";
 import {
+  componentResourceSeries,
+  fabricComponentsInHistory,
   jobStatusActivity,
+  mergeMonitoringHistory,
+  newerMonitoringSnapshot,
   rankWorkersByUtilization,
 } from "./monitoringModel";
 
@@ -59,6 +63,15 @@ describe("rankWorkersByUtilization", () => {
       ]).map(({ name }) => name),
     ).toEqual(["known", "unknown"]);
   });
+
+  it("uses natural worker-name ordering to break equal-score ties", () => {
+    expect(
+      rankWorkersByUtilization([
+        worker("worker-10", 1, 1),
+        worker("worker-2", 1, 1),
+      ]).map(({ name }) => name),
+    ).toEqual(["worker-2", "worker-10"]);
+  });
 });
 
 function database(jobsByStatus: Record<string, number>): MonitoringDatabaseStats {
@@ -74,6 +87,61 @@ function database(jobsByStatus: Record<string, number>): MonitoringDatabaseStats
     events_by_severity: {},
   };
 }
+
+function snapshot(
+  collectedAt: string,
+  workers: MonitoringComponent[] = [],
+): MonitoringSnapshot {
+  return {
+    collected_at: collectedAt,
+    duration_ms: 1,
+    status: "complete",
+    broker: { ...worker("broker", 1, 10), id: "broker", role: "broker" },
+    client: { ...worker("nfweb", 1, 10), id: "client:nfweb", role: "client" },
+    workers,
+    database: database({}),
+    errors: [],
+  };
+}
+
+describe("monitoring history", () => {
+  it("deduplicates and orders out-of-order HTTP and WebSocket samples", () => {
+    const newest = snapshot("2026-08-31T10:00:10Z");
+    const oldest = snapshot("2026-08-31T10:00:00Z");
+    const middle = snapshot("2026-08-31T10:00:05Z");
+
+    expect(
+      mergeMonitoringHistory([newest], [middle, oldest, middle]).map(
+        ({ collected_at }) => collected_at,
+      ),
+    ).toEqual([
+      "2026-08-31T10:00:00Z",
+      "2026-08-31T10:00:05Z",
+      "2026-08-31T10:00:10Z",
+    ]);
+    expect(newerMonitoringSnapshot(newest, middle)).toBe(newest);
+    expect(newerMonitoringSnapshot(middle, newest)).toBe(newest);
+  });
+
+  it("retains disconnected workers in fabric history and emits gaps", () => {
+    const retired = worker("retired", 20, 200);
+    const current = worker("current", 30, 300);
+    const history = [
+      snapshot("2026-08-31T10:00:00Z", [retired]),
+      snapshot("2026-08-31T10:00:05Z", [current]),
+    ];
+
+    expect(fabricComponentsInHistory(history).map(({ name }) => name)).toEqual([
+      "broker",
+      "current",
+      "retired",
+    ]);
+    expect(componentResourceSeries(history, retired.id, "memory_mbyte")).toEqual([
+      ["2026-08-31T10:00:00Z", 200],
+      ["2026-08-31T10:00:05Z", null],
+    ]);
+  });
+});
 
 describe("jobStatusActivity", () => {
   it("returns positive status-count changes for each sample interval", () => {

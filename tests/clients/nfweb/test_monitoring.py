@@ -92,6 +92,73 @@ def test_collect_once_merges_existing_status_interfaces() -> None:
     assert snapshot.workers[0].holdtime_seconds == 12.5
 
 
+def test_collect_once_keeps_malformed_worker_metrics_partial() -> None:
+    process = Mock()
+    process.cpu_percent.return_value = 0.0
+    process.memory_info.return_value = Mock(rss=1)
+    client = make_client()
+    replies = list(client.mmi.side_effect)
+    worker_reply = replies[1]
+    worker_reply["results"][0]["holdtime"] = "not-a-number"
+    worker_reply["results"][0]["keepalives tx/rx"] = "bad / counters"
+    client.mmi.side_effect = replies
+
+    with patch(
+        "norfab.clients.nfweb.monitoring.collector.psutil.Process",
+        return_value=process,
+    ):
+        snapshot = MonitoringCollector(client, MonitoringConfig()).collect_once()
+
+    assert snapshot.status == "partial"
+    assert snapshot.workers[0].holdtime_seconds is None
+    assert snapshot.workers[0].keepalives_sent is None
+    assert snapshot.workers[0].keepalives_received is None
+    assert "nornir-worker-1: invalid holdtime value" in snapshot.errors
+    assert "nornir-worker-1: invalid keepalive counters" in snapshot.errors
+
+
+def test_collect_once_names_workers_missing_from_sample_interval() -> None:
+    process = Mock()
+    process.cpu_percent.return_value = 0.0
+    process.memory_info.return_value = Mock(rss=1)
+    client = make_client()
+    replies = list(client.mmi.side_effect)
+    replies[1]["results"].append(
+        {
+            "name": "nornir-worker-2",
+            "service": "nornir",
+            "status": "alive",
+            "holdtime": "12.5",
+            "keepalives tx/rx": "40 / 39",
+        }
+    )
+    client.mmi.side_effect = replies
+    client.run_job.return_value = {
+        "nornir-worker-1": {
+            "service": "nornir",
+            "failed": False,
+            "result": {
+                "worker_cpu_percent": None,
+                "worker_ram_usage_mbyte": 128.0,
+            },
+        }
+    }
+
+    with patch(
+        "norfab.clients.nfweb.monitoring.collector.psutil.Process",
+        return_value=process,
+    ):
+        snapshot = MonitoringCollector(client, MonitoringConfig()).collect_once()
+
+    assert snapshot.status == "partial"
+    assert snapshot.workers[0].cpu_percent is None
+    assert snapshot.workers[1].cpu_percent is None
+    assert snapshot.errors == [
+        "nornir-worker-1: worker did not respond during this sample interval",
+        "nornir-worker-2: worker did not respond during this sample interval",
+    ]
+
+
 def test_worker_database_stats_uses_existing_job_list_task() -> None:
     process = Mock()
     process.cpu_percent.return_value = 0.0

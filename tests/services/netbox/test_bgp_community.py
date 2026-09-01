@@ -7,11 +7,11 @@ from tests.services.netbox.common import get_pynetbox
 
 pytestmark = [
     pytest.mark.netbox,
-    pytest.mark.netbox_bgp_community_sync,
+    pytest.mark.netbox_sync_bgp_community,
 ]
 
 
-class TestBgpCommunitySync:
+class TestSyncBgpCommunity:
     DEVICES = ["fn-ceos-lf-1", "fn-ceos-lf-2"]
     ROUTE_TARGET_VALUES = {"65000:200", "65000:999"}
     COMMUNITY_VALUES = {"65000:100", "65000:300", "65000:999"}
@@ -53,11 +53,11 @@ class TestBgpCommunitySync:
         **kwargs: object,
     ) -> dict:
         if devices is None and not any(key.startswith("F") for key in kwargs):
-            devices = TestBgpCommunitySync.DEVICES
+            devices = TestSyncBgpCommunity.DEVICES
         sync_kwargs = {"devices": devices, **kwargs} if devices else kwargs
         return nfclient.run_job(
             "netbox",
-            "bgp_community_sync",
+            "sync_bgp_community",
             workers="any",
             kwargs=sync_kwargs,
         )
@@ -137,10 +137,29 @@ class TestBgpCommunitySync:
 
         route_target = self.nb.ipam.route_targets.get(name="65000:200")
         assert route_target.custom_fields["community_aliases"] == (
-            "TENANT_BLUE, VPN_BLUE"
+            "TENANT_BLUE, VPN_BLUE, stale"
+        )
+        standard = self.nb.plugins.bgp.community.get(value="65000:100")
+        site_origin = self.nb.plugins.bgp.community.get(value="65000:300")
+        assert standard.custom_fields["community_aliases"] == (
+            "BLUE_EXPORT, CUSTOMER_EXPORT, stale"
+        )
+        assert site_origin.custom_fields["community_aliases"] == (
+            "ORIGIN_SITE, SITE_ORIGIN, stale"
         )
         assert self.nb.ipam.route_targets.get(name="65000:999") is not None
         assert self.nb.plugins.bgp.community.get(value="65000:999") is not None
+
+        response = self._sync(
+            nfclient,
+            community_name_field="community_aliases",
+        )
+        for result in self._successful_results(response):
+            assert result["result"]["route_targets"]["in_sync"] == ["65000:200"]
+            assert result["result"]["communities"]["in_sync"] == [
+                "65000:100",
+                "65000:300",
+            ]
 
     def test_custom_field_sync_can_be_disabled(self, nfclient: Any) -> None:
         response = self._sync(nfclient, community_name_field=False)
@@ -174,3 +193,31 @@ class TestBgpCommunitySync:
                 "65000:100",
                 "65000:300",
             ]
+
+    def test_resources_failed_are_reported(self, nfclient: Any) -> None:
+        device = self.nb.dcim.devices.get(name="cisco_ios_xr1")
+        if device is not None:
+            device.delete()
+        device = self.nb.dcim.devices.create(
+            name="cisco_ios_xr1",
+            device_type=self.nb.dcim.device_types.get(model="XVR9000").id,
+            role=self.nb.dcim.device_roles.get(name="VirtualRouter").id,
+            site=self.nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
+            status="active",
+        )
+        try:
+            response = self._sync(nfclient, devices=["fn-ceos-lf-1", "cisco_ios_xr1"])
+            for result in response.values():
+                assert any(
+                    "failed to fetch BGP community data from devices cisco_ios_xr1"
+                    in error
+                    for error in result["errors"]
+                )
+                assert result["failed"] is False
+                assert result["result"]["route_targets"]["created"] == ["65000:200"]
+                assert result["result"]["communities"]["created"] == [
+                    "65000:100",
+                    "65000:300",
+                ]
+        finally:
+            device.delete()

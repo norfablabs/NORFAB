@@ -2107,12 +2107,23 @@ class NetboxBgpPeeringsTasks:
 
         # Normalize live parse data per device
         job.event("normalising live BGP session data")
+        failed_devices = set()
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
                 msg = f"{wname} - failed to parse BGP session data from devices"
                 log.warning(msg)
                 job.event(msg, severity="WARNING")
                 continue
+            resources_failed = wdata.get("resources_failed") or []
+            if resources_failed:
+                failed_devices.update(resources_failed)
+                msg = (
+                    f"{wname} failed to fetch BGP session data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
             for device_name, host_sessions in (wdata.get("result") or {}).items():
                 normalised_live.setdefault(device_name, {})
                 for s in host_sessions:
@@ -2201,6 +2212,9 @@ class NetboxBgpPeeringsTasks:
         job.event(
             f"normalised {live_session_count} live BGP session(s) after applying filters"
         )
+
+        for device_name in failed_devices:
+            normalised_nb.pop(device_name, None)
 
         # Single diff on the full normalised datasets
         job.event("calculating BGP session sync diff")

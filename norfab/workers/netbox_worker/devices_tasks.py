@@ -586,6 +586,7 @@ class NetboxDevicesTasks:
             return ret
 
         live_records_by_device = {device_name: [] for device_name in devices}
+        failed_devices = set()
         for worker_name, worker_data in parse_data.items():
             if worker_data["failed"]:
                 if not worker_data["result"]:
@@ -594,6 +595,16 @@ class NetboxDevicesTasks:
                     log.warning(f"{msg}: {worker_data['errors']}")
                     job.event(msg, severity="WARNING")
                     continue
+            resources_failed = worker_data.get("resources_failed") or []
+            if resources_failed:
+                failed_devices.update(resources_failed)
+                msg = (
+                    f"{worker_name} failed to fetch inventory data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
             for device_name, host_inventory in worker_data["result"].items():
                 if device_name not in live_records_by_device:
                     continue
@@ -603,6 +614,8 @@ class NetboxDevicesTasks:
         # Normalize live and NetBox state.
         job.event("normalising live and NetBox inventory data")
         for device_name in devices:
+            if device_name in failed_devices:
+                continue
             records = live_records_by_device[device_name]
             if transform_function:
                 try:

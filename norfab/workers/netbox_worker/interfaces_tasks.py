@@ -906,7 +906,8 @@ class NetboxInterfacesTasks:
         1. **Fetch**: Pull current interface state from NetBox (source of truth).
         2. **Collect live state**: Run Nornir ``parse_ttp`` interface configuration
            and status jobs against devices. Configuration is authoritative, while
-           status fills missing MTU, duplex, and speed values.
+           status fills missing MTU, duplex, and speed values. Existing NetBox MTU
+           and speed values are preserved when live values are ``None`` or ``0``.
         3. **Diff**: Compare normalized NetBox state against normalized live state using
            DeepDiff to classify each interface as ``create``, ``update``, ``delete``, or
            ``in_sync``.
@@ -1200,6 +1201,15 @@ class NetboxInterfacesTasks:
                 log.warning(msg)
                 job.event(msg, severity="WARNING")
                 continue
+            resources_failed = wdata.get("resources_failed") or []
+            if resources_failed:
+                msg = (
+                    f"{wname} failed to fetch interface status data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
             for device_name, host_interfaces in wdata["result"].items():
                 device_status = interface_status.setdefault(device_name, {})
                 for data in host_interfaces or []:
@@ -1215,6 +1225,15 @@ class NetboxInterfacesTasks:
                 log.warning(msg)
                 job.event(msg, severity="WARNING")
                 continue
+            resources_failed = wdata.get("resources_failed") or []
+            if resources_failed:
+                msg = (
+                    f"{wname} failed to fetch interface data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
             for device_name, host_interfaces in wdata["result"].items():
                 normalised_live_all.setdefault(device_name, {})
                 device_interface_map = [
@@ -1276,6 +1295,12 @@ class NetboxInterfacesTasks:
                         interface["speed"] = status_speed // 1_000
                     if interface["duplex"] is None:
                         interface["duplex"] = status.get("duplex")
+                    # Preserve existing NetBox values when live data has no usable value.
+                    nb_interface = normalised_nb_all.get(device_name, {}).get(intf_name)
+                    if nb_interface:
+                        for field in ("mtu", "speed"):
+                            if interface[field] in (None, 0) and nb_interface[field]:
+                                interface[field] = nb_interface[field]
         live_interface_count = sum(len(v) for v in normalised_live_all.values())
         job.event(
             f"normalised {live_interface_count} live interface(s) after applying filters"
@@ -1792,6 +1817,15 @@ class NetboxInterfacesTasks:
                 log.warning(msg)
                 job.event(msg, severity="WARNING")
                 continue
+            resources_failed = wdata.get("resources_failed") or []
+            if resources_failed:
+                msg = (
+                    f"{wname} failed to fetch interface data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
             for device_name, host_interfaces in wdata["result"].items():
                 for data in host_interfaces:
                     intf_name = data["name"]

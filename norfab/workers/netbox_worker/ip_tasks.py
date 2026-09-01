@@ -57,6 +57,7 @@ def _ip_payload(ip_data: dict, ignore_vrf: bool) -> dict:
 def collect_live_interface_ip_data(
     client,
     job: Job,
+    ret: Result,
     devices: list,
     timeout: int,
     filter_by_name: Union[None, str] = None,
@@ -79,6 +80,15 @@ def collect_live_interface_ip_data(
             log.warning(msg)
             job.event(msg, severity="WARNING")
             continue
+        resources_failed = worker_data.get("resources_failed") or []
+        if resources_failed:
+            msg = (
+                f"{worker_name} failed to fetch interface data from devices "
+                f"{', '.join(sorted(resources_failed))}"
+            )
+            job.event(msg, severity="ERROR")
+            log.error(f"Failed to collect live interface data: {msg}")
+            ret.errors.append(msg)
         for device_name, host_interfaces in worker_data["result"].items():
             filtered = {}
             for interface in host_interfaces:
@@ -825,6 +835,7 @@ class NetboxIpTasks:
         normalised_live_all = collect_live_interface_ip_data(
             client=self.client,
             job=job,
+            ret=ret,
             devices=devices,
             timeout=timeout,
             filter_by_name=filter_by_name,
@@ -1243,6 +1254,7 @@ class NetboxIpTasks:
         normalised_live_all = collect_live_interface_ip_data(
             client=self.client,
             job=job,
+            ret=ret,
             devices=devices,
             timeout=timeout,
             filter_by_name=filter_by_name,

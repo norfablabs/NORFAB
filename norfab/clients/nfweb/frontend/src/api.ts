@@ -64,9 +64,25 @@ export const api = {
     ),
 };
 
-export function openMonitoringStream(
-  onSnapshot: (snapshot: MonitoringSnapshot) => void,
-  onState: (state: "connecting" | "connected" | "disconnected") => void,
+export type StreamState = "connecting" | "connected" | "disconnected";
+
+interface BrowserLocation {
+  protocol: string;
+  host: string;
+}
+
+export function webSocketUrl(
+  path: string,
+  location: BrowserLocation = window.location,
+): string {
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${location.host}${path}`;
+}
+
+function openSnapshotStream<T>(
+  path: string,
+  onSnapshot: (snapshot: T) => void,
+  onState: (state: StreamState) => void,
 ): () => void {
   let socket: WebSocket | null = null;
   let stopped = false;
@@ -76,26 +92,33 @@ export function openMonitoringStream(
   const connect = () => {
     if (stopped) return;
     onState("connecting");
-    socket = new WebSocket(
-      `ws://${window.location.host}/api/v1/monitoring/stream`,
-    );
+    socket = new WebSocket(webSocketUrl(path));
     socket.onopen = () => {
+      if (stopped) {
+        socket?.close();
+        return;
+      }
       retry = 500;
       onState("connected");
     };
     socket.onmessage = (event) => {
-      const message = JSON.parse(event.data) as {
-        type: string;
-        data?: MonitoringSnapshot;
-      };
-      if (message.type === "snapshot" && message.data) onSnapshot(message.data);
+      if (stopped) return;
+      if (typeof event.data !== "string") return;
+      try {
+        const message = JSON.parse(event.data) as {
+          type: string;
+          data?: T;
+        };
+        if (message.type === "snapshot" && message.data) onSnapshot(message.data);
+      } catch {
+        // Ignore malformed frames and keep the live stream connected.
+      }
     };
     socket.onclose = () => {
+      if (stopped) return;
       onState("disconnected");
-      if (!stopped) {
-        reconnectTimer = window.setTimeout(connect, retry);
-        retry = Math.min(retry * 2, 10_000);
-      }
+      reconnectTimer = window.setTimeout(connect, retry);
+      retry = Math.min(retry * 2, 10_000);
     };
   };
 
@@ -107,45 +130,20 @@ export function openMonitoringStream(
   };
 }
 
+export function openMonitoringStream(
+  onSnapshot: (snapshot: MonitoringSnapshot) => void,
+  onState: (state: StreamState) => void,
+): () => void {
+  return openSnapshotStream(
+    "/api/v1/monitoring/stream",
+    onSnapshot,
+    onState,
+  );
+}
+
 export function openTopologyStream(
   onSnapshot: (snapshot: TopologySnapshot) => void,
-  onState: (state: "connecting" | "connected" | "disconnected") => void,
+  onState: (state: StreamState) => void,
 ): () => void {
-  let socket: WebSocket | null = null;
-  let stopped = false;
-  let retry = 500;
-  let reconnectTimer: number | undefined;
-
-  const connect = () => {
-    if (stopped) return;
-    onState("connecting");
-    socket = new WebSocket(
-      `ws://${window.location.host}/api/v1/topology/stream`,
-    );
-    socket.onopen = () => {
-      retry = 500;
-      onState("connected");
-    };
-    socket.onmessage = (event) => {
-      const message = JSON.parse(event.data) as {
-        type: string;
-        data?: TopologySnapshot;
-      };
-      if (message.type === "snapshot" && message.data) onSnapshot(message.data);
-    };
-    socket.onclose = () => {
-      onState("disconnected");
-      if (!stopped) {
-        reconnectTimer = window.setTimeout(connect, retry);
-        retry = Math.min(retry * 2, 10_000);
-      }
-    };
-  };
-
-  connect();
-  return () => {
-    stopped = true;
-    if (reconnectTimer) window.clearTimeout(reconnectTimer);
-    socket?.close();
-  };
+  return openSnapshotStream("/api/v1/topology/stream", onSnapshot, onState);
 }

@@ -939,6 +939,28 @@ class TestSyncDeviceInterfaces:
         ), f"Ethernet9.610 parent mismatch: got {nb_subif.parent!r}"
         assert nb_subif.mtu is None, "Operational MTU 0 must not be synced to NetBox"
 
+    def test_sync_device_interfaces_preserves_mtu_and_speed(
+        self, nfclient: Any
+    ) -> None:
+        """Do not replace NetBox values with zero values from live data."""
+        device = "fn-ceos-sp-1"
+        interface = "Ethernet9.610"
+        self._cleanup(nfclient, [device])
+        self._sync(nfclient, [device])
+
+        intf_id = self._get_intf_id(nfclient, device, interface)
+        self._patch_intf(nfclient, intf_id, {"mtu": 9100, "speed": 1_000_000})
+
+        ret = self._sync(nfclient, [device], filter_by_name=interface)
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            assert interface in res["result"][device]["in_sync"]
+
+        nb_interface = self._get_nb_intf(nfclient, device, interface)
+        assert nb_interface.mtu == 9100
+        assert nb_interface.speed == 1_000_000
+
     def test_sync_device_interfaces_create_lag_with_members(self, nfclient):
         """Clean TEST_SYNC from spine-1 then verify sync creates Port-Channel41 (LAG)
         and its member interfaces Ethernet6 (TEST_SYNC_LAG_MEMBER_A) and
