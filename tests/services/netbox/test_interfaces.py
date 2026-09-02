@@ -5,6 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from norfab.workers.netbox_worker.netbox_models import (
+    GetInterfacesInput,
     SyncAllInput,
     SyncDeviceInterfacesInput,
 )
@@ -43,6 +44,28 @@ pytestmark = pytest.mark.netbox
 @pytest.mark.netbox_get_interfaces
 class TestGetInterfaces:
     nb_version = None
+
+    def test_get_interfaces_raise_on_empty_model(self) -> None:
+        """Validate the default and NFCLI alias for empty-result handling."""
+        assert GetInterfacesInput().raise_on_empty is True
+        assert (
+            GetInterfacesInput.model_validate({"raise-on-empty": False}).raise_on_empty
+            is False
+        )
+
+    def test_get_interfaces_allow_empty_result(self, nfclient: Any) -> None:
+        """Return an empty device mapping when raise_on_empty is disabled."""
+        device = "fn-junos-1"
+        ret = nfclient.run_job(
+            "netbox",
+            "get_interfaces",
+            workers="any",
+            kwargs={"devices": [device], "raise_on_empty": False, "cache": False},
+        )
+
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed - {res}"
+            assert res["result"] == {device: {}}
 
     def test_get_interfaces(self, nfclient):
         if self.nb_version is None:
@@ -592,8 +615,8 @@ class TestSyncDeviceInterfaces:
     @pytest.mark.parametrize(
         "criteria",
         [
-            {"vlan_ids": ["4095"]},
-            {"vlan_ids": ["[400-499]"]},
+            {"match_vlan_ids": ["4095"]},
+            {"match_vlan_ids": ["[400-499]"]},
         ],
     )
     def test_sync_device_interfaces_rejects_invalid_vlan_map_criteria(
@@ -602,7 +625,7 @@ class TestSyncDeviceInterfaces:
     ) -> None:
         with pytest.raises(ValidationError):
             SyncDeviceInterfacesInput.model_validate(
-                {"vlan_map": [{"vlan_group": "INVALID", **criteria}]}
+                {"vlan_map": [{"set_vlan_group": "INVALID", **criteria}]}
             )
 
     def test_sync_device_interfaces_shell_accepts_vlan_map(
@@ -615,15 +638,17 @@ class TestSyncDeviceInterfaces:
 
         vlan_map = [
             {
-                "vlan_group": "ACCESS",
-                "vlan_ids": ["100-199"],
-                "interface_names": ["Ethernet*"],
+                "set_vlan_group": "ACCESS",
+                "match_vlan_ids": ["100-199"],
+                "match_interface_names": ["Ethernet*"],
             }
         ]
         model = netbox_picle_shell_sync_interfaces.SyncInterfacesShell.model_validate(
             {"vlan-map": vlan_map}
         )
-        assert model.vlan_map[0].interface_names == ["Ethernet*"]
+        assert model.vlan_map[0].set_vlan_group == "ACCESS"
+        assert model.vlan_map[0].match_vlan_ids == ["100-199"]
+        assert model.vlan_map[0].match_interface_names == ["Ethernet*"]
 
         calls = []
         monkeypatch.setattr(
@@ -1093,9 +1118,9 @@ class TestSyncDeviceInterfaces:
                 vlan_group=fallback_group_name,
                 vlan_map=[
                     {
-                        "vlan_group": mapped_group_name,
-                        "interface_names": ["Ethernet*"],
-                        "device_names": [device],
+                        "set_vlan_group": mapped_group_name,
+                        "match_interface_names": ["Ethernet*"],
+                        "match_device_names": [device],
                         "vlan_names": ["IGNORED_BY_INTERFACE_SYNC"],
                     }
                 ],
@@ -1116,9 +1141,9 @@ class TestSyncDeviceInterfaces:
     @pytest.mark.parametrize(
         "non_matching_criteria",
         [
-            {"vlan_ids": ["520"]},
-            {"interface_names": ["Loopback*"]},
-            {"device_names": ["fn-ceos-sp-2"]},
+            {"match_vlan_ids": ["520"]},
+            {"match_interface_names": ["Loopback*"]},
+            {"match_device_names": ["fn-ceos-sp-2"]},
         ],
     )
     def test_sync_device_interfaces_vlan_map_mismatch_uses_fallback_group(
@@ -1145,7 +1170,7 @@ class TestSyncDeviceInterfaces:
                 vlan_group=fallback_group_name,
                 vlan_map=[
                     {
-                        "vlan_group": mapped_group_name,
+                        "set_vlan_group": mapped_group_name,
                         **non_matching_criteria,
                     }
                 ],
@@ -1402,6 +1427,63 @@ class TestSyncDeviceInterfaces:
             411,
             510,
         } <= lag_vids, f"Port-Channel41 tagged_vlans not restored in NetBox: expected {{410, 411, 510}} subset, got VIDs {lag_vids}"
+
+    def test_sync_device_interfaces_resolves_junos_vlan_names(self, nfclient):
+        """Initialize empty Junos interfaces and resolve VLAN member names."""
+        device = "fn-junos-1"
+        trunk_parent = "ge-0/0/12"
+        access_parent = "ge-0/0/45"
+        trunk_name = f"{trunk_parent}.0"
+        access_name = f"{access_parent}.0"
+        for interface_name in (trunk_name, access_name, trunk_parent, access_parent):
+            delete_interfaces(nfclient, device, interface_name)
+
+        try:
+            ret = self._sync(
+                nfclient,
+                [device],
+                filter_by_name="ge-0/0/*",
+            )
+            for worker, res in ret.items():
+                assert res["failed"] is False, f"{worker} failed - {res}"
+                assert res["errors"] == [], f"{worker} returned errors - {res}"
+
+            nb_trunk = self._get_nb_intf(nfclient, device, trunk_name)
+            nb_access = self._get_nb_intf(nfclient, device, access_name)
+            nb_trunk_parent = self._get_nb_intf(nfclient, device, trunk_parent)
+            nb_access_parent = self._get_nb_intf(nfclient, device, access_parent)
+
+            assert nb_trunk.parent.name == trunk_parent
+            assert nb_trunk.mode.value == "tagged"
+            assert {vlan.name: vlan.vid for vlan in nb_trunk.tagged_vlans} == {
+                "VLANNAME1": 124,
+                "VLANNAME2": 125,
+            }
+            assert nb_access.parent.name == access_parent
+            assert nb_access.mode.value == "access"
+            assert (
+                nb_access.untagged_vlan.name,
+                nb_access.untagged_vlan.vid,
+            ) == ("VLANNAME3", 126)
+
+            dry_run = self._sync(
+                nfclient,
+                [device],
+                dry_run=True,
+                filter_by_name="ge-0/0/*",
+            )
+            for worker, res in dry_run.items():
+                assert res["failed"] is False, f"{worker} failed - {res}"
+                assert trunk_name in res["result"][device]["in_sync"]
+                assert access_name in res["result"][device]["in_sync"]
+        finally:
+            for interface_name in (
+                trunk_name,
+                access_name,
+                trunk_parent,
+                access_parent,
+            ):
+                delete_interfaces(nfclient, device, interface_name)
 
     # ------------------------------------------------------------------ #
     # Delete scenarios                                                     #

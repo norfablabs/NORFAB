@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 1 September 2026*
+*Last updated: 2 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -666,7 +666,7 @@ code in favour of the lower-level helper for new internal development.
 
 Lists, searches, reads, creates, updates, and deletes arbitrary NetBox objects
 and retrieves change logs, with field selection, pagination, ordering, bulk
-payloads, PATCH/PUT choice, and dry-run for create/update/delete. **Use cases:**
+payloads, PATCH updates, and dry-run for create/update/delete. **Use cases:**
 broad object lifecycle automation, data migration, reporting, audit history,
 and AI tool use. **Limitations:** generic operations require knowledge of the
 NetBox data model and do not provide every safeguard of a dedicated task.
@@ -764,8 +764,12 @@ parsing. Missing or zero live MTU and speed values preserve existing NetBox
 values. The task computes a desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
+An empty NetBox interface set is valid, allowing a device to be initialized
+entirely from discovered live interfaces.
 Interface-name and VLAN-group mapping rules can be supplied inline or loaded
-from YAML through `nf://` URLs.
+from YAML through `nf://` URLs. Live interface VLAN values can be numeric VIDs
+or names; names are resolved against existing scoped NetBox VLANs before the
+desired/current diff is calculated.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the `other` fallback. **Use cases:**
@@ -779,7 +783,9 @@ reviewed with dry-run first.
 Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
 NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
 an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
-loaded from YAML through `nf://` URLs. VLANs are identified by VID per scope;
+loaded from YAML through `nf://` URLs, using `match_device_names`,
+`match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
+and group selection. VLANs are identified by VID per scope;
 the first device supplies values when later devices report a conflict.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines
@@ -833,12 +839,22 @@ consistent IP/ASN/VRF modelling.
 ### Live BGP community reconciliation
 
 Collects named BGP communities from supported live devices, stores route
-targets in NetBox IPAM and other types in the NetBox BGP plugin, and appends
-missing live names for the same value into an optional custom field. **Use
-cases:** community inventory, naming audits, and source-of-truth onboarding.
+targets in NetBox IPAM and other types in the NetBox BGP plugin, appends
+missing live names for the same value, and associates observed devices through
+optional custom fields. **Use cases:** community inventory, naming audits,
+device-to-community inventory, and source-of-truth onboarding.
 **Limitations:** parser and NetBox plugin value support determine coverage;
 objects are never deleted.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_bgp_community.md)
+
+### Live BGP ASN reconciliation
+
+Reconciles globally unique ASNs and descriptions from supported live devices
+with NetBox IPAM and optionally associates each ASN with the devices on which it
+was observed. Missing ASNs are created only when an existing RIR is supplied.
+**Use cases:** ASN inventory, description audits, and device-to-ASN inventory.
+**Limitations:** ASNs and device associations are never deleted automatically.
+[Task details](workers/netbox/services_netbox_service_tasks_sync_bgp_asn.md)
 
 ### Interface description updates
 

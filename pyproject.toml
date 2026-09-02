@@ -368,6 +368,7 @@ markers = [
     "netbox_get_topology: NetBox get_topology task tests",
     "netbox_graphql: NetBox graphql task tests",
     "netbox_sync_all: NetBox sync_all task tests",
+    "netbox_sync_bgp_asn: NetBox sync_bgp_asn task tests",
     "netbox_sync_bgp_community: NetBox sync_bgp_community task tests",
     "netbox_sync_bgp_peerings: NetBox sync_bgp_peerings task tests",
     "netbox_sync_device_interfaces: NetBox sync_device_interfaces task tests",

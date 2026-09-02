@@ -20,7 +20,6 @@ from rich.console import Console
 from norfab.workers.netbox_worker.netbox_models import GraphqlInput, NetboxCommonArgs
 
 from ..common import log_error_or_result, run_future_job
-from .netbox_picle_shell_sync_bgp_community import SyncBgpCommunityShell
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_check_sync import CheckSyncCommands
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
@@ -40,6 +39,8 @@ from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_get_interfaces import GetInterfaces
 from .netbox_picle_shell_get_topology import GetTopology
 from .netbox_picle_shell_sync_all import SyncAllDevicesShell
+from .netbox_picle_shell_sync_bgp_asn import SyncBgpAsnShell
+from .netbox_picle_shell_sync_bgp_community import SyncBgpCommunityShell
 from .netbox_picle_shell_sync_bgp_peerings import SyncBgpPeeringsShell
 from .netbox_picle_shell_sync_device import SyncDeviceInventoryShell
 from .netbox_picle_shell_sync_interfaces import SyncInterfacesShell
@@ -274,6 +275,11 @@ class CreateCommands(BaseModel):
 
 
 class SyncCommands(BaseModel):
+    bgp_asn: SyncBgpAsnShell = Field(
+        None,
+        description="Sync live BGP ASNs with NetBox",
+        alias="bgp-asn",
+    )
     bgp_communities: SyncBgpCommunityShell = Field(
         None,
         description="Sync live BGP communities with NetBox",

@@ -21,13 +21,13 @@ def prepare_vlan_map(
         rule_data = rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
         explicit_vlan_ids = {
             int(vlan_id)
-            for vlan_range in rule_data.get("vlan_ids") or []
+            for vlan_range in rule_data.get("match_vlan_ids") or []
             for vlan_id in expand_alphanumeric_range(f"[{vlan_range}]")
         }
         if vlan_groups is None:
             rule_data["expanded_vlan_ids"] = explicit_vlan_ids or None
         else:
-            group = vlan_groups[rule_data["vlan_group"]]
+            group = vlan_groups[rule_data["set_vlan_group"]]
             group_ranges = getattr(group, "vid_ranges", None)
             if group_ranges is None:
                 group_ranges = [[1, 4094]]
@@ -40,7 +40,7 @@ def prepare_vlan_map(
                     or not 1 <= bounds[0] <= bounds[1] <= 4094
                 ):
                     raise ValueError(
-                        f"invalid vid_ranges for VLAN group '{rule_data['vlan_group']}'"
+                        f"invalid vid_ranges for VLAN group '{rule_data['set_vlan_group']}'"
                     )
                 group_vlan_ids.update(range(bounds[0], bounds[1] + 1))
             rule_data["expanded_vlan_ids"] = (
@@ -73,16 +73,16 @@ def match_vlan_map(
                 for pattern in rule["vlan_names"]
             )
         )
-        device_name_match = not rule.get("device_names") or any(
+        device_name_match = not rule.get("match_device_names") or any(
             fnmatch.fnmatchcase(device_name, pattern)
-            for pattern in rule["device_names"]
+            for pattern in rule["match_device_names"]
         )
         interface_name_match = (
             interface_name is None
-            or not rule.get("interface_names")
+            or not rule.get("match_interface_names")
             or any(
                 fnmatch.fnmatchcase(interface_name, pattern)
-                for pattern in rule["interface_names"]
+                for pattern in rule["match_interface_names"]
             )
         )
         if (
@@ -91,7 +91,7 @@ def match_vlan_map(
             and device_name_match
             and interface_name_match
         ):
-            return rule["vlan_group"]
+            return rule["set_vlan_group"]
     return None
 
 
@@ -176,7 +176,7 @@ def resolve_vrf(
 
 
 def resolve_vlan(
-    vid: Union[None, int],
+    vid: Union[None, int, str],
     nb: Any,
     job: Job,
     ret: Result,
@@ -184,8 +184,9 @@ def resolve_vlan(
     site_id: Union[None, int] = None,
     vlan_group: Union[None, int, str] = None,
     _lookup_cache: Union[None, dict] = None,
+    return_vid: bool = False,
 ) -> Union[int, None]:
-    """Resolve or create a VLAN, return its NetBox ID or None."""
+    """Resolve a VLAN name or resolve/create a VLAN VID in NetBox."""
     if vid is None:
         return None
     if _lookup_cache is None:
@@ -214,6 +215,53 @@ def resolve_vlan(
         group_id = _lookup_cache[group_cache_key]
         if group_id is None:
             return None
+
+    # When given a VLAN name not VID integer, look up an existing NetBox VLAN.
+    # A missing VLAN cannot be created because its numeric VID is unknown.
+    if isinstance(vid, str):
+        cache_key = (
+            ("vlan_name", vid, "group", group_id)
+            if group_id
+            else ("vlan_name", vid, "site", site_id)
+        )
+        if cache_key in _lookup_cache:
+            nb_vlan = _lookup_cache[cache_key]
+            if nb_vlan is None:
+                return None
+            return int(nb_vlan.vid) if return_vid else nb_vlan.id
+
+        filter_kwargs = {"name": vid}
+        if group_id:
+            filter_kwargs["group_id"] = group_id
+        elif site_id:
+            filter_kwargs["site_id"] = site_id
+
+        try:
+            vlan_candidates = nb.ipam.vlans.filter(**filter_kwargs)
+            if not group_id and not site_id:
+                vlan_candidates = (
+                    vlan for vlan in vlan_candidates if not vlan.site and not vlan.group
+                )
+            nb_vlan = next(iter(vlan_candidates), None)
+        except Exception as e:
+            msg = (
+                f"Failed to fetch Netbox vlan using filters "
+                f"'{filter_kwargs}', error: {e}"
+            )
+            log.error(msg)
+            job.event(msg, severity="ERROR")
+            ret.errors.append(msg)
+            return None
+
+        _lookup_cache[cache_key] = nb_vlan
+        if nb_vlan:
+            return int(nb_vlan.vid) if return_vid else nb_vlan.id
+
+        msg = f"failed to find VLAN named '{vid}' in NetBox using filters '{filter_kwargs}'"
+        job.event(msg, severity="ERROR")
+        log.error(f"{worker_name} - {msg}")
+        ret.errors.append(msg)
+        return None
 
     cache_key = (
         (

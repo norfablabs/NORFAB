@@ -462,6 +462,9 @@ vlans.extend(
         {"name": "TEST_S2_TRUNK_B", "vid": 421},
         {"name": "TEST_S2_ACCESS", "vid": 520},
         {"name": "TEST_S2_SUBIF", "vid": 620},
+        {"name": "VLANNAME1", "vid": 124, "site": {"name": "NORFAB-LAB"}},
+        {"name": "VLANNAME2", "vid": 125, "site": {"name": "NORFAB-LAB"}},
+        {"name": "VLANNAME3", "vid": 126, "site": {"name": "NORFAB-LAB"}},
     ]
 )
 
@@ -916,6 +919,14 @@ rirs = [
 
 # Custom fields data
 custom_fields = [
+    {
+        "name": "norfab_crud_test_text",
+        "label": "NorFab CRUD Test Text",
+        "type": "text",
+        "description": "Text field for generic CRUD update tests",
+        "object_types": ["dcim.device"],
+        "related_object_type": None,
+    },
     {
         "name": "vrf",
         "label": "VRF",
@@ -1902,6 +1913,23 @@ devices = [
             "nornir": {
                 "hostname": "127.0.0.1",
                 "port": 6205,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
+    },
+    {
+        "name": "fn-junos-2",
+        "device_type": {"slug": slugify("vMX")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "juniper_junos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6206,
                 "username": "nornir",
                 "password": "nornir",
             },

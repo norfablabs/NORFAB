@@ -1,4 +1,12 @@
 hosts:
+  failed-nornir-device:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6299
+    groups:
+      - eos_params
   cisco_ios_xr1:
     hostname: 127.0.0.1
     platform: cisco_xr
@@ -58,5 +66,13 @@ hosts:
     username: nornir
     password: nornir
     port: 6205
+    groups:
+      - junos_params
+  fn-junos-2:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    username: nornir
+    password: nornir
+    port: 6206
     groups:
       - junos_params

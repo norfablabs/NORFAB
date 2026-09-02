@@ -41,3 +41,10 @@ hosts:
     platform: juniper_junos
     nos:
       plugin: fn-junos-1
+  fn-junos-2:
+    username: nornir
+    password: nornir
+    port: 6206
+    platform: juniper_junos
+    nos:
+      plugin: fn-junos-1

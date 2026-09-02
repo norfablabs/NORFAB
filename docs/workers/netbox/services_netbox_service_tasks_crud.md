@@ -490,8 +490,7 @@ nf#
 > task api name: `crud_update`
 
 Update one or multiple NetBox objects. Each item in `data` must contain an `"id"` field.
-By default uses PATCH (partial update — only specified fields are changed). Set
-`partial=False` to use PUT (full replace — omitted fields revert to their defaults).
+The task uses PATCH, so only the supplied fields are changed.
 
 Use `dry_run=True` to compute field-level diffs without modifying anything.
 
@@ -596,7 +595,6 @@ root
             ├── timeout:    Job timeout
             ├── *object-type:    Object type e.g. "dcim.manufacturers"
             ├── *data:    JSON dict or list of dicts; each must contain "id"
-            ├── no-partial:    Use PUT (full replace) instead of PATCH (partial update)
             └── dry-run:    Show diffs without updating
 nf#
 ```

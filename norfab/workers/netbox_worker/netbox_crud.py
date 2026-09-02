@@ -503,7 +503,6 @@ class NetboxCrudTasks:
         job: Job,
         object_type: str,
         data: Union[dict, list],
-        partial: bool = True,
         instance: Union[None, str] = None,
         branch: Union[None, str] = None,
         dry_run: bool = False,
@@ -515,7 +514,6 @@ class NetboxCrudTasks:
             job: NorFab Job object
             object_type: "app.resource"
             data: dict (single) or list[dict]; each must contain "id" field
-            partial: True → PATCH (only specified fields); False → PUT (full replace)
             instance: NetBox instance name; uses default if omitted
             branch: NetBox branching plugin branch name to use
             dry_run: if True fetches current state, computes diffs, returns without modifying
@@ -584,12 +582,7 @@ class NetboxCrudTasks:
             obj_id = item["id"]
             obj = accessor.get(obj_id)
             if obj:
-                if partial:
-                    obj.update(item)
-                else:
-                    # full PUT: save the entire item dict
-                    obj.update(item)
-                    obj.save()
+                obj.update(item)
                 updated_dicts.append(dict(obj))
 
         log.info(

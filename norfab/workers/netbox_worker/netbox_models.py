@@ -1331,6 +1331,12 @@ class GetInterfacesInput(
         description="If True, return stripped-down interface data for MCP/LLM context window optimisation",
         json_schema_extra={"presence": True},
     )
+    raise_on_empty: StrictBool = Field(
+        True,
+        description="Raise an error when no interfaces match the query",
+        alias="raise-on-empty",
+        json_schema_extra={"presence": True},
+    )
 
 
 # --------------------------------------------------------------------------
@@ -1339,36 +1345,36 @@ class GetInterfacesInput(
 
 
 class VlanMapRule(BaseModel, extra="forbid", populate_by_name=True):
-    vlan_group: StrictStr = Field(
+    set_vlan_group: StrictStr = Field(
         ...,
         min_length=1,
         description="Exact NetBox VLAN group name for matching VLANs",
-        alias="vlan-group",
+        alias="set-vlan-group",
     )
-    vlan_ids: Union[None, List[StrictStr]] = Field(
+    match_vlan_ids: Union[None, List[StrictStr]] = Field(
         None,
         description="VLAN IDs or inclusive ranges narrowing the group VID ranges",
-        alias="vlan-ids",
+        alias="match-vlan-ids",
     )
     vlan_names: Union[None, List[StrictStr]] = Field(
         None,
         description="Glob patterns matched against VLAN names",
         alias="vlan-names",
     )
-    device_names: Union[None, List[StrictStr]] = Field(
+    match_device_names: Union[None, List[StrictStr]] = Field(
         None,
         description="Glob patterns matched against device names",
-        alias="device-names",
+        alias="match-device-names",
     )
-    interface_names: Union[None, List[StrictStr]] = Field(
+    match_interface_names: Union[None, List[StrictStr]] = Field(
         None,
         description="Glob patterns matched against interface names",
-        alias="interface-names",
+        alias="match-interface-names",
     )
 
     @model_validator(mode="after")
     def validate_rule(self) -> "VlanMapRule":
-        for vlan_range in self.vlan_ids or []:
+        for vlan_range in self.match_vlan_ids or []:
             values = expand_alphanumeric_range(f"[{vlan_range}]")
             parts = vlan_range.split("-")
             if (
@@ -1383,10 +1389,14 @@ class VlanMapRule(BaseModel, extra="forbid", populate_by_name=True):
                 )
             ):
                 raise ValueError(f"invalid VLAN ID range '{vlan_range}'")
-        for patterns in (self.vlan_names, self.device_names, self.interface_names):
+        for patterns in (
+            self.vlan_names,
+            self.match_device_names,
+            self.match_interface_names,
+        ):
             if patterns and any(not pattern.strip() for pattern in patterns):
                 raise ValueError("VLAN map glob patterns cannot be empty")
-        if not self.vlan_group.strip():
+        if not self.set_vlan_group.strip():
             raise ValueError("VLAN group name cannot be empty")
         return self
 
@@ -1916,9 +1926,6 @@ class CrudUpdateArgs(NetboxCommonArgs, use_enum_values=True, populate_by_name=Tr
     data: Union[Dict[StrictStr, Any], List[Dict[StrictStr, Any]]] = Field(
         ..., description="Object data; each item must contain 'id'"
     )
-    partial: StrictBool = Field(
-        True, description="True=PATCH (partial); False=PUT (full replace)"
-    )
     dry_run: StrictBool = Field(False, description="Compute diffs without updating")
 
 
@@ -2314,6 +2321,63 @@ class SyncVrfsResult(Result):
 
 
 # --------------------------------------------------------------------------
+# BGP ASN TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class SyncBgpAsnInput(
+    NetboxNornirHostsFilters,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    dry_run: StrictBool = Field(
+        False,
+        description="Calculate the BGP ASN diff without writing to NetBox",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox device names to collect BGP ASNs from",
+    )
+    timeout: StrictInt = Field(
+        600,
+        gt=0,
+        description="Timeout in seconds for host resolution and BGP ASN parsing",
+    )
+    with_approval: StrictBool = Field(
+        False,
+        description="Preview BGP ASN changes before writing to NetBox",
+        alias="with-approval",
+        json_schema_extra={"presence": True},
+    )
+    rir: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox RIR name required to create missing ASNs",
+    )
+    device_custom_field: StrictStr = Field(
+        "devices",
+        min_length=1,
+        description="ASN custom field that stores associated NetBox devices",
+        alias="device-custom-field",
+    )
+    ignore_asn_by_range: Union[None, List[StrictStr]] = Field(
+        None,
+        description="ASN values or numerical ranges to exclude from synchronization",
+        alias="ignore-asn-by-range",
+        examples=[["65000", "65100-65200"]],
+    )
+
+
+class SyncBgpAsnResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="BGP ASN synchronization actions keyed by global scope",
+    )
+
+
+# --------------------------------------------------------------------------
 # BGP COMMUNITY TASK MODELS
 # --------------------------------------------------------------------------
 
@@ -2349,6 +2413,12 @@ class SyncBgpCommunityInput(
         "community_name",
         description="Optional custom field used to store live community-set names",
         alias="community-name-field",
+    )
+    device_custom_field: StrictStr = Field(
+        "devices",
+        min_length=1,
+        description="Community custom field that stores associated NetBox devices",
+        alias="device-custom-field",
     )
 
 

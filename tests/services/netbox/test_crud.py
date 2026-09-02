@@ -810,6 +810,82 @@ class TestCrudUpdate:
         obj = nb.dcim.manufacturers.get(test_manufacturer)
         assert obj.name == new_name, "manufacturer name not updated in NetBox"
 
+    def test_device_attributes_and_custom_fields(self, nfclient):
+        """Update standard device attributes and custom field data together."""
+        nb = get_pynetbox()
+        device_custom_field = "norfab_crud_test_text"
+        assert nb.extras.custom_fields.get(
+            name=device_custom_field
+        ), f"seeded custom field '{device_custom_field}' not found in NetBox"
+        device = nb.dcim.devices.get(name="ceos1")
+        assert device is not None, "test device 'ceos1' not found in NetBox"
+        original_serial = device.serial
+        original_name = device.name
+        original_status = device.status.value
+        original_custom_field_value = (device.custom_fields or {}).get(
+            device_custom_field
+        )
+        other_custom_fields = {
+            key: value
+            for key, value in (device.custom_fields or {}).items()
+            if key != device_custom_field
+        }
+        new_serial = "NORFAB-CRUD-UPDATED"
+        new_custom_field_value = "updated by crud_update"
+
+        try:
+            ret = nfclient.run_job(
+                "netbox",
+                "crud_update",
+                workers="any",
+                kwargs={
+                    "object_type": "dcim.devices",
+                    "data": {
+                        "id": device.id,
+                        "serial": new_serial,
+                        "custom_fields": {device_custom_field: new_custom_field_value},
+                    },
+                },
+            )
+            pprint.pprint(ret)
+
+            for worker, res in ret.items():
+                assert not res["errors"], f"{worker} - received error"
+                result = res["result"]
+                assert result["updated"] == 1
+                assert result["objects"][0]["serial"] == new_serial
+                assert (
+                    result["objects"][0]["custom_fields"][device_custom_field]
+                    == new_custom_field_value
+                )
+                assert {
+                    key: value
+                    for key, value in result["objects"][0]["custom_fields"].items()
+                    if key != device_custom_field
+                } == other_custom_fields
+
+            updated = nb.dcim.devices.get(device.id)
+            assert updated.serial == new_serial
+            assert updated.name == original_name
+            assert updated.status.value == original_status
+            assert updated.custom_fields[device_custom_field] == new_custom_field_value
+            assert {
+                key: value
+                for key, value in updated.custom_fields.items()
+                if key != device_custom_field
+            } == other_custom_fields
+        finally:
+            device = nb.dcim.devices.get(device.id)
+            if device:
+                device.update(
+                    {
+                        "serial": original_serial,
+                        "custom_fields": {
+                            device_custom_field: original_custom_field_value
+                        },
+                    }
+                )
+
     def test_no_change_dry_run(self, nfclient, test_manufacturer):
         """dry_run with unchanged field returns empty changes dict."""
         nb = get_pynetbox()

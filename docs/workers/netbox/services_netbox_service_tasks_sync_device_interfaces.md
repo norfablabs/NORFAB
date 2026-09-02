@@ -9,6 +9,9 @@ tags:
 
 The Netbox Sync Device Interfaces Task synchronizes device interface configuration from live network devices into NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan and applies interface create, update, and delete operations in a safe dependency order.
 
+Devices may begin with no interfaces in NetBox. The task treats an empty
+current interface set as valid and creates interfaces discovered from live data.
+
 ## How It Works
 
 The task follows a four-step pipeline:
@@ -133,7 +136,7 @@ By default `process_deletions=False` — interfaces present in NetBox but absent
 
 ## Ignoring VLANs and VRFs
 
-By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Set `ignore_vlans=True` to skip VLAN creation and leave all interface VLAN associations unchanged. Set `ignore_vrf=True` to skip VRF creation and leave interface VRF associations unchanged.
+By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Numeric VLAN IDs are resolved by VID and can be created when missing. VLAN names are resolved to the VID of an existing VLAN in the selected group or device site before the interface diff is calculated. A missing named VLAN cannot be created because its VID is unknown. Set `ignore_vlans=True` to skip VLAN creation and leave all interface VLAN associations unchanged. Set `ignore_vrf=True` to skip VRF creation and leave interface VRF associations unchanged.
 
 ## VLAN Group Selection
 
@@ -147,14 +150,14 @@ neither argument selects a group, the device site is used.
 ```python
 [
     {
-        "vlan_group": "ACCESS_VLANS",
-        "interface_names": ["Ethernet*"],
-        "vlan_ids": ["100-199", "300"],
-        "device_names": ["leaf-*"],
+        "set_vlan_group": "ACCESS_VLANS",
+        "match_interface_names": ["Ethernet*"],
+        "match_vlan_ids": ["100-199", "300"],
+        "match_device_names": ["leaf-*"],
     },
     {
-        "vlan_group": "INFRA_VLANS",
-        "vlan_ids": ["400-499"],
+        "set_vlan_group": "INFRA_VLANS",
+        "match_vlan_ids": ["400-499"],
     },
 ]
 ```
@@ -162,10 +165,10 @@ neither argument selects a group, the device site is used.
 Values within one criterion use OR logic and populated criteria use AND logic.
 Rules are checked in list order and the first match wins. Interface and device
 names use case-sensitive glob matching. VLAN ranges use plain strings such as
-`100-199`; bracket notation is not accepted. Interface sync ignores
-`vlan_names` because interface parsing does not provide VLAN names. Each rule
-also uses the referenced NetBox group's `vid_ranges`; explicit `vlan_ids`
-narrow those group ranges. A rule containing only `vlan_group` is valid.
+`100-199`; bracket notation is not accepted. Interface sync applies
+`vlan_names` when the interfaces getter returns VLAN names. Each rule
+also uses the referenced NetBox group's `vid_ranges`; explicit `match_vlan_ids`
+narrow those group ranges. A rule containing only `set_vlan_group` is valid.
 
 ## Branching Support
 
@@ -184,7 +187,7 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
     Select VLAN groups with ordered rules and a fallback group:
 
     ```
-    nf#netbox sync interfaces devices leaf-1 vlan-group DEFAULT_VLANS vlan-map '[{"vlan_group":"ACCESS_VLANS","vlan_ids":["100-199"],"interface_names":["Ethernet*"]}]'
+    nf#netbox sync interfaces devices leaf-1 vlan-group DEFAULT_VLANS vlan-map '[{"set_vlan_group":"ACCESS_VLANS","match_vlan_ids":["100-199"],"match_interface_names":["Ethernet*"]}]'
     ```
 
     Preview changes without writing to NetBox (dry run):
@@ -345,13 +348,13 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
             "vlan_group": "DEFAULT_VLANS",
             "vlan_map": [
                 {
-                    "vlan_group": "ACCESS_VLANS",
-                    "interface_names": ["Ethernet*"],
-                    "vlan_ids": ["100-199", "300"],
+                    "set_vlan_group": "ACCESS_VLANS",
+                    "match_interface_names": ["Ethernet*"],
+                    "match_vlan_ids": ["100-199", "300"],
                 },
                 {
-                    "vlan_group": "INFRA_VLANS",
-                    "vlan_ids": ["400-499"],
+                    "set_vlan_group": "INFRA_VLANS",
+                    "match_vlan_ids": ["400-499"],
                 },
             ],
         },

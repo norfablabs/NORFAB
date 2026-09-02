@@ -285,6 +285,7 @@ class NetboxInterfacesTasks:
         cache: Union[None, bool, str] = None,
         branch: Union[None, str] = None,
         brief: bool = False,
+        raise_on_empty: bool = True,
     ) -> Result:
         """
         Retrieve device interfaces from Netbox using Pynetbox REST API.
@@ -302,6 +303,8 @@ class NetboxInterfacesTasks:
                 ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check
             brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context
                 window optimization. Full data is still fetched; brief mode only affects what is returned.
+            raise_on_empty (bool, optional): Raise an error when no interfaces match.
+                Defaults to True.
 
         Returns:
             dict: Dictionary keyed by device name with interface details.
@@ -415,7 +418,11 @@ class NetboxInterfacesTasks:
             all_interfaces = self.bulk_filter(nb.dcim.interfaces, **fetch_filter_params)
             job.event(f"retrieved {len(all_interfaces)} interface(s) from NetBox")
 
-        if not all_interfaces and not any(ret.result.get(d) for d in devices):
+        if (
+            raise_on_empty
+            and not all_interfaces
+            and not any(ret.result.get(d) for d in devices)
+        ):
             raise Exception(
                 f"{self.name} - no interfaces data returned by '{instance}' "
                 f"for devices {', '.join(devices)}"
@@ -996,8 +1003,8 @@ class NetboxInterfacesTasks:
                 use the device site.
             vlan_map: Ordered VLAN group mapping rules, or an ``nf://`` YAML file
                 containing them. Rules use VLAN ID, device name, and interface
-                name criteria. VLAN name criteria are ignored because interface
-                parsing does not supply VLAN names.
+                name criteria. VLAN name criteria apply when interface parsing
+                supplies VLAN names instead of numeric VIDs.
             ignore_vlans (bool, optional): If True, ignore discovered VLANs and
                 leave interface VLAN associations unchanged. Defaults to False.
             ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave
@@ -1034,7 +1041,7 @@ class NetboxInterfacesTasks:
         )
         nb = self._get_pynetbox(instance, branch=branch, job=job)
         vlan_groups = {}
-        group_names = [rule["vlan_group"] for rule in vlan_map]
+        group_names = [rule["set_vlan_group"] for rule in vlan_map]
         if vlan_group:
             group_names.append(vlan_group)
         for group_name in dict.fromkeys(group_names):
@@ -1109,6 +1116,7 @@ class NetboxInterfacesTasks:
             devices=devices,
             ip_addresses=False,
             cache="refresh",
+            raise_on_empty=False,
         )
         if nb_interfaces_result.errors:
             job.event("failed to fetch NetBox interface data", severity="ERROR")
@@ -1219,6 +1227,8 @@ class NetboxInterfacesTasks:
         # Normalize live interface data per device.
         job.event("normalising live interface data")
         normalised_live_all = {}
+        unresolved_vlan_fields = set()
+        vlan_lookup_cache = {}
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
                 msg = f"{wname} - failed to parse interface data from devices"
@@ -1268,6 +1278,60 @@ class NetboxInterfacesTasks:
                         str(data.get("description") or ""), filter_by_description
                     ):
                         continue
+
+                    # Live interface parsers may return VLAN names instead of
+                    # numeric VIDs. Resolve names to NetBox VIDs so live and
+                    # NetBox interface states use the same values for diffing.
+                    untagged_vlan = None
+                    tagged_vlans = []
+                    qinq_svlan = None
+                    if not ignore_vlans:
+                        for field in (
+                            "untagged_vlan",
+                            "tagged_vlans",
+                            "qinq_svlan",
+                        ):
+                            value = data.get(field)
+                            vlans = value or [] if field == "tagged_vlans" else [value]
+                            for vlan in vlans:
+                                if vlan is None:
+                                    continue
+                                resolved_vlan = vlan
+                                if isinstance(vlan, str):
+                                    mapped_group = match_vlan_map(
+                                        vlan_map,
+                                        vlan_id=None,
+                                        vlan_name=vlan,
+                                        device_name=device_name,
+                                        interface_name=intf_name,
+                                    )
+                                    selected_group = mapped_group or vlan_group
+                                    resolved_vlan = resolve_vlan(
+                                        vid=vlan,
+                                        nb=nb,
+                                        job=job,
+                                        ret=ret,
+                                        worker_name=self.name,
+                                        site_id=nb_devices_data[device_name]["site_id"],
+                                        vlan_group=(
+                                            vlan_groups[selected_group].id
+                                            if selected_group
+                                            else None
+                                        ),
+                                        _lookup_cache=vlan_lookup_cache,
+                                        return_vid=True,
+                                    )
+                                if resolved_vlan is None:
+                                    unresolved_vlan_fields.add(
+                                        (device_name, intf_name, field)
+                                    )
+                                elif field == "tagged_vlans":
+                                    tagged_vlans.append(resolved_vlan)
+                                elif field == "untagged_vlan":
+                                    untagged_vlan = resolved_vlan
+                                elif field == "qinq_svlan":
+                                    qinq_svlan = resolved_vlan
+                        tagged_vlans = sorted(set(tagged_vlans))
                     normalised_live_all[device_name][intf_name] = {
                         "name": intf_name,
                         "type": data["type"],
@@ -1281,9 +1345,9 @@ class NetboxInterfacesTasks:
                         "duplex": data.get("duplex"),
                         "description": str(data.get("description") or ""),
                         "mode": data.get("mode"),
-                        "untagged_vlan": data.get("untagged_vlan"),
-                        "tagged_vlans": data.get("tagged_vlans") or [],
-                        "qinq_svlan": data.get("qinq_svlan"),
+                        "untagged_vlan": untagged_vlan,
+                        "tagged_vlans": tagged_vlans,
+                        "qinq_svlan": qinq_svlan,
                         "vrf": data.get("vrf"),
                     }
                     interface = normalised_live_all[device_name][intf_name]
@@ -1318,6 +1382,12 @@ class NetboxInterfacesTasks:
                     for interface in interfaces.values():
                         for field in ignored_fields:
                             interface.pop(field, None)
+
+        # Do not clear existing NetBox VLAN associations when a live VLAN name
+        # could not be resolved to a VID.
+        for device_name, intf_name, field in unresolved_vlan_fields:
+            for state in (normalised_nb_all, normalised_live_all):
+                state.get(device_name, {}).get(intf_name, {}).pop(field, None)
 
         # remove devices that returned no parsing results
         for device_name in devices:
@@ -1443,7 +1513,7 @@ class NetboxInterfacesTasks:
             f"prepared {len(bulk_create_lag_interfaces)} LAG interface create payload(s)"
         )
         if bulk_create_lag_interfaces:
-            job.event(f"creating LAG interfaces")
+            job.event("creating LAG interfaces")
             try:
                 nb.dcim.interfaces.create(bulk_create_lag_interfaces)
                 job.event(f"created {len(bulk_create_lag_interfaces)} LAG interface(s)")
@@ -1462,7 +1532,7 @@ class NetboxInterfacesTasks:
 
         # re-fetch interface IDs after creating LAG interfaces
         job.event("refreshing interface IDs after LAG interface creation")
-        nb_intf_ids = {}
+        nb_intf_ids = {device_name: {} for device_name in devices}
         for intf in self.bulk_filter(
             nb.dcim.interfaces, device=devices, fields="id,name,device"
         ):
@@ -1499,7 +1569,7 @@ class NetboxInterfacesTasks:
             f"prepared {len(bulk_create_parent_interfaces)} non-child/main interface create payload(s)"
         )
         if bulk_create_parent_interfaces:
-            job.event(f"creating non-child/main interfaces")
+            job.event("creating non-child/main interfaces")
             try:
                 nb.dcim.interfaces.create(bulk_create_parent_interfaces)
                 job.event(
@@ -1520,7 +1590,7 @@ class NetboxInterfacesTasks:
 
         # re-fetch interface IDs after creating parent interfaces
         job.event("refreshing interface IDs after non-child/main interface creation")
-        nb_intf_ids = {}
+        nb_intf_ids = {device_name: {} for device_name in devices}
         for intf in self.bulk_filter(
             nb.dcim.interfaces, device=devices, fields="id,name,device"
         ):
@@ -1557,7 +1627,7 @@ class NetboxInterfacesTasks:
             f"prepared {len(bulk_create_child_interfaces)} child interface create payload(s)"
         )
         if bulk_create_child_interfaces:
-            job.event(f"creating child interfaces")
+            job.event("creating child interfaces")
             try:
                 nb.dcim.interfaces.create(bulk_create_child_interfaces)
                 job.event(
@@ -1626,7 +1696,7 @@ class NetboxInterfacesTasks:
         # Build bulk_delete_interfaces payload from full_diff
         bulk_delete_interfaces = {}  # keyed by intf id, values intf names
         if process_deletions:
-            job.event(f"processing interface deletions")
+            job.event("processing interface deletions")
             for device_name, actions in full_diff.items():
                 # delete children before parents to avoid constraint errors
                 ordered_deletes = sorted(

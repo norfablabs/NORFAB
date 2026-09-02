@@ -40,25 +40,25 @@ Each rule contains an exact NetBox VLAN group name. Additional matching
 criteria are optional:
 
 ```yaml
-- vlan_group: CAMPUS
-  vlan_ids:
+- set_vlan_group: CAMPUS
+  match_vlan_ids:
     - 100-199
   vlan_names:
     - USERS*
     - VOICE*
-  device_names:
+  match_device_names:
     - leaf-*
-  interface_names:
+  match_interface_names:
     - Ethernet*
 ```
 
 Rules are evaluated in list order and the first match wins. Values inside one
 criterion use OR logic. Populated criteria use AND logic. VLAN and device names
 use case-sensitive glob matching. VLAN ranges are inclusive and must remain
-within `1..4094`. VLAN sync ignores `interface_names` because its live VLAN
+within `1..4094`. VLAN sync ignores `match_interface_names` because its live VLAN
 records have no interface context. Every rule also uses its NetBox VLAN group's
-configured `vid_ranges`; explicit `vlan_ids` narrow those ranges. An unmatched
-VLAN uses `vlan_group` when supplied, otherwise it uses its device site.
+configured `vid_ranges`; explicit `match_vlan_ids` narrow those ranges. An
+unmatched VLAN uses `vlan_group` when supplied, otherwise it uses its device site.
 
 Every group referenced by `vlan_map` or `vlan_group` must already exist. The
 task resolves groups by exact name and does not create or update groups. Mapping
@@ -191,10 +191,10 @@ installed and configured for branch use.
                 "filter_by_vlan_ids": ["100-399"],
                 "vlan_map": [
                     {
-                        "vlan_group": "CAMPUS",
-                        "vlan_ids": ["100-199"],
+                        "set_vlan_group": "CAMPUS",
+                        "match_vlan_ids": ["100-199"],
                         "vlan_names": ["TEST_L*"],
-                        "device_names": ["fn-ceos-lf-*"],
+                        "match_device_names": ["fn-ceos-lf-*"],
                     }
                 ],
             },

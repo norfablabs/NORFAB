@@ -13,8 +13,9 @@ stored as IPAM route targets. Other community types are stored as NetBox BGP
 plugin community objects when the plugin is installed.
 
 Objects are matched by community value. The task creates missing objects and
-extends their optional community-name custom field with missing live names, but
-it never deletes NetBox objects.
+extends their optional community-name custom field with missing live names. An
+optional multi-object custom field associates each community with the devices
+on which it was observed. The task never deletes NetBox objects or associations.
 
 ## How It Works
 
@@ -51,6 +52,7 @@ when they are missing.
 | `with_approval` | No | `False` | Preview the diff and request approval before writing |
 | `timeout` | No | `600` | Timeout in seconds for host resolution and live parsing |
 | `community_name_field` | No | `community_name` | Custom field used to store live community-set names; set to `False` to disable name synchronization |
+| `device_custom_field` | No | `devices` | Multi-object custom field related to `dcim.device` that stores associated devices |
 
 At least one explicit device or Nornir host filter must select a device. Device
 names from both sources are combined and deduplicated.
@@ -63,11 +65,13 @@ names from both sources are combined and deduplicated.
 - The NetBox BGP plugin is required to store non-route-target communities.
 - To synchronize community-set names, the configured custom field must exist
   and be assigned to `ipam.routetarget`, `netbox_bgp.community`, or both.
+- To associate devices, `device_custom_field` must name a multi-object custom
+  field assigned to the community models and related to `dcim.device`.
 
-The custom field is optional. If it does not exist, the task emits a warning
-and continues creating community objects without updating community names. If
-the BGP plugin is unavailable, the task emits a warning and synchronizes route
-targets only.
+The community-name custom field is optional. If it does not exist, the task
+emits a warning and continues creating community objects without updating
+community names. A missing device custom field is ignored. If the BGP plugin is
+unavailable, the task emits a warning and synchronizes route targets only.
 
 ## Live Data
 

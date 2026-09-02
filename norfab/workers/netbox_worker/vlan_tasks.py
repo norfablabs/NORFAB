@@ -146,7 +146,7 @@ class NetboxVlansTasks:
         )
 
         vlan_groups = {}
-        group_names = [rule["vlan_group"] for rule in rules]
+        group_names = [rule["set_vlan_group"] for rule in rules]
         if vlan_group:
             group_names.append(vlan_group)
         for group_name in dict.fromkeys(group_names):

@@ -59,6 +59,7 @@ class NetboxBgpCommunityTasks:
         devices: Union[None, list] = None,
         branch: Union[None, str] = None,
         community_name_field: Union[str, bool] = "community_name",
+        device_custom_field: str = "devices",
         **kwargs: Any,
     ) -> Result:
         """Synchronize live BGP communities with NetBox.
@@ -67,7 +68,8 @@ class NetboxBgpCommunityTasks:
         community type is stored as a NetBox BGP plugin community. Objects are
         keyed by community value and are never deleted. When the configured
         custom field exists, it stores the sorted, comma-separated live
-        community-set names observed for each value.
+        community-set names observed for each value. The selected device custom
+        field records devices on which each community was observed.
 
         Args:
             job: NorFab job object.
@@ -78,6 +80,7 @@ class NetboxBgpCommunityTasks:
             devices: Explicit NetBox and Nornir device names.
             branch: NetBox Branching plugin branch name.
             community_name_field: Optional custom field for community-set names.
+            device_custom_field: Community custom field containing associated devices.
             **kwargs: Nornir FFun host filters.
 
         Returns:
@@ -129,7 +132,7 @@ class NetboxBgpCommunityTasks:
             return ret
 
         netbox_devices = {
-            device.name
+            device.name: device
             for device in self.bulk_filter(
                 nb.dcim.devices,
                 name=devices,
@@ -160,6 +163,9 @@ class NetboxBgpCommunityTasks:
             log.warning(f"{self.name} - {msg}")
             community_name_field = False
 
+        if not nb.extras.custom_fields.get(name=device_custom_field):
+            device_custom_field = None
+
         msg = f"collecting live BGP communities from {len(devices)} device(s)"
         job.event(msg)
         log.info(f"{self.name} - {msg}")
@@ -173,9 +179,9 @@ class NetboxBgpCommunityTasks:
 
         # Build one live state dictionary for DeepDiff. Route targets always
         # participate; plugin communities are included only when available.
-        normalised_live = {"route_targets": {}}
+        observations = {"route_targets": {}}
         if has_bgp_plugin:
-            normalised_live["communities"] = {}
+            observations["communities"] = {}
         result_devices = set()
         failed_devices = set()
         parsed_count = 0
@@ -231,8 +237,8 @@ class NetboxBgpCommunityTasks:
                         scope = "communities"
                     else:
                         continue
-                    normalised_live[scope].setdefault(value, set()).add(
-                        record["name"].strip()
+                    observations[scope].setdefault(value, []).append(
+                        {"device": device_name, "name": record["name"].strip()}
                     )
                     parsed_count += 1
 
@@ -252,13 +258,22 @@ class NetboxBgpCommunityTasks:
         job.event(msg)
         log.info(f"{self.name} - {msg}")
 
-        for scope in normalised_live:
-            for sname, names in sorted(normalised_live[scope].items()):
+        normalised_live = {scope: {} for scope in observations}
+        for scope in observations:
+            for sname, records in sorted(observations[scope].items()):
                 normalised_live[scope][sname] = (
-                    {community_name_field: ", ".join(sorted(names))}
+                    {
+                        community_name_field: ", ".join(
+                            sorted({record["name"] for record in records})
+                        )
+                    }
                     if community_name_field
                     else {}
                 )
+                if device_custom_field:
+                    normalised_live[scope][sname][device_custom_field] = sorted(
+                        {netbox_devices[record["device"]].id for record in records}
+                    )
 
         # Fetch matching NetBox objects directly, keyed the same way as live
         # data so DeepDiff sees only create, update, and in-sync candidates.
@@ -284,7 +299,7 @@ class NetboxBgpCommunityTasks:
                 normalised_nb["route_targets"][sname] = {
                     community_name_field: current_value
                 }
-                normalised_live["route_targets"][sname] = (
+                normalised_live["route_targets"][sname].update(
                     normalise_community_name_field(
                         current_value,
                         community_name_field,
@@ -292,6 +307,20 @@ class NetboxBgpCommunityTasks:
                             community_name_field, ""
                         ),
                     )
+                )
+            if device_custom_field:
+                current_devices = [
+                    device["id"]
+                    for device in (
+                        nb_community.custom_fields[device_custom_field] or []
+                    )
+                ]
+                normalised_nb["route_targets"][sname][
+                    device_custom_field
+                ] = current_devices
+                normalised_live["route_targets"][sname][device_custom_field] = sorted(
+                    set(current_devices)
+                    | set(normalised_live["route_targets"][sname][device_custom_field])
                 )
             nb_community_objects["route_targets"][sname] = nb_community
 
@@ -317,13 +346,29 @@ class NetboxBgpCommunityTasks:
                     normalised_nb["communities"][sname] = {
                         community_name_field: current_value
                     }
-                    normalised_live["communities"][sname] = (
+                    normalised_live["communities"][sname].update(
                         normalise_community_name_field(
                             current_value,
                             community_name_field,
                             normalised_live["communities"][sname].get(
                                 community_name_field, ""
                             ),
+                        )
+                    )
+                if device_custom_field:
+                    current_devices = [
+                        device["id"]
+                        for device in (
+                            nb_community.custom_fields[device_custom_field] or []
+                        )
+                    ]
+                    normalised_nb["communities"][sname][
+                        device_custom_field
+                    ] = current_devices
+                    normalised_live["communities"][sname][device_custom_field] = sorted(
+                        set(current_devices)
+                        | set(
+                            normalised_live["communities"][sname][device_custom_field]
                         )
                     )
                 nb_community_objects["communities"][sname] = nb_community
@@ -382,12 +427,8 @@ class NetboxBgpCommunityTasks:
         create_payloads = []
         for sname in create_snames:
             payload = {"name": sname}
-            if community_name_field:
-                payload["custom_fields"] = {
-                    community_name_field: normalised_live["route_targets"][sname][
-                        community_name_field
-                    ]
-                }
+            if normalised_live["route_targets"][sname]:
+                payload["custom_fields"] = normalised_live["route_targets"][sname]
             create_payloads.append(payload)
         if create_payloads:
             msg = f"creating {len(create_payloads)} route target(s) in NetBox"
@@ -400,14 +441,9 @@ class NetboxBgpCommunityTasks:
         update_payloads = [
             {
                 "id": nb_community_objects["route_targets"][sname].id,
-                "custom_fields": {
-                    community_name_field: normalised_live["route_targets"][sname][
-                        community_name_field
-                    ]
-                },
+                "custom_fields": normalised_live["route_targets"][sname],
             }
             for sname in update_snames
-            if community_name_field
         ]
         if update_payloads:
             msg = f"updating {len(update_payloads)} route target(s) in NetBox"
@@ -421,12 +457,8 @@ class NetboxBgpCommunityTasks:
             create_payloads = []
             for sname in create_snames:
                 payload = {"value": sname}
-                if community_name_field:
-                    payload["custom_fields"] = {
-                        community_name_field: normalised_live["communities"][sname][
-                            community_name_field
-                        ]
-                    }
+                if normalised_live["communities"][sname]:
+                    payload["custom_fields"] = normalised_live["communities"][sname]
                 create_payloads.append(payload)
             if create_payloads:
                 msg = (
@@ -441,14 +473,9 @@ class NetboxBgpCommunityTasks:
             update_payloads = [
                 {
                     "id": nb_community_objects["communities"][sname].id,
-                    "custom_fields": {
-                        community_name_field: normalised_live["communities"][sname][
-                            community_name_field
-                        ]
-                    },
+                    "custom_fields": normalised_live["communities"][sname],
                 }
                 for sname in update_snames
-                if community_name_field
             ]
             if update_payloads:
                 msg = (

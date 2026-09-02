@@ -30,6 +30,15 @@ commands:
     alias: show run section vlan
   show running-config section vrf:
     alias: show run section vrf
+  show running-config section router bgp:
+    output: |
+      router bgp 4200000101
+         neighbor TRANSIT peer group
+         neighbor TRANSIT remote-as 4200000200
+         neighbor 192.0.2.1 peer group TRANSIT
+         neighbor CUSTOMER_A peer group
+         neighbor CUSTOMER_A remote-as 4200000301
+      !
   show running-config | include community-list:
     output: |
       ip community-list BLUE_EXPORT permit 65000:100

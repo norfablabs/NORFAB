@@ -23,6 +23,7 @@ Retrieves interface data from NetBox for one or more devices using the REST API.
 | `dry_run` | No | Return REST filter parameters without querying NetBox |
 | `cache` | No | Cache usage mode: `True`, `False`, `refresh`, or `force` |
 | `brief` | No | Return a stripped-down interface payload for smaller context windows |
+| `raise_on_empty` | No | Raise an error when no interfaces match; defaults to `True` |
 
 ## Output
 
@@ -50,7 +51,9 @@ Normal mode returns a dictionary keyed by device name and interface name:
 - `interface_list` maps to the NFCLI alias `interface-list`.
 - `interface_regex` maps to the NFCLI alias `interface-regex`.
 - `brief=True` affects only the returned payload. The task still fetches full interface data before reducing it.
-- If no interface data is returned for the selected devices, the task raises an error.
+- If no interface data is returned, the task raises an error by default. Set
+  `raise_on_empty=False` to return the selected device keys with empty interface
+  dictionaries instead.
 
 ## Examples
 
@@ -163,7 +166,8 @@ root
             ├── inventory-items:    Retrieves interface inventory items
             ├── dry-run:    Only return query content, do not run it
             ├── cache:    Cache usage mode
-            └── brief:    Return stripped-down interface data
+            ├── brief:    Return stripped-down interface data
+            └── raise-on-empty:    Raise an error when no interfaces match
 nf#
 ```
 

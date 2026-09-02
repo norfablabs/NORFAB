@@ -1,3 +1,27 @@
+# 0.22.3
+
+## FEATURES
+
+1. Added the NetBox `sync_bgp_asn` task and `netbox sync bgp-asn` NFCLI command to reconcile globally unique live ASNs, descriptions, and optional device associations with NetBox IPAM. Existing ASNs can be updated without an RIR; creating missing ASNs requires an existing NetBox RIR supplied through `rir`.
+
+## ENHANCEMENTS
+
+1. Enhanced the NetBox `sync_bgp_community` task with optional device-to-community associations. The configured `device_custom_field`, which defaults to `devices`, records the NetBox devices on which each route target or BGP plugin community was observed while preserving existing associations.
+2. Added `ignore_asn_by_range` filtering to the NetBox `sync_bgp_asn` task so individual ASNs and numerical ranges, such as `65000` and `65100-65200`, can be excluded from synchronization.
+3. Enhanced `sync_device_interfaces` to resolve VLAN names returned by Nornir interface getters against existing site- or group-scoped NetBox VLANs before diffing, while retaining numeric VID lookup and creation behavior. Added Juniper vMX-style FakeNOS coverage for access and trunk interfaces containing named VLAN members.
+4. Added `raise_on_empty` to NetBox `get_interfaces`, defaulting to the existing error behavior, and disabled it internally for `sync_device_interfaces` so devices with no existing NetBox interfaces can be initialized from live data.
+
+## BUG FIXES
+
+1. Fixed `sync_device_interfaces` raising a `KeyError` while initializing a device that has no existing NetBox interfaces.
+
+## CHANGES
+
+1. Removed the NetBox `crud_update` task's ineffective `partial` argument. Updates consistently use PATCH semantics through pynetbox, including standard device attributes and custom field data.
+2. Renamed the NetBox `vlan_map` rule fields `vlan_ids`, `device_names`, `interface_names`, and `vlan_group` to `match_vlan_ids`, `match_device_names`, `match_interface_names`, and `set_vlan_group`, respectively.
+
+---
+
 # 0.22.2
 
 ## ENHANCEMENTS

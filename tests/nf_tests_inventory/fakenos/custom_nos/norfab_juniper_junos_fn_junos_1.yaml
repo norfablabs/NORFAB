@@ -39,6 +39,20 @@ commands:
       }
     prompt: 'nornir@{base_prompt}>'
     help: targeted BGP sync test data
+  'show configuration interfaces | display set':
+    output: |
+      set interfaces ge-0/0/12 description "description 1"
+      set interfaces ge-0/0/12 speed 10g
+      set interfaces ge-0/0/12 unit 0 family ethernet-switching interface-mode trunk
+      set interfaces ge-0/0/12 unit 0 family ethernet-switching vlan members VLANNAME1
+      set interfaces ge-0/0/12 unit 0 family ethernet-switching vlan members VLANNAME2
+
+      set interfaces ge-0/0/45 description "description 2"
+      set interfaces ge-0/0/45 speed 1g
+      set interfaces ge-0/0/45 unit 0 family ethernet-switching interface-mode access
+      set interfaces ge-0/0/45 unit 0 family ethernet-switching vlan members VLANNAME3
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted interface VLAN-name sync test data
   exit:
     output: true
     prompt: 'nornir@{base_prompt}>'

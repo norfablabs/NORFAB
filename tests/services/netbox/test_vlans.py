@@ -140,10 +140,10 @@ class TestSyncVlans:
             filter_by_vlan_ids=["110", "210"],
             vlan_map=[
                 {
-                    "vlan_group": self.GROUP_1_NAME,
+                    "set_vlan_group": self.GROUP_1_NAME,
                     "vlan_names": ["TEST_L1*"],
-                    "device_names": ["fn-ceos-lf-*"],
-                    "interface_names": ["ignored-by-vlan-sync"],
+                    "match_device_names": ["fn-ceos-lf-*"],
+                    "match_interface_names": ["ignored-by-vlan-sync"],
                 }
             ],
         )
@@ -174,8 +174,8 @@ class TestSyncVlans:
             filter_by_vlan_ids=["110-111"],
             vlan_map=[
                 {
-                    "vlan_group": self.GROUP_1_NAME,
-                    "vlan_ids": ["111"],
+                    "set_vlan_group": self.GROUP_1_NAME,
+                    "match_vlan_ids": ["111"],
                 }
             ],
         )
@@ -194,14 +194,14 @@ class TestSyncVlans:
             filter_by_vlan_ids=["110-111"],
             vlan_map=[
                 {
-                    "vlan_group": self.GROUP_1_NAME,
+                    "set_vlan_group": self.GROUP_1_NAME,
                     "vlan_names": ["*_TRUNK_A"],
-                    "device_names": ["fn-ceos-lf-1"],
+                    "match_device_names": ["fn-ceos-lf-1"],
                 },
                 {
-                    "vlan_group": self.GROUP_2_NAME,
+                    "set_vlan_group": self.GROUP_2_NAME,
                     "vlan_names": ["*_TRUNK_B"],
-                    "device_names": ["fn-ceos-lf-*"],
+                    "match_device_names": ["fn-ceos-lf-*"],
                 },
             ],
         )
@@ -221,11 +221,11 @@ class TestSyncVlans:
             filter_by_vlan_ids=["110"],
             vlan_map=[
                 {
-                    "vlan_group": self.GROUP_1_NAME,
+                    "set_vlan_group": self.GROUP_1_NAME,
                     "vlan_names": ["TEST_L1_TRUNK_A"],
                 },
                 {
-                    "vlan_group": self.GROUP_2_NAME,
+                    "set_vlan_group": self.GROUP_2_NAME,
                     "vlan_names": ["TEST_L1_TRUNK_A"],
                 },
             ],
@@ -246,8 +246,8 @@ class TestSyncVlans:
             filter_by_vlan_ids=["121"],
             vlan_map=[
                 {
-                    "vlan_group": self.GROUP_1_NAME,
-                    "device_names": [self.DEVICE_1],
+                    "set_vlan_group": self.GROUP_1_NAME,
+                    "match_device_names": [self.DEVICE_1],
                 }
             ],
         )
@@ -295,8 +295,8 @@ class TestSyncVlans:
             filter_by_vlan_ids=["190"],
             vlan_map=[
                 {
-                    "vlan_group": self.GROUP_1_NAME,
-                    "vlan_ids": ["190"],
+                    "set_vlan_group": self.GROUP_1_NAME,
+                    "match_vlan_ids": ["190"],
                 }
             ],
         )
@@ -321,8 +321,8 @@ class TestSyncVlans:
             vlan_group=self.GROUP_2_NAME,
             vlan_map=[
                 {
-                    "vlan_group": self.GROUP_1_NAME,
-                    "vlan_ids": ["110"],
+                    "set_vlan_group": self.GROUP_1_NAME,
+                    "match_vlan_ids": ["110"],
                 }
             ],
         )
