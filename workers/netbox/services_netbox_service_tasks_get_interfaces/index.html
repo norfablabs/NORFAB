@@ -2724,6 +2724,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP ASNs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
         
   
@@ -6959,6 +6987,11 @@
 <td style="text-align: right;">No</td>
 <td>Return a stripped-down interface payload for smaller context windows</td>
 </tr>
+<tr>
+<td><code>raise_on_empty</code></td>
+<td style="text-align: right;">No</td>
+<td>Raise an error when no interfaces match; defaults to <code>True</code></td>
+</tr>
 </tbody>
 </table>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
@@ -6983,7 +7016,9 @@
 <li><code>interface_list</code> maps to the NFCLI alias <code>interface-list</code>.</li>
 <li><code>interface_regex</code> maps to the NFCLI alias <code>interface-regex</code>.</li>
 <li><code>brief=True</code> affects only the returned payload. The task still fetches full interface data before reducing it.</li>
-<li>If no interface data is returned for the selected devices, the task raises an error.</li>
+<li>If no interface data is returned, the task raises an error by default. Set
+  <code>raise_on_empty=False</code> to return the selected device keys with empty interface
+  dictionaries instead.</li>
 </ul>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
@@ -7075,7 +7110,8 @@ root
 <span class="w">            </span>├──<span class="w"> </span>inventory-items:<span class="w">    </span>Retrieves<span class="w"> </span>interface<span class="w"> </span>inventory<span class="w"> </span>items
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Only<span class="w"> </span><span class="k">return</span><span class="w"> </span>query<span class="w"> </span>content,<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>run<span class="w"> </span>it
 <span class="w">            </span>├──<span class="w"> </span>cache:<span class="w">    </span>Cache<span class="w"> </span>usage<span class="w"> </span>mode
-<span class="w">            </span>└──<span class="w"> </span>brief:<span class="w">    </span>Return<span class="w"> </span>stripped-down<span class="w"> </span>interface<span class="w"> </span>data
+<span class="w">            </span>├──<span class="w"> </span>brief:<span class="w">    </span>Return<span class="w"> </span>stripped-down<span class="w"> </span>interface<span class="w"> </span>data
+<span class="w">            </span>└──<span class="w"> </span>raise-on-empty:<span class="w">    </span>Raise<span class="w"> </span>an<span class="w"> </span>error<span class="w"> </span>when<span class="w"> </span>no<span class="w"> </span>interfaces<span class="w"> </span>match
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7262,6 +7298,23 @@ window optimization. Full data is still fetched; brief mode only affects what is
             </td>
             <td>
                   <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>raise_on_empty</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Raise an error when no interfaces match.
+Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
       </tbody>
@@ -7532,7 +7585,14 @@ results in  certain format.</p>
 <span class="normal">485</span>
 <span class="normal">486</span>
 <span class="normal">487</span>
-<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetInterfacesResult</span><span class="p">,</span>
@@ -7559,6 +7619,7 @@ results in  certain format.</p>
     <span class="n">cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">brief</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">raise_on_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve device interfaces from Netbox using Pynetbox REST API.</span>
@@ -7576,6 +7637,8 @@ results in  certain format.</p>
 <span class="sd">            ``&quot;refresh&quot;`` - fetch and overwrite cache; ``&quot;force&quot;`` - use cache without staleness check</span>
 <span class="sd">        brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context</span>
 <span class="sd">            window optimization. Full data is still fetched; brief mode only affects what is returned.</span>
+<span class="sd">        raise_on_empty (bool, optional): Raise an error when no interfaces match.</span>
+<span class="sd">            Defaults to True.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary keyed by device name with interface details.</span>
@@ -7689,7 +7752,11 @@ results in  certain format.</p>
         <span class="n">all_interfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span> <span class="o">**</span><span class="n">fetch_filter_params</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s) from NetBox&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_interfaces</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">raise_on_empty</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">all_interfaces</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">)</span>
+    <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - no interfaces data returned by &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;for devices </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>

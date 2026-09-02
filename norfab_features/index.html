@@ -1328,6 +1328,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#live-bgp-asn-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live BGP ASN reconciliation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#interface-description-updates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4109,6 +4120,34 @@
     
   
     Sync VRFs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP ASNs
   
 
     
@@ -9130,6 +9169,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#live-bgp-asn-reconciliation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live BGP ASN reconciliation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#interface-description-updates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -9716,7 +9766,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 1 September 2026</em></p>
+<p><em>Last updated: 2 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -9818,6 +9868,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 <li><a href="#hardware-inventory-reconciliation">Hardware inventory reconciliation</a></li>
 <li><a href="#bgp-peering-lifecycle">BGP peering lifecycle</a></li>
 <li><a href="#live-bgp-community-reconciliation">Live BGP community reconciliation</a></li>
+<li><a href="#live-bgp-asn-reconciliation">Live BGP ASN reconciliation</a></li>
 <li><a href="#interface-description-updates">Interface description updates</a></li>
 <li><a href="#drift-assessment-and-coordinated-synchronization">Drift assessment and coordinated synchronization</a></li>
 </ul>
@@ -10431,7 +10482,7 @@ code in favour of the lower-level helper for new internal development.
 <h3 id="generic-object-crud">Generic object CRUD<a class="headerlink" href="#generic-object-crud" title="Permanent link">¤</a></h3>
 <p>Lists, searches, reads, creates, updates, and deletes arbitrary NetBox objects
 and retrieves change logs, with field selection, pagination, ordering, bulk
-payloads, PATCH/PUT choice, and dry-run for create/update/delete. <strong>Use cases:</strong>
+payloads, PATCH updates, and dry-run for create/update/delete. <strong>Use cases:</strong>
 broad object lifecycle automation, data migration, reporting, audit history,
 and AI tool use. <strong>Limitations:</strong> generic operations require knowledge of the
 NetBox data model and do not provide every safeguard of a dedicated task.
@@ -10508,8 +10559,12 @@ parsing. Missing or zero live MTU and speed values preserve existing NetBox
 values. The task computes a desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
+An empty NetBox interface set is valid, allowing a device to be initialized
+entirely from discovered live interfaces.
 Interface-name and VLAN-group mapping rules can be supplied inline or loaded
-from YAML through <code>nf://</code> URLs.
+from YAML through <code>nf://</code> URLs. Live interface VLAN values can be numeric VIDs
+or names; names are resolved against existing scoped NetBox VLANs before the
+desired/current diff is calculated.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the <code>other</code> fallback. <strong>Use cases:</strong>
@@ -10521,7 +10576,9 @@ reviewed with dry-run first.
 <p>Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
 NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
 an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
-loaded from YAML through <code>nf://</code> URLs. VLANs are identified by VID per scope;
+loaded from YAML through <code>nf://</code> URLs, using <code>match_device_names</code>,
+<code>match_interface_names</code>, <code>match_vlan_ids</code>, and <code>set_vlan_group</code> for matching
+and group selection. VLANs are identified by VID per scope;
 the first device supplies values when later devices report a conflict.
 <strong>Use cases:</strong> correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. <strong>Limitations:</strong> parser coverage determines
@@ -10565,12 +10622,20 @@ consistent IP/ASN/VRF modelling.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_peerings/">Synchronize</a></p>
 <h3 id="live-bgp-community-reconciliation">Live BGP community reconciliation<a class="headerlink" href="#live-bgp-community-reconciliation" title="Permanent link">¤</a></h3>
 <p>Collects named BGP communities from supported live devices, stores route
-targets in NetBox IPAM and other types in the NetBox BGP plugin, and appends
-missing live names for the same value into an optional custom field. <strong>Use
-cases:</strong> community inventory, naming audits, and source-of-truth onboarding.
+targets in NetBox IPAM and other types in the NetBox BGP plugin, appends
+missing live names for the same value, and associates observed devices through
+optional custom fields. <strong>Use cases:</strong> community inventory, naming audits,
+device-to-community inventory, and source-of-truth onboarding.
 <strong>Limitations:</strong> parser and NetBox plugin value support determine coverage;
 objects are never deleted.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_community/">Task details</a></p>
+<h3 id="live-bgp-asn-reconciliation">Live BGP ASN reconciliation<a class="headerlink" href="#live-bgp-asn-reconciliation" title="Permanent link">¤</a></h3>
+<p>Reconciles globally unique ASNs and descriptions from supported live devices
+with NetBox IPAM and optionally associates each ASN with the devices on which it
+was observed. Missing ASNs are created only when an existing RIR is supplied.
+<strong>Use cases:</strong> ASN inventory, description audits, and device-to-ASN inventory.
+<strong>Limitations:</strong> ASNs and device associations are never deleted automatically.
+<a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_asn/">Task details</a></p>
 <h3 id="interface-description-updates">Interface description updates<a class="headerlink" href="#interface-description-updates" title="Permanent link">¤</a></h3>
 <p>Writes static or Jinja2-rendered descriptions using interface and connection
 context. <strong>Use cases:</strong> circuit labels, neighbour descriptions, and

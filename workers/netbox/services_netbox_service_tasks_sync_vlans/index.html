@@ -2818,6 +2818,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync BGP ASNs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_bgp_community/" class="md-nav__link">
         
   
@@ -7152,24 +7180,24 @@ synchronization.</p>
 <h2 id="vlan-mapping">VLAN mapping<a class="headerlink" href="#vlan-mapping" title="Permanent link">¤</a></h2>
 <p>Each rule contains an exact NetBox VLAN group name. Additional matching
 criteria are optional:</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">vlan_group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAMPUS</span>
-<span class="w">  </span><span class="nt">vlan_ids</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">set_vlan_group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAMPUS</span>
+<span class="w">  </span><span class="nt">match_vlan_ids</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100-199</span>
 <span class="w">  </span><span class="nt">vlan_names</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USERS*</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VOICE*</span>
-<span class="w">  </span><span class="nt">device_names</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">match_device_names</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">leaf-*</span>
-<span class="w">  </span><span class="nt">interface_names</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">match_interface_names</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet*</span>
 </code></pre></div>
 <p>Rules are evaluated in list order and the first match wins. Values inside one
 criterion use OR logic. Populated criteria use AND logic. VLAN and device names
 use case-sensitive glob matching. VLAN ranges are inclusive and must remain
-within <code>1..4094</code>. VLAN sync ignores <code>interface_names</code> because its live VLAN
+within <code>1..4094</code>. VLAN sync ignores <code>match_interface_names</code> because its live VLAN
 records have no interface context. Every rule also uses its NetBox VLAN group's
-configured <code>vid_ranges</code>; explicit <code>vlan_ids</code> narrow those ranges. An unmatched
-VLAN uses <code>vlan_group</code> when supplied, otherwise it uses its device site.</p>
+configured <code>vid_ranges</code>; explicit <code>match_vlan_ids</code> narrow those ranges. An
+unmatched VLAN uses <code>vlan_group</code> when supplied, otherwise it uses its device site.</p>
 <p>Every group referenced by <code>vlan_map</code> or <code>vlan_group</code> must already exist. The
 task resolves groups by exact name and does not create or update groups. Mapping
 rules are constrained by their group's configured VID ranges. The scalar
@@ -7268,10 +7296,10 @@ installed and configured for branch use.</p>
             <span class="s2">&quot;filter_by_vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-399&quot;</span><span class="p">],</span>
             <span class="s2">&quot;vlan_map&quot;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;CAMPUS&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-199&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;set_vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;CAMPUS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;match_vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-199&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;vlan_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TEST_L*&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;device_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fn-ceos-lf-*&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;match_device_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fn-ceos-lf-*&quot;</span><span class="p">],</span>
                 <span class="p">}</span>
             <span class="p">],</span>
         <span class="p">},</span>
@@ -8100,7 +8128,7 @@ file containing them.</p>
     <span class="p">)</span>
 
     <span class="n">vlan_groups</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">group_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule</span><span class="p">[</span><span class="s2">&quot;vlan_group&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">]</span>
+    <span class="n">group_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule</span><span class="p">[</span><span class="s2">&quot;set_vlan_group&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">vlan_group</span><span class="p">:</span>
         <span class="n">group_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vlan_group</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">group_names</span><span class="p">):</span>
