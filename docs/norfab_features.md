@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 2 September 2026*
+*Last updated: 3 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -808,8 +808,8 @@ automatically.
 ### Live IP and MAC reconciliation
 
 Reconciles device IP assignments, derived prefixes, and interface MAC addresses
-with NetBox, including filters, anycast handling, VRF/site association, and
-controlled deletion behavior. **Use cases:** IPAM accuracy and address/MAC drift correction.
+with NetBox, including filters, inline or `nf://` anycast ranges, VRF/site
+association, and controlled deletion behavior. **Use cases:** IPAM accuracy and address/MAC drift correction.
 **Limitations:** requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 [IP sync](workers/netbox/services_netbox_service_tasks_sync_device_ip.md) ·
@@ -849,9 +849,10 @@ objects are never deleted.
 
 ### Live BGP ASN reconciliation
 
-Reconciles globally unique ASNs and descriptions from supported live devices
-with NetBox IPAM and optionally associates each ASN with the devices on which it
-was observed. Missing ASNs are created only when an existing RIR is supplied.
+Reconciles globally unique ASNs from supported live devices with NetBox IPAM,
+preserves existing descriptions by default, and optionally associates each ASN
+with the devices for which it is a local ASN. Missing ASNs are created only
+when an existing RIR is supplied.
 **Use cases:** ASN inventory, description audits, and device-to-ASN inventory.
 **Limitations:** ASNs and device associations are never deleted automatically.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_bgp_asn.md)

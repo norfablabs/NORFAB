@@ -13,6 +13,8 @@ from .netbox_worker_utilities import review_sync_task_result
 
 log = logging.getLogger(__name__)
 
+NO_COMMUNITY_NAME = "__no_name__"
+
 
 def normalise_community_name_field(
     current_value: str,
@@ -65,11 +67,14 @@ class NetboxBgpCommunityTasks:
         """Synchronize live BGP communities with NetBox.
 
         Route-target communities are stored as IPAM route targets. Every other
-        community type is stored as a NetBox BGP plugin community. Objects are
-        keyed by community value and are never deleted. When the configured
-        custom field exists, it stores the sorted, comma-separated live
-        community-set names observed for each value. The selected device custom
-        field records devices on which each community was observed.
+        community type is stored as a NetBox BGP plugin community. Route
+        targets are keyed by community value. BGP plugin communities are keyed
+        by community value and live community-set name, allowing NetBox to hold
+        several standard communities with the same value. Objects are never
+        deleted. When the configured custom field exists, it stores the sorted,
+        comma-separated live community-set names observed for each object. The
+        selected device custom field records devices on which each community was
+        observed.
 
         Args:
             job: NorFab job object.
@@ -177,11 +182,10 @@ class NetboxBgpCommunityTasks:
             timeout=timeout,
         )
 
-        # Build one live state dictionary for DeepDiff. Route targets always
-        # participate; plugin communities are included only when available.
-        observations = {"route_targets": {}}
-        if has_bgp_plugin:
-            observations["communities"] = {}
+        # Collect live records once. Route targets are always reconciled; other
+        # community types wait for the BGP plugin-specific flow below.
+        route_target_observations = {}
+        bgp_community_observations = []
         result_devices = set()
         failed_devices = set()
         parsed_count = 0
@@ -223,7 +227,7 @@ class NetboxBgpCommunityTasks:
                 for record in records:
                     if not isinstance(record, dict) or not all(
                         isinstance(record.get(field), str) and record[field].strip()
-                        for field in ("value", "type", "name")
+                        for field in ("value", "type")
                     ):
                         msg = f"device '{device_name}' returned malformed community record"
                         job.event(msg, severity="ERROR")
@@ -231,16 +235,22 @@ class NetboxBgpCommunityTasks:
                         ret.errors.append(msg)
                         continue
                     value = record["value"].strip()
-                    if record["type"].strip().lower() == "rt":
-                        scope = "route_targets"
-                    elif has_bgp_plugin:
-                        scope = "communities"
-                    else:
-                        continue
-                    observations[scope].setdefault(value, []).append(
-                        {"device": device_name, "name": record["name"].strip()}
+                    name = (
+                        record.get("name", "").strip()
+                        if isinstance(record.get("name", ""), str)
+                        else ""
                     )
-                    parsed_count += 1
+                    if record["type"].strip().lower() == "rt":
+                        route_target_observations.setdefault(value, []).append(
+                            {"device": device_name, "name": name}
+                        )
+                        parsed_count += 1
+                    else:
+                        bgp_community_observations.append(
+                            {"device": device_name, "value": value, "name": name}
+                        )
+                        if has_bgp_plugin:
+                            parsed_count += 1
 
         for device_name in devices:
             if device_name not in result_devices and device_name not in failed_devices:
@@ -258,27 +268,29 @@ class NetboxBgpCommunityTasks:
         job.event(msg)
         log.info(f"{self.name} - {msg}")
 
-        normalised_live = {scope: {} for scope in observations}
-        for scope in observations:
-            for sname, records in sorted(observations[scope].items()):
-                normalised_live[scope][sname] = (
-                    {
-                        community_name_field: ", ".join(
-                            sorted({record["name"] for record in records})
-                        )
-                    }
-                    if community_name_field
-                    else {}
-                )
-                if device_custom_field:
-                    normalised_live[scope][sname][device_custom_field] = sorted(
-                        {netbox_devices[record["device"]].id for record in records}
-                    )
-
-        # Fetch matching NetBox objects directly, keyed the same way as live
-        # data so DeepDiff sees only create, update, and in-sync candidates.
+        # Route targets are unique by NetBox IPAM name, so value-only matching
+        # is safe here and remains separate from plugin community matching.
+        msg = "matching live route targets with NetBox"
+        job.event(msg)
+        log.info(f"{self.name} - Matching live route targets with NetBox")
+        normalised_live = {"route_targets": {}}
         normalised_nb = {"route_targets": {}}
         nb_community_objects = {"route_targets": {}}
+        community_key_data = {}
+
+        for sname, records in sorted(route_target_observations.items()):
+            live_names = sorted(
+                {record["name"] for record in records if record["name"]}
+            )
+            normalised_live["route_targets"][sname] = (
+                {community_name_field: ", ".join(live_names)}
+                if community_name_field and live_names
+                else {}
+            )
+            if device_custom_field:
+                normalised_live["route_targets"][sname][device_custom_field] = sorted(
+                    {netbox_devices[record["device"]].id for record in records}
+                )
 
         route_target_snames = list(normalised_live["route_targets"])
         nb_communities_result = (
@@ -309,11 +321,10 @@ class NetboxBgpCommunityTasks:
                     )
                 )
             if device_custom_field:
+                custom_fields = nb_community.custom_fields or {}
                 current_devices = [
                     device["id"]
-                    for device in (
-                        nb_community.custom_fields[device_custom_field] or []
-                    )
+                    for device in (custom_fields.get(device_custom_field) or [])
                 ]
                 normalised_nb["route_targets"][sname][
                     device_custom_field
@@ -325,20 +336,109 @@ class NetboxBgpCommunityTasks:
             nb_community_objects["route_targets"][sname] = nb_community
 
         if has_bgp_plugin:
+            # Standard BGP communities may share the same value, so keep the
+            # live name in the sync key and match NetBox from most-specific to
+            # least-specific identity.
+            msg = "matching live BGP plugin communities with NetBox"
+            job.event(msg)
+            log.info(f"{self.name} - Matching live BGP plugin communities with NetBox")
+            normalised_live["communities"] = {}
             normalised_nb["communities"] = {}
             nb_community_objects["communities"] = {}
-            community_snames = list(normalised_live["communities"])
+
+            for record in bgp_community_observations:
+                sname = f"{record['value']}::{record['name'] or NO_COMMUNITY_NAME}"
+                community_key_data[sname] = {
+                    "value": record["value"],
+                    "name": record["name"],
+                }
+                normalised_live["communities"].setdefault(sname, {})
+                if community_name_field and record["name"]:
+                    normalised_live["communities"][sname][community_name_field] = (
+                        record["name"]
+                    )
+                if device_custom_field:
+                    device_ids = normalised_live["communities"][sname].setdefault(
+                        device_custom_field, []
+                    )
+                    device_id = netbox_devices[record["device"]].id
+                    if device_id not in device_ids:
+                        device_ids.append(device_id)
+
+            for sname in normalised_live["communities"]:
+                if device_custom_field:
+                    normalised_live["communities"][sname][device_custom_field] = sorted(
+                        normalised_live["communities"][sname][device_custom_field]
+                    )
+
+            community_values = sorted(
+                {data["value"] for data in community_key_data.values()}
+            )
             nb_communities_result = (
                 self.bulk_filter(
                     nb.plugins.bgp.community,
-                    value=community_snames,
-                    fields="id,value,custom_fields",
+                    value=community_values,
+                    fields="id,value,description,custom_fields",
                 )
-                if community_snames
+                if community_values
                 else []
             )
+            nb_communities_by_value = {}
             for nb_community in nb_communities_result:
-                sname = str(nb_community.value)
+                nb_communities_by_value.setdefault(str(nb_community.value), []).append(
+                    nb_community
+                )
+
+            for sname, data in sorted(community_key_data.items()):
+                nb_community = None
+                candidates = nb_communities_by_value.get(data["value"], [])
+                name = data["name"]
+                # Prefer explicit community-name custom-field containment,
+                # then description, then an unlabeled same-value object.
+                if community_name_field and name:
+                    for candidate in candidates:
+                        custom_fields = candidate.custom_fields or {}
+                        current_value = str(custom_fields.get(community_name_field, ""))
+                        current_names = {
+                            current_name.strip()
+                            for current_name in current_value.split(",")
+                            if current_name.strip()
+                        }
+                        if name in current_names:
+                            nb_community = candidate
+                            break
+                if nb_community is None and name:
+                    for candidate in candidates:
+                        current_description = str(
+                            getattr(candidate, "description", "") or ""
+                        ).strip()
+                        if current_description == name:
+                            nb_community = candidate
+                            break
+                if nb_community is None and not name and candidates:
+                    nb_community = candidates[0]
+                if nb_community is None and name:
+                    for candidate in candidates:
+                        custom_fields = candidate.custom_fields or {}
+                        current_names = (
+                            {
+                                current_name.strip()
+                                for current_name in str(
+                                    custom_fields.get(community_name_field, "")
+                                ).split(",")
+                                if current_name.strip()
+                            }
+                            if community_name_field
+                            else set()
+                        )
+                        current_description = str(
+                            getattr(candidate, "description", "") or ""
+                        ).strip()
+                        if not current_names and not current_description:
+                            nb_community = candidate
+                            break
+                if nb_community is None:
+                    continue
                 normalised_nb["communities"][sname] = {}
                 if community_name_field:
                     custom_fields = nb_community.custom_fields or {}
@@ -356,11 +456,10 @@ class NetboxBgpCommunityTasks:
                         )
                     )
                 if device_custom_field:
+                    custom_fields = nb_community.custom_fields or {}
                     current_devices = [
                         device["id"]
-                        for device in (
-                            nb_community.custom_fields[device_custom_field] or []
-                        )
+                        for device in (custom_fields.get(device_custom_field) or [])
                     ]
                     normalised_nb["communities"][sname][
                         device_custom_field
@@ -456,7 +555,10 @@ class NetboxBgpCommunityTasks:
             create_snames = full_diff["communities"]["create"]
             create_payloads = []
             for sname in create_snames:
-                payload = {"value": sname}
+                community_data = community_key_data[sname]
+                payload = {"value": community_data["value"]}
+                if community_data["name"]:
+                    payload["description"] = community_data["name"]
                 if normalised_live["communities"][sname]:
                     payload["custom_fields"] = normalised_live["communities"][sname]
                 create_payloads.append(payload)

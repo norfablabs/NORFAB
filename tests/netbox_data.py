@@ -1,3 +1,4 @@
+import argparse
 import logging
 import re
 import traceback
@@ -437,6 +438,7 @@ vlan_groups = [
     {"name": "SYNC_VLANS_GROUP_2", "vid_ranges": [[100, 399]]},
     {"name": "SYNC_INTERFACES_GROUP_1", "vid_ranges": [[500, 599]]},
     {"name": "SYNC_INTERFACES_GROUP_2", "vid_ranges": [[500, 699]]},
+    {"name": "SYNC_NAMED_VLANS_GROUP_1", "vid_ranges": [[100, 199]]},
 ]
 
 vlans = [{"name": f"VLAN_{i}", "vid": 100 + i} for i in range(1, 6)]
@@ -465,6 +467,21 @@ vlans.extend(
         {"name": "VLANNAME1", "vid": 124, "site": {"name": "NORFAB-LAB"}},
         {"name": "VLANNAME2", "vid": 125, "site": {"name": "NORFAB-LAB"}},
         {"name": "VLANNAME3", "vid": 126, "site": {"name": "NORFAB-LAB"}},
+        {
+            "name": "VLANNAME1",
+            "vid": 124,
+            "group": {"name": "SYNC_NAMED_VLANS_GROUP_1"},
+        },
+        {
+            "name": "VLANNAME2",
+            "vid": 125,
+            "group": {"name": "SYNC_NAMED_VLANS_GROUP_1"},
+        },
+        {
+            "name": "VLANNAME3",
+            "vid": 126,
+            "group": {"name": "SYNC_NAMED_VLANS_GROUP_1"},
+        },
     ]
 )
 
@@ -939,8 +956,8 @@ custom_fields = [
         "name": "devices",
         "label": "Devices",
         "type": "multiobject",
-        "description": "Devices on which a VRF is configured",
-        "object_types": ["ipam.vrf"],
+        "description": "Devices on which a VRF or BGP community is configured",
+        "object_types": ["ipam.vrf", "ipam.routetarget", "netbox_bgp.community"],
         "related_object_type": "dcim.device",
     },
     {
@@ -949,6 +966,30 @@ custom_fields = [
         "type": "multiobject",
         "description": "Alternate device association field for VRF sync tests",
         "object_types": ["ipam.vrf"],
+        "related_object_type": "dcim.device",
+    },
+    {
+        "name": "community_name",
+        "label": "Community Name",
+        "type": "longtext",
+        "description": "Live BGP community-set names",
+        "object_types": ["ipam.routetarget", "netbox_bgp.community"],
+        "related_object_type": None,
+    },
+    {
+        "name": "community_aliases",
+        "label": "Community Aliases",
+        "type": "longtext",
+        "description": "Alternate live BGP community-set names",
+        "object_types": ["ipam.routetarget", "netbox_bgp.community"],
+        "related_object_type": None,
+    },
+    {
+        "name": "community_devices",
+        "label": "Community Devices",
+        "type": "multiobject",
+        "description": "Alternate device association field for BGP community sync tests",
+        "object_types": ["ipam.routetarget", "netbox_bgp.community"],
         "related_object_type": "dcim.device",
     },
 ]
@@ -3598,7 +3639,101 @@ def populate_netbox():
     create_bgp_peerings()
 
 
-if __name__ == "__main__":
+def delete_interfaces():
+    """Remove all interfaces so the interface seed data can be recreated."""
+    log.info("deleting all interfaces")
+    for interface in nb.dcim.interfaces.all():
+        interface.delete()
+
+
+def delete_mac_addresses():
+    """Remove all MAC addresses so the MAC address seed data can be recreated."""
+    if NB_VERSION < 4.2:
+        log.info("Skipping MAC addresses cleanup for NetBox versions below 4.2")
+        return
+
+    log.info("deleting all MAC addresses")
+    for mac_address in nb.dcim.mac_addresses.all():
+        mac_address.delete()
+
+
+def delete_power_outlet_ports():
+    """Remove all power outlet ports so their seed data can be recreated."""
+    log.info("deleting all power outlet ports")
+    for port in nb.dcim.power_outlets.all():
+        port.delete()
+
+
+def delete_power_ports():
+    """Remove all power ports so their seed data can be recreated."""
+    log.info("deleting all power ports")
+    for port in nb.dcim.power_ports.all():
+        port.delete()
+
+
+def delete_inventory_items():
+    """Remove all inventory items so the inventory item seed data can be recreated."""
+    log.info("deleting all inventory items")
+    for item in nb.dcim.inventory_items.all():
+        item.delete()
+
+
+def delete_console_server_ports():
+    """Remove all console server ports so their seed data can be recreated."""
+    log.info("deleting all console server ports")
+    for port in nb.dcim.console_server_ports.all():
+        port.delete()
+
+
+def delete_console_ports():
+    """Remove all console ports so their seed data can be recreated."""
+    log.info("deleting all console ports")
+    for port in nb.dcim.console_ports.all():
+        port.delete()
+
+
+def main():
+    """Connect to NetBox, prompt for an action, then manage selected data."""
+    parser = argparse.ArgumentParser(
+        description="Populate or clean up the NetBox test data."
+    )
+    parser.add_argument("--regions", action="store_true")
+    parser.add_argument("--tenants", action="store_true")
+    parser.add_argument("--sites", action="store_true")
+    parser.add_argument("--racks", action="store_true")
+    parser.add_argument("--manufacturers", action="store_true")
+    parser.add_argument("--tags", action="store_true")
+    parser.add_argument("--platforms", action="store_true")
+    parser.add_argument("--device-types", action="store_true")
+    parser.add_argument("--device-roles", action="store_true")
+    parser.add_argument("--vrf", "--vrfs", dest="vrfs", action="store_true")
+    parser.add_argument("--rir", action="store_true")
+    parser.add_argument("--prefix-roles", action="store_true")
+    parser.add_argument("--prefixes", action="store_true")
+    parser.add_argument("--ip-addresses", action="store_true")
+    parser.add_argument("--vlans", action="store_true")
+    parser.add_argument("--vlan-groups", action="store_true")
+    parser.add_argument("--devices", action="store_true")
+    parser.add_argument("--interfaces", action="store_true")
+    parser.add_argument("--mac-addresses", action="store_true")
+    parser.add_argument("--power-outlet-ports", action="store_true")
+    parser.add_argument("--power-ports", action="store_true")
+    parser.add_argument("--inventory-item-roles", action="store_true")
+    parser.add_argument("--inventory-items", action="store_true")
+    parser.add_argument("--console-server-ports", action="store_true")
+    parser.add_argument("--console-ports", action="store_true")
+    parser.add_argument("--connections", action="store_true")
+    parser.add_argument("--circuit-providers", action="store_true")
+    parser.add_argument("--circuit-provider-networks", action="store_true")
+    parser.add_argument("--circuit-provider-accounts", action="store_true")
+    parser.add_argument("--circuit-types", action="store_true")
+    parser.add_argument("--circuits", action="store_true")
+    parser.add_argument("--config-templates", action="store_true")
+    parser.add_argument("--custom-fields", action="store_true")
+    parser.add_argument("--bgp-asn", action="store_true")
+    parser.add_argument("--bgp-peer-groups", action="store_true")
+    parser.add_argument("--bgp-peerings", action="store_true")
+    args = parser.parse_args()
     try:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN, threading=True)
         # request status to verify that Netbox is reachable,
@@ -3619,10 +3754,164 @@ if __name__ == "__main__":
 2 - populate
 3 - cleanup first, next populate
 [1,2,3]: """)
-    if todo == "1":
-        clean_up_netbox()
-    elif todo == "2":
-        populate_netbox()
-    elif todo == "3":
-        clean_up_netbox()
-        populate_netbox()
+    if not any(vars(args).values()):
+        if todo == "1":
+            clean_up_netbox()
+        elif todo == "2":
+            populate_netbox()
+        elif todo == "3":
+            clean_up_netbox()
+            populate_netbox()
+        return
+
+    if todo in ("1", "3"):
+        if args.bgp_peerings:
+            delete_bgp_peerings()
+        if args.custom_fields:
+            delete_custom_fields()
+        if args.bgp_peer_groups:
+            delete_bgp_peer_groups()
+        if args.bgp_asn:
+            delete_bgp_asn()
+        if args.connections:
+            delete_connections()
+        if args.circuits:
+            delete_circuits()
+        if args.circuit_provider_accounts:
+            delete_circuit_provider_accounts()
+        if args.circuit_provider_networks:
+            delete_circuit_provider_networks()
+        if args.circuit_providers:
+            delete_circuit_providers()
+        if args.circuit_types:
+            delete_circuit_types()
+        if args.mac_addresses:
+            delete_mac_addresses()
+        if args.interfaces:
+            delete_interfaces()
+        if args.devices:
+            delete_devices()
+        if args.prefixes:
+            delete_prefixes()
+        if args.prefix_roles:
+            delete_prefix_roles()
+        if args.ip_addresses:
+            delete_ip_addresses()
+        if args.vrfs:
+            delete_vrfs()
+        if args.vlans:
+            delete_vlans()
+        if args.vlan_groups:
+            delete_vlan_groups()
+        if args.device_roles:
+            delete_device_roles()
+        if args.device_types:
+            delete_device_types()
+        if args.platforms:
+            delete_platforms()
+        if args.manufacturers:
+            delete_manufacturers()
+        if args.tags:
+            delete_tags()
+        if args.power_outlet_ports:
+            delete_power_outlet_ports()
+        if args.power_ports:
+            delete_power_ports()
+        if args.inventory_items:
+            delete_inventory_items()
+        if args.inventory_item_roles:
+            delete_inventory_items_roles()
+        if args.console_server_ports:
+            delete_console_server_ports()
+        if args.console_ports:
+            delete_console_ports()
+        if args.rir:
+            delete_rir()
+        if args.config_templates:
+            delete_config_templates()
+        if args.racks:
+            delete_racks()
+        if args.sites:
+            delete_sites()
+        if args.regions:
+            delete_regions()
+        if args.tenants:
+            delete_tenants()
+
+    if todo in ("2", "3"):
+        if args.regions:
+            create_regions()
+        if args.tenants:
+            ceate_tenants()
+        if args.sites:
+            create_sites()
+        if args.racks:
+            create_racks()
+        if args.manufacturers:
+            create_manufacturers()
+        if args.device_types:
+            create_device_types()
+        if args.device_roles:
+            create_device_roles()
+        if args.platforms:
+            create_platforms()
+        if args.vrfs:
+            create_vrfs()
+        if args.custom_fields:
+            create_custom_fields()
+        if args.rir:
+            create_rir()
+        if args.prefix_roles:
+            create_prefix_roles()
+        if args.prefixes:
+            create_prefixes()
+        if args.ip_addresses:
+            create_ip_addresses()
+        if args.tags:
+            create_tags()
+        if args.devices:
+            create_devices()
+        if args.vlan_groups:
+            create_vlan_groups()
+        if args.vlans:
+            create_vlans()
+        if args.interfaces:
+            create_interfaces()
+        if args.mac_addresses:
+            create_mac_addresses()
+        if args.power_outlet_ports:
+            create_power_outlet_ports()
+        if args.power_ports:
+            create_power_ports()
+        if args.inventory_item_roles:
+            create_inventory_items_roles()
+        if args.inventory_items:
+            create_inventory_items()
+        if args.console_server_ports:
+            create_console_server_ports()
+        if args.console_ports:
+            create_console_ports()
+        if args.connections:
+            create_connections()
+        if args.circuit_providers:
+            create_circuit_providers()
+        if args.circuit_provider_networks:
+            creat_circuit_provider_networks()
+        if args.circuit_provider_accounts:
+            create_circuit_provider_accounts()
+        if args.circuit_types:
+            create_circuit_types()
+        if args.circuits:
+            create_circuits()
+        if args.config_templates:
+            create_config_templates()
+        if args.bgp_asn:
+            create_bgp_asn()
+        if args.bgp_peer_groups:
+            create_bgp_peer_groups()
+        if args.bgp_peerings:
+            create_bgp_peerings()
+
+
+if __name__ == "__main__":
+    main()

@@ -12,7 +12,9 @@ devices and reconciles them with NetBox. Route-target (`rt`) communities are
 stored as IPAM route targets. Other community types are stored as NetBox BGP
 plugin community objects when the plugin is installed.
 
-Objects are matched by community value. The task creates missing objects and
+Route targets are matched by community value. BGP plugin communities are
+matched by value and live community-set name so NetBox can hold several
+standard communities with the same value. The task creates missing objects and
 extends their optional community-name custom field with missing live names. An
 optional multi-object custom field associates each community with the devices
 on which it was observed. The task never deletes NetBox objects or associations.
@@ -23,18 +25,25 @@ on which it was observed. The task never deletes NetBox objects or associations.
 2. Confirm the selected devices exist in NetBox.
 3. Run Nornir [`parse_ttp`](../nornir/services_nornir_service_tasks_parse.md)
    with the TTP Templates `bgp_communities` getter.
-4. Group records by community value and aggregate the sorted, unique live
-   community-set names.
-5. Compare live values with NetBox route targets and BGP plugin communities.
+4. Group route targets by community value and BGP plugin communities by
+   community value plus live community-set name.
+5. Compare live route targets and BGP plugin communities with matching NetBox
+   objects.
 6. Return the diff or apply bulk create and update operations.
 
-If several devices use different names for the same value, the configured
-custom field stores the names as a comma-separated string. For example,
-`65000:100` named `CUSTOMER_EXPORT` on one device and `BLUE_EXPORT` on another
-is stored as:
+For BGP plugin communities, existing NetBox objects are matched in this order:
+same value with the live name contained in the configured community-name custom
+field, same value with a description matching the live name, then an unlabeled
+same-value object. If the community-name custom field is disabled or missing,
+the task starts with the description match.
+
+If several route-target records use different names for the same value, the
+configured custom field stores the names as a comma-separated string. For
+example, `65000:200` named `TENANT_BLUE` on one device and `VPN_BLUE` on
+another is stored as:
 
 ```text
-BLUE_EXPORT, CUSTOMER_EXPORT
+TENANT_BLUE, VPN_BLUE
 ```
 
 Existing custom-field values are preserved. New live names are appended only
@@ -118,7 +127,7 @@ Dry-run output uses `create`, `update`, `delete`, and `in_sync` actions:
     "in_sync": []
   },
   "communities": {
-    "create": ["65000:100"],
+    "create": ["65000:100::BLUE_EXPORT"],
     "update": {},
     "delete": [],
     "in_sync": []
@@ -137,7 +146,7 @@ Live-run output uses `created`, `updated`, `deleted`, and `in_sync`:
     "in_sync": []
   },
   "communities": {
-    "created": ["65000:100"],
+    "created": ["65000:100::BLUE_EXPORT"],
     "updated": [],
     "deleted": [],
     "in_sync": []

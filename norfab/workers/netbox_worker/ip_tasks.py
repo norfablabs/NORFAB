@@ -4,6 +4,8 @@ import ipaddress
 import logging
 from typing import Any, Union
 
+import yaml
+
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
@@ -734,7 +736,8 @@ class NetboxIpTasks:
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branch name to use.
             anycast_ranges (list, optional): IP prefix(es) used to classify
-                IP addresses as anycast role, e.g. ``'10.3.250.0/24'``.
+                IP addresses as anycast role, or an ``nf://`` or ``git://<remote>/`` YAML 
+                file containing a list of prefixes, e.g. ``'10.3.250.0/24'``.
             ignore_ranges (list, optional): Prefixes to ignore IP addresses for, includes
                 by default 127.0.0.0/8, 224.0.0.0/24 and others
             ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored
@@ -769,6 +772,10 @@ class NetboxIpTasks:
         )
 
         # pre-process anycast ranges
+        if self.is_url(anycast_ranges):
+            anycast_ranges = yaml.safe_load(
+                self.fetch_file(anycast_ranges, raise_on_fail=True)
+            )
         if isinstance(anycast_ranges, str):
             anycast_ranges = [anycast_ranges]
         anycast_nets = [

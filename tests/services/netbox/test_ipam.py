@@ -635,6 +635,31 @@ class TestSyncDeviceIP:
 
         self._cleanup(nfclient, self.ALL_DEVICES)
 
+    def test_sync_device_ip_anycast_ranges_nf_url(self, nfclient):
+        """Sync anycast IPs using anycast_ranges from an nf:// YAML file."""
+        self._cleanup(nfclient, self.ALL_DEVICES)
+
+        ret = self._sync(
+            nfclient,
+            self.ALL_DEVICES,
+            anycast_ranges="nf://netbox/anycast_ranges.yaml",
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            for device in self.ALL_DEVICES:
+                assert (
+                    self.ANYCAST_IP in res["result"][device]["created"]
+                ), f"{worker}:{device} anycast IP {self.ANYCAST_IP} not in created list"
+
+        pynb = get_pynetbox(nfclient)
+        nb_anycast_ips = list(pynb.ipam.ip_addresses.filter(address=self.ANYCAST_IP))
+        assert len(nb_anycast_ips) >= len(self.ALL_DEVICES)
+        for ip_entry in nb_anycast_ips:
+            assert str(ip_entry.role).lower() == "anycast"
+
+        self._cleanup(nfclient, self.ALL_DEVICES)
+
     def test_sync_device_ip_anycast_already_in_sync(self, nfclient):
         """Sync all devices with anycast_ranges twice. The second run must report
         anycast IPs as in_sync without creating duplicates."""

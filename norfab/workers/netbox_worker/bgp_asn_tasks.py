@@ -38,6 +38,7 @@ class NetboxBgpAsnTasks:
         rir: Union[None, str] = None,
         device_custom_field: str = "devices",
         ignore_asn_by_range: Union[None, list] = None,
+        preserve_description: bool = True,
         **kwargs: Any,
     ) -> Result:
         """Synchronize globally unique live BGP ASNs with NetBox.
@@ -58,6 +59,7 @@ class NetboxBgpAsnTasks:
             rir: NetBox RIR name required when creating missing ASNs.
             device_custom_field: ASN custom field containing associated devices.
             ignore_asn_by_range: ASN values or numerical ranges to ignore.
+            preserve_description: Keep existing NetBox ASN descriptions unchanged.
             **kwargs: Nornir FFun host filters.
 
         Returns:
@@ -162,6 +164,7 @@ class NetboxBgpAsnTasks:
                         {
                             "device": device_name,
                             "description": record["description"] or "",
+                            "local_asn": record.get("local_asn", True),
                         }
                     )
                     parsed_count += 1
@@ -195,7 +198,11 @@ class NetboxBgpAsnTasks:
             }
             if device_custom_field:
                 live_asns[asn][device_custom_field] = sorted(
-                    {nb_devices[record["device"]].id for record in records}
+                    {
+                        nb_devices[record["device"]].id
+                        for record in records
+                        if record["local_asn"] is True
+                    }
                 )
 
         netbox_asns = {}
@@ -212,6 +219,8 @@ class NetboxBgpAsnTasks:
         )
         for asn in netbox_asn_records:
             current = {"description": asn.description}
+            if preserve_description:
+                live_asns[asn.asn]["description"] = asn.description
             if device_custom_field:
                 current[device_custom_field] = [
                     device["id"]

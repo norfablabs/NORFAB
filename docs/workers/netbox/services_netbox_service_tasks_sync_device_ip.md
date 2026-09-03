@@ -79,11 +79,17 @@ Multiple filters combine as intersection — all specified conditions must be sa
 
 IP addresses in one or more `anycast_ranges` prefixes are assigned the `anycast` role. NetBox allows multiple IP address records with the same value when the role is `anycast`, so each device gets its own record. Without `anycast_ranges`, a second device trying to use the same IP address triggers a duplicate-conflict error.
 
-Set `anycast_ranges` to a prefix string or list of prefixes:
+Set `anycast_ranges` to a prefix string, list of prefixes, or an `nf://` URL to a YAML file containing a list of prefixes:
 
-```
+```python
 anycast_ranges = "10.0.250.0/24"
 anycast_ranges = ["10.0.250.0/24", "2001:db8:ffff::/48"]
+anycast_ranges = "nf://netbox/anycast_ranges.yaml"
+```
+
+```yaml
+- 10.0.250.0/24
+- 2001:db8:ffff::/48
 ```
 
 ### VRF Handling

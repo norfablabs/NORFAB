@@ -115,7 +115,9 @@ class TestSyncBgpAsn:
         transit = self.nb.ipam.asns.get(asn=4200000200)
         device = self.nb.dcim.devices.get(name=self.DEVICE_1)
         assert transit.description == "TRANSIT"
-        assert self._custom_field_device_ids(transit, "devices") == {device.id}
+        assert self._custom_field_device_ids(transit, "devices") == set()
+        local_asn = self.nb.ipam.asns.get(asn=4200000101)
+        assert self._custom_field_device_ids(local_asn, "devices") == {device.id}
 
         second_sync = self._sync(nfclient, rir=self.RIR)
         for result in self._successful_results(second_sync):
@@ -134,21 +136,46 @@ class TestSyncBgpAsn:
             description="Old description",
             custom_fields={"devices": [existing_device.id]},
         )
+        self.nb.ipam.asns.create(
+            asn=4200000101,
+            rir=rir.id,
+            description="Old local description",
+        )
 
         response = self._sync(nfclient)
 
         for result in self._successful_results(response, allow_errors=True):
             assert result["result"]["global"]["created"] == []
+            assert result["result"]["global"]["updated"] == [4200000101]
+            assert any("no RIR provided" in error for error in result["errors"])
+        transit = self.nb.ipam.asns.get(asn=4200000200)
+        local_asn = self.nb.ipam.asns.get(asn=4200000101)
+        selected_device = self.nb.dcim.devices.get(name=self.DEVICE_1)
+        assert transit.description == "Old description"
+        assert self._custom_field_device_ids(transit, "devices") == {
+            existing_device.id,
+        }
+        assert local_asn.description == "Old local description"
+        assert self._custom_field_device_ids(local_asn, "devices") == {
+            selected_device.id,
+        }
+        assert self.nb.ipam.asns.get(asn=4200000301) is None
+
+    def test_can_override_existing_description(self, nfclient: Any) -> None:
+        rir = self.nb.ipam.rirs.get(name=self.RIR)
+        self.nb.ipam.asns.create(
+            asn=4200000200,
+            rir=rir.id,
+            description="Old description",
+        )
+
+        response = self._sync(nfclient, preserve_description=False)
+
+        for result in self._successful_results(response, allow_errors=True):
             assert result["result"]["global"]["updated"] == [4200000200]
             assert any("no RIR provided" in error for error in result["errors"])
         transit = self.nb.ipam.asns.get(asn=4200000200)
-        selected_device = self.nb.dcim.devices.get(name=self.DEVICE_1)
         assert transit.description == "TRANSIT"
-        assert self._custom_field_device_ids(transit, "devices") == {
-            existing_device.id,
-            selected_device.id,
-        }
-        assert self.nb.ipam.asns.get(asn=4200000101) is None
 
     def test_multiple_devices_are_aggregated(self, nfclient: Any) -> None:
         response = self._sync(
@@ -160,10 +187,13 @@ class TestSyncBgpAsn:
             assert set(result["result"]["global"]["created"]) == expected_asns
         transit = self.nb.ipam.asns.get(asn=4200000200)
         assert transit.description == "TRANSIT"
-        assert self._custom_field_device_ids(transit, "devices") == {
-            self.nb.dcim.devices.get(name=self.DEVICE_1).id,
-            self.nb.dcim.devices.get(name=self.DEVICE_2).id,
-        }
+        assert self._custom_field_device_ids(transit, "devices") == set()
+        assert self._custom_field_device_ids(
+            self.nb.ipam.asns.get(asn=4200000101), "devices"
+        ) == {self.nb.dcim.devices.get(name=self.DEVICE_1).id}
+        assert self._custom_field_device_ids(
+            self.nb.ipam.asns.get(asn=4200000102), "devices"
+        ) == {self.nb.dcim.devices.get(name=self.DEVICE_2).id}
         assert self.nb.ipam.asns.get(asn=4200000301).description == "CUSTOMER_A"
         assert self.nb.ipam.asns.get(asn=4200000302).description == "CUSTOMER_B"
 
@@ -178,8 +208,7 @@ class TestSyncBgpAsn:
         for result in self._successful_results(response):
             assert result["result"]["global"]["created"] == [4200000301]
         customer = self.nb.ipam.asns.get(asn=4200000301)
-        device = self.nb.dcim.devices.get(name=self.DEVICE_1)
-        assert self._custom_field_device_ids(customer, "asn_devices") == {device.id}
+        assert self._custom_field_device_ids(customer, "asn_devices") == set()
         assert self.nb.ipam.asns.get(asn=4200000101) is None
         assert self.nb.ipam.asns.get(asn=4200000200) is None
 

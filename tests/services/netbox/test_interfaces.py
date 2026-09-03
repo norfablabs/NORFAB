@@ -1091,6 +1091,9 @@ class TestSyncDeviceInterfaces:
                 nb_vlan_510.group is not None
                 and nb_vlan_510.group.name == vlan_group_name
             ), f"VLAN 510 group mismatch: got {nb_vlan_510.group!r}"
+            assert nb_vlan_510.site is None, (
+                f"VLAN 510 site mismatch: got {nb_vlan_510.site!r}"
+            )
         finally:
             delete_interfaces_with_description(
                 nfclient, TestSyncDeviceInterfaces.ALL_DEVICES, "TEST_SYNC"
@@ -1429,8 +1432,9 @@ class TestSyncDeviceInterfaces:
         } <= lag_vids, f"Port-Channel41 tagged_vlans not restored in NetBox: expected {{410, 411, 510}} subset, got VIDs {lag_vids}"
 
     def test_sync_device_interfaces_resolves_junos_vlan_names(self, nfclient):
-        """Initialize empty Junos interfaces and resolve VLAN member names."""
+        """Initialize empty Junos interfaces and resolve mapped VLAN member names."""
         device = "fn-junos-1"
+        vlan_group_name = "SYNC_NAMED_VLANS_GROUP_1"
         trunk_parent = "ge-0/0/12"
         access_parent = "ge-0/0/45"
         trunk_name = f"{trunk_parent}.0"
@@ -1443,6 +1447,14 @@ class TestSyncDeviceInterfaces:
                 nfclient,
                 [device],
                 filter_by_name="ge-0/0/*",
+                vlan_map=[
+                    {
+                        "set_vlan_group": vlan_group_name,
+                        "vlan_names": ["VLANNAME*"],
+                        "match_device_names": [device],
+                        "match_interface_names": ["ge-0/0/*"],
+                    }
+                ],
             )
             for worker, res in ret.items():
                 assert res["failed"] is False, f"{worker} failed - {res}"
@@ -1459,18 +1471,30 @@ class TestSyncDeviceInterfaces:
                 "VLANNAME1": 124,
                 "VLANNAME2": 125,
             }
+            assert {vlan.group.name for vlan in nb_trunk.tagged_vlans} == {
+                vlan_group_name
+            }
             assert nb_access.parent.name == access_parent
             assert nb_access.mode.value == "access"
             assert (
                 nb_access.untagged_vlan.name,
                 nb_access.untagged_vlan.vid,
             ) == ("VLANNAME3", 126)
+            assert nb_access.untagged_vlan.group.name == vlan_group_name
 
             dry_run = self._sync(
                 nfclient,
                 [device],
                 dry_run=True,
                 filter_by_name="ge-0/0/*",
+                vlan_map=[
+                    {
+                        "set_vlan_group": vlan_group_name,
+                        "vlan_names": ["VLANNAME*"],
+                        "match_device_names": [device],
+                        "match_interface_names": ["ge-0/0/*"],
+                    }
+                ],
             )
             for worker, res in dry_run.items():
                 assert res["failed"] is False, f"{worker} failed - {res}"

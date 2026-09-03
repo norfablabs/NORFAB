@@ -1,3 +1,17 @@
+# 0.22.4
+
+## ENHANCEMENTS
+
+1. Enhanced NetBox `sync_bgp_community` handling for standard BGP plugin communities that share the same value. The task now keeps live community names in the sync identity and matches existing NetBox communities by value plus community-name custom-field containment, then value plus description, before falling back to value-only matching.
+2. Added `preserve_description` to NetBox `sync_bgp_asn`, defaulting to `True`, so existing NetBox ASN descriptions stay unchanged unless explicitly overridden.
+3. Enhanced NetBox `sync_bgp_asn` device custom-field associations to use only parser records where `local_asn` is `True`, preventing peer ASNs from being associated with the observing device.
+
+## BUGS
+
+1. Fixed NetBox `sync_device_interfaces` VLAN mapping for VLAN names returned by Nornir getters. Matching named VLANs now resolve against their mapped VLAN group rather than falling back to the device site, and newly created group-scoped VLANs no longer receive a site association.
+
+---
+
 # 0.22.3
 
 ## FEATURES

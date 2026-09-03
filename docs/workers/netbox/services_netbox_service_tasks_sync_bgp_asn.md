@@ -4,8 +4,8 @@
 
 The `sync_bgp_asn` task collects globally unique BGP ASNs from live devices
 using the Nornir TTP `bgp_asn` getter and reconciles them with NetBox IPAM.
-It updates descriptions and optionally records the devices on which each ASN
-was observed. It never deletes ASNs or device associations.
+It updates descriptions only when requested and optionally records the devices
+on which each local ASN was observed. It never deletes ASNs or device associations.
 
 ## Inputs
 
@@ -15,6 +15,7 @@ was observed. It never deletes ASNs or device associations.
 | `rir` | For creation | `None` | Existing NetBox RIR name used to create missing ASNs |
 | `device_custom_field` | No | `devices` | Multi-object ASN custom field related to `dcim.device` |
 | `ignore_asn_by_range` | No | `None` | ASN values or numerical ranges to exclude, such as `65000` or `65100-65200` |
+| `preserve_description` | No | `True` | Keep existing NetBox ASN descriptions unchanged |
 | `instance` | No | Worker default | NetBox instance to target |
 | `branch` | No | `None` | NetBox Branching plugin branch |
 | `dry_run` | No | `False` | Return the calculated diff without writing |
@@ -28,6 +29,10 @@ creation, and continues updating existing ASNs.
 
 The device custom field must be assigned to `ipam.asn`, use the multi-object
 type, and relate to `dcim.device`. A missing field is ignored.
+
+By default, existing NetBox ASN descriptions are preserved. Set
+`preserve_description=False` to replace them with parsed live descriptions.
+Newly created ASNs still receive the parsed live description when available.
 
 ## Output
 
@@ -55,6 +60,12 @@ and `in_sync` ASN lists. Dry-run output uses `create`, `update`, `delete`, and
     nf# netbox sync bgp-asn devices edge-1 dry-run
     ```
 
+    Override existing descriptions with parsed live values:
+
+    ```bash
+    nf# netbox sync bgp-asn devices edge-1 preserve-description false
+    ```
+
 === "Python"
 
     ```python
@@ -77,6 +88,10 @@ and `in_sync` ASN lists. Dry-run output uses `create`, `update`, `delete`, and
 
 - When several devices report the same ASN, the first non-empty description in
   device-name order is used.
+- Device custom-field associations are added only for parser records where
+  `local_asn` is `True`.
+- Existing ASN descriptions are preserved unless `preserve_description` is
+  disabled.
 - Existing device associations are preserved and newly observed devices are
   appended.
 - `with_approval` cannot be combined with the NFCLI `nowait` option.

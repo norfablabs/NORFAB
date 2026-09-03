@@ -1584,7 +1584,7 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
     )
     anycast_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
         None,
-        description="IP prefix(es) to classify as anycast role, e.g. '10.3.250.0/24'",
+        description="IP prefix(es) to classify as anycast role, or nf:// YAML file reference",
         alias="anycast-ranges",
     )
     ignore_ranges: Union[None, StrictStr, list[StrictStr]] = Field(
@@ -2367,6 +2367,11 @@ class SyncBgpAsnInput(
         description="ASN values or numerical ranges to exclude from synchronization",
         alias="ignore-asn-by-range",
         examples=[["65000", "65100-65200"]],
+    )
+    preserve_description: StrictBool = Field(
+        True,
+        description="Keep existing NetBox ASN descriptions unchanged",
+        alias="preserve-description",
     )
 
 

@@ -59,32 +59,43 @@ def match_vlan_map(
     device_name: str,
     interface_name: Union[None, str],
 ) -> Union[None, str]:
-    """Return the first matching group, ignoring unavailable name contexts."""
+    """Return the group from the first VLAN mapping rule that matches.
+
+    Rules are evaluated in order. A rule can constrain the VLAN ID or name and
+    the device or interface name using glob patterns. Criteria that are not
+    configured do not restrict a rule. VLAN ID, VLAN name, and interface-name
+    criteria are skipped when the caller does not have that value available;
+    for example, a named VLAN has no ID until it is resolved from NetBox.
+    """
     for rule in rules:
-        vlan_id_match = (
-            rule.get("expanded_vlan_ids") is None
-            or vlan_id in rule["expanded_vlan_ids"]
-        )
-        vlan_name_match = (
-            vlan_name is None
-            or not rule.get("vlan_names")
-            or any(
+        # Named VLANs have no VID until the selected NetBox group resolves them.
+        # Do not reject a name-based rule before that lookup can take place.
+        vlan_id_match = True
+        if vlan_id is not None and rule.get("expanded_vlan_ids") is not None:
+            vlan_id_match = vlan_id in rule["expanded_vlan_ids"]
+        # Do not reject a rule when the caller did not provide a VLAN name.
+        vlan_name_match = True
+        if vlan_name is not None and rule.get("vlan_names"):
+            vlan_name_match = any(
                 fnmatch.fnmatchcase(vlan_name, pattern)
                 for pattern in rule["vlan_names"]
             )
-        )
-        device_name_match = not rule.get("match_device_names") or any(
-            fnmatch.fnmatchcase(device_name, pattern)
-            for pattern in rule["match_device_names"]
-        )
-        interface_name_match = (
-            interface_name is None
-            or not rule.get("match_interface_names")
-            or any(
+
+        # A device name is always available, so apply this criterion whenever set.
+        device_name_match = True
+        if rule.get("match_device_names"):
+            device_name_match = any(
+                fnmatch.fnmatchcase(device_name, pattern)
+                for pattern in rule["match_device_names"]
+            )
+
+        # Interface-free callers, such as VLAN sync, cannot evaluate this criterion.
+        interface_name_match = True
+        if interface_name is not None and rule.get("match_interface_names"):
+            interface_name_match = any(
                 fnmatch.fnmatchcase(interface_name, pattern)
                 for pattern in rule["match_interface_names"]
             )
-        )
         if (
             vlan_id_match
             and vlan_name_match
@@ -122,7 +133,7 @@ def build_vlan_payload(
     payload = {"vid": vid, "name": name, "description": description}
     if group_id:
         payload["group"] = group_id
-    if site_id:
+    elif site_id:
         payload["site"] = site_id
     return payload
 
@@ -320,7 +331,7 @@ def resolve_vlan(
         msg = f"created VLAN '{vid}' in NetBox"
         if group_id:
             msg += f" in VLAN group '{vlan_group}'"
-        if site_id:
+        elif site_id:
             msg += f" for site '{new_vlan.site.name}'"
         job.event(msg)
         log.info(f"{worker_name} - {msg}")
