@@ -9766,7 +9766,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 2 September 2026</em></p>
+<p><em>Last updated: 3 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10597,8 +10597,8 @@ automatically.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_vrfs/">Task details</a></p>
 <h3 id="live-ip-and-mac-reconciliation">Live IP and MAC reconciliation<a class="headerlink" href="#live-ip-and-mac-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles device IP assignments, derived prefixes, and interface MAC addresses
-with NetBox, including filters, anycast handling, VRF/site association, and
-controlled deletion behavior. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
+with NetBox, including filters, inline or <code>nf://</code> anycast ranges, VRF/site
+association, and controlled deletion behavior. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
 <strong>Limitations:</strong> requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_ip/">IP sync</a> ·
@@ -10630,9 +10630,10 @@ device-to-community inventory, and source-of-truth onboarding.
 objects are never deleted.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_community/">Task details</a></p>
 <h3 id="live-bgp-asn-reconciliation">Live BGP ASN reconciliation<a class="headerlink" href="#live-bgp-asn-reconciliation" title="Permanent link">¤</a></h3>
-<p>Reconciles globally unique ASNs and descriptions from supported live devices
-with NetBox IPAM and optionally associates each ASN with the devices on which it
-was observed. Missing ASNs are created only when an existing RIR is supplied.
+<p>Reconciles globally unique ASNs from supported live devices with NetBox IPAM,
+preserves existing descriptions by default, and optionally associates each ASN
+with the devices for which it is a local ASN. Missing ASNs are created only
+when an existing RIR is supplied.
 <strong>Use cases:</strong> ASN inventory, description audits, and device-to-ASN inventory.
 <strong>Limitations:</strong> ASNs and device associations are never deleted automatically.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_asn/">Task details</a></p>

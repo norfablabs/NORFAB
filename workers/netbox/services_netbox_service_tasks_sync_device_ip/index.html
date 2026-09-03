@@ -7129,9 +7129,13 @@ returned by NetBox is reused and its VRF value is left unchanged.</p>
 <h2 id="special-features">Special Features<a class="headerlink" href="#special-features" title="Permanent link">¤</a></h2>
 <h3 id="anycast-support">Anycast Support<a class="headerlink" href="#anycast-support" title="Permanent link">¤</a></h3>
 <p>IP addresses in one or more <code>anycast_ranges</code> prefixes are assigned the <code>anycast</code> role. NetBox allows multiple IP address records with the same value when the role is <code>anycast</code>, so each device gets its own record. Without <code>anycast_ranges</code>, a second device trying to use the same IP address triggers a duplicate-conflict error.</p>
-<p>Set <code>anycast_ranges</code> to a prefix string or list of prefixes:</p>
-<div class="highlight"><pre><span></span><code>anycast_ranges = &quot;10.0.250.0/24&quot;
-anycast_ranges = [&quot;10.0.250.0/24&quot;, &quot;2001:db8:ffff::/48&quot;]
+<p>Set <code>anycast_ranges</code> to a prefix string, list of prefixes, or an <code>nf://</code> URL to a YAML file containing a list of prefixes:</p>
+<div class="highlight"><pre><span></span><code><span class="n">anycast_ranges</span> <span class="o">=</span> <span class="s2">&quot;10.0.250.0/24&quot;</span>
+<span class="n">anycast_ranges</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;10.0.250.0/24&quot;</span><span class="p">,</span> <span class="s2">&quot;2001:db8:ffff::/48&quot;</span><span class="p">]</span>
+<span class="n">anycast_ranges</span> <span class="o">=</span> <span class="s2">&quot;nf://netbox/anycast_ranges.yaml&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.250.0/24</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:ffff::/48</span>
 </code></pre></div>
 <h3 id="vrf-handling">VRF Handling<a class="headerlink" href="#vrf-handling" title="Permanent link">¤</a></h3>
 <p>Existing IP addresses are always searched by address only; VRF is not added to
@@ -7576,7 +7580,8 @@ the same structure showing what was done.</p>
             <td>
               <div class="doc-md-description">
                 <p>IP prefix(es) used to classify
-IP addresses as anycast role, e.g. <code>'10.3.250.0/24'</code>.</p>
+IP addresses as anycast role, or an <code>nf://</code> or <code>git://&lt;remote&gt;/</code> YAML 
+file containing a list of prefixes, e.g. <code>'10.3.250.0/24'</code>.</p>
               </div>
             </td>
             <td>
@@ -7733,9 +7738,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 664</span>
-<span class="normal"> 665</span>
-<span class="normal"> 666</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 666</span>
 <span class="normal"> 667</span>
 <span class="normal"> 668</span>
 <span class="normal"> 669</span>
@@ -8224,7 +8227,14 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="normal">1152</span>
 <span class="normal">1153</span>
 <span class="normal">1154</span>
-<span class="normal">1155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1155</span>
+<span class="normal">1156</span>
+<span class="normal">1157</span>
+<span class="normal">1158</span>
+<span class="normal">1159</span>
+<span class="normal">1160</span>
+<span class="normal">1161</span>
+<span class="normal">1162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -8297,7 +8307,8 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branch name to use.</span>
 <span class="sd">        anycast_ranges (list, optional): IP prefix(es) used to classify</span>
-<span class="sd">            IP addresses as anycast role, e.g. ``&#39;10.3.250.0/24&#39;``.</span>
+<span class="sd">            IP addresses as anycast role, or an ``nf://`` or ``git://&lt;remote&gt;/`` YAML </span>
+<span class="sd">            file containing a list of prefixes, e.g. ``&#39;10.3.250.0/24&#39;``.</span>
 <span class="sd">        ignore_ranges (list, optional): Prefixes to ignore IP addresses for, includes</span>
 <span class="sd">            by default 127.0.0.0/8, 224.0.0.0/24 and others</span>
 <span class="sd">        ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored</span>
@@ -8332,6 +8343,10 @@ are included, e.g. <code>'10.0.*'</code>.</p>
     <span class="p">)</span>
 
     <span class="c1"># pre-process anycast ranges</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">anycast_ranges</span><span class="p">):</span>
+        <span class="n">anycast_ranges</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">anycast_ranges</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">anycast_ranges</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">anycast_ranges</span> <span class="o">=</span> <span class="p">[</span><span class="n">anycast_ranges</span><span class="p">]</span>
     <span class="n">anycast_nets</span> <span class="o">=</span> <span class="p">[</span>

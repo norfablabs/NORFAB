@@ -6895,8 +6895,8 @@
 </blockquote>
 <p>The <code>sync_bgp_asn</code> task collects globally unique BGP ASNs from live devices
 using the Nornir TTP <code>bgp_asn</code> getter and reconciles them with NetBox IPAM.
-It updates descriptions and optionally records the devices on which each ASN
-was observed. It never deletes ASNs or device associations.</p>
+It updates descriptions only when requested and optionally records the devices
+on which each local ASN was observed. It never deletes ASNs or device associations.</p>
 <h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
 <table>
 <thead>
@@ -6931,6 +6931,12 @@ was observed. It never deletes ASNs or device associations.</p>
 <td>No</td>
 <td><code>None</code></td>
 <td>ASN values or numerical ranges to exclude, such as <code>65000</code> or <code>65100-65200</code></td>
+</tr>
+<tr>
+<td><code>preserve_description</code></td>
+<td>No</td>
+<td><code>True</code></td>
+<td>Keep existing NetBox ASN descriptions unchanged</td>
 </tr>
 <tr>
 <td><code>instance</code></td>
@@ -6975,6 +6981,9 @@ was observed. It never deletes ASNs or device associations.</p>
 creation, and continues updating existing ASNs.</p>
 <p>The device custom field must be assigned to <code>ipam.asn</code>, use the multi-object
 type, and relate to <code>dcim.device</code>. A missing field is ignored.</p>
+<p>By default, existing NetBox ASN descriptions are preserved. Set
+<code>preserve_description=False</code> to replace them with parsed live descriptions.
+Newly created ASNs still receive the parsed live description when available.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Results are grouped under <code>global</code> and contain <code>created</code>, <code>updated</code>, <code>deleted</code>,
 and <code>in_sync</code> ASN lists. Dry-run output uses <code>create</code>, <code>update</code>, <code>delete</code>, and
@@ -6990,6 +6999,9 @@ and <code>in_sync</code> ASN lists. Dry-run output uses <code>create</code>, <co
 </code></pre></div>
 <p>Preview updates without supplying an RIR:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>bgp-asn<span class="w"> </span>devices<span class="w"> </span>edge-1<span class="w"> </span>dry-run
+</code></pre></div>
+<p>Override existing descriptions with parsed live values:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>bgp-asn<span class="w"> </span>devices<span class="w"> </span>edge-1<span class="w"> </span>preserve-description<span class="w"> </span><span class="nb">false</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7014,6 +7026,10 @@ and <code>in_sync</code> ASN lists. Dry-run output uses <code>create</code>, <co
 <ul>
 <li>When several devices report the same ASN, the first non-empty description in
   device-name order is used.</li>
+<li>Device custom-field associations are added only for parser records where
+  <code>local_asn</code> is <code>True</code>.</li>
+<li>Existing ASN descriptions are preserved unless <code>preserve_description</code> is
+  disabled.</li>
 <li>Existing device associations are preserved and newly observed devices are
   appended.</li>
 <li><code>with_approval</code> cannot be combined with the NFCLI <code>nowait</code> option.</li>
@@ -7204,6 +7220,22 @@ observed. ASNs and device associations are never deleted.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>preserve_description</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Keep existing NetBox ASN descriptions unchanged.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7561,7 +7593,16 @@ observed. ASNs and device associations are never deleted.</p>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
-<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpAsnResult</span><span class="p">,</span>
@@ -7587,6 +7628,7 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="n">rir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">device_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
     <span class="n">ignore_asn_by_range</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">preserve_description</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize globally unique live BGP ASNs with NetBox.</span>
@@ -7607,6 +7649,7 @@ observed. ASNs and device associations are never deleted.</p>
 <span class="sd">        rir: NetBox RIR name required when creating missing ASNs.</span>
 <span class="sd">        device_custom_field: ASN custom field containing associated devices.</span>
 <span class="sd">        ignore_asn_by_range: ASN values or numerical ranges to ignore.</span>
+<span class="sd">        preserve_description: Keep existing NetBox ASN descriptions unchanged.</span>
 <span class="sd">        **kwargs: Nornir FFun host filters.</span>
 
 <span class="sd">    Returns:</span>
@@ -7711,6 +7754,7 @@ observed. ASNs and device associations are never deleted.</p>
                     <span class="p">{</span>
                         <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
                         <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;local_asn&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_asn&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
                 <span class="n">parsed_count</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -7744,7 +7788,11 @@ observed. ASNs and device associations are never deleted.</p>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
             <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-                <span class="p">{</span><span class="n">nb_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">}</span>
+                <span class="p">{</span>
+                    <span class="n">nb_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span>
+                    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span>
+                    <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;local_asn&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+                <span class="p">}</span>
             <span class="p">)</span>
 
     <span class="n">netbox_asns</span> <span class="o">=</span> <span class="p">{}</span>
@@ -7761,6 +7809,8 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">netbox_asn_records</span><span class="p">:</span>
         <span class="n">current</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">asn</span><span class="o">.</span><span class="n">description</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">preserve_description</span><span class="p">:</span>
+            <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">asn</span><span class="o">.</span><span class="n">description</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
             <span class="n">current</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">device</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>

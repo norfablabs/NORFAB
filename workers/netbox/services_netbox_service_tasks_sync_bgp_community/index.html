@@ -7062,7 +7062,9 @@
 devices and reconciles them with NetBox. Route-target (<code>rt</code>) communities are
 stored as IPAM route targets. Other community types are stored as NetBox BGP
 plugin community objects when the plugin is installed.</p>
-<p>Objects are matched by community value. The task creates missing objects and
+<p>Route targets are matched by community value. BGP plugin communities are
+matched by value and live community-set name so NetBox can hold several
+standard communities with the same value. The task creates missing objects and
 extends their optional community-name custom field with missing live names. An
 optional multi-object custom field associates each community with the devices
 on which it was observed. The task never deletes NetBox objects or associations.</p>
@@ -7072,16 +7074,22 @@ on which it was observed. The task never deletes NetBox objects or associations.
 <li>Confirm the selected devices exist in NetBox.</li>
 <li>Run Nornir <a href="../../nornir/services_nornir_service_tasks_parse/"><code>parse_ttp</code></a>
    with the TTP Templates <code>bgp_communities</code> getter.</li>
-<li>Group records by community value and aggregate the sorted, unique live
-   community-set names.</li>
-<li>Compare live values with NetBox route targets and BGP plugin communities.</li>
+<li>Group route targets by community value and BGP plugin communities by
+   community value plus live community-set name.</li>
+<li>Compare live route targets and BGP plugin communities with matching NetBox
+   objects.</li>
 <li>Return the diff or apply bulk create and update operations.</li>
 </ol>
-<p>If several devices use different names for the same value, the configured
-custom field stores the names as a comma-separated string. For example,
-<code>65000:100</code> named <code>CUSTOMER_EXPORT</code> on one device and <code>BLUE_EXPORT</code> on another
-is stored as:</p>
-<div class="highlight"><pre><span></span><code>BLUE_EXPORT, CUSTOMER_EXPORT
+<p>For BGP plugin communities, existing NetBox objects are matched in this order:
+same value with the live name contained in the configured community-name custom
+field, same value with a description matching the live name, then an unlabeled
+same-value object. If the community-name custom field is disabled or missing,
+the task starts with the description match.</p>
+<p>If several route-target records use different names for the same value, the
+configured custom field stores the names as a comma-separated string. For
+example, <code>65000:200</code> named <code>TENANT_BLUE</code> on one device and <code>VPN_BLUE</code> on
+another is stored as:</p>
+<div class="highlight"><pre><span></span><code>TENANT_BLUE, VPN_BLUE
 </code></pre></div>
 <p>Existing custom-field values are preserved. New live names are appended only
 when they are missing.</p>
@@ -7201,7 +7209,7 @@ plan remains available in the top-level <code>diff</code> field.</p>
 <span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;communities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;65000:100&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;65000:100::BLUE_EXPORT&quot;</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">    </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
@@ -7217,7 +7225,7 @@ plan remains available in the top-level <code>diff</code> field.</p>
 <span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;communities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;65000:100&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;65000:100::BLUE_EXPORT&quot;</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">    </span><span class="nt">&quot;deleted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
@@ -7344,11 +7352,14 @@ nf#
 
         <p>Synchronize live BGP communities with NetBox.</p>
 <p>Route-target communities are stored as IPAM route targets. Every other
-community type is stored as a NetBox BGP plugin community. Objects are
-keyed by community value and are never deleted. When the configured
-custom field exists, it stores the sorted, comma-separated live
-community-set names observed for each value. The selected device custom
-field records devices on which each community was observed.</p>
+community type is stored as a NetBox BGP plugin community. Route
+targets are keyed by community value. BGP plugin communities are keyed
+by community value and live community-set name, allowing NetBox to hold
+several standard communities with the same value. Objects are never
+deleted. When the configured custom field exists, it stores the sorted,
+comma-separated live community-set names observed for each object. The
+selected device custom field records devices on which each community was
+observed.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -7551,9 +7562,7 @@ field records devices on which each community was observed.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_community_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 40</span>
 <span class="normal"> 41</span>
 <span class="normal"> 42</span>
 <span class="normal"> 43</span>
@@ -8008,7 +8017,109 @@ field records devices on which each community was observed.</p>
 <span class="normal">492</span>
 <span class="normal">493</span>
 <span class="normal">494</span>
-<span class="normal">495</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpCommunityInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpCommunityResult</span><span class="p">,</span>
@@ -8038,11 +8149,14 @@ field records devices on which each community was observed.</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize live BGP communities with NetBox.</span>
 
 <span class="sd">    Route-target communities are stored as IPAM route targets. Every other</span>
-<span class="sd">    community type is stored as a NetBox BGP plugin community. Objects are</span>
-<span class="sd">    keyed by community value and are never deleted. When the configured</span>
-<span class="sd">    custom field exists, it stores the sorted, comma-separated live</span>
-<span class="sd">    community-set names observed for each value. The selected device custom</span>
-<span class="sd">    field records devices on which each community was observed.</span>
+<span class="sd">    community type is stored as a NetBox BGP plugin community. Route</span>
+<span class="sd">    targets are keyed by community value. BGP plugin communities are keyed</span>
+<span class="sd">    by community value and live community-set name, allowing NetBox to hold</span>
+<span class="sd">    several standard communities with the same value. Objects are never</span>
+<span class="sd">    deleted. When the configured custom field exists, it stores the sorted,</span>
+<span class="sd">    comma-separated live community-set names observed for each object. The</span>
+<span class="sd">    selected device custom field records devices on which each community was</span>
+<span class="sd">    observed.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab job object.</span>
@@ -8150,11 +8264,10 @@ field records devices on which each community was observed.</p>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="c1"># Build one live state dictionary for DeepDiff. Route targets always</span>
-    <span class="c1"># participate; plugin communities are included only when available.</span>
-    <span class="n">observations</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{}}</span>
-    <span class="k">if</span> <span class="n">has_bgp_plugin</span><span class="p">:</span>
-        <span class="n">observations</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Collect live records once. Route targets are always reconciled; other</span>
+    <span class="c1"># community types wait for the BGP plugin-specific flow below.</span>
+    <span class="n">route_target_observations</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">bgp_community_observations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">result_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">failed_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">parsed_count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -8196,7 +8309,7 @@ field records devices on which each community was observed.</p>
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
                     <span class="nb">isinstance</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">)</span>
                 <span class="p">):</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; returned malformed community record&quot;</span>
                     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
@@ -8204,16 +8317,22 @@ field records devices on which each community was observed.</p>
                     <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">continue</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;rt&quot;</span><span class="p">:</span>
-                    <span class="n">scope</span> <span class="o">=</span> <span class="s2">&quot;route_targets&quot;</span>
-                <span class="k">elif</span> <span class="n">has_bgp_plugin</span><span class="p">:</span>
-                    <span class="n">scope</span> <span class="o">=</span> <span class="s2">&quot;communities&quot;</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="n">observations</span><span class="p">[</span><span class="n">scope</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()}</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="s2">&quot;&quot;</span>
                 <span class="p">)</span>
-                <span class="n">parsed_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;rt&quot;</span><span class="p">:</span>
+                    <span class="n">route_target_observations</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+                    <span class="p">)</span>
+                    <span class="n">parsed_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bgp_community_observations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">has_bgp_plugin</span><span class="p">:</span>
+                        <span class="n">parsed_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result_devices</span> <span class="ow">and</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">failed_devices</span><span class="p">:</span>
@@ -8231,27 +8350,29 @@ field records devices on which each community was observed.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">normalised_live</span> <span class="o">=</span> <span class="p">{</span><span class="n">scope</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">scope</span> <span class="ow">in</span> <span class="n">observations</span><span class="p">}</span>
-    <span class="k">for</span> <span class="n">scope</span> <span class="ow">in</span> <span class="n">observations</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">[</span><span class="n">scope</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-            <span class="n">normalised_live</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">sname</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="n">community_name_field</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="nb">sorted</span><span class="p">({</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">})</span>
-                    <span class="p">)</span>
-                <span class="p">}</span>
-                <span class="k">if</span> <span class="n">community_name_field</span>
-                <span class="k">else</span> <span class="p">{}</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
-                <span class="n">normalised_live</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-                    <span class="p">{</span><span class="n">netbox_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">}</span>
-                <span class="p">)</span>
-
-    <span class="c1"># Fetch matching NetBox objects directly, keyed the same way as live</span>
-    <span class="c1"># data so DeepDiff sees only create, update, and in-sync candidates.</span>
+    <span class="c1"># Route targets are unique by NetBox IPAM name, so value-only matching</span>
+    <span class="c1"># is safe here and remains separate from plugin community matching.</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;matching live route targets with NetBox&quot;</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Matching live route targets with NetBox&quot;</span><span class="p">)</span>
+    <span class="n">normalised_live</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{}}</span>
     <span class="n">normalised_nb</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{}}</span>
     <span class="n">nb_community_objects</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+    <span class="n">community_key_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">route_target_observations</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">live_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]}</span>
+        <span class="p">)</span>
+        <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;route_targets&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">{</span><span class="n">community_name_field</span><span class="p">:</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">live_names</span><span class="p">)}</span>
+            <span class="k">if</span> <span class="n">community_name_field</span> <span class="ow">and</span> <span class="n">live_names</span>
+            <span class="k">else</span> <span class="p">{}</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
+            <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;route_targets&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">netbox_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">}</span>
+            <span class="p">)</span>
 
     <span class="n">route_target_snames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;route_targets&quot;</span><span class="p">])</span>
     <span class="n">nb_communities_result</span> <span class="o">=</span> <span class="p">(</span>
@@ -8282,11 +8403,10 @@ field records devices on which each community was observed.</p>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
+            <span class="n">custom_fields</span> <span class="o">=</span> <span class="n">nb_community</span><span class="o">.</span><span class="n">custom_fields</span> <span class="ow">or</span> <span class="p">{}</span>
             <span class="n">current_devices</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">device</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="p">(</span>
-                    <span class="n">nb_community</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[]</span>
-                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="p">(</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_custom_field</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
             <span class="p">]</span>
             <span class="n">normalised_nb</span><span class="p">[</span><span class="s2">&quot;route_targets&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span>
                 <span class="n">device_custom_field</span>
@@ -8298,20 +8418,109 @@ field records devices on which each community was observed.</p>
         <span class="n">nb_community_objects</span><span class="p">[</span><span class="s2">&quot;route_targets&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_community</span>
 
     <span class="k">if</span> <span class="n">has_bgp_plugin</span><span class="p">:</span>
+        <span class="c1"># Standard BGP communities may share the same value, so keep the</span>
+        <span class="c1"># live name in the sync key and match NetBox from most-specific to</span>
+        <span class="c1"># least-specific identity.</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;matching live BGP plugin communities with NetBox&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Matching live BGP plugin communities with NetBox&quot;</span><span class="p">)</span>
+        <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">normalised_nb</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">nb_community_objects</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">community_snames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">bgp_community_observations</span><span class="p">:</span>
+            <span class="n">sname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">::</span><span class="si">{</span><span class="n">record</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">NO_COMMUNITY_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">community_key_data</span><span class="p">[</span><span class="n">sname</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+            <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">if</span> <span class="n">community_name_field</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]:</span>
+                <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">community_name_field</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
+                <span class="n">device_ids</span> <span class="o">=</span> <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="n">device_custom_field</span><span class="p">,</span> <span class="p">[]</span>
+                <span class="p">)</span>
+                <span class="n">device_id</span> <span class="o">=</span> <span class="n">netbox_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">if</span> <span class="n">device_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">device_ids</span><span class="p">:</span>
+                    <span class="n">device_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">device_id</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
+                <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                    <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span>
+                <span class="p">)</span>
+
+        <span class="n">community_values</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">community_key_data</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
+        <span class="p">)</span>
         <span class="n">nb_communities_result</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">community</span><span class="p">,</span>
-                <span class="n">value</span><span class="o">=</span><span class="n">community_snames</span><span class="p">,</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,value,custom_fields&quot;</span><span class="p">,</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">community_values</span><span class="p">,</span>
+                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,value,description,custom_fields&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">community_snames</span>
+            <span class="k">if</span> <span class="n">community_values</span>
             <span class="k">else</span> <span class="p">[]</span>
         <span class="p">)</span>
+        <span class="n">nb_communities_by_value</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">nb_community</span> <span class="ow">in</span> <span class="n">nb_communities_result</span><span class="p">:</span>
-            <span class="n">sname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_community</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">nb_communities_by_value</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_community</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">nb_community</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">community_key_data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">nb_community</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">candidates</span> <span class="o">=</span> <span class="n">nb_communities_by_value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">],</span> <span class="p">[])</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="c1"># Prefer explicit community-name custom-field containment,</span>
+            <span class="c1"># then description, then an unlabeled same-value object.</span>
+            <span class="k">if</span> <span class="n">community_name_field</span> <span class="ow">and</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+                    <span class="n">custom_fields</span> <span class="o">=</span> <span class="n">candidate</span><span class="o">.</span><span class="n">custom_fields</span> <span class="ow">or</span> <span class="p">{}</span>
+                    <span class="n">current_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">community_name_field</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                    <span class="n">current_names</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">current_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">current_name</span> <span class="ow">in</span> <span class="n">current_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">current_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">current_names</span><span class="p">:</span>
+                        <span class="n">nb_community</span> <span class="o">=</span> <span class="n">candidate</span>
+                        <span class="k">break</span>
+            <span class="k">if</span> <span class="n">nb_community</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+                    <span class="n">current_description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">current_description</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                        <span class="n">nb_community</span> <span class="o">=</span> <span class="n">candidate</span>
+                        <span class="k">break</span>
+            <span class="k">if</span> <span class="n">nb_community</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">candidates</span><span class="p">:</span>
+                <span class="n">nb_community</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nb_community</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+                    <span class="n">custom_fields</span> <span class="o">=</span> <span class="n">candidate</span><span class="o">.</span><span class="n">custom_fields</span> <span class="ow">or</span> <span class="p">{}</span>
+                    <span class="n">current_names</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="n">current_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">current_name</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span>
+                                <span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">community_name_field</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">current_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="p">}</span>
+                        <span class="k">if</span> <span class="n">community_name_field</span>
+                        <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+                    <span class="p">)</span>
+                    <span class="n">current_description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">current_names</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">current_description</span><span class="p">:</span>
+                        <span class="n">nb_community</span> <span class="o">=</span> <span class="n">candidate</span>
+                        <span class="k">break</span>
+            <span class="k">if</span> <span class="n">nb_community</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="n">normalised_nb</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">community_name_field</span><span class="p">:</span>
                 <span class="n">custom_fields</span> <span class="o">=</span> <span class="n">nb_community</span><span class="o">.</span><span class="n">custom_fields</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -8329,11 +8538,10 @@ field records devices on which each community was observed.</p>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
+                <span class="n">custom_fields</span> <span class="o">=</span> <span class="n">nb_community</span><span class="o">.</span><span class="n">custom_fields</span> <span class="ow">or</span> <span class="p">{}</span>
                 <span class="n">current_devices</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="n">device</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-                    <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="p">(</span>
-                        <span class="n">nb_community</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[]</span>
-                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="p">(</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_custom_field</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
                 <span class="p">]</span>
                 <span class="n">normalised_nb</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">][</span>
                     <span class="n">device_custom_field</span>
@@ -8429,7 +8637,10 @@ field records devices on which each community was observed.</p>
         <span class="n">create_snames</span> <span class="o">=</span> <span class="n">full_diff</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="s2">&quot;create&quot;</span><span class="p">]</span>
         <span class="n">create_payloads</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">create_snames</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">sname</span><span class="p">}</span>
+            <span class="n">community_data</span> <span class="o">=</span> <span class="n">community_key_data</span><span class="p">[</span><span class="n">sname</span><span class="p">]</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">community_data</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]}</span>
+            <span class="k">if</span> <span class="n">community_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]:</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">]:</span>
                 <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalised_live</span><span class="p">[</span><span class="s2">&quot;communities&quot;</span><span class="p">][</span><span class="n">sname</span><span class="p">]</span>
             <span class="n">create_payloads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
