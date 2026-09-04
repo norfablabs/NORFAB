@@ -106,6 +106,15 @@ name_template="{device}_BGP_{name}"
 
 **Live-run mode** applies changes and returns the same structure showing what was done.
 
+## Description Preservation
+
+`preserve_description` controls descriptions on sessions that already exist in
+NetBox. Its default value, `None`, keeps the NetBox description when the live
+description is empty and otherwise uses the live value. Set it to `True` to
+always keep the NetBox description. Set it to `False` to always use the live
+description, including an empty string. Newly created sessions always use the
+live description.
+
 ## Filtering
 
 Three optional filters narrow which sessions are considered during sync. Filters apply to **both** the NetBox dataset and the live device dataset before the diff is computed. Sessions that do not match are silently excluded from creates, updates, and deletes.
@@ -304,6 +313,7 @@ Set `process_deletions=True` to delete stale sessions. Only sessions for the exp
             "devices": ["ceos-leaf-1"],
             "rir": "lab",
             "filter_by_description": "*spine uplink*",
+            "preserve_description": None,
         },
     )
 
@@ -358,6 +368,7 @@ root
             ├── filter-by-remote-as:    Only sync sessions with matching remote AS number(s)
             ├── filter-by-peer-group:    Only sync sessions with matching peer group name(s)
             ├── filter-by-description:    Only sync sessions whose description matches this glob pattern
+            ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── vrf-custom-field:    BGP session field for VRF reference, default 'vrf'
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns

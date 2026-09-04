@@ -6,7 +6,7 @@ from norfab.models import Result
 from norfab.utils.text import expand_alphanumeric_range
 
 from .netbox_models import NetboxFastApiArgs, SyncBgpAsnInput, SyncBgpAsnResult
-from .netbox_worker_utilities import review_sync_task_result
+from .netbox_worker_utilities import apply_description_policy, review_sync_task_result
 
 log = logging.getLogger(__name__)
 
@@ -219,8 +219,11 @@ class NetboxBgpAsnTasks:
         )
         for asn in netbox_asn_records:
             current = {"description": asn.description}
-            if preserve_description:
-                live_asns[asn.asn]["description"] = asn.description
+            live_asns[asn.asn]["description"] = apply_description_policy(
+                live_asns[asn.asn]["description"],
+                current["description"],
+                preserve_description,
+            )
             if device_custom_field:
                 current[device_custom_field] = [
                     device["id"]

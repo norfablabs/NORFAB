@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 3 September 2026*
+*Last updated: 4 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -761,7 +761,9 @@ in their NetBox task errors while retaining usable results from other devices.
 Collects live interface configuration and operational data through Nornir.
 Operational state fills MTU, duplex, and speed when absent from configuration
 parsing. Missing or zero live MTU and speed values preserve existing NetBox
-values. The task computes a desired/current diff, optionally maps live
+values. Existing descriptions can be preserved always, preserved only when
+live text is empty, or overwritten by live text. The task computes a
+desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
 An empty NetBox interface set is valid, allowing a device to be initialized
@@ -785,7 +787,8 @@ NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
 an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
 loaded from YAML through `nf://` URLs, using `match_device_names`,
 `match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
-and group selection. VLANs are identified by VID per scope;
+and group selection. Existing descriptions support always, live-empty-only, or
+never preservation. VLANs are identified by VID per scope;
 the first device supplies values when later devices report a conflict.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines
@@ -798,7 +801,10 @@ reliably identify stale NetBox objects.
 Reconciles global VRFs and descriptions from live devices, and adds all observed
 import/export route targets to the existing NetBox associations. Missing route
 targets are created, and an optional multi-object custom field records the
-devices on which each VRF was observed. **Use cases:** VRF inventory,
+devices on which each VRF was observed. Existing descriptions support the same
+always, live-empty-only, or never preservation policy as interface and BGP
+peering synchronization. If multiple NetBox VRFs share a matched name, the
+lowest numeric ID is selected and a warning is logged. **Use cases:** VRF inventory,
 route-target aggregation, and device-to-VRF inventory. **Limitations:** route
 distinguishers and route policies are not stored; VRF objects, route-target
 objects, route-target associations, and device associations are not removed
@@ -808,8 +814,9 @@ automatically.
 ### Live IP and MAC reconciliation
 
 Reconciles device IP assignments, derived prefixes, and interface MAC addresses
-with NetBox, including filters, inline or `nf://` anycast ranges, VRF/site
-association, and controlled deletion behavior. **Use cases:** IPAM accuracy and address/MAC drift correction.
+with NetBox, including interface-first IP matching, filters, inline or `nf://`
+anycast ranges, VRF/site association, and controlled deletion behavior. **Use
+cases:** IPAM accuracy and address/MAC drift correction.
 **Limitations:** requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 [IP sync](workers/netbox/services_netbox_service_tasks_sync_device_ip.md) ·
@@ -828,8 +835,9 @@ prerequisites; templates and transformer files execute as trusted code.
 ### BGP peering lifecycle
 
 Creates or updates individual and bulk BGP sessions, and reconciles live BGP
-neighbors with NetBox using dry-run, filters, and optional stale-session
-deletion. **Use cases:** routing source-of-truth onboarding and drift control.
+neighbors with NetBox using dry-run, filters, optional stale-session deletion,
+and tri-state existing-description preservation. **Use cases:** routing
+source-of-truth onboarding and drift control.
 **Limitations:** requires the NetBox BGP plugin, supported live parsing, and
 consistent IP/ASN/VRF modelling.
 [Create](workers/netbox/services_netbox_service_tasks_create_bgp_peering.md) ·

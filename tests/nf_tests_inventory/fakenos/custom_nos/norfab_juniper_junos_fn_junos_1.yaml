@@ -39,6 +39,11 @@ commands:
       }
     prompt: 'nornir@{base_prompt}>'
     help: targeted BGP sync test data
+  'show configuration | display set | match "policy-options community"':
+    output: |
+      set policy-options community NOEXPORT members no-export
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted BGP community sync test data
   'show configuration interfaces | display set':
     output: |
       set interfaces ge-0/0/12 description "description 1"

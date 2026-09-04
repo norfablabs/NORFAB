@@ -30,6 +30,7 @@ synchronization.
 | `vlan_group` | `None` | Existing group for live VLANs not matched by `vlan_map`. |
 | `vlan_map` | `None` | Ordered rules mapping live VLANs to existing groups, inline or in an `nf://` YAML file. |
 | `filter_by_vlan_ids` | `None` | VLAN IDs or inclusive ranges such as `100` and `200-299`. |
+| `preserve_description` | `None` | Preserve NetBox descriptions only when live text is empty. Use `True` to always preserve or `False` to always use live text. |
 | Nornir filters | `None` | `FO`, `FB`, `FH`, `FC`, `FR`, `FG`, `FP`, `FL`, `FM`, `FX`, and `FN`. |
 
 Provide `devices` or at least one Nornir host filter.
@@ -87,6 +88,12 @@ Only `vid`, `name`, and `description` are managed. Names and descriptions are
 trimmed, null descriptions become an empty string, and case is preserved.
 `filter_by_vlan_ids` removes out-of-range records from both the complete live
 device dataset and NetBox before comparison.
+
+For existing VLANs, the default `preserve_description=None` keeps the NetBox
+description when live text is empty and otherwise uses the live value. Set it
+to `True` to always retain the NetBox description, or `False` to always apply
+the live value, including an empty string. Newly created VLANs always use the
+live description.
 
 Identical observations from multiple devices in one scope are collapsed. VLAN
 observations with the same VID but different names or descriptions are reported
@@ -168,6 +175,12 @@ installed and configured for branch use.
     nf# netbox sync vlans FC leaf vlan-ids 100 200-299
     ```
 
+    Clear existing descriptions when live descriptions are empty:
+
+    ```bash
+    nf# netbox sync vlans FC leaf vlan-ids 100 200-299 preserve-description false
+    ```
+
     Place all unmatched VLANs into one existing group:
 
     ```bash
@@ -189,6 +202,7 @@ installed and configured for branch use.
                 "devices": ["fn-ceos-lf-1", "fn-ceos-lf-2"],
                 "dry_run": True,
                 "filter_by_vlan_ids": ["100-399"],
+                "preserve_description": None,
                 "vlan_map": [
                     {
                         "set_vlan_group": "CAMPUS",
@@ -259,6 +273,7 @@ root
             ├── vlan-group:    Exact group name for live VLANs not matched by vlan-map
             ├── vlan-map:    Ordered rules mapping live VLANs to NetBox VLAN groups
             ├── vlan-ids:    VLAN IDs or inclusive ranges to reconcile
+            ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'
             └── nowait:    Do not wait for job to complete, default 'False'

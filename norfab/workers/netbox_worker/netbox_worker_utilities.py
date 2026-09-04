@@ -11,6 +11,28 @@ from norfab.utils.text import expand_alphanumeric_range
 log = logging.getLogger(__name__)
 
 
+def apply_description_policy(
+    live_description: Union[None, str],
+    netbox_description: Union[None, str],
+    preserve_description: Union[None, bool] = None,
+) -> str:
+    """Return the description selected by a NetBox sync preservation policy."""
+    live_description = str(live_description or "")
+    netbox_description = str(netbox_description or "")
+
+    # Explicit preservation always keeps the description already in NetBox.
+    if preserve_description is True:
+        return netbox_description
+
+    # By default, empty live data must not erase an existing description.
+    if preserve_description is None:
+        if not live_description:
+            return netbox_description
+
+    # Use live data when preservation is disabled or the default has live text.
+    return live_description
+
+
 def prepare_vlan_map(
     vlan_map: Union[None, list],
     vlan_groups: Union[None, dict] = None,

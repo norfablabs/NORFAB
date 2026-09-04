@@ -200,6 +200,7 @@ class NetboxDevicesTasks:
         dry_run: bool = False,
         devices: Union[None, list] = None,
         cache: Union[None, bool, str] = None,
+        branch: Union[None, str] = None,
     ) -> Result:
         """
         Retrieve device data from Netbox REST API using Pynetbox.
@@ -212,6 +213,7 @@ class NetboxDevicesTasks:
             devices: list of device names to fetch, merged into filters as ``{"name": devices}``
             cache: ``True`` - use cache if up to date; ``False`` - skip cache;
                 ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check
+            branch: NetBox branching plugin branch name.
 
         Returns:
             dict keyed by device name with fields: last_updated, custom_field_data, tags, device_type,
@@ -225,7 +227,7 @@ class NetboxDevicesTasks:
         devices = devices or []
         devices_to_fetch = []
         sites_data = {}
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         # merge named devices into filters as a name filter
         if devices:
@@ -283,7 +285,7 @@ class NetboxDevicesTasks:
         # fetch full device data from Netbox
         if filters_to_fetch:
             job.event(f"fetching device data from NetBox instance '{instance}'")
-            nb = self._get_pynetbox(instance, job=job)
+            nb = self._get_pynetbox(instance, branch=branch, job=job)
             all_devices_raw = {}
 
             for filter_item in filters_to_fetch:

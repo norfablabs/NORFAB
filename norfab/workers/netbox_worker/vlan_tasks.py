@@ -15,6 +15,7 @@ from .netbox_models import (
     VlanMapRule,
 )
 from .netbox_worker_utilities import (
+    apply_description_policy,
     build_vlan_payload,
     match_vlan_map,
     prepare_vlan_map,
@@ -51,6 +52,7 @@ class NetboxVlansTasks:
         vlan_group: Union[None, str] = None,
         vlan_map: Union[None, str, list] = None,
         filter_by_vlan_ids: Union[None, list[str]] = None,
+        preserve_description: Union[None, bool] = None,
         **kwargs: Any,
     ) -> Result:
         """Synchronize live VLAN names and descriptions with NetBox.
@@ -73,6 +75,9 @@ class NetboxVlansTasks:
             vlan_map: Ordered VLAN-to-group mapping rules, or an ``nf://`` YAML
                 file containing them.
             filter_by_vlan_ids: VLAN IDs or inclusive ranges to reconcile.
+            preserve_description: Description preservation policy. ``None`` preserves
+                NetBox text when the live description is empty, ``True`` always
+                preserves NetBox text, and ``False`` always uses live text.
             **kwargs: Nornir FFun host filters.
 
         Returns:
@@ -338,6 +343,14 @@ class NetboxVlansTasks:
                         getattr(vlan, "description", None) or ""
                     ).strip(),
                 }
+                if vid in normalized_live[scope]:
+                    normalized_live[scope][vid]["description"] = (
+                        apply_description_policy(
+                            normalized_live[scope][vid]["description"],
+                            normalized_netbox[scope][vid]["description"],
+                            preserve_description,
+                        )
+                    )
                 netbox_objects[scope][vid] = vlan
         job.event(f"loaded {netbox_vlan_count} in-scope NetBox VLAN record(s)")
 

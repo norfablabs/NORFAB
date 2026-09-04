@@ -88,6 +88,34 @@ class TestSyncVrfs:
             for value in values
         }
 
+    def test_preserve_description_modes(self, nfclient: Any) -> None:
+        self.nb.ipam.vrfs.create(name="TENANT_B", description="NetBox empty-live")
+
+        self._successful_results(self._sync(nfclient, [self.DEVICE_1]))
+        assert self.nb.ipam.vrfs.get(name="TENANT_B").description == (
+            "NetBox empty-live"
+        )
+
+        self._successful_results(
+            self._sync(nfclient, [self.DEVICE_1], preserve_description=False)
+        )
+        assert self.nb.ipam.vrfs.get(name="TENANT_B").description == ""
+
+        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a.description = "NetBox curated"
+        tenant_a.save()
+        self._successful_results(
+            self._sync(nfclient, [self.DEVICE_1], preserve_description=True)
+        )
+        assert self.nb.ipam.vrfs.get(name="TENANT_A").description == "NetBox curated"
+
+        self._successful_results(
+            self._sync(nfclient, [self.DEVICE_1], preserve_description=False)
+        )
+        assert self.nb.ipam.vrfs.get(name="TENANT_A").description == (
+            "Tenant A services"
+        )
+
     def test_dry_run_create_apply_and_exact_match(self, nfclient: Any) -> None:
         dry_run = self._sync(nfclient, [self.DEVICE_1], dry_run=True)
         for result in self._successful_results(dry_run):

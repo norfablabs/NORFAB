@@ -235,6 +235,9 @@ class NetboxBgpCommunityTasks:
                         ret.errors.append(msg)
                         continue
                     value = record["value"].strip()
+                    # netbox bgp plugin does not accept communites with no ':' in the value
+                    if ":" not in value:
+                        continue
                     name = (
                         record.get("name", "").strip()
                         if isinstance(record.get("name", ""), str)

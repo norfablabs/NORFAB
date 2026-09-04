@@ -736,7 +736,7 @@ class NetboxIpTasks:
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branch name to use.
             anycast_ranges (list, optional): IP prefix(es) used to classify
-                IP addresses as anycast role, or an ``nf://`` or ``git://<remote>/`` YAML 
+                IP addresses as anycast role, or an ``nf://`` or ``git://<remote>/`` YAML
                 file containing a list of prefixes, e.g. ``'10.3.250.0/24'``.
             ignore_ranges (list, optional): Prefixes to ignore IP addresses for, includes
                 by default 127.0.0.0/8, 224.0.0.0/24 and others
@@ -962,13 +962,17 @@ class NetboxIpTasks:
             matching_nb_ips = [
                 i for i in nb_ips if i["address"].startswith(f"{ip_live_no_mask}/")
             ]
-            if ignore_vrf:
-                if ip_live["role"] != "anycast":
-                    matching_nb_ips = matching_nb_ips[:1]
+            # Prefer the matching IP already assigned to the target interface.
+            for nb_ip in matching_nb_ips:
+                if nb_ip["assigned_object_id"] == ip_live["assigned_object_id"]:
+                    matching_nb_ips = [nb_ip]
+                    break
             else:
-                matching_nb_ips = [
-                    i for i in matching_nb_ips if i["vrf"] == ip_live["vrf"]
-                ]
+                # Restrict fallback matches to the live VRF when VRFs are enforced.
+                if not ignore_vrf:
+                    matching_nb_ips = [
+                        i for i in matching_nb_ips if i["vrf"] == ip_live["vrf"]
+                    ]
             # no existing IP found, create it
             if not matching_nb_ips:
                 bulk_create_ip[key] = _ip_payload(ip_live, ignore_vrf)
@@ -1001,10 +1005,12 @@ class NetboxIpTasks:
             # no IP assigned to same interface
             else:
                 # if an unassigned IP exists, update it instead of creating a duplicate
-                nb_ip = next(
-                    (i for i in matching_nb_ips if not i["assigned_object_id"]),
-                    None,
-                )
+                nb_ip = None
+                for candidate_nb_ip in matching_nb_ips:
+                    # Prefer reassigning an available IP over creating a duplicate.
+                    if not candidate_nb_ip["assigned_object_id"]:
+                        nb_ip = candidate_nb_ip
+                        break
                 if nb_ip:
                     payload = _ip_payload(ip_live, ignore_vrf)
                     payload["id"] = nb_ip["id"]

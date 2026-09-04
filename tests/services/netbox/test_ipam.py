@@ -696,6 +696,46 @@ class TestSyncDeviceIP:
 
         self._cleanup(nfclient, self.ALL_DEVICES)
 
+    def test_sync_device_ip_anycast_same_interface_ignores_vrf_for_matching(
+        self, nfclient
+    ):
+        """An existing interface assignment takes priority over VRF filtering."""
+        device = "ceos-spine-1"
+        interface = "Loopback250"
+        self._cleanup(nfclient, [device])
+
+        pynb = get_pynetbox(nfclient)
+        nb_interface = pynb.dcim.interfaces.get(device=device, name=interface)
+        wrong_vrf = pynb.ipam.vrfs.get(name=self.WRONG_VRF)
+        existing_ip = pynb.ipam.ip_addresses.create(
+            address=self.ANYCAST_IP,
+            role="anycast",
+            vrf=wrong_vrf.id,
+            assigned_object_type="dcim.interface",
+            assigned_object_id=nb_interface.id,
+        )
+
+        ret = self._sync(
+            nfclient,
+            [device],
+            anycast_ranges=self.ANYCAST_RANGE,
+            ignore_vrf=False,
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            device_data = res["result"][device]
+            assert self.ANYCAST_IP in device_data["updated"]
+            assert self.ANYCAST_IP not in device_data["created"]
+
+        interface_ips = self._get_nb_ip(nfclient, device, interface)
+        matching_ips = [ip for ip in interface_ips if str(ip) == self.ANYCAST_IP]
+        assert len(matching_ips) == 1
+        assert matching_ips[0].id == existing_ip.id
+        assert matching_ips[0].vrf is None
+
+        self._cleanup(nfclient, [device])
+
     # ------------------------------------------------------------------ #
     # Update scenarios                                                     #
     # ------------------------------------------------------------------ #
@@ -875,6 +915,95 @@ class TestSyncDeviceIP:
             assert ips[0].assigned_object.device.name == self.FAKENOS_SPINE1
             assert ips[0].assigned_object.name == self.CONTROL_PLANE_INTF
 
+        finally:
+            self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+
+    def test_sync_device_ip_vrf_aware_prefers_same_interface(self, nfclient):
+        """ignore_vrf=False reuses the IP already assigned to the live interface."""
+        self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+
+        pynb = get_pynetbox(nfclient)
+        wrong_vrf = pynb.ipam.vrfs.get(name=self.WRONG_VRF)
+        nb_interface = pynb.dcim.interfaces.get(
+            device=self.FAKENOS_SPINE1,
+            name=self.CONTROL_PLANE_INTF,
+        )
+        assert wrong_vrf is not None, f"VRF {self.WRONG_VRF!r} not found in NetBox"
+        assert nb_interface is not None, (
+            f"Interface {self.FAKENOS_SPINE1}:{self.CONTROL_PLANE_INTF} "
+            "not found in NetBox"
+        )
+
+        try:
+            existing_ip = pynb.ipam.ip_addresses.create(
+                address=self.CONTROL_PLANE_IP,
+                vrf=wrong_vrf.id,
+                assigned_object_type="dcim.interface",
+                assigned_object_id=nb_interface.id,
+            )
+            ret = self._sync(
+                nfclient,
+                [self.FAKENOS_SPINE1],
+                filter_by_name=self.CONTROL_PLANE_INTF,
+                ignore_vrf=False,
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed - {res}"
+                device_data = res["result"][self.FAKENOS_SPINE1]
+                assert self.CONTROL_PLANE_IP in device_data["updated"]
+                assert self.CONTROL_PLANE_IP not in device_data["created"]
+
+            ips = list(pynb.ipam.ip_addresses.filter(address=self.CONTROL_PLANE_IP))
+            assert len(ips) == 1, f"Expected one IP, got {len(ips)}: {ips}"
+            assert ips[0].id == existing_ip.id
+            assert ips[0].vrf.name == self.CONTROL_PLANE_VRF
+            assert ips[0].assigned_object.id == nb_interface.id
+        finally:
+            self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+
+    def test_sync_device_ip_ignore_vrf_prefers_same_interface(self, nfclient):
+        """ignore_vrf=True reuses the interface IP without changing its VRF."""
+        self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
+
+        pynb = get_pynetbox(nfclient)
+        wrong_vrf = pynb.ipam.vrfs.get(name=self.WRONG_VRF)
+        nb_interface = pynb.dcim.interfaces.get(
+            device=self.FAKENOS_SPINE1,
+            name=self.CONTROL_PLANE_INTF,
+        )
+        assert wrong_vrf is not None, f"VRF {self.WRONG_VRF!r} not found in NetBox"
+        assert nb_interface is not None, (
+            f"Interface {self.FAKENOS_SPINE1}:{self.CONTROL_PLANE_INTF} "
+            "not found in NetBox"
+        )
+
+        try:
+            existing_ip = pynb.ipam.ip_addresses.create(
+                address=self.CONTROL_PLANE_IP,
+                vrf=wrong_vrf.id,
+                assigned_object_type="dcim.interface",
+                assigned_object_id=nb_interface.id,
+            )
+            ret = self._sync(
+                nfclient,
+                [self.FAKENOS_SPINE1],
+                filter_by_name=self.CONTROL_PLANE_INTF,
+                ignore_vrf=True,
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert res["failed"] == False, f"{worker} failed - {res}"
+                device_data = res["result"][self.FAKENOS_SPINE1]
+                assert self.CONTROL_PLANE_IP in device_data["in_sync"]
+                assert self.CONTROL_PLANE_IP not in device_data["created"]
+                assert self.CONTROL_PLANE_IP not in device_data["updated"]
+
+            ips = list(pynb.ipam.ip_addresses.filter(address=self.CONTROL_PLANE_IP))
+            assert len(ips) == 1, f"Expected one IP, got {len(ips)}: {ips}"
+            assert ips[0].id == existing_ip.id
+            assert ips[0].vrf.name == self.WRONG_VRF
+            assert ips[0].assigned_object.id == nb_interface.id
         finally:
             self._delete_ip_addresses(nfclient, self.CONTROL_PLANE_IP)
 

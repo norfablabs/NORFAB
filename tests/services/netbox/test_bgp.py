@@ -1,4 +1,5 @@
 import pprint
+from typing import Any
 
 import pytest
 
@@ -601,6 +602,56 @@ class TestSyncBgpPeerings:
                 assert (
                     target.name in res["result"][target_device]["updated"]
                 ), f"{worker}: expected '{target.name}' in updated"
+
+    def test_sync_bgp_peerings_preserve_description_modes(self, nfclient: Any) -> None:
+        target_device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "rir": "lab"},
+        )
+        nb = get_pynetbox(nfclient)
+        target = next(
+            session
+            for session in nb.plugins.bgp.session.filter(device=target_device)
+            if session.description
+        )
+        live_description = target.description
+        target.description = "NetBox curated"
+        target.save()
+
+        preserved = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [target_device],
+                "rir": "lab",
+                "preserve_description": True,
+            },
+        )
+        for worker, result in preserved.items():
+            assert result["failed"] is False, f"{worker} failed: {result['errors']}"
+        assert nb.plugins.bgp.session.get(name=target.name).description == (
+            "NetBox curated"
+        )
+
+        overwritten = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [target_device],
+                "rir": "lab",
+                "preserve_description": False,
+            },
+        )
+        for worker, result in overwritten.items():
+            assert result["failed"] is False, f"{worker} failed: {result['errors']}"
+        assert (
+            nb.plugins.bgp.session.get(name=target.name).description == live_description
+        )
 
     def test_sync_bgp_peerings_update_status(self, nfclient):
         """Pre-create sessions; change status on one; re-run; verify updated."""

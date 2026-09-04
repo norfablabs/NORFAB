@@ -824,6 +824,49 @@ class TestSyncDeviceInterfaces:
             == "other"
         )
 
+    def test_sync_device_interfaces_preserve_description_modes(
+        self, nfclient: Any
+    ) -> None:
+        device = "fn-ceos-sp-1"
+        self._sync(nfclient, [device])
+
+        management = self._get_nb_intf(nfclient, device, "Management0")
+        self._patch_intf(nfclient, management.id, {"description": "NetBox empty-live"})
+        self._sync(nfclient, [device], filter_by_name="Management0")
+        assert self._get_nb_intf(nfclient, device, "Management0").description == (
+            "NetBox empty-live"
+        )
+
+        self._sync(
+            nfclient,
+            [device],
+            filter_by_name="Management0",
+            preserve_description=False,
+        )
+        assert self._get_nb_intf(nfclient, device, "Management0").description == ""
+
+        loopback = self._get_nb_intf(nfclient, device, "Loopback10")
+        self._patch_intf(nfclient, loopback.id, {"description": "NetBox curated"})
+        self._sync(
+            nfclient,
+            [device],
+            filter_by_name="Loopback10",
+            preserve_description=True,
+        )
+        assert self._get_nb_intf(nfclient, device, "Loopback10").description == (
+            "NetBox curated"
+        )
+
+        self._sync(
+            nfclient,
+            [device],
+            filter_by_name="Loopback10",
+            preserve_description=False,
+        )
+        assert self._get_nb_intf(nfclient, device, "Loopback10").description == (
+            "TEST_SYNC_LOOPBACK_IPV4"
+        )
+
     def test_sync_device_interfaces_all_devices(self, nfclient):
         """Clean TEST_SYNC from all 5 devices then sync. Each device must have
         at least one interface created."""
@@ -935,6 +978,13 @@ class TestSyncDeviceInterfaces:
         assert nb_interface.mtu == 9214
         assert nb_interface.speed == 1_000_000
         assert nb_interface.duplex.value == "full"
+
+        ret = self._sync(nfclient, [device], filter_by_name=interface, dry_run=True)
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            assert interface in res["result"][device]["in_sync"]
+            assert interface not in res["result"][device]["update"]
 
     def test_sync_device_interfaces_create_child(self, nfclient):
         """Clean TEST_SYNC from spine-1 then verify sync creates Ethernet9.610

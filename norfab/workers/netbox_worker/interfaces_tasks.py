@@ -25,6 +25,7 @@ from .netbox_models import (
     VlanMapRule,
 )
 from .netbox_worker_utilities import (
+    apply_description_policy,
     match_vlan_map,
     prepare_vlan_map,
     resolve_vlan,
@@ -902,6 +903,7 @@ class NetboxInterfacesTasks:
         vlan_map: Union[None, str, list] = None,
         ignore_vlans: bool = False,
         ignore_vrf: bool = False,
+        preserve_description: Union[None, bool] = None,
         **kwargs: Any,
     ) -> Result:
         """
@@ -992,6 +994,10 @@ class NetboxInterfacesTasks:
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
                 interfaces are included by description, e.g. ``'uplink*'``.
+            preserve_description (bool, optional): Description preservation policy.
+                ``None`` preserves NetBox text when the live description is empty,
+                ``True`` always preserves NetBox text, and ``False`` always uses
+                live text.
             update_type (bool): Safely update existing interface types. Updates are
                 allowed from ``other`` to ``virtual``, ``bridge``, or ``lag``, and
                 between those logical types. Specific physical types are protected,
@@ -1164,7 +1170,11 @@ class NetboxInterfacesTasks:
                     "lag": lag,
                     "mtu": data.get("mtu"),
                     "speed": data.get("speed"),
-                    "duplex": data.get("duplex"),
+                    "duplex": (
+                        data["duplex"].get("value")
+                        if isinstance(data.get("duplex"), dict)
+                        else data.get("duplex")
+                    ),
                     "description": str(data.get("description") or ""),
                     "mode": (data.get("mode") or {}).get("value"),
                     "untagged_vlan": (
@@ -1362,6 +1372,11 @@ class NetboxInterfacesTasks:
                     # Preserve existing NetBox values when live data has no usable value.
                     nb_interface = normalised_nb_all.get(device_name, {}).get(intf_name)
                     if nb_interface:
+                        interface["description"] = apply_description_policy(
+                            interface["description"],
+                            nb_interface["description"],
+                            preserve_description,
+                        )
                         for field in ("mtu", "speed"):
                             if interface[field] in (None, 0) and nb_interface[field]:
                                 interface[field] = nb_interface[field]

@@ -20,7 +20,12 @@ from .netbox_models import (
     UpdateBgpPeeringInput,
     UpdateBgpPeeringResult,
 )
-from .netbox_worker_utilities import resolve_ip, resolve_vrf, review_sync_task_result
+from .netbox_worker_utilities import (
+    apply_description_policy,
+    resolve_ip,
+    resolve_vrf,
+    review_sync_task_result,
+)
 
 log = logging.getLogger(__name__)
 
@@ -755,6 +760,7 @@ class NetboxBgpPeeringsTasks:
         instance: Union[None, str] = None,
         devices: Union[None, list] = None,
         cache: Union[None, bool, str] = None,
+        branch: Union[None, str] = None,
     ) -> Result:
         """
         Retrieve device BGP peerings from NetBox using REST API.
@@ -763,6 +769,7 @@ class NetboxBgpPeeringsTasks:
             job: NorFab Job object containing relevant metadata
             instance (str, optional): NetBox instance name.
             devices (list, optional): List of devices to retrieve BGP peerings for.
+            branch (str, optional): NetBox branching plugin branch name.
             cache (Union[bool, str], optional): Cache usage options:
 
                 - True: Use data stored in cache if it is up to date, refresh it otherwise.
@@ -916,7 +923,7 @@ class NetboxBgpPeeringsTasks:
 
         # Get device details to collect device IDs
         devices_result = self.get_devices(
-            job=job, devices=devices, instance=instance, cache=False
+            job=job, devices=devices, instance=instance, cache=False, branch=branch
         )
         if devices_result.errors:
             ret.errors.append(
@@ -924,7 +931,7 @@ class NetboxBgpPeeringsTasks:
             )
             return ret
 
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         for device_name in devices:
             # Skip devices not found in NetBox
@@ -1881,6 +1888,7 @@ class NetboxBgpPeeringsTasks:
         filter_by_description: Union[None, str] = None,
         ignore_peer_ranges: Union[None, list] = None,
         vrf_custom_field: str = "vrf",
+        preserve_description: Union[None, bool] = None,
         **kwargs: object,
     ) -> Result:
         """
@@ -1931,6 +1939,10 @@ class NetboxBgpPeeringsTasks:
                 VRF object reference read from and written into
                 ``custom_fields[vrf_custom_field]``.  Default ``'vrf'`` means
                 ``custom_fields['vrf']``.
+            preserve_description (bool, optional): Description preservation policy.
+                ``None`` preserves NetBox text when the live description is empty,
+                ``True`` always preserves NetBox text, and ``False`` always uses
+                live text.
             **kwargs: Nornir host filters (e.g. ``FC``, ``FL``, ``FB``).
 
         Returns:
@@ -1990,7 +2002,7 @@ class NetboxBgpPeeringsTasks:
 
         # Validate VRF custom field
         job.event("validating BGP session VRF custom field")
-        nb = self._get_pynetbox(instance, job=job)
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         vrf_custom_field = _resolve_vrf_custom_field(
             vrf_custom_field, nb, job, self.name
         )
@@ -2024,7 +2036,11 @@ class NetboxBgpPeeringsTasks:
         # Fetch existing NetBox BGP sessions
         job.event(f"fetching BGP session data from NetBox for {len(devices)} device(s)")
         nb_sessions_result = self.get_bgp_peerings(
-            job=job, instance=instance, devices=devices, cache="refresh"
+            job=job,
+            instance=instance,
+            devices=devices,
+            cache="refresh",
+            branch=branch,
         )
         if nb_sessions_result.errors:
             job.event("failed to fetch BGP session data from NetBox", severity="ERROR")
@@ -2215,6 +2231,15 @@ class NetboxBgpPeeringsTasks:
 
         for device_name in failed_devices:
             normalised_nb.pop(device_name, None)
+
+        for device_name, sessions in normalised_live.items():
+            for identity, session in sessions.items():
+                if identity in normalised_nb.get(device_name, {}):
+                    session["description"] = apply_description_policy(
+                        session["description"],
+                        normalised_nb[device_name][identity]["description"],
+                        preserve_description,
+                    )
 
         # Single diff on the full normalised datasets
         job.event("calculating BGP session sync diff")

@@ -9,6 +9,10 @@ The task creates missing NetBox route targets before it creates or updates
 VRFs. Route distinguishers and import/export route policies returned by the TTP
 getter are not stored in NetBox.
 
+If multiple existing NetBox VRFs match the same live VRF name, the task logs a
+warning and reconciles against the matched VRF with the numerically lowest
+NetBox ID. Other same-name VRFs are left unchanged.
+
 ## Inputs
 
 | Input | Default | Description |
@@ -20,6 +24,7 @@ getter are not stored in NetBox.
 | `devices` | `None` | Explicit NetBox and Nornir device names. |
 | `branch` | `None` | NetBox Branching plugin branch name. |
 | `device_custom_field` | `devices` | Multi-object VRF custom field related to `dcim.device`. |
+| `preserve_description` | `None` | Preserve NetBox descriptions only when live text is empty. Use `True` to always preserve or `False` to always use live text. |
 | Nornir filters | `None` | `FO`, `FB`, `FH`, `FC`, `FR`, `FG`, `FP`, `FL`, `FM`, `FX`, and `FN`. |
 
 Provide `devices` or at least one Nornir host filter.
@@ -59,14 +64,19 @@ The task runs Nornir `parse_ttp` with `get="vrfs"`, which returns:
   route_policy_export: TENANT_A_EXPORT
 ```
 
-Only `name`, `description`, `rt_import`, and `rt_export` are used. Description
-text and route-target values are used without string normalization, and null
-descriptions become an empty string.
+Only `name`, `description`, `rt_import`, and `rt_export` are used. When
+`instance_type` is present, records whose value is not `vrf` are silently
+skipped. Description text and route-target values are used without string
+normalization, and null descriptions become an empty string.
 
 For each VRF, devices are ordered alphabetically. The first non-empty
 description in that order becomes the NetBox description; the description is
-empty when no device supplies one. Different descriptions from multiple
-devices are resolved by this rule and are not reported as conflicts.
+empty when no device supplies one. For existing VRFs, the default
+`preserve_description=None` keeps the NetBox description when this aggregate
+live description is empty. Set it to `True` to always retain the NetBox value,
+or `False` to always apply the live value, including an empty string. Different
+descriptions from multiple devices are resolved by this rule and are not
+reported as conflicts.
 
 Import and export route-target lists from every reporting device are
 concatenated to form the live aggregate. The shared `make_diff` method compares
@@ -232,6 +242,12 @@ installed and configured for branch use.
     nf# netbox sync vrfs FC leaf device-custom-field vrf_devices
     ```
 
+    Always keep existing NetBox descriptions:
+
+    ```bash
+    nf# netbox sync vrfs devices fn-ceos-lf-1 preserve-description true
+    ```
+
 === "Python"
 
     ```python
@@ -247,6 +263,7 @@ installed and configured for branch use.
                 "devices": ["fn-ceos-lf-1", "fn-ceos-lf-2"],
                 "dry_run": True,
                 "device_custom_field": "devices",
+                "preserve_description": None,
             },
         )
         print(result)
@@ -307,6 +324,7 @@ root
             ├── timeout:    Job timeout
             ├── with-approval:    Preview VRF changes and ask for review before writing to NetBox, default 'False'
             ├── device-custom-field:    VRF custom field that stores associated NetBox devices, default 'devices'
+            ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'
             └── nowait:    Do not wait for job to complete, default 'False'

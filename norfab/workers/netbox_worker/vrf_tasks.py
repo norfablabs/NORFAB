@@ -5,7 +5,7 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 
 from .netbox_models import NetboxFastApiArgs, SyncVrfsInput, SyncVrfsResult
-from .netbox_worker_utilities import review_sync_task_result
+from .netbox_worker_utilities import apply_description_policy, review_sync_task_result
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +35,7 @@ class NetboxVrfsTasks:
         devices: Union[None, list] = None,
         branch: Union[None, str] = None,
         device_custom_field: str = "devices",
+        preserve_description: Union[None, bool] = None,
         **kwargs: Any,
     ) -> Result:
         """Synchronize live VRFs and their route targets with NetBox.
@@ -54,6 +55,9 @@ class NetboxVrfsTasks:
             devices: Explicit NetBox and Nornir device names.
             branch: NetBox Branching plugin branch name.
             device_custom_field: VRF custom field containing associated devices.
+            preserve_description: Description preservation policy. ``None`` preserves
+                NetBox text when the live description is empty, ``True`` always
+                preserves NetBox text, and ``False`` always uses live text.
             **kwargs: Nornir FFun host filters.
 
         Returns:
@@ -146,8 +150,13 @@ class NetboxVrfsTasks:
                 if device_name not in nb_devices:
                     continue
                 result_devices.add(device_name)
-                parsed_count += len(records)
                 for record in records:
+                    if (
+                        record.get("instance_type")
+                        and record["instance_type"] != "vrf"
+                    ):
+                        continue
+                    parsed_count += 1
                     observations.setdefault(record["name"], []).append(
                         {
                             "device": device_name,
@@ -215,6 +224,11 @@ class NetboxVrfsTasks:
                 "import_targets": [target.name for target in vrf.import_targets],
                 "export_targets": [target.name for target in vrf.export_targets],
             }
+            live_vrfs[vrf.name]["description"] = apply_description_policy(
+                live_vrfs[vrf.name]["description"],
+                current["description"],
+                preserve_description,
+            )
             if device_custom_field:
                 current[device_custom_field] = [
                     device["id"]
@@ -224,8 +238,16 @@ class NetboxVrfsTasks:
                     set(current[device_custom_field])
                     | set(live_vrfs[vrf.name][device_custom_field])
                 )
-            netbox_vrfs[vrf.name] = current
-            netbox_objects[vrf.name] = vrf
+            existing_vrf = netbox_objects.get(vrf.name)
+            if existing_vrf:
+                log.warning(
+                    f"{self.name} - Sync VRFs: Multiple NetBox VRFs matched "
+                    f"by name '{vrf.name}', using lowest ID from "
+                    f"{existing_vrf.id} and {vrf.id}"
+                )
+            if existing_vrf is None or int(vrf.id) < int(existing_vrf.id):
+                netbox_vrfs[vrf.name] = current
+                netbox_objects[vrf.name] = vrf
         job.event(f"loaded {len(netbox_vrfs)} matching NetBox VRF(s)")
 
         job.event("calculating VRF sync diff")

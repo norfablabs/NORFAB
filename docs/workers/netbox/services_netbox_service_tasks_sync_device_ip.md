@@ -16,13 +16,13 @@ The task follows a three-step pipeline:
 1. **Collect live state** — Run a Nornir [`parse_ttp`](../nornir/services_nornir_service_tasks_parse.md) job against the target devices to collect live IPv4 and IPv6 addresses per interface.
 2. **Fetch NetBox state** — Retrieve all existing IP address objects from NetBox that match any discovered address value.
 3. **Reconcile** — Compare live addresses against NetBox records and classify each IP as:
-    - **create** — address not in NetBox at all; a new record is created and assigned to the interface
-    - **update** — address exists in NetBox but is unassigned or has a stale role/VRF; the record is updated
-    - **in_sync** — address already assigned to the correct interface with the correct role and VRF; no change needed
+    - **create** — no reusable candidate remains after interface and VRF selection
+    - **update** — a reusable record is unassigned or needs a managed role or VRF change
+    - **in_sync** — the address is on the target interface and no managed change is needed
 
-By default `ignore_vrf=True`, so discovered interface VRFs are not written to IP
-addresses. Existing IPs are matched by address only; the first matching object
-returned by NetBox is reused and its VRF value is left unchanged.
+NetBox candidates are searched by host address without using the prefix length.
+When several records have the same address, interface assignment takes priority
+over VRF and unassigned-record fallback matching.
 
 Roles are assigned automatically:
 
@@ -73,11 +73,37 @@ IP addresses and interfaces can be scoped before reconciliation. All filters are
 
 Multiple filters combine as intersection — all specified conditions must be satisfied for an IP to be included.
 
-## Special Features
+## Existing IP Selection
+
+For each live address, the task uses this order:
+
+1. Reuse the matching IP already assigned to the target interface.
+2. If no interface match exists, apply the `ignore_vrf` rule.
+3. Reuse the first matching unassigned IP, if available.
+4. Otherwise, create the IP or report a conflict according to its role.
+
+| Scenario | `ignore_vrf=True` (default) | `ignore_vrf=False` |
+|---|---|---|
+| Same IP is assigned to the target interface | Reuse it and leave its VRF unchanged. For example, an IP discovered in `BLUE` but stored in `RED` remains in `RED`. | Reuse it and update its VRF to the VRF of the IP discovered from the live device. The existing record ID and assignment are preserved. |
+| Same IP is unassigned in NetBox | Reuse the first unassigned record across all VRFs, assign it to the interface, and leave its VRF unchanged. | Reuse the first unassigned record in the VRF of the IP discovered from the live device and assign it to the interface. |
+| Only an unassigned IP in another VRF exists | Reuse it and preserve its current VRF. | Ignore it and create a record in the VRF of the IP discovered from the live device. |
+| Same non-anycast IP is assigned to another interface | Report a duplicate conflict. | Report a conflict when it is in the same VRF as the IP discovered from the live device. A record in another VRF does not match, so a new record is created in the discovered IP's VRF. |
+| Same anycast IP is assigned to another interface | Create another anycast record for the target interface without a VRF. | Create another anycast record for the target interface in the VRF of the IP discovered from the live device. |
+| No matching IP exists | Create and assign an IP without a VRF. | Create and assign an IP in the VRF of the IP discovered from the live device. |
 
 ### Anycast Support
 
-IP addresses in one or more `anycast_ranges` prefixes are assigned the `anycast` role. NetBox allows multiple IP address records with the same value when the role is `anycast`, so each device gets its own record. Without `anycast_ranges`, a second device trying to use the same IP address triggers a duplicate-conflict error.
+Addresses within `anycast_ranges` receive the `anycast` role. An existing
+anycast record on the target interface is reused, so repeated syncs do not add
+another copy to that interface. If the same anycast address belongs to another
+interface, NetBox receives a separate record for the target interface.
+
+!!! note
+
+    If the same IP already has the `anycast` role in NetBox and is assigned to
+    another interface, the IP discovered from the live device automatically
+    receives the `anycast` role. This applies even when `anycast_ranges` is not
+    provided.
 
 Set `anycast_ranges` to a prefix string, list of prefixes, or an `nf://` URL to a YAML file containing a list of prefixes:
 
@@ -91,38 +117,6 @@ anycast_ranges = "nf://netbox/anycast_ranges.yaml"
 - 10.0.250.0/24
 - 2001:db8:ffff::/48
 ```
-
-### VRF Handling
-
-Existing IP addresses are always searched by address only; VRF is not added to
-the NetBox filter. The `ignore_vrf` setting controls how matches are selected
-and whether the discovered VRF is written back.
-
-When `ignore_vrf=True` (default):
-
-- The first matching IP address returned by NetBox is reused.
-- Existing VRF values are left unchanged.
-- New IP addresses are created without a VRF.
-
-Example:
-
-| Discovered | Existing NetBox objects | Result |
-|---|---|---|
-| IP `10.0.0.1/31` in VRF `BLUE` | `10.0.0.1/31` in VRF `RED` | Reuse the `RED` IP object, update assignment/role if needed, leave VRF as `RED` |
-| IP `10.0.0.2/31` in VRF `BLUE` | No matching IP | Create IP without VRF |
-
-When `ignore_vrf=False`:
-
-- Matching IPs already in the discovered VRF are preferred.
-- If no matching-VRF object exists, a new IP is created with the discovered
-  VRF. IPs in other VRFs are left unchanged.
-
-Example:
-
-| Discovered | Existing NetBox objects | Result |
-|---|---|---|
-| IP `10.0.0.1/31` in VRF `BLUE` | `10.0.0.1/31` in VRF `BLUE`, `10.0.0.1/31` in VRF `RED` | Reuse the `BLUE` IP object |
-| IP `10.0.0.1/31` in VRF `BLUE` | `10.0.0.1/31` in VRF `RED` | Create a new IP in VRF `BLUE`; leave the `RED` IP unchanged |
 
 ### Duplicate IP Guard
 

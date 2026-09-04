@@ -1,3 +1,21 @@
+# 0.22.5
+
+# ENHANCEMENTS
+
+1. Added tri-state `preserve_description` handling to NetBox `sync_vlans`, `sync_vrfs`, `sync_device_interfaces`, and `sync_bgp_peerings`. The default preserves an existing NetBox description only when live text is empty; `True` always preserves it, while `False` always applies live text, including an empty string. NetBox `sync_bgp_asn` now uses the same shared description policy while retaining its existing `True` default.
+2. Enhanced NetBox `sync_bgp_community` to skip live community values that do not contain `:`, preventing well-known names such as Junos `no-export` from being synchronized as NetBox BGP community objects.
+3. Enhanced NetBox `sync_vrfs` to handle multiple existing NetBox VRFs with the same name deterministically by logging a warning and reconciling against the matched VRF with the numerically lowest ID.
+4. Enhanced NetBox `sync_vrfs` to silently skip live parser records whose `instance_type` is present and not equal to `vrf`.
+5. Extended NetBox `get_bgp_peerings` to support the `branch` argument when reading BGP sessions from a NetBox branch.
+
+# BUGS
+
+1. Fixed NetBox `sync_device_interfaces` duplex comparison by normalizing NetBox choice dictionaries to scalar values before diffing against live interface data.
+2. Fixed NetBox `sync_device_ip` matching to prioritize an IP already assigned to the target interface before applying VRF and duplicate-address fallback rules.
+3. Fixed NetBox BGP peering reads to pass the selected branch through `get_bgp_peerings`, `get_devices`, and pynetbox calls during `sync_bgp_peerings`.
+
+---
+
 # 0.22.4
 
 ## ENHANCEMENTS

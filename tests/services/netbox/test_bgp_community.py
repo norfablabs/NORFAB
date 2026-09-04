@@ -246,6 +246,19 @@ class TestSyncBgpCommunity:
             assert result["result"]["route_targets"]["created"] == ["65000:200"]
             assert result["result"]["communities"]["created"] == self.COMMUNITY_KEYS
 
+    def test_non_colon_community_values_are_skipped(self, nfclient: Any) -> None:
+        response = self._sync(
+            nfclient,
+            devices=["fn-junos-1"],
+            dry_run=True,
+            device_custom_field="community_devices",
+        )
+
+        for result in self._successful_results(response):
+            assert result["result"]["route_targets"]["create"] == []
+            assert result["result"]["communities"]["create"] == []
+            assert self.nb.plugins.bgp.community.get(value="no-export") is None
+
     def test_custom_device_field_name(self, nfclient: Any) -> None:
         self._sync(
             nfclient,

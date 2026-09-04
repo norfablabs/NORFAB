@@ -111,7 +111,7 @@ class TestSyncVlans:
             assert actions["updated"] == []
             assert actions["in_sync"] == [110, 111]
 
-    def test_live_sync_updates_name_and_description(self, nfclient: Any) -> None:
+    def test_live_sync_description_preservation_modes(self, nfclient: Any) -> None:
         self.nb.ipam.vlans.create(
             vid=120,
             name="VLAN_120",
@@ -129,6 +129,18 @@ class TestSyncVlans:
             assert result["result"][self._site_scope()]["updated"] == [120]
         vlan = self._site_vlan(120)
         assert vlan.name == "TEST_L2_TRUNK_A"
+        assert vlan.description == "stale description"
+
+        response = self._sync(
+            nfclient,
+            [self.DEVICE_2],
+            filter_by_vlan_ids=["120"],
+            preserve_description=False,
+        )
+
+        for result in self._successful_results(response):
+            assert result["result"][self._site_scope()]["updated"] == [120]
+        vlan = self._site_vlan(120)
         assert vlan.description == ""
 
     def test_vlan_map_uses_netbox_group_ranges_and_site_fallback(

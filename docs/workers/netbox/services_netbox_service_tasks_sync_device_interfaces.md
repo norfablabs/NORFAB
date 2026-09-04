@@ -95,6 +95,15 @@ and reported as warning events.
 
 In live-run mode `res["diff"]` is also populated with field-level change details for all interfaces that were created or updated.
 
+## Description Preservation
+
+`preserve_description` controls descriptions on interfaces that already exist
+in NetBox. Its default value, `None`, keeps the NetBox description when the
+live description is empty and otherwise uses the live value. Set it to `True`
+to always keep the NetBox description. Set it to `False` to always use the live
+description, including an empty string. Newly created interfaces always use
+the live description.
+
 ## Filtering
 
 Interfaces can be scoped using glob patterns so that only a subset is considered on both the live and NetBox sides:
@@ -323,6 +332,7 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
             "devices": ["ceos-spine-1"],
             "process_deletions": True,
             "filter_by_description": "TEST_SYNC_*",
+            "preserve_description": None,
         },
     )
 
@@ -405,6 +415,7 @@ root
             ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
+            ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── update-type:    Safely update existing NetBox logical interface types, default 'True'
             ├── vlan-group:    Fallback VLAN group exact name
             ├── vlan-map:    Ordered VLAN-to-group mapping rules

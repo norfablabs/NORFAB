@@ -223,6 +223,14 @@ class SyncBgpPeeringsInput(
         description="Only sync sessions whose description matches this glob pattern (e.g. '*uplink*')",
         alias="filter-by-description",
     )
+    preserve_description: Union[None, StrictBool] = Field(
+        None,
+        description=(
+            "Preserve existing NetBox descriptions always (true), only when live "
+            "text is empty (null), or never (false)"
+        ),
+        alias="preserve-description",
+    )
     ignore_peer_ranges: Union[None, List[str]] = Field(
         None,
         description="Only sync sessions whose peer IP is not within one of provided prefixes",
@@ -1463,6 +1471,14 @@ class SyncDeviceInterfacesInput(
         description="Glob pattern to filter interfaces by description, e.g. 'uplink*'",
         alias="filter-by-description",
     )
+    preserve_description: Union[None, StrictBool] = Field(
+        None,
+        description=(
+            "Preserve existing NetBox descriptions always (true), only when live "
+            "text is empty (null), or never (false)"
+        ),
+        alias="preserve-description",
+    )
     update_type: StrictBool = Field(
         True,
         description="Safely update existing NetBox logical interface types",
@@ -2245,6 +2261,14 @@ class SyncVlansInput(
         alias="vlan-ids",
         examples=[["100", "200-299"]],
     )
+    preserve_description: Union[None, StrictBool] = Field(
+        None,
+        description=(
+            "Preserve existing NetBox descriptions always (true), only when live "
+            "text is empty (null), or never (false)"
+        ),
+        alias="preserve-description",
+    )
 
     @model_validator(mode="after")
     def validate_sync_vlans(self) -> "SyncVlansInput":
@@ -2310,6 +2334,14 @@ class SyncVrfsInput(
         min_length=1,
         description="VRF custom field that stores associated NetBox devices",
         alias="device-custom-field",
+    )
+    preserve_description: Union[None, StrictBool] = Field(
+        None,
+        description=(
+            "Preserve existing NetBox descriptions always (true), only when live "
+            "text is empty (null), or never (false)"
+        ),
+        alias="preserve-description",
     )
 
 
