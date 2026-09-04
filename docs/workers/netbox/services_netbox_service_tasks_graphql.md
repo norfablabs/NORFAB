@@ -12,6 +12,8 @@ Runs GraphQL queries against a NetBox instance. The task can build a query from 
 !!! warning
     The `graphql` task is marked deprecated in code in favour of the lower-level `netbox_graphql` helper. Existing callers can still use `graphql`, but new internal code should prefer `netbox_graphql` where appropriate.
 
+The `netbox_graphql` task accepts a complete paginated GraphQL query and an optional `branch` name. When a branch is supplied, the worker creates it if missing, rejects a merged branch, waits for it to become ready, and sends its schema ID in the `X-NetBox-Branch` header. The deprecated `graphql` task is unchanged and is not branch-aware.
+
 ## Inputs
 
 | Parameter | Required | Description |
@@ -151,6 +153,28 @@ nf#
 ```
 
 ## Python API Reference
+
+Use `branch` with `netbox_graphql` to query proposed state:
+
+```python
+result = client.run_job(
+    "netbox",
+    "netbox_graphql",
+    workers="any",
+    kwargs={
+        "instance": "prod",
+        "branch": "planned-change",
+        "query": """
+            query Devices($offset: Int!, $limit: Int!) {
+                devices: device_list(
+                    pagination: {offset: $offset, limit: $limit}
+                ) { name }
+            }
+        """,
+        "variables": {},
+    },
+)
+```
 
 ### graphql
 

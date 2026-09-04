@@ -313,6 +313,7 @@ class NetboxIpTasks:
                     devices=[device],
                     interfaces=[interface],
                     instance=instance,
+                    branch=branch,
                 )
                 if interface in connection.result[device]:
                     peer = connection.result[device][interface]
@@ -619,6 +620,7 @@ class NetboxIpTasks:
             interface_list=interface_list,
             interface_regex=interface_regex,
             instance=instance,
+            branch=branch,
         )
         if interfaces.errors:
             job.event(

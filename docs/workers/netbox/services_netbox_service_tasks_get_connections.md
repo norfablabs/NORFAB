@@ -31,6 +31,7 @@ Retrieves connection details for interfaces and ports on one or more devices fro
 | `interfaces` | No | Exact interface or port names to include |
 | `interface_regex` | No | Case-insensitive regex pattern to match interface and port names |
 | `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name to read from |
 | `dry_run` | No | Return raw GraphQL query content instead of processed connection data |
 | `cache` | No | Cache usage mode accepted by the command model |
 
@@ -72,6 +73,8 @@ Provider network connections include `provider` instead of remote device/interfa
 Use `interfaces` when you know exact port names. Use `interface_regex` when you want to match a group of ports. If both are provided, NetBox returns only ports matching the explicit names and the regex.
 
 ## Dry Run Mode
+
+When `branch` is supplied, both dry-run and live GraphQL requests use the validated branch schema ID.
 
 `dry_run=True` returns the raw GraphQL result used by the task. This is useful when checking the NetBox query output or troubleshooting why a connection was not normalised.
 
@@ -191,6 +194,7 @@ root
             ├── verbose-result:    Control output details, default 'False'
             ├── progress:    Display progress events, default 'True'
             ├── instance:    Netbox instance name to target
+            ├── branch:    NetBox branching plugin branch name to use
             ├── dry-run:    Only return query content, do not run it
             ├── devices:    Device names to query data for
             ├── interfaces:    Interface and port names to query data for

@@ -43,6 +43,8 @@ At least one NetBox device filter or Nornir host filter is required.
 
 Returns topology data with `nodes` and `links`.
 
+When `branch` is supplied, both device REST reads and connection GraphQL reads use that branch.
+
 ```json
 {
   "nodes": [

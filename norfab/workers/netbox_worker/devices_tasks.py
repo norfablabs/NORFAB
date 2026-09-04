@@ -223,6 +223,8 @@ class NetboxDevicesTasks:
         instance = instance or self.default_instance
         ret = Result(task=f"{self.name}:get_devices", result={}, resources=[instance])
         cache = self.cache_use if cache is None else cache
+        if branch is not None:
+            cache = False
         filters = list(filters) if filters else []
         devices = devices or []
         devices_to_fetch = []

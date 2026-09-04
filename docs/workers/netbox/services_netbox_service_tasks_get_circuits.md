@@ -54,6 +54,7 @@ Normal mode returns circuit data keyed by device name and circuit ID:
 ## Notes / Gotchas
 
 - The task queries circuits broadly by device site, then filters and maps results client-side.
+- `get_circuits` is not branch-aware and always reads the main NetBox context.
 - `devices` uses the NFCLI alias `device-list`.
 - `add_interface_details=True` performs extra interface lookups and increases runtime.
 

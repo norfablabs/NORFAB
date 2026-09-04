@@ -39,6 +39,7 @@ class NetboxContainerlabInventoryTasks:
         filters: Union[None, list] = None,
         devices: Union[None, list] = None,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         image: Union[None, str] = None,
         ipv4_subnet: str = "172.100.100.0/24",
         ports: tuple = (12000, 15000),
@@ -106,6 +107,7 @@ class NetboxContainerlabInventoryTasks:
             filters (list, optional): List of filters to apply when retrieving devices from NetBox.
             devices (list, optional): List of specific devices to retrieve from NetBox.
             instance (str, optional): NetBox instance to use.
+            branch (str, optional): NetBox branching plugin branch name to use.
             image (str, optional): Default containerlab image to use,
             ipv4_subnet (str, Optional): Management subnet to use to IP number nodes
                 starting with 2nd IP in the subnet, in assumption that 1st IP is a default gateway.
@@ -127,6 +129,8 @@ class NetboxContainerlabInventoryTasks:
         ports_map = ports_map or {}
         endpts_done = []  # to deduplicate links
         instance = instance or self.default_instance
+        if branch is not None:
+            cache = False
         # handle lab name and tenant name with filters
         if lab_name is None and tenant:
             lab_name = tenant
@@ -179,6 +183,7 @@ class NetboxContainerlabInventoryTasks:
             filters=filters,
             devices=devices,
             instance=instance,
+            branch=branch,
             cache=cache,
         )
         if nb_devices.errors:
@@ -258,7 +263,11 @@ class NetboxContainerlabInventoryTasks:
 
         # query interface connections data from netbox
         nb_connections = self.get_connections(
-            job=job, devices=list(nodes), instance=instance, cache=cache
+            job=job,
+            devices=list(nodes),
+            instance=instance,
+            branch=branch,
+            cache=cache,
         )
         if nb_connections.errors:
             job.event("connection retrieval completed with errors", severity="WARNING")

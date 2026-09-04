@@ -4,6 +4,7 @@ import pytest
 
 try:
     from tests.services.netbox.common import (
+        delete_branch,
         get_nb_version,
     )
 except ModuleNotFoundError as exc:
@@ -15,6 +16,7 @@ except ModuleNotFoundError as exc:
     }:
         raise
     from services.netbox.common import (
+        delete_branch,
         get_nb_version,
     )
 
@@ -26,6 +28,72 @@ pytestmark = [
 
 class TestNetboxGrapQL:
     nb_version = None
+
+    def test_netbox_graphql_with_branch(self, nfclient):
+        """Raw REST writes and GraphQL reads use the selected branch."""
+        branch = "norfab-netbox-graphql-branch-test"
+        slug = "norfab-netbox-graphql-branch-test"
+        query = """
+        query Manufacturers($offset: Int!, $limit: Int!) {
+            manufacturers: manufacturer_list(
+                pagination: {offset: $offset, limit: $limit}
+            ) {
+                slug
+            }
+        }
+        """
+        delete_branch(branch, nfclient)
+
+        try:
+            created = nfclient.run_job(
+                "netbox",
+                "rest",
+                workers="any",
+                kwargs={
+                    "instance": "prod",
+                    "branch": branch,
+                    "method": "post",
+                    "api": "dcim/manufacturers",
+                    "json": {
+                        "name": "NorFab GraphQL Branch Test",
+                        "slug": slug,
+                    },
+                },
+            )
+            for worker, result in created.items():
+                assert not result["errors"], f"{worker} - received REST error"
+                assert result["result"]["slug"] == slug
+
+            branch_result = nfclient.run_job(
+                "netbox",
+                "netbox_graphql",
+                workers="any",
+                kwargs={
+                    "instance": "prod",
+                    "branch": branch,
+                    "query": query,
+                    "variables": {},
+                },
+            )
+            for worker, result in branch_result.items():
+                assert not result["errors"], f"{worker} - received GraphQL error"
+                assert slug in {
+                    item["slug"] for item in result["result"]["manufacturers"]
+                }
+
+            main_result = nfclient.run_job(
+                "netbox",
+                "netbox_graphql",
+                workers="any",
+                kwargs={"instance": "prod", "query": query, "variables": {}},
+            )
+            for worker, result in main_result.items():
+                assert not result["errors"], f"{worker} - received GraphQL error"
+                assert slug not in {
+                    item["slug"] for item in result["result"]["manufacturers"]
+                }
+        finally:
+            delete_branch(branch, nfclient)
 
     def test_graphql_query_string(self, nfclient):
         ret = nfclient.run_job(

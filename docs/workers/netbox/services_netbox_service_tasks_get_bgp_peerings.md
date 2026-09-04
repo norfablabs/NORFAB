@@ -60,6 +60,7 @@ Returns BGP session data keyed by device name and session name:
 - Device name must exist: Unknown devices are skipped with warnings; verify names beforehand or use `get_devices` to inspect inventory.
 - Session key uniqueness: Sessions in the result are keyed by `name`. If session names are not unique per device, later entries overwrite earlier ones.
 - Partial-field queries: Smart update relies on `fields="id,last_updated,name"`. Older NetBox versions may not support `fields`, which can affect cache comparison.
+- Supplying `branch` forces `cache=False` so main-context cached data cannot be returned for a branch read.
 - Large datasets: Fetching many devices or sessions may be slow; prefer cache or limit `devices` for interactive runs.
 
 ## Examples

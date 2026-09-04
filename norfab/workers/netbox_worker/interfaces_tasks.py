@@ -330,6 +330,8 @@ class NetboxInterfacesTasks:
         nb = self._get_pynetbox(instance, branch=branch, job=job)
         devices = devices or []
         cache = self.cache_use if cache is None else cache
+        if branch is not None:
+            cache = False
         log.info(
             f"{self.name} - Get interfaces: Fetching interfaces for {len(devices)} device(s) from '{instance}'"
         )
@@ -751,6 +753,7 @@ class NetboxInterfacesTasks:
                 interfaces=interfaces,
                 interface_regex=interface_regex,
                 instance=instance,
+                branch=branch,
             )
             if nb_connections.errors:
                 ret.errors.extend(nb_connections.errors)

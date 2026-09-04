@@ -201,6 +201,7 @@ class NetboxConnectionsTasks:
         interfaces: Union[None, list[str]] = None,
         interface_regex: Union[None, str] = None,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         dry_run: bool = False,
         cache: Union[None, bool, str] = None,
     ) -> Result:
@@ -225,6 +226,7 @@ class NetboxConnectionsTasks:
             interfaces (list, optional): List of interface, console port, console server
                 port, or power outlet names to retrieve connections for.
             instance (str, optional): Netbox instance name for the GraphQL query.
+            branch (str, optional): NetBox branching plugin branch name to use.
             dry_run (bool, optional): If True, perform a dry run without making actual changes.
             interface_regex (str, optional): Regex pattern to match interfaces, console ports and
                 console server ports by name, case insensitive.
@@ -302,6 +304,7 @@ class NetboxConnectionsTasks:
             query=CONNECTIONS_QUERY,
             variables=variables,
             instance=instance,
+            branch=branch,
             dry_run=dry_run,
         )
         if query_result.errors:

@@ -16,6 +16,7 @@ Retrieves device records from NetBox using the REST API. Results are keyed by de
 | `filters` | No | List of NetBox device filter dictionaries |
 | `devices` | No | Device names to retrieve |
 | `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name to read from |
 | `dry_run` | No | Return the merged filters without querying NetBox |
 | `cache` | No | Cache usage mode: `True`, `False`, `refresh`, or `force` |
 
@@ -41,6 +42,7 @@ Normal mode returns a dictionary keyed by device name:
 - When both `devices` and `filters` are provided, device names are merged into the filter list as a NetBox `name` filter.
 - `cache=True` uses cached device data when `last_updated` matches NetBox. `cache="force"` uses cached data without the freshness check.
 - `cache=False` skips cache reads and writes. `cache="refresh"` fetches fresh data and overwrites cache.
+- Supplying `branch` forces `cache=False` so main-context cached data cannot be returned for a branch read.
 
 ## Examples
 
@@ -133,6 +135,7 @@ root
     └── get:    Query data from Netbox
         └── devices:    Query Netbox devices data
             ├── instance:    Netbox instance name to target
+            ├── branch:    NetBox branching plugin branch name to use
             ├── workers:    Filter worker to target, default 'any'
             ├── timeout:    Job timeout
             ├── filters:    List of device filters dictionaries as a JSON string, examples: [{"q": "ceos1"}]

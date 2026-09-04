@@ -570,6 +570,10 @@ class GetConnectionsInput(BaseModel, use_enum_values=True, populate_by_name=True
         None,
         description="NetBox instance name to target",
     )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
+    )
     dry_run: StrictBool = Field(
         False,
         description="Return query content without running it",
@@ -617,6 +621,10 @@ class GetContainerlabInventoryInput(
     instance: Union[None, StrictStr] = Field(
         None,
         description="NetBox instance name to target",
+    )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
     )
     image: Union[None, StrictStr] = Field(
         None,
@@ -700,6 +708,10 @@ class GetDevicesInput(BaseModel, use_enum_values=True, populate_by_name=True):
     instance: Union[None, StrictStr] = Field(
         None,
         description="NetBox instance name to target",
+    )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
     )
     dry_run: StrictBool = Field(
         False,
@@ -1024,6 +1036,10 @@ class NetboxGraphqlInput(BaseModel, use_enum_values=True, populate_by_name=True)
     instance: StrictStr = Field(
         ...,
         description="NetBox instance name to target",
+    )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
     )
     query: StrictStr = Field(
         ...,
@@ -2137,6 +2153,10 @@ class RestInput(BaseModel, use_enum_values=True, populate_by_name=True):
         None,
         description="NetBox instance name to target",
     )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
+    )
     method: StrictStr = Field(
         "get",
         description="HTTP method to use",
@@ -2171,6 +2191,10 @@ class GetNornirInventoryInput(BaseModel, use_enum_values=True, populate_by_name=
     instance: Union[None, StrictStr] = Field(
         None,
         description="NetBox instance name to target",
+    )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
     )
     interfaces: Union[dict[StrictStr, Any], StrictBool] = Field(
         False,

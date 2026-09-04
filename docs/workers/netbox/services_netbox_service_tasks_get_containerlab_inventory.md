@@ -27,6 +27,7 @@ Builds a Containerlab topology inventory from NetBox device and connection data.
 | `filters` | Conditional | NetBox device filter dictionaries |
 | `devices` | Conditional | Device names to include in the lab |
 | `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name used for device and connection reads |
 | `image` | No | Container image to use for all nodes |
 | `ipv4_subnet` | No | Management subnet, default `172.100.100.0/24` |
 | `ports` | No | TCP/UDP port allocation range |
@@ -67,6 +68,7 @@ topology:
 - If `image` is provided, it overrides node image values. Otherwise, the task uses `{kind}:latest` when no image is configured.
 - `interfaces_rename` in config context can rename interfaces in generated links.
 - If `lab_name` is omitted and `tenant` is provided, the tenant name becomes the lab name.
+- Supplying `branch` bypasses caches and applies the branch to device and connection reads. Circuit links remain main-context data because `get_circuits` is not branch-aware.
 
 ## Examples
 
@@ -159,6 +161,7 @@ root
             ├── devices:    List of devices to generate lab inventory for
             ├── progress:    Display progress events, default 'True'
             ├── netbox-instance:    Name of Netbox instance to pull inventory from
+            ├── branch:    NetBox branching plugin branch name to use
             ├── ipv4-subnet:    IPv4 management subnet to use for lab, default '172.100.100.0/24'
             ├── image:    Docker image to use for all nodes
             └── ports:    Range of TCP/UDP ports to use for nodes, default '[12000, 13000]'

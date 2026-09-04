@@ -76,6 +76,7 @@ def graphql_fetch_page(
     connect_timeout: int,
     read_timeout: int,
     worker_name: str,
+    branch_schema_id: Union[None, str] = None,
 ) -> dict[str, Any]:
     """Execute a single paginated GraphQL POST request and return the ``data`` payload.
 
@@ -91,6 +92,7 @@ def graphql_fetch_page(
         connect_timeout: Connection timeout in seconds.
         read_timeout: Read timeout in seconds.
         worker_name: Worker name used in error messages.
+        branch_schema_id: Optional NetBox branch schema ID for the request header.
 
     Returns:
         The ``data`` section of the GraphQL JSON response.
@@ -118,6 +120,8 @@ def graphql_fetch_page(
             "Authorization": f"Token {token}",
         }
     )
+    if branch_schema_id is not None:
+        session.headers["X-NetBox-Branch"] = branch_schema_id
     try:
         response = session.post(
             url=f"{nb_url}/graphql/",
@@ -156,6 +160,7 @@ class NetboxGraphqlTasks:
         job: Job,
         instance: str,
         query: str,
+        branch: Union[None, str] = None,
         variables: Union[None, dict] = None,
         dry_run: bool = False,
         offset: int = 0,
@@ -173,6 +178,7 @@ class NetboxGraphqlTasks:
             instance: Name of the NetBox instance to query.
             query: GraphQL query string. Must accept ``$offset: Int!`` and ``$limit: Int!``
                 variables to support automatic pagination.
+            branch: NetBox branching plugin branch name to use.
             variables: Optional extra GraphQL variables forwarded verbatim to the GraphQL query.
             dry_run: When ``True``, return the request parameters without executing any HTTP calls.
             offset: Starting pagination offset (number of records to skip before the first page).
@@ -184,6 +190,10 @@ class NetboxGraphqlTasks:
         """
         nb_params = self._get_instance_params(instance)
         ret = Result(task=f"{self.name}:graphql", resources=[instance])
+        branch_schema_id = None
+        if branch is not None:
+            nb = self._get_pynetbox(instance, branch=branch, job=job)
+            branch_schema_id = nb.http_session.headers["X-NetBox-Branch"]
 
         if dry_run is True:
             job.event("dry-run requested, returning GraphQL request payload")
@@ -196,6 +206,11 @@ class NetboxGraphqlTasks:
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                     "Authorization": f"Token ...{nb_params['token'][-6:]}",
+                    **(
+                        {"X-NetBox-Branch": branch_schema_id}
+                        if branch_schema_id is not None
+                        else {}
+                    ),
                 },
             }
             return ret
@@ -229,6 +244,7 @@ class NetboxGraphqlTasks:
                         self.netbox_connect_timeout,
                         self.netbox_read_timeout,
                         self.name,
+                        branch_schema_id,
                     ): page_offset
                     for page_offset in batch_offsets
                 }

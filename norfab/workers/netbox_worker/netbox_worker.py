@@ -1095,6 +1095,7 @@ class NetboxWorker(
         self,
         job: Job,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         method: str = "get",
         api: str = "",
         **kwargs: Any,
@@ -1104,6 +1105,7 @@ class NetboxWorker(
 
         Args:
             instance (str, optional): The Netbox instance name to get parameters for.
+            branch (str, optional): NetBox branching plugin branch name to use.
             method (str, optional): The HTTP method to use for the request (e.g., 'get', 'post'). Defaults to "get".
             api (str, optional): The API endpoint to send the request to. Defaults to "".
             **kwargs: Additional arguments to pass to the request (e.g., params, data, json).
@@ -1115,6 +1117,7 @@ class NetboxWorker(
             requests.exceptions.HTTPError: If the HTTP request returned an unsuccessful status code.
         """
         ret = Result(task=f"{self.name}:rest", result={})
+        instance = instance or self.default_instance
         nb_params = self._get_instance_params(instance)
         api = api.strip("/")
 
@@ -1122,15 +1125,19 @@ class NetboxWorker(
         kwargs.setdefault(
             "timeout", (self.netbox_connect_timeout, self.netbox_read_timeout)
         )
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Token {nb_params['token']}",
+        }
+        if branch is not None:
+            nb = self._get_pynetbox(instance, branch=branch, job=job)
+            headers["X-NetBox-Branch"] = nb.http_session.headers["X-NetBox-Branch"]
 
         # send request to Netbox REST API
         response = getattr(self.netbox_http_session, method)(
             url=f"{nb_params['url']}/api/{api}/",
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": f"Token {nb_params['token']}",
-            },
+            headers=headers,
             verify=nb_params.get("ssl_verify", True),
             **kwargs,
         )

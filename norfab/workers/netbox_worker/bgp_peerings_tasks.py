@@ -907,6 +907,8 @@ class NetboxBgpPeeringsTasks:
             f"{self.name} - Get BGP peerings: Fetching BGP peerings for {len(devices)} device(s) from '{instance}' NetBox"
         )
         cache = self.cache_use if cache is None else cache
+        if branch is not None:
+            cache = False
         ret = Result(
             task=f"{self.name}:get_bgp_peerings",
             result={d: {} for d in devices},

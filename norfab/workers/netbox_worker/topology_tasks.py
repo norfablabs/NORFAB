@@ -248,6 +248,7 @@ class NetboxTopologyTasks:
                 query=TOPOLOGY_INTERFACES_QUERY,
                 variables={"devices": devices or ["*"], "offset": 0, "limit": 50},
                 instance=instance,
+                branch=branch,
                 dry_run=True,
             )
             ret.dry_run = True
@@ -310,6 +311,7 @@ class NetboxTopologyTasks:
             query=TOPOLOGY_INTERFACES_QUERY,
             variables=variables,
             instance=instance,
+            branch=branch,
             dry_run=False,
         )
 

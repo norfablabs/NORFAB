@@ -35,6 +35,7 @@ class NetboxNornirInventoryTasks:
         filters: Union[None, list] = None,
         devices: Union[None, list] = None,
         instance: Union[None, str] = None,
+        branch: Union[None, str] = None,
         interfaces: Union[dict, bool] = False,
         connections: Union[dict, bool] = False,
         circuits: Union[dict, bool] = False,
@@ -51,6 +52,7 @@ class NetboxNornirInventoryTasks:
             filters (list, optional): List of filters to apply when retrieving devices from NetBox.
             devices (list, optional): List of specific devices to retrieve from NetBox.
             instance (str, optional): NetBox instance to use.
+            branch (str, optional): NetBox branching plugin branch name to use.
             interfaces (Union[dict, bool], optional): If True, include interfaces data
                     in the inventory. If a dict, use it as arguments for the get_interfaces method.
             connections (Union[dict, bool], optional): If True, include connections data
@@ -73,6 +75,8 @@ class NetboxNornirInventoryTasks:
         hosts = {}
         filters = filters or []
         devices = devices or []
+        if branch is not None:
+            cache = False
         inventory = {"hosts": hosts}
         ret = Result(task=f"{self.name}:get_nornir_inventory", result=inventory)
 
@@ -88,7 +92,12 @@ class NetboxNornirInventoryTasks:
         # retrieve devices data
         job.event("fetching devices data for Nornir inventory")
         nb_devices = self.get_devices(
-            job=job, filters=filters, devices=devices, instance=instance, cache=cache
+            job=job,
+            filters=filters,
+            devices=devices,
+            instance=instance,
+            branch=branch,
+            cache=cache,
         )
         if nb_devices.errors:
             job.event("failed to fetch devices for Nornir inventory", severity="ERROR")
@@ -133,6 +142,7 @@ class NetboxNornirInventoryTasks:
             # decide on get_interfaces arguments
             kwargs = interfaces if isinstance(interfaces, dict) else {}
             kwargs.setdefault("cache", cache)
+            kwargs.setdefault("branch", branch)
             # add 'interfaces' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("interfaces", {})
@@ -156,6 +166,7 @@ class NetboxNornirInventoryTasks:
             # decide on get_interfaces arguments
             kwargs = connections if isinstance(connections, dict) else {}
             kwargs.setdefault("cache", cache)
+            kwargs.setdefault("branch", branch)
             # add 'connections' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("connections", {})
@@ -200,6 +211,7 @@ class NetboxNornirInventoryTasks:
             # decide on get_interfaces arguments
             kwargs = bgp_peerings if isinstance(bgp_peerings, dict) else {}
             kwargs.setdefault("cache", cache)
+            kwargs.setdefault("branch", branch)
             # add 'bgp_peerings' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("bgp_peerings", {})

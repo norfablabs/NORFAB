@@ -674,13 +674,14 @@ NetBox data model and do not provide every safeguard of a dedicated task.
 
 ### Branch-aware changes
 
-Supported tasks can target a named NetBox branch, and the service can delete a
+Supported get, sync, CRUD, raw REST, and paginated GraphQL tasks can target a named NetBox branch, and the service can delete a
 branch through the NetBox Branching plugin. **Use cases:** stage designs,
 review source-of-truth changes, test automation against proposed state, and
 clean up completed branches. **Interfaces:** branch arguments are available on
 supporting Python/REST/MCP tasks; branch deletion is not currently modelled in
 NFCLI. **Limitations:** requires a compatible branching plugin and not every
-NetBox operation is inherently branch-aware.
+NetBox operation is inherently branch-aware. Branch reads bypass the main-context
+cache; circuit retrieval remains main-context only.
 
 ### Device and interface retrieval
 
