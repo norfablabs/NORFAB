@@ -190,6 +190,7 @@ class NetboxNornirInventoryTasks:
             # decide on get_interfaces arguments
             kwargs = circuits if isinstance(circuits, dict) else {}
             kwargs.setdefault("cache", cache)
+            kwargs.setdefault("branch", branch)
             # add 'circuits' key to all hosts' data
             for host in hosts.values():
                 host["data"].setdefault("circuits", {})

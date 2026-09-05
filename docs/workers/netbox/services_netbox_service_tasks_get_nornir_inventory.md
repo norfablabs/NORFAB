@@ -27,7 +27,7 @@ Builds a Nornir inventory from NetBox device data. Nornir workers can call this 
 | `filters` | No | NetBox device filter dictionaries |
 | `devices` | No | Device names to include in inventory |
 | `instance` | No | NetBox instance name to target |
-| `branch` | No | NetBox Branching plugin branch name used for device, interface, connection, and BGP peering reads |
+| `branch` | No | NetBox Branching plugin branch name used for all supported inventory reads |
 | `interfaces` | No | `True` to include interfaces, or a dictionary of `get_interfaces` kwargs |
 | `connections` | No | `True` to include connections, or a dictionary of `get_connections` kwargs |
 | `circuits` | No | `True` to include circuits, or a dictionary of `get_circuits` kwargs |
@@ -62,7 +62,7 @@ Returns a Nornir inventory dictionary:
 - The host name can be overridden by `config_context.nornir.name` on the NetBox device.
 - If host `platform` or `hostname` is not present in NetBox config context, the task derives them from NetBox platform and primary IP fields.
 - `interfaces`, `connections`, `circuits`, and `bgp_peerings` can be `True` or dictionaries with kwargs for the related task.
-- Supplying `branch` bypasses caches and applies the branch to device, interface, connection, and BGP peering reads. Circuit enrichment remains main-context data because `get_circuits` is not branch-aware.
+- Supplying `branch` bypasses caches and applies the branch to device, interface, connection, circuit, and BGP peering reads.
 - The current NFCLI command model does not expose `get_nornir_inventory` directly under `netbox get`, so this task is commonly used by Nornir worker startup or Python API callers.
 
 ## Examples

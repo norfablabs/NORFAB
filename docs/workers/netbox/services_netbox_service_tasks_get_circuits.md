@@ -25,6 +25,7 @@ Retrieves NetBox circuit data for selected devices. The task maps circuit termin
 | `devices` | Yes | Device names to retrieve circuits for |
 | `cid` | No | Circuit identifiers to retrieve |
 | `instance` | No | NetBox instance name to target |
+| `branch` | No | NetBox Branching plugin branch name to read from |
 | `dry_run` | No | Return GraphQL query content without running it |
 | `cache` | No | Cache usage mode: `True`, `False`, `refresh`, or `force` |
 | `add_interface_details` | No | Add interface IP, VRF, and child-interface details |
@@ -54,7 +55,8 @@ Normal mode returns circuit data keyed by device name and circuit ID:
 ## Notes / Gotchas
 
 - The task queries circuits broadly by device site, then filters and maps results client-side.
-- `get_circuits` is not branch-aware and always reads the main NetBox context.
+- Supplying `branch` applies the branch to device, circuit, termination-path, and optional interface reads.
+- Supplying `branch` forces `cache=False` so main-context cached circuit data cannot be returned.
 - `devices` uses the NFCLI alias `device-list`.
 - `add_interface_details=True` performs extra interface lookups and increases runtime.
 
@@ -86,6 +88,12 @@ Normal mode returns circuit data keyed by device name and circuit ID:
     nf#netbox get circuits device-list fceos4 dry-run
     ```
 
+    Read circuits from a NetBox branch:
+
+    ```bash
+    nf#netbox get circuits device-list fceos4 branch planned-change
+    ```
+
 === "Python"
 
     ```python
@@ -102,6 +110,7 @@ Normal mode returns circuit data keyed by device name and circuit ID:
         workers="any",
         kwargs={
             "devices": ["fceos4", "fceos5"],
+            "branch": "planned-change",
         },
     )
 
@@ -131,6 +140,7 @@ root
     └── get:    Query data from Netbox
         └── circuits:    Query Netbox circuits data for devices
             ├── instance:    Netbox instance name to target
+            ├── branch:    NetBox branching plugin branch name to use
             ├── workers:    Filter worker to target, default 'any'
             ├── timeout:    Job timeout
             ├── device-list:    Device names to query data for

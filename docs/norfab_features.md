@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 4 September 2026*
+*Last updated: 5 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -681,7 +681,7 @@ clean up completed branches. **Interfaces:** branch arguments are available on
 supporting Python/REST/MCP tasks; branch deletion is not currently modelled in
 NFCLI. **Limitations:** requires a compatible branching plugin and not every
 NetBox operation is inherently branch-aware. Branch reads bypass the main-context
-cache; circuit retrieval remains main-context only.
+cache, including circuit retrieval and circuit termination path tracing.
 
 ### Device and interface retrieval
 

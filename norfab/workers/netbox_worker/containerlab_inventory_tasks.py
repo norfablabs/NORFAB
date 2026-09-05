@@ -323,7 +323,11 @@ class NetboxContainerlabInventoryTasks:
 
         # query circuits connections data from netbox
         nb_circuits = self.get_circuits(
-            job=job, devices=list(nodes), instance=instance, cache=cache
+            job=job,
+            devices=list(nodes),
+            instance=instance,
+            branch=branch,
+            cache=cache,
         )
         if nb_circuits.errors:
             job.event("circuit retrieval completed with errors", severity="WARNING")

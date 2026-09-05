@@ -7,9 +7,11 @@
 3. Enhanced NetBox `sync_vrfs` to handle multiple existing NetBox VRFs with the same name deterministically by logging a warning and reconciling against the matched VRF with the numerically lowest ID.
 4. Enhanced NetBox `sync_vrfs` to silently skip live parser records whose `instance_type` is present and not equal to `vrf`.
 5. Extended NetBox `get_bgp_peerings` to support the `branch` argument when reading BGP sessions from a NetBox branch.
-6. Extended NetBox `get_devices`, `get_connections`, `get_topology`, `get_nornir_inventory`, and `get_containerlab_inventory` with branch-aware reads. Nested inventory lookups propagate the branch except for `get_circuits`, which remains main-context only.
+6. Extended NetBox `get_devices`, `get_connections`, `get_topology`, `get_nornir_inventory`, and `get_containerlab_inventory` with branch-aware reads. Nested inventory lookups propagate the branch to all supported data retrieval tasks.
 7. Added branch support to NetBox `netbox_graphql` and `rest`; both validate or create the branch through the existing pynetbox branch lifecycle and send its schema ID in the `X-NetBox-Branch` header. The deprecated `graphql` task remains unchanged.
-8. Branch-aware NetBox device, interface, BGP peering, Nornir inventory, and Containerlab inventory reads now bypass cache without changing existing cache keys or non-branch cache behavior.
+8. Branch-aware NetBox device, interface, circuit, BGP peering, Nornir inventory, and Containerlab inventory reads now bypass cache without changing existing cache keys or non-branch cache behavior.
+9. Refactored NetBox `get_circuits` to use the paginated `netbox_graphql` task with explicit circuit and cache-freshness queries, replacing its dependency on the deprecated `graphql` task.
+10. Added branch support to NetBox `get_circuits`, including device and circuit queries, REST termination path tracing, optional interface enrichment, and circuit lookups made by Nornir and Containerlab inventory tasks.
 
 # BUGS
 

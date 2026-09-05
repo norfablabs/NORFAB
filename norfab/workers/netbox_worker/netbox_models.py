@@ -522,6 +522,10 @@ class GetCircuitsInput(BaseModel, use_enum_values=True, populate_by_name=True):
         None,
         description="NetBox instance name to target",
     )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branching plugin branch name to use",
+    )
     dry_run: StrictBool = Field(
         False,
         description="Return query content without running it",

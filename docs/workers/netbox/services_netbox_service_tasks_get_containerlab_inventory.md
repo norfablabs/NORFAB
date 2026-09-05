@@ -68,7 +68,7 @@ topology:
 - If `image` is provided, it overrides node image values. Otherwise, the task uses `{kind}:latest` when no image is configured.
 - `interfaces_rename` in config context can rename interfaces in generated links.
 - If `lab_name` is omitted and `tenant` is provided, the tenant name becomes the lab name.
-- Supplying `branch` bypasses caches and applies the branch to device and connection reads. Circuit links remain main-context data because `get_circuits` is not branch-aware.
+- Supplying `branch` bypasses caches and applies the branch to device, connection, and circuit reads.
 
 ## Examples
 
