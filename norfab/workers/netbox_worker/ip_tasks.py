@@ -758,7 +758,10 @@ class NetboxIpTasks:
 
         Returns:
             Result: Per-device action summary with ``created``, ``updated``, and
-                ``in_sync`` IP address lists.
+                ``in_sync`` IP address lists. ``Result.diff`` contains the
+                corresponding ``create``, ``update``, ``delete``, and ``in_sync``
+                reconciliation plan; ``delete`` is always empty because this task
+                does not delete IP addresses.
         """
         devices = devices or []
         instance = instance or self.default_instance
@@ -766,6 +769,7 @@ class NetboxIpTasks:
             task=f"{self.name}:sync_device_ip",
             result={},
             resources=[instance],
+            diff={},
             dry_run=dry_run,
         )
         nb = self._get_pynetbox(instance, branch=branch, job=job)
@@ -877,6 +881,15 @@ class NetboxIpTasks:
             for device_name in devices
         }
         ret.result = device_results
+        ret.diff = {
+            device_name: {
+                "create": [],
+                "update": {},
+                "delete": [],
+                "in_sync": [],
+            }
+            for device_name in devices
+        }
 
         # collect all discovered IP addresses
         job.event("collecting live IP address candidates")
@@ -933,6 +946,9 @@ class NetboxIpTasks:
                 "address": ip.address,
                 "vrf": ip.vrf.id if ip.vrf else None,
                 "role": str(ip.role).lower(),
+                "assigned_object_type": (
+                    "dcim.interface" if ip.assigned_object else None
+                ),
                 "assigned_object_id": (
                     ip.assigned_object.id if ip.assigned_object else None
                 ),
@@ -1102,6 +1118,37 @@ class NetboxIpTasks:
                     bulk_create_ip.pop(key, None)
                     bulk_update_ip.pop(key, None)
 
+        # Build the public diff after payload validation so it exactly describes
+        # the actions that remain eligible for application.
+        full_diff = {
+            device_name: {
+                "create": [],
+                "update": {},
+                "delete": [],
+                "in_sync": sorted(set(actions["in_sync"])),
+            }
+            for device_name, actions in device_results.items()
+        }
+        nb_ips_by_id = {ip_data["id"]: ip_data for ip_data in nb_ips}
+        for key in bulk_create_ip:
+            full_diff[key[0]]["create"].append(key[2])
+        for key, payload in bulk_update_ip.items():
+            current = dict(nb_ips_by_id.get(payload["id"], {}))
+            if current.get("role") == "none":
+                current["role"] = None
+            full_diff[key[0]]["update"][key[2]] = {
+                field: {"old_value": current.get(field), "new_value": value}
+                for field, value in payload.items()
+                if field != "id" and current.get(field) != value
+            }
+        for actions in full_diff.values():
+            actions["create"] = sorted(set(actions["create"]))
+            actions["update"] = {
+                address: actions["update"][address]
+                for address in sorted(actions["update"])
+            }
+        ret.diff = full_diff
+
         if with_approval:
             ip_preview_result = copy.deepcopy(device_results)
             for key in bulk_create_ip:
@@ -1226,6 +1273,9 @@ class NetboxIpTasks:
 
         Returns:
             Result: Global ``created``, ``updated``, and ``in_sync`` prefix lists.
+                ``Result.diff`` contains a ``global`` reconciliation plan with
+                ``create``, ``update``, ``delete``, and ``in_sync`` actions;
+                ``delete`` is always empty because this task does not delete prefixes.
         """
         devices = list(devices or [])
         instance = instance or self.default_instance
@@ -1233,6 +1283,14 @@ class NetboxIpTasks:
             task=f"{self.name}:sync_device_prefixes",
             result={"created": [], "updated": [], "in_sync": []},
             resources=[instance],
+            diff={
+                "global": {
+                    "create": [],
+                    "update": {},
+                    "delete": [],
+                    "in_sync": [],
+                }
+            },
             dry_run=dry_run,
         )
         nb = self._get_pynetbox(instance, branch=branch, job=job)
@@ -1333,6 +1391,7 @@ class NetboxIpTasks:
         )
         create_prefixes = {}
         update_prefixes = {}
+        update_prefixes_diff = {}
         for key, desired in desired_prefixes.items():
             matching = [
                 prefix
@@ -1364,8 +1423,31 @@ class NetboxIpTasks:
                     "scope_type": "dcim.site",
                     "scope_id": desired["site"],
                 }
+                update_prefixes_diff[key] = {
+                    "site": {
+                        "old_value": current_site,
+                        "new_value": desired["site"],
+                    }
+                }
             else:
                 ret.result["in_sync"].append(desired["prefix"])
+
+        ret.diff = {
+            "global": {
+                "create": sorted(
+                    {desired_prefixes[key]["prefix"] for key in create_prefixes}
+                ),
+                "update": {
+                    desired_prefixes[key]["prefix"]: update_prefixes_diff[key]
+                    for key in sorted(
+                        update_prefixes_diff,
+                        key=lambda item: desired_prefixes[item]["prefix"],
+                    )
+                },
+                "delete": [],
+                "in_sync": sorted(set(ret.result["in_sync"])),
+            }
+        }
 
         preview = copy.deepcopy(ret.result)
         preview["created"].extend(

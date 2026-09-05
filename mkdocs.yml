@@ -279,6 +279,7 @@ nav:
     - Norfab Logging Isolation: development/adr_norfab_logging_isolation.md
     - Invoke Developer Automation: development/adr_invoke_developer_automation.md
     - NFWeb Platform and First 3D Topology: development/adr_web_ui_topology_architecture.md
+    - NFWeb Browser-Native Terminal Application: development/adr_nfweb_browser_terminal_application.md
     - Nornir SNMP Tasks: development\adr_nornir_snmp_tasks.md
     - Nornir Create Hosts from NetBox Devices: development/adr_nornir_create_hosts_from_netbox_devices.md
     - Single-Owner ZeroMQ Socket I/O: development/adr_norfab_single_owner_zeromq_socket_io.md

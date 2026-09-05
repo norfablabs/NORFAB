@@ -38,6 +38,21 @@ devices:
 }
 ```
 
+The top-level `diff` field always contains a global reconciliation plan:
+
+```json
+{
+    "global": {
+        "create": [],
+        "update": {},
+        "delete": [],
+        "in_sync": ["2001:db8::1/128"]
+    }
+}
+```
+
+The task does not delete prefixes, so `delete` is always empty.
+
 Dry-run returns the same structure without writing to NetBox. With
 `with_approval=True`, the prepared result is shown for approval before any
 prefixes are written.

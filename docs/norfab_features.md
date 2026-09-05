@@ -816,8 +816,9 @@ automatically.
 
 Reconciles device IP assignments, derived prefixes, and interface MAC addresses
 with NetBox, including interface-first IP matching, filters, inline or `nf://`
-anycast ranges, VRF/site association, and controlled deletion behavior. **Use
-cases:** IPAM accuracy and address/MAC drift correction.
+anycast ranges, VRF/site association, controlled deletion behavior, and stable
+create, update, delete, and in-sync diff reports. **Use cases:** IPAM accuracy
+and address/MAC drift correction.
 **Limitations:** requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 [IP sync](workers/netbox/services_netbox_service_tasks_sync_device_ip.md) ·

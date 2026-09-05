@@ -52,6 +52,22 @@ Both dry-run and live-run modes return the same per-device structure keyed by de
 }
 ```
 
+The top-level `diff` field always contains the per-device reconciliation plan,
+including when every address is already synchronized:
+
+```json
+{
+    "<device>": {
+        "create": [],
+        "update": {},
+        "delete": [],
+        "in_sync": ["10.0.0.5/31", "2001:db8::1/128"]
+    }
+}
+```
+
+The task does not delete IP addresses, so `delete` is always empty.
+
 **Dry-run mode** (`dry_run=True`) returns what *would* be created or updated without making any changes to NetBox.
 
 **With Approval** — Pass `with_approval=True` to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.

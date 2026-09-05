@@ -24,7 +24,9 @@ For a new development session:
 1. Read `AGENTS.md` for repository-wide commands and conventions.
 2. Read the
    [NFWeb architecture decision](adr_web_ui_topology_architecture.md) for accepted
-   product and security boundaries.
+   product and security boundaries. When planning terminal work, also read the
+   proposed
+   [browser-native terminal decision](adr_nfweb_browser_terminal_application.md).
 3. Read the user-facing [NFWeb overview](../clients_nfweb_overview.md),
    [monitoring dashboard guide](../clients_nfweb_monitoring.md), and
    [topology application guide](../clients_nfweb_topology.md).

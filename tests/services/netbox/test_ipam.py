@@ -36,6 +36,7 @@ pytestmark = pytest.mark.netbox
 
 @pytest.mark.netbox_sync_device_prefixes
 class TestSyncDevicePrefixes:
+    DIFF_KEYS = {"create", "update", "delete", "in_sync"}
     DEVICE = "fn-ceos-sp-1"
     PREFIX_ONLY_INTERFACE = "Loopback251"
     PREFIX_ONLY_IP = "10.3.251.1/32"
@@ -105,6 +106,9 @@ class TestSyncDevicePrefixes:
                 "updated": [],
                 "in_sync": [],
             }
+            assert set(result["diff"]["global"]) == self.DIFF_KEYS
+            assert result["diff"]["global"]["create"] == [self.PREFIX_ONLY_PREFIX]
+            assert result["diff"]["global"]["delete"] == []
 
         nb = get_pynetbox(nfclient)
         assert nb.ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX) is not None
@@ -129,6 +133,8 @@ class TestSyncDevicePrefixes:
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
             assert result["result"]["created"] == [self.PREFIX_ONLY_PREFIX]
+            assert set(result["diff"]["global"]) == self.DIFF_KEYS
+            assert result["diff"]["global"]["create"] == [self.PREFIX_ONLY_PREFIX]
         assert (
             get_pynetbox(nfclient).ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)
             is None
@@ -149,6 +155,12 @@ class TestSyncDevicePrefixes:
             assert result["result"] == {
                 "created": [],
                 "updated": [],
+                "in_sync": [],
+            }
+            assert result["diff"]["global"] == {
+                "create": [],
+                "update": {},
+                "delete": [],
                 "in_sync": [],
             }
 
@@ -199,6 +211,12 @@ class TestSyncDevicePrefixes:
             assert result["result"]["created"] == []
             assert result["result"]["updated"] == []
             assert result["result"]["in_sync"] == [self.PREFIX_ONLY_PREFIX]
+            assert result["diff"]["global"] == {
+                "create": [],
+                "update": {},
+                "delete": [],
+                "in_sync": [self.PREFIX_ONLY_PREFIX],
+            }
 
     def test_ignore_vrf_reuses_prefix_in_other_vrf(self, nfclient):
         nb = get_pynetbox(nfclient)
@@ -281,6 +299,7 @@ class TestSyncDevicePrefixes:
         for worker, result in ret.items():
             assert not result["failed"], f"{worker} failed - {result}"
             assert result["result"]["updated"] == [self.PREFIX_ONLY_PREFIX]
+            assert self.PREFIX_ONLY_PREFIX in result["diff"]["global"]["update"]
 
         prefix = nb.ipam.prefixes.get(prefix=self.PREFIX_ONLY_PREFIX)
         assert prefix.scope.name == nb.dcim.devices.get(name=self.DEVICE).site.name
@@ -351,6 +370,7 @@ class TestSyncDeviceIP:
         "ceos-leaf-3",
     ]
     RESULT_KEYS = {"created", "updated", "in_sync"}
+    DIFF_KEYS = {"create", "update", "delete", "in_sync"}
 
     # Known TEST_SYNC IPs from interfaces_parse_data.json (10.3.x.x / 2001:beef:: only)
     SPINE1_IP = "10.3.15.33/30"  # ceos-spine-1 Ethernet9 (TEST_SYNC_ROUTED_WITH_MAC)
@@ -452,6 +472,9 @@ class TestSyncDeviceIP:
                 assert device_data[
                     "created"
                 ], f"{worker}:{device} no IPs created after cleanup"
+                assert set(res["diff"][device]) == self.DIFF_KEYS
+                assert res["diff"][device]["create"]
+                assert res["diff"][device]["delete"] == []
 
         # Validate both spine IPs exist in NetBox assigned to the correct interface
         pynb = get_pynetbox(nfclient)
@@ -493,6 +516,8 @@ class TestSyncDeviceIP:
                 assert device_data[
                     "created"
                 ], f"{worker}:{device} dry-run created list is empty after cleanup"
+                assert set(res["diff"][device]) == self.DIFF_KEYS
+                assert res["diff"][device]["create"]
 
         # Verify dry-run made no writes - IPs must still be absent from NetBox
         pynb = get_pynetbox(nfclient)
@@ -528,6 +553,12 @@ class TestSyncDeviceIP:
                 assert device_data[
                     "in_sync"
                 ], f"{worker}:{device} in_sync list empty on second sync"
+                assert res["diff"][device]["create"] == []
+                assert res["diff"][device]["update"] == {}
+                assert res["diff"][device]["delete"] == []
+                assert set(res["diff"][device]["in_sync"]) == set(
+                    device_data["in_sync"]
+                )
 
         # Validate IPs are still correctly assigned in NetBox after second sync
         pynb = get_pynetbox(nfclient)
@@ -761,6 +792,7 @@ class TestSyncDeviceIP:
             assert (
                 self.SPINE1_IP not in device_data["created"]
             ), f"{worker} {self.SPINE1_IP} incorrectly listed as created"
+            assert self.SPINE1_IP in res["diff"]["ceos-spine-1"]["update"]
 
         # Validate the IP is now assigned to the correct interface
         nb_ips = self._get_nb_ip(nfclient, "ceos-spine-1", self.SPINE1_INTF)
@@ -789,6 +821,7 @@ class TestSyncDeviceIP:
             assert (
                 self.SPINE1_IP in device_data["updated"]
             ), f"{worker} {self.SPINE1_IP} not in updated list for dry-run"
+            assert self.SPINE1_IP in res["diff"]["ceos-spine-1"]["update"]
 
         # Dry-run must not have made any changes - IP must remain unassigned
         pynb = get_pynetbox(nfclient)
@@ -1244,6 +1277,12 @@ class TestSyncDeviceIP:
             assert not device_data[
                 "updated"
             ], f"{worker} unexpected updated IPs with non-matching filter_by_name: {device_data['updated']}"
+            assert res["diff"]["ceos-spine-1"] == {
+                "create": [],
+                "update": {},
+                "delete": [],
+                "in_sync": [],
+            }
 
         # Validate no IPs were written to NetBox for spine-1 at all
         pynb = get_pynetbox(nfclient)

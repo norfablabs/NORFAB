@@ -1,3 +1,11 @@
+# 0.22.6
+
+## ENHANCEMENTS
+
+1. Normalized NetBox `sync_device_ip` and `sync_device_prefixes` diff output to always include `create`, `update`, `delete`, and `in_sync` actions, including empty plans and fully synchronized objects.
+
+---
+
 # 0.22.5
 
 # ENHANCEMENTS
