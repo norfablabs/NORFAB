@@ -7129,6 +7129,9 @@ Route-target and device associations are additive.</p>
 <p>The task creates missing NetBox route targets before it creates or updates
 VRFs. Route distinguishers and import/export route policies returned by the TTP
 getter are not stored in NetBox.</p>
+<p>If multiple existing NetBox VRFs match the same live VRF name, the task logs a
+warning and reconciles against the matched VRF with the numerically lowest
+NetBox ID. Other same-name VRFs are left unchanged.</p>
 <h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
 <table>
 <thead>
@@ -7175,6 +7178,11 @@ getter are not stored in NetBox.</p>
 <td>Multi-object VRF custom field related to <code>dcim.device</code>.</td>
 </tr>
 <tr>
+<td><code>preserve_description</code></td>
+<td><code>None</code></td>
+<td>Preserve NetBox descriptions only when live text is empty. Use <code>True</code> to always preserve or <code>False</code> to always use live text.</td>
+</tr>
+<tr>
 <td>Nornir filters</td>
 <td><code>None</code></td>
 <td><code>FO</code>, <code>FB</code>, <code>FH</code>, <code>FC</code>, <code>FR</code>, <code>FG</code>, <code>FP</code>, <code>FL</code>, <code>FM</code>, <code>FX</code>, and <code>FN</code>.</td>
@@ -7209,13 +7217,18 @@ field value to the VRF.</p>
 <span class="w">  </span><span class="nt">route_policy_import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A_IMPORT</span>
 <span class="w">  </span><span class="nt">route_policy_export</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A_EXPORT</span>
 </code></pre></div>
-<p>Only <code>name</code>, <code>description</code>, <code>rt_import</code>, and <code>rt_export</code> are used. Description
-text and route-target values are used without string normalization, and null
-descriptions become an empty string.</p>
+<p>Only <code>name</code>, <code>description</code>, <code>rt_import</code>, and <code>rt_export</code> are used. When
+<code>instance_type</code> is present, records whose value is not <code>vrf</code> are silently
+skipped. Description text and route-target values are used without string
+normalization, and null descriptions become an empty string.</p>
 <p>For each VRF, devices are ordered alphabetically. The first non-empty
 description in that order becomes the NetBox description; the description is
-empty when no device supplies one. Different descriptions from multiple
-devices are resolved by this rule and are not reported as conflicts.</p>
+empty when no device supplies one. For existing VRFs, the default
+<code>preserve_description=None</code> keeps the NetBox description when this aggregate
+live description is empty. Set it to <code>True</code> to always retain the NetBox value,
+or <code>False</code> to always apply the live value, including an empty string. Different
+descriptions from multiple devices are resolved by this rule and are not
+reported as conflicts.</p>
 <p>Import and export route-target lists from every reporting device are
 concatenated to form the live aggregate. The shared <code>make_diff</code> method compares
 that aggregate with NetBox and ignores route-target order. If it finds an
@@ -7403,6 +7416,9 @@ installed and configured for branch use.</p>
 <p>Select devices with a Nornir filter and use another custom field:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vrfs<span class="w"> </span>FC<span class="w"> </span>leaf<span class="w"> </span>device-custom-field<span class="w"> </span>vrf_devices
 </code></pre></div>
+<p>Always keep existing NetBox descriptions:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vrfs<span class="w"> </span>devices<span class="w"> </span>fn-ceos-lf-1<span class="w"> </span>preserve-description<span class="w"> </span><span class="nb">true</span>
+</code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">norfab.core.nfapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NorFab</span>
@@ -7417,6 +7433,7 @@ installed and configured for branch use.</p>
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fn-ceos-lf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;fn-ceos-lf-2&quot;</span><span class="p">],</span>
             <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;device_custom_field&quot;</span><span class="p">:</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;preserve_description&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7468,6 +7485,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
 <span class="w">            </span>├──<span class="w"> </span>with-approval:<span class="w">    </span>Preview<span class="w"> </span>VRF<span class="w"> </span>changes<span class="w"> </span>and<span class="w"> </span>ask<span class="w"> </span><span class="k">for</span><span class="w"> </span>review<span class="w"> </span>before<span class="w"> </span>writing<span class="w"> </span>to<span class="w"> </span>NetBox,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>device-custom-field:<span class="w">    </span>VRF<span class="w"> </span>custom<span class="w"> </span>field<span class="w"> </span>that<span class="w"> </span>stores<span class="w"> </span>associated<span class="w"> </span>NetBox<span class="w"> </span>devices,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;devices&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>preserve-description:<span class="w">    </span>Preserve<span class="w"> </span>NetBox<span class="w"> </span>descriptions<span class="w"> </span>always<span class="w"> </span><span class="o">(</span><span class="nb">true</span><span class="o">)</span>,<span class="w"> </span>when<span class="w"> </span>live<span class="w"> </span>text<span class="w"> </span>is<span class="w"> </span>empty<span class="w"> </span><span class="o">(</span>null<span class="o">)</span>,<span class="w"> </span>or<span class="w"> </span>never<span class="w"> </span><span class="o">(</span><span class="nb">false</span><span class="o">)</span>
 <span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 <span class="w">            </span>└──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
@@ -7628,6 +7646,24 @@ records devices on which each VRF was observed.</p>
             </td>
             <td>
                   <code>&#39;devices&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>preserve_description</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="bool">bool</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description preservation policy. <code>None</code> preserves
+NetBox text when the live description is empty, <code>True</code> always
+preserves NetBox text, and <code>False</code> always uses live text.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -8020,7 +8056,29 @@ records devices on which each VRF was observed.</p>
 <span class="normal">356</span>
 <span class="normal">357</span>
 <span class="normal">358</span>
-<span class="normal">359</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncVrfsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncVrfsResult</span><span class="p">,</span>
@@ -8044,6 +8102,7 @@ records devices on which each VRF was observed.</p>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">device_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
+    <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize live VRFs and their route targets with NetBox.</span>
@@ -8063,6 +8122,9 @@ records devices on which each VRF was observed.</p>
 <span class="sd">        devices: Explicit NetBox and Nornir device names.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
 <span class="sd">        device_custom_field: VRF custom field containing associated devices.</span>
+<span class="sd">        preserve_description: Description preservation policy. ``None`` preserves</span>
+<span class="sd">            NetBox text when the live description is empty, ``True`` always</span>
+<span class="sd">            preserves NetBox text, and ``False`` always uses live text.</span>
 <span class="sd">        **kwargs: Nornir FFun host filters.</span>
 
 <span class="sd">    Returns:</span>
@@ -8155,8 +8217,13 @@ records devices on which each VRF was observed.</p>
             <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">result_devices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
-            <span class="n">parsed_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instance_type&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;instance_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;vrf&quot;</span>
+                <span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">parsed_count</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">observations</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
                         <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
@@ -8224,6 +8291,11 @@ records devices on which each VRF was observed.</p>
             <span class="s2">&quot;import_targets&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">vrf</span><span class="o">.</span><span class="n">import_targets</span><span class="p">],</span>
             <span class="s2">&quot;export_targets&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">vrf</span><span class="o">.</span><span class="n">export_targets</span><span class="p">],</span>
         <span class="p">}</span>
+        <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
+            <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+            <span class="n">current</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+            <span class="n">preserve_description</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
             <span class="n">current</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">device</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
@@ -8233,8 +8305,16 @@ records devices on which each VRF was observed.</p>
                 <span class="nb">set</span><span class="p">(</span><span class="n">current</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">])</span>
                 <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">])</span>
             <span class="p">)</span>
-        <span class="n">netbox_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span>
-        <span class="n">netbox_objects</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
+        <span class="n">existing_vrf</span> <span class="o">=</span> <span class="n">netbox_objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing_vrf</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: Multiple NetBox VRFs matched &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;by name &#39;</span><span class="si">{</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, using lowest ID from &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">existing_vrf</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing_vrf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">existing_vrf</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
+            <span class="n">netbox_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span>
+            <span class="n">netbox_objects</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">netbox_vrfs</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching NetBox VRF(s)&quot;</span><span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating VRF sync diff&quot;</span><span class="p">)</span>

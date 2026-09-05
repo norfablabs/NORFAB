@@ -2620,6 +2620,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#description-preservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description Preservation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtering" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6925,6 +6936,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#description-preservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description Preservation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtering" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7133,6 +7155,13 @@ and reported as warning events.</p>
 <span class="p">}</span>
 </code></pre></div>
 <p>In live-run mode <code>res["diff"]</code> is also populated with field-level change details for all interfaces that were created or updated.</p>
+<h2 id="description-preservation">Description Preservation<a class="headerlink" href="#description-preservation" title="Permanent link">¤</a></h2>
+<p><code>preserve_description</code> controls descriptions on interfaces that already exist
+in NetBox. Its default value, <code>None</code>, keeps the NetBox description when the
+live description is empty and otherwise uses the live value. Set it to <code>True</code>
+to always keep the NetBox description. Set it to <code>False</code> to always use the live
+description, including an empty string. Newly created interfaces always use
+the live description.</p>
 <h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
 <p>Interfaces can be scoped using glob patterns so that only a subset is considered on both the live and NetBox sides:</p>
 <ul>
@@ -7305,6 +7334,7 @@ narrow those group ranges. A rule containing only <code>set_vlan_group</code> is
         <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">],</span>
         <span class="s2">&quot;process_deletions&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s2">&quot;filter_by_description&quot;</span><span class="p">:</span> <span class="s2">&quot;TEST_SYNC_*&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;preserve_description&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7386,6 +7416,7 @@ root
             ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Loopback*&#39;
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
+            ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── update-type:    Safely update existing NetBox logical interface types, default &#39;True&#39;
             ├── vlan-group:    Fallback VLAN group exact name
             ├── vlan-map:    Ordered VLAN-to-group mapping rules
@@ -7672,6 +7703,25 @@ interfaces are included by description, e.g. <code>'uplink*'</code>.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>preserve_description</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description preservation policy.
+<code>None</code> preserves NetBox text when the live description is empty,
+<code>True</code> always preserves NetBox text, and <code>False</code> always uses
+live text.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>update_type</code>
             </td>
             <td>
@@ -7810,11 +7860,7 @@ dry-run mode.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\interfaces_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 873</span>
-<span class="normal"> 874</span>
-<span class="normal"> 875</span>
-<span class="normal"> 876</span>
-<span class="normal"> 877</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 877</span>
 <span class="normal"> 878</span>
 <span class="normal"> 879</span>
 <span class="normal"> 880</span>
@@ -8673,7 +8719,25 @@ dry-run mode.</p>
 <span class="normal">1733</span>
 <span class="normal">1734</span>
 <span class="normal">1735</span>
-<span class="normal">1736</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1736</span>
+<span class="normal">1737</span>
+<span class="normal">1738</span>
+<span class="normal">1739</span>
+<span class="normal">1740</span>
+<span class="normal">1741</span>
+<span class="normal">1742</span>
+<span class="normal">1743</span>
+<span class="normal">1744</span>
+<span class="normal">1745</span>
+<span class="normal">1746</span>
+<span class="normal">1747</span>
+<span class="normal">1748</span>
+<span class="normal">1749</span>
+<span class="normal">1750</span>
+<span class="normal">1751</span>
+<span class="normal">1752</span>
+<span class="normal">1753</span>
+<span class="normal">1754</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -8705,6 +8769,7 @@ dry-run mode.</p>
     <span class="n">vlan_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_vlans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">ignore_vrf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8795,6 +8860,10 @@ dry-run mode.</p>
 <span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
 <span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
 <span class="sd">            interfaces are included by description, e.g. ``&#39;uplink*&#39;``.</span>
+<span class="sd">        preserve_description (bool, optional): Description preservation policy.</span>
+<span class="sd">            ``None`` preserves NetBox text when the live description is empty,</span>
+<span class="sd">            ``True`` always preserves NetBox text, and ``False`` always uses</span>
+<span class="sd">            live text.</span>
 <span class="sd">        update_type (bool): Safely update existing interface types. Updates are</span>
 <span class="sd">            allowed from ``other`` to ``virtual``, ``bridge``, or ``lag``, and</span>
 <span class="sd">            between those logical types. Specific physical types are protected,</span>
@@ -8967,7 +9036,11 @@ dry-run mode.</p>
                 <span class="s2">&quot;lag&quot;</span><span class="p">:</span> <span class="n">lag</span><span class="p">,</span>
                 <span class="s2">&quot;mtu&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mtu&quot;</span><span class="p">),</span>
                 <span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;speed&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;duplex&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duplex&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;duplex&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;duplex&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duplex&quot;</span><span class="p">),</span> <span class="nb">dict</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duplex&quot;</span><span class="p">)</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
                 <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">),</span>
                 <span class="s2">&quot;untagged_vlan&quot;</span><span class="p">:</span> <span class="p">(</span>
@@ -9165,6 +9238,11 @@ dry-run mode.</p>
                 <span class="c1"># Preserve existing NetBox values when live data has no usable value.</span>
                 <span class="n">nb_interface</span> <span class="o">=</span> <span class="n">normalised_nb_all</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">nb_interface</span><span class="p">:</span>
+                    <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
+                        <span class="n">interface</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                        <span class="n">nb_interface</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                        <span class="n">preserve_description</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;mtu&quot;</span><span class="p">,</span> <span class="s2">&quot;speed&quot;</span><span class="p">):</span>
                         <span class="k">if</span> <span class="n">interface</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nb_interface</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span>
                             <span class="n">interface</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>

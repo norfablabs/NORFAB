@@ -2866,6 +2866,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#description-preservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description Preservation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtering" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6947,6 +6958,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#description-preservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description Preservation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtering" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7182,6 +7204,13 @@
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> returns what <em>would</em> happen without writing to NetBox.</p>
 <p><strong>Live-run mode</strong> applies changes and returns the same structure showing what was done.</p>
+<h2 id="description-preservation">Description Preservation<a class="headerlink" href="#description-preservation" title="Permanent link">¤</a></h2>
+<p><code>preserve_description</code> controls descriptions on sessions that already exist in
+NetBox. Its default value, <code>None</code>, keeps the NetBox description when the live
+description is empty and otherwise uses the live value. Set it to <code>True</code> to
+always keep the NetBox description. Set it to <code>False</code> to always use the live
+description, including an empty string. Newly created sessions always use the
+live description.</p>
 <h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
 <p>Three optional filters narrow which sessions are considered during sync. Filters apply to <strong>both</strong> the NetBox dataset and the live device dataset before the diff is computed. Sessions that do not match are silently excluded from creates, updates, and deletes.</p>
 <table>
@@ -7366,6 +7395,7 @@
         <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
         <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
         <span class="s2">&quot;filter_by_description&quot;</span><span class="p">:</span> <span class="s2">&quot;*spine uplink*&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;preserve_description&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -7415,6 +7445,7 @@ root
             ├── filter-by-remote-as:    Only sync sessions with matching remote AS number(s)
             ├── filter-by-peer-group:    Only sync sessions with matching peer group name(s)
             ├── filter-by-description:    Only sync sessions whose description matches this glob pattern
+            ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── vrf-custom-field:    BGP session field for VRF reference, default &#39;vrf&#39;
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
@@ -7752,6 +7783,25 @@ VRF object reference read from and written into
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>preserve_description</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description preservation policy.
+<code>None</code> preserves NetBox text when the live description is empty,
+<code>True</code> always preserves NetBox text, and <code>False</code> always uses
+live text.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**kwargs</code>
             </td>
             <td>
@@ -7821,16 +7871,7 @@ VRF object reference read from and written into
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1851</span>
-<span class="normal">1852</span>
-<span class="normal">1853</span>
-<span class="normal">1854</span>
-<span class="normal">1855</span>
-<span class="normal">1856</span>
-<span class="normal">1857</span>
-<span class="normal">1858</span>
-<span class="normal">1859</span>
-<span class="normal">1860</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1860</span>
 <span class="normal">1861</span>
 <span class="normal">1862</span>
 <span class="normal">1863</span>
@@ -8370,7 +8411,34 @@ VRF object reference read from and written into
 <span class="normal">2397</span>
 <span class="normal">2398</span>
 <span class="normal">2399</span>
-<span class="normal">2400</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2400</span>
+<span class="normal">2401</span>
+<span class="normal">2402</span>
+<span class="normal">2403</span>
+<span class="normal">2404</span>
+<span class="normal">2405</span>
+<span class="normal">2406</span>
+<span class="normal">2407</span>
+<span class="normal">2408</span>
+<span class="normal">2409</span>
+<span class="normal">2410</span>
+<span class="normal">2411</span>
+<span class="normal">2412</span>
+<span class="normal">2413</span>
+<span class="normal">2414</span>
+<span class="normal">2415</span>
+<span class="normal">2416</span>
+<span class="normal">2417</span>
+<span class="normal">2418</span>
+<span class="normal">2419</span>
+<span class="normal">2420</span>
+<span class="normal">2421</span>
+<span class="normal">2422</span>
+<span class="normal">2423</span>
+<span class="normal">2424</span>
+<span class="normal">2425</span>
+<span class="normal">2426</span>
+<span class="normal">2427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpPeeringsResult</span><span class="p">,</span>
@@ -8403,6 +8471,7 @@ VRF object reference read from and written into
     <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_peer_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vrf_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
+    <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8453,6 +8522,10 @@ VRF object reference read from and written into
 <span class="sd">            VRF object reference read from and written into</span>
 <span class="sd">            ``custom_fields[vrf_custom_field]``.  Default ``&#39;vrf&#39;`` means</span>
 <span class="sd">            ``custom_fields[&#39;vrf&#39;]``.</span>
+<span class="sd">        preserve_description (bool, optional): Description preservation policy.</span>
+<span class="sd">            ``None`` preserves NetBox text when the live description is empty,</span>
+<span class="sd">            ``True`` always preserves NetBox text, and ``False`` always uses</span>
+<span class="sd">            live text.</span>
 <span class="sd">        **kwargs: Nornir host filters (e.g. ``FC``, ``FL``, ``FB``).</span>
 
 <span class="sd">    Returns:</span>
@@ -8512,7 +8585,7 @@ VRF object reference read from and written into
 
     <span class="c1"># Validate VRF custom field</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;validating BGP session VRF custom field&quot;</span><span class="p">)</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="n">vrf_custom_field</span> <span class="o">=</span> <span class="n">_resolve_vrf_custom_field</span><span class="p">(</span>
         <span class="n">vrf_custom_field</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="p">)</span>
@@ -8546,7 +8619,11 @@ VRF object reference read from and written into
     <span class="c1"># Fetch existing NetBox BGP sessions</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching BGP session data from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
     <span class="n">nb_sessions_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bgp_peerings</span><span class="p">(</span>
-        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="s2">&quot;refresh&quot;</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+        <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+        <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
+        <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_sessions_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed to fetch BGP session data from NetBox&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
@@ -8737,6 +8814,15 @@ VRF object reference read from and written into
 
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">failed_devices</span><span class="p">:</span>
         <span class="n">normalised_nb</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">sessions</span> <span class="ow">in</span> <span class="n">normalised_live</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">normalised_nb</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{}):</span>
+                <span class="n">session</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
+                    <span class="n">session</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                    <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                    <span class="n">preserve_description</span><span class="p">,</span>
+                <span class="p">)</span>
 
     <span class="c1"># Single diff on the full normalised datasets</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating BGP session sync diff&quot;</span><span class="p">)</span>

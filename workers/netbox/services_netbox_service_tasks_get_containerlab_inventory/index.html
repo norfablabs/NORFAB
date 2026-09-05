@@ -6994,6 +6994,11 @@
 <td>NetBox instance name to target</td>
 </tr>
 <tr>
+<td><code>branch</code></td>
+<td style="text-align: right;">No</td>
+<td>NetBox Branching plugin branch name used for device and connection reads</td>
+</tr>
+<tr>
 <td><code>image</code></td>
 <td style="text-align: right;">No</td>
 <td>Container image to use for all nodes</td>
@@ -7049,6 +7054,7 @@
 <li>If <code>image</code> is provided, it overrides node image values. Otherwise, the task uses <code>{kind}:latest</code> when no image is configured.</li>
 <li><code>interfaces_rename</code> in config context can rename interfaces in generated links.</li>
 <li>If <code>lab_name</code> is omitted and <code>tenant</code> is provided, the tenant name becomes the lab name.</li>
+<li>Supplying <code>branch</code> bypasses caches and applies the branch to device, connection, and circuit reads.</li>
 </ul>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
@@ -7127,6 +7133,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>devices<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>lab<span class="w"> </span>inventory<span class="w"> </span><span class="k">for</span>
 <span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>netbox-instance:<span class="w">    </span>Name<span class="w"> </span>of<span class="w"> </span>Netbox<span class="w"> </span>instance<span class="w"> </span>to<span class="w"> </span>pull<span class="w"> </span>inventory<span class="w"> </span>from
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>NetBox<span class="w"> </span>branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>ipv4-subnet:<span class="w">    </span>IPv4<span class="w"> </span>management<span class="w"> </span>subnet<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>lab,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;172.100.100.0/24&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>image:<span class="w">    </span>Docker<span class="w"> </span>image<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>all<span class="w"> </span>nodes
 <span class="w">            </span>└──<span class="w"> </span>ports:<span class="w">    </span>Range<span class="w"> </span>of<span class="w"> </span>TCP/UDP<span class="w"> </span>ports<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>nodes,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;[12000, 13000]&#39;</span>
@@ -7292,6 +7299,22 @@ devices matched.</p>
             <td>
               <div class="doc-md-description">
                 <p>NetBox instance to use.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>branch</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NetBox branching plugin branch name to use.</p>
               </div>
             </td>
             <td>
@@ -7801,7 +7824,20 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
 <span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span>
-<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetContainerlabInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetContainerlabInventoryResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -7823,6 +7859,7 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
     <span class="n">filters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">image</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;172.100.100.0/24&quot;</span><span class="p">,</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">15000</span><span class="p">),</span>
@@ -7890,6 +7927,7 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
 <span class="sd">        filters (list, optional): List of filters to apply when retrieving devices from NetBox.</span>
 <span class="sd">        devices (list, optional): List of specific devices to retrieve from NetBox.</span>
 <span class="sd">        instance (str, optional): NetBox instance to use.</span>
+<span class="sd">        branch (str, optional): NetBox branching plugin branch name to use.</span>
 <span class="sd">        image (str, optional): Default containerlab image to use,</span>
 <span class="sd">        ipv4_subnet (str, Optional): Management subnet to use to IP number nodes</span>
 <span class="sd">            starting with 2nd IP in the subnet, in assumption that 1st IP is a default gateway.</span>
@@ -7911,6 +7949,8 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
     <span class="n">ports_map</span> <span class="o">=</span> <span class="n">ports_map</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">endpts_done</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># to deduplicate links</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># handle lab name and tenant name with filters</span>
     <span class="k">if</span> <span class="n">lab_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tenant</span><span class="p">:</span>
         <span class="n">lab_name</span> <span class="o">=</span> <span class="n">tenant</span>
@@ -7963,6 +8003,7 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
         <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
         <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+        <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_devices</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
@@ -8042,7 +8083,11 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
 
     <span class="c1"># query interface connections data from netbox</span>
     <span class="n">nb_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connections</span><span class="p">(</span>
-        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+        <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span>
+        <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+        <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_connections</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;connection retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
@@ -8098,7 +8143,11 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
 
     <span class="c1"># query circuits connections data from netbox</span>
     <span class="n">nb_circuits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_circuits</span><span class="p">(</span>
-        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+        <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">),</span>
+        <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+        <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">nb_circuits</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;circuit retrieval completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>

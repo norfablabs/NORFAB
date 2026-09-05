@@ -9766,7 +9766,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 3 September 2026</em></p>
+<p><em>Last updated: 5 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10488,13 +10488,14 @@ and AI tool use. <strong>Limitations:</strong> generic operations require knowle
 NetBox data model and do not provide every safeguard of a dedicated task.
 <a href="../workers/netbox/services_netbox_service_tasks_crud/">Task details</a></p>
 <h3 id="branch-aware-changes">Branch-aware changes<a class="headerlink" href="#branch-aware-changes" title="Permanent link">¤</a></h3>
-<p>Supported tasks can target a named NetBox branch, and the service can delete a
+<p>Supported get, sync, CRUD, raw REST, and paginated GraphQL tasks can target a named NetBox branch, and the service can delete a
 branch through the NetBox Branching plugin. <strong>Use cases:</strong> stage designs,
 review source-of-truth changes, test automation against proposed state, and
 clean up completed branches. <strong>Interfaces:</strong> branch arguments are available on
 supporting Python/REST/MCP tasks; branch deletion is not currently modelled in
 NFCLI. <strong>Limitations:</strong> requires a compatible branching plugin and not every
-NetBox operation is inherently branch-aware.</p>
+NetBox operation is inherently branch-aware. Branch reads bypass the main-context
+cache, including circuit retrieval and circuit termination path tracing.</p>
 <h3 id="device-and-interface-retrieval">Device and interface retrieval<a class="headerlink" href="#device-and-interface-retrieval" title="Permanent link">¤</a></h3>
 <p>Returns devices and detailed interfaces, with optional IP, inventory item,
 child-interface, and LAG relationships. <strong>Use cases:</strong> inventory exports,
@@ -10556,7 +10557,9 @@ in their NetBox task errors while retaining usable results from other devices.</
 <p>Collects live interface configuration and operational data through Nornir.
 Operational state fills MTU, duplex, and speed when absent from configuration
 parsing. Missing or zero live MTU and speed values preserve existing NetBox
-values. The task computes a desired/current diff, optionally maps live
+values. Existing descriptions can be preserved always, preserved only when
+live text is empty, or overwritten by live text. The task computes a
+desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
 An empty NetBox interface set is valid, allowing a device to be initialized
@@ -10578,7 +10581,8 @@ NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
 an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
 loaded from YAML through <code>nf://</code> URLs, using <code>match_device_names</code>,
 <code>match_interface_names</code>, <code>match_vlan_ids</code>, and <code>set_vlan_group</code> for matching
-and group selection. VLANs are identified by VID per scope;
+and group selection. Existing descriptions support always, live-empty-only, or
+never preservation. VLANs are identified by VID per scope;
 the first device supplies values when later devices report a conflict.
 <strong>Use cases:</strong> correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. <strong>Limitations:</strong> parser coverage determines
@@ -10589,7 +10593,10 @@ reliably identify stale NetBox objects.
 <p>Reconciles global VRFs and descriptions from live devices, and adds all observed
 import/export route targets to the existing NetBox associations. Missing route
 targets are created, and an optional multi-object custom field records the
-devices on which each VRF was observed. <strong>Use cases:</strong> VRF inventory,
+devices on which each VRF was observed. Existing descriptions support the same
+always, live-empty-only, or never preservation policy as interface and BGP
+peering synchronization. If multiple NetBox VRFs share a matched name, the
+lowest numeric ID is selected and a warning is logged. <strong>Use cases:</strong> VRF inventory,
 route-target aggregation, and device-to-VRF inventory. <strong>Limitations:</strong> route
 distinguishers and route policies are not stored; VRF objects, route-target
 objects, route-target associations, and device associations are not removed
@@ -10597,8 +10604,9 @@ automatically.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_vrfs/">Task details</a></p>
 <h3 id="live-ip-and-mac-reconciliation">Live IP and MAC reconciliation<a class="headerlink" href="#live-ip-and-mac-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles device IP assignments, derived prefixes, and interface MAC addresses
-with NetBox, including filters, inline or <code>nf://</code> anycast ranges, VRF/site
-association, and controlled deletion behavior. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
+with NetBox, including interface-first IP matching, filters, inline or <code>nf://</code>
+anycast ranges, VRF/site association, and controlled deletion behavior. <strong>Use
+cases:</strong> IPAM accuracy and address/MAC drift correction.
 <strong>Limitations:</strong> requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_ip/">IP sync</a> ·
@@ -10613,8 +10621,9 @@ prerequisites; templates and transformer files execute as trusted code.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_inventory/">Task details</a></p>
 <h3 id="bgp-peering-lifecycle">BGP peering lifecycle<a class="headerlink" href="#bgp-peering-lifecycle" title="Permanent link">¤</a></h3>
 <p>Creates or updates individual and bulk BGP sessions, and reconciles live BGP
-neighbors with NetBox using dry-run, filters, and optional stale-session
-deletion. <strong>Use cases:</strong> routing source-of-truth onboarding and drift control.
+neighbors with NetBox using dry-run, filters, optional stale-session deletion,
+and tri-state existing-description preservation. <strong>Use cases:</strong> routing
+source-of-truth onboarding and drift control.
 <strong>Limitations:</strong> requires the NetBox BGP plugin, supported live parsing, and
 consistent IP/ASN/VRF modelling.
 <a href="../workers/netbox/services_netbox_service_tasks_create_bgp_peering/">Create</a> ·

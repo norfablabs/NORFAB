@@ -7602,7 +7602,10 @@ observed. ASNs and device associations are never deleted.</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpAsnResult</span><span class="p">,</span>
@@ -7809,8 +7812,11 @@ observed. ASNs and device associations are never deleted.</p>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">netbox_asn_records</span><span class="p">:</span>
         <span class="n">current</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">asn</span><span class="o">.</span><span class="n">description</span><span class="p">}</span>
-        <span class="k">if</span> <span class="n">preserve_description</span><span class="p">:</span>
-            <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">asn</span><span class="o">.</span><span class="n">description</span>
+        <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_description_policy</span><span class="p">(</span>
+            <span class="n">live_asns</span><span class="p">[</span><span class="n">asn</span><span class="o">.</span><span class="n">asn</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+            <span class="n">current</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+            <span class="n">preserve_description</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
             <span class="n">current</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">device</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>

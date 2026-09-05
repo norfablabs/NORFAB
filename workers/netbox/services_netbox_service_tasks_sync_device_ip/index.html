@@ -2788,15 +2788,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#special-features" class="md-nav__link">
+  <a href="#existing-ip-selection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Special Features
+        Existing IP Selection
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Special Features">
+    <nav class="md-nav" aria-label="Existing IP Selection">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2804,17 +2804,6 @@
     <span class="md-ellipsis">
       
         Anycast Support
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#vrf-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        VRF Handling
       
     </span>
   </a>
@@ -6931,15 +6920,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#special-features" class="md-nav__link">
+  <a href="#existing-ip-selection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Special Features
+        Existing IP Selection
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Special Features">
+    <nav class="md-nav" aria-label="Existing IP Selection">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -6947,17 +6936,6 @@
     <span class="md-ellipsis">
       
         Anycast Support
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#vrf-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        VRF Handling
       
     </span>
   </a>
@@ -7077,15 +7055,15 @@
 <li><strong>Collect live state</strong> — Run a Nornir <a href="../../nornir/services_nornir_service_tasks_parse/"><code>parse_ttp</code></a> job against the target devices to collect live IPv4 and IPv6 addresses per interface.</li>
 <li><strong>Fetch NetBox state</strong> — Retrieve all existing IP address objects from NetBox that match any discovered address value.</li>
 <li><strong>Reconcile</strong> — Compare live addresses against NetBox records and classify each IP as:<ul>
-<li><strong>create</strong> — address not in NetBox at all; a new record is created and assigned to the interface</li>
-<li><strong>update</strong> — address exists in NetBox but is unassigned or has a stale role/VRF; the record is updated</li>
-<li><strong>in_sync</strong> — address already assigned to the correct interface with the correct role and VRF; no change needed</li>
+<li><strong>create</strong> — no reusable candidate remains after interface and VRF selection</li>
+<li><strong>update</strong> — a reusable record is unassigned or needs a managed role or VRF change</li>
+<li><strong>in_sync</strong> — the address is on the target interface and no managed change is needed</li>
 </ul>
 </li>
 </ol>
-<p>By default <code>ignore_vrf=True</code>, so discovered interface VRFs are not written to IP
-addresses. Existing IPs are matched by address only; the first matching object
-returned by NetBox is reused and its VRF value is left unchanged.</p>
+<p>NetBox candidates are searched by host address without using the prefix length.
+When several records have the same address, interface assignment takes priority
+over VRF and unassigned-record fallback matching.</p>
 <p>Roles are assigned automatically:</p>
 <ul>
 <li>Interfaces whose name starts with <code>loopback</code> or <code>lo</code> → role <code>loopback</code></li>
@@ -7126,9 +7104,67 @@ returned by NetBox is reused and its VRF value is left unchanged.</p>
 <li><code>filter_by_ip</code> — glob pattern matched against the host portion of the IP address (without prefix length), e.g. <code>"10.0.1.*"</code>. Only matching addresses are included.</li>
 </ul>
 <p>Multiple filters combine as intersection — all specified conditions must be satisfied for an IP to be included.</p>
-<h2 id="special-features">Special Features<a class="headerlink" href="#special-features" title="Permanent link">¤</a></h2>
+<h2 id="existing-ip-selection">Existing IP Selection<a class="headerlink" href="#existing-ip-selection" title="Permanent link">¤</a></h2>
+<p>For each live address, the task uses this order:</p>
+<ol>
+<li>Reuse the matching IP already assigned to the target interface.</li>
+<li>If no interface match exists, apply the <code>ignore_vrf</code> rule.</li>
+<li>Reuse the first matching unassigned IP, if available.</li>
+<li>Otherwise, create the IP or report a conflict according to its role.</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th><code>ignore_vrf=True</code> (default)</th>
+<th><code>ignore_vrf=False</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Same IP is assigned to the target interface</td>
+<td>Reuse it and leave its VRF unchanged. For example, an IP discovered in <code>BLUE</code> but stored in <code>RED</code> remains in <code>RED</code>.</td>
+<td>Reuse it and update its VRF to the VRF of the IP discovered from the live device. The existing record ID and assignment are preserved.</td>
+</tr>
+<tr>
+<td>Same IP is unassigned in NetBox</td>
+<td>Reuse the first unassigned record across all VRFs, assign it to the interface, and leave its VRF unchanged.</td>
+<td>Reuse the first unassigned record in the VRF of the IP discovered from the live device and assign it to the interface.</td>
+</tr>
+<tr>
+<td>Only an unassigned IP in another VRF exists</td>
+<td>Reuse it and preserve its current VRF.</td>
+<td>Ignore it and create a record in the VRF of the IP discovered from the live device.</td>
+</tr>
+<tr>
+<td>Same non-anycast IP is assigned to another interface</td>
+<td>Report a duplicate conflict.</td>
+<td>Report a conflict when it is in the same VRF as the IP discovered from the live device. A record in another VRF does not match, so a new record is created in the discovered IP's VRF.</td>
+</tr>
+<tr>
+<td>Same anycast IP is assigned to another interface</td>
+<td>Create another anycast record for the target interface without a VRF.</td>
+<td>Create another anycast record for the target interface in the VRF of the IP discovered from the live device.</td>
+</tr>
+<tr>
+<td>No matching IP exists</td>
+<td>Create and assign an IP without a VRF.</td>
+<td>Create and assign an IP in the VRF of the IP discovered from the live device.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="anycast-support">Anycast Support<a class="headerlink" href="#anycast-support" title="Permanent link">¤</a></h3>
-<p>IP addresses in one or more <code>anycast_ranges</code> prefixes are assigned the <code>anycast</code> role. NetBox allows multiple IP address records with the same value when the role is <code>anycast</code>, so each device gets its own record. Without <code>anycast_ranges</code>, a second device trying to use the same IP address triggers a duplicate-conflict error.</p>
+<p>Addresses within <code>anycast_ranges</code> receive the <code>anycast</code> role. An existing
+anycast record on the target interface is reused, so repeated syncs do not add
+another copy to that interface. If the same anycast address belongs to another
+interface, NetBox receives a separate record for the target interface.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the same IP already has the <code>anycast</code> role in NetBox and is assigned to
+another interface, the IP discovered from the live device automatically
+receives the <code>anycast</code> role. This applies even when <code>anycast_ranges</code> is not
+provided.</p>
+</div>
 <p>Set <code>anycast_ranges</code> to a prefix string, list of prefixes, or an <code>nf://</code> URL to a YAML file containing a list of prefixes:</p>
 <div class="highlight"><pre><span></span><code><span class="n">anycast_ranges</span> <span class="o">=</span> <span class="s2">&quot;10.0.250.0/24&quot;</span>
 <span class="n">anycast_ranges</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;10.0.250.0/24&quot;</span><span class="p">,</span> <span class="s2">&quot;2001:db8:ffff::/48&quot;</span><span class="p">]</span>
@@ -7137,66 +7173,6 @@ returned by NetBox is reused and its VRF value is left unchanged.</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.250.0/24</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:ffff::/48</span>
 </code></pre></div>
-<h3 id="vrf-handling">VRF Handling<a class="headerlink" href="#vrf-handling" title="Permanent link">¤</a></h3>
-<p>Existing IP addresses are always searched by address only; VRF is not added to
-the NetBox filter. The <code>ignore_vrf</code> setting controls how matches are selected
-and whether the discovered VRF is written back.</p>
-<p>When <code>ignore_vrf=True</code> (default):</p>
-<ul>
-<li>The first matching IP address returned by NetBox is reused.</li>
-<li>Existing VRF values are left unchanged.</li>
-<li>New IP addresses are created without a VRF.</li>
-</ul>
-<p>Example:</p>
-<table>
-<thead>
-<tr>
-<th>Discovered</th>
-<th>Existing NetBox objects</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>IP <code>10.0.0.1/31</code> in VRF <code>BLUE</code></td>
-<td><code>10.0.0.1/31</code> in VRF <code>RED</code></td>
-<td>Reuse the <code>RED</code> IP object, update assignment/role if needed, leave VRF as <code>RED</code></td>
-</tr>
-<tr>
-<td>IP <code>10.0.0.2/31</code> in VRF <code>BLUE</code></td>
-<td>No matching IP</td>
-<td>Create IP without VRF</td>
-</tr>
-</tbody>
-</table>
-<p>When <code>ignore_vrf=False</code>:</p>
-<ul>
-<li>Matching IPs already in the discovered VRF are preferred.</li>
-<li>If no matching-VRF object exists, a new IP is created with the discovered
-  VRF. IPs in other VRFs are left unchanged.</li>
-</ul>
-<p>Example:</p>
-<table>
-<thead>
-<tr>
-<th>Discovered</th>
-<th>Existing NetBox objects</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>IP <code>10.0.0.1/31</code> in VRF <code>BLUE</code></td>
-<td><code>10.0.0.1/31</code> in VRF <code>BLUE</code>, <code>10.0.0.1/31</code> in VRF <code>RED</code></td>
-<td>Reuse the <code>BLUE</code> IP object</td>
-</tr>
-<tr>
-<td>IP <code>10.0.0.1/31</code> in VRF <code>BLUE</code></td>
-<td><code>10.0.0.1/31</code> in VRF <code>RED</code></td>
-<td>Create a new IP in VRF <code>BLUE</code>; leave the <code>RED</code> IP unchanged</td>
-</tr>
-</tbody>
-</table>
 <h3 id="duplicate-ip-guard">Duplicate IP Guard<a class="headerlink" href="#duplicate-ip-guard" title="Permanent link">¤</a></h3>
 <p>Before executing bulk writes the task checks that no non-anycast IP address appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.</p>
 <h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
@@ -7580,7 +7556,7 @@ the same structure showing what was done.</p>
             <td>
               <div class="doc-md-description">
                 <p>IP prefix(es) used to classify
-IP addresses as anycast role, or an <code>nf://</code> or <code>git://&lt;remote&gt;/</code> YAML 
+IP addresses as anycast role, or an <code>nf://</code> or <code>git://&lt;remote&gt;/</code> YAML
 file containing a list of prefixes, e.g. <code>'10.3.250.0/24'</code>.</p>
               </div>
             </td>
@@ -7738,9 +7714,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 666</span>
-<span class="normal"> 667</span>
-<span class="normal"> 668</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 668</span>
 <span class="normal"> 669</span>
 <span class="normal"> 670</span>
 <span class="normal"> 671</span>
@@ -8234,7 +8208,15 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="normal">1159</span>
 <span class="normal">1160</span>
 <span class="normal">1161</span>
-<span class="normal">1162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1162</span>
+<span class="normal">1163</span>
+<span class="normal">1164</span>
+<span class="normal">1165</span>
+<span class="normal">1166</span>
+<span class="normal">1167</span>
+<span class="normal">1168</span>
+<span class="normal">1169</span>
+<span class="normal">1170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -8307,7 +8289,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branch name to use.</span>
 <span class="sd">        anycast_ranges (list, optional): IP prefix(es) used to classify</span>
-<span class="sd">            IP addresses as anycast role, or an ``nf://`` or ``git://&lt;remote&gt;/`` YAML </span>
+<span class="sd">            IP addresses as anycast role, or an ``nf://`` or ``git://&lt;remote&gt;/`` YAML</span>
 <span class="sd">            file containing a list of prefixes, e.g. ``&#39;10.3.250.0/24&#39;``.</span>
 <span class="sd">        ignore_ranges (list, optional): Prefixes to ignore IP addresses for, includes</span>
 <span class="sd">            by default 127.0.0.0/8, 224.0.0.0/24 and others</span>
@@ -8533,13 +8515,17 @@ are included, e.g. <code>'10.0.*'</code>.</p>
         <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ip_live_no_mask</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="k">if</span> <span class="n">ignore_vrf</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
-                <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="n">matching_nb_ips</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Prefer the matching IP already assigned to the target interface.</span>
+        <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+                <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span><span class="n">nb_ip</span><span class="p">]</span>
+                <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
-            <span class="p">]</span>
+            <span class="c1"># Restrict fallback matches to the live VRF when VRFs are enforced.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_vrf</span><span class="p">:</span>
+                <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+                <span class="p">]</span>
         <span class="c1"># no existing IP found, create it</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
             <span class="n">bulk_create_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
@@ -8572,10 +8558,12 @@ are included, e.g. <code>'10.0.*'</code>.</p>
         <span class="c1"># no IP assigned to same interface</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># if an unassigned IP exists, update it instead of creating a duplicate</span>
-            <span class="n">nb_ip</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]),</span>
-                <span class="kc">None</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">nb_ip</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">candidate_nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
+                <span class="c1"># Prefer reassigning an available IP over creating a duplicate.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">candidate_nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+                    <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">candidate_nb_ip</span>
+                    <span class="k">break</span>
             <span class="k">if</span> <span class="n">nb_ip</span><span class="p">:</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
                 <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>

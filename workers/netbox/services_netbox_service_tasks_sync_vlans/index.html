@@ -7170,6 +7170,11 @@ synchronization.</p>
 <td>VLAN IDs or inclusive ranges such as <code>100</code> and <code>200-299</code>.</td>
 </tr>
 <tr>
+<td><code>preserve_description</code></td>
+<td><code>None</code></td>
+<td>Preserve NetBox descriptions only when live text is empty. Use <code>True</code> to always preserve or <code>False</code> to always use live text.</td>
+</tr>
+<tr>
 <td>Nornir filters</td>
 <td><code>None</code></td>
 <td><code>FO</code>, <code>FB</code>, <code>FH</code>, <code>FC</code>, <code>FR</code>, <code>FG</code>, <code>FP</code>, <code>FL</code>, <code>FM</code>, <code>FX</code>, and <code>FN</code>.</td>
@@ -7217,6 +7222,11 @@ rules are reused or maintained separately:</p>
 trimmed, null descriptions become an empty string, and case is preserved.
 <code>filter_by_vlan_ids</code> removes out-of-range records from both the complete live
 device dataset and NetBox before comparison.</p>
+<p>For existing VLANs, the default <code>preserve_description=None</code> keeps the NetBox
+description when live text is empty and otherwise uses the live value. Set it
+to <code>True</code> to always retain the NetBox description, or <code>False</code> to always apply
+the live value, including an empty string. Newly created VLANs always use the
+live description.</p>
 <p>Identical observations from multiple devices in one scope are collapsed. VLAN
 observations with the same VID but different names or descriptions are reported
 as source conflicts. The first device in sorted device-name order supplies the
@@ -7277,6 +7287,9 @@ installed and configured for branch use.</p>
 <p>Select devices with a Nornir filter and restrict VLAN IDs:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vlans<span class="w"> </span>FC<span class="w"> </span>leaf<span class="w"> </span>vlan-ids<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="m">200</span>-299
 </code></pre></div>
+<p>Clear existing descriptions when live descriptions are empty:</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vlans<span class="w"> </span>FC<span class="w"> </span>leaf<span class="w"> </span>vlan-ids<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="m">200</span>-299<span class="w"> </span>preserve-description<span class="w"> </span><span class="nb">false</span>
+</code></pre></div>
 <p>Place all unmatched VLANs into one existing group:</p>
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>sync<span class="w"> </span>vlans<span class="w"> </span>devices<span class="w"> </span>fn-ceos-lf-1<span class="w"> </span>vlan-group<span class="w"> </span>CAMPUS
 </code></pre></div>
@@ -7294,6 +7307,7 @@ installed and configured for branch use.</p>
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fn-ceos-lf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;fn-ceos-lf-2&quot;</span><span class="p">],</span>
             <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;filter_by_vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-399&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;preserve_description&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">&quot;vlan_map&quot;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;set_vlan_group&quot;</span><span class="p">:</span> <span class="s2">&quot;CAMPUS&quot;</span><span class="p">,</span>
@@ -7355,6 +7369,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>vlan-group:<span class="w">    </span>Exact<span class="w"> </span>group<span class="w"> </span>name<span class="w"> </span><span class="k">for</span><span class="w"> </span>live<span class="w"> </span>VLANs<span class="w"> </span>not<span class="w"> </span>matched<span class="w"> </span>by<span class="w"> </span>vlan-map
 <span class="w">            </span>├──<span class="w"> </span>vlan-map:<span class="w">    </span>Ordered<span class="w"> </span>rules<span class="w"> </span>mapping<span class="w"> </span>live<span class="w"> </span>VLANs<span class="w"> </span>to<span class="w"> </span>NetBox<span class="w"> </span>VLAN<span class="w"> </span>groups
 <span class="w">            </span>├──<span class="w"> </span>vlan-ids:<span class="w">    </span>VLAN<span class="w"> </span>IDs<span class="w"> </span>or<span class="w"> </span>inclusive<span class="w"> </span>ranges<span class="w"> </span>to<span class="w"> </span>reconcile
+<span class="w">            </span>├──<span class="w"> </span>preserve-description:<span class="w">    </span>Preserve<span class="w"> </span>NetBox<span class="w"> </span>descriptions<span class="w"> </span>always<span class="w"> </span><span class="o">(</span><span class="nb">true</span><span class="o">)</span>,<span class="w"> </span>when<span class="w"> </span>live<span class="w"> </span>text<span class="w"> </span>is<span class="w"> </span>empty<span class="w"> </span><span class="o">(</span>null<span class="o">)</span>,<span class="w"> </span>or<span class="w"> </span>never<span class="w"> </span><span class="o">(</span><span class="nb">false</span><span class="o">)</span>
 <span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 <span class="w">            </span>└──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
@@ -7552,6 +7567,24 @@ file containing them.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>preserve_description</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="bool">bool</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description preservation policy. <code>None</code> preserves
+NetBox text when the live description is empty, <code>True</code> always
+preserves NetBox text, and <code>False</code> always uses live text.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**kwargs</code>
             </td>
             <td>
@@ -7595,8 +7628,7 @@ file containing them.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\vlan_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 28</span>
-<span class="normal"> 29</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 29</span>
 <span class="normal"> 30</span>
 <span class="normal"> 31</span>
 <span class="normal"> 32</span>
@@ -8007,7 +8039,20 @@ file containing them.</p>
 <span class="normal">437</span>
 <span class="normal">438</span>
 <span class="normal">439</span>
-<span class="normal">440</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncVlansInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncVlansResult</span><span class="p">,</span>
@@ -8033,6 +8078,7 @@ file containing them.</p>
     <span class="n">vlan_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vlan_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_vlan_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize live VLAN names and descriptions with NetBox.</span>
@@ -8055,6 +8101,9 @@ file containing them.</p>
 <span class="sd">        vlan_map: Ordered VLAN-to-group mapping rules, or an ``nf://`` YAML</span>
 <span class="sd">            file containing them.</span>
 <span class="sd">        filter_by_vlan_ids: VLAN IDs or inclusive ranges to reconcile.</span>
+<span class="sd">        preserve_description: Description preservation policy. ``None`` preserves</span>
+<span class="sd">            NetBox text when the live description is empty, ``True`` always</span>
+<span class="sd">            preserves NetBox text, and ``False`` always uses live text.</span>
 <span class="sd">        **kwargs: Nornir FFun host filters.</span>
 
 <span class="sd">    Returns:</span>
@@ -8320,6 +8369,14 @@ file containing them.</p>
                     <span class="nb">getattr</span><span class="p">(</span><span class="n">vlan</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
             <span class="p">}</span>
+            <span class="k">if</span> <span class="n">vid</span> <span class="ow">in</span> <span class="n">normalized_live</span><span class="p">[</span><span class="n">scope</span><span class="p">]:</span>
+                <span class="n">normalized_live</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">vid</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">apply_description_policy</span><span class="p">(</span>
+                        <span class="n">normalized_live</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">vid</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                        <span class="n">normalized_netbox</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">vid</span><span class="p">][</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+                        <span class="n">preserve_description</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="n">netbox_objects</span><span class="p">[</span><span class="n">scope</span><span class="p">][</span><span class="n">vid</span><span class="p">]</span> <span class="o">=</span> <span class="n">vlan</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="n">netbox_vlan_count</span><span class="si">}</span><span class="s2"> in-scope NetBox VLAN record(s)&quot;</span><span class="p">)</span>
 
