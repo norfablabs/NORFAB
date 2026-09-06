@@ -1,0 +1,701 @@
+hosts:
+  spine01.site1:
+    username: nornir
+    password: nornir
+    port: 6400
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_001
+  spine02.site1:
+    username: nornir
+    password: nornir
+    port: 6401
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_002
+  spine03.site1:
+    username: nornir
+    password: nornir
+    port: 6402
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_003
+  spine04.site1:
+    username: nornir
+    password: nornir
+    port: 6403
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_004
+  leaf01.site1:
+    username: nornir
+    password: nornir
+    port: 6404
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_005
+  leaf02.site1:
+    username: nornir
+    password: nornir
+    port: 6405
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_006
+  leaf03.site1:
+    username: nornir
+    password: nornir
+    port: 6406
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_007
+  leaf04.site1:
+    username: nornir
+    password: nornir
+    port: 6407
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_008
+  leaf05.site1:
+    username: nornir
+    password: nornir
+    port: 6408
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_009
+  leaf06.site1:
+    username: nornir
+    password: nornir
+    port: 6409
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_010
+  leaf07.site1:
+    username: nornir
+    password: nornir
+    port: 6410
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_011
+  leaf08.site1:
+    username: nornir
+    password: nornir
+    port: 6411
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_012
+  leaf09.site1:
+    username: nornir
+    password: nornir
+    port: 6412
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_013
+  leaf10.site1:
+    username: nornir
+    password: nornir
+    port: 6413
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_014
+  leaf11.site1:
+    username: nornir
+    password: nornir
+    port: 6414
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_015
+  leaf12.site1:
+    username: nornir
+    password: nornir
+    port: 6415
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_016
+  dcpe01.site1:
+    username: nornir
+    password: nornir
+    port: 6416
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_017
+  dcpe02.site1:
+    username: nornir
+    password: nornir
+    port: 6417
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_018
+  spine01.site2:
+    username: nornir
+    password: nornir
+    port: 6418
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_019
+  spine02.site2:
+    username: nornir
+    password: nornir
+    port: 6419
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_020
+  spine03.site2:
+    username: nornir
+    password: nornir
+    port: 6420
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_021
+  spine04.site2:
+    username: nornir
+    password: nornir
+    port: 6421
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_022
+  leaf01.site2:
+    username: nornir
+    password: nornir
+    port: 6422
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_023
+  leaf02.site2:
+    username: nornir
+    password: nornir
+    port: 6423
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_024
+  leaf03.site2:
+    username: nornir
+    password: nornir
+    port: 6424
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_025
+  leaf04.site2:
+    username: nornir
+    password: nornir
+    port: 6425
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_026
+  leaf05.site2:
+    username: nornir
+    password: nornir
+    port: 6426
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_027
+  leaf06.site2:
+    username: nornir
+    password: nornir
+    port: 6427
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_028
+  leaf07.site2:
+    username: nornir
+    password: nornir
+    port: 6428
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_029
+  leaf08.site2:
+    username: nornir
+    password: nornir
+    port: 6429
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_030
+  leaf09.site2:
+    username: nornir
+    password: nornir
+    port: 6430
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_031
+  leaf10.site2:
+    username: nornir
+    password: nornir
+    port: 6431
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_032
+  leaf11.site2:
+    username: nornir
+    password: nornir
+    port: 6432
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_033
+  leaf12.site2:
+    username: nornir
+    password: nornir
+    port: 6433
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_034
+  dcpe01.site2:
+    username: nornir
+    password: nornir
+    port: 6434
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_035
+  dcpe02.site2:
+    username: nornir
+    password: nornir
+    port: 6435
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_036
+  pcore01.site3:
+    username: nornir
+    password: nornir
+    port: 6436
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_037
+  pcore02.site3:
+    username: nornir
+    password: nornir
+    port: 6437
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_038
+  pcore03.site3:
+    username: nornir
+    password: nornir
+    port: 6438
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_039
+  pcore04.site3:
+    username: nornir
+    password: nornir
+    port: 6439
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_040
+  pcore05.site3:
+    username: nornir
+    password: nornir
+    port: 6440
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_041
+  pcore06.site3:
+    username: nornir
+    password: nornir
+    port: 6441
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_042
+  rr01.site3:
+    username: nornir
+    password: nornir
+    port: 6442
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_043
+  rr02.site3:
+    username: nornir
+    password: nornir
+    port: 6443
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_044
+  edge01.site4:
+    username: nornir
+    password: nornir
+    port: 6444
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_045
+  edge02.site4:
+    username: nornir
+    password: nornir
+    port: 6445
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_046
+  edge03.site4:
+    username: nornir
+    password: nornir
+    port: 6446
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_047
+  edge04.site4:
+    username: nornir
+    password: nornir
+    port: 6447
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_048
+  edge05.site4:
+    username: nornir
+    password: nornir
+    port: 6448
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_049
+  edge06.site4:
+    username: nornir
+    password: nornir
+    port: 6449
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_050
+  agg01.site5:
+    username: nornir
+    password: nornir
+    port: 6450
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_051
+  agg02.site5:
+    username: nornir
+    password: nornir
+    port: 6451
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_052
+  agg03.site5:
+    username: nornir
+    password: nornir
+    port: 6452
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_053
+  agg04.site5:
+    username: nornir
+    password: nornir
+    port: 6453
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_054
+  agg05.site5:
+    username: nornir
+    password: nornir
+    port: 6454
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_055
+  agg06.site5:
+    username: nornir
+    password: nornir
+    port: 6455
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_056
+  agg07.site5:
+    username: nornir
+    password: nornir
+    port: 6456
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_057
+  agg01.site6:
+    username: nornir
+    password: nornir
+    port: 6457
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_058
+  agg02.site6:
+    username: nornir
+    password: nornir
+    port: 6458
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_059
+  agg03.site6:
+    username: nornir
+    password: nornir
+    port: 6459
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_060
+  agg04.site6:
+    username: nornir
+    password: nornir
+    port: 6460
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_061
+  agg05.site6:
+    username: nornir
+    password: nornir
+    port: 6461
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_062
+  agg06.site6:
+    username: nornir
+    password: nornir
+    port: 6462
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_063
+  agg07.site6:
+    username: nornir
+    password: nornir
+    port: 6463
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_064
+  access01.site5:
+    username: nornir
+    password: nornir
+    port: 6464
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_065
+  access02.site5:
+    username: nornir
+    password: nornir
+    port: 6465
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_066
+  access03.site5:
+    username: nornir
+    password: nornir
+    port: 6466
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_067
+  access04.site5:
+    username: nornir
+    password: nornir
+    port: 6467
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_068
+  access05.site5:
+    username: nornir
+    password: nornir
+    port: 6468
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_069
+  access06.site5:
+    username: nornir
+    password: nornir
+    port: 6469
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_070
+  access07.site5:
+    username: nornir
+    password: nornir
+    port: 6470
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_071
+  access08.site5:
+    username: nornir
+    password: nornir
+    port: 6471
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_072
+  access09.site5:
+    username: nornir
+    password: nornir
+    port: 6472
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_073
+  access10.site5:
+    username: nornir
+    password: nornir
+    port: 6473
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_074
+  access11.site5:
+    username: nornir
+    password: nornir
+    port: 6474
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_075
+  access12.site5:
+    username: nornir
+    password: nornir
+    port: 6475
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_076
+  access13.site5:
+    username: nornir
+    password: nornir
+    port: 6476
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_077
+  access14.site5:
+    username: nornir
+    password: nornir
+    port: 6477
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_078
+  access15.site5:
+    username: nornir
+    password: nornir
+    port: 6478
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_079
+  access16.site5:
+    username: nornir
+    password: nornir
+    port: 6479
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_080
+  access17.site5:
+    username: nornir
+    password: nornir
+    port: 6480
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_081
+  access18.site5:
+    username: nornir
+    password: nornir
+    port: 6481
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_082
+  access01.site6:
+    username: nornir
+    password: nornir
+    port: 6482
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_083
+  access02.site6:
+    username: nornir
+    password: nornir
+    port: 6483
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_084
+  access03.site6:
+    username: nornir
+    password: nornir
+    port: 6484
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_085
+  access04.site6:
+    username: nornir
+    password: nornir
+    port: 6485
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_086
+  access05.site6:
+    username: nornir
+    password: nornir
+    port: 6486
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_087
+  access06.site6:
+    username: nornir
+    password: nornir
+    port: 6487
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_088
+  access07.site6:
+    username: nornir
+    password: nornir
+    port: 6488
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_089
+  access08.site6:
+    username: nornir
+    password: nornir
+    port: 6489
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_090
+  access09.site6:
+    username: nornir
+    password: nornir
+    port: 6490
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_091
+  access10.site6:
+    username: nornir
+    password: nornir
+    port: 6491
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_092
+  access11.site6:
+    username: nornir
+    password: nornir
+    port: 6492
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_093
+  access12.site6:
+    username: nornir
+    password: nornir
+    port: 6493
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_094
+  access13.site6:
+    username: nornir
+    password: nornir
+    port: 6494
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_095
+  access14.site6:
+    username: nornir
+    password: nornir
+    port: 6495
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_096
+  access15.site6:
+    username: nornir
+    password: nornir
+    port: 6496
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_097
+  access16.site6:
+    username: nornir
+    password: nornir
+    port: 6497
+    platform: cisco_xr
+    nos:
+      plugin: NFWEB_SCALE_098
+  access17.site6:
+    username: nornir
+    password: nornir
+    port: 6498
+    platform: juniper_junos
+    nos:
+      plugin: NFWEB_SCALE_099
+  access18.site6:
+    username: nornir
+    password: nornir
+    port: 6499
+    platform: arista_eos
+    nos:
+      plugin: NFWEB_SCALE_100

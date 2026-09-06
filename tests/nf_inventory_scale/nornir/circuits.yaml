@@ -1,0 +1,239 @@
+hosts:
+  spine02.site1:
+    data:
+      circuits: []
+  spine04.site1:
+    data:
+      circuits: []
+  leaf02.site1:
+    data:
+      circuits: []
+  leaf04.site1:
+    data:
+      circuits: []
+  leaf06.site1:
+    data:
+      circuits: []
+  leaf08.site1:
+    data:
+      circuits: []
+  leaf10.site1:
+    data:
+      circuits: []
+  leaf12.site1:
+    data:
+      circuits: []
+  dcpe02.site1:
+    data:
+      circuits:
+      - cid: MPLS-DC-002
+        type: mpls-backbone
+        status: active
+        source: dcpe02.site1
+        target: pcore01.site3
+        source_interface: ge-0/0/200
+        target_interface: Ethernet201
+        provider: provider-mpls-backbone
+  spine02.site2:
+    data:
+      circuits: []
+  spine04.site2:
+    data:
+      circuits: []
+  leaf02.site2:
+    data:
+      circuits: []
+  leaf04.site2:
+    data:
+      circuits: []
+  leaf06.site2:
+    data:
+      circuits: []
+  leaf08.site2:
+    data:
+      circuits: []
+  leaf10.site2:
+    data:
+      circuits: []
+  leaf12.site2:
+    data:
+      circuits: []
+  dcpe02.site2:
+    data:
+      circuits:
+      - cid: MPLS-DC-004
+        type: mpls-backbone
+        status: active
+        source: dcpe02.site2
+        target: pcore05.site3
+        source_interface: ge-0/0/200
+        target_interface: GigabitEthernet0/0/0/202
+        provider: provider-mpls-backbone
+  pcore02.site3:
+    data:
+      circuits: []
+  pcore04.site3:
+    data:
+      circuits: []
+  pcore06.site3:
+    data:
+      circuits: []
+  rr02.site3:
+    data:
+      circuits: []
+  edge02.site4:
+    data:
+      circuits:
+      - cid: EDGE-02-01
+        type: internet-transit
+        status: active
+        source: edge02.site4
+        target: provider-internet-02
+        source_interface: Ethernet151
+        target_interface: NNI-02
+        provider: provider-internet-02
+      - cid: EDGE-02-02
+        type: cloud-connect
+        status: active
+        source: edge02.site4
+        target: provider-azure
+        source_interface: Ethernet152
+        target_interface: NNI-02
+        provider: provider-azure
+      - cid: EDGE-02-03
+        type: cloud-connect
+        status: active
+        source: edge02.site4
+        target: provider-cloud-exchange
+        source_interface: Ethernet153
+        target_interface: NNI-02
+        provider: provider-cloud-exchange
+  edge04.site4:
+    data:
+      circuits:
+      - cid: EDGE-04-01
+        type: cloud-connect
+        status: active
+        source: edge04.site4
+        target: provider-azure
+        source_interface: ge-0/0/150
+        target_interface: NNI-04
+        provider: provider-azure
+      - cid: EDGE-04-02
+        type: cloud-connect
+        status: active
+        source: edge04.site4
+        target: provider-cloud-exchange
+        source_interface: ge-0/0/151
+        target_interface: NNI-04
+        provider: provider-cloud-exchange
+      - cid: EDGE-04-03
+        type: internet-transit
+        status: active
+        source: edge04.site4
+        target: provider-internet-02
+        source_interface: ge-0/0/152
+        target_interface: NNI-04
+        provider: provider-internet-02
+  edge06.site4:
+    data:
+      circuits:
+      - cid: EDGE-06-01
+        type: cloud-connect
+        status: active
+        source: edge06.site4
+        target: provider-cloud-exchange
+        source_interface: GigabitEthernet0/0/0/151
+        target_interface: NNI-06
+        provider: provider-cloud-exchange
+      - cid: EDGE-06-02
+        type: internet-transit
+        status: active
+        source: edge06.site4
+        target: provider-internet-02
+        source_interface: GigabitEthernet0/0/0/152
+        target_interface: NNI-06
+        provider: provider-internet-02
+      - cid: EDGE-06-03
+        type: cloud-connect
+        status: active
+        source: edge06.site4
+        target: provider-azure
+        source_interface: GigabitEthernet0/0/0/153
+        target_interface: NNI-06
+        provider: provider-azure
+  agg02.site5:
+    data:
+      circuits: []
+  agg04.site5:
+    data:
+      circuits: []
+  agg06.site5:
+    data:
+      circuits: []
+  agg01.site6:
+    data:
+      circuits: []
+  agg03.site6:
+    data:
+      circuits: []
+  agg05.site6:
+    data:
+      circuits: []
+  agg07.site6:
+    data:
+      circuits: []
+  access02.site5:
+    data:
+      circuits: []
+  access04.site5:
+    data:
+      circuits: []
+  access06.site5:
+    data:
+      circuits: []
+  access08.site5:
+    data:
+      circuits: []
+  access10.site5:
+    data:
+      circuits: []
+  access12.site5:
+    data:
+      circuits: []
+  access14.site5:
+    data:
+      circuits: []
+  access16.site5:
+    data:
+      circuits: []
+  access18.site5:
+    data:
+      circuits: []
+  access02.site6:
+    data:
+      circuits: []
+  access04.site6:
+    data:
+      circuits: []
+  access06.site6:
+    data:
+      circuits: []
+  access08.site6:
+    data:
+      circuits: []
+  access10.site6:
+    data:
+      circuits: []
+  access12.site6:
+    data:
+      circuits: []
+  access14.site6:
+    data:
+      circuits: []
+  access16.site6:
+    data:
+      circuits: []
+  access18.site6:
+    data:
+      circuits: []

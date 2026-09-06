@@ -1,0 +1,991 @@
+hosts:
+  spine02.site1:
+    data:
+      connections:
+      - source: spine02.site1
+        target: dcpe01.site1
+        source_interface: GigabitEthernet0/0/0/13
+        target_interface: GigabitEthernet0/0/0/2
+        status: connected
+      - source: spine02.site1
+        target: dcpe02.site1
+        source_interface: GigabitEthernet0/0/0/14
+        target_interface: ge-0/0/1
+        status: connected
+      - source: leaf01.site1
+        target: spine02.site1
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: leaf03.site1
+        target: spine02.site1
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/3
+        status: connected
+      - source: leaf05.site1
+        target: spine02.site1
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/5
+        status: connected
+      - source: leaf07.site1
+        target: spine02.site1
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/7
+        status: connected
+      - source: leaf09.site1
+        target: spine02.site1
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/9
+        status: connected
+      - source: leaf11.site1
+        target: spine02.site1
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/11
+        status: connected
+  spine04.site1:
+    data:
+      connections:
+      - source: spine04.site1
+        target: dcpe01.site1
+        source_interface: Ethernet13
+        target_interface: GigabitEthernet0/0/0/4
+        status: connected
+      - source: spine04.site1
+        target: dcpe02.site1
+        source_interface: Ethernet14
+        target_interface: ge-0/0/3
+        status: connected
+      - source: leaf01.site1
+        target: spine04.site1
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet1
+        status: connected
+      - source: leaf03.site1
+        target: spine04.site1
+        source_interface: Ethernet4
+        target_interface: Ethernet3
+        status: connected
+      - source: leaf05.site1
+        target: spine04.site1
+        source_interface: ge-0/0/3
+        target_interface: Ethernet5
+        status: connected
+      - source: leaf07.site1
+        target: spine04.site1
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet7
+        status: connected
+      - source: leaf09.site1
+        target: spine04.site1
+        source_interface: Ethernet4
+        target_interface: Ethernet9
+        status: connected
+      - source: leaf11.site1
+        target: spine04.site1
+        source_interface: ge-0/0/3
+        target_interface: Ethernet11
+        status: connected
+  leaf02.site1:
+    data:
+      connections:
+      - source: leaf02.site1
+        target: spine01.site1
+        source_interface: ge-0/0/0
+        target_interface: Ethernet2
+        status: connected
+      - source: leaf02.site1
+        target: spine02.site1
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/2
+        status: connected
+      - source: leaf02.site1
+        target: spine03.site1
+        source_interface: ge-0/0/2
+        target_interface: ge-0/0/1
+        status: connected
+      - source: leaf02.site1
+        target: spine04.site1
+        source_interface: ge-0/0/3
+        target_interface: Ethernet2
+        status: connected
+  leaf04.site1:
+    data:
+      connections:
+      - source: leaf04.site1
+        target: spine01.site1
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: Ethernet4
+        status: connected
+      - source: leaf04.site1
+        target: spine02.site1
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/4
+        status: connected
+      - source: leaf04.site1
+        target: spine03.site1
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: ge-0/0/3
+        status: connected
+      - source: leaf04.site1
+        target: spine04.site1
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet4
+        status: connected
+  leaf06.site1:
+    data:
+      connections:
+      - source: leaf06.site1
+        target: spine01.site1
+        source_interface: Ethernet1
+        target_interface: Ethernet6
+        status: connected
+      - source: leaf06.site1
+        target: spine02.site1
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/6
+        status: connected
+      - source: leaf06.site1
+        target: spine03.site1
+        source_interface: Ethernet3
+        target_interface: ge-0/0/5
+        status: connected
+      - source: leaf06.site1
+        target: spine04.site1
+        source_interface: Ethernet4
+        target_interface: Ethernet6
+        status: connected
+  leaf08.site1:
+    data:
+      connections:
+      - source: leaf08.site1
+        target: spine01.site1
+        source_interface: ge-0/0/0
+        target_interface: Ethernet8
+        status: connected
+      - source: leaf08.site1
+        target: spine02.site1
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/8
+        status: connected
+      - source: leaf08.site1
+        target: spine03.site1
+        source_interface: ge-0/0/2
+        target_interface: ge-0/0/7
+        status: connected
+      - source: leaf08.site1
+        target: spine04.site1
+        source_interface: ge-0/0/3
+        target_interface: Ethernet8
+        status: connected
+  leaf10.site1:
+    data:
+      connections:
+      - source: leaf10.site1
+        target: spine01.site1
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: Ethernet10
+        status: connected
+      - source: leaf10.site1
+        target: spine02.site1
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/10
+        status: connected
+      - source: leaf10.site1
+        target: spine03.site1
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: ge-0/0/9
+        status: connected
+      - source: leaf10.site1
+        target: spine04.site1
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet10
+        status: connected
+  leaf12.site1:
+    data:
+      connections:
+      - source: leaf12.site1
+        target: spine01.site1
+        source_interface: Ethernet1
+        target_interface: Ethernet12
+        status: connected
+      - source: leaf12.site1
+        target: spine02.site1
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/12
+        status: connected
+      - source: leaf12.site1
+        target: spine03.site1
+        source_interface: Ethernet3
+        target_interface: ge-0/0/11
+        status: connected
+      - source: leaf12.site1
+        target: spine04.site1
+        source_interface: Ethernet4
+        target_interface: Ethernet12
+        status: connected
+  dcpe02.site1:
+    data:
+      connections:
+      - source: spine01.site1
+        target: dcpe02.site1
+        source_interface: Ethernet14
+        target_interface: ge-0/0/0
+        status: connected
+      - source: spine03.site1
+        target: dcpe02.site1
+        source_interface: ge-0/0/13
+        target_interface: ge-0/0/2
+        status: connected
+      - source: dcpe02.site1
+        target: pcore03.site3
+        source_interface: ge-0/0/4
+        target_interface: ge-0/0/4
+        status: connected
+      - source: dcpe02.site1
+        target: pcore06.site3
+        source_interface: ge-0/0/5
+        target_interface: ge-0/0/4
+        status: connected
+  spine02.site2:
+    data:
+      connections:
+      - source: spine02.site2
+        target: dcpe01.site2
+        source_interface: GigabitEthernet0/0/0/13
+        target_interface: GigabitEthernet0/0/0/2
+        status: connected
+      - source: spine02.site2
+        target: dcpe02.site2
+        source_interface: GigabitEthernet0/0/0/14
+        target_interface: ge-0/0/1
+        status: connected
+      - source: leaf01.site2
+        target: spine02.site2
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: leaf03.site2
+        target: spine02.site2
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/3
+        status: connected
+      - source: leaf05.site2
+        target: spine02.site2
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/5
+        status: connected
+      - source: leaf07.site2
+        target: spine02.site2
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/7
+        status: connected
+      - source: leaf09.site2
+        target: spine02.site2
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/9
+        status: connected
+      - source: leaf11.site2
+        target: spine02.site2
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/11
+        status: connected
+  spine04.site2:
+    data:
+      connections:
+      - source: spine04.site2
+        target: dcpe01.site2
+        source_interface: Ethernet13
+        target_interface: GigabitEthernet0/0/0/4
+        status: connected
+      - source: spine04.site2
+        target: dcpe02.site2
+        source_interface: Ethernet14
+        target_interface: ge-0/0/3
+        status: connected
+      - source: leaf01.site2
+        target: spine04.site2
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet1
+        status: connected
+      - source: leaf03.site2
+        target: spine04.site2
+        source_interface: Ethernet4
+        target_interface: Ethernet3
+        status: connected
+      - source: leaf05.site2
+        target: spine04.site2
+        source_interface: ge-0/0/3
+        target_interface: Ethernet5
+        status: connected
+      - source: leaf07.site2
+        target: spine04.site2
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet7
+        status: connected
+      - source: leaf09.site2
+        target: spine04.site2
+        source_interface: Ethernet4
+        target_interface: Ethernet9
+        status: connected
+      - source: leaf11.site2
+        target: spine04.site2
+        source_interface: ge-0/0/3
+        target_interface: Ethernet11
+        status: connected
+  leaf02.site2:
+    data:
+      connections:
+      - source: leaf02.site2
+        target: spine01.site2
+        source_interface: ge-0/0/0
+        target_interface: Ethernet2
+        status: connected
+      - source: leaf02.site2
+        target: spine02.site2
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/2
+        status: connected
+      - source: leaf02.site2
+        target: spine03.site2
+        source_interface: ge-0/0/2
+        target_interface: ge-0/0/1
+        status: connected
+      - source: leaf02.site2
+        target: spine04.site2
+        source_interface: ge-0/0/3
+        target_interface: Ethernet2
+        status: connected
+  leaf04.site2:
+    data:
+      connections:
+      - source: leaf04.site2
+        target: spine01.site2
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: Ethernet4
+        status: connected
+      - source: leaf04.site2
+        target: spine02.site2
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/4
+        status: connected
+      - source: leaf04.site2
+        target: spine03.site2
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: ge-0/0/3
+        status: connected
+      - source: leaf04.site2
+        target: spine04.site2
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet4
+        status: connected
+  leaf06.site2:
+    data:
+      connections:
+      - source: leaf06.site2
+        target: spine01.site2
+        source_interface: Ethernet1
+        target_interface: Ethernet6
+        status: connected
+      - source: leaf06.site2
+        target: spine02.site2
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/6
+        status: connected
+      - source: leaf06.site2
+        target: spine03.site2
+        source_interface: Ethernet3
+        target_interface: ge-0/0/5
+        status: connected
+      - source: leaf06.site2
+        target: spine04.site2
+        source_interface: Ethernet4
+        target_interface: Ethernet6
+        status: connected
+  leaf08.site2:
+    data:
+      connections:
+      - source: leaf08.site2
+        target: spine01.site2
+        source_interface: ge-0/0/0
+        target_interface: Ethernet8
+        status: connected
+      - source: leaf08.site2
+        target: spine02.site2
+        source_interface: ge-0/0/1
+        target_interface: GigabitEthernet0/0/0/8
+        status: connected
+      - source: leaf08.site2
+        target: spine03.site2
+        source_interface: ge-0/0/2
+        target_interface: ge-0/0/7
+        status: connected
+      - source: leaf08.site2
+        target: spine04.site2
+        source_interface: ge-0/0/3
+        target_interface: Ethernet8
+        status: connected
+  leaf10.site2:
+    data:
+      connections:
+      - source: leaf10.site2
+        target: spine01.site2
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: Ethernet10
+        status: connected
+      - source: leaf10.site2
+        target: spine02.site2
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/10
+        status: connected
+      - source: leaf10.site2
+        target: spine03.site2
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: ge-0/0/9
+        status: connected
+      - source: leaf10.site2
+        target: spine04.site2
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: Ethernet10
+        status: connected
+  leaf12.site2:
+    data:
+      connections:
+      - source: leaf12.site2
+        target: spine01.site2
+        source_interface: Ethernet1
+        target_interface: Ethernet12
+        status: connected
+      - source: leaf12.site2
+        target: spine02.site2
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/12
+        status: connected
+      - source: leaf12.site2
+        target: spine03.site2
+        source_interface: Ethernet3
+        target_interface: ge-0/0/11
+        status: connected
+      - source: leaf12.site2
+        target: spine04.site2
+        source_interface: Ethernet4
+        target_interface: Ethernet12
+        status: connected
+  dcpe02.site2:
+    data:
+      connections:
+      - source: spine01.site2
+        target: dcpe02.site2
+        source_interface: Ethernet14
+        target_interface: ge-0/0/0
+        status: connected
+      - source: spine03.site2
+        target: dcpe02.site2
+        source_interface: ge-0/0/13
+        target_interface: ge-0/0/2
+        status: connected
+      - source: dcpe02.site2
+        target: pcore01.site3
+        source_interface: ge-0/0/4
+        target_interface: Ethernet6
+        status: connected
+      - source: dcpe02.site2
+        target: pcore04.site3
+        source_interface: ge-0/0/5
+        target_interface: Ethernet6
+        status: connected
+  pcore02.site3:
+    data:
+      connections:
+      - source: dcpe01.site2
+        target: pcore02.site3
+        source_interface: GigabitEthernet0/0/0/6
+        target_interface: GigabitEthernet0/0/0/5
+        status: connected
+      - source: pcore01.site3
+        target: pcore02.site3
+        source_interface: Ethernet1
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: pcore02.site3
+        target: pcore03.site3
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: pcore05.site3
+        target: pcore02.site3
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: GigabitEthernet0/0/0/3
+        status: connected
+      - source: agg05.site5
+        target: pcore02.site3
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/8
+        status: connected
+      - source: agg04.site6
+        target: pcore02.site3
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/10
+        status: connected
+  pcore04.site3:
+    data:
+      connections:
+      - source: dcpe01.site1
+        target: pcore04.site3
+        source_interface: GigabitEthernet0/0/0/6
+        target_interface: Ethernet5
+        status: connected
+      - source: pcore01.site3
+        target: pcore04.site3
+        source_interface: Ethernet3
+        target_interface: Ethernet3
+        status: connected
+      - source: pcore03.site3
+        target: pcore04.site3
+        source_interface: ge-0/0/1
+        target_interface: Ethernet1
+        status: connected
+      - source: pcore04.site3
+        target: pcore05.site3
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: agg01.site5
+        target: pcore04.site3
+        source_interface: ge-0/0/1
+        target_interface: Ethernet8
+        status: connected
+      - source: agg07.site5
+        target: pcore04.site3
+        source_interface: ge-0/0/1
+        target_interface: Ethernet10
+        status: connected
+      - source: agg06.site6
+        target: pcore04.site3
+        source_interface: ge-0/0/1
+        target_interface: Ethernet12
+        status: connected
+  pcore06.site3:
+    data:
+      connections:
+      - source: pcore03.site3
+        target: pcore06.site3
+        source_interface: ge-0/0/2
+        target_interface: ge-0/0/2
+        status: connected
+      - source: pcore05.site3
+        target: pcore06.site3
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: pcore06.site3
+        target: pcore01.site3
+        source_interface: ge-0/0/1
+        target_interface: Ethernet2
+        status: connected
+      - source: agg03.site5
+        target: pcore06.site3
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/8
+        status: connected
+      - source: agg02.site6
+        target: pcore06.site3
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/10
+        status: connected
+  rr02.site3:
+    data:
+      connections:
+      - source: rr02.site3
+        target: pcore02.site3
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: GigabitEthernet0/0/0/4
+        status: connected
+      - source: rr02.site3
+        target: pcore04.site3
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: Ethernet4
+        status: connected
+      - source: rr02.site3
+        target: pcore06.site3
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: ge-0/0/3
+        status: connected
+  edge02.site4:
+    data:
+      connections:
+      - source: edge02.site4
+        target: pcore02.site3
+        source_interface: Ethernet1
+        target_interface: GigabitEthernet0/0/0/6
+        status: connected
+      - source: edge02.site4
+        target: pcore06.site3
+        source_interface: Ethernet2
+        target_interface: ge-0/0/5
+        status: connected
+  edge04.site4:
+    data:
+      connections:
+      - source: edge04.site4
+        target: pcore04.site3
+        source_interface: ge-0/0/0
+        target_interface: Ethernet7
+        status: connected
+      - source: edge04.site4
+        target: pcore06.site3
+        source_interface: ge-0/0/1
+        target_interface: ge-0/0/6
+        status: connected
+  edge06.site4:
+    data:
+      connections:
+      - source: edge06.site4
+        target: pcore06.site3
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: ge-0/0/7
+        status: connected
+  agg02.site5:
+    data:
+      connections:
+      - source: agg01.site5
+        target: agg02.site5
+        source_interface: ge-0/0/2
+        target_interface: Ethernet2
+        status: connected
+      - source: agg02.site5
+        target: pcore02.site3
+        source_interface: Ethernet1
+        target_interface: GigabitEthernet0/0/0/7
+        status: connected
+      - source: agg02.site5
+        target: agg03.site5
+        source_interface: Ethernet3
+        target_interface: GigabitEthernet0/0/0/3
+        status: connected
+  agg04.site5:
+    data:
+      connections:
+      - source: agg03.site5
+        target: agg04.site5
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: ge-0/0/1
+        status: connected
+      - source: agg04.site5
+        target: pcore04.site3
+        source_interface: ge-0/0/0
+        target_interface: Ethernet9
+        status: connected
+      - source: agg04.site5
+        target: agg05.site5
+        source_interface: ge-0/0/2
+        target_interface: Ethernet3
+        status: connected
+  agg06.site5:
+    data:
+      connections:
+      - source: agg05.site5
+        target: agg06.site5
+        source_interface: Ethernet4
+        target_interface: GigabitEthernet0/0/0/2
+        status: connected
+      - source: agg06.site5
+        target: pcore06.site3
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: ge-0/0/9
+        status: connected
+      - source: agg06.site5
+        target: agg07.site5
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: ge-0/0/2
+        status: connected
+  agg01.site6:
+    data:
+      connections:
+      - source: agg01.site6
+        target: pcore02.site3
+        source_interface: Ethernet1
+        target_interface: GigabitEthernet0/0/0/9
+        status: connected
+      - source: agg01.site6
+        target: agg02.site6
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/3
+        status: connected
+      - source: agg01.site6
+        target: access01.site6
+        source_interface: Ethernet4
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+  agg03.site6:
+    data:
+      connections:
+      - source: agg02.site6
+        target: agg03.site6
+        source_interface: GigabitEthernet0/0/0/4
+        target_interface: ge-0/0/1
+        status: connected
+      - source: agg03.site6
+        target: pcore04.site3
+        source_interface: ge-0/0/0
+        target_interface: Ethernet11
+        status: connected
+      - source: agg03.site6
+        target: agg04.site6
+        source_interface: ge-0/0/2
+        target_interface: Ethernet3
+        status: connected
+      - source: agg03.site6
+        target: access11.site6
+        source_interface: ge-0/0/3
+        target_interface: ge-0/0/2
+        status: connected
+  agg05.site6:
+    data:
+      connections:
+      - source: agg04.site6
+        target: agg05.site6
+        source_interface: Ethernet4
+        target_interface: GigabitEthernet0/0/0/2
+        status: connected
+      - source: agg05.site6
+        target: pcore06.site3
+        source_interface: GigabitEthernet0/0/0/1
+        target_interface: ge-0/0/11
+        status: connected
+      - source: agg05.site6
+        target: agg06.site6
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: ge-0/0/2
+        status: connected
+  agg07.site6:
+    data:
+      connections:
+      - source: agg06.site6
+        target: agg07.site6
+        source_interface: ge-0/0/3
+        target_interface: Ethernet2
+        status: connected
+      - source: agg07.site6
+        target: pcore02.site3
+        source_interface: Ethernet1
+        target_interface: GigabitEthernet0/0/0/11
+        status: connected
+      - source: agg07.site6
+        target: agg01.site6
+        source_interface: Ethernet3
+        target_interface: Ethernet3
+        status: connected
+  access02.site5:
+    data:
+      connections:
+      - source: access01.site5
+        target: access02.site5
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access02.site5
+        target: access03.site5
+        source_interface: ge-0/0/1
+        target_interface: Ethernet1
+        status: connected
+  access04.site5:
+    data:
+      connections:
+      - source: access03.site5
+        target: access04.site5
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: access04.site5
+        target: access05.site5
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+  access06.site5:
+    data:
+      connections:
+      - source: access05.site5
+        target: access06.site5
+        source_interface: ge-0/0/1
+        target_interface: Ethernet1
+        status: connected
+      - source: access06.site5
+        target: access07.site5
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+  access08.site5:
+    data:
+      connections:
+      - source: access07.site5
+        target: access08.site5
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access08.site5
+        target: access09.site5
+        source_interface: ge-0/0/1
+        target_interface: Ethernet1
+        status: connected
+  access10.site5:
+    data:
+      connections:
+      - source: access09.site5
+        target: access10.site5
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: access10.site5
+        target: agg02.site5
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: Ethernet4
+        status: connected
+  access12.site5:
+    data:
+      connections:
+      - source: access11.site5
+        target: access12.site5
+        source_interface: ge-0/0/0
+        target_interface: Ethernet1
+        status: connected
+      - source: access12.site5
+        target: access14.site5
+        source_interface: Ethernet2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access12.site5
+        target: access15.site5
+        source_interface: Ethernet3
+        target_interface: Ethernet1
+        status: connected
+  access14.site5:
+    data:
+      connections: []
+  access16.site5:
+    data:
+      connections:
+      - source: access13.site5
+        target: access16.site5
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: access16.site5
+        target: access17.site5
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access16.site5
+        target: access18.site5
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: Ethernet1
+        status: connected
+  access18.site5:
+    data:
+      connections: []
+  access02.site6:
+    data:
+      connections:
+      - source: access01.site6
+        target: access02.site6
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access02.site6
+        target: access03.site6
+        source_interface: ge-0/0/1
+        target_interface: Ethernet1
+        status: connected
+  access04.site6:
+    data:
+      connections:
+      - source: access03.site6
+        target: access04.site6
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: access04.site6
+        target: access05.site6
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+  access06.site6:
+    data:
+      connections:
+      - source: access05.site6
+        target: access06.site6
+        source_interface: ge-0/0/1
+        target_interface: Ethernet1
+        status: connected
+      - source: access06.site6
+        target: access07.site6
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+  access08.site6:
+    data:
+      connections:
+      - source: access07.site6
+        target: access08.site6
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access08.site6
+        target: access09.site6
+        source_interface: ge-0/0/1
+        target_interface: Ethernet1
+        status: connected
+  access10.site6:
+    data:
+      connections:
+      - source: access09.site6
+        target: access10.site6
+        source_interface: Ethernet2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: access10.site6
+        target: agg02.site6
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/5
+        status: connected
+  access12.site6:
+    data:
+      connections:
+      - source: access11.site6
+        target: access12.site6
+        source_interface: ge-0/0/0
+        target_interface: Ethernet1
+        status: connected
+      - source: access12.site6
+        target: access14.site6
+        source_interface: Ethernet2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access12.site6
+        target: access15.site6
+        source_interface: Ethernet3
+        target_interface: Ethernet1
+        status: connected
+  access14.site6:
+    data:
+      connections: []
+  access16.site6:
+    data:
+      connections:
+      - source: access13.site6
+        target: access16.site6
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: GigabitEthernet0/0/0/1
+        status: connected
+      - source: access16.site6
+        target: access17.site6
+        source_interface: GigabitEthernet0/0/0/2
+        target_interface: ge-0/0/0
+        status: connected
+      - source: access16.site6
+        target: access18.site6
+        source_interface: GigabitEthernet0/0/0/3
+        target_interface: Ethernet1
+        status: connected
+  access18.site6:
+    data:
+      connections: []

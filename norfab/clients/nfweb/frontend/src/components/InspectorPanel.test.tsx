@@ -13,9 +13,9 @@ const selected: SelectedItem = {
   value: {
     id: "leaf-01",
     label: "leaf-01",
-    kind: "device",
     health: "healthy",
-    layers: ["lldp"],
+    layers: ["topology"],
+    origin: ["nornir"],
     attributes: { site: "lab", status: "active" },
   },
 };
@@ -24,8 +24,9 @@ const connection: TopologyLink = {
   id: "leaf-01--spine-01",
   source: "leaf-01",
   target: "spine-01",
-  layer: "lldp",
+  layer: "topology",
   health: "healthy",
+  origin: ["live-lldp"],
   metrics: { source_input_utilization: 12 },
   attributes: {
     source_interface: "Ethernet1",

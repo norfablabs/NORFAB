@@ -2,9 +2,12 @@ import argparse
 import logging
 import re
 import traceback
+from collections import defaultdict
+from pathlib import Path
 
 import pynetbox
 import requests
+import yaml
 
 logging.basicConfig(
     level=logging.INFO,
@@ -494,6 +497,315 @@ bulk_connection_pairs = [
     for right in bulk_connection_device_names[5:]
 ]
 
+# NFWeb scale-test topology. NetBox owns the odd-ordinal 50-device half; the
+# complementary even-ordinal half is committed as static Nornir inventory.
+scale_inventory_root = Path(__file__).parent / "nf_inventory_scale"
+
+
+def load_scale_inventory_file(relative_path):
+    """Load one committed NFWeb scale-inventory YAML file."""
+    return yaml.safe_load(
+        (scale_inventory_root / relative_path).read_text(encoding="utf-8")
+    )
+
+
+scale_fakenos_hosts = load_scale_inventory_file("fakenos/network.yaml")["hosts"]
+
+
+def scale_interface_name(device, number):
+    """Return the platform-native interface name used by the scale inventory."""
+    if device["platform"] == "arista_eos":
+        return f"Ethernet{number}"
+    if device["platform"] == "cisco_xr":
+        return f"GigabitEthernet0/0/0/{number}"
+    return f"ge-0/0/{number - 1}"
+
+
+scale_platform_data = {
+    "arista_eos": ("Arista", "Arista cEOS"),
+    "cisco_xr": ("Cisco", "XVR9000"),
+    "juniper_junos": ("Juniper", "vMX"),
+}
+scale_all_devices = []
+for scale_name, scale_host in sorted(
+    scale_fakenos_hosts.items(), key=lambda item: item[1]["port"]
+):
+    scale_role_with_number, scale_site = scale_name.split(".", 1)
+    scale_role = re.sub(r"\d+$", "", scale_role_with_number)
+    scale_ordinal = scale_host["port"] - 6399
+    scale_vendor, scale_model = scale_platform_data[scale_host["platform"]]
+    scale_all_devices.append(
+        {
+            "name": scale_name,
+            "platform": scale_host["platform"],
+            "vendor": scale_vendor,
+            "model": scale_model,
+            "role": scale_role,
+            "site": scale_site,
+            "ordinal": scale_ordinal,
+            "port": scale_host["port"],
+            "netbox": scale_ordinal % 2 == 1,
+        }
+    )
+
+scale_devices_by_name = {device["name"]: device for device in scale_all_devices}
+scale_netbox_devices = [device for device in scale_all_devices if device["netbox"]]
+scale_netbox_device_names = {device["name"] for device in scale_netbox_devices}
+
+
+def scale_devices_for(role, site=None):
+    """Return scale devices for a role and optional site."""
+    return [
+        device
+        for device in scale_all_devices
+        if device["role"] == role and (site is None or device["site"] == site)
+    ]
+
+
+scale_links = []
+scale_link_ports = defaultdict(int)
+scale_link_pairs = set()
+
+
+def add_scale_link(left, right):
+    """Add one deterministic physical link unless it already exists."""
+    pair = tuple(sorted((left["name"], right["name"])))
+    if pair in scale_link_pairs:
+        return
+    scale_link_pairs.add(pair)
+    scale_link_ports[left["name"]] += 1
+    scale_link_ports[right["name"]] += 1
+    scale_links.append(
+        {
+            "source": left["name"],
+            "target": right["name"],
+            "source_interface": scale_interface_name(
+                left, scale_link_ports[left["name"]]
+            ),
+            "target_interface": scale_interface_name(
+                right, scale_link_ports[right["name"]]
+            ),
+        }
+    )
+
+
+for scale_site in ("site1", "site2"):
+    scale_spines = scale_devices_for("spine", scale_site)
+    scale_leaves = scale_devices_for("leaf", scale_site)
+    scale_dcpe = scale_devices_for("dcpe", scale_site)
+    for scale_leaf in scale_leaves:
+        for scale_spine in scale_spines:
+            add_scale_link(scale_leaf, scale_spine)
+    for scale_spine in scale_spines:
+        for scale_dcpe_router in scale_dcpe:
+            add_scale_link(scale_spine, scale_dcpe_router)
+
+scale_pcore = scale_devices_for("pcore")
+scale_rr = scale_devices_for("rr")
+scale_dcpe = scale_devices_for("dcpe")
+scale_edges = scale_devices_for("edge")
+scale_aggs = scale_devices_for("agg")
+for scale_index, scale_router in enumerate(scale_pcore):
+    add_scale_link(scale_router, scale_pcore[(scale_index + 1) % len(scale_pcore)])
+for scale_index in range(0, len(scale_pcore), 2):
+    add_scale_link(
+        scale_pcore[scale_index],
+        scale_pcore[(scale_index + 3) % len(scale_pcore)],
+    )
+for scale_index, scale_reflector in enumerate(scale_rr):
+    for scale_router in scale_pcore[scale_index::2]:
+        add_scale_link(scale_reflector, scale_router)
+for scale_index, scale_dcpe_router in enumerate(scale_dcpe):
+    add_scale_link(scale_dcpe_router, scale_pcore[(scale_index * 2) % len(scale_pcore)])
+    add_scale_link(
+        scale_dcpe_router,
+        scale_pcore[(scale_index * 2 + 3) % len(scale_pcore)],
+    )
+for scale_index, scale_edge in enumerate(scale_edges):
+    add_scale_link(scale_edge, scale_pcore[scale_index % len(scale_pcore)])
+    add_scale_link(scale_edge, scale_pcore[(scale_index * 3 + 2) % len(scale_pcore)])
+for scale_index, scale_agg in enumerate(scale_aggs):
+    add_scale_link(scale_agg, scale_pcore[scale_index % len(scale_pcore)])
+    if scale_index % 2 == 0:
+        add_scale_link(scale_agg, scale_pcore[(scale_index + 3) % len(scale_pcore)])
+
+for scale_site in ("site5", "site6"):
+    scale_site_aggs = scale_devices_for("agg", scale_site)
+    scale_site_access = scale_devices_for("access", scale_site)
+    for scale_index, scale_agg in enumerate(scale_site_aggs):
+        add_scale_link(
+            scale_agg, scale_site_aggs[(scale_index + 1) % len(scale_site_aggs)]
+        )
+    scale_ring = scale_site_access[:10]
+    add_scale_link(scale_site_aggs[0], scale_ring[0])
+    for scale_left, scale_right in zip(scale_ring, scale_ring[1:]):
+        add_scale_link(scale_left, scale_right)
+    add_scale_link(scale_ring[-1], scale_site_aggs[1])
+    scale_tree = scale_site_access[10:]
+    for scale_left_index, scale_right_index in (
+        (0, 1),
+        (0, 2),
+        (1, 3),
+        (1, 4),
+        (2, 5),
+        (5, 6),
+        (5, 7),
+    ):
+        add_scale_link(scale_tree[scale_left_index], scale_tree[scale_right_index])
+    add_scale_link(scale_site_aggs[2], scale_tree[0])
+
+scale_netbox_links = [
+    link
+    for link in scale_links
+    if link["source"] in scale_netbox_device_names
+    and link["target"] in scale_netbox_device_names
+]
+scale_provider_names = (
+    "provider-internet-01",
+    "provider-internet-02",
+    "provider-aws",
+    "provider-azure",
+    "provider-gcp",
+    "provider-cloud-exchange",
+)
+scale_circuits = []
+scale_circuit_ports = defaultdict(lambda: 201)
+for scale_index, scale_dcpe_router in enumerate(scale_dcpe, start=1):
+    scale_router = scale_pcore[(scale_index * 2 + 2) % len(scale_pcore)]
+    scale_source_port = scale_circuit_ports[scale_dcpe_router["name"]]
+    scale_target_port = scale_circuit_ports[scale_router["name"]]
+    scale_circuit_ports[scale_dcpe_router["name"]] += 1
+    scale_circuit_ports[scale_router["name"]] += 1
+    scale_circuits.append(
+        {
+            "cid": f"MPLS-DC-{scale_index:03d}",
+            "type": "mpls-backbone",
+            "source": scale_dcpe_router["name"],
+            "target": scale_router["name"],
+            "source_interface": scale_interface_name(
+                scale_dcpe_router, scale_source_port
+            ),
+            "target_interface": scale_interface_name(scale_router, scale_target_port),
+            "provider": "provider-mpls-backbone",
+            "target_managed": True,
+        }
+    )
+for scale_edge_index, scale_edge in enumerate(scale_edges):
+    for scale_provider_index in range(3):
+        scale_provider = scale_provider_names[
+            (scale_edge_index + scale_provider_index * 2) % len(scale_provider_names)
+        ]
+        scale_circuits.append(
+            {
+                "cid": f"EDGE-{scale_edge_index + 1:02d}-{scale_provider_index + 1:02d}",
+                "type": (
+                    "internet-transit"
+                    if "internet" in scale_provider
+                    else "cloud-connect"
+                ),
+                "source": scale_edge["name"],
+                "target": scale_provider,
+                "source_interface": scale_interface_name(
+                    scale_edge, 151 + scale_provider_index
+                ),
+                "target_interface": f"NNI-{scale_edge_index + 1:02d}",
+                "provider": scale_provider,
+                "target_managed": False,
+            }
+        )
+scale_netbox_circuits = [
+    circuit
+    for circuit in scale_circuits
+    if circuit["source"] in scale_netbox_device_names
+    and (
+        not circuit["target_managed"] or circuit["target"] in scale_netbox_device_names
+    )
+]
+scale_bgp_pairs = set()
+
+
+def add_scale_bgp(left, right):
+    """Add one symmetric managed BGP pairing."""
+    scale_bgp_pairs.add(tuple(sorted((left["name"], right["name"]))))
+
+
+for scale_link in scale_links:
+    scale_left = scale_devices_by_name[scale_link["source"]]
+    scale_right = scale_devices_by_name[scale_link["target"]]
+    if {scale_left["role"], scale_right["role"]} == {"leaf", "spine"}:
+        add_scale_bgp(scale_left, scale_right)
+for scale_reflector in scale_rr:
+    for scale_client in scale_pcore + scale_dcpe + scale_edges + scale_aggs:
+        add_scale_bgp(scale_reflector, scale_client)
+add_scale_bgp(scale_rr[0], scale_rr[1])
+for scale_site in ("site5", "site6"):
+    scale_access_aggs = scale_devices_for("agg", scale_site)[:2]
+    for scale_access in scale_devices_for("access", scale_site):
+        for scale_agg in scale_access_aggs:
+            add_scale_bgp(scale_access, scale_agg)
+scale_bgp_peerings = [
+    {"source": source, "target": target} for source, target in sorted(scale_bgp_pairs)
+]
+scale_netbox_bgp_peerings = [
+    peering
+    for peering in scale_bgp_peerings
+    if peering["source"] in scale_netbox_device_names
+    and peering["target"] in scale_netbox_device_names
+]
+
+
+tenants.append({"name": "norfab-scale", "slug": "norfab-scale"})
+sites.extend(
+    [
+        {
+            "name": site_name,
+            "tenant": {"name": "norfab-scale"},
+            "region": {"name": "APAC"},
+        }
+        for site_name in [f"site{index}" for index in range(1, 7)]
+    ]
+)
+scale_roles = ["spine", "leaf", "dcpe", "pcore", "rr", "edge", "agg", "access"]
+scale_role_tags = {role: f"scale-{role}" for role in scale_roles}
+tags.extend(
+    [{"name": "norfab-scale"}]
+    + [{"name": scale_role_tags[role]} for role in scale_roles]
+)
+device_roles.extend(
+    [
+        {"name": f"Scale{role.title()}", "color": color}
+        for role, color in zip(
+            scale_roles,
+            [
+                "673ab7",
+                "009688",
+                "3f51b5",
+                "f44336",
+                "9c27b0",
+                "ff9800",
+                "4caf50",
+                "607d8b",
+            ],
+        )
+    ]
+)
+prefixes.append(
+    {
+        "prefix": "10.250.0.0/24",
+        "description": "NFWeb scale-test loopbacks",
+        "tenant": {"slug": "norfab-scale"},
+    }
+)
+ip_addresses.extend(
+    [
+        {
+            "address": f"10.250.0.{device['ordinal']}/32",
+            "tenant": {"slug": "norfab-scale"},
+        }
+        for device in scale_netbox_devices
+    ]
+)
+
 interfaces = [
     {"name": "loopback0", "device": {"name": "fceos4"}, "type": "virtual"},
     {"name": "loopback0", "device": {"name": "fceos5"}, "type": "virtual"},
@@ -724,6 +1036,92 @@ interfaces.extend(
     ]
 )
 
+# Add loopbacks and topology endpoints for the 50 NetBox-backed scale devices.
+interfaces.extend(
+    [
+        {
+            "name": "Loopback0",
+            "device": {"name": device["name"]},
+            "type": "virtual",
+            "description": "NFWeb scale-test router ID",
+        }
+        for device in scale_netbox_devices
+    ]
+)
+scale_netbox_connection_endpoints = [
+    (
+        scale_devices_by_name[link["source"]],
+        link["source_interface"],
+        scale_devices_by_name[link["target"]],
+        link["target_interface"],
+    )
+    for link in scale_netbox_links
+]
+# Keep one concrete endpoint mismatch between NetBox and Nornir/LLDP.
+if scale_netbox_connection_endpoints:
+    left, _, right, right_interface = scale_netbox_connection_endpoints[-1]
+    scale_netbox_connection_endpoints[-1] = (
+        left,
+        scale_interface_name(left, 999),
+        right,
+        right_interface,
+    )
+
+interfaces.extend(
+    [
+        {
+            "name": interface_name,
+            "device": {"name": device["name"]},
+            "type": "10gbase-x-sfpp",
+            "mtu": 1500,
+            "description": "NFWeb scale-test topology link",
+        }
+        for device, interface_name in {
+            (endpoint_device["name"], endpoint_interface): (
+                endpoint_device,
+                endpoint_interface,
+            )
+            for left, left_interface, right, right_interface in scale_netbox_connection_endpoints
+            for endpoint_device, endpoint_interface in (
+                (left, left_interface),
+                (right, right_interface),
+            )
+        }.values()
+    ]
+)
+
+interfaces.extend(
+    [
+        {
+            "name": interface_name,
+            "device": {"name": device["name"]},
+            "type": "10gbase-x-sfpp",
+            "mtu": 1500,
+            "description": "NFWeb scale-test circuit endpoint",
+        }
+        for device, interface_name in {
+            (device["name"], interface_name): (device, interface_name)
+            for circuit in scale_netbox_circuits
+            for device, interface_name in (
+                (
+                    scale_devices_by_name[circuit["source"]],
+                    circuit["source_interface"],
+                ),
+                *(
+                    [
+                        (
+                            scale_devices_by_name[circuit["target"]],
+                            circuit["target_interface"],
+                        )
+                    ]
+                    if circuit["target_managed"]
+                    else []
+                ),
+            )
+        }.values()
+    ]
+)
+
 # Seed MAC addresses used by get_connections tests.
 mac_addresses = [
     {
@@ -923,6 +1321,17 @@ ip_adress_to_devices.extend(
         for i in range(1, 11)
     ]
 )
+ip_adress_to_devices.extend(
+    [
+        {
+            "address": f"10.250.0.{device['ordinal']}/32",
+            "interface": "Loopback0",
+            "device": device["name"],
+            "primary_device_ip": True,
+        }
+        for device in scale_netbox_devices
+    ]
+)
 
 # RIR (Regional Internet Registry) data
 rirs = [
@@ -1004,6 +1413,10 @@ bgp_peer_groups = [
         "name": "TEST_BGP_PEER_GROUP_2",
         "description": "Test BGP peer group 2 for VRF peerings",
     },
+    {
+        "name": "NORFAB_SCALE_TOPOLOGY",
+        "description": "NFWeb scale-test fabric, route-reflector, and access sessions",
+    },
 ]
 
 # BGP ASN (Autonomous System Numbers) data
@@ -1016,6 +1429,16 @@ bgp_asns = [
     {
         "asn": 65101,
         "description": "BGP ASN for fceos5",
+        "rir": "lab",
+    },
+    {
+        "asn": 65000,
+        "description": "NFWeb scale-test fabric ASN",
+        "rir": "lab",
+    },
+    {
+        "asn": 65150,
+        "description": "NFWeb scale-test peer ASN",
         "rir": "lab",
     },
 ]
@@ -1115,6 +1538,32 @@ bgp_peerings = [
         "site": "SALTNORNIR-LAB",
     },
 ]
+bgp_peerings.extend(
+    [
+        {
+            "name": f"{left['name']}-{right['name']}-loopbacks",
+            "description": "NFWeb scale-test designed BGP session",
+            "device": left["name"],
+            "device_a": left["name"],
+            "ip_a": f"10.250.0.{left['ordinal']}/32",
+            "local_as": 65000,
+            "device_b": right["name"],
+            "ip_b": f"10.250.0.{right['ordinal']}/32",
+            "remote_as": 65150,
+            "status": "active",
+            "peer_group": "NORFAB_SCALE_TOPOLOGY",
+            "tenant": "norfab-scale",
+            "site": left["site"],
+        }
+        for peering in scale_netbox_bgp_peerings
+        for left, right in [
+            (
+                scale_devices_by_name[peering["source"]],
+                scale_devices_by_name[peering["target"]],
+            )
+        ]
+    ]
+)
 
 # create interface connections
 # supported teminaton types - "dcim.consoleport", "dcim.interface", "dcim.consoleserverport" etc.
@@ -1519,6 +1968,31 @@ connections.extend(
     ]
 )
 
+connections.extend(
+    [
+        {
+            "type": "smf",
+            "a_terminations": [
+                {
+                    "device": left["name"],
+                    "interface": left_interface,
+                    "termination_type": "dcim.interface",
+                }
+            ],
+            "b_terminations": [
+                {
+                    "device": right["name"],
+                    "interface": right_interface,
+                    "termination_type": "dcim.interface",
+                }
+            ],
+            "status": "connected",
+            "tenant": {"slug": "norfab-scale"},
+        }
+        for left, left_interface, right, right_interface in scale_netbox_connection_endpoints
+    ]
+)
+
 devices = [
     {
         "name": "fceos4",
@@ -1868,7 +2342,7 @@ devices = [
         "tenant": {"name": "NORFAB"},
         "site": {"name": "NORFAB-LAB"},
         "rack": {"name": "R123"},
-        "position": 43,
+        "position": 39,
         "face": "front",
         "serial": "FN-FNS123456789",
         "asset_tag": "FN-UUID-FNS123456789",
@@ -1977,6 +2451,48 @@ devices = [
         },
     },
 ]
+devices.extend(
+    [
+        {
+            "name": device["name"],
+            "device_type": {"slug": slugify(device["model"])},
+            "device_role": {"name": f"Scale{device['role'].title()}"},
+            "tenant": {"name": "norfab-scale"},
+            "site": {"name": device["site"]},
+            "serial": f"NFWEB-SCALE-{device['ordinal']:03d}",
+            "asset_tag": f"NFWEB-SCALE-{device['ordinal']:03d}",
+            "tags": [
+                {"name": "norfab-scale"},
+                {"name": scale_role_tags[device["role"]]},
+            ],
+            "platform": {"name": device["platform"]},
+            "local_context_data": {
+                "nornir": {
+                    "hostname": "127.0.0.1",
+                    "port": 6400 + device["ordinal"] - 1,
+                    "username": "nornir",
+                    "password": "nornir",
+                    "groups": [
+                        f"scale_{'eos' if device['platform'] == 'arista_eos' else 'xr' if device['platform'] == 'cisco_xr' else 'junos'}"
+                    ],
+                    "data": {
+                        "role": device["role"],
+                        "site": device["site"],
+                        "status": "active",
+                        "manufacturer": device["vendor"],
+                        "device_type": device["model"],
+                        "tags": [
+                            "norfab-scale",
+                            scale_role_tags[device["role"]],
+                        ],
+                        "primary_ip": f"10.250.0.{device['ordinal']}/32",
+                    },
+                }
+            },
+        }
+        for device in scale_netbox_devices
+    ]
+)
 # add fceos3_390-fceos3_399 devices to test multi-threading retrieval
 for i in range(10):
     devices.append(
@@ -2143,16 +2659,40 @@ netbox_secrets_secrets = [
 ]
 
 circuit_providers = [{"name": "Provider1"}]
+circuit_providers.extend(
+    [
+        {"name": provider}
+        for provider in sorted({c["provider"] for c in scale_netbox_circuits})
+    ]
+)
 
 circuit_provider_networks = [
     {"name": "Provider1-Net1", "provider": {"name": "Provider1"}}
 ]
+circuit_provider_networks.extend(
+    [
+        {"name": f"{provider}-network", "provider": {"name": provider}}
+        for provider in sorted(
+            {
+                circuit["provider"]
+                for circuit in scale_netbox_circuits
+                if not circuit["target_managed"]
+            }
+        )
+    ]
+)
 
 provider_accounts = [
     {"provider": {"slug": slugify("Provider1")}, "account": "test_account"}
 ]
 
 circuit_types = [{"name": "DarkFibre"}]
+circuit_types.extend(
+    [
+        {"name": circuit_type.replace("-", " ").title()}
+        for circuit_type in sorted({c["type"] for c in scale_netbox_circuits})
+    ]
+)
 
 circuits = [
     {
@@ -2233,6 +2773,38 @@ circuits = [
         "provider_account": {"account": "test_account"},
     },
 ]
+circuits.extend(
+    [
+        {
+            "provider": {"slug": slugify(circuit["provider"])},
+            "type": {"slug": slugify(circuit["type"])},
+            "status": "active",
+            "cid": circuit["cid"],
+            "tenant": {"slug": "norfab-scale"},
+            "termination_a": {
+                "device": circuit["source"],
+                "interface": circuit["source_interface"],
+                "termination_type": "dcim.interface",
+                "cable": {"type": "smf"},
+                "site": scale_devices_by_name[circuit["source"]]["site"],
+            },
+            "termination_b": (
+                {
+                    "device": circuit["target"],
+                    "interface": circuit["target_interface"],
+                    "termination_type": "dcim.interface",
+                    "cable": {"type": "smf"},
+                    "site": scale_devices_by_name[circuit["target"]]["site"],
+                }
+                if circuit["target_managed"]
+                else {"provider_network": f"{circuit['target']}-network"}
+            ),
+            "description": "NFWeb scale-test topology circuit",
+            "tags": [{"name": "norfab-scale"}],
+        }
+        for circuit in scale_netbox_circuits
+    ]
+)
 
 config_templates = [
     {
@@ -3448,7 +4020,8 @@ def delete_inventory_items_roles():
     for role in inventory_items_roles:
         try:
             nb_role = nb.dcim.inventory_item_roles.get(name=role["name"])
-            nb_role.delete()
+            if nb_role:
+                nb_role.delete()
         except Exception as e:
             log.error(f"deleting inventory item role '{role}' error '{e}'")
 

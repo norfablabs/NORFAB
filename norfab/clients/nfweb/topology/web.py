@@ -117,7 +117,7 @@ class TopologyRefreshHandler(NFWebJSONHandler):
 
 
 class TopologyDevicesHandler(NFWebJSONHandler):
-    """Return the combined NetBox and Nornir device inventory."""
+    """Return the Nornir device inventory and current topology scope."""
 
     def initialize(self, topology_collector: TopologyCollector) -> None:
         """Attach the collector that discovers selectable devices."""

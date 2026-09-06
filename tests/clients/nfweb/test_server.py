@@ -51,8 +51,8 @@ class FakeCollector:
     async def device_inventory(self) -> dict[str, Any]:
         return {
             "devices": [
-                {"name": "r1", "sources": ["netbox", "nornir"]},
-                {"name": "r2", "sources": ["netbox"]},
+                {"name": "r1", "sources": ["nornir"]},
+                {"name": "r2", "sources": ["nornir"]},
             ],
             "selected": self.selected_devices,
             "errors": [],
@@ -233,13 +233,13 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         assert response.code == 200
         assert self.collector.force_values == [True]
 
-    def test_devices_route_returns_combined_inventory(self) -> None:
+    def test_devices_route_returns_nornir_inventory(self) -> None:
         response = self.fetch("/api/v1/topology/devices")
 
         assert response.code == 200
         assert json.loads(response.body)["devices"][0] == {
             "name": "r1",
-            "sources": ["netbox", "nornir"],
+            "sources": ["nornir"],
         }
 
     def test_logs_route_returns_active_scope_events(self) -> None:

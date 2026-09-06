@@ -1,0 +1,2019 @@
+name: NFWEB_SCALE_011
+initial_prompt: '{base_prompt}#'
+commands:
+  show lldp neighbors detail:
+    output: |-
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/1
+      Chassis id: 0200.0b01.0001
+      Port id: Ethernet7
+      Port Description: Link to leaf07.site1
+      System Name: spine01.site1
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/2
+      Chassis id: 0200.0b02.0001
+      Port id: GigabitEthernet0/0/0/7
+      Port Description: Link to leaf07.site1
+      System Name: spine02.site1
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/3
+      Chassis id: 0200.0b03.0001
+      Port id: ge-0/0/6
+      Port Description: Link to leaf07.site1
+      System Name: spine03.site1
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/4
+      Chassis id: 0200.0b04.0001
+      Port id: Ethernet7
+      Port Description: Link to leaf07.site1
+      System Name: spine04.site1
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/101
+      Chassis id: 0200.0b05.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0471
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/102
+      Chassis id: 0200.0b06.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0490
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/103
+      Chassis id: 0200.0b07.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0509
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/104
+      Chassis id: 0200.0b08.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0528
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/105
+      Chassis id: 0200.0b09.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0547
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/106
+      Chassis id: 0200.0b0a.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0566
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/107
+      Chassis id: 0200.0b0b.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0585
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/108
+      Chassis id: 0200.0b0c.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0604
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/109
+      Chassis id: 0200.0b0d.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0623
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/110
+      Chassis id: 0200.0b0e.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0642
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/111
+      Chassis id: 0200.0b0f.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0661
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/112
+      Chassis id: 0200.0b10.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0680
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/113
+      Chassis id: 0200.0b11.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0699
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/114
+      Chassis id: 0200.0b12.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0718
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/115
+      Chassis id: 0200.0b13.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0737
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/116
+      Chassis id: 0200.0b14.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0756
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/117
+      Chassis id: 0200.0b15.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0775
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/118
+      Chassis id: 0200.0b16.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0794
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/119
+      Chassis id: 0200.0b17.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0813
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/120
+      Chassis id: 0200.0b18.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0832
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/121
+      Chassis id: 0200.0b19.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0851
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/122
+      Chassis id: 0200.0b1a.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0870
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/123
+      Chassis id: 0200.0b1b.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0889
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/124
+      Chassis id: 0200.0b1c.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0908
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/125
+      Chassis id: 0200.0b1d.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0927
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/126
+      Chassis id: 0200.0b1e.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0946
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/127
+      Chassis id: 0200.0b1f.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0015
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/128
+      Chassis id: 0200.0b20.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0034
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/129
+      Chassis id: 0200.0b21.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0053
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/130
+      Chassis id: 0200.0b22.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0072
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/131
+      Chassis id: 0200.0b23.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0091
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/132
+      Chassis id: 0200.0b24.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0110
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/133
+      Chassis id: 0200.0b25.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0129
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/134
+      Chassis id: 0200.0b26.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0148
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/135
+      Chassis id: 0200.0b27.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0167
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/136
+      Chassis id: 0200.0b28.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0186
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/137
+      Chassis id: 0200.0b29.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0205
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/138
+      Chassis id: 0200.0b2a.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0224
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/139
+      Chassis id: 0200.0b2b.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0243
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/140
+      Chassis id: 0200.0b2c.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0262
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/141
+      Chassis id: 0200.0b2d.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0281
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/142
+      Chassis id: 0200.0b2e.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0300
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/143
+      Chassis id: 0200.0b2f.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0319
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/144
+      Chassis id: 0200.0b30.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0338
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/145
+      Chassis id: 0200.0b31.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0357
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/146
+      Chassis id: 0200.0b32.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0376
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/147
+      Chassis id: 0200.0b33.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0395
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/148
+      Chassis id: 0200.0b34.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0414
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/149
+      Chassis id: 0200.0b35.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0433
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+
+      ------------------------------------------------
+      Local Interface: GigabitEthernet0/0/0/150
+      Chassis id: 0200.0b36.0001
+      Port id: Ethernet11
+      Port Description: Link to leaf07.site1
+      System Name: adjacent-switch-0452
+      System Description:
+      Deterministic NFWeb scale neighbor
+      Time remaining: 110 seconds
+      Hold Time: 120 seconds
+      Age: 20 seconds
+      System Capabilities: B,R
+      Enabled Capabilities: B,R
+  show bgp neighbors:
+    output: |-
+      BGP neighbor is 10.250.0.1
+       Remote AS 65101, local AS 65011, external link
+       Description: LEAF-SPINE (10.250.0.1)
+       Remote router ID 10.250.0.1
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 10.250.0.1, Foreign port: 179
+
+      BGP neighbor is 10.250.0.2
+       Remote AS 65102, local AS 65011, external link
+       Description: LEAF-SPINE (10.250.0.2)
+       Remote router ID 10.250.0.2
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 10.250.0.2, Foreign port: 179
+
+      BGP neighbor is 10.250.0.3
+       Remote AS 65103, local AS 65011, external link
+       Description: LEAF-SPINE (10.250.0.3)
+       Remote router ID 10.250.0.3
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 10.250.0.3, Foreign port: 179
+
+      BGP neighbor is 10.250.0.4
+       Remote AS 65104, local AS 65011, external link
+       Description: LEAF-SPINE (10.250.0.4)
+       Remote router ID 10.250.0.4
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 10.250.0.4, Foreign port: 179
+
+      BGP neighbor is 198.18.2.32
+       Remote AS 65105, local AS 65011, external link
+       Description: TRANSIT-4 (198.18.2.32)
+       Remote router ID 198.18.2.32
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.32, Foreign port: 179
+
+      BGP neighbor is 198.18.2.49
+       Remote AS 65106, local AS 65011, external link
+       Description: TRANSIT-5 (198.18.2.49)
+       Remote router ID 198.18.2.49
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.49, Foreign port: 179
+
+      BGP neighbor is 198.18.2.66
+       Remote AS 65107, local AS 65011, external link
+       Description: TRANSIT-6 (198.18.2.66)
+       Remote router ID 198.18.2.66
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.66, Foreign port: 179
+
+      BGP neighbor is 198.18.2.83
+       Remote AS 65108, local AS 65011, external link
+       Description: TRANSIT-7 (198.18.2.83)
+       Remote router ID 198.18.2.83
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.83, Foreign port: 179
+
+      BGP neighbor is 198.18.2.100
+       Remote AS 65109, local AS 65011, external link
+       Description: TRANSIT-8 (198.18.2.100)
+       Remote router ID 198.18.2.100
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.100, Foreign port: 179
+
+      BGP neighbor is 198.18.2.117
+       Remote AS 65110, local AS 65011, external link
+       Description: TRANSIT-1 (198.18.2.117)
+       Remote router ID 198.18.2.117
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.117, Foreign port: 179
+
+      BGP neighbor is 198.18.2.134
+       Remote AS 65111, local AS 65011, external link
+       Description: TRANSIT-2 (198.18.2.134)
+       Remote router ID 198.18.2.134
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.134, Foreign port: 179
+
+      BGP neighbor is 198.18.2.151
+       Remote AS 65112, local AS 65011, external link
+       Description: TRANSIT-3 (198.18.2.151)
+       Remote router ID 198.18.2.151
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.151, Foreign port: 179
+
+      BGP neighbor is 198.18.2.168
+       Remote AS 65113, local AS 65011, external link
+       Description: TRANSIT-4 (198.18.2.168)
+       Remote router ID 198.18.2.168
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.168, Foreign port: 179
+
+      BGP neighbor is 198.18.2.185
+       Remote AS 65114, local AS 65011, external link
+       Description: TRANSIT-5 (198.18.2.185)
+       Remote router ID 198.18.2.185
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.185, Foreign port: 179
+
+      BGP neighbor is 198.18.2.202
+       Remote AS 65115, local AS 65011, external link
+       Description: TRANSIT-6 (198.18.2.202)
+       Remote router ID 198.18.2.202
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.202, Foreign port: 179
+
+      BGP neighbor is 198.18.2.219
+       Remote AS 65116, local AS 65011, external link
+       Description: TRANSIT-7 (198.18.2.219)
+       Remote router ID 198.18.2.219
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.219, Foreign port: 179
+
+      BGP neighbor is 198.18.2.236
+       Remote AS 65117, local AS 65011, external link
+       Description: TRANSIT-8 (198.18.2.236)
+       Remote router ID 198.18.2.236
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.2.236, Foreign port: 179
+
+      BGP neighbor is 198.18.3.3
+       Remote AS 65118, local AS 65011, external link
+       Description: TRANSIT-1 (198.18.3.3)
+       Remote router ID 198.18.3.3
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.3, Foreign port: 179
+
+      BGP neighbor is 198.18.3.20
+       Remote AS 65119, local AS 65011, external link
+       Description: TRANSIT-2 (198.18.3.20)
+       Remote router ID 198.18.3.20
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.20, Foreign port: 179
+
+      BGP neighbor is 198.18.3.37
+       Remote AS 65120, local AS 65011, external link
+       Description: TRANSIT-3 (198.18.3.37)
+       Remote router ID 198.18.3.37
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.37, Foreign port: 179
+
+      BGP neighbor is 198.18.3.54
+       Remote AS 65121, local AS 65011, external link
+       Description: TRANSIT-4 (198.18.3.54)
+       Remote router ID 198.18.3.54
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.54, Foreign port: 179
+
+      BGP neighbor is 198.18.3.71
+       Remote AS 65122, local AS 65011, external link
+       Description: TRANSIT-5 (198.18.3.71)
+       Remote router ID 198.18.3.71
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.71, Foreign port: 179
+
+      BGP neighbor is 198.18.3.88
+       Remote AS 65123, local AS 65011, external link
+       Description: TRANSIT-6 (198.18.3.88)
+       Remote router ID 198.18.3.88
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.88, Foreign port: 179
+
+      BGP neighbor is 198.18.3.105
+       Remote AS 65124, local AS 65011, external link
+       Description: TRANSIT-7 (198.18.3.105)
+       Remote router ID 198.18.3.105
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.105, Foreign port: 179
+
+      BGP neighbor is 198.18.3.122
+       Remote AS 65125, local AS 65011, external link
+       Description: TRANSIT-8 (198.18.3.122)
+       Remote router ID 198.18.3.122
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.122, Foreign port: 179
+
+      BGP neighbor is 198.18.3.139
+       Remote AS 65126, local AS 65011, external link
+       Description: TRANSIT-1 (198.18.3.139)
+       Remote router ID 198.18.3.139
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.139, Foreign port: 179
+
+      BGP neighbor is 198.18.3.156
+       Remote AS 65127, local AS 65011, external link
+       Description: TRANSIT-2 (198.18.3.156)
+       Remote router ID 198.18.3.156
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.156, Foreign port: 179
+
+      BGP neighbor is 198.18.3.173
+       Remote AS 65128, local AS 65011, external link
+       Description: TRANSIT-3 (198.18.3.173)
+       Remote router ID 198.18.3.173
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.173, Foreign port: 179
+
+      BGP neighbor is 198.18.3.190
+       Remote AS 65129, local AS 65011, external link
+       Description: TRANSIT-4 (198.18.3.190)
+       Remote router ID 198.18.3.190
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.3.190, Foreign port: 179
+
+      BGP neighbor is 198.18.0.7
+       Remote AS 65130, local AS 65011, external link
+       Description: TRANSIT-7 (198.18.0.7)
+       Remote router ID 198.18.0.7
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.7, Foreign port: 179
+
+      BGP neighbor is 198.18.0.24
+       Remote AS 65131, local AS 65011, external link
+       Description: TRANSIT-8 (198.18.0.24)
+       Remote router ID 198.18.0.24
+        BGP state = Idle
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.24, Foreign port: 179
+
+      BGP neighbor is 198.18.0.41
+       Remote AS 65132, local AS 65011, external link
+       Description: TRANSIT-1 (198.18.0.41)
+       Remote router ID 198.18.0.41
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.41, Foreign port: 179
+
+      BGP neighbor is 198.18.0.58
+       Remote AS 65133, local AS 65011, external link
+       Description: TRANSIT-2 (198.18.0.58)
+       Remote router ID 198.18.0.58
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.58, Foreign port: 179
+
+      BGP neighbor is 198.18.0.75
+       Remote AS 65134, local AS 65011, external link
+       Description: TRANSIT-3 (198.18.0.75)
+       Remote router ID 198.18.0.75
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.75, Foreign port: 179
+
+      BGP neighbor is 198.18.0.92
+       Remote AS 65135, local AS 65011, external link
+       Description: TRANSIT-4 (198.18.0.92)
+       Remote router ID 198.18.0.92
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.92, Foreign port: 179
+
+      BGP neighbor is 198.18.0.109
+       Remote AS 65136, local AS 65011, external link
+       Description: TRANSIT-5 (198.18.0.109)
+       Remote router ID 198.18.0.109
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.109, Foreign port: 179
+
+      BGP neighbor is 198.18.0.126
+       Remote AS 65137, local AS 65011, external link
+       Description: TRANSIT-6 (198.18.0.126)
+       Remote router ID 198.18.0.126
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.126, Foreign port: 179
+
+      BGP neighbor is 198.18.0.143
+       Remote AS 65138, local AS 65011, external link
+       Description: TRANSIT-7 (198.18.0.143)
+       Remote router ID 198.18.0.143
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.143, Foreign port: 179
+
+      BGP neighbor is 198.18.0.160
+       Remote AS 65139, local AS 65011, external link
+       Description: TRANSIT-8 (198.18.0.160)
+       Remote router ID 198.18.0.160
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.160, Foreign port: 179
+
+      BGP neighbor is 198.18.0.177
+       Remote AS 65140, local AS 65011, external link
+       Description: TRANSIT-1 (198.18.0.177)
+       Remote router ID 198.18.0.177
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.177, Foreign port: 179
+
+      BGP neighbor is 198.18.0.194
+       Remote AS 65141, local AS 65011, external link
+       Description: TRANSIT-2 (198.18.0.194)
+       Remote router ID 198.18.0.194
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.194, Foreign port: 179
+
+      BGP neighbor is 198.18.0.211
+       Remote AS 65142, local AS 65011, external link
+       Description: TRANSIT-3 (198.18.0.211)
+       Remote router ID 198.18.0.211
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.211, Foreign port: 179
+
+      BGP neighbor is 198.18.0.228
+       Remote AS 65143, local AS 65011, external link
+       Description: TRANSIT-4 (198.18.0.228)
+       Remote router ID 198.18.0.228
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.228, Foreign port: 179
+
+      BGP neighbor is 198.18.0.245
+       Remote AS 65144, local AS 65011, external link
+       Description: TRANSIT-5 (198.18.0.245)
+       Remote router ID 198.18.0.245
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.0.245, Foreign port: 179
+
+      BGP neighbor is 198.18.1.12
+       Remote AS 65145, local AS 65011, external link
+       Description: TRANSIT-6 (198.18.1.12)
+       Remote router ID 198.18.1.12
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.12, Foreign port: 179
+
+      BGP neighbor is 198.18.1.29
+       Remote AS 65146, local AS 65011, external link
+       Description: TRANSIT-7 (198.18.1.29)
+       Remote router ID 198.18.1.29
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.29, Foreign port: 179
+
+      BGP neighbor is 198.18.1.46
+       Remote AS 65147, local AS 65011, external link
+       Description: TRANSIT-8 (198.18.1.46)
+       Remote router ID 198.18.1.46
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.46, Foreign port: 179
+
+      BGP neighbor is 198.18.1.63
+       Remote AS 65148, local AS 65011, external link
+       Description: TRANSIT-1 (198.18.1.63)
+       Remote router ID 198.18.1.63
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.63, Foreign port: 179
+
+      BGP neighbor is 198.18.1.80
+       Remote AS 65149, local AS 65011, external link
+       Description: TRANSIT-2 (198.18.1.80)
+       Remote router ID 198.18.1.80
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.80, Foreign port: 179
+
+      BGP neighbor is 198.18.1.97
+       Remote AS 65100, local AS 65011, external link
+       Description: TRANSIT-3 (198.18.1.97)
+       Remote router ID 198.18.1.97
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.97, Foreign port: 179
+
+      BGP neighbor is 198.18.1.114
+       Remote AS 65101, local AS 65011, external link
+       Description: TRANSIT-4 (198.18.1.114)
+       Remote router ID 198.18.1.114
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.114, Foreign port: 179
+
+      BGP neighbor is 198.18.1.131
+       Remote AS 65102, local AS 65011, external link
+       Description: TRANSIT-5 (198.18.1.131)
+       Remote router ID 198.18.1.131
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.131, Foreign port: 179
+
+      BGP neighbor is 198.18.1.148
+       Remote AS 65103, local AS 65011, external link
+       Description: TRANSIT-6 (198.18.1.148)
+       Remote router ID 198.18.1.148
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.148, Foreign port: 179
+
+      BGP neighbor is 198.18.1.165
+       Remote AS 65104, local AS 65011, external link
+       Description: TRANSIT-7 (198.18.1.165)
+       Remote router ID 198.18.1.165
+        BGP state = Established, up for 02:00:00
+        Hold time is 180, keepalive interval is 60 seconds
+       For Address Family: IPv4 Unicast
+        Local host: 10.250.0.11, Local port: 179
+        Foreign host: 198.18.1.165, Foreign port: 179
+  show interfaces:
+    output: |-
+      GigabitEthernet0/0/0/1 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to spine01.site1
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1001000 bits/sec, 101 packets/sec
+        5 minute output rate 2001000 bits/sec, 201 packets/sec
+           10001 packets input, 100001 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20001 packets output, 200001 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/2 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to spine02.site1
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1002000 bits/sec, 102 packets/sec
+        5 minute output rate 2002000 bits/sec, 202 packets/sec
+           10002 packets input, 100002 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20002 packets output, 200002 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/3 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to spine03.site1
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1003000 bits/sec, 103 packets/sec
+        5 minute output rate 2003000 bits/sec, 203 packets/sec
+           10003 packets input, 100003 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20003 packets output, 200003 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/4 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to spine04.site1
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1004000 bits/sec, 104 packets/sec
+        5 minute output rate 2004000 bits/sec, 204 packets/sec
+           10004 packets input, 100004 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20004 packets output, 200004 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/101 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0471
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1005000 bits/sec, 105 packets/sec
+        5 minute output rate 2005000 bits/sec, 205 packets/sec
+           10005 packets input, 100005 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20005 packets output, 200005 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/102 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0490
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1006000 bits/sec, 106 packets/sec
+        5 minute output rate 2006000 bits/sec, 206 packets/sec
+           10006 packets input, 100006 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20006 packets output, 200006 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/103 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0509
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1007000 bits/sec, 107 packets/sec
+        5 minute output rate 2007000 bits/sec, 207 packets/sec
+           10007 packets input, 100007 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20007 packets output, 200007 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/104 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0528
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1008000 bits/sec, 108 packets/sec
+        5 minute output rate 2008000 bits/sec, 208 packets/sec
+           10008 packets input, 100008 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20008 packets output, 200008 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/105 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0547
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1009000 bits/sec, 109 packets/sec
+        5 minute output rate 2009000 bits/sec, 209 packets/sec
+           10009 packets input, 100009 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20009 packets output, 200009 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/106 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0566
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1010000 bits/sec, 110 packets/sec
+        5 minute output rate 2010000 bits/sec, 210 packets/sec
+           10010 packets input, 100010 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20010 packets output, 200010 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/107 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0585
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1011000 bits/sec, 111 packets/sec
+        5 minute output rate 2011000 bits/sec, 211 packets/sec
+           10011 packets input, 100011 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20011 packets output, 200011 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/108 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0604
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1012000 bits/sec, 112 packets/sec
+        5 minute output rate 2012000 bits/sec, 212 packets/sec
+           10012 packets input, 100012 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20012 packets output, 200012 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/109 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0623
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1013000 bits/sec, 113 packets/sec
+        5 minute output rate 2013000 bits/sec, 213 packets/sec
+           10013 packets input, 100013 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20013 packets output, 200013 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/110 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0642
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1014000 bits/sec, 114 packets/sec
+        5 minute output rate 2014000 bits/sec, 214 packets/sec
+           10014 packets input, 100014 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20014 packets output, 200014 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/111 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0661
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1015000 bits/sec, 115 packets/sec
+        5 minute output rate 2015000 bits/sec, 215 packets/sec
+           10015 packets input, 100015 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20015 packets output, 200015 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/112 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0680
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1016000 bits/sec, 116 packets/sec
+        5 minute output rate 2016000 bits/sec, 216 packets/sec
+           10016 packets input, 100016 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20016 packets output, 200016 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/113 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0699
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1017000 bits/sec, 117 packets/sec
+        5 minute output rate 2017000 bits/sec, 217 packets/sec
+           10017 packets input, 100017 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20017 packets output, 200017 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/114 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0718
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1018000 bits/sec, 118 packets/sec
+        5 minute output rate 2018000 bits/sec, 218 packets/sec
+           10018 packets input, 100018 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20018 packets output, 200018 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/115 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0737
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1019000 bits/sec, 119 packets/sec
+        5 minute output rate 2019000 bits/sec, 219 packets/sec
+           10019 packets input, 100019 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20019 packets output, 200019 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/116 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0756
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1020000 bits/sec, 120 packets/sec
+        5 minute output rate 2020000 bits/sec, 220 packets/sec
+           10020 packets input, 100020 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20020 packets output, 200020 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/117 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0775
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1021000 bits/sec, 121 packets/sec
+        5 minute output rate 2021000 bits/sec, 221 packets/sec
+           10021 packets input, 100021 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20021 packets output, 200021 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/118 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0794
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1022000 bits/sec, 122 packets/sec
+        5 minute output rate 2022000 bits/sec, 222 packets/sec
+           10022 packets input, 100022 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20022 packets output, 200022 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/119 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0813
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1023000 bits/sec, 123 packets/sec
+        5 minute output rate 2023000 bits/sec, 223 packets/sec
+           10023 packets input, 100023 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20023 packets output, 200023 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/120 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0832
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1024000 bits/sec, 124 packets/sec
+        5 minute output rate 2024000 bits/sec, 224 packets/sec
+           10024 packets input, 100024 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20024 packets output, 200024 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/121 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0851
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1025000 bits/sec, 125 packets/sec
+        5 minute output rate 2025000 bits/sec, 225 packets/sec
+           10025 packets input, 100025 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20025 packets output, 200025 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/122 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0870
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1026000 bits/sec, 126 packets/sec
+        5 minute output rate 2026000 bits/sec, 226 packets/sec
+           10026 packets input, 100026 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20026 packets output, 200026 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/123 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0889
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1027000 bits/sec, 127 packets/sec
+        5 minute output rate 2027000 bits/sec, 227 packets/sec
+           10027 packets input, 100027 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20027 packets output, 200027 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/124 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0908
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1028000 bits/sec, 128 packets/sec
+        5 minute output rate 2028000 bits/sec, 228 packets/sec
+           10028 packets input, 100028 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20028 packets output, 200028 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/125 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0927
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1029000 bits/sec, 129 packets/sec
+        5 minute output rate 2029000 bits/sec, 229 packets/sec
+           10029 packets input, 100029 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20029 packets output, 200029 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/126 is administratively down, line protocol is down
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0946
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1030000 bits/sec, 130 packets/sec
+        5 minute output rate 2030000 bits/sec, 230 packets/sec
+           10030 packets input, 100030 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20030 packets output, 200030 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/127 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0015
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1031000 bits/sec, 131 packets/sec
+        5 minute output rate 2031000 bits/sec, 231 packets/sec
+           10031 packets input, 100031 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20031 packets output, 200031 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/128 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0034
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1032000 bits/sec, 132 packets/sec
+        5 minute output rate 2032000 bits/sec, 232 packets/sec
+           10032 packets input, 100032 bytes, 0 total input drops
+           7 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20032 packets output, 200032 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/129 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0053
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1033000 bits/sec, 133 packets/sec
+        5 minute output rate 2033000 bits/sec, 233 packets/sec
+           10033 packets input, 100033 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20033 packets output, 200033 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/130 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0072
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1034000 bits/sec, 134 packets/sec
+        5 minute output rate 2034000 bits/sec, 234 packets/sec
+           10034 packets input, 100034 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20034 packets output, 200034 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/131 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0091
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1035000 bits/sec, 135 packets/sec
+        5 minute output rate 2035000 bits/sec, 235 packets/sec
+           10035 packets input, 100035 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20035 packets output, 200035 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/132 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0110
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1036000 bits/sec, 136 packets/sec
+        5 minute output rate 2036000 bits/sec, 236 packets/sec
+           10036 packets input, 100036 bytes, 0 total input drops
+           0 input errors, 2 CRC, 0 frame, 0 overrun, 0 ignored
+           20036 packets output, 200036 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/133 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0129
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1037000 bits/sec, 137 packets/sec
+        5 minute output rate 2037000 bits/sec, 237 packets/sec
+           10037 packets input, 100037 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20037 packets output, 200037 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/134 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0148
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1038000 bits/sec, 138 packets/sec
+        5 minute output rate 2038000 bits/sec, 238 packets/sec
+           10038 packets input, 100038 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20038 packets output, 200038 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/135 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0167
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1039000 bits/sec, 139 packets/sec
+        5 minute output rate 2039000 bits/sec, 239 packets/sec
+           10039 packets input, 100039 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20039 packets output, 200039 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/136 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0186
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1040000 bits/sec, 140 packets/sec
+        5 minute output rate 2040000 bits/sec, 240 packets/sec
+           10040 packets input, 100040 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20040 packets output, 200040 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/137 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0205
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1041000 bits/sec, 141 packets/sec
+        5 minute output rate 2041000 bits/sec, 241 packets/sec
+           10041 packets input, 100041 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20041 packets output, 200041 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/138 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0224
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1042000 bits/sec, 142 packets/sec
+        5 minute output rate 2042000 bits/sec, 242 packets/sec
+           10042 packets input, 100042 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20042 packets output, 200042 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/139 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0243
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1043000 bits/sec, 143 packets/sec
+        5 minute output rate 2043000 bits/sec, 243 packets/sec
+           10043 packets input, 100043 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20043 packets output, 200043 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/140 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0262
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1044000 bits/sec, 144 packets/sec
+        5 minute output rate 2044000 bits/sec, 244 packets/sec
+           10044 packets input, 100044 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20044 packets output, 200044 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/141 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0281
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1045000 bits/sec, 145 packets/sec
+        5 minute output rate 2045000 bits/sec, 245 packets/sec
+           10045 packets input, 100045 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20045 packets output, 200045 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/142 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0300
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1046000 bits/sec, 146 packets/sec
+        5 minute output rate 2046000 bits/sec, 246 packets/sec
+           10046 packets input, 100046 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20046 packets output, 200046 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/143 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0319
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1047000 bits/sec, 147 packets/sec
+        5 minute output rate 2047000 bits/sec, 247 packets/sec
+           10047 packets input, 100047 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20047 packets output, 200047 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/144 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0338
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1048000 bits/sec, 148 packets/sec
+        5 minute output rate 2048000 bits/sec, 248 packets/sec
+           10048 packets input, 100048 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20048 packets output, 200048 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/145 is up, line protocol is up
+        Interface state transitions: 0
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0357
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1049000 bits/sec, 149 packets/sec
+        5 minute output rate 2049000 bits/sec, 249 packets/sec
+           10049 packets input, 100049 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20049 packets output, 200049 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/146 is up, line protocol is up
+        Interface state transitions: 5
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0376
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1050000 bits/sec, 150 packets/sec
+        5 minute output rate 2050000 bits/sec, 250 packets/sec
+           10050 packets input, 100050 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20050 packets output, 200050 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/147 is up, line protocol is up
+        Interface state transitions: 11
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0395
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1051000 bits/sec, 151 packets/sec
+        5 minute output rate 2051000 bits/sec, 251 packets/sec
+           10051 packets input, 100051 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20051 packets output, 200051 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/148 is up, line protocol is up
+        Interface state transitions: 42
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0414
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1052000 bits/sec, 152 packets/sec
+        5 minute output rate 2052000 bits/sec, 252 packets/sec
+           10052 packets input, 100052 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20052 packets output, 200052 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/149 is up, line protocol is up
+        Interface state transitions: 101
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0433
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1053000 bits/sec, 153 packets/sec
+        5 minute output rate 2053000 bits/sec, 253 packets/sec
+           10053 packets input, 100053 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20053 packets output, 200053 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+      GigabitEthernet0/0/0/150 is up, line protocol is up
+        Interface state transitions: 180
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0452
+        MTU 1514 bytes, BW 10000000 Kbit
+        Full-duplex, 10Gb/s
+        Last clearing of "show interface" counters never
+        5 minute input rate 1054000 bits/sec, 154 packets/sec
+        5 minute output rate 2054000 bits/sec, 254 packets/sec
+           10054 packets input, 100054 bytes, 0 total input drops
+           0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+           20054 packets output, 200054 bytes, 0 total output drops
+           0 output errors, 0 underruns, 0 applique, 0 resets
+  terminal length 0:
+    output: Pagination disabled.
+  terminal width 511:
+    output: Width set to 511 columns.
+  set cli screen-length 0:
+    output: Screen length set to 0
+  set cli screen-width 511:
+    output: Screen width set to 511
+  set cli complete-on-space off:
+    output: Disabling complete-on-space
+  exit:
+    output: true
+  _default_:
+    output: '% Invalid input'

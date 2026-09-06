@@ -2,15 +2,13 @@ import type { ForceGraphMethods } from "react-force-graph-3d";
 import type { Health, TopologyLink, TopologyNode } from "./types";
 
 export const LAYER_LABELS: Record<string, string> = {
-  inventory: "NetBox",
-  lldp: "LLDP",
+  topology: "Topology",
   bgp: "BGP",
   interfaces: "Interfaces",
 };
 
 export const LAYER_COLORS: Record<string, string> = {
-  inventory: "#3b82f6",
-  lldp: "#f97316",
+  topology: "#3b82f6",
   bgp: "#b67cff",
   interfaces: "#38d9c4",
 };
@@ -38,11 +36,7 @@ export type GraphNode = TopologyNode & {
 
 export const TRAFFIC_LANE_CURVATURE = 0.06;
 
-const TRAFFIC_LINK_LAYERS = new Set(["inventory", "lldp"]);
-
-export function selectableLayers(layers: string[]): string[] {
-  return layers.filter((layer) => layer !== "interfaces");
-}
+const TRAFFIC_LINK_LAYERS = new Set(["topology"]);
 
 export type RenderedTopologyLink = TopologyLink & {
   curvature: number;
@@ -54,6 +48,7 @@ export type RenderedTopologyLink = TopologyLink & {
   trafficRateBps?: number;
   trafficUtilization?: number;
   trafficColor?: string;
+  statsColor?: string;
   particleSpeed?: number;
   visualOnly?: boolean;
   selectionLink?: TopologyLink;
@@ -99,7 +94,7 @@ export function nodeMatchesSearch(node: TopologyNode, query: string): boolean {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return false;
   return includesSearch(
-    `${node.id} ${node.label} ${node.kind} ${node.health} ${node.layers.join(" ")} ${JSON.stringify(node.attributes)}`,
+    `${node.id} ${node.label} ${node.health} ${node.layers.join(" ")} ${node.origin.join(" ")} ${JSON.stringify(node.attributes)}`,
     normalized,
   );
 }
@@ -108,7 +103,7 @@ export function linkMatchesSearch(link: TopologyLink, query: string): boolean {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return false;
   return includesSearch(
-    `${link.id} ${link.layer} ${LAYER_LABELS[link.layer] ?? ""} ${link.layer === "bgp" ? "peerings" : "links"} ${link.health} ${JSON.stringify(link.attributes)} ${JSON.stringify(link.metrics)}`,
+    `${link.id} ${link.layer} ${LAYER_LABELS[link.layer] ?? ""} ${link.origin.join(" ")} ${link.layer === "bgp" ? "peerings" : "links"} ${link.health} ${JSON.stringify(link.attributes)} ${JSON.stringify(link.metrics)}`,
     normalized,
   );
 }
@@ -178,6 +173,7 @@ function bundleLinksByLayer(
       target,
       layer: members[0].layer,
       health,
+      origin: [...new Set(members.flatMap((member) => member.origin))].sort(),
       metrics: {},
       attributes: bundleAttributes(members, source),
       memberCount: members.length,
@@ -300,8 +296,11 @@ export function addTrafficLanes(
 ): RenderedTopologyLink[] {
   return links.flatMap((link) => {
     const traffic = directionalTraffic(link);
-    if (!TRAFFIC_LINK_LAYERS.has(link.layer) || !traffic.hasTelemetry) {
-      return [link];
+    if (!TRAFFIC_LINK_LAYERS.has(link.layer)) {
+      return [{ ...link, statsColor: "#475569" }];
+    }
+    if (!traffic.hasTelemetry) {
+      return [{ ...link, statsColor: "#475569" }];
     }
     const selectionLink: TopologyLink = link;
     const lane = (

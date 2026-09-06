@@ -63,7 +63,10 @@ class TopologyHistoryStore:
             "SELECT payload FROM topology_snapshots ORDER BY collected_ts DESC"
         ).fetchall()
         for row in rows:
-            snapshot = self._decode(row)
+            try:
+                snapshot = self._decode(row)
+            except (ValueError, TypeError, zlib.error):
+                continue
             if devices is None or snapshot.devices == devices:
                 return snapshot
         return None
@@ -74,7 +77,12 @@ class TopologyHistoryStore:
             "SELECT payload FROM topology_snapshots WHERE snapshot_id = ?",
             (snapshot_id,),
         ).fetchone()
-        return self._decode(row) if row else None
+        if not row:
+            return None
+        try:
+            return self._decode(row)
+        except (ValueError, TypeError, zlib.error):
+            return None
 
     def history(self, devices: list[str] | None = None) -> list[TopologyHistoryEntry]:
         """Return retained snapshot timestamps, optionally for one exact device scope."""
@@ -90,11 +98,15 @@ class TopologyHistoryStore:
         ).fetchall()
         if devices is None:
             return [self._history_entry(row) for row in rows]
-        return [
-            self._history_entry(row)
-            for row in rows
-            if self._decode(row).devices == devices
-        ]
+        entries = []
+        for row in rows:
+            try:
+                snapshot = self._decode(row)
+            except (ValueError, TypeError, zlib.error):
+                continue
+            if snapshot.devices == devices:
+                entries.append(self._history_entry(row))
+        return entries
 
     def logs(self, devices: list[str], limit: int = 300) -> list[TopologyLogEntry]:
         """Return the newest terminal entries for one device scope."""
@@ -112,7 +124,10 @@ class TopologyHistoryStore:
         ).fetchall()
         entries: list[TopologyLogEntry] = []
         for row in rows:
-            snapshot = self._decode(row)
+            try:
+                snapshot = self._decode(row)
+            except (ValueError, TypeError, zlib.error):
+                continue
             if snapshot.devices != devices:
                 continue
             entries.extend(

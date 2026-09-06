@@ -1,0 +1,30 @@
+service: nornir
+watchdog_interval: 30
+connections_idle_timeout: 0
+max_concurrent_jobs: 5
+runner:
+  plugin: RetryRunner
+  options:
+    num_workers: 50
+    num_connectors: 30
+    connect_retry: 1
+    connect_backoff: 100
+    connect_splay: 50
+    task_retry: 1
+    task_backoff: 100
+    task_splay: 50
+    reconnect_on_fail: true
+    task_timeout: 600
+groups:
+  scale_eos:
+    data:
+      manufacturer: Arista
+  scale_xr:
+    data:
+      manufacturer: Cisco
+  scale_junos:
+    data:
+      manufacturer: Juniper
+defaults:
+  username: nornir
+  password: nornir

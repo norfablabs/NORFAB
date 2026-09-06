@@ -17,17 +17,26 @@ NFWeb process is running.
 
 ## Data Sources and Layers
 
+Nornir is the source of selectable devices. For selected hosts, NFWeb reads the
+running Nornir inventory and uses its host metadata, interfaces and addresses,
+connections, circuits, and BGP peerings as the initial graph. Passwords,
+usernames, connection options, and unrelated host data are not sent to the
+browser.
+
 | Layer | NORFAB source | Purpose |
 | --- | --- | --- |
-| `inventory` | NetBox `get_topology` | Device metadata and intended physical cabling |
-| `lldp` | Nornir `parse_ttp`, `get=lldp_neighbors` | Observed physical adjacency |
-| `bgp` | Nornir `parse_ttp`, `get=bgp_neighbors` plus NetBox IP resolution | Peer sessions and state |
-| `interfaces` | Nornir `parse_ttp`, `get=interfaces_status` | Link state, counters, rates, and utilization when available |
+| `topology` | Nornir `get_inventory`, NetBox `get_topology`, and live LLDP | Physical connections and circuits |
+| `bgp` | Cached Nornir peerings and live Nornir `bgp_neighbors` | Peer sessions and current state |
+| `interfaces` | Live Nornir `interfaces_status` | Link state, counters, rates, and utilization |
 
-Graph-producing layers can be enabled independently. Interface observations do
-not have a separate visibility button because they decorate matching links with
-health, counters, rates, and utilization. Static inventory data can refresh less
-frequently than live operational layers.
+NetBox is queried only for topology related to the selected Nornir hosts and for
+unresolved BGP addresses. Adjacent nodes returned by NetBox, Nornir inventory, or
+LLDP remain visible even when they are outside the selected scope. Missing cached
+connections, circuits, peerings, or NetBox topology is a normal empty result.
+
+Connections reported by more than one source merge by device and interface
+endpoints. Their `origin` records `netbox`, `nornir`, and/or `live-lldp`. Cached
+and live BGP sessions merge by their local and remote session IP addresses.
 
 ## Configure the Application
 
@@ -49,11 +58,10 @@ client:
       retention_minutes: 180
       request_timeout: 60
       devices: []
-      sites: []
       netbox_workers: any
       nornir_workers: all
       layers:
-        inventory: true
+        topology: true
         lldp: true
         bgp: true
         interfaces: true
@@ -61,10 +69,9 @@ client:
 
 `devices` is an optional startup selection. Its default is empty, so NFWeb does
 not collect topology data until the operator selects devices in the dashboard.
-The selector discovers the union of NetBox `get_devices` results and Nornir
-`get_nornir_hosts` results; a device also shows which inventory reported it.
-`sites` restricts NetBox discovery when configured, while Nornir still reports its
-available hosts.
+The selector contains only Nornir `get_nornir_hosts` results. NetBox-only devices
+cannot be selected, although directly adjacent NetBox nodes can appear in the
+graph.
 
 `collection_interval` controls live collection and cannot be less than five
 seconds. `inventory_refresh_interval` defaults to five minutes. The history window
@@ -89,14 +96,19 @@ NFWeb is running without an open browser. An empty scope performs no collection.
 
 The topology dashboard provides:
 
-- a top-bar multi-device selector populated from combined NetBox and Nornir
-  discovery, with an empty initial scope by default;
-- button-style checkbox controls for independently selecting NetBox, LLDP, and
-  BGP graph layers;
+- a top-bar multi-device selector populated from Nornir, with an empty initial
+  scope by default;
+- a **Topology** multi-select for NetBox, Nornir connections, LLDP, and circuits;
+- a **Protocols** multi-select containing BGP;
+- a mutually exclusive **Stats** selector with Off, Traffic, Errors, and Flaps;
 - health and text filters across device metadata such as site, role, and address;
 - node and link inspection with source properties, state, and available metrics;
-- weather-map link colors and utilization-derived widths, with physical links
-  presented as undirected relationships;
+- traffic animation and utilization coloring when Traffic statistics are selected;
+- red error links when any reported input, output, or CRC error counter is non-zero;
+- green links for 0–10 transitions, yellow for 11–100, and red above 100 in Flaps
+  mode;
+- subdued grey links when the selected statistic is unavailable, without hiding
+  structural topology;
 - stable node positions and a persistent 3D camera across live snapshots;
 - automatic coordinate locking after layout convergence, with explicit controls
   to restart or pause layout calculation without refreshes rearranging the graph;
@@ -110,7 +122,8 @@ The topology dashboard provides:
   NFCLI's timestamp, severity, worker, status, task, resource, and message layout;
 - vertical and horizontal log scrolling so long terminal lines remain available
   without wrapping or truncation;
-- a manual refresh action that bypasses layer caches and collects fresh data;
+- a manual refresh action that bypasses NFWeb caches and repeats the scoped
+  inventory, topology, and live reads without refreshing Nornir inventory;
 - a single-line, horizontally scrollable top toolbar containing live status, a
   three-hour timestamp snapshot selector, and a clear return-to-live action;
 - an 80/20 topology-to-inspector desktop split, with the inspector extending into

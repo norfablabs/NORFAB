@@ -8,7 +8,7 @@ class TopologyLayersConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    inventory: StrictBool = True
+    topology: StrictBool = True
     lldp: StrictBool = True
     bgp: StrictBool = True
     interfaces: StrictBool = True
@@ -20,7 +20,6 @@ class TopologyConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     devices: list[StrictStr] = Field(default_factory=list)
-    sites: list[StrictStr] = Field(default_factory=list)
     netbox_workers: StrictStr = "any"
     nornir_workers: StrictStr = "all"
     collection_interval: StrictInt = Field(30, ge=5, le=3600)

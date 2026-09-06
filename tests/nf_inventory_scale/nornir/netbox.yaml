@@ -1,0 +1,14 @@
+netbox:
+  timeout: 600
+  instance: prod
+  filters:
+    - tenant: norfab-scale
+  interfaces:
+    ip_addresses: true
+  connections: true
+  circuits:
+    add_interface_details: true
+  bgp_peerings: true
+  nbdata: false
+  primary_ip: ipv4
+  cache: true

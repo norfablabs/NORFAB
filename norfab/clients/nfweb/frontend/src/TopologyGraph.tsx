@@ -16,7 +16,6 @@ import {
   LAYER_COLORS,
   LAYER_LABELS,
   endpointId,
-  numericMetric,
 } from "./graphModel";
 import type {
   GraphData,
@@ -133,7 +132,7 @@ export default function TopologyGraph({
       cooldownTicks={160}
       nodeLabel={(node) => {
         const item = node as GraphNode;
-        return `<b>${escapeHtml(item.label)}</b><br>${escapeHtml(item.health)} / ${escapeHtml(item.kind)}`;
+        return `<b>${escapeHtml(item.label)}</b><br>${escapeHtml(item.health)} / ${escapeHtml(item.origin.join(" + ") || "unknown origin")}`;
       }}
       nodeColor={(node) => {
         const item = node as GraphNode;
@@ -165,6 +164,7 @@ export default function TopologyGraph({
       linkColor={(link) => {
         const item = link as RenderedTopologyLink;
         if (item.trafficColor) return item.trafficColor;
+        if (item.statsColor) return item.statsColor;
         return item.searchMatch
           ? "#ffffff"
           : LAYER_COLORS[item.layer] ?? HEALTH_COLORS.unknown;
@@ -175,11 +175,7 @@ export default function TopologyGraph({
         if (item.trafficLane) {
           return 1 + Math.min(item.trafficUtilization ?? 0, 100) / 45;
         }
-        return (
-          0.7 +
-          Math.min(numericMetric(item), 100) / 22 +
-          (item.searchMatch ? 2.2 : 0)
-        );
+        return 0.7 + (item.searchMatch ? 2.2 : 0);
       }}
       linkCurvature="curvature"
       linkCurveRotation="rotation"

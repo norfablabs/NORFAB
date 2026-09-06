@@ -1,0 +1,2635 @@
+name: NFWEB_SCALE_091
+initial_prompt: '{base_prompt}>'
+commands:
+  show lldp neighbors detail | json:
+    output: |-
+      {
+        "lldpNeighbors": {
+          "Ethernet1": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:01:01",
+                "systemName": "access08.site6",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "ge-0/0/1",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet2": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:02:01",
+                "systemName": "access10.site6",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "GigabitEthernet0/0/0/1",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet101": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:03:01",
+                "systemName": "adjacent-switch-0431",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet102": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:04:01",
+                "systemName": "adjacent-switch-0450",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet103": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:05:01",
+                "systemName": "adjacent-switch-0469",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet104": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:06:01",
+                "systemName": "adjacent-switch-0488",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet105": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:07:01",
+                "systemName": "adjacent-switch-0507",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet106": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:08:01",
+                "systemName": "adjacent-switch-0526",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet107": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:09:01",
+                "systemName": "adjacent-switch-0545",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet108": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:0a:01",
+                "systemName": "adjacent-switch-0564",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet109": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:0b:01",
+                "systemName": "adjacent-switch-0583",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet110": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:0c:01",
+                "systemName": "adjacent-switch-0602",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet111": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:0d:01",
+                "systemName": "adjacent-switch-0621",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet112": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:0e:01",
+                "systemName": "adjacent-switch-0640",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet113": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:0f:01",
+                "systemName": "adjacent-switch-0659",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet114": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:10:01",
+                "systemName": "adjacent-switch-0678",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet115": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:11:01",
+                "systemName": "adjacent-switch-0697",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet116": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:12:01",
+                "systemName": "adjacent-switch-0716",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet117": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:13:01",
+                "systemName": "adjacent-switch-0735",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet118": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:14:01",
+                "systemName": "adjacent-switch-0754",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet119": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:15:01",
+                "systemName": "adjacent-switch-0773",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet120": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:16:01",
+                "systemName": "adjacent-switch-0792",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet121": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:17:01",
+                "systemName": "adjacent-switch-0811",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet122": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:18:01",
+                "systemName": "adjacent-switch-0830",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet123": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:19:01",
+                "systemName": "adjacent-switch-0849",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet124": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:1a:01",
+                "systemName": "adjacent-switch-0868",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet125": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:1b:01",
+                "systemName": "adjacent-switch-0887",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet126": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:1c:01",
+                "systemName": "adjacent-switch-0906",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet127": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:1d:01",
+                "systemName": "adjacent-switch-0925",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet128": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:1e:01",
+                "systemName": "adjacent-switch-0944",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet129": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:1f:01",
+                "systemName": "adjacent-switch-0013",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet130": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:20:01",
+                "systemName": "adjacent-switch-0032",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet131": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:21:01",
+                "systemName": "adjacent-switch-0051",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet132": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:22:01",
+                "systemName": "adjacent-switch-0070",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet133": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:23:01",
+                "systemName": "adjacent-switch-0089",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet134": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:24:01",
+                "systemName": "adjacent-switch-0108",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet135": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:25:01",
+                "systemName": "adjacent-switch-0127",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet136": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:26:01",
+                "systemName": "adjacent-switch-0146",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet137": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:27:01",
+                "systemName": "adjacent-switch-0165",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet138": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:28:01",
+                "systemName": "adjacent-switch-0184",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet139": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:29:01",
+                "systemName": "adjacent-switch-0203",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet140": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:2a:01",
+                "systemName": "adjacent-switch-0222",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet141": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:2b:01",
+                "systemName": "adjacent-switch-0241",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet142": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:2c:01",
+                "systemName": "adjacent-switch-0260",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet143": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:2d:01",
+                "systemName": "adjacent-switch-0279",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet144": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:2e:01",
+                "systemName": "adjacent-switch-0298",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet145": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:2f:01",
+                "systemName": "adjacent-switch-0317",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet146": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:30:01",
+                "systemName": "adjacent-switch-0336",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet147": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:31:01",
+                "systemName": "adjacent-switch-0355",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet148": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:32:01",
+                "systemName": "adjacent-switch-0374",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet149": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:33:01",
+                "systemName": "adjacent-switch-0393",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          },
+          "Ethernet150": {
+            "lldpNeighborInfo": [
+              {
+                "chassisId": "02:00:5b:00:34:01",
+                "systemName": "adjacent-switch-0412",
+                "systemDescription": "Deterministic NFWeb scale neighbor",
+                "managementAddresses": [],
+                "neighborInterfaceInfo": {
+                  "interfaceId_v2": "Ethernet91",
+                  "interfaceDescription": "Link to access09.site6"
+                }
+              }
+            ]
+          }
+        }
+      }
+  show ip bgp neighbors vrf all | json:
+    output: |-
+      {
+        "vrfs": {
+          "default": {
+            "peerList": [
+              {
+                "peerAddress": "10.250.0.58",
+                "asn": "65101",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "10.250.0.58",
+                "vrf": "default",
+                "description": "ACCESS-AGG (10.250.0.58)",
+                "peerGroupName": "ACCESS-AGG",
+                "state": "Established",
+                "establishedTime": 7201,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "10.250.0.59",
+                "asn": "65102",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "10.250.0.59",
+                "vrf": "default",
+                "description": "ACCESS-AGG (10.250.0.59)",
+                "peerGroupName": "ACCESS-AGG",
+                "state": "Established",
+                "establishedTime": 7202,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.22",
+                "asn": "65103",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.22",
+                "vrf": "default",
+                "description": "TRANSIT-6 (198.18.0.22)",
+                "peerGroupName": "TRANSIT-6",
+                "state": "Established",
+                "establishedTime": 7203,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.39",
+                "asn": "65104",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.39",
+                "vrf": "default",
+                "description": "TRANSIT-7 (198.18.0.39)",
+                "peerGroupName": "TRANSIT-7",
+                "state": "Established",
+                "establishedTime": 7204,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.56",
+                "asn": "65105",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.56",
+                "vrf": "default",
+                "description": "TRANSIT-8 (198.18.0.56)",
+                "peerGroupName": "TRANSIT-8",
+                "state": "Established",
+                "establishedTime": 7205,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.73",
+                "asn": "65106",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.73",
+                "vrf": "default",
+                "description": "TRANSIT-1 (198.18.0.73)",
+                "peerGroupName": "TRANSIT-1",
+                "state": "Established",
+                "establishedTime": 7206,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.90",
+                "asn": "65107",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.90",
+                "vrf": "default",
+                "description": "TRANSIT-2 (198.18.0.90)",
+                "peerGroupName": "TRANSIT-2",
+                "state": "Established",
+                "establishedTime": 7207,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.107",
+                "asn": "65108",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.107",
+                "vrf": "default",
+                "description": "TRANSIT-3 (198.18.0.107)",
+                "peerGroupName": "TRANSIT-3",
+                "state": "Established",
+                "establishedTime": 7208,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.124",
+                "asn": "65109",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.124",
+                "vrf": "default",
+                "description": "TRANSIT-4 (198.18.0.124)",
+                "peerGroupName": "TRANSIT-4",
+                "state": "Established",
+                "establishedTime": 7209,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.141",
+                "asn": "65110",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.141",
+                "vrf": "default",
+                "description": "TRANSIT-5 (198.18.0.141)",
+                "peerGroupName": "TRANSIT-5",
+                "state": "Established",
+                "establishedTime": 7210,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.158",
+                "asn": "65111",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.158",
+                "vrf": "default",
+                "description": "TRANSIT-6 (198.18.0.158)",
+                "peerGroupName": "TRANSIT-6",
+                "state": "Established",
+                "establishedTime": 7211,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.175",
+                "asn": "65112",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.175",
+                "vrf": "default",
+                "description": "TRANSIT-7 (198.18.0.175)",
+                "peerGroupName": "TRANSIT-7",
+                "state": "Established",
+                "establishedTime": 7212,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.192",
+                "asn": "65113",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.192",
+                "vrf": "default",
+                "description": "TRANSIT-8 (198.18.0.192)",
+                "peerGroupName": "TRANSIT-8",
+                "state": "Established",
+                "establishedTime": 7213,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.209",
+                "asn": "65114",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.209",
+                "vrf": "default",
+                "description": "TRANSIT-1 (198.18.0.209)",
+                "peerGroupName": "TRANSIT-1",
+                "state": "Established",
+                "establishedTime": 7214,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.226",
+                "asn": "65115",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.226",
+                "vrf": "default",
+                "description": "TRANSIT-2 (198.18.0.226)",
+                "peerGroupName": "TRANSIT-2",
+                "state": "Established",
+                "establishedTime": 7215,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.0.243",
+                "asn": "65116",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.0.243",
+                "vrf": "default",
+                "description": "TRANSIT-3 (198.18.0.243)",
+                "peerGroupName": "TRANSIT-3",
+                "state": "Established",
+                "establishedTime": 7216,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.10",
+                "asn": "65117",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.10",
+                "vrf": "default",
+                "description": "TRANSIT-4 (198.18.1.10)",
+                "peerGroupName": "TRANSIT-4",
+                "state": "Established",
+                "establishedTime": 7217,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.27",
+                "asn": "65118",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.27",
+                "vrf": "default",
+                "description": "TRANSIT-5 (198.18.1.27)",
+                "peerGroupName": "TRANSIT-5",
+                "state": "Established",
+                "establishedTime": 7218,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.44",
+                "asn": "65119",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.44",
+                "vrf": "default",
+                "description": "TRANSIT-6 (198.18.1.44)",
+                "peerGroupName": "TRANSIT-6",
+                "state": "Established",
+                "establishedTime": 7219,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.61",
+                "asn": "65120",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.61",
+                "vrf": "default",
+                "description": "TRANSIT-7 (198.18.1.61)",
+                "peerGroupName": "TRANSIT-7",
+                "state": "Established",
+                "establishedTime": 7220,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.78",
+                "asn": "65121",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.78",
+                "vrf": "default",
+                "description": "TRANSIT-8 (198.18.1.78)",
+                "peerGroupName": "TRANSIT-8",
+                "state": "Established",
+                "establishedTime": 7221,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.95",
+                "asn": "65122",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.95",
+                "vrf": "default",
+                "description": "TRANSIT-1 (198.18.1.95)",
+                "peerGroupName": "TRANSIT-1",
+                "state": "Established",
+                "establishedTime": 7222,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.112",
+                "asn": "65123",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.112",
+                "vrf": "default",
+                "description": "TRANSIT-2 (198.18.1.112)",
+                "peerGroupName": "TRANSIT-2",
+                "state": "Idle",
+                "establishedTime": 7223,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.129",
+                "asn": "65124",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.129",
+                "vrf": "default",
+                "description": "TRANSIT-3 (198.18.1.129)",
+                "peerGroupName": "TRANSIT-3",
+                "state": "Established",
+                "establishedTime": 7224,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.146",
+                "asn": "65125",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.146",
+                "vrf": "default",
+                "description": "TRANSIT-4 (198.18.1.146)",
+                "peerGroupName": "TRANSIT-4",
+                "state": "Established",
+                "establishedTime": 7225,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.163",
+                "asn": "65126",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.163",
+                "vrf": "default",
+                "description": "TRANSIT-5 (198.18.1.163)",
+                "peerGroupName": "TRANSIT-5",
+                "state": "Established",
+                "establishedTime": 7226,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.180",
+                "asn": "65127",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.180",
+                "vrf": "default",
+                "description": "TRANSIT-6 (198.18.1.180)",
+                "peerGroupName": "TRANSIT-6",
+                "state": "Established",
+                "establishedTime": 7227,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.197",
+                "asn": "65128",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.197",
+                "vrf": "default",
+                "description": "TRANSIT-7 (198.18.1.197)",
+                "peerGroupName": "TRANSIT-7",
+                "state": "Established",
+                "establishedTime": 7228,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.214",
+                "asn": "65129",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.214",
+                "vrf": "default",
+                "description": "TRANSIT-8 (198.18.1.214)",
+                "peerGroupName": "TRANSIT-8",
+                "state": "Established",
+                "establishedTime": 7229,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.231",
+                "asn": "65130",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.231",
+                "vrf": "default",
+                "description": "TRANSIT-1 (198.18.1.231)",
+                "peerGroupName": "TRANSIT-1",
+                "state": "Established",
+                "establishedTime": 7230,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.1.248",
+                "asn": "65131",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.1.248",
+                "vrf": "default",
+                "description": "TRANSIT-2 (198.18.1.248)",
+                "peerGroupName": "TRANSIT-2",
+                "state": "Established",
+                "establishedTime": 7231,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.15",
+                "asn": "65132",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.15",
+                "vrf": "default",
+                "description": "TRANSIT-3 (198.18.2.15)",
+                "peerGroupName": "TRANSIT-3",
+                "state": "Established",
+                "establishedTime": 7232,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.32",
+                "asn": "65133",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.32",
+                "vrf": "default",
+                "description": "TRANSIT-4 (198.18.2.32)",
+                "peerGroupName": "TRANSIT-4",
+                "state": "Established",
+                "establishedTime": 7233,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.49",
+                "asn": "65134",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.49",
+                "vrf": "default",
+                "description": "TRANSIT-5 (198.18.2.49)",
+                "peerGroupName": "TRANSIT-5",
+                "state": "Established",
+                "establishedTime": 7234,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.66",
+                "asn": "65135",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.66",
+                "vrf": "default",
+                "description": "TRANSIT-6 (198.18.2.66)",
+                "peerGroupName": "TRANSIT-6",
+                "state": "Established",
+                "establishedTime": 7235,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.83",
+                "asn": "65136",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.83",
+                "vrf": "default",
+                "description": "TRANSIT-7 (198.18.2.83)",
+                "peerGroupName": "TRANSIT-7",
+                "state": "Established",
+                "establishedTime": 7236,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.100",
+                "asn": "65137",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.100",
+                "vrf": "default",
+                "description": "TRANSIT-8 (198.18.2.100)",
+                "peerGroupName": "TRANSIT-8",
+                "state": "Established",
+                "establishedTime": 7237,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.117",
+                "asn": "65138",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.117",
+                "vrf": "default",
+                "description": "TRANSIT-1 (198.18.2.117)",
+                "peerGroupName": "TRANSIT-1",
+                "state": "Established",
+                "establishedTime": 7238,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.134",
+                "asn": "65139",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.134",
+                "vrf": "default",
+                "description": "TRANSIT-2 (198.18.2.134)",
+                "peerGroupName": "TRANSIT-2",
+                "state": "Established",
+                "establishedTime": 7239,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.151",
+                "asn": "65140",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.151",
+                "vrf": "default",
+                "description": "TRANSIT-3 (198.18.2.151)",
+                "peerGroupName": "TRANSIT-3",
+                "state": "Established",
+                "establishedTime": 7240,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.168",
+                "asn": "65141",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.168",
+                "vrf": "default",
+                "description": "TRANSIT-4 (198.18.2.168)",
+                "peerGroupName": "TRANSIT-4",
+                "state": "Established",
+                "establishedTime": 7241,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.185",
+                "asn": "65142",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.185",
+                "vrf": "default",
+                "description": "TRANSIT-5 (198.18.2.185)",
+                "peerGroupName": "TRANSIT-5",
+                "state": "Established",
+                "establishedTime": 7242,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.202",
+                "asn": "65143",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.202",
+                "vrf": "default",
+                "description": "TRANSIT-6 (198.18.2.202)",
+                "peerGroupName": "TRANSIT-6",
+                "state": "Established",
+                "establishedTime": 7243,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.219",
+                "asn": "65144",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.219",
+                "vrf": "default",
+                "description": "TRANSIT-7 (198.18.2.219)",
+                "peerGroupName": "TRANSIT-7",
+                "state": "Established",
+                "establishedTime": 7244,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.2.236",
+                "asn": "65145",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.2.236",
+                "vrf": "default",
+                "description": "TRANSIT-8 (198.18.2.236)",
+                "peerGroupName": "TRANSIT-8",
+                "state": "Established",
+                "establishedTime": 7245,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.3.3",
+                "asn": "65146",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.3.3",
+                "vrf": "default",
+                "description": "TRANSIT-1 (198.18.3.3)",
+                "peerGroupName": "TRANSIT-1",
+                "state": "Established",
+                "establishedTime": 7246,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.3.20",
+                "asn": "65147",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.3.20",
+                "vrf": "default",
+                "description": "TRANSIT-2 (198.18.3.20)",
+                "peerGroupName": "TRANSIT-2",
+                "state": "Established",
+                "establishedTime": 7247,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.3.37",
+                "asn": "65148",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.3.37",
+                "vrf": "default",
+                "description": "TRANSIT-3 (198.18.3.37)",
+                "peerGroupName": "TRANSIT-3",
+                "state": "Established",
+                "establishedTime": 7248,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.3.54",
+                "asn": "65149",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.3.54",
+                "vrf": "default",
+                "description": "TRANSIT-4 (198.18.3.54)",
+                "peerGroupName": "TRANSIT-4",
+                "state": "Established",
+                "establishedTime": 7249,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.3.71",
+                "asn": "65100",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.3.71",
+                "vrf": "default",
+                "description": "TRANSIT-5 (198.18.3.71)",
+                "peerGroupName": "TRANSIT-5",
+                "state": "Established",
+                "establishedTime": 7250,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.3.88",
+                "asn": "65101",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.3.88",
+                "vrf": "default",
+                "description": "TRANSIT-6 (198.18.3.88)",
+                "peerGroupName": "TRANSIT-6",
+                "state": "Established",
+                "establishedTime": 7251,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              },
+              {
+                "peerAddress": "198.18.3.105",
+                "asn": "65102",
+                "localAsn": "65091",
+                "updateSource": "10.250.0.91",
+                "ifName": "Loopback0",
+                "linkType": "external",
+                "routerId": "198.18.3.105",
+                "vrf": "default",
+                "description": "TRANSIT-7 (198.18.3.105)",
+                "peerGroupName": "TRANSIT-7",
+                "state": "Established",
+                "establishedTime": 7252,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "neighborCapabilities": {
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "enabled": true
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+  show interfaces:
+    output: |-
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to access08.site6
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1001000 bps (0.1% with framing overhead), 101 packets/sec
+        5 minutes output rate 2001000 bps (0.2% with framing overhead), 201 packets/sec
+           10001 packets input, 100001 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20001 packets output, 200001 bytes
+           0 output errors, 0 collisions
+      Ethernet2 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to access10.site6
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1002000 bps (0.1% with framing overhead), 102 packets/sec
+        5 minutes output rate 2002000 bps (0.2% with framing overhead), 202 packets/sec
+           10002 packets input, 100002 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20002 packets output, 200002 bytes
+           0 output errors, 0 collisions
+      Ethernet101 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0431
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1003000 bps (0.1% with framing overhead), 103 packets/sec
+        5 minutes output rate 2003000 bps (0.2% with framing overhead), 203 packets/sec
+           10003 packets input, 100003 bytes
+           0 input errors, 2 CRC, 0 alignment, 0 symbol, 0 input discards
+           20003 packets output, 200003 bytes
+           0 output errors, 0 collisions
+      Ethernet102 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0450
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1004000 bps (0.1% with framing overhead), 104 packets/sec
+        5 minutes output rate 2004000 bps (0.2% with framing overhead), 204 packets/sec
+           10004 packets input, 100004 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20004 packets output, 200004 bytes
+           0 output errors, 0 collisions
+      Ethernet103 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0469
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1005000 bps (0.1% with framing overhead), 105 packets/sec
+        5 minutes output rate 2005000 bps (0.2% with framing overhead), 205 packets/sec
+           10005 packets input, 100005 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20005 packets output, 200005 bytes
+           0 output errors, 0 collisions
+      Ethernet104 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0488
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1006000 bps (0.1% with framing overhead), 106 packets/sec
+        5 minutes output rate 2006000 bps (0.2% with framing overhead), 206 packets/sec
+           10006 packets input, 100006 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20006 packets output, 200006 bytes
+           0 output errors, 0 collisions
+      Ethernet105 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0507
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1007000 bps (0.1% with framing overhead), 107 packets/sec
+        5 minutes output rate 2007000 bps (0.2% with framing overhead), 207 packets/sec
+           10007 packets input, 100007 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20007 packets output, 200007 bytes
+           0 output errors, 0 collisions
+      Ethernet106 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0526
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1008000 bps (0.1% with framing overhead), 108 packets/sec
+        5 minutes output rate 2008000 bps (0.2% with framing overhead), 208 packets/sec
+           10008 packets input, 100008 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20008 packets output, 200008 bytes
+           0 output errors, 0 collisions
+      Ethernet107 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0545
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1009000 bps (0.1% with framing overhead), 109 packets/sec
+        5 minutes output rate 2009000 bps (0.2% with framing overhead), 209 packets/sec
+           10009 packets input, 100009 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20009 packets output, 200009 bytes
+           0 output errors, 0 collisions
+      Ethernet108 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0564
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1010000 bps (0.1% with framing overhead), 110 packets/sec
+        5 minutes output rate 2010000 bps (0.2% with framing overhead), 210 packets/sec
+           10010 packets input, 100010 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20010 packets output, 200010 bytes
+           0 output errors, 0 collisions
+      Ethernet109 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0583
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1011000 bps (0.1% with framing overhead), 111 packets/sec
+        5 minutes output rate 2011000 bps (0.2% with framing overhead), 211 packets/sec
+           10011 packets input, 100011 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20011 packets output, 200011 bytes
+           0 output errors, 0 collisions
+      Ethernet110 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0602
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1012000 bps (0.1% with framing overhead), 112 packets/sec
+        5 minutes output rate 2012000 bps (0.2% with framing overhead), 212 packets/sec
+           10012 packets input, 100012 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20012 packets output, 200012 bytes
+           0 output errors, 0 collisions
+      Ethernet111 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0621
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1013000 bps (0.1% with framing overhead), 113 packets/sec
+        5 minutes output rate 2013000 bps (0.2% with framing overhead), 213 packets/sec
+           10013 packets input, 100013 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20013 packets output, 200013 bytes
+           0 output errors, 0 collisions
+      Ethernet112 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0640
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1014000 bps (0.1% with framing overhead), 114 packets/sec
+        5 minutes output rate 2014000 bps (0.2% with framing overhead), 214 packets/sec
+           10014 packets input, 100014 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20014 packets output, 200014 bytes
+           0 output errors, 0 collisions
+      Ethernet113 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0659
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1015000 bps (0.1% with framing overhead), 115 packets/sec
+        5 minutes output rate 2015000 bps (0.2% with framing overhead), 215 packets/sec
+           10015 packets input, 100015 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20015 packets output, 200015 bytes
+           0 output errors, 0 collisions
+      Ethernet114 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0678
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1016000 bps (0.1% with framing overhead), 116 packets/sec
+        5 minutes output rate 2016000 bps (0.2% with framing overhead), 216 packets/sec
+           10016 packets input, 100016 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20016 packets output, 200016 bytes
+           0 output errors, 0 collisions
+      Ethernet115 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0697
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1017000 bps (0.1% with framing overhead), 117 packets/sec
+        5 minutes output rate 2017000 bps (0.2% with framing overhead), 217 packets/sec
+           10017 packets input, 100017 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20017 packets output, 200017 bytes
+           0 output errors, 0 collisions
+      Ethernet116 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0716
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1018000 bps (0.1% with framing overhead), 118 packets/sec
+        5 minutes output rate 2018000 bps (0.2% with framing overhead), 218 packets/sec
+           10018 packets input, 100018 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20018 packets output, 200018 bytes
+           0 output errors, 0 collisions
+      Ethernet117 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0735
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1019000 bps (0.1% with framing overhead), 119 packets/sec
+        5 minutes output rate 2019000 bps (0.2% with framing overhead), 219 packets/sec
+           10019 packets input, 100019 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20019 packets output, 200019 bytes
+           0 output errors, 0 collisions
+      Ethernet118 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0754
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1020000 bps (0.1% with framing overhead), 120 packets/sec
+        5 minutes output rate 2020000 bps (0.2% with framing overhead), 220 packets/sec
+           10020 packets input, 100020 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20020 packets output, 200020 bytes
+           0 output errors, 0 collisions
+      Ethernet119 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0773
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1021000 bps (0.1% with framing overhead), 121 packets/sec
+        5 minutes output rate 2021000 bps (0.2% with framing overhead), 221 packets/sec
+           10021 packets input, 100021 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20021 packets output, 200021 bytes
+           0 output errors, 0 collisions
+      Ethernet120 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0792
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1022000 bps (0.1% with framing overhead), 122 packets/sec
+        5 minutes output rate 2022000 bps (0.2% with framing overhead), 222 packets/sec
+           10022 packets input, 100022 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20022 packets output, 200022 bytes
+           0 output errors, 0 collisions
+      Ethernet121 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0811
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1023000 bps (0.1% with framing overhead), 123 packets/sec
+        5 minutes output rate 2023000 bps (0.2% with framing overhead), 223 packets/sec
+           10023 packets input, 100023 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20023 packets output, 200023 bytes
+           0 output errors, 0 collisions
+      Ethernet122 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0830
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1024000 bps (0.1% with framing overhead), 124 packets/sec
+        5 minutes output rate 2024000 bps (0.2% with framing overhead), 224 packets/sec
+           10024 packets input, 100024 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20024 packets output, 200024 bytes
+           0 output errors, 0 collisions
+      Ethernet123 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0849
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1025000 bps (0.1% with framing overhead), 125 packets/sec
+        5 minutes output rate 2025000 bps (0.2% with framing overhead), 225 packets/sec
+           10025 packets input, 100025 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20025 packets output, 200025 bytes
+           0 output errors, 0 collisions
+      Ethernet124 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0868
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1026000 bps (0.1% with framing overhead), 126 packets/sec
+        5 minutes output rate 2026000 bps (0.2% with framing overhead), 226 packets/sec
+           10026 packets input, 100026 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20026 packets output, 200026 bytes
+           0 output errors, 0 collisions
+      Ethernet125 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0887
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1027000 bps (0.1% with framing overhead), 127 packets/sec
+        5 minutes output rate 2027000 bps (0.2% with framing overhead), 227 packets/sec
+           10027 packets input, 100027 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20027 packets output, 200027 bytes
+           0 output errors, 0 collisions
+      Ethernet126 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0906
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1028000 bps (0.1% with framing overhead), 128 packets/sec
+        5 minutes output rate 2028000 bps (0.2% with framing overhead), 228 packets/sec
+           10028 packets input, 100028 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20028 packets output, 200028 bytes
+           0 output errors, 0 collisions
+      Ethernet127 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0925
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1029000 bps (0.1% with framing overhead), 129 packets/sec
+        5 minutes output rate 2029000 bps (0.2% with framing overhead), 229 packets/sec
+           10029 packets input, 100029 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20029 packets output, 200029 bytes
+           0 output errors, 0 collisions
+      Ethernet128 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0944
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1030000 bps (0.1% with framing overhead), 130 packets/sec
+        5 minutes output rate 2030000 bps (0.2% with framing overhead), 230 packets/sec
+           10030 packets input, 100030 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20030 packets output, 200030 bytes
+           0 output errors, 0 collisions
+      Ethernet129 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0013
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1031000 bps (0.1% with framing overhead), 131 packets/sec
+        5 minutes output rate 2031000 bps (0.2% with framing overhead), 231 packets/sec
+           10031 packets input, 100031 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20031 packets output, 200031 bytes
+           0 output errors, 0 collisions
+      Ethernet130 is administratively down, line protocol is down (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0032
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1032000 bps (0.1% with framing overhead), 132 packets/sec
+        5 minutes output rate 2032000 bps (0.2% with framing overhead), 232 packets/sec
+           10032 packets input, 100032 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20032 packets output, 200032 bytes
+           0 output errors, 0 collisions
+      Ethernet131 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0051
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1033000 bps (0.1% with framing overhead), 133 packets/sec
+        5 minutes output rate 2033000 bps (0.2% with framing overhead), 233 packets/sec
+           10033 packets input, 100033 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20033 packets output, 200033 bytes
+           0 output errors, 0 collisions
+      Ethernet132 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0070
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1034000 bps (0.1% with framing overhead), 134 packets/sec
+        5 minutes output rate 2034000 bps (0.2% with framing overhead), 234 packets/sec
+           10034 packets input, 100034 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20034 packets output, 200034 bytes
+           0 output errors, 0 collisions
+      Ethernet133 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0089
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1035000 bps (0.1% with framing overhead), 135 packets/sec
+        5 minutes output rate 2035000 bps (0.2% with framing overhead), 235 packets/sec
+           10035 packets input, 100035 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20035 packets output, 200035 bytes
+           0 output errors, 0 collisions
+      Ethernet134 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0108
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1036000 bps (0.1% with framing overhead), 136 packets/sec
+        5 minutes output rate 2036000 bps (0.2% with framing overhead), 236 packets/sec
+           10036 packets input, 100036 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20036 packets output, 200036 bytes
+           0 output errors, 0 collisions
+      Ethernet135 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0127
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1037000 bps (0.1% with framing overhead), 137 packets/sec
+        5 minutes output rate 2037000 bps (0.2% with framing overhead), 237 packets/sec
+           10037 packets input, 100037 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20037 packets output, 200037 bytes
+           0 output errors, 0 collisions
+      Ethernet136 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0146
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1038000 bps (0.1% with framing overhead), 138 packets/sec
+        5 minutes output rate 2038000 bps (0.2% with framing overhead), 238 packets/sec
+           10038 packets input, 100038 bytes
+           7 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20038 packets output, 200038 bytes
+           0 output errors, 0 collisions
+      Ethernet137 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0165
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1039000 bps (0.1% with framing overhead), 139 packets/sec
+        5 minutes output rate 2039000 bps (0.2% with framing overhead), 239 packets/sec
+           10039 packets input, 100039 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20039 packets output, 200039 bytes
+           0 output errors, 0 collisions
+      Ethernet138 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0184
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1040000 bps (0.1% with framing overhead), 140 packets/sec
+        5 minutes output rate 2040000 bps (0.2% with framing overhead), 240 packets/sec
+           10040 packets input, 100040 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20040 packets output, 200040 bytes
+           0 output errors, 0 collisions
+      Ethernet139 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0203
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1041000 bps (0.1% with framing overhead), 141 packets/sec
+        5 minutes output rate 2041000 bps (0.2% with framing overhead), 241 packets/sec
+           10041 packets input, 100041 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20041 packets output, 200041 bytes
+           0 output errors, 0 collisions
+      Ethernet140 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0222
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1042000 bps (0.1% with framing overhead), 142 packets/sec
+        5 minutes output rate 2042000 bps (0.2% with framing overhead), 242 packets/sec
+           10042 packets input, 100042 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20042 packets output, 200042 bytes
+           0 output errors, 0 collisions
+      Ethernet141 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0241
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1043000 bps (0.1% with framing overhead), 143 packets/sec
+        5 minutes output rate 2043000 bps (0.2% with framing overhead), 243 packets/sec
+           10043 packets input, 100043 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20043 packets output, 200043 bytes
+           0 output errors, 0 collisions
+      Ethernet142 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0260
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1044000 bps (0.1% with framing overhead), 144 packets/sec
+        5 minutes output rate 2044000 bps (0.2% with framing overhead), 244 packets/sec
+           10044 packets input, 100044 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20044 packets output, 200044 bytes
+           0 output errors, 0 collisions
+      Ethernet143 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0279
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1045000 bps (0.1% with framing overhead), 145 packets/sec
+        5 minutes output rate 2045000 bps (0.2% with framing overhead), 245 packets/sec
+           10045 packets input, 100045 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20045 packets output, 200045 bytes
+           0 output errors, 0 collisions
+      Ethernet144 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0298
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1046000 bps (0.1% with framing overhead), 146 packets/sec
+        5 minutes output rate 2046000 bps (0.2% with framing overhead), 246 packets/sec
+           10046 packets input, 100046 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20046 packets output, 200046 bytes
+           0 output errors, 0 collisions
+      Ethernet145 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0317
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        0 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1047000 bps (0.1% with framing overhead), 147 packets/sec
+        5 minutes output rate 2047000 bps (0.2% with framing overhead), 247 packets/sec
+           10047 packets input, 100047 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20047 packets output, 200047 bytes
+           0 output errors, 0 collisions
+      Ethernet146 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0336
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        5 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1048000 bps (0.1% with framing overhead), 148 packets/sec
+        5 minutes output rate 2048000 bps (0.2% with framing overhead), 248 packets/sec
+           10048 packets input, 100048 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20048 packets output, 200048 bytes
+           0 output errors, 0 collisions
+      Ethernet147 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0355
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        11 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1049000 bps (0.1% with framing overhead), 149 packets/sec
+        5 minutes output rate 2049000 bps (0.2% with framing overhead), 249 packets/sec
+           10049 packets input, 100049 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20049 packets output, 200049 bytes
+           0 output errors, 0 collisions
+      Ethernet148 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0374
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        42 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1050000 bps (0.1% with framing overhead), 150 packets/sec
+        5 minutes output rate 2050000 bps (0.2% with framing overhead), 250 packets/sec
+           10050 packets input, 100050 bytes
+           0 input errors, 2 CRC, 0 alignment, 0 symbol, 0 input discards
+           20050 packets output, 200050 bytes
+           0 output errors, 0 collisions
+      Ethernet149 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0393
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        101 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1051000 bps (0.1% with framing overhead), 151 packets/sec
+        5 minutes output rate 2051000 bps (0.2% with framing overhead), 251 packets/sec
+           10051 packets input, 100051 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20051 packets output, 200051 bytes
+           0 output errors, 0 collisions
+      Ethernet150 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0200.0000.0001
+        Description: Link to adjacent-switch-0412
+        IP MTU 1500 bytes (default), BW 10000000 kbit
+        Full-duplex, 10Gb/s
+        180 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 1052000 bps (0.1% with framing overhead), 152 packets/sec
+        5 minutes output rate 2052000 bps (0.2% with framing overhead), 252 packets/sec
+           10052 packets input, 100052 bytes
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           20052 packets output, 200052 bytes
+           0 output errors, 0 collisions
+  terminal length 0:
+    output: Pagination disabled.
+  terminal width 511:
+    output: Width set to 511 columns.
+  set cli screen-length 0:
+    output: Screen length set to 0
+  set cli screen-width 511:
+    output: Screen width set to 511
+  set cli complete-on-space off:
+    output: Disabling complete-on-space
+  exit:
+    output: true
+  _default_:
+    output: '% Invalid input'

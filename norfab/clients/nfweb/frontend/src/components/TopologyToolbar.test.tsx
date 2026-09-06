@@ -8,7 +8,7 @@ describe("TopologyToolbar", () => {
     const markup = renderToStaticMarkup(
       <MantineProvider>
         <TopologyToolbar
-          deviceOptions={[{ name: "spine-1", sources: ["netbox"] }]}
+          deviceOptions={[{ name: "spine-1", sources: ["nornir"] }]}
           selectedDevices={["spine-1"]}
           draftDevices={["spine-1"]}
           discoveringDevices={false}
@@ -19,9 +19,12 @@ describe("TopologyToolbar", () => {
           onSearch={() => undefined}
           activeSearch=""
           onApplySearch={() => undefined}
-          availableLayers={["inventory", "lldp", "bgp"]}
-          visibleLayers={["inventory"]}
-          onVisibleLayers={() => undefined}
+          topologySources={["netbox", "nornir", "live-lldp", "circuits"]}
+          onTopologySources={() => undefined}
+          protocols={["bgp"]}
+          onProtocols={() => undefined}
+          statsMode="off"
+          onStatsMode={() => undefined}
           health="all"
           onHealth={() => undefined}
           hasGraph
@@ -29,7 +32,6 @@ describe("TopologyToolbar", () => {
           layoutRunning={false}
           rotationEnabled
           bloomEnabled
-          trafficEnabled={false}
           rotationSpeed={1}
           nodeDistance={85}
           nodeSizeMode="fixed"
@@ -37,7 +39,6 @@ describe("TopologyToolbar", () => {
           onToggleLayout={() => undefined}
           onToggleRotation={() => undefined}
           onToggleBloom={() => undefined}
-          onToggleTraffic={() => undefined}
           onRotationSpeed={() => undefined}
           onNodeDistance={() => undefined}
           onNodeSizeMode={() => undefined}
@@ -68,14 +69,14 @@ describe("TopologyToolbar", () => {
     expect(markup).toContain('aria-label="Find infrastructure"');
     expect(markup).toContain('aria-label="Apply topology search"');
     expect(markup).toContain("Link selectors");
-    expect(markup).toContain('aria-label="Select L1 links"');
-    expect(markup).toContain('aria-label="Select BGP links"');
-    expect(markup).toContain('aria-label="Select L2 overlays"');
-    expect(markup.indexOf('aria-label="Select L1 links"')).toBeLessThan(
-      markup.indexOf('aria-label="Select L2 overlays"'),
+    expect(markup).toContain('aria-label="Select topology links"');
+    expect(markup).toContain('aria-label="Select protocols"');
+    expect(markup).toContain('aria-label="Select topology statistics"');
+    expect(markup.indexOf('aria-label="Select topology links"')).toBeLessThan(
+      markup.indexOf('aria-label="Select protocols"'),
     );
-    expect(markup.indexOf('aria-label="Select L2 overlays"')).toBeLessThan(
-      markup.indexOf('aria-label="Select BGP links"'),
+    expect(markup.indexOf('aria-label="Select protocols"')).toBeLessThan(
+      markup.indexOf('aria-label="Select topology statistics"'),
     );
     expect(markup).not.toContain('aria-label="NetBox layer"');
     expect(markup).toContain("Health filter");

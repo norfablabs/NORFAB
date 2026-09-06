@@ -41,12 +41,101 @@ class FakeClient:
     def _job_result(self, service: str, task: str, **options: Any) -> dict[str, Any]:
         kwargs = options.get("kwargs", {})
         self.calls.append((service, task, kwargs))
-        if (service, task) == ("netbox", "get_devices"):
-            return {"netbox-worker": {"result": {"r1": {}, "r2": {}}, "errors": []}}
         if (service, task) == ("nornir", "get_nornir_hosts"):
             return {
                 "nornir-worker": {
                     "result": ["r1", "nornir-only"],
+                    "errors": [],
+                }
+            }
+        if (service, task) == ("nornir", "get_inventory"):
+            hosts = {
+                "r1": {
+                    "hostname": "10.0.0.1",
+                    "platform": "arista_eos",
+                    "groups": ["eos"],
+                    "username": "secret-user",
+                    "password": "secret-password",
+                    "data": {
+                        "role": "spine",
+                        "site": "dc1",
+                        "status": "active",
+                        "interfaces": [
+                            {"name": "Loopback0", "ip_addresses": ["10.0.0.1/32"]}
+                        ],
+                        "connections": [
+                            {
+                                "source": "r1",
+                                "target": "r2",
+                                "source_interface": "Ethernet1",
+                                "target_interface": "Ethernet1",
+                                "status": "connected",
+                            }
+                        ],
+                        "circuits": [
+                            {
+                                "cid": "INET-001",
+                                "type": "internet-transit",
+                                "status": "active",
+                                "source": "r1",
+                                "target": "provider-a",
+                                "source_interface": "Ethernet2",
+                                "target_interface": "NNI-1",
+                                "provider": "provider-a",
+                            }
+                        ],
+                        "bgp_peerings": [
+                            {
+                                "local_address": "10.0.0.1",
+                                "remote_address": "10.0.0.2",
+                                "peer_group": "FABRIC",
+                                "state": "established",
+                            }
+                        ],
+                    },
+                },
+                "r2": {
+                    "hostname": "10.0.0.2",
+                    "platform": "juniper_junos",
+                    "groups": ["junos"],
+                    "data": {
+                        "role": "leaf",
+                        "site": "dc1",
+                        "status": "active",
+                        "interfaces": {
+                            "Loopback0": {"ip_addresses": [{"address": "10.0.0.2/32"}]}
+                        },
+                        "connections": {
+                            "Ethernet1": {
+                                "remote_device": "r1",
+                                "remote_interface": "Ethernet1",
+                                "cable": {"status": "connected"},
+                            }
+                        },
+                        "circuits": {
+                            "WAN-002": {
+                                "interface": "Ethernet2",
+                                "provider_network": "provider-b",
+                                "remote_interface": "NNI-2",
+                                "provider": "provider-b",
+                                "status": "active",
+                                "type": "cloud-connect",
+                            }
+                        },
+                        "bgp_peerings": {
+                            "r2-r1": {
+                                "local_address": {"address": "10.0.0.2/32"},
+                                "remote_address": {"address": "10.0.0.1/32"},
+                                "peer_group": {"name": "FABRIC"},
+                            }
+                        },
+                    },
+                },
+            }
+            selected = kwargs.get("FL") or list(hosts)
+            return {
+                "nornir-worker": {
+                    "result": {"hosts": {name: hosts[name] for name in selected}},
                     "errors": [],
                 }
             }
@@ -62,6 +151,7 @@ class FakeClient:
                                 "ip": "10.0.0.1/32",
                                 "status": "active",
                                 "site": "dc1",
+                                "role": "netbox-spine",
                             },
                             {
                                 "id": "r2",
@@ -203,7 +293,7 @@ def test_submit_job_wait_does_not_block_event_loop() -> None:
     assert asyncio.run(exercise()) == {"worker": {"result": {}, "errors": []}}
 
 
-def test_device_discovery_combines_netbox_and_nornir() -> None:
+def test_device_discovery_uses_nornir_only() -> None:
     options, errors = asyncio.run(
         discover_device_options(FakeClient(), TopologyConfig())
     )
@@ -211,8 +301,7 @@ def test_device_discovery_combines_netbox_and_nornir() -> None:
     assert errors == []
     assert [(option.name, option.sources) for option in options] == [
         ("nornir-only", ["nornir"]),
-        ("r1", ["netbox", "nornir"]),
-        ("r2", ["netbox"]),
+        ("r1", ["nornir"]),
     ]
 
 
@@ -268,7 +357,7 @@ def test_lldp_normalizes_reverse_device_and_interface_names() -> None:
     lldp, interfaces = asyncio.run(collect_layers())
     _, links = TopologyCollector._merge([lldp, interfaces])
 
-    assert list(links) == ["lldp:r1:ethernet1--r2:ethernet1"]
+    assert list(links) == ["topology:r1:ethernet1--r2:ethernet1"]
     link = next(iter(links.values()))
     assert {link.source, link.target} == {"r1", "r2"}
     assert link.metrics["source_output_utilization"] == 27
@@ -284,18 +373,44 @@ def test_collector_merges_live_layers_and_interface_health(tmp_path: Path) -> No
     snapshot = asyncio.run(collector.collect_once())
 
     assert snapshot.status == "complete"
-    assert snapshot.layers == ["inventory", "lldp", "bgp", "interfaces"]
-    assert {node.id for node in snapshot.nodes} == {"r1", "r2"}
+    assert snapshot.layers == ["topology", "lldp", "bgp", "interfaces"]
+    assert {node.id for node in snapshot.nodes} == {
+        "provider-a",
+        "provider-b",
+        "r1",
+        "r2",
+    }
     assert next(node for node in snapshot.nodes if node.id == "r2").health == "healthy"
-    inventory_link = next(link for link in snapshot.links if link.layer == "inventory")
-    assert inventory_link.health == "critical"
-    assert inventory_link.metrics["source_output_utilization"] == 42
-    assert inventory_link.metrics["target_errors_in"] == 7
-    assert inventory_link.attributes["source_status_oper"] == "up"
-    lldp_link = next(link for link in snapshot.links if link.layer == "lldp")
-    assert lldp_link.attributes["remote_chassi_id"] == "001c.7300.0001"
+    topology_link = next(
+        link
+        for link in snapshot.links
+        if link.layer == "topology" and {link.source, link.target} == {"r1", "r2"}
+    )
+    assert topology_link.health == "critical"
+    assert topology_link.origin == ["live-lldp", "netbox", "nornir"]
+    assert topology_link.metrics["source_output_utilization"] == 42
+    assert topology_link.metrics["target_errors_in"] == 7
+    assert topology_link.attributes["source_status_oper"] == "up"
+    assert topology_link.attributes["remote_chassi_id"] == "001c.7300.0001"
+    r1 = next(node for node in snapshot.nodes if node.id == "r1")
+    assert r1.origin == ["live-lldp", "netbox", "nornir"]
+    assert r1.attributes["role"] == "netbox-spine"
+    assert "kind" not in r1.model_dump()
+    assert "username" not in r1.attributes
+    assert "password" not in r1.attributes
+    bgp_links = [link for link in snapshot.links if link.layer == "bgp"]
+    assert len(bgp_links) == 1
+    assert bgp_links[0].id == "bgp:10.0.0.1--10.0.0.2"
+    assert bgp_links[0].attributes["peer_group"] == "FABRIC"
+    circuit = next(link for link in snapshot.links if link.attributes.get("cid"))
+    assert circuit.attributes["type"] == "internet-transit"
+    assert circuit.origin == ["nornir"]
     assert all(task != "crud_read" for _, task, _ in client.calls)
     assert all(task != "get_devices" for _, task, _ in client.calls)
+    inventory_call = next(
+        call for call in client.calls if call[:2] == ("nornir", "get_inventory")
+    )
+    assert inventory_call[2] == {"FL": ["r1", "r2"]}
     topology_call = next(
         call for call in client.calls if call[:2] == ("netbox", "get_topology")
     )
@@ -356,7 +471,12 @@ def test_collector_keeps_partial_worker_payload(tmp_path: Path) -> None:
     snapshot = asyncio.run(collector.collect_once())
 
     assert snapshot.status == "partial"
-    assert {node.id for node in snapshot.nodes} == {"r1", "r2"}
+    assert {node.id for node in snapshot.nodes} == {
+        "provider-a",
+        "provider-b",
+        "r1",
+        "r2",
+    }
     assert any(
         "one cable could not be read" in error.message for error in snapshot.errors
     )

@@ -130,9 +130,7 @@ export default function InspectorPanel({
         ? `${endpointId(selected.value.source)} ↔ ${endpointId(selected.value.target)}`
         : "Select an object";
   const sources = selected
-    ? selected.kind === "node"
-      ? selected.value.layers
-      : [selected.value.layer]
+    ? selected.value.origin
     : [];
   const statusRows = selected
     ? detailTableRows(
@@ -225,8 +223,8 @@ export default function InspectorPanel({
         {
           id: selected.value.id,
           ...(selected.kind === "node"
-            ? { kind: selected.value.kind, layers: selected.value.layers }
-            : { layer: selected.value.layer }),
+            ? { layers: selected.value.layers, origin: selected.value.origin }
+            : { layer: selected.value.layer, origin: selected.value.origin }),
           ...selected.value.attributes,
         },
         "property",

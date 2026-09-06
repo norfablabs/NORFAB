@@ -1,4 +1,6 @@
 export type Health = "healthy" | "warning" | "critical" | "unknown";
+export type TopologyOrigin = "netbox" | "nornir" | "live-lldp";
+export type StatsMode = "off" | "traffic" | "errors" | "flaps";
 export type SnapshotStatus = "complete" | "partial" | "empty" | "failed";
 
 export interface NFWebFooterConfig {
@@ -79,9 +81,9 @@ export interface MonitoringSnapshot {
 export interface TopologyNode {
   id: string;
   label: string;
-  kind: string;
   health: Health;
   layers: string[];
+  origin: TopologyOrigin[];
   attributes: Record<string, unknown>;
 }
 
@@ -91,6 +93,7 @@ export interface TopologyLink {
   target: string | TopologyNode;
   layer: string;
   health: Health;
+  origin: TopologyOrigin[];
   metrics: Record<string, unknown>;
   attributes: Record<string, unknown>;
 }

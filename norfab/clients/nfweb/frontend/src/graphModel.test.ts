@@ -9,7 +9,6 @@ import {
   linkMatchesSearch,
   nodeMatchesSearch,
   numericMetric,
-  selectableLayers,
   TRAFFIC_LANE_CURVATURE,
 } from "./graphModel";
 
@@ -23,8 +22,9 @@ function link(
     id,
     source,
     target,
-    layer: "lldp",
+    layer: "topology",
     health: "healthy",
+    origin: ["live-lldp"],
     metrics,
     attributes: {},
   };
@@ -40,19 +40,13 @@ describe("topology graph helpers", () => {
     });
   });
 
-  it("only exposes graph-producing layers as selectable controls", () => {
-    expect(selectableLayers(["inventory", "lldp", "bgp", "interfaces"])).toEqual(
-      ["inventory", "lldp", "bgp"],
-    );
-  });
-
   it("reads endpoints after ForceGraph replaces IDs with node objects", () => {
     const node: TopologyNode = {
       id: "spine-1",
       label: "Spine 1",
-      kind: "device",
       health: "healthy",
       layers: ["lldp"],
+      origin: ["live-lldp"],
       attributes: {},
     };
 
@@ -62,8 +56,8 @@ describe("topology graph helpers", () => {
 
   it("groups reverse and multi-layer links into stable parallel curves", () => {
     const links = addParallelCurves([
-      { ...link("inventory:1", "spine-1", "spine-2"), layer: "inventory" },
-      { ...link("lldp:1", "spine-2", "spine-1"), layer: "lldp" },
+      link("topology:1", "spine-1", "spine-2"),
+      { ...link("bgp:1", "spine-2", "spine-1"), layer: "bgp" },
     ]);
 
     expect(links).toHaveLength(2);
@@ -77,9 +71,9 @@ describe("topology graph helpers", () => {
     const node: TopologyNode = {
       id: "leaf-1",
       label: "Brisbane leaf",
-      kind: "device",
       health: "healthy",
       layers: ["lldp"],
+      origin: ["live-lldp"],
       attributes: { site: "BNE" },
     };
     const peering = {
@@ -117,13 +111,12 @@ describe("topology graph helpers", () => {
           target_interface: "Ethernet3",
         },
       },
-      { ...link("inventory:1", "spine-1", "spine-2"), layer: "inventory" },
       { ...link("bgp:1", "spine-1", "spine-2"), layer: "bgp" },
     ]);
 
-    expect(links).toHaveLength(3);
-    const lldp = links.find((item) => item.layer === "lldp");
-    expect(lldp).toMatchObject({
+    expect(links).toHaveLength(2);
+    const topology = links.find((item) => item.layer === "topology");
+    expect(topology).toMatchObject({
       source: "spine-1",
       target: "spine-2",
       health: "warning",
@@ -133,12 +126,8 @@ describe("topology graph helpers", () => {
         interface_pairs: ["Ethernet1 ↔ Ethernet2", "Ethernet3 ↔ Ethernet4"],
       },
     });
-    expect(numericMetric(lldp!)).toBe(67);
-    expect(links.map((item) => item.layer).sort()).toEqual([
-      "bgp",
-      "inventory",
-      "lldp",
-    ]);
+    expect(numericMetric(topology!)).toBe(67);
+    expect(links.map((item) => item.layer).sort()).toEqual(["bgp", "topology"]);
   });
 
   it("uses the largest reported utilization without inventing missing values", () => {
@@ -201,6 +190,8 @@ describe("topology graph helpers", () => {
       },
     ]);
 
-    expect(addTrafficLanes([bgp])).toEqual([bgp]);
+    expect(addTrafficLanes([bgp])).toEqual([
+      { ...bgp, statsColor: "#475569" },
+    ]);
   });
 });

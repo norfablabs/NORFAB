@@ -41,7 +41,6 @@ import {
   numericMetric,
   linkMatchesSearch,
   nodeMatchesSearch,
-  selectableLayers,
   trafficMetric,
 } from "./graphModel";
 import type {
@@ -54,6 +53,8 @@ import type {
   Health,
   NFWebFooterConfig,
   SelectedItem,
+  StatsMode,
+  TopologyOrigin,
   TopologyHistoryItem,
   TopologyLink,
   TopologyLogEntry,
@@ -126,8 +127,6 @@ export default function App() {
   const hasFramedGraph = useRef(false);
   const positions = useRef(new Map<string, NodeCoordinates>());
   const newestSnapshot = useRef<TopologySnapshot | null>(null);
-  const layersInitialized = useRef(false);
-  const [availableLayers, setAvailableLayers] = useState<string[]>([]);
   const [snapshot, setSnapshot] = useState<TopologySnapshot | null>(null);
   const [history, setHistory] = useState<TopologyHistoryItem[]>([]);
   const [footerConfig, setFooterConfig] = useState<NFWebFooterConfig>({
@@ -137,7 +136,11 @@ export default function App() {
     github_url: null,
   });
   const [collectionLog, setCollectionLog] = useState<TopologyLogEntry[]>([]);
-  const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
+  const [topologySources, setTopologySources] = useState<
+    Set<TopologyOrigin | "circuits">
+  >(new Set(["netbox", "nornir", "live-lldp", "circuits"]));
+  const [protocols, setProtocols] = useState<Set<string>>(new Set(["bgp"]));
+  const [statsMode, setStatsMode] = useState<StatsMode>("off");
   const [openNavigation, setOpenNavigation] =
     useState<NavigationSection | null>("dashboards");
   const [activeView, setActiveView] = useState<ApplicationView>(
@@ -152,7 +155,6 @@ export default function App() {
   const [visualizationPaused, setVisualizationPaused] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
   const [bloomEnabled, setBloomEnabled] = useState(true);
-  const [trafficEnabled, setTrafficEnabled] = useState(false);
   const [rotationSpeed, setRotationSpeed] = useState(1);
   const [nodeDistance, setNodeDistance] = useState(85);
   const [nodeSizeMode, setNodeSizeMode] = useState<NodeSizeMode>("fixed");
@@ -241,12 +243,11 @@ export default function App() {
     (next: TopologySnapshot) => {
       rememberNodePositions();
       newestSnapshot.current = next;
-      const nextAvailableLayers = selectableLayers(next.layers);
-      setAvailableLayers(nextAvailableLayers);
-      if (!layersInitialized.current) {
-        layersInitialized.current = true;
-        setVisibleLayers(new Set(nextAvailableLayers));
-      }
+      setError(
+        next.errors.length
+          ? next.errors.map((item) => item.message).join("; ")
+          : null,
+      );
       appendCollectionLog(snapshotLogs(next));
       setHistory((current) => {
         return [
@@ -312,13 +313,25 @@ export default function App() {
         .filter((node) => health === "all" || node.health === health)
         .map((node) => node.id),
     );
-    const links = snapshot.links.filter(
-      (link) =>
-        visibleLayers.has(link.layer) &&
+    const links = snapshot.links.filter((link) => {
+      const isCircuit = Boolean(
+        link.attributes.cid ??
+          link.attributes.circuit_id ??
+          link.attributes.circuit_type,
+      );
+      const sourceVisible = link.origin.some((origin) => topologySources.has(origin));
+      const linkVisible =
+        link.layer === "bgp"
+          ? protocols.has("bgp")
+          : link.layer === "topology" &&
+            (sourceVisible || (isCircuit && topologySources.has("circuits")));
+      return (
+        linkVisible &&
         allowedNodeIds.has(endpointId(link.source)) &&
         allowedNodeIds.has(endpointId(link.target)) &&
-        (health === "all" || link.health === health),
-    );
+        (health === "all" || link.health === health)
+      );
+    });
     const linkedNodes = new Set(
       links.flatMap((link) => [
         endpointId(link.source),
@@ -353,7 +366,9 @@ export default function App() {
       .filter(
         (node) =>
           linkedNodes.has(node.id) ||
-          node.layers.some((layer) => visibleLayers.has(layer)),
+          (node.layers.includes("topology") &&
+            node.origin.some((origin) => topologySources.has(origin))) ||
+          (node.layers.includes("bgp") && protocols.has("bgp")),
       )
       .map((node) => {
         const coordinates = positions.current.get(node.id);
@@ -363,9 +378,7 @@ export default function App() {
             ? 3 + Math.min(stats.connections, 15) * 1.5
             : nodeSizeMode === "traffic"
               ? 3 + Math.min(18, Math.log10(stats.traffic + 1) * 2)
-              : node.kind === "device"
-                ? 5
-                : 2.5;
+              : 5;
         return {
           ...node,
           ...(coordinates ?? {}),
@@ -380,24 +393,55 @@ export default function App() {
           searchMatch: matchingNodeIds.has(node.id),
         };
       });
-    const renderedLinks = addParallelCurves(links).map((link) => ({
+    let renderedLinks: RenderedTopologyLink[] = addParallelCurves(links).map((link) => ({
       ...link,
       searchMatch:
         Boolean(query) &&
         link.memberLinks.some((member) => matchingLinks.has(member.id)),
     }));
+    if (statsMode === "traffic") {
+      renderedLinks = addTrafficLanes(renderedLinks);
+    } else if (statsMode === "errors" || statsMode === "flaps") {
+      renderedLinks = renderedLinks.map((link) => {
+        const metricNames =
+          statsMode === "errors"
+            ? ["errors_in", "errors_out", "crc_errors"]
+            : ["transitions"];
+        const values = link.memberLinks.flatMap((member) =>
+          Object.entries(member.metrics)
+            .filter(([key]) => metricNames.some((name) => key.endsWith(name)))
+            .map(([, value]) => Number(value)),
+        );
+        const validValues = values.filter(Number.isFinite);
+        const maximum = validValues.length ? Math.max(...validValues) : undefined;
+        const statsColor =
+          maximum === undefined
+            ? "#475569"
+            : statsMode === "errors"
+              ? maximum > 0
+                ? "#ef4444"
+                : "#22c55e"
+              : maximum > 100
+                ? "#ef4444"
+                : maximum > 10
+                  ? "#facc15"
+                  : "#22c55e";
+        return { ...link, statsColor };
+      });
+    }
     return {
       nodes,
-      links: trafficEnabled ? addTrafficLanes(renderedLinks) : renderedLinks,
+      links: renderedLinks,
     };
   }, [
     snapshot,
-    visibleLayers,
+    topologySources,
+    protocols,
     activeSearch,
     health,
     layoutRunning,
     nodeSizeMode,
-    trafficEnabled,
+    statsMode,
   ]);
 
   useEffect(() => {
@@ -511,9 +555,6 @@ export default function App() {
       setSelectedDevices(result.selected);
       setHistory([]);
       setCollectionLog([]);
-      layersInitialized.current = false;
-      setAvailableLayers([]);
-      setVisibleLayers(new Set());
       hasFramedGraph.current = false;
       if (result.snapshot) {
         acceptLiveSnapshot(result.snapshot);
@@ -659,9 +700,16 @@ export default function App() {
             onSearch={setSearch}
             activeSearch={activeSearch}
             onApplySearch={setActiveSearch}
-            availableLayers={availableLayers}
-            visibleLayers={[...visibleLayers]}
-            onVisibleLayers={(layers) => setVisibleLayers(new Set(layers))}
+            topologySources={[...topologySources]}
+            onTopologySources={(sources) =>
+              setTopologySources(
+                new Set(sources as Array<TopologyOrigin | "circuits">),
+              )
+            }
+            protocols={[...protocols]}
+            onProtocols={(values) => setProtocols(new Set(values))}
+            statsMode={statsMode}
+            onStatsMode={setStatsMode}
             health={health}
             onHealth={setHealth}
             hasGraph={graphData.nodes.length > 0}
@@ -669,7 +717,6 @@ export default function App() {
             layoutRunning={layoutRunning}
             rotationEnabled={rotationEnabled}
             bloomEnabled={bloomEnabled}
-            trafficEnabled={trafficEnabled}
             rotationSpeed={rotationSpeed}
             nodeDistance={nodeDistance}
             nodeSizeMode={nodeSizeMode}
@@ -679,7 +726,6 @@ export default function App() {
             }
             onToggleRotation={toggleRotation}
             onToggleBloom={() => setBloomEnabled((enabled) => !enabled)}
-            onToggleTraffic={() => setTrafficEnabled((enabled) => !enabled)}
             onRotationSpeed={setRotationSpeed}
             onNodeDistance={changeNodeDistance}
             onNodeSizeMode={setNodeSizeMode}

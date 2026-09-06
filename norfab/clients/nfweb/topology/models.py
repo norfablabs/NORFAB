@@ -7,6 +7,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field
 
 TopologyHealth = Literal["healthy", "warning", "critical", "unknown"]
+TopologyOrigin = Literal["netbox", "nornir", "live-lldp"]
 SnapshotStatus = Literal["complete", "partial", "empty", "failed"]
 
 
@@ -22,9 +23,9 @@ class TopologyNode(BaseModel):
 
     id: str
     label: str
-    kind: str = "device"
     health: TopologyHealth = "unknown"
     layers: list[str] = Field(default_factory=list)
+    origin: list[TopologyOrigin] = Field(default_factory=list)
     attributes: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -38,6 +39,7 @@ class TopologyLink(BaseModel):
     target: str
     layer: str
     health: TopologyHealth = "unknown"
+    origin: list[TopologyOrigin] = Field(default_factory=list)
     metrics: dict[str, Any] = Field(default_factory=dict)
     attributes: dict[str, Any] = Field(default_factory=dict)
 

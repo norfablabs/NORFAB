@@ -133,29 +133,10 @@ def _worker_payloads(
 async def discover_device_options(
     client: Any, config: TopologyConfig
 ) -> tuple[list[TopologyDeviceOption], list[TopologyCollectionError]]:
-    """Return the union of device names reported by NetBox and Nornir."""
+    """Return device names reported by Nornir."""
     context = CollectionContext(config=config)
-    sources: dict[str, set[str]] = {}
+    names: set[str] = set()
     errors: list[TopologyCollectionError] = []
-
-    netbox_filter: dict[str, Any] = {"name__iregex": ".*"}
-    if config.sites:
-        netbox_filter["site"] = config.sites
-    netbox_result = await _submit_job(
-        client,
-        context,
-        "netbox",
-        "get_devices",
-        workers=config.netbox_workers,
-        kwargs={"filters": [netbox_filter]},
-        timeout=config.request_timeout,
-    )
-    payloads, job_errors = _worker_payloads(netbox_result, "inventory")
-    errors.extend(job_errors)
-    for payload in payloads:
-        if isinstance(payload, Mapping):
-            for name in payload:
-                sources.setdefault(str(name), set()).add("netbox")
 
     nornir_result = await _submit_job(
         client,
@@ -166,18 +147,16 @@ async def discover_device_options(
         kwargs={},
         timeout=config.request_timeout,
     )
-    payloads, job_errors = _worker_payloads(nornir_result, "inventory")
+    payloads, job_errors = _worker_payloads(nornir_result, "topology")
     errors.extend(job_errors)
     for payload in payloads:
         if isinstance(payload, list):
             for name in payload:
-                sources.setdefault(str(name), set()).add("nornir")
+                names.add(str(name))
 
     options = [
-        TopologyDeviceOption(name=name, sources=sorted(device_sources))
-        for name, device_sources in sorted(
-            sources.items(), key=lambda item: item[0].casefold()
-        )
+        TopologyDeviceOption(name=name, sources=["nornir"])
+        for name in sorted(names, key=str.casefold)
     ]
     return options, errors
 
@@ -276,6 +255,9 @@ def _link_id(
     target_interface: str | None = None,
 ) -> str:
     """Build a direction-independent link identifier from two endpoints."""
+    if layer == "bgp":
+        addresses = sorted([_device_identity(source), _device_identity(target)])
+        return f"bgp:{addresses[0]}--{addresses[1]}"
     endpoints = sorted(
         [
             _endpoint(source, source_interface),
@@ -291,34 +273,350 @@ def _string(value: Any) -> str:
 
 
 class InventoryLayer:
-    """Collect intended physical topology and device metadata from NetBox."""
+    """Seed topology from the selected hosts' running Nornir inventory."""
 
-    name = "inventory"
+    name = "topology"
 
     def __init__(self, refresh_interval: int = 300) -> None:
-        """Set how long inventory data may remain cached."""
+        """Set how long Nornir inventory data may remain cached."""
         self.refresh_interval = refresh_interval
 
     async def collect(self, client: Any, context: CollectionContext) -> LayerPatch:
-        """Collect NetBox devices and cables as an inventory layer patch."""
+        """Collect topology-safe host, connection, circuit, and BGP data."""
         patch = LayerPatch(name=self.name)
-        scope: dict[str, Any] = {"device_regex": ".*"}
-        if context.devices:
-            scope = {"devices": context.devices}
-        elif context.config.sites:
-            scope = {"sites": context.config.sites}
+        if not context.devices:
+            return patch
+        result = await _submit_job(
+            client,
+            context,
+            "nornir",
+            "get_inventory",
+            workers=context.config.nornir_workers,
+            kwargs={"FL": context.devices},
+            timeout=context.config.request_timeout,
+        )
+        payloads, errors = _worker_payloads(result, self.name)
+        patch.errors.extend(errors)
+
+        inventories: list[Mapping[str, Any]] = []
+        for payload in payloads:
+            if not isinstance(payload, Mapping):
+                continue
+            hosts = payload.get("hosts") or {}
+            if not isinstance(hosts, Mapping):
+                continue
+            inventories.append(hosts)
+            for raw_name, raw_host in hosts.items():
+                host = _as_dict(raw_host)
+                if not isinstance(host, Mapping):
+                    continue
+                name = _known_device(str(raw_name), context.devices)
+                data = _as_dict(host.get("data"))
+                data = data if isinstance(data, Mapping) else {}
+                attributes = {
+                    key: host[key]
+                    for key in ("hostname", "platform", "groups")
+                    if host.get(key) not in (None, "", [])
+                }
+                attributes.update(
+                    {
+                        key: data[key]
+                        for key in (
+                            "role",
+                            "site",
+                            "status",
+                            "manufacturer",
+                            "device_type",
+                            "tags",
+                            "primary_ip",
+                        )
+                        if data.get(key) not in (None, "", [])
+                    }
+                )
+                patch.nodes.append(
+                    TopologyNode(
+                        id=name,
+                        label=name,
+                        health=_health_from_state(data.get("status")),
+                        layers=[self.name],
+                        origin=["nornir"],
+                        attributes=attributes,
+                    )
+                )
+                addresses: list[Any] = [data.get("primary_ip"), host.get("hostname")]
+                interfaces = data.get("interfaces") or []
+                if isinstance(interfaces, Mapping):
+                    interfaces = interfaces.values()
+                for raw_interface in interfaces:
+                    interface = _as_dict(raw_interface)
+                    if not isinstance(interface, Mapping):
+                        continue
+                    raw_addresses = interface.get("ip_addresses") or []
+                    if isinstance(raw_addresses, Mapping):
+                        raw_addresses = raw_addresses.values()
+                    addresses.extend(raw_addresses)
+                known_addresses: list[str] = []
+                for raw_address in addresses:
+                    address = _as_dict(raw_address)
+                    if isinstance(address, Mapping):
+                        address = address.get("address") or address.get("display")
+                    ip = _string(address).split("/", 1)[0]
+                    if ip:
+                        context.ip_to_device[ip] = name
+                        known_addresses.append(ip)
+                if known_addresses:
+                    patch.nodes[-1].attributes["addresses"] = sorted(
+                        set(known_addresses)
+                    )
+
+        for hosts in inventories:
+            for raw_name, raw_host in hosts.items():
+                host = _as_dict(raw_host)
+                if not isinstance(host, Mapping):
+                    continue
+                name = _known_device(str(raw_name), context.devices)
+                data = _as_dict(host.get("data"))
+                data = data if isinstance(data, Mapping) else {}
+                connections = (
+                    data.get("connections") or []
+                    if context.config.layers.topology
+                    else []
+                )
+                connection_items = (
+                    connections.items()
+                    if isinstance(connections, Mapping)
+                    else ((None, item) for item in connections)
+                )
+                for local_interface, raw_link in connection_items:
+                    link = _as_dict(raw_link)
+                    if not isinstance(link, Mapping):
+                        continue
+                    source = _known_device(
+                        _string(link.get("source") or name), context.devices
+                    )
+                    target = _known_device(
+                        _string(
+                            link.get("target")
+                            or link.get("remote_device")
+                            or link.get("provider")
+                        ),
+                        context.devices,
+                    )
+                    if not source or not target:
+                        continue
+                    source_interface = _string(
+                        link.get("source_interface")
+                        or link.get("src_iface")
+                        or local_interface
+                    )
+                    target_interface = _string(
+                        link.get("target_interface")
+                        or link.get("dst_iface")
+                        or link.get("remote_interface")
+                    )
+                    cable = _as_dict(link.get("cable"))
+                    cable = cable if isinstance(cable, Mapping) else {}
+                    patch.links.append(
+                        TopologyLink(
+                            id=_link_id(
+                                self.name,
+                                source,
+                                target,
+                                source_interface,
+                                target_interface,
+                            ),
+                            source=source,
+                            target=target,
+                            layer=self.name,
+                            health=_health_from_state(
+                                link.get("status") or cable.get("status")
+                            ),
+                            origin=["nornir"],
+                            attributes={
+                                key: value
+                                for key, value in link.items()
+                                if key
+                                not in {
+                                    "source",
+                                    "target",
+                                    "source_interface",
+                                    "target_interface",
+                                    "src_iface",
+                                    "dst_iface",
+                                }
+                            }
+                            | {
+                                "source_interface": source_interface,
+                                "target_interface": target_interface,
+                            },
+                        )
+                    )
+                circuits = (
+                    data.get("circuits") or [] if context.config.layers.topology else []
+                )
+                circuit_items = (
+                    circuits.items()
+                    if isinstance(circuits, Mapping)
+                    else ((None, item) for item in circuits)
+                )
+                for circuit_id, raw_circuit in circuit_items:
+                    circuit = _as_dict(raw_circuit)
+                    if not isinstance(circuit, Mapping):
+                        continue
+                    source = _known_device(
+                        _string(circuit.get("source") or name), context.devices
+                    )
+                    target = _known_device(
+                        _string(
+                            circuit.get("target")
+                            or circuit.get("remote_device")
+                            or circuit.get("provider_network")
+                            or circuit.get("provider")
+                        ),
+                        context.devices,
+                    )
+                    if not source or not target:
+                        continue
+                    source_interface = _string(
+                        circuit.get("source_interface")
+                        or circuit.get("src_iface")
+                        or circuit.get("interface")
+                    )
+                    target_interface = _string(
+                        circuit.get("target_interface")
+                        or circuit.get("dst_iface")
+                        or circuit.get("remote_interface")
+                    )
+                    patch.links.append(
+                        TopologyLink(
+                            id=_link_id(
+                                self.name,
+                                source,
+                                target,
+                                source_interface,
+                                target_interface,
+                            ),
+                            source=source,
+                            target=target,
+                            layer=self.name,
+                            health=_health_from_state(circuit.get("status")),
+                            origin=["nornir"],
+                            attributes={
+                                key: value
+                                for key, value in circuit.items()
+                                if key
+                                not in {
+                                    "source",
+                                    "target",
+                                    "source_interface",
+                                    "target_interface",
+                                    "src_iface",
+                                    "dst_iface",
+                                }
+                            }
+                            | {
+                                "cid": circuit.get("cid") or circuit_id,
+                                "source_interface": source_interface,
+                                "target_interface": target_interface,
+                            },
+                        )
+                    )
+                if not context.config.layers.bgp:
+                    continue
+                peerings = data.get("bgp_peerings") or []
+                peering_items = (
+                    peerings.items()
+                    if isinstance(peerings, Mapping)
+                    else ((None, item) for item in peerings)
+                )
+                for peering_name, raw_peer in peering_items:
+                    peer = _as_dict(raw_peer)
+                    if not isinstance(peer, Mapping):
+                        continue
+                    local_address = _as_dict(peer.get("local_address"))
+                    if isinstance(local_address, Mapping):
+                        local_address = local_address.get("address")
+                    remote_address = _as_dict(peer.get("remote_address"))
+                    if isinstance(remote_address, Mapping):
+                        remote_address = remote_address.get("address")
+                    local_ip = _string(local_address).split("/", 1)[0]
+                    remote_ip = _string(remote_address).split("/", 1)[0]
+                    if not remote_ip:
+                        continue
+                    remote = context.ip_to_device.get(remote_ip, remote_ip)
+                    peer_group = _as_dict(peer.get("peer_group"))
+                    if isinstance(peer_group, Mapping):
+                        peer_group = peer_group.get("name") or peer_group.get("display")
+                    label = (
+                        remote
+                        if remote != remote_ip
+                        else (
+                            f"{peer_group} ({remote_ip})" if peer_group else remote_ip
+                        )
+                    )
+                    health = _health_from_state(peer.get("state"))
+                    patch.nodes.append(
+                        TopologyNode(
+                            id=remote,
+                            label=label,
+                            health=health,
+                            layers=["bgp"],
+                            origin=["nornir"],
+                            attributes={"ip": remote_ip},
+                        )
+                    )
+                    patch.links.append(
+                        TopologyLink(
+                            id=_link_id("bgp", local_ip or name, remote_ip),
+                            source=name,
+                            target=remote,
+                            layer="bgp",
+                            health=health,
+                            origin=["nornir"],
+                            attributes={
+                                key: peer[key]
+                                for key in (
+                                    "description",
+                                    "local_as",
+                                    "remote_as",
+                                    "state",
+                                )
+                                if peer.get(key) is not None
+                            }
+                            | {
+                                "name": peer.get("name") or peering_name,
+                                "peer_group": peer_group,
+                                "local_address": local_ip,
+                                "remote_address": remote_ip,
+                            },
+                        )
+                    )
+        return patch
+
+
+class NetBoxTopologyLayer:
+    """Collect desired topology for the selected Nornir hosts from NetBox."""
+
+    name = "topology"
+
+    def __init__(self, refresh_interval: int = 300) -> None:
+        self.refresh_interval = refresh_interval
+
+    async def collect(self, client: Any, context: CollectionContext) -> LayerPatch:
+        patch = LayerPatch(name=self.name)
+        if not context.devices:
+            return patch
         result = await _submit_job(
             client,
             context,
             "netbox",
             "get_topology",
             workers=context.config.netbox_workers,
-            kwargs=scope,
+            kwargs={"devices": context.devices},
             timeout=context.config.request_timeout,
         )
         payloads, errors = _worker_payloads(result, self.name)
         patch.errors.extend(errors)
-
         for payload in payloads:
             if not isinstance(payload, Mapping):
                 continue
@@ -333,12 +631,12 @@ class InventoryLayer:
                         label=str(node.get("name") or node_id),
                         health=_health_from_state(node.get("status")),
                         layers=[self.name],
+                        origin=["netbox"],
                         attributes={
                             key: value
                             for key, value in node.items()
-                            if key not in {"id", "name", "status"}
-                        }
-                        | {"status": node.get("status")},
+                            if key not in {"id", "name"}
+                        },
                     )
                 )
             for raw_link in payload.get("links") or []:
@@ -367,11 +665,22 @@ class InventoryLayer:
                         source=source,
                         target=target,
                         layer=self.name,
-                        health=_health_from_state(link.get("cable_status")),
+                        health=_health_from_state(
+                            link.get("cable_status") or link.get("status")
+                        ),
+                        origin=["netbox"],
                         attributes={
                             key: value
                             for key, value in link.items()
-                            if key not in {"source", "target", "src_iface", "dst_iface"}
+                            if key
+                            not in {
+                                "source",
+                                "target",
+                                "src_iface",
+                                "dst_iface",
+                                "source_interface",
+                                "target_interface",
+                            }
                         }
                         | {
                             "source_interface": source_interface,
@@ -419,7 +728,8 @@ class LLDPLayer:
                         id=local,
                         label=local,
                         health="healthy",
-                        layers=[self.name],
+                        layers=["topology"],
+                        origin=["live-lldp"],
                     )
                 )
                 for raw_neighbor in raw_neighbors or []:
@@ -433,7 +743,7 @@ class LLDPLayer:
                     source_interface = _string(neighbor.get("interface"))
                     target_interface = _string(neighbor.get("remote_interface"))
                     link_id = _link_id(
-                        self.name,
+                        "topology",
                         local,
                         remote,
                         source_interface,
@@ -447,7 +757,8 @@ class LLDPLayer:
                             id=remote,
                             label=remote,
                             health="healthy",
-                            layers=[self.name],
+                            layers=["topology"],
+                            origin=["live-lldp"],
                         )
                     )
                     patch.links.append(
@@ -455,8 +766,9 @@ class LLDPLayer:
                             id=link_id,
                             source=local,
                             target=remote,
-                            layer=self.name,
+                            layer="topology",
                             health="healthy",
+                            origin=["live-lldp"],
                             attributes={
                                 "source_interface": source_interface,
                                 "target_interface": target_interface,
@@ -502,7 +814,7 @@ class BGPLayer:
         payloads, errors = _worker_payloads(result, self.name)
         patch.errors.extend(errors)
         peer_ips = {
-            _string(peer.get("remote_address"))
+            _string(peer.get("remote_address")).split("/", 1)[0]
             for payload in payloads
             if isinstance(payload, Mapping)
             for peers in payload.values()
@@ -524,16 +836,28 @@ class BGPLayer:
                         label=str(device),
                         health="unknown",
                         layers=[self.name],
+                        origin=["nornir"],
                     )
                 )
                 for raw_peer in raw_peers or []:
                     peer = _as_dict(raw_peer)
                     if not isinstance(peer, Mapping):
                         continue
-                    remote_ip = _string(peer.get("remote_address"))
+                    remote_ip = _string(peer.get("remote_address")).split("/", 1)[0]
                     if not remote_ip:
                         continue
                     remote = context.ip_to_device.get(remote_ip, remote_ip)
+                    local_ip = _string(peer.get("local_address")).split("/", 1)[0]
+                    if not local_ip:
+                        local_ip = next(
+                            (
+                                ip
+                                for ip, known_device in context.ip_to_device.items()
+                                if _device_identity(known_device)
+                                == _device_identity(str(device))
+                            ),
+                            str(device),
+                        )
                     state = peer.get("state")
                     if state is None:
                         health: TopologyHealth = "unknown"
@@ -541,17 +865,25 @@ class BGPLayer:
                         health = "healthy"
                     else:
                         health = "critical"
-                    link_id = _link_id(self.name, str(device), remote, remote_ip, None)
+                    link_id = _link_id(self.name, local_ip, remote_ip)
                     if link_id in seen:
                         continue
                     seen.add(link_id)
                     patch.nodes.append(
                         TopologyNode(
                             id=remote,
-                            label=remote,
-                            kind="device" if remote != remote_ip else "external-peer",
+                            label=(
+                                remote
+                                if remote != remote_ip
+                                else (
+                                    f"{peer.get('peer_group')} ({remote_ip})"
+                                    if peer.get("peer_group")
+                                    else remote_ip
+                                )
+                            ),
                             health=health,
                             layers=[self.name],
+                            origin=["nornir"],
                             attributes={"ip": remote_ip},
                         )
                     )
@@ -562,12 +894,17 @@ class BGPLayer:
                             target=remote,
                             layer=self.name,
                             health=health,
+                            origin=["nornir"],
                             attributes={
                                 key: value
                                 for key, value in peer.items()
                                 if key not in {"remote_address"}
                             }
-                            | {"remote_address": remote_ip, "state": state},
+                            | {
+                                "local_address": local_ip,
+                                "remote_address": remote_ip,
+                                "state": state,
+                            },
                         )
                     )
         return patch
@@ -692,8 +1029,10 @@ class InterfacesLayer:
 def enabled_adapters(config: TopologyConfig) -> Iterable[TopologyLayerAdapter]:
     """Create adapters enabled in the inventory, in dependency order."""
     layers = config.layers
-    if layers.inventory:
+    if layers.topology or layers.bgp:
         yield InventoryLayer(config.inventory_refresh_interval)
+    if layers.topology:
+        yield NetBoxTopologyLayer(config.inventory_refresh_interval)
     if layers.lldp:
         yield LLDPLayer(config.collection_interval)
     if layers.bgp:

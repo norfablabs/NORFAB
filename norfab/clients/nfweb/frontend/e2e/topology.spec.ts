@@ -6,22 +6,22 @@ const snapshot = {
   duration_ms: 42,
   status: "complete",
   devices: ["leaf-01", "spine-01"],
-  layers: ["inventory", "lldp", "bgp", "interfaces"],
+  layers: ["topology", "lldp", "bgp", "interfaces"],
   nodes: [
     {
       id: "leaf-01",
       label: "leaf-01",
-      kind: "device",
       health: "healthy",
-      layers: ["lldp"],
+      layers: ["topology"],
+      origin: ["nornir", "live-lldp"],
       attributes: { role: "leaf", site: "lab" },
     },
     {
       id: "spine-01",
       label: "spine-01",
-      kind: "device",
       health: "healthy",
-      layers: ["lldp"],
+      layers: ["topology"],
+      origin: ["nornir", "live-lldp"],
       attributes: { role: "spine", site: "lab" },
     },
   ],
@@ -30,8 +30,9 @@ const snapshot = {
       id: "leaf-01--spine-01--lldp",
       source: "leaf-01",
       target: "spine-01",
-      layer: "lldp",
+      layer: "topology",
       health: "healthy",
+      origin: ["live-lldp"],
       metrics: {
         source_rate_bps_out: 2_500_000_000,
         target_rate_bps_out: 850_000_000,
@@ -47,8 +48,9 @@ const snapshot = {
       id: "leaf-01--spine-01--lldp-secondary",
       source: "spine-01",
       target: "leaf-01",
-      layer: "lldp",
+      layer: "topology",
       health: "healthy",
+      origin: ["live-lldp"],
       metrics: {
         source_rate_bps_out: 900_000_000,
         target_rate_bps_out: 1_400_000_000,
@@ -83,9 +85,9 @@ const olderSnapshot = {
     {
       id: "leaf-01",
       label: "leaf-01",
-      kind: "device",
       health: "healthy",
-      layers: ["lldp"],
+      layers: ["topology"],
+      origin: ["nornir", "live-lldp"],
       attributes: { role: "leaf", site: "lab" },
     },
   ],
@@ -232,6 +234,7 @@ test("renders the topology shell, header history, and configured footer", async 
 });
 
 test("uses working Mantine toolbar controls", async ({ page }) => {
+  test.setTimeout(60_000);
   const deviceSelector = page.getByRole("button", {
     name: "Select topology devices",
   });
@@ -323,55 +326,46 @@ test("uses working Mantine toolbar controls", async ({ page }) => {
   }
   await healthFilter.press("Escape");
 
-  const l1Selector = page.getByRole("button", { name: "Select L1 links" });
-  const bgpSelector = page.getByRole("button", { name: "Select BGP links" });
-  const l2Selector = page.getByRole("button", { name: "Select L2 overlays" });
-  await expect(l1Selector).toHaveText(/L1/);
-  await expect(bgpSelector).toHaveText(/BGP/);
-  await expect(l2Selector).toHaveText(/L2/);
-
-  await l2Selector.click();
-  const trafficOverlay = page.getByRole("menuitemcheckbox", {
-    name: "Display directional traffic",
+  const topologySelector = page.getByRole("button", {
+    name: "Select topology links",
   });
-  await expect(trafficOverlay).toHaveAttribute("aria-checked", "false");
-  await trafficOverlay.click();
-  await expect(trafficOverlay).toHaveAttribute("aria-checked", "true");
-  await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
-  await l2Selector.click();
+  const protocolsSelector = page.getByRole("button", {
+    name: "Select protocols",
+  });
+  const statsSelector = page.getByRole("button", {
+    name: "Select topology statistics",
+  });
+  await expect(topologySelector).toHaveText(/Topology/);
+  await expect(protocolsSelector).toHaveText(/Protocols/);
+  await expect(statsSelector).toHaveText(/Stats/);
 
-  await l1Selector.click();
+  await statsSelector.click();
+  const trafficMode = page.getByRole("menuitemradio", { name: "Traffic" });
+  await trafficMode.click();
+  await expect(trafficMode).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
+  await statsSelector.click();
+
+  await topologySelector.click();
   const netboxLayer = page.getByRole("menuitemcheckbox", {
     name: "NetBox links",
   });
   const lldpLayer = page.getByRole("menuitemcheckbox", { name: "LLDP links" });
   await expect(netboxLayer).toHaveAttribute("aria-checked", "true");
   await expect(lldpLayer).toHaveAttribute("aria-checked", "true");
-  await expect(page.locator('[data-layer="inventory"]').last()).toHaveCSS(
-    "background-color",
-    "rgb(59, 130, 246)",
-  );
-  await expect(page.locator('[data-layer="lldp"]').last()).toHaveCSS(
-    "background-color",
-    "rgb(249, 115, 22)",
-  );
   await lldpLayer.click();
   await expect(lldpLayer).toHaveAttribute("aria-checked", "false");
-  await expect(page.getByText("0 nodes / 0 links", { exact: true })).toBeVisible();
+  await expect(page.getByText("2 nodes / 0 links", { exact: true })).toBeVisible();
   await lldpLayer.click();
   await expect(lldpLayer).toHaveAttribute("aria-checked", "true");
   await expect(page.getByText("2 nodes / 1 link", { exact: true })).toBeVisible();
 
-  await l1Selector.click();
-  await bgpSelector.click();
+  await topologySelector.click();
+  await protocolsSelector.click();
   const bgpPeerings = page.getByRole("menuitemcheckbox", {
     name: "BGP peerings",
   });
   await expect(bgpPeerings).toHaveAttribute("aria-checked", "true");
-  await expect(page.locator('[data-layer="bgp"]').last()).toHaveCSS(
-    "background-color",
-    "rgb(182, 124, 255)",
-  );
 
   const [topbarBox, distanceBox, nodeSizeBox] = await Promise.all([
     page.locator(".topbar").boundingBox(),

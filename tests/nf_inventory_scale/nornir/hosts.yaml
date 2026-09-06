@@ -1,0 +1,801 @@
+hosts:
+  spine02.site1:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6401
+    groups:
+    - scale_xr
+    data:
+      role: spine
+      site: site1
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-spine
+      primary_ip: 10.250.0.2/32
+  spine04.site1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6403
+    groups:
+    - scale_eos
+    data:
+      role: spine
+      site: site1
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-spine
+      primary_ip: 10.250.0.4/32
+  leaf02.site1:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6405
+    groups:
+    - scale_junos
+    data:
+      role: leaf
+      site: site1
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.6/32
+  leaf04.site1:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6407
+    groups:
+    - scale_xr
+    data:
+      role: leaf
+      site: site1
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.8/32
+  leaf06.site1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6409
+    groups:
+    - scale_eos
+    data:
+      role: leaf
+      site: site1
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.10/32
+  leaf08.site1:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6411
+    groups:
+    - scale_junos
+    data:
+      role: leaf
+      site: site1
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.12/32
+  leaf10.site1:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6413
+    groups:
+    - scale_xr
+    data:
+      role: leaf
+      site: site1
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.14/32
+  leaf12.site1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6415
+    groups:
+    - scale_eos
+    data:
+      role: leaf
+      site: site1
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.16/32
+  dcpe02.site1:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6417
+    groups:
+    - scale_junos
+    data:
+      role: dcpe
+      site: site1
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-dcpe
+      primary_ip: 10.250.0.18/32
+  spine02.site2:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6419
+    groups:
+    - scale_xr
+    data:
+      role: spine
+      site: site2
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-spine
+      primary_ip: 10.250.0.20/32
+  spine04.site2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6421
+    groups:
+    - scale_eos
+    data:
+      role: spine
+      site: site2
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-spine
+      primary_ip: 10.250.0.22/32
+  leaf02.site2:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6423
+    groups:
+    - scale_junos
+    data:
+      role: leaf
+      site: site2
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.24/32
+  leaf04.site2:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6425
+    groups:
+    - scale_xr
+    data:
+      role: leaf
+      site: site2
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.26/32
+  leaf06.site2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6427
+    groups:
+    - scale_eos
+    data:
+      role: leaf
+      site: site2
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.28/32
+  leaf08.site2:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6429
+    groups:
+    - scale_junos
+    data:
+      role: leaf
+      site: site2
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.30/32
+  leaf10.site2:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6431
+    groups:
+    - scale_xr
+    data:
+      role: leaf
+      site: site2
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.32/32
+  leaf12.site2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6433
+    groups:
+    - scale_eos
+    data:
+      role: leaf
+      site: site2
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-leaf
+      primary_ip: 10.250.0.34/32
+  dcpe02.site2:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6435
+    groups:
+    - scale_junos
+    data:
+      role: dcpe
+      site: site2
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-dcpe
+      primary_ip: 10.250.0.36/32
+  pcore02.site3:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6437
+    groups:
+    - scale_xr
+    data:
+      role: pcore
+      site: site3
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-pcore
+      primary_ip: 10.250.0.38/32
+  pcore04.site3:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6439
+    groups:
+    - scale_eos
+    data:
+      role: pcore
+      site: site3
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-pcore
+      primary_ip: 10.250.0.40/32
+  pcore06.site3:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6441
+    groups:
+    - scale_junos
+    data:
+      role: pcore
+      site: site3
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-pcore
+      primary_ip: 10.250.0.42/32
+  rr02.site3:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6443
+    groups:
+    - scale_xr
+    data:
+      role: rr
+      site: site3
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-rr
+      primary_ip: 10.250.0.44/32
+  edge02.site4:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6445
+    groups:
+    - scale_eos
+    data:
+      role: edge
+      site: site4
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-edge
+      primary_ip: 10.250.0.46/32
+  edge04.site4:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6447
+    groups:
+    - scale_junos
+    data:
+      role: edge
+      site: site4
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-edge
+      primary_ip: 10.250.0.48/32
+  edge06.site4:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6449
+    groups:
+    - scale_xr
+    data:
+      role: edge
+      site: site4
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-edge
+      primary_ip: 10.250.0.50/32
+  agg02.site5:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6451
+    groups:
+    - scale_eos
+    data:
+      role: agg
+      site: site5
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-agg
+      primary_ip: 10.250.0.52/32
+  agg04.site5:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6453
+    groups:
+    - scale_junos
+    data:
+      role: agg
+      site: site5
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-agg
+      primary_ip: 10.250.0.54/32
+  agg06.site5:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6455
+    groups:
+    - scale_xr
+    data:
+      role: agg
+      site: site5
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-agg
+      primary_ip: 10.250.0.56/32
+  agg01.site6:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6457
+    groups:
+    - scale_eos
+    data:
+      role: agg
+      site: site6
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-agg
+      primary_ip: 10.250.0.58/32
+  agg03.site6:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6459
+    groups:
+    - scale_junos
+    data:
+      role: agg
+      site: site6
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-agg
+      primary_ip: 10.250.0.60/32
+  agg05.site6:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6461
+    groups:
+    - scale_xr
+    data:
+      role: agg
+      site: site6
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-agg
+      primary_ip: 10.250.0.62/32
+  agg07.site6:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6463
+    groups:
+    - scale_eos
+    data:
+      role: agg
+      site: site6
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-agg
+      primary_ip: 10.250.0.64/32
+  access02.site5:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6465
+    groups:
+    - scale_junos
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.66/32
+  access04.site5:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6467
+    groups:
+    - scale_xr
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.68/32
+  access06.site5:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6469
+    groups:
+    - scale_eos
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.70/32
+  access08.site5:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6471
+    groups:
+    - scale_junos
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.72/32
+  access10.site5:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6473
+    groups:
+    - scale_xr
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.74/32
+  access12.site5:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6475
+    groups:
+    - scale_eos
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.76/32
+  access14.site5:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6477
+    groups:
+    - scale_junos
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.78/32
+  access16.site5:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6479
+    groups:
+    - scale_xr
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.80/32
+  access18.site5:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6481
+    groups:
+    - scale_eos
+    data:
+      role: access
+      site: site5
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.82/32
+  access02.site6:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6483
+    groups:
+    - scale_junos
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.84/32
+  access04.site6:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6485
+    groups:
+    - scale_xr
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.86/32
+  access06.site6:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6487
+    groups:
+    - scale_eos
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.88/32
+  access08.site6:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6489
+    groups:
+    - scale_junos
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.90/32
+  access10.site6:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6491
+    groups:
+    - scale_xr
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.92/32
+  access12.site6:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6493
+    groups:
+    - scale_eos
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.94/32
+  access14.site6:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    port: 6495
+    groups:
+    - scale_junos
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Juniper
+      device_type: vMX
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.96/32
+  access16.site6:
+    hostname: 127.0.0.1
+    platform: cisco_xr
+    port: 6497
+    groups:
+    - scale_xr
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Cisco
+      device_type: XVR9000
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.98/32
+  access18.site6:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    port: 6499
+    groups:
+    - scale_eos
+    data:
+      role: access
+      site: site6
+      status: active
+      manufacturer: Arista
+      device_type: Arista cEOS
+      tags:
+      - norfab-scale
+      - scale-access
+      primary_ip: 10.250.0.100/32

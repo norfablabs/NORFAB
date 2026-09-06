@@ -27,26 +27,22 @@ import {
   IconTopologyStar3,
   IconX,
 } from "@tabler/icons-react";
-import { HEALTH_COLORS, LAYER_COLORS } from "../graphModel";
-import type { DeviceOption, Health, TopologyHistoryItem } from "../types";
+import { HEALTH_COLORS } from "../graphModel";
+import type {
+  DeviceOption,
+  Health,
+  StatsMode,
+  TopologyHistoryItem,
+} from "../types";
 import Timeline from "./Timeline";
 
 export type NodeSizeMode = "fixed" | "connections" | "traffic";
 
-const TRAFFIC_COLOR = "#38d9c4";
-
-const LINK_SELECTOR_GROUPS = [
-  {
-    label: "L1",
-    layers: [
-      { value: "inventory", label: "NetBox" },
-      { value: "lldp", label: "LLDP" },
-    ],
-  },
-  {
-    label: "BGP",
-    layers: [{ value: "bgp", label: "Peerings" }],
-  },
+const TOPOLOGY_OPTIONS = [
+  { value: "netbox", label: "NetBox" },
+  { value: "nornir", label: "Nornir connections" },
+  { value: "live-lldp", label: "LLDP" },
+  { value: "circuits", label: "Circuits" },
 ] as const;
 
 interface TopologyToolbarProps {
@@ -61,9 +57,12 @@ interface TopologyToolbarProps {
   onSearch: (value: string) => void;
   activeSearch: string;
   onApplySearch: (value: string) => void;
-  availableLayers: string[];
-  visibleLayers: string[];
-  onVisibleLayers: (layers: string[]) => void;
+  topologySources: string[];
+  onTopologySources: (sources: string[]) => void;
+  protocols: string[];
+  onProtocols: (protocols: string[]) => void;
+  statsMode: StatsMode;
+  onStatsMode: (mode: StatsMode) => void;
   health: Health | "all";
   onHealth: (health: Health | "all") => void;
   hasGraph: boolean;
@@ -71,7 +70,6 @@ interface TopologyToolbarProps {
   layoutRunning: boolean;
   rotationEnabled: boolean;
   bloomEnabled: boolean;
-  trafficEnabled: boolean;
   rotationSpeed: number;
   nodeDistance: number;
   nodeSizeMode: NodeSizeMode;
@@ -79,7 +77,6 @@ interface TopologyToolbarProps {
   onToggleLayout: () => void;
   onToggleRotation: () => void;
   onToggleBloom: () => void;
-  onToggleTraffic: () => void;
   onRotationSpeed: (speed: number) => void;
   onNodeDistance: (distance: number) => void;
   onNodeSizeMode: (mode: NodeSizeMode) => void;
@@ -107,9 +104,12 @@ export default function TopologyToolbar({
   onSearch,
   activeSearch,
   onApplySearch,
-  availableLayers,
-  visibleLayers,
-  onVisibleLayers,
+  topologySources,
+  onTopologySources,
+  protocols,
+  onProtocols,
+  statsMode,
+  onStatsMode,
   health,
   onHealth,
   hasGraph,
@@ -117,7 +117,6 @@ export default function TopologyToolbar({
   layoutRunning,
   rotationEnabled,
   bloomEnabled,
-  trafficEnabled,
   rotationSpeed,
   nodeDistance,
   nodeSizeMode,
@@ -125,7 +124,6 @@ export default function TopologyToolbar({
   onToggleLayout,
   onToggleRotation,
   onToggleBloom,
-  onToggleTraffic,
   onRotationSpeed,
   onNodeDistance,
   onNodeSizeMode,
@@ -162,20 +160,6 @@ export default function TopologyToolbar({
     normalizedSearch.toLowerCase() === activeSearch.toLowerCase();
   const toggleSearch = () => {
     onApplySearch(searchIsApplied ? "" : normalizedSearch);
-  };
-
-  const changeVisibleLinkGroup = (
-    groupLayers: readonly string[],
-    selectedGroupLayers: string[],
-  ) => {
-    const group = new Set(groupLayers);
-    const nextLayers = new Set(
-      visibleLayers.filter((layer) => !group.has(layer)),
-    );
-    selectedGroupLayers.forEach((layer) => nextLayers.add(layer));
-    onVisibleLayers(
-      availableLayers.filter((layer) => nextLayers.has(layer)),
-    );
   };
 
   return (
@@ -263,7 +247,7 @@ export default function TopologyToolbar({
                       value={device.name}
                       rightSection={
                         <Text c="dimmed" size="xs">
-                          {device.sources.join(" + ") || "inventory"}
+                          {device.sources.join(" + ") || "nornir"}
                         </Text>
                       }
                     >
@@ -278,7 +262,7 @@ export default function TopologyToolbar({
               )
             ) : (
               <Text c="dimmed" p="sm" size="xs">
-                No devices reported by NetBox or Nornir.
+                No devices reported by Nornir.
               </Text>
             )}
           </ScrollArea.Autosize>
@@ -349,139 +333,84 @@ export default function TopologyToolbar({
         role="group"
         wrap="nowrap"
       >
-        {availableLayers.length ? (
-          LINK_SELECTOR_GROUPS.map((selector) => {
-            const layers = selector.layers.filter((layer) =>
-              availableLayers.includes(layer.value),
-            );
-            if (!layers.length) return null;
-            const layerValues = layers.map((layer) => layer.value);
-            const selectedValues = layerValues.filter((layer) =>
-              visibleLayers.includes(layer),
-            );
-            const layerMenu = (
-              <Menu
-                closeOnItemClick={false}
-                key={selector.label}
-                position="bottom-start"
-                shadow="md"
-                width={176}
-              >
-                <Menu.Target>
-                  <Button
-                    className="toolbar-control toolbar-link-selector"
-                    aria-label={`Select ${selector.label} links`}
-                    data-active={selectedValues.length > 0 || undefined}
-                    leftSection={
-                      <span
-                        aria-hidden="true"
-                        className="layer-color-key"
-                      >
-                        {layers.map((layer) => (
-                          <span
-                            className="layer-color-key__segment"
-                            data-layer={layer.value}
-                            key={layer.value}
-                            style={{ backgroundColor: LAYER_COLORS[layer.value] }}
-                          />
-                        ))}
-                      </span>
-                    }
-                    rightSection={<IconChevronDown size={14} />}
-                    size="xs"
-                    variant="default"
-                  >
-                    {selector.label}
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Label>{selector.label} links</Menu.Label>
-                  <Menu.CheckboxGroup
-                    value={selectedValues}
-                    onChange={(values) =>
-                      changeVisibleLinkGroup(layerValues, values)
-                    }
-                  >
-                    {layers.map((layer) => (
-                      <Menu.CheckboxItem
-                        aria-label={
-                          layer.value === "bgp"
-                            ? "BGP peerings"
-                            : `${layer.label} links`
-                        }
-                        key={layer.value}
-                        value={layer.value}
-                      >
-                        <span className="layer-menu-label">
-                          <span
-                            aria-hidden="true"
-                            className="layer-menu-label__line"
-                            data-layer={layer.value}
-                            style={{ backgroundColor: LAYER_COLORS[layer.value] }}
-                          />
-                          {layer.label}
-                        </span>
-                      </Menu.CheckboxItem>
-                    ))}
-                  </Menu.CheckboxGroup>
-                </Menu.Dropdown>
-              </Menu>
-            );
-            if (selector.label !== "L1") return layerMenu;
-            return [
-              layerMenu,
-              <Menu
-                closeOnItemClick={false}
-                key="L2"
-                position="bottom-start"
-                shadow="md"
-                width={176}
-              >
-                <Menu.Target>
-                  <Button
-                    className="toolbar-control toolbar-link-selector"
-                    aria-label="Select L2 overlays"
-                    data-active={trafficEnabled || undefined}
-                    leftSection={
-                      <span aria-hidden="true" className="layer-color-key">
-                        <span
-                          className="layer-color-key__segment"
-                          style={{ backgroundColor: TRAFFIC_COLOR }}
-                        />
-                      </span>
-                    }
-                    rightSection={<IconChevronDown size={14} />}
-                    size="xs"
-                    variant="default"
-                  >
-                    L2
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Label>L2 overlays</Menu.Label>
-                  <Menu.CheckboxItem
-                    aria-label="Display directional traffic"
-                    checked={trafficEnabled}
-                    onClick={onToggleTraffic}
-                  >
-                    <span className="layer-menu-label">
-                      <span
-                        aria-hidden="true"
-                        className="layer-menu-label__line"
-                        style={{ backgroundColor: TRAFFIC_COLOR }}
-                      />
-                      Traffic
-                    </span>
-                  </Menu.CheckboxItem>
-                </Menu.Dropdown>
-              </Menu>,
-            ];
-          })
-        ) : (
-          <Button disabled size="xs" variant="default">
-            No links
-          </Button>
-        )}
+        <Menu closeOnItemClick={false} position="bottom-start" shadow="md">
+          <Menu.Target>
+            <Button
+              aria-label="Select topology links"
+              data-active={topologySources.length > 0 || undefined}
+              rightSection={<IconChevronDown size={14} />}
+              size="xs"
+              variant="default"
+            >
+              Topology
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Topology links</Menu.Label>
+            <Menu.CheckboxGroup value={topologySources} onChange={onTopologySources}>
+              {TOPOLOGY_OPTIONS.map((option) => (
+                <Menu.CheckboxItem
+                  aria-label={`${option.label} links`}
+                  key={option.value}
+                  value={option.value}
+                >
+                  {option.label}
+                </Menu.CheckboxItem>
+              ))}
+            </Menu.CheckboxGroup>
+          </Menu.Dropdown>
+        </Menu>
+
+        <Menu closeOnItemClick={false} position="bottom-start" shadow="md">
+          <Menu.Target>
+            <Button
+              aria-label="Select protocols"
+              data-active={protocols.length > 0 || undefined}
+              rightSection={<IconChevronDown size={14} />}
+              size="xs"
+              variant="default"
+            >
+              Protocols
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Protocols</Menu.Label>
+            <Menu.CheckboxGroup value={protocols} onChange={onProtocols}>
+              <Menu.CheckboxItem aria-label="BGP peerings" value="bgp">
+                BGP
+              </Menu.CheckboxItem>
+            </Menu.CheckboxGroup>
+          </Menu.Dropdown>
+        </Menu>
+
+        <Menu position="bottom-start" shadow="md">
+          <Menu.Target>
+            <Button
+              aria-label="Select topology statistics"
+              data-active={statsMode !== "off" || undefined}
+              rightSection={<IconChevronDown size={14} />}
+              size="xs"
+              variant="default"
+            >
+              Stats
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Statistics</Menu.Label>
+            <Menu.RadioGroup
+              value={statsMode}
+              onChange={(value) => onStatsMode(value as StatsMode)}
+            >
+              {(["off", "traffic", "errors", "flaps"] as StatsMode[]).map(
+                (mode) => (
+                  <Menu.RadioItem key={mode} value={mode}>
+                    {mode[0].toUpperCase() + mode.slice(1)}
+                  </Menu.RadioItem>
+                ),
+              )}
+            </Menu.RadioGroup>
+          </Menu.Dropdown>
+        </Menu>
       </Group>
 
       <Select

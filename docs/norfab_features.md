@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 5 September 2026*
+*Last updated: 6 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -68,17 +68,19 @@ database or telemetry journal is created. **Monitoring use cases:** live fabric
 health, worker availability, resource trend inspection, and keepalive diagnosis.
 
 The first built-in application is the **3D topology observatory**. Its persistent
-Vasturiano scene combines intended NetBox cabling with observed LLDP, BGP, and
-interface state, makes partial collection failures visible, and stores compressed
-snapshots in a rolling three-hour local SQLite history. Same-layer connections
-between a node pair render as one link while their interface-level records remain
-available in the inspector; NetBox, LLDP, and BGP links remain separate. Its shared
+Vasturiano scene seeds selected devices from cached Nornir inventory, complements
+them with selected-host NetBox topology and live LLDP, BGP, and interface state,
+makes partial collection failures visible, and stores compressed snapshots in a
+rolling three-hour local SQLite history. Matching physical connections merge
+their NetBox, Nornir, and live-LLDP origins while parallel interface records remain
+available in the inspector. Its shared
 shell provides
 an inventory-configured footer message and quick links to FastAPI, documentation,
 and the NORFAB repository. Common controls use the maintained Mantine React
-component system with Tabler icons, color-matched L1 and BGP link selectors,
-an L2 traffic overlay that renders telemetry-backed physical-link directions as
-shallow, independently colored and animated lanes without obscuring BGP peerings,
+component system with Tabler icons, Topology and Protocols multi-selects, and an
+exclusive Stats mode for traffic, error counters, or interface transitions.
+Traffic renders telemetry-backed physical-link directions as shallow,
+independently colored and animated lanes,
 fully opaque health-colored nodes with matching States-dropdown keys, toggleable
 3D bloom, and Enter-submitted topology
 search that highlights matches without removing non-matching elements. It also
@@ -87,7 +89,7 @@ The local runtime supports graceful Ctrl+C
 shutdown with a second-interrupt forced-exit fallback. **Topology use cases:**
 weather-map dashboards, topology exploration, current-state windows, incident
 timelines, and intended-versus-observed context. **Current limitations:** NFWeb has
-no authentication, origin filtering, or TLS, and both applications are polling-based.
+no authentication, request-origin validation, or TLS, and both applications are polling-based.
 Restrict remote access to trusted administrative networks. Unknown telemetry is
 not inferred and monitoring does not capture message payloads.
 [NFWeb client details](clients_nfweb_overview.md) ·

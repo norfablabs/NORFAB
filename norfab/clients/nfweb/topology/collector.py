@@ -130,14 +130,15 @@ class TopologyCollector:
         errors = []
 
         for adapter in self.adapters:
-            cached = self._layer_cache.get(adapter.name)
+            cache_key = adapter.__class__.__name__
+            cached = self._layer_cache.get(cache_key)
             now = time.monotonic()
             if not force and cached and now - cached[0] < adapter.refresh_interval:
                 patch = cached[1]
             else:
                 try:
                     patch = await adapter.collect(self.client, context)
-                    self._layer_cache[adapter.name] = (now, patch)
+                    self._layer_cache[cache_key] = (now, patch)
                 except Exception as exc:
                     patch = LayerPatch(
                         name=adapter.name,
@@ -150,9 +151,15 @@ class TopologyCollector:
                     )
             patches.append(patch)
             errors.extend(patch.errors)
-            if patch.name == "inventory":
-                for node in patch.nodes:
-                    ip = str(node.attributes.get("ip") or "").split("/")[0]
+            for node in patch.nodes:
+                addresses = node.attributes.get("addresses") or []
+                if isinstance(addresses, list):
+                    addresses = list(addresses)
+                else:
+                    addresses = [addresses]
+                addresses.append(node.attributes.get("primary_ip"))
+                for address in addresses:
+                    ip = str(address or "").split("/", 1)[0]
                     if ip:
                         context.ip_to_device[ip] = node.id
 
@@ -170,7 +177,7 @@ class TopologyCollector:
             duration_ms=round((time.perf_counter() - started) * 1000),
             status=status,
             devices=list(self.selected_devices),
-            layers=[patch.name for patch in patches],
+            layers=list(dict.fromkeys(patch.name for patch in patches)),
             nodes=sorted(nodes.values(), key=lambda node: node.id.casefold()),
             links=sorted(links.values(), key=lambda link: link.id.casefold()),
             errors=errors,
@@ -178,7 +185,7 @@ class TopologyCollector:
         )
 
     async def device_inventory(self, force: bool = False) -> dict[str, Any]:
-        """Return selectable devices discovered from NetBox and Nornir."""
+        """Return selectable devices discovered from Nornir."""
         cached = self._device_options_cache
         if not force and cached and time.monotonic() - cached[0] < 60:
             options, errors = cached[1], cached[2]
@@ -223,13 +230,55 @@ class TopologyCollector:
                     continue
                 existing.health = worst_health(existing.health, incoming.health)
                 existing.layers = sorted(set(existing.layers + incoming.layers))
-                existing.attributes = incoming.attributes | existing.attributes
+                existing.origin = sorted(set(existing.origin + incoming.origin))
+                if "netbox" in incoming.origin or patch.name == "bgp":
+                    existing.attributes.update(incoming.attributes)
+                else:
+                    for key, value in incoming.attributes.items():
+                        existing.attributes.setdefault(key, value)
                 if existing.label == existing.id and incoming.label != incoming.id:
                     existing.label = incoming.label
-                if existing.kind == "external-peer" and incoming.kind == "device":
-                    existing.kind = "device"
             for incoming in patch.links:
-                links[incoming.id] = incoming.model_copy(deep=True)
+                existing = links.get(incoming.id)
+                if existing is None:
+                    links[incoming.id] = incoming.model_copy(deep=True)
+                    continue
+                existing.health = worst_health(existing.health, incoming.health)
+                existing.origin = sorted(set(existing.origin + incoming.origin))
+                attributes = dict(incoming.attributes)
+                if (
+                    incoming.source == existing.target
+                    and incoming.target == existing.source
+                ):
+                    if incoming.layer == "bgp":
+                        for suffix in ("address", "as"):
+                            local_value = attributes.pop(f"local_{suffix}", None)
+                            remote_value = attributes.pop(f"remote_{suffix}", None)
+                            if remote_value is not None:
+                                attributes[f"local_{suffix}"] = remote_value
+                            if local_value is not None:
+                                attributes[f"remote_{suffix}"] = local_value
+                    for suffix in {
+                        key.removeprefix("source_")
+                        for key in attributes
+                        if key.startswith("source_")
+                    } | {
+                        key.removeprefix("target_")
+                        for key in attributes
+                        if key.startswith("target_")
+                    }:
+                        source_value = attributes.pop(f"source_{suffix}", None)
+                        target_value = attributes.pop(f"target_{suffix}", None)
+                        if target_value is not None:
+                            attributes[f"source_{suffix}"] = target_value
+                        if source_value is not None:
+                            attributes[f"target_{suffix}"] = source_value
+                if "netbox" in incoming.origin or patch.name == "bgp":
+                    existing.attributes.update(attributes)
+                else:
+                    for key, value in attributes.items():
+                        existing.attributes.setdefault(key, value)
+                existing.metrics.update(incoming.metrics)
 
         for link in links.values():
             for side in ("source", "target"):
@@ -248,9 +297,9 @@ class TopologyCollector:
                     nodes[node_id] = TopologyNode(
                         id=node_id,
                         label=node_id,
-                        kind="external-peer",
                         health=link.health,
                         layers=[link.layer],
+                        origin=list(link.origin),
                     )
         return nodes, links
 

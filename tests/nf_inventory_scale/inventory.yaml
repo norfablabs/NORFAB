@@ -1,0 +1,40 @@
+broker:
+  endpoint: tcp://127.0.0.1:5565
+  shared_key: norfab-scale-test-environment
+  zmq_auth: false
+client:
+  nfweb:
+    port: 9015
+    footer:
+      message: NORFAB NFWeb scale-test environment
+logging:
+  handlers:
+    file:
+      level: INFO
+    terminal:
+      level: WARNING
+topology:
+  broker: true
+  workers_init_timeout: 600
+  workers:
+  - fakenos-scale
+  - netbox-scale
+  - nornir-static
+  - nornir-netbox:
+      depends_on:
+      - netbox-scale
+workers:
+  fakenos-scale:
+  - fakenos/common.yaml
+  netbox-scale:
+  - netbox/common.yaml
+  nornir-static:
+  - nornir/common.yaml
+  - nornir/hosts.yaml
+  - nornir/interfaces.yaml
+  - nornir/connections.yaml
+  - nornir/circuits.yaml
+  - nornir/bgp_peerings.yaml
+  nornir-netbox:
+  - nornir/common.yaml
+  - nornir/netbox.yaml

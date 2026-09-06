@@ -177,7 +177,7 @@ client:
       netbox_workers: any
       nornir_workers: all
       layers:
-        inventory: true
+        topology: true
         lldp: true
         bgp: true
         interfaces: true
@@ -205,14 +205,10 @@ NetBox and Nornir workers
 
 ### Discovery Is Separate From Collection
 
-Device discovery combines:
-
-- NetBox `get_devices`, filtered by configured sites when present;
-- Nornir `get_nornir_hosts`.
-
-Discovery returns the union of names and their sources. It does not collect graph
-data. The collector begins only after the operator applies a non-empty selection
-or `topology.devices` supplies a startup scope.
+Device discovery calls only Nornir `get_nornir_hosts`. NetBox-only devices are not
+selectable. Discovery does not collect graph data; collection begins only after
+the operator applies a non-empty selection or `topology.devices` supplies a
+startup scope.
 
 Changing the selected devices validates them against discovery, sorts and
 deduplicates them, clears all layer caches, and immediately performs a forced
@@ -223,8 +219,8 @@ periodic cycles from submitting work.
 
 | Purpose | Service and task | Important kwargs |
 | --- | --- | --- |
-| Discover NetBox devices | `netbox.get_devices` | `filters=[{"name__iregex": ".*"}]`; adds `site` when configured |
 | Discover Nornir devices | `nornir.get_nornir_hosts` | none |
+| Seed selected devices | `nornir.get_inventory` | `FL=[...]` |
 | Intended topology | `netbox.get_topology` | `devices=[...]` for the active scope |
 | Observed adjacency | `nornir.parse_ttp` | `get="lldp_neighbors"`, `FL=[...]` |
 | BGP sessions | `nornir.parse_ttp` | `get="bgp_neighbors"`, `FL=[...]` |
@@ -247,10 +243,11 @@ prevents overlapping topology collection cycles.
 
 Adapters run in dependency order:
 
-1. inventory;
-2. LLDP;
-3. BGP;
-4. interface observations.
+1. scoped Nornir inventory;
+2. scoped NetBox topology;
+3. LLDP;
+4. BGP;
+5. interface observations.
 
 Inventory populates the IP-to-device map before BGP resolution. Each adapter has
 an independent cache timestamp. Normal periodic collection reuses a fresh cache;
@@ -271,14 +268,17 @@ change is incomplete until both sides and their tests are updated.
 - A node can belong to multiple layers.
 - Duplicate nodes merge by ID. Health becomes the worst reported health, layers
   are unioned, and stronger device metadata replaces placeholder metadata.
-- Unresolved BGP addresses use the IP as an `external-peer` node ID.
+- Nodes have no inferred kind. Unresolved BGP addresses use the IP as their ID.
+- Every node carries a sorted union of `netbox`, `nornir`, and `live-lldp`
+  origins.
 - Do not use labels as IDs unless the worker contract guarantees the label is the
   canonical device identity.
 
 ### Link Rules
 
 - `TopologyLink.id` is the merge identity.
-- Link IDs include the layer, both devices, and available interfaces.
+- Physical link IDs include normalized device and interface endpoints. BGP link
+  IDs use normalized session addresses.
 - `_link_id()` sorts its two `device:interface` endpoints. LLDP reverse
   advertisements with exactly matching names therefore produce one link.
 - `source` and `target` are required by ForceGraph but do not automatically mean a
@@ -286,8 +286,9 @@ change is incomplete until both sides and their tests are updated.
 - Exact normalization matters. `Ethernet1` and `Eth1`, or a short hostname and an
   FQDN, create different endpoint IDs. Add an explicit normalization policy and
   tests before trying to collapse those variants.
-- Layers intentionally remain separate. NetBox, LLDP, and BGP relationships
-  between the same devices render as separate blue, orange, and purple links.
+- NetBox, cached Nornir connections, and live LLDP relationships with matching
+  endpoints merge into one topology link and union their origins. BGP remains a
+  protocol layer.
 - Multiple real connections between the same devices remain distinct in the
   snapshot and inspector because interface names are part of their IDs.
 - The interfaces adapter creates observations, not standalone graph links. During
@@ -389,7 +390,7 @@ Current routes are:
 | `POST` | `/api/v1/monitoring/refresh` | Request an immediate sample |
 | `GET` | `/api/v1/monitoring/workers/{name}/database` | Summarize the selected worker's recent `job_list` result |
 | WebSocket | `/api/v1/monitoring/stream` | Latest and newly completed samples |
-| `GET` | `/api/v1/topology/devices` | Combined device discovery and active scope |
+| `GET` | `/api/v1/topology/devices` | Nornir device discovery and active scope |
 | `POST` | `/api/v1/topology/selection` | Apply a scope and collect when non-empty |
 | `POST` | `/api/v1/topology/refresh` | Force a cache-bypassing collection |
 | `GET` | `/api/v1/topology/history` | Timestamped snapshot entries for the active scope |
@@ -455,12 +456,10 @@ applications and remains a fixed-width shell column. Topology remains the defaul
 the URL hash selects Monitoring. Topology controls, including
 the snapshot selector, return-to-live action, and trailing stream-status badge,
 belong in one non-wrapping, horizontally scrollable application toolbar, not the
-navigation panel. Graph-producing layers
-use compact Mantine checkbox menus grouped by network purpose. The **L1** selector
-contains independently selectable **NetBox** and **LLDP** links, while the **BGP**
-selector contains **Peerings**. The **L2** selector controls the directional
-**Traffic** overlay. Selector keys and menu items reuse the matching graph-link
-colors. The remaining
+navigation panel. Link controls use compact Mantine menus. **Topology** is a union
+multi-select for NetBox, Nornir connections, LLDP, and circuits. **Protocols**
+contains BGP and is the extension point for later protocol layers. **Stats** is a
+single-value choice between Off, Traffic, Errors, and Flaps. The remaining
 desktop content width is split 80% for the topology stage and 20% for the
 inspector, and the inspector spans into the top-right corner above its content.
 The graph-control group includes a bloom toggle implemented with Three.js
@@ -538,17 +537,19 @@ memory. The initial `/logs` request restores retained events after page reload.
 - Do not recreate the graph solely to update controls or a snapshot. Preserve the
   camera, selection, and saved coordinates.
 
-LLDP and physical cabling remain undirected topology relationships. When the L2
-Traffic overlay is enabled, a link with interface telemetry is rendered as two
+LLDP and physical cabling remain undirected topology relationships. When Traffic
+statistics are selected, a link with interface telemetry is rendered as two
 shallow curved visual lanes around that one relationship. The overlay applies to
-NetBox and LLDP links, leaving BGP peerings on their own layer paths. Forward
+physical topology links, leaving BGP peerings on their own layer paths. Forward
 traffic uses source output or target input telemetry; reverse traffic uses target
 output or source input telemetry. Particle speed is bounded and proportional to
 the reported bit rate, with utilization as a fallback. Lane color changes at
 warning and critical utilization thresholds. The reverse visual lane has zero D3
 link-force strength, so enabling traffic does not add another physical
-relationship to the layout. Links without directional telemetry remain single
-and are not animated; unknown traffic is never invented. Node spheres are fully
+relationship to the layout. Errors uses input, output, and CRC counters. Flaps is
+green through 10 transitions, yellow through 100, and red above 100. Links without
+the selected statistics remain visible in subdued grey; unknown values are never
+invented. Node spheres are fully
 opaque and use the same green, yellow, red, and gray health palette shown in the
 States dropdown. Traffic retains a separate teal, amber, and pink scale.
 
@@ -738,11 +739,11 @@ shape.
 
 ### Multiple Connection Records Appear
 
-Rendered links are bundled per device pair and layer, but the inspector continues
-to show raw connection records. Inspect each record's `layer`, ID, device names,
-and interface names. Common valid cases are:
+Physical records with the same normalized endpoints merge and union their
+origins. Rendered links are then bundled per device pair and layer, while the
+inspector retains parallel interface records. Inspect each record's `layer`, ID,
+origin, device names, and interface names. Common valid cases are:
 
-- NetBox and LLDP observations of the same cable;
 - separate data and management links;
 - two real parallel interfaces.
 
@@ -750,8 +751,7 @@ For reverse LLDP advertisements, canonical IDs are identical when device aliases
 resolve uniquely to the selected scope and interfaces use a supported common short
 or long spelling. If they are not, compare hostname qualification, ambiguous
 aliases, and vendor-specific interface names. Do not deduplicate the stored data
-by device pair. Rendering bundles additionally include the layer in their key so
-NetBox, LLDP, and BGP remain separate.
+by device pair because real parallel interfaces must remain distinct.
 
 ### The Graph Rearranges on Every Snapshot
 
@@ -786,11 +786,8 @@ Keep these visible when planning work:
   interface abbreviations. Ambiguous device aliases and vendor-specific interface
   spellings are deliberately preserved rather than guessed.
 
-NetBox intent and LLDP observations intentionally remain separate edges. This
-preserves independent layer visibility, source-specific properties, and the
-requested layer colors; combining them would require an explicit multi-source edge
-contract. Empty Overview and Admin navigation sections are reserved extension
-points, not incomplete application behavior.
+Empty Overview and Admin navigation sections are reserved extension points, not
+incomplete application behavior.
 
 Do not solve these gaps incidentally during an unrelated change. Make the smallest
 coherent change, add tests for the intended behavior, and update this list when a

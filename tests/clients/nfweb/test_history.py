@@ -14,7 +14,7 @@ def _snapshot(collected_at: datetime, node_id: str) -> TopologySnapshot:
         collected_at=collected_at,
         status="complete",
         devices=[node_id],
-        layers=["inventory"],
+        layers=["topology"],
         nodes=[TopologyNode(id=node_id, label=node_id)],
     )
 
