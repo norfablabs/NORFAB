@@ -191,6 +191,7 @@ def _build_interface_payload(
             interface_name=intf_name,
         )
         selected_vlan_group = mapped_vlan_group or vlan_group
+        group_data = vlan_groups[selected_vlan_group] if selected_vlan_group else None
         return resolve_vlan(
             vid=vid,
             nb=nb,
@@ -198,9 +199,7 @@ def _build_interface_payload(
             ret=ret,
             worker_name=worker_name,
             site_id=device["site_id"],
-            vlan_group=(
-                vlan_groups[selected_vlan_group].id if selected_vlan_group else None
-            ),
+            vlan_group=(group_data["group"].id if selected_vlan_group else None),
             _lookup_cache=_lookup_cache,
         )
 
@@ -1055,14 +1054,23 @@ class NetboxInterfacesTasks:
             group_names.append(vlan_group)
         for group_name in dict.fromkeys(group_names):
             group = nb.ipam.vlan_groups.get(name=group_name)
-            if group is None:
-                msg = f"VLAN group '{group_name}' does not exist in NetBox"
-                job.event(msg, severity="ERROR")
-                ret.errors.append(msg)
-                ret.failed = True
-                return ret
-            vlan_groups[group_name] = group
-        vlan_map = prepare_vlan_map(vlan_map, vlan_groups)
+            vlan_groups[group_name] = {
+                "group": group,
+                "skip": group is None,
+                "skip_reason": (
+                    f"VLAN group '{group_name}' does not exist in NetBox"
+                    if group is None
+                    else None
+                ),
+            }
+        for rule in vlan_map:
+            group_data = vlan_groups[rule["set_vlan_group"]]
+            if not group_data["skip"]:
+                rule.update(
+                    prepare_vlan_map(
+                        [rule], {rule["set_vlan_group"]: group_data["group"]}
+                    )[0]
+                )
         log.info(
             f"{self.name} - Sync device interfaces: Processing {len(devices)} device(s) in '{instance}'"
         )
@@ -1310,15 +1318,36 @@ class NetboxInterfacesTasks:
                                 if vlan is None:
                                     continue
                                 resolved_vlan = vlan
-                                if isinstance(vlan, str):
-                                    mapped_group = match_vlan_map(
-                                        vlan_map,
-                                        vlan_id=None,
-                                        vlan_name=vlan,
-                                        device_name=device_name,
-                                        interface_name=intf_name,
+                                mapped_group = match_vlan_map(
+                                    vlan_map,
+                                    vlan_id=vlan if isinstance(vlan, int) else None,
+                                    vlan_name=vlan if isinstance(vlan, str) else None,
+                                    device_name=device_name,
+                                    interface_name=intf_name,
+                                )
+                                selected_group = mapped_group or vlan_group
+                                group_data = (
+                                    vlan_groups[selected_group]
+                                    if selected_group
+                                    else None
+                                )
+                                if group_data and group_data["skip"]:
+                                    msg = (
+                                        f"VLAN '{vlan}' on {device_name}:{intf_name} "
+                                        f"skipped: {group_data['skip_reason']}"
                                     )
-                                    selected_group = mapped_group or vlan_group
+                                    job.event(
+                                        f"skipping VLAN '{vlan}' on "
+                                        f"{device_name}:{intf_name}: "
+                                        f"{group_data['skip_reason']}",
+                                        severity="ERROR",
+                                    )
+                                    log.error(
+                                        f"{self.name} - Sync device interfaces: {msg}"
+                                    )
+                                    ret.errors.append(msg)
+                                    resolved_vlan = None
+                                elif isinstance(vlan, str):
                                     resolved_vlan = resolve_vlan(
                                         vid=vlan,
                                         nb=nb,
@@ -1327,7 +1356,7 @@ class NetboxInterfacesTasks:
                                         worker_name=self.name,
                                         site_id=nb_devices_data[device_name]["site_id"],
                                         vlan_group=(
-                                            vlan_groups[selected_group].id
+                                            group_data["group"].id
                                             if selected_group
                                             else None
                                         ),

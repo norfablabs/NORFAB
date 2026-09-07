@@ -4,6 +4,7 @@
 
 1. Normalized NetBox `sync_device_ip` and `sync_device_prefixes` diff output to always include `create`, `update`, `delete`, and `in_sync` actions, including empty plans and fully synchronized objects.
 2. Refactored NFWeb topology to seed selected devices from cached Nornir inventory, merge scoped NetBox and live discovery data with origin tracking, and add Topology, Protocols, and Stats filters.
+3. Enhanced NetBox `sync_vlans` and `sync_device_interfaces` to skip and report each VLAN mapped to a missing VLAN group while continuing to synchronize the remaining VLANs instead of aborting the task.
 
 ---
 

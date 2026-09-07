@@ -151,7 +151,9 @@ By default, discovered VLANs and VRFs are resolved or created in NetBox and asso
 
 `vlan_group` accepts one exact VLAN group name and acts as the fallback for
 VLANs not matched by `vlan_map`. Slugs and numeric IDs are not resolved. When
-neither argument selects a group, the device site is used.
+neither argument match a group, the device site is used. VLAN associations
+that matches a missing group are skipped and reported individually without
+aborting the interface sync task.
 
 `vlan_map` accepts the same ordered list of rules as VLAN sync, inline or as an
 `nf://` URL to a YAML file:

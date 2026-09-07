@@ -156,17 +156,28 @@ class NetboxVlansTasks:
             group_names.append(vlan_group)
         for group_name in dict.fromkeys(group_names):
             group = nb.ipam.vlan_groups.get(name=group_name)
-            if group is None:
-                msg = f"vlan group '{group_name}' does not exist in NetBox"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync VLANs: {msg}")
-                ret.errors.append(msg)
-                ret.failed = True
-                return ret
-            vlan_groups[group_name] = group
-        rules = prepare_vlan_map(rules, vlan_groups)
+            vlan_groups[group_name] = {
+                "group": group,
+                "skip": group is None,
+                "skip_reason": (
+                    f"VLAN group '{group_name}' does not exist in NetBox"
+                    if group is None
+                    else None
+                ),
+            }
+        for rule in rules:
+            group_data = vlan_groups[rule["set_vlan_group"]]
+            if not group_data["skip"]:
+                rule.update(
+                    prepare_vlan_map(
+                        [rule], {rule["set_vlan_group"]: group_data["group"]}
+                    )[0]
+                )
         if vlan_groups:
-            job.event(f"resolved {len(vlan_groups)} NetBox VLAN group(s)")
+            resolved_groups = sum(
+                not group_data["skip"] for group_data in vlan_groups.values()
+            )
+            job.event(f"resolved {resolved_groups} NetBox VLAN group(s)")
 
         # Build the site and group scopes used for comparison.
         scope_metadata = {}
@@ -181,7 +192,10 @@ class NetboxVlansTasks:
                 "id": device.site.id,
                 "name": device.site.name,
             }
-        for group in vlan_groups.values():
+        for group_data in vlan_groups.values():
+            if group_data["skip"]:
+                continue
+            group = group_data["group"]
             scope = f"group:{group.name}"
             group_scopes[group.name] = scope
             scope_metadata[scope] = {
@@ -281,6 +295,20 @@ class NetboxVlansTasks:
                     or vlan_group
                 )
                 if selected_group_name:
+                    group_data = vlan_groups[selected_group_name]
+                    if group_data["skip"]:
+                        msg = (
+                            f"VLAN {vlan['vid']} from device '{device_name}' skipped: "
+                            f"{group_data['skip_reason']}"
+                        )
+                        job.event(
+                            f"skipping VLAN {vlan['vid']} from device "
+                            f"'{device_name}': {group_data['skip_reason']}",
+                            severity="ERROR",
+                        )
+                        log.error(f"{self.name} - Sync VLANs: {msg}")
+                        ret.errors.append(msg)
+                        continue
                     scope = group_scopes[selected_group_name]
                 else:
                     scope = site_scopes[device_name]

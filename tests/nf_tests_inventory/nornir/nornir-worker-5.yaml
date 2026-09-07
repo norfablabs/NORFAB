@@ -18,3 +18,4 @@ netbox:
   filters: 
     - name__ic: fceos3
     - platform: cisco_xr
+      name__ic: iosxr1

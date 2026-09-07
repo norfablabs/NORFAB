@@ -348,21 +348,30 @@ class TestSyncVlans:
         assert self._site_vlan(110) is None
         assert self._site_vlan(210) is None
 
-    def test_unknown_vlan_group_fails_before_writes(self, nfclient: Any) -> None:
+    def test_unknown_vlan_map_group_skips_matching_vlans(self, nfclient: Any) -> None:
         response = self._sync(
             nfclient,
             [self.DEVICE_1],
-            filter_by_vlan_ids=["110"],
-            vlan_group="DOES_NOT_EXIST",
+            filter_by_vlan_ids=["110", "210"],
+            vlan_map=[
+                {
+                    "set_vlan_group": "DOES_NOT_EXIST",
+                    "match_vlan_ids": ["110"],
+                }
+            ],
         )
 
         assert response
         for worker, result in response.items():
-            assert result["failed"] is True, f"{worker} did not fail: {result}"
+            assert result["failed"] is False, f"{worker} failed: {result}"
             assert any(
-                "does not exist in NetBox" in error for error in result["errors"]
+                "VLAN 110" in error
+                and "skipped" in error
+                and "does not exist in NetBox" in error
+                for error in result["errors"]
             )
         assert self._site_vlan(110) is None
+        assert self._site_vlan(210).name == "TEST_L1_ACCESS"
         assert self._group_vlan(self.group_1, 110) is None
         assert self._group_vlan(self.group_2, 110) is None
 

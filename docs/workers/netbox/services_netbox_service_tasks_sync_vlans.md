@@ -61,11 +61,12 @@ records have no interface context. Every rule also uses its NetBox VLAN group's
 configured `vid_ranges`; explicit `match_vlan_ids` narrow those ranges. An
 unmatched VLAN uses `vlan_group` when supplied, otherwise it uses its device site.
 
-Every group referenced by `vlan_map` or `vlan_group` must already exist. The
-task resolves groups by exact name and does not create or update groups. Mapping
-rules are constrained by their group's configured VID ranges. The scalar
-`vlan_group` is an unconditional fallback and does not filter live VLANs by the
-group's configured ranges; NetBox validates the resulting writes.
+The task resolves groups by exact name and does not create or update groups.
+VLANs matching a group that does not exist are skipped and reported
+individually. Mapping rules for existing groups are constrained by the group's
+configured VID ranges. The scalar `vlan_group` is an unconditional fallback and
+does not filter live VLANs by the group's configured ranges; NetBox validates
+the resulting writes.
 
 Store the same YAML list in the File Sharing service and pass its URL when the
 rules are reused or maintained separately:
@@ -234,7 +235,8 @@ synchronize the first device's values.
 ### VLAN group resolution
 
 Check that the scalar `vlan_group` and every group named in `vlan_map` exist
-exactly as written. Group resolution finishes before live collection or writes.
+exactly as written. A missing group does not abort the task; each live VLAN that
+selects it is skipped and reported in `errors`.
 
 ### NetBox bulk failures
 
