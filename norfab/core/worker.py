@@ -16,7 +16,6 @@ from contextlib import contextmanager
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
 import orjson
-import psutil
 import zmq
 from jinja2 import Environment, FileSystemLoader, meta
 from jinja2.nodes import Include
@@ -34,11 +33,11 @@ from norfab import models
 from norfab.core.inventory import NorFabInventory
 from norfab.models import InputRequestModel, NorFabEvent, Result
 from norfab.utils.nflogging import read_jsonl_logs, setup_process_logging
-from norfab.utils.text import format_duration
 
 from . import NFP
 from .client import NFPClient
 from .keepalives import KeepAliver
+from .monitoring import ProcessMonitor, WorkerMonitoringStats, WorkerWatchDog
 from .security import generate_certificates
 
 try:
@@ -1151,149 +1150,6 @@ class JobDatabase:
 
 
 # --------------------------------------------------------------------------------------------
-# NORFAB Worker watchdog Object
-# --------------------------------------------------------------------------------------------
-
-
-class WorkerWatchDog(threading.Thread):
-    """
-    Class to monitor worker performance.
-
-    Attributes:
-        worker (object): The worker instance being monitored.
-        worker_process (psutil.Process): The process of the worker.
-        watchdog_interval (int): Interval in seconds for the watchdog to check the worker's status.
-        memory_threshold_mbyte (int): Memory usage threshold in megabytes.
-        memory_threshold_action (str): Action to take when memory threshold is exceeded ("log" or "shutdown").
-        runs (int): Counter for the number of times the watchdog has run.
-        watchdog_tasks (list): List of additional tasks to run during each watchdog interval.
-
-    Methods:
-        check_ram(): Checks the worker's RAM usage and takes action if it exceeds the threshold.
-        get_ram_usage(): Returns the worker's RAM usage in megabytes.
-        run(): Main loop of the watchdog thread, periodically checks the worker's status and runs tasks.
-
-    Args:
-        worker (object): The worker object containing inventory attributes.
-    """
-
-    def __init__(self, worker) -> None:
-        super().__init__()
-        self.worker = worker
-        self.worker_process = psutil.Process(os.getpid())
-        self.worker_process.cpu_percent(interval=None)
-        self.started_at = time.time()
-
-        # extract inventory attributes
-        self.watchdog_interval = worker.inventory.get("watchdog_interval", 30)
-        self.memory_threshold_mbyte = worker.inventory.get(
-            "memory_threshold_mbyte", 1000
-        )
-        self.memory_threshold_action = worker.inventory.get(
-            "memory_threshold_action", "log"
-        )
-
-        # initiate variables
-        self.runs = 0
-        self.watchdog_tasks = []
-
-    def stats(self) -> Dict:
-        """
-        Collects and returns statistics about the worker.
-
-        Returns:
-            dict: A dictionary containing the following keys:
-
-                - runs (int): The number of runs executed by the worker.
-                - timestamp (str): The current time in a human-readable format.
-                - alive (int): The time in seconds since the worker started.
-                - worker_ram_usage_mbyte (float): The current RAM usage of the worker in megabytes.
-        """
-        stats = {
-            "watchdog_runs": self.runs,
-            "timestamp": time.ctime(),
-            "uptime": format_duration(int(time.time() - self.started_at)),
-            "uptime_seconds": int(time.time() - self.started_at),
-            "worker_cpu_percent": self.worker_process.cpu_percent(interval=None),
-            "worker_ram_usage_mbyte": self.get_ram_usage(),
-        }
-        stats.update(self.worker.status)
-        return stats
-
-    def check_ram(self) -> None:
-        """
-        Checks the current RAM usage and performs an action if it exceeds the threshold.
-
-        This method retrieves the current RAM usage and compares it to the predefined
-        memory threshold. If the RAM usage exceeds the threshold, it performs an action
-        based on the `memory_threshold_action` attribute. The possible actions are:
-
-        - "log": Logs a warning message.
-        - "shutdown": Raises a SystemExit exception to terminate the program.
-
-        Raises:
-            SystemExit: If the memory usage exceeds the threshold and the action is "shutdown".
-        """
-        mem_usage = self.get_ram_usage()
-        if mem_usage > self.memory_threshold_mbyte:
-            if self.memory_threshold_action == "log":
-                log.warning(
-                    f"{self.name} watchdog, '{self.memory_threshold_mbyte}' "
-                    f"memory_threshold_mbyte exceeded, memory usage "
-                    f"{mem_usage}MByte"
-                )
-            elif self.memory_threshold_action == "shutdown":
-                raise SystemExit(
-                    f"{self.name} watchdog, '{self.memory_threshold_mbyte}' "
-                    f"memory_threshold_mbyte exceeded, memory usage "
-                    f"{mem_usage}MByte, killing myself"
-                )
-
-    def get_ram_usage(self) -> float:
-        """
-        Get the RAM usage of the worker process.
-
-        Returns:
-            float: The RAM usage in megabytes.
-        """
-        return self.worker_process.memory_info().rss / 1024000
-
-    def run(self) -> None:
-        """
-        Executes the worker's watchdog main loop, periodically running tasks and checking conditions.
-        The method performs the following steps in a loop until the worker's exit event is set:
-
-        1. Sleeps in increments of 0.1 seconds until the total sleep time reaches the watchdog interval.
-        2. Runs built-in tasks such as checking RAM usage.
-        3. Executes additional tasks provided by child classes.
-        4. Updates the run counter.
-        5. Resets the sleep counter to start the cycle again.
-
-        Attributes:
-            slept (float): The total time slept in the current cycle.
-        """
-        slept = 0
-        while not self.worker.exit_event.is_set():
-            # continue sleeping for watchdog_interval
-            if slept < self.watchdog_interval:
-                time.sleep(0.1)
-                slept += 0.1
-                continue
-
-            # run built in tasks:
-            self.check_ram()
-
-            # run child classes tasks
-            for task in self.watchdog_tasks:
-                task()
-
-            # update counters
-            self.runs += 1
-
-            slept = 0  # reset to go to sleep
-
-
-# --------------------------------------------------------------------------------------------
 # NORFAB worker
 # --------------------------------------------------------------------------------------------
 
@@ -1537,7 +1393,9 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
             try:
                 if not worker.destroy_event.is_set():
                     worker.broker_socket.send_multipart(outbound)
+                    worker.monitoring.record_sent()
             except Exception as e:
+                worker.monitoring.record_send_failure()
                 log.error(
                     f"{worker.name} - failed to send queued message to broker, "
                     f"error '{e}'",
@@ -1550,7 +1408,9 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
                     worker.broker_socket.send_multipart(
                         worker.keepaliver.make_message()
                     )
+                    worker.monitoring.record_sent()
             except Exception as e:
+                worker.monitoring.record_send_failure()
                 log.error(
                     f"{worker.name} - failed to send keepalive to broker, error '{e}'"
                 )
@@ -1568,7 +1428,12 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
             break  # Interrupted
 
         if msg is not None:
+            worker.monitoring.record_received()
             log.debug(f"{worker.name} - received '{msg}'")
+            if len(msg) < 3:
+                worker.monitoring.record_receive_failure()
+                log.error(f"{worker.name} - received malformed message: {msg}")
+                continue
             empty = msg.pop(0)  # noqa
             header = msg.pop(0)
             command = msg.pop(0)
@@ -1588,7 +1453,9 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
                 if ready_msg and not worker.destroy_event.is_set():
                     try:
                         worker.broker_socket.send_multipart(ready_msg)
+                        worker.monitoring.record_sent()
                     except Exception as e:
+                        worker.monitoring.record_send_failure()
                         log.error(
                             f"{worker.name} - failed to send ready to broker, "
                             f"error '{e}'"
@@ -1606,7 +1473,9 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
                 )
                 try:
                     worker.broker_socket.send_multipart(disconnect_msg)
+                    worker.monitoring.record_sent()
                 except Exception as e:
+                    worker.monitoring.record_send_failure()
                     log.error(
                         f"{worker.name} - failed to send disconnect to broker, "
                         f"error '{e}'"
@@ -1615,7 +1484,9 @@ def zmq_send_recv(worker: object, destroy_event: threading.Event) -> None:
             if ready_msg and not worker.destroy_event.is_set():
                 try:
                     worker.broker_socket.send_multipart(ready_msg)
+                    worker.monitoring.record_sent()
                 except Exception as e:
+                    worker.monitoring.record_send_failure()
                     log.error(
                         f"{worker.name} - failed to send ready to broker, error '{e}'"
                     )
@@ -1640,7 +1511,7 @@ class NFPWorker:
     """
 
     keepaliver = None
-    stats_reconnect_to_broker = 0
+    monitoring_model = WorkerMonitoringStats
 
     def __init__(
         self,
@@ -1667,6 +1538,11 @@ class NFPWorker:
         self.keepalive = keepalive
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.build_message = NFP.MessageBuilder()
+        self.monitoring = ProcessMonitor()
+        self.public_keys_dir = None
+        self.secret_keys_dir = None
+        self.worker_private_key_file = None
+        self.broker_public_key_file = None
 
         # create base directories
         self.base_dir = os.path.join(
@@ -1792,16 +1668,20 @@ class NFPWorker:
             # We need two certificates, one for the client and one for
             # the server. The client must know the server's public key
             # to make a CURVE connection.
-            client_secret_file = os.path.join(
+            self.worker_private_key_file = os.path.join(
                 self.secret_keys_dir, f"{self.name}.key_secret"
             )
-            client_public, client_secret = zmq.auth.load_certificate(client_secret_file)
+            client_public, client_secret = zmq.auth.load_certificate(
+                self.worker_private_key_file
+            )
             self.broker_socket.curve_secretkey = client_secret
             self.broker_socket.curve_publickey = client_public
 
             # The client must know the server's public key to make a CURVE connection.
-            server_public_file = os.path.join(self.public_keys_dir, "broker.key")
-            server_public, _ = zmq.auth.load_certificate(server_public_file)
+            self.broker_public_key_file = os.path.join(
+                self.public_keys_dir, "broker.key"
+            )
+            server_public, _ = zmq.auth.load_certificate(self.broker_public_key_file)
             self.broker_socket.curve_serverkey = server_public
 
         self.broker_socket.connect(self.broker)
@@ -1829,7 +1709,7 @@ class NFPWorker:
             )
             self.keepaliver.start()
 
-        self.stats_reconnect_to_broker += 1
+        self.monitoring.record_reconnect()
         log.info(
             f"{self.name} - registered to broker at '{self.broker}', "
             f"service '{self.service.decode('utf-8')}'"
@@ -2444,14 +2324,51 @@ class NFPWorker:
         return Result(result=self.client.delete_fetched_files(filepath))
 
     @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
-    def get_watchdog_stats(self) -> Result:
-        """
-        Retrieve worker statistics from the watchdog.
+    def get_worker_status(self) -> Result:
+        """Return worker identity, runtime paths, and security configuration."""
+        return Result(
+            result={
+                "name": self.name,
+                "role": "worker",
+                "service": self.service.decode("utf-8"),
+                "status": ("active" if not self.exit_event.is_set() else "stopping"),
+                "broker": self.broker,
+                "directories": {
+                    "base_dir": self.base_dir,
+                    "public_keys_dir": self.public_keys_dir,
+                    "private_keys_dir": self.secret_keys_dir,
+                },
+                "security": {
+                    "worker_private_key_file": self.worker_private_key_file,
+                    "broker_public_key_file": self.broker_public_key_file,
+                    "zmq_auth": self.zmq_auth,
+                },
+            }
+        )
 
-        Returns:
-            Result: An object containing the statistics from the watchdog.
-        """
-        return Result(result=self.watchdog.stats())
+    @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
+    def get_stats(self) -> Result:
+        """Return the worker's validated in-memory monitoring snapshot."""
+        stats_data = {
+            "name": self.name,
+            "status": "active" if not self.exit_event.is_set() else "stopping",
+            "process": self.monitoring.process_stats(),
+            "messaging": self.monitoring.messaging_stats(),
+            "service": self.service.decode("utf-8"),
+            "broker": self.broker,
+            "reconnects": self.monitoring.reconnects,
+            "outbound_queue_depth": self.outbound_queue.qsize(),
+            "running_jobs": len(self.running_jobs),
+            "max_concurrent_jobs": self.max_concurrent_jobs,
+            "watchdog_runs": self.watchdog.runs,
+            "keepalives_sent": self.keepaliver.keepalives_send,
+            "keepalives_received": self.keepaliver.keepalives_received,
+        }
+        stats_data.update(self.watchdog.get_stats())
+        stats = self.monitoring_model(
+            **stats_data,
+        )
+        return Result(result=stats.model_dump(mode="json"))
 
     @Task(fastapi={"methods": ["GET"]}, agent={"enabled": False})
     def get_watchdog_configuration(self) -> Result:

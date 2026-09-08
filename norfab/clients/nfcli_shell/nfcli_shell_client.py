@@ -28,7 +28,7 @@ from norfab.models.norfab_configuration import NorFabInventory
 
 from .agent import agent_picle_shell
 from .client_agent import client_agent_picle_shell
-from .common import ClientRunJobArgs, log_error_or_result, run_future_job
+from .common import run_future_job
 from .containerlab import containerlab_picle_shell
 from .fakenos import fakenos_picle_shell
 from .fastapi import fastapi_picle_shell
@@ -41,6 +41,7 @@ from .workers.workers_picle_shell import (
     NorfabWorkersCommands,
     ShowWorkersJobsModel,
     ShowWorkersStatistics,
+    ShowWorkersStatus,
     ShowWorkersStatusBrief,
     ShowWorkersVersion,
 )
@@ -65,6 +66,16 @@ class LogLevel(str, Enum):
 
 
 class ShowBrokerModel(BaseModel):
+    status: Any = Field(
+        None,
+        description="Show broker status and environment",
+        json_schema_extra={"function": "show_status"},
+    )
+    statistics: Any = Field(
+        None,
+        description="Show broker monitoring statistics",
+        json_schema_extra={"function": "show_statistics"},
+    )
     version: Any = Field(
         None,
         description="Show broker version report",
@@ -93,7 +104,15 @@ class ShowBrokerModel(BaseModel):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
-        return ShowBrokerModel._run_broker_mmi("show_broker")
+        return ShowBrokerModel._run_broker_mmi("get_status")
+
+    @staticmethod
+    def show_status(**kwargs: object):
+        return ShowBrokerModel._run_broker_mmi("get_status")
+
+    @staticmethod
+    def show_statistics(**kwargs: object):
+        return ShowBrokerModel._run_broker_mmi("get_stats")
 
     @staticmethod
     def show_broker_version(**kwargs: object):
@@ -110,15 +129,11 @@ class ShowBrokerModel(BaseModel):
         if reply["errors"]:
             return "\n".join(reply["errors"])
 
-        results = reply["results"]
-        if task == "show_broker":
-            ip_allowlist = results.get("security", {}).get("ip-allowlist")
-            if isinstance(ip_allowlist, list):
-                results["security"]["ip-allowlist"] = ", ".join(ip_allowlist)
-        return results
+        return reply["results"]
 
 
 class ShowNorfabWorkersModel(BaseModel):
+    status: ShowWorkersStatus = Field(None, description="Show workers status")
     jobs: ShowWorkersJobsModel = Field(None, description="Show workers jobs")
     statistics: ShowWorkersStatistics = Field(
         None, description="Show workers statistics"
@@ -131,6 +146,16 @@ class ShowNorfabWorkersModel(BaseModel):
 
 
 class ShowNorfabClientModel(BaseModel):
+    status: Any = Field(
+        None,
+        description="Show client status and environment",
+        json_schema_extra={"function": "show_status"},
+    )
+    statistics: Any = Field(
+        None,
+        description="Show client monitoring statistics",
+        json_schema_extra={"function": "show_statistics"},
+    )
     version: Any = Field(
         None,
         description="show nfcli client version report",
@@ -147,29 +172,19 @@ class ShowNorfabClientModel(BaseModel):
 
     @staticmethod
     def run(*args: object, **kwargs: object):
+        return ShowNorfabClientModel.show_status()
+
+    @staticmethod
+    def show_status(**kwargs: object):
         nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
-        return {
-            "client-type": "PICLE Shell",
-            "status": "connected",
-            "name": nfclient.name,
-            "zmq-name": nfclient.zmq_name,
-            "broker": {
-                "endpoint": nfclient.broker,
-                "reconnects": nfclient.stats_reconnect_to_broker,
-                "messages-rx": nfclient.stats_recv_from_broker,
-                "messages-tx": nfclient.stats_send_to_broker,
-            },
-            "directories": {
-                "base-dir": nfclient.base_dir,
-                "public-keys-dir": nfclient.public_keys_dir,
-                "private-keys-dir": nfclient.private_keys_dir,
-            },
-            "security": {
-                "client-private-key-file": nfclient.client_private_key_file,
-                "broker-public-key-file": nfclient.broker_public_key_file,
-                "zmq_auth": nfclient.zmq_auth,
-            },
-        }
+        status = nfclient.get_status()
+        status["client_type"] = "PICLE Shell"
+        return status
+
+    @staticmethod
+    def show_statistics(**kwargs: object):
+        nfclient = getattr(builtins, "NFCLIENT", NFCLIENT)
+        return nfclient.get_stats()
 
     @staticmethod
     def show_version(**kwargs: object):

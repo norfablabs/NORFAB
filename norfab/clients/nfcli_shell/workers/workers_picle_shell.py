@@ -59,7 +59,7 @@ class ShowWorkersStatistics(ClientRunJobArgs):
 
         result = run_future_job(
             "all",
-            "get_watchdog_stats",
+            "get_stats",
             workers=workers,
             args=args,
             kwargs=kwargs,
@@ -80,6 +80,44 @@ class ShowWorkersStatistics(ClientRunJobArgs):
         )
         workers = [i["name"] for i in reply["results"]]
 
+        return ["all", "any"] + workers
+
+    class PicleConfig:
+        pipe = PipeFunctionsModel
+        outputter = Outputters.outputter_nested
+
+
+class ShowWorkersStatus(ClientRunJobArgs):
+
+    @staticmethod
+    def run(*args: object, **kwargs: object):
+        workers = kwargs.pop("workers", "all")
+        timeout = kwargs.pop("timeout", 600)
+        verbose_result = kwargs.pop("verbose_result", False)
+        nowait = kwargs.pop("nowait", False)
+
+        result = run_future_job(
+            "all",
+            "get_worker_status",
+            workers=workers,
+            args=args,
+            kwargs=kwargs,
+            timeout=timeout,
+            nowait=nowait,
+        )
+
+        if nowait:
+            return result, Outputters.outputter_nested
+
+        return log_error_or_result(result, verbose_result=verbose_result)
+
+    @staticmethod
+    def source_workers() -> list:
+        NFCLIENT = builtins.NFCLIENT
+        reply = NFCLIENT.mmi(
+            "mmi.service.broker", "show_workers", kwargs={"service": "all"}
+        )
+        workers = [i["name"] for i in reply["results"]]
         return ["all", "any"] + workers
 
     class PicleConfig:

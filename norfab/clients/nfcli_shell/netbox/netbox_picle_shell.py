@@ -49,6 +49,7 @@ from .netbox_picle_shell_sync_mac_addresses import SyncMacAddressesShell
 from .netbox_picle_shell_sync_prefixes import SyncPrefixesShell
 from .netbox_picle_shell_sync_vlans import SyncVlansShell
 from .netbox_picle_shell_sync_vrfs import SyncVrfsShell
+from .netbox_picle_shell_sync_vrrp import SyncVrrpShell
 from .netbox_picle_shell_update_bgp_peering import UpdateBgpPeeringShell
 from .netbox_picle_shell_update_interfaces import UpdateInterfaces
 
@@ -297,6 +298,10 @@ class SyncCommands(BaseModel):
     vlans: SyncVlansShell = Field(
         None,
         description="Sync live VLAN configuration with NetBox",
+    )
+    vrrp: SyncVrrpShell = Field(
+        None,
+        description="Sync live VRRP groups and interface assignments with NetBox",
     )
     vrfs: SyncVrfsShell = Field(
         None,

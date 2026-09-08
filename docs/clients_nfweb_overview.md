@@ -25,7 +25,7 @@ and terminal event presentation. Monitoring charts use the maintained
 
 The 3D network topology dashboard is NFWeb's first application. Runtime Monitoring
 is the second built-in application. It shows the broker, NFWeb client, and workers
-using existing NORFAB management and watchdog interfaces, with live charts and a
+using NORFAB's unified in-memory monitoring interface, with live charts and a
 non-persistent three-hour history.
 
 NFWeb does not require a FastAPI worker, Node.js, an internet connection, or a
@@ -65,8 +65,8 @@ client inside the trusted local Python process.
 
 ### Runtime Monitoring
 
-The Monitoring dashboard polls the broker's `show_broker` and `show_workers`
-management operations and each worker's `get_watchdog_stats` task. It displays
+The Monitoring dashboard polls the broker's `get_stats` management operation,
+each worker's `get_stats` task, and the local client's `get_stats` method. It displays
 component health, CPU and resident memory, uptime, worker keepalive transmit and
 receive counts, and the local NFWeb client's message, reconnect, and queue
 counters. ECharts provides gauges and time-series/bar charts, while a WebSocket

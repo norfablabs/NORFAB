@@ -115,7 +115,7 @@ class BasePanel(Widget):
 
 
 class WorkerStatsPanel(BasePanel):
-    """Per-worker RAM and uptime, polled via get_watchdog_stats."""
+    """Per-worker RAM and uptime, polled via get_stats."""
 
     DEFAULT_CSS = BasePanel.DEFAULT_CSS + """
     WorkerStatsPanel {
@@ -145,9 +145,7 @@ class WorkerStatsPanel(BasePanel):
         self.warn_ram_mb = warn_ram_mb
 
     def fetch_data(self) -> list:
-        raw = self.nfclient.run_job(
-            service="all", workers="all", task="get_watchdog_stats"
-        )
+        raw = self.nfclient.run_job(service="all", workers="all", task="get_stats")
         rows = []
         for worker_name, job in (raw or {}).items():
             if job.get("failed"):
@@ -166,8 +164,10 @@ class WorkerStatsPanel(BasePanel):
                     {
                         "worker": worker_name,
                         "service": job.get("service") or "\u2014",
-                        "ram_mb": result.get("worker_ram_usage_mbyte"),
-                        "uptime": result.get("uptime", "\u2014"),
+                        "ram_mb": (result.get("process") or {}).get("memory_rss_mbyte"),
+                        "uptime": (
+                            f"{(result.get('process') or {}).get('uptime_seconds', 0)}s"
+                        ),
                         "error": None,
                     }
                 )
@@ -240,7 +240,7 @@ class ClientDBPanel(BasePanel):
         )
 
     def fetch_data(self) -> dict:
-        return self.nfclient.job_db.jobs_stats()
+        return self.nfclient.get_stats()["jobs"]
 
     def render_data(self, data: dict) -> None:
         if "__error__" in data:
@@ -297,7 +297,7 @@ class ClientDBPanel(BasePanel):
 
 
 class BrokerPanel(BasePanel):
-    """Broker status via MMI show_broker."""
+    """Broker status via MMI get_stats."""
 
     DEFAULT_CSS = BasePanel.DEFAULT_CSS + """
     BrokerPanel {
@@ -322,7 +322,7 @@ class BrokerPanel(BasePanel):
         if self.nfclient is None:
             return {"__no_client__": True}
         try:
-            result = self.nfclient.mmi("mmi.service.broker", "show_broker")
+            result = self.nfclient.mmi("mmi.service.broker", "get_stats")
             if result.get("status") == "200":
                 return result.get("results", {})
             return {
@@ -348,19 +348,11 @@ class BrokerPanel(BasePanel):
         status = data.get("status", dash)
         status_color = "green" if status == "active" else "red"
         table.add_row("Status", f"[{status_color}]{status}[/{status_color}]")
-        table.add_row("Workers", str(data.get("workers count", dash)))
-        table.add_row("Services", str(data.get("services count", dash)))
+        table.add_row("Workers", str(data.get("worker_count", dash)))
+        table.add_row("Services", str(data.get("service_count", dash)))
 
-        ka = data.get("keepalives", {})
-        table.add_row("KA interval", str(ka.get("interval", dash)))
-        table.add_row("KA multiplier", str(ka.get("multiplier", dash)))
-
-        sec = data.get("security", {})
-        if sec:
-            table.add_row("[bold]Security[/bold]", "")
-            zmq_auth = sec.get("zmq-auth", dash)
-            auth_color = "green" if zmq_auth is True else "red"
-            table.add_row("  ZMQ auth", f"[{auth_color}]{zmq_auth}[/{auth_color}]")
+        table.add_row("KA interval", str(data.get("keepalive_interval_ms", dash)))
+        table.add_row("KA multiplier", str(data.get("keepalive_multiplier", dash)))
 
         self._content.update(table)
 

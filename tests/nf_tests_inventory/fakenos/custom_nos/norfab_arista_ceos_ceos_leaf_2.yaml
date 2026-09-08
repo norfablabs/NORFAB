@@ -30,6 +30,13 @@ commands:
     alias: show run section vlan
   show running-config section vrf:
     alias: show run section vrf
+  show running-config section vrrp:
+    output: |
+      interface Vlan250
+         vrrp 20 ipv4 198.18.252.1
+         vrrp 20 ipv4 version 3
+         vrrp 20 priority-level 100
+      !
   show running-config section router bgp:
     output: |
       router bgp 4200000102

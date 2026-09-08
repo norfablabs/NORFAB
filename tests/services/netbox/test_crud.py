@@ -64,7 +64,7 @@ def crud_branch_name(nfclient):
 
 
 @pytest.fixture(scope="function")
-def test_manufacturer(nfclient):
+def manufacturer(nfclient):
     """Create a temporary manufacturer in NetBox; yield its ID; delete after test."""
     nb = get_pynetbox()
     existing = nb.dcim.manufacturers.get(slug="norfab-crud-test-manufacturer")
@@ -752,7 +752,7 @@ class TestCrudCreate:
 # ---------------------------------------------------------------------------
 @pytest.mark.netbox_crud_update
 class TestCrudUpdate:
-    def test_dry_run_diffs(self, nfclient, test_manufacturer):
+    def test_dry_run_diffs(self, nfclient, manufacturer):
         """dry_run=True computes diffs without modifying the object."""
         new_name = "NorFab CRUD Test Manufacturer UPDATED"
         ret = nfclient.run_job(
@@ -761,7 +761,7 @@ class TestCrudUpdate:
             workers="any",
             kwargs={
                 "object_type": "dcim.manufacturers",
-                "data": {"id": test_manufacturer, "name": new_name},
+                "data": {"id": manufacturer, "name": new_name},
                 "dry_run": True,
             },
         )
@@ -773,7 +773,7 @@ class TestCrudUpdate:
             assert res.get("dry_run") is True, f"{worker} - expected dry_run=True"
             assert result["count"] == 1, f"{worker} - expected count=1"
             changes_entry = result["changes"][0]
-            assert changes_entry["id"] == test_manufacturer
+            assert changes_entry["id"] == manufacturer
             assert (
                 "name" in changes_entry["changes"]
             ), f"{worker} - expected 'name' in changes"
@@ -781,10 +781,10 @@ class TestCrudUpdate:
 
         # verify the object was NOT modified
         nb = get_pynetbox()
-        obj = nb.dcim.manufacturers.get(test_manufacturer)
+        obj = nb.dcim.manufacturers.get(manufacturer)
         assert obj.name != new_name, "dry_run should not modify the manufacturer"
 
-    def test_single_object(self, nfclient, test_manufacturer):
+    def test_single_object(self, nfclient, manufacturer):
         """Update a manufacturer's name and verify the change in NetBox."""
         new_name = "NorFab CRUD Test Manufacturer UPDATED"
         ret = nfclient.run_job(
@@ -793,7 +793,7 @@ class TestCrudUpdate:
             workers="any",
             kwargs={
                 "object_type": "dcim.manufacturers",
-                "data": {"id": test_manufacturer, "name": new_name},
+                "data": {"id": manufacturer, "name": new_name},
             },
         )
         pprint.pprint(ret)
@@ -802,12 +802,12 @@ class TestCrudUpdate:
             assert not res["errors"], f"{worker} - received error"
             result = res["result"]
             assert result["updated"] == 1, f"{worker} - expected updated=1"
-            assert result["objects"][0]["id"] == test_manufacturer
+            assert result["objects"][0]["id"] == manufacturer
             assert result["objects"][0]["name"] == new_name
 
         # verify in NetBox
         nb = get_pynetbox()
-        obj = nb.dcim.manufacturers.get(test_manufacturer)
+        obj = nb.dcim.manufacturers.get(manufacturer)
         assert obj.name == new_name, "manufacturer name not updated in NetBox"
 
     def test_device_attributes_and_custom_fields(self, nfclient):
@@ -886,10 +886,10 @@ class TestCrudUpdate:
                     }
                 )
 
-    def test_no_change_dry_run(self, nfclient, test_manufacturer):
+    def test_no_change_dry_run(self, nfclient, manufacturer):
         """dry_run with unchanged field returns empty changes dict."""
         nb = get_pynetbox()
-        original = nb.dcim.manufacturers.get(test_manufacturer)
+        original = nb.dcim.manufacturers.get(manufacturer)
 
         ret = nfclient.run_job(
             "netbox",
@@ -897,7 +897,7 @@ class TestCrudUpdate:
             workers="any",
             kwargs={
                 "object_type": "dcim.manufacturers",
-                "data": {"id": test_manufacturer, "name": original.name},
+                "data": {"id": manufacturer, "name": original.name},
                 "dry_run": True,
             },
         )
@@ -918,7 +918,7 @@ class TestCrudUpdate:
 # ---------------------------------------------------------------------------
 @pytest.mark.netbox_crud_delete
 class TestCrudDelete:
-    def test_dry_run(self, nfclient, test_manufacturer):
+    def test_dry_run(self, nfclient, manufacturer):
         """dry_run=True returns what would be deleted without deleting."""
         ret = nfclient.run_job(
             "netbox",
@@ -926,7 +926,7 @@ class TestCrudDelete:
             workers="any",
             kwargs={
                 "object_type": "dcim.manufacturers",
-                "object_id": test_manufacturer,
+                "object_id": manufacturer,
                 "dry_run": True,
             },
         )
@@ -937,11 +937,11 @@ class TestCrudDelete:
             result = res["result"]
             assert res.get("dry_run") is True
             assert result["count"] == 1
-            assert result["would_delete"][0]["id"] == test_manufacturer
+            assert result["would_delete"][0]["id"] == manufacturer
 
         # verify it was NOT deleted
         nb = get_pynetbox()
-        obj = nb.dcim.manufacturers.get(test_manufacturer)
+        obj = nb.dcim.manufacturers.get(manufacturer)
         assert obj is not None, "dry_run should not delete the manufacturer"
 
     def test_single_id(self, nfclient):

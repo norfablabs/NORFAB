@@ -76,7 +76,7 @@ class TestWorkersListTasks:
         with pytest.raises(ValidationError, match="duplicate MCP prompt names"):
             Task(mcp={"prompts": [prompt, copy.deepcopy(prompt)]})
 
-    def test_list_tasks_and_watchdog_stats(self, nfclient):
+    def test_list_tasks_and_monitoring_stats(self, nfclient):
         ret = nfclient.run_job("nornir", "list_tasks", workers="any")
 
         pprint.pprint(ret, width=200)
@@ -98,19 +98,41 @@ class TestWorkersListTasks:
 
         ret = nfclient.run_job(
             "all",
-            "get_watchdog_stats",
+            "get_stats",
             workers="all",
             timeout=30,
         )
 
-        assert ret, "No worker watchdog statistics returned"
+        assert ret, "No worker statistics returned"
         for worker, response in ret.items():
             assert response["failed"] is False, worker
             stats = response["result"]
-            assert isinstance(stats["worker_cpu_percent"], (int, float)), worker
-            assert stats["worker_cpu_percent"] >= 0, worker
-            assert stats["worker_ram_usage_mbyte"] > 0, worker
-            assert stats["uptime_seconds"] >= 0, worker
+            assert stats["role"] == "worker", worker
+            assert stats["process"]["cpu_percent"] >= 0, worker
+            assert stats["process"]["memory_rss_mbyte"] > 0, worker
+            assert stats["process"]["uptime_seconds"] >= 0, worker
+            assert stats["messaging"]["received"] > 0, worker
+            assert "details" not in stats, worker
+            if stats["service"] == "nornir":
+                assert stats["nornir_hosts"] > 0, worker
+                assert stats["dead_connections_cleaned"] >= 0, worker
+                assert stats["idle_connections_cleaned"] >= 0, worker
+
+        status_ret = nfclient.run_job(
+            "all",
+            "get_worker_status",
+            workers="all",
+            timeout=30,
+        )
+        assert status_ret, "No worker status returned"
+        for worker, response in status_ret.items():
+            assert response["failed"] is False, worker
+            status = response["result"]
+            assert status["role"] == "worker", worker
+            assert status["status"] == "active", worker
+            assert status["directories"]["base_dir"], worker
+            assert "zmq_auth" in status["security"], worker
+            assert "worker_private_key_file" in status["security"], worker
 
     def test_list_tasks_brief(self, nfclient):
         ret = nfclient.run_job(

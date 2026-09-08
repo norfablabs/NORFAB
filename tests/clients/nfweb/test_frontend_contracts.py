@@ -37,40 +37,40 @@ def _interface_fields(source: str, name: str) -> set[str]:
     return fields
 
 
-def test_typescript_contract_fields_match_pydantic_models() -> None:
-    source = (FRONTEND / "src" / "types.ts").read_text(encoding="utf-8")
-    contracts = {
-        "NFWebFooterConfig": NFWebFooterConfig,
-        "MonitoringComponent": MonitoringComponent,
-        "MonitoringDatabaseStats": MonitoringDatabaseStats,
-        "MonitoringWorkerDatabaseStats": MonitoringWorkerDatabaseStats,
-        "MonitoringSnapshot": MonitoringSnapshot,
-        "TopologyNode": TopologyNode,
-        "TopologyLink": TopologyLink,
-        "CollectionError": TopologyCollectionError,
-        "CollectionEvent": TopologyCollectionEvent,
-        "DeviceOption": TopologyDeviceOption,
-        "TopologyLogEntry": TopologyLogEntry,
-        "TopologySnapshot": TopologySnapshot,
-    }
+class TestFrontendContracts:
+    def test_typescript_contract_fields_match_pydantic_models(self) -> None:
+        source = (FRONTEND / "src" / "types.ts").read_text(encoding="utf-8")
+        contracts = {
+            "NFWebFooterConfig": NFWebFooterConfig,
+            "MonitoringComponent": MonitoringComponent,
+            "MonitoringDatabaseStats": MonitoringDatabaseStats,
+            "MonitoringWorkerDatabaseStats": MonitoringWorkerDatabaseStats,
+            "MonitoringSnapshot": MonitoringSnapshot,
+            "TopologyNode": TopologyNode,
+            "TopologyLink": TopologyLink,
+            "CollectionError": TopologyCollectionError,
+            "CollectionEvent": TopologyCollectionEvent,
+            "DeviceOption": TopologyDeviceOption,
+            "TopologyLogEntry": TopologyLogEntry,
+            "TopologySnapshot": TopologySnapshot,
+        }
 
-    for interface, model in contracts.items():
-        assert _interface_fields(source, interface) == set(
-            model.model_fields
-        ), interface
+        for interface, model in contracts.items():
+            assert _interface_fields(source, interface) == set(
+                model.model_fields
+            ), interface
 
+    def test_built_frontend_assets_are_packaged_and_local(self) -> None:
+        static = files("norfab.clients.nfweb").joinpath("static")
+        index = static.joinpath("index.html")
 
-def test_built_frontend_assets_are_packaged_and_local() -> None:
-    static = files("norfab.clients.nfweb").joinpath("static")
-    index = static.joinpath("index.html")
-
-    assert index.is_file()
-    html = index.read_text(encoding="utf-8")
-    references = re.findall(r'(?:src|href)="([^"]+)"', html)
-    assert references
-    assert all(
-        not reference.startswith(("http://", "https://", "//"))
-        for reference in references
-    )
-    for reference in references:
-        assert static.joinpath(reference.lstrip("/")).is_file(), reference
+        assert index.is_file()
+        html = index.read_text(encoding="utf-8")
+        references = re.findall(r'(?:src|href)="([^"]+)"', html)
+        assert references
+        assert all(
+            not reference.startswith(("http://", "https://", "//"))
+            for reference in references
+        )
+        for reference in references:
+            assert static.joinpath(reference.lstrip("/")).is_file(), reference

@@ -130,21 +130,38 @@ class TestClientApi:
         for worker in ret:
             assert all(k in worker for k in ["holdtime", "name", "service", "status"])
 
-    def test_mmi_show_broker(self, nfclient):
-        reply = nfclient.mmi("mmi.service.broker", "show_broker")
+    def test_mmi_get_broker_stats(self, nfclient):
+        reply = nfclient.mmi("mmi.service.broker", "get_stats")
 
         ret = reply["results"]
         pprint.pprint(ret)
 
         for k in [
             "endpoint",
-            "keepalives",
-            "services count",
+            "keepalive_interval_ms",
+            "service_count",
             "status",
-            "workers count",
+            "worker_count",
+            "process",
+            "messaging",
         ]:
             assert k in ret, "Not all broker params returned"
             assert ret[k], "Some broker params seems wrong"
+
+        client_stats = nfclient.get_stats()
+        assert isinstance(client_stats, dict)
+        assert client_stats["role"] == "client"
+        assert client_stats["process"]["memory_rss_mbyte"] > 0
+        assert client_stats["messaging"]["sent"] > 0
+        assert client_stats["messaging"]["received"] > 0
+        assert client_stats["reconnects"] > 0
+
+        client_status = nfclient.get_status()
+        assert client_status["role"] == "client"
+        assert client_status["status"] == "active"
+        assert client_status["directories"]["base_dir"]
+        assert client_status["security"]["zmq_auth"] is False
+        assert client_status["security"]["client_private_key_file"] is None
 
     def test_mmi_show_broker_version(self, nfclient):
         reply = nfclient.mmi("mmi.service.broker", "show_broker_version")
@@ -1218,22 +1235,23 @@ class TestJobStatusTransitions:
         assert job["result_data"] == original_result
 
 
-def test_client_send_to_broker_queues_prepared_message() -> None:
-    client = NFPClient.__new__(NFPClient)
-    client.name = "test-client"
-    client.destroy_event = threading.Event()
-    client.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
-    client.build_message = NFP.MessageBuilder()
+class TestClientMessaging:
+    def test_send_to_broker_queues_prepared_message(self) -> None:
+        client = NFPClient.__new__(NFPClient)
+        client.name = "test-client"
+        client.destroy_event = threading.Event()
+        client.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
+        client.build_message = NFP.MessageBuilder()
 
-    client.send_to_broker(
-        NFP.GET,
-        b"service",
-        b"worker",
-        b"uuid",
-        b'{"task":"show"}',
-    )
+        client.send_to_broker(
+            NFP.GET,
+            b"service",
+            b"worker",
+            b"uuid",
+            b'{"task":"show"}',
+        )
 
-    assert client.outbound_queue.qsize() == 1
-    msg = client.outbound_queue.get_nowait()
-    assert msg[1] == NFP.CLIENT
-    assert msg[2] == NFP.GET
+        assert client.outbound_queue.qsize() == 1
+        msg = client.outbound_queue.get_nowait()
+        assert msg[1] == NFP.CLIENT
+        assert msg[2] == NFP.GET

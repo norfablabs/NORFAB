@@ -392,6 +392,9 @@ prefixes = [
     },
     {"prefix": "10.0.2.0/24", "description": "TEST_BGP_PEERINGS"},
     {"prefix": "10.0.1.0/30", "description": "Point to point link"},
+    {"prefix": "198.18.250.0/24", "description": "TEST_SYNC_VRRP"},
+    {"prefix": "198.18.251.0/24", "description": "TEST_SYNC_VRRP"},
+    {"prefix": "198.18.252.0/24", "description": "TEST_SYNC_VRRP"},
     {"prefix": "1.0.1.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.100.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.10.0/24", "description": "Subinterface addresses"},
@@ -973,6 +976,28 @@ interfaces.append(
         "device": {"name": "fn-ceos-sp-1"},
         "type": "1000base-t",
     }
+)
+
+# add FakeNOS interfaces used by VRRP synchronization tests
+interfaces.extend(
+    [
+        {
+            "name": interface_name,
+            "device": {"name": device_name},
+            "type": interface_type,
+            "description": "TEST_SYNC_VRRP",
+        }
+        for device_name, interface_type, interface_names in [
+            (
+                "xr1",
+                "1000base-t",
+                ["GigabitEthernet0/0/0/3", "GigabitEthernet0/0/0/4"],
+            ),
+            ("fn-ceos-lf-1", "virtual", ["Vlan250"]),
+            ("fn-ceos-lf-2", "virtual", ["Vlan250"]),
+        ]
+        for interface_name in interface_names
+    ]
 )
 
 
@@ -2202,6 +2227,14 @@ devices = [
         "serial": "OLD-FAKENOS-CHASSIS",
     },
     {
+        "name": "xr1",
+        "device_type": {"slug": slugify("XVR9000")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "SALTNORNIR"},
+        "site": {"name": "SALTNORNIR-LAB"},
+        "platform": {"name": "cisco_xr"},
+    },
+    {
         "name": "PatchPanel-1",
         "device_type": {"slug": slugify("24-port-lc-patch-panel")},
         "device_role": {"name": "PatchPanel"},
@@ -3225,6 +3258,48 @@ def create_devices():
     )
 
 
+def create_sync_vrrp_data():
+    """Create only the NetBox records required by VRRP synchronization tests."""
+    log.info("creating VRRP synchronization test data")
+    for prefix in prefixes:
+        if prefix.get("description") == "TEST_SYNC_VRRP" and not list(
+            nb.ipam.prefixes.filter(prefix=prefix["prefix"])
+        ):
+            nb.ipam.prefixes.create(prefix)
+
+    sync_interfaces = [
+        interface
+        for interface in interfaces
+        if interface.get("description") == "TEST_SYNC_VRRP"
+    ]
+    sync_device_names = {interface["device"]["name"] for interface in sync_interfaces}
+    nb_devices = {}
+    for device_data in devices:
+        if device_data["name"] not in sync_device_names:
+            continue
+        device = nb.dcim.devices.get(name=device_data["name"])
+        if device is None:
+            payload = dict(device_data)
+            payload.setdefault("slug", slugify(payload["name"]))
+            if NB_VERSION >= 3.6:
+                payload["role"] = payload.pop("device_role")
+            device = nb.dcim.devices.create(payload)
+        nb_devices[device.name] = device
+
+    for interface_data in sync_interfaces:
+        device = nb_devices[interface_data["device"]["name"]]
+        if nb.dcim.interfaces.get(device_id=device.id, name=interface_data["name"]):
+            continue
+        nb.dcim.interfaces.create(
+            {
+                "name": interface_data["name"],
+                "device": device.id,
+                "type": interface_data["type"],
+                "description": interface_data["description"],
+            }
+        )
+
+
 def associate_ip_adress_to_devices():
     """Function to associate IP adresses to device intefaces and to associate vrfs to interfaces and ip adresses"""
     log.info("associating primary ip adresses to devices")
@@ -4219,6 +4294,54 @@ def delete_interfaces():
         interface.delete()
 
 
+def delete_sync_vrrp_data():
+    """Delete only the NetBox records used by VRRP synchronization tests."""
+    log.info("deleting VRRP synchronization test data")
+    sync_interfaces = [
+        interface
+        for interface in interfaces
+        if interface.get("description") == "TEST_SYNC_VRRP"
+    ]
+    netbox_interfaces = []
+    group_ids = set()
+    for interface_data in sync_interfaces:
+        device = nb.dcim.devices.get(name=interface_data["device"]["name"])
+        if device:
+            interface = nb.dcim.interfaces.get(
+                device_id=device.id, name=interface_data["name"]
+            )
+            if interface is None:
+                continue
+            netbox_interfaces.append(interface)
+            for assignment in nb.ipam.fhrp_group_assignments.filter(
+                interface_id=interface.id
+            ):
+                group_ids.add(assignment.group.id)
+
+    for group_id in group_ids:
+        for ip_address in nb.ipam.ip_addresses.filter(
+            assigned_object_type="ipam.fhrpgroup",
+            assigned_object_id=group_id,
+        ):
+            ip_address.delete()
+        group = nb.ipam.fhrp_groups.get(id=group_id)
+        if group:
+            group.delete()
+
+    for interface in netbox_interfaces:
+        if interface.device.name != "xr1":
+            interface.delete()
+
+    device = nb.dcim.devices.get(name="xr1")
+    if device:
+        device.delete()
+
+    for prefix in prefixes:
+        if prefix.get("description") == "TEST_SYNC_VRRP":
+            for netbox_prefix in nb.ipam.prefixes.filter(prefix=prefix["prefix"]):
+                netbox_prefix.delete()
+
+
 def delete_mac_addresses():
     """Remove all MAC addresses so the MAC address seed data can be recreated."""
     if NB_VERSION < 4.2:
@@ -4306,6 +4429,7 @@ def main():
     parser.add_argument("--bgp-asn", action="store_true")
     parser.add_argument("--bgp-peer-groups", action="store_true")
     parser.add_argument("--bgp-peerings", action="store_true")
+    parser.add_argument("--sync-vrrp", action="store_true")
     args = parser.parse_args()
     try:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN, threading=True)
@@ -4338,6 +4462,8 @@ def main():
         return
 
     if todo in ("1", "3"):
+        if args.sync_vrrp:
+            delete_sync_vrrp_data()
         if args.bgp_peerings:
             delete_bgp_peerings()
         if args.custom_fields:
@@ -4484,6 +4610,8 @@ def main():
             create_bgp_peer_groups()
         if args.bgp_peerings:
             create_bgp_peerings()
+        if args.sync_vrrp:
+            create_sync_vrrp_data()
 
 
 if __name__ == "__main__":

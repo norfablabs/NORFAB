@@ -59,7 +59,7 @@ class TestNornirWorker:
             assert isinstance(data["result"], list), worker_name
 
     @pytest.mark.skip(reason="TBD")
-    def test_get_watchdog_stats(self, nfclient):
+    def test_get_stats(self, nfclient):
         pass
 
     @pytest.mark.skip(reason="TBD")

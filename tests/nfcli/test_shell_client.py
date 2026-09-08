@@ -6,21 +6,40 @@ pytestmark = pytest.mark.nfcli
 
 
 class TestShowCommands:
-    @pytest.mark.skip(reason="TBD")
-    def test_show_broker(self):
-        pass
+    def test_show_broker(self, picle_shell, capsys):
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd("show norfab broker status")
+        shell.onecmd("show norfab broker statistics")
 
-    @pytest.mark.skip(reason="TBD")
-    def test_show_client(self):
-        pass
+        captured = capsys.readouterr()
+        assert "broker_private_key_file" in captured.out
+        assert "schema_version" in captured.out
+
+    def test_show_client(self, picle_shell, capsys):
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd("show norfab client status")
+        shell.onecmd("show norfab client statistics")
+
+        captured = capsys.readouterr()
+        assert "client_private_key_file" in captured.out
+        assert "PICLE Shell" in captured.out
+        assert "schema_version" in captured.out
 
     @pytest.mark.skip(reason="TBD")
     def test_show_version(self):
         pass
 
-    @pytest.mark.skip(reason="TBD")
-    def test_show_workers(self):
-        pass
+    def test_show_workers(self, picle_shell, capsys):
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd("show norfab workers status")
+        shell.onecmd("show norfab workers statistics")
+
+        captured = capsys.readouterr()
+        assert "worker_private_key_file" in captured.out
+        assert "schema_version" in captured.out
 
     @pytest.mark.skip(reason="TBD")
     def test_show_workers_by_status(self):

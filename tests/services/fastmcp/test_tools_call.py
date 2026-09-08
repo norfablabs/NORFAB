@@ -73,11 +73,11 @@ class TestToolsCallNornir:
 
         asyncio.run(run_test())
 
-    def test_call_get_watchdog_stats(self, nfclient, mcp_url):
-        ensure_tool_discovered(self, nfclient, "nornir", "get_watchdog_stats")
+    def test_call_get_stats(self, nfclient, mcp_url):
+        ensure_tool_discovered(self, nfclient, "nornir", "get_stats")
 
         async def run_test():
-            tool_name = "service_nornir__task_get_watchdog_stats"
+            tool_name = "service_nornir__task_get_stats"
             kwargs = {}
             await call_mcp_tool(mcp_url, tool_name, kwargs)
 

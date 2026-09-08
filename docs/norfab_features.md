@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 6 September 2026*
+*Last updated: 8 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -50,8 +50,8 @@ requiring a FastAPI worker or a central web deployment. It is intended to grow i
 a collection of focused web applications for visual operations, observability,
 troubleshooting, reporting, and guided workflows.
 
-The **runtime monitoring dashboard** polls existing broker management and worker
-watchdog interfaces to show broker, local NFWeb client, and worker health; CPU and
+The **runtime monitoring dashboard** uses the shared, versioned Pydantic monitoring
+schema and in-memory counters for broker, client, and worker health; CPU and
 resident memory; worker resource comparisons; stacked fabric-wide broker and
 worker CPU and memory consumption; selected-worker trends; and
 local-client job totals and interval status activity from the existing client job
@@ -66,6 +66,11 @@ browsers over WebSocket and retained
 only in process memory for up to three hours; restart clears them and no monitoring
 database or telemetry journal is created. **Monitoring use cases:** live fabric
 health, worker availability, resource trend inspection, and keepalive diagnosis.
+The core `get_stats` interfaces also expose consistent message, failure, reconnect,
+queue, job, and database metrics for tests, profiling, and external dashboards.
+Worker services can publish typed extensions of the common monitoring schema;
+Nornir includes connection-cleanup, failed-host, host-count, and inventory-status
+metrics without an unvalidated extension dictionary.
 
 The first built-in application is the **3D topology observatory**. Its persistent
 Vasturiano scene seeds selected devices from cached Nornir inventory, complements
@@ -108,6 +113,17 @@ on a laptop, server, VM, container, or distributed hosts. **Use cases:** central
 automation, remote execution, hybrid deployments, and workload isolation.
 **Limitations:** the broker endpoint must be reachable by every component and
 production resilience depends on the topology and infrastructure deployed.
+
+### Operational status and statistics
+
+Provides separate status and statistics views for brokers, clients, and workers.
+Status reports component identity, endpoints, runtime directories, and CurveZMQ
+configuration for environment troubleshooting. Versioned statistics report
+process resources, message activity, queues, jobs, connections, and service-specific
+metrics for performance analysis and dashboards. NFCLI exposes these through
+`show norfab <component> status` and `show norfab <component> statistics`.
+**Limitations:** status output contains local filesystem paths and should only be
+shared with trusted operators; neither interface returns private key contents.
 
 ### Horizontal worker scaling
 
@@ -798,6 +814,22 @@ layer-two source-of-truth drift. **Limitations:** parser coverage determines
 live-state quality; the task does not delete VLANs because live data cannot
 reliably identify stale NetBox objects.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vlans.md)
+
+### Live VRRP reconciliation
+
+Reconciles TTP-parsed VRRP state with NetBox FHRP groups, virtual IP addresses,
+and device-interface group assignments. Assignments are identified by device,
+interface, and group ID; priorities remain per-interface while peers with the
+same protocol version, group, virtual address, and authentication type share
+a NetBox FHRP group. Live VRRPv2 and VRRPv3 values map to NetBox's `vrrp2` and
+`vrrp3` protocols. Inline Jinja2 or `nf://` templates generate and synchronize
+group names using NetBox device and interface context. Existing unassigned IP
+records are reused and assigned the `vrrp` role; missing virtual IPs are created,
+while addresses assigned to other objects are reported without reassignment.
+**Use cases:** first-hop redundancy inventory, priority drift detection,
+consistent group naming, and virtual-IP auditing. **Limitations:**
+synchronization is additive and does not delete stale FHRP data.
+[Task details](workers/netbox/services_netbox_service_tasks_sync_vrrp.md)
 
 ### Live VRF reconciliation
 

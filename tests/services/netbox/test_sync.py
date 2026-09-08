@@ -121,6 +121,7 @@ class TestSyncResourcesFailed:
                 DEVICE,
             ),
             ("sync_vlans", "failed to fetch VLAN data", VLAN_DEVICE),
+            ("sync_vrrp", "failed to fetch VRRP data", VLAN_DEVICE),
             ("sync_device_prefixes", "failed to fetch interface data", DEVICE),
             ("sync_vrfs", "failed to fetch VRF data", DEVICE),
             ("sync_device_interfaces", "failed to fetch interface data", DEVICE),
@@ -164,6 +165,12 @@ class TestSyncResourcesFailed:
                     error_text in error and failed_device in error
                     for error in result["errors"]
                 )
+                if task == "sync_vrrp":
+                    assert not any(
+                        "missing a live VRRP result" in error
+                        and failed_device in error
+                        for error in result["errors"]
+                    )
                 assert result["failed"] is False
         finally:
             device.delete()

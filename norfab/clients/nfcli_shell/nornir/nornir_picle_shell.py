@@ -102,7 +102,7 @@ class ShowWatchDogModel(NorniHostsFilters):
     statistics: Any = Field(
         None,
         description="show Nornir watchdog statistics",
-        json_schema_extra={"function": "get_watchdog_stats"},
+        json_schema_extra={"function": "get_stats"},
     )
     configuration: Any = Field(
         None,
@@ -119,10 +119,10 @@ class ShowWatchDogModel(NorniHostsFilters):
         outputter = Outputters.outputter_nested
 
     @staticmethod
-    def get_watchdog_stats(**kwargs: object):
+    def get_stats(**kwargs: object):
         workers = kwargs.pop("workers", "all")
         nowait = kwargs.pop("nowait", False)
-        result = run_future_job("nornir", "get_watchdog_stats", workers=workers)
+        result = run_future_job("nornir", "get_stats", workers=workers)
         if nowait:
             return result
         return log_error_or_result(result)

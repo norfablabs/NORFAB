@@ -2326,6 +2326,57 @@ class SyncVlansResult(Result):
 
 
 # --------------------------------------------------------------------------
+# FHRP TASK MODELS
+# --------------------------------------------------------------------------
+
+
+class SyncVrrpInput(
+    NetboxNornirHostsFilters,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
+    dry_run: StrictBool = Field(
+        False,
+        description="Calculate the VRRP diff without writing to NetBox",
+        alias="dry-run",
+        json_schema_extra={"presence": True},
+    )
+    devices: Union[None, List[StrictStr]] = Field(
+        None,
+        description="List of NetBox device names to collect VRRP state from",
+    )
+    name_template: StrictStr = Field(
+        "{{ device.name }}_{{ interface }}_VRRP{{ group_id }}",
+        min_length=1,
+        max_length=500,
+        description=(
+            "Inline Jinja2 template or nf:// path used to render NetBox FHRP "
+            "group names"
+        ),
+        alias="name-template",
+    )
+    timeout: StrictInt = Field(
+        600,
+        gt=0,
+        description="Timeout in seconds for Nornir host resolution and VRRP parsing",
+    )
+    with_approval: StrictBool = Field(
+        False,
+        description="Preview VRRP changes and ask for review before writing to NetBox",
+        alias="with-approval",
+        json_schema_extra={"presence": True},
+    )
+
+
+class SyncVrrpResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {},
+        description="VRRP sync actions keyed by NetBox device name",
+    )
+
+
+# --------------------------------------------------------------------------
 # VRF TASK MODELS
 # --------------------------------------------------------------------------
 

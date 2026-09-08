@@ -343,7 +343,7 @@ snapshot table for an unrelated domain model.
 Monitoring is deliberately smaller than Topology and does not use the database:
 
 ```text
-broker show_broker + show_workers and worker get_watchdog_stats
+broker get_stats + worker get_stats + local client get_stats
   -> MonitoringCollector creates one MonitoringSnapshot
   -> bounded deque retains at most the configured three-hour window
   -> MonitoringBroadcaster publishes the sample over WebSocket
@@ -693,9 +693,9 @@ application responsibilities.
 
 ### Add or Change a Monitoring Metric
 
-1. Confirm the value already exists on `show_broker`, `show_workers`, the worker
-   watchdog response, or the local native client.
-2. Add the field to `monitoring/models.py` and `frontend/src/types.ts`.
+1. Add and document the value in the appropriate Pydantic model in
+   `norfab/core/monitoring.py`.
+2. Add the presentation field to `monitoring/models.py` and `frontend/src/types.ts`.
 3. Merge it in `MonitoringCollector.collect_once()` without inventing fallbacks.
 4. Add it directly to the existing ECharts options, details, or worker table.
 5. Extend collector, server, and contract-parity tests.

@@ -49,19 +49,29 @@ Monitoring reuses normal NORFAB interfaces:
 
 | Component data | Existing interface |
 | --- | --- |
-| Broker state and process resources | `mmi.service.broker` / `show_broker` |
-| Worker registration and keepalives | `mmi.service.broker` / `show_workers` |
-| Worker process resources and uptime | `get_watchdog_stats` on all workers |
-| Local client counters and process resources | The NFWeb process and its native `NFPClient` |
-| Job and event statistics | The native client's existing job database |
+| Broker state, registered workers, and resources | `mmi.service.broker` / `get_stats` |
+| Worker resources, messages, and keepalives | `get_stats` on all workers |
+| Local client counters, resources, and job statistics | Native `NFPClient.get_stats()` |
 | Selected-worker job statistics | Existing `job_list` task on that worker |
 
 The monitoring request traffic itself is included in the local client's job and
 message accounting. The dashboard reads aggregate database statistics; it does
 not capture or retain message payloads or create a separate monitoring database.
+Message, failure, reconnect, and watchdog counters are process-lifetime totals;
+each resets when its owning broker, client, or worker process restarts.
 Selecting a worker makes one targeted `job_list` request and summarizes at most
 the latest 1,000 returned records. The card labels a full window as truncated;
 it does not present the bounded result as an all-time worker total.
+
+Broker, client, and worker responses share a versioned Pydantic contract from
+`norfab.core.monitoring`. Every response contains `schema_version`, `collected_at`,
+component identity and status, `process`, and `messaging`. Role-specific sections
+add broker registrations, client database aggregates, or worker queues, jobs,
+and keepalives. Individual worker services subclass `WorkerMonitoringStats` to
+declare additional metrics as typed top-level fields; Nornir watchdog and
+inventory metrics are the first such extension. Service models reject unknown
+fields so format changes are explicit and can be published through Pydantic JSON
+Schema.
 
 ## In-memory History
 

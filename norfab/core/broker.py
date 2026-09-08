@@ -5,12 +5,10 @@ import random
 import signal
 import sys
 import threading
-import time
 from multiprocessing import Event
 from typing import List, Optional, Union
 
 import orjson
-import psutil
 import zmq
 import zmq.auth
 from zmq.auth.thread import ThreadAuthenticator
@@ -20,6 +18,11 @@ from norfab.utils.nflogging import read_jsonl_logs, setup_process_logging
 from . import NFP
 from .inventory import NorFabInventory
 from .keepalives import KeepAliver
+from .monitoring import (
+    BrokerMonitoringStats,
+    BrokerWorkerMonitoringStats,
+    ProcessMonitor,
+)
 from .security import generate_certificates
 
 log = logging.getLogger(__name__)
@@ -69,6 +72,7 @@ class NFPWorker(object):
         socket: The socket object used for communication.
         multiplier (int): Multiplier value, e.g., 6 times.
         keepalive (int): Keepalive interval in milliseconds, e.g., 5000 ms.
+        monitoring (ProcessMonitor): Broker process message counter store.
         service (NFPService, optional): The service instance. Defaults to None.
     """
 
@@ -78,6 +82,7 @@ class NFPWorker(object):
         socket: zmq.Socket,
         multiplier: int,  # e.g. 6 times
         keepalive: int,  # e.g. 5000 ms
+        monitoring: ProcessMonitor,
         service: Optional[NFPService] = None,
     ) -> None:
         self.address = address  # Address to route to
@@ -88,6 +93,7 @@ class NFPWorker(object):
         self.keepalive = keepalive
         self.multiplier = multiplier
         self.build_message = NFP.MessageBuilder()
+        self.monitoring = monitoring
 
     def start_keepalives(self) -> None:
         self.keepaliver = KeepAliver(
@@ -134,7 +140,12 @@ class NFPWorker(object):
             msg = self.build_message.broker_to_worker_disconnect(
                 worker_address=self.address, service=self.service.name
             )
-            self.socket.send_multipart(msg)
+            try:
+                self.socket.send_multipart(msg)
+                self.monitoring.record_sent()
+            except Exception:
+                self.monitoring.record_send_failure()
+                raise
 
 
 class NFPBroker:
@@ -221,9 +232,7 @@ class NFPBroker:
         self.services = {}
         self.workers = {}
         self.build_message = NFP.MessageBuilder()
-        self.started_at = time.time()
-        self.process = psutil.Process(os.getpid())
-        self.process.cpu_percent(interval=None)
+        self.monitoring = ProcessMonitor()
         self.exit_event = exit_event
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.ip_allowlist = self.inventory.broker.get("ip_allowlist", ["*"])
@@ -308,6 +317,55 @@ class NFPBroker:
             inventory_logging=self.inventory.logging,
         )
 
+    def get_stats(self) -> BrokerMonitoringStats:
+        """Return the broker's validated in-memory monitoring snapshot."""
+        workers = [
+            BrokerWorkerMonitoringStats(
+                name=worker.address.decode("utf-8"),
+                service=worker.service.name.decode("utf-8"),
+                status="alive" if worker.keepaliver.is_alive() else "dead",
+                holdtime_seconds=worker.keepaliver.show_holdtime(),
+                uptime_seconds=worker.keepaliver.show_alive_for(),
+                keepalives_sent=worker.keepaliver.keepalives_send,
+                keepalives_received=worker.keepaliver.keepalives_received,
+            )
+            for worker in self.workers.values()
+            if worker.service is not None and hasattr(worker, "keepaliver")
+        ]
+        return BrokerMonitoringStats(
+            name="NFPBroker",
+            status="active" if not self.exit_event.is_set() else "stopping",
+            process=self.monitoring.process_stats(),
+            messaging=self.monitoring.messaging_stats(),
+            endpoint=self.socket.getsockopt_string(zmq.LAST_ENDPOINT),
+            worker_count=len(self.workers),
+            service_count=len(self.services),
+            keepalive_interval_ms=self.keepalive,
+            keepalive_multiplier=self.multiplier,
+            workers=workers,
+        )
+
+    def get_status(self) -> dict:
+        """Return broker identity, runtime paths, and security configuration."""
+        return {
+            "name": "NFPBroker",
+            "role": "broker",
+            "status": "active" if not self.exit_event.is_set() else "stopping",
+            "endpoint": self.socket.getsockopt_string(zmq.LAST_ENDPOINT),
+            "directories": {
+                "base_dir": self.base_dir,
+                "broker_base_dir": self.broker_base_dir,
+                "private_keys_dir": self.private_keys_dir,
+                "public_keys_dir": self.public_keys_dir,
+            },
+            "security": {
+                "broker_private_key_file": self.broker_private_key_file,
+                "broker_public_key_file": self.broker_public_key_file,
+                "zmq_auth": self.zmq_auth,
+                "ip_allowlist": self.ip_allowlist,
+            },
+        }
+
     def mediate(self) -> None:
         """
         Main broker work happens here.
@@ -335,9 +393,11 @@ class NFPBroker:
                 break  # Interrupted
 
             if msg is not None:
+                self.monitoring.record_received()
                 log.debug(f"NFPBroker - received '{msg}'")
 
                 if len(msg) < 3:
+                    self.monitoring.record_receive_failure()
                     log.error(f"NFPBroker - received malformed message: {msg}")
                     continue
 
@@ -349,6 +409,7 @@ class NFPBroker:
                     try:
                         self.process_client(sender, msg)
                     except Exception as e:
+                        self.monitoring.record_receive_failure()
                         log.error(
                             f"NFPBroker - failed to process client message from "
                             f"'{NFP.bytest_to_text(sender)}': {e}",
@@ -358,6 +419,7 @@ class NFPBroker:
                     try:
                         self.process_worker(sender, msg)
                     except Exception as e:
+                        self.monitoring.record_receive_failure()
                         log.error(
                             f"NFPBroker - failed to process worker message from "
                             f"'{NFP.bytest_to_text(sender)}': {e}",
@@ -447,7 +509,9 @@ class NFPBroker:
             ):
                 try:
                     self.socket.send_multipart(worker.keepaliver.make_message())
+                    self.monitoring.record_sent()
                 except Exception as e:
+                    self.monitoring.record_send_failure()
                     log.error(
                         f"NFPBroker - failed to send keepalive to "
                         f"'{NFP.bytest_to_text(worker.address)}', error '{e}'"
@@ -493,7 +557,12 @@ class NFPBroker:
         log.debug(
             f"NFPBroker - sending command '{command}' to worker '{worker.address}', job '{uuid}', from client '{sender}'"
         )
-        self.socket.send_multipart(msg)
+        try:
+            self.socket.send_multipart(msg)
+            self.monitoring.record_sent()
+        except Exception:
+            self.monitoring.record_send_failure()
+            raise
 
     def send_to_client(
         self, client: str, command: str, service: str, message: list
@@ -531,7 +600,12 @@ class NFPBroker:
         log.debug(
             f"NFPBroker - sending to client '{client}', command '{command}', service '{service}'"
         )
-        self.socket.send_multipart(msg)
+        try:
+            self.socket.send_multipart(msg)
+            self.monitoring.record_sent()
+        except Exception:
+            self.monitoring.record_send_failure()
+            raise
 
     def process_worker(self, sender: str, msg: list) -> None:
         """
@@ -606,6 +680,7 @@ class NFPBroker:
                 socket=self.socket,
                 multiplier=self.multiplier,
                 keepalive=self.keepalive,
+                monitoring=self.monitoring,
             )
             log.info(f"NFPBroker - registered new worker {NFP.bytest_to_text(address)}")
 
@@ -825,7 +900,8 @@ class NFPBroker:
         Supported MMI Tasks:
 
         - "show_workers": Returns a list of workers with their details.
-        - "show_broker": Returns broker details including endpoint, status, keepalives, workers count, services count, directories, and security.
+        - "get_stats": Returns validated broker process and messaging statistics.
+        - "get_status": Returns broker identity, paths, and security configuration.
         - "show_broker_version": Returns the version of various packages and the platform.
         - "show_broker_inventory": Returns the broker's inventory.
         - "get_logs": Returns broker process JSONL log records.
@@ -868,32 +944,10 @@ class NFPBroker:
                     ret = [{"name": "", "service": "", "status": ""}]
             else:
                 ret = [{"name": "", "service": "", "status": ""}]
-        elif task == "show_broker":
-            memory = self.process.memory_info()
-            ret = {
-                "endpoint": self.socket.getsockopt_string(zmq.LAST_ENDPOINT),
-                "status": "active",
-                "cpu_percent": self.process.cpu_percent(interval=None),
-                "memory_rss_mbyte": memory.rss / 1024 / 1024,
-                "uptime_seconds": int(time.time() - self.started_at),
-                "keepalives": {
-                    "interval": self.keepalive,
-                    "multiplier": self.multiplier,
-                },
-                "workers count": len(self.workers),
-                "services count": len(self.services),
-                "directories": {
-                    "base-dir": self.base_dir,
-                    "private-keys-dir": self.private_keys_dir,
-                    "public-keys-dir": self.public_keys_dir,
-                },
-                "security": {
-                    "broker-private-key-file": self.broker_private_key_file,
-                    "broker-public-key-file": self.broker_public_key_file,
-                    "zmq-auth": self.zmq_auth,
-                    "ip-allowlist": self.ip_allowlist,
-                },
-            }
+        elif task == "get_stats":
+            ret = self.get_stats().model_dump(mode="json")
+        elif task == "get_status":
+            ret = self.get_status()
         elif task == "show_broker_version":
             ret = {
                 "norfab": "",

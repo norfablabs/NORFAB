@@ -102,9 +102,9 @@ class NorFabJobsShellCommands(BaseModel):
     @staticmethod
     def jobs_statistics(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
-        return NFCLIENT.job_db.jobs_stats(), Outputters.outputter_nested
+        return NFCLIENT.get_stats()["jobs"], Outputters.outputter_nested
 
     @staticmethod
     def jobs_database_statistics(*args: object, **kwargs: object):
         NFCLIENT = builtins.NFCLIENT
-        return NFCLIENT.job_db.jobs_db_stats(), Outputters.outputter_kv
+        return NFCLIENT.get_stats()["database"], Outputters.outputter_kv

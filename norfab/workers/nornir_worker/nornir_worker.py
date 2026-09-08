@@ -26,9 +26,9 @@ from nornir_salt.plugins.tasks import (
     connections as nr_connections,
 )
 
-from norfab.core.worker import Job, NFPWorker, Task, WorkerWatchDog
+from norfab.core.monitoring import WorkerWatchDog
+from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
-from norfab.utils.text import format_duration
 
 from .cfg_task import CfgTask
 from .cli_task import CliTask
@@ -44,6 +44,7 @@ from .nornir_models import (
     GetVersionResult,
     GetWatchdogConnectionsInput,
     GetWatchdogConnectionsResult,
+    NornirWorkerMonitoringStats,
     RefreshNornirInput,
     RefreshNornirResult,
 )
@@ -111,31 +112,13 @@ class WatchDog(WorkerWatchDog):
             self.connections_keepalive,
         ]
 
-    def stats(self) -> Dict:
-        """
-        Collects and returns statistics about the worker.
-
-        Returns:
-            dict: A dictionary containing the following keys:
-
-                - runs (int): The number of runs executed by the worker.
-                - timestamp (str): The current time in a human-readable format.
-                - alive (int): The time in seconds since the worker started.
-                - dead_connections_cleaned (int): The number of dead connections cleaned.
-                - idle_connections_cleaned (int): The number of idle connections cleaned.
-                - worker_ram_usage_mbyte (float): The current RAM usage of the worker in megabytes.
-        """
+    def get_stats(self) -> Dict:
+        """Return Nornir-specific values for the worker monitoring snapshot."""
         return {
-            "watchdog_runs": self.runs,
-            "timestamp": time.ctime(),
-            "uptime": format_duration(int(time.time() - self.started_at)),
-            "uptime_seconds": int(time.time() - self.started_at),
-            "worker_cpu_percent": self.worker_process.cpu_percent(interval=None),
             "dead_connections_cleaned": self.dead_connections_cleaned,
             "idle_connections_cleaned": self.idle_connections_cleaned,
             "failed_hosts_recovered": self.failed_hosts_recovered,
             "errdisabled_hosts": len(self.worker.nr.data.failed_hosts),
-            "worker_ram_usage_mbyte": self.get_ram_usage(),
             "nornir_hosts": (
                 len(self.worker.nr.inventory.hosts) if self.worker.nr else 0
             ),
@@ -428,6 +411,7 @@ class NornirWorker(
     nr = None
     nornir_inventory = {}
     autostart_watchdog = False
+    monitoring_model = NornirWorkerMonitoringStats
 
     def __init__(
         self,

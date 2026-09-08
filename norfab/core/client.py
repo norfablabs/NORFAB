@@ -23,6 +23,12 @@ from norfab.models import InputResponseModel
 from norfab.utils.markdown_results import markdown_results
 
 from . import NFP
+from .monitoring import (
+    ClientMonitoringStats,
+    DatabaseMonitoringStats,
+    JobMonitoringStats,
+    ProcessMonitor,
+)
 from .security import generate_certificates
 
 log = logging.getLogger(__name__)
@@ -727,8 +733,9 @@ def zmq_send_recv(client: object) -> None:
             try:
                 if not client.destroy_event.is_set():
                     client.broker_socket.send_multipart(outbound)
-                    client.stats_send_to_broker += 1
+                    client.monitoring.record_sent()
             except Exception as e:
+                client.monitoring.record_send_failure()
                 log.error(
                     f"{client.name} - failed to send queued message to broker, "
                     f"error '{e}'",
@@ -759,10 +766,11 @@ def zmq_send_recv(client: object) -> None:
         if msg is None:
             continue
 
-        client.stats_recv_from_broker += 1
+        client.monitoring.record_received()
 
         # Message format: [empty, header, command, service, uuid, status, payload]
         if len(msg) < 7:
+            client.monitoring.record_receive_failure()
             log.error(f"{client.name} - received malformed message: {msg}")
             continue
 
@@ -789,6 +797,7 @@ def zmq_send_recv(client: object) -> None:
         try:
             payload = orjson.loads(msg[6])
         except Exception as e:
+            client.monitoring.record_receive_failure()
             log.error(
                 f"{client.name} - failed to parse message, error '{e}'", exc_info=True
             )
@@ -817,7 +826,7 @@ def handle_event(client: object, juuid: str, payload: dict, msg: list) -> None:
         payload: Event payload dictionary
         msg: Original message multipart for queue
     """
-    client.stats_recv_event_from_broker += 1
+    client.monitoring.record_event_received()
     future = client.job_futures.get(juuid)
     if future and not future.add_event(payload):
         return
@@ -1200,10 +1209,6 @@ class NFPClient(object):
         broker_socket (zmq.Socket): The ZeroMQ socket for communication with the broker.
         poller (zmq.Poller): The ZeroMQ poller for managing socket events.
         name (str): The name of the client.
-        stats_send_to_broker (int): Counter for messages sent to the broker.
-        stats_recv_from_broker (int): Counter for messages received from the broker.
-        stats_reconnect_to_broker (int): Counter for reconnections to the broker.
-        stats_recv_event_from_broker (int): Counter for events received from the broker.
         client_private_key_file (str): Path to the client's private key file.
         broker_public_key_file (str): Path to the broker's public key file.
 
@@ -1245,10 +1250,6 @@ class NFPClient(object):
     broker_socket = None
     poller = None
     name = None
-    stats_send_to_broker = 0
-    stats_recv_from_broker = 0
-    stats_reconnect_to_broker = 0
-    stats_recv_event_from_broker = 0
     client_private_key_file = None
     broker_public_key_file = None
     public_keys_dir = None
@@ -1272,6 +1273,7 @@ class NFPClient(object):
         self.file_transfers = {}  # file transfers tracker
         self.zmq_auth = self.inventory.broker.get("zmq_auth", True)
         self.build_message = NFP.MessageBuilder()
+        self.monitoring = ProcessMonitor()
 
         # create base directories
         os.makedirs(self.base_dir, exist_ok=True)
@@ -1333,6 +1335,49 @@ class NFPClient(object):
         )
         self.dispatcher_thread.start()
 
+    def get_stats(self) -> dict:
+        """Return the client's validated monitoring snapshot as a dictionary."""
+        receiver_alive = bool(
+            getattr(self, "recv_thread", None) and self.recv_thread.is_alive()
+        )
+        stats = ClientMonitoringStats(
+            name=self.name,
+            status="active" if receiver_alive else "starting",
+            process=self.monitoring.process_stats(),
+            messaging=self.monitoring.messaging_stats(),
+            broker=self.broker,
+            reconnects=self.monitoring.reconnects,
+            outbound_queue_depth=self.outbound_queue.qsize(),
+            jobs=JobMonitoringStats.model_validate(self.job_db.jobs_stats()),
+            database=DatabaseMonitoringStats.model_validate(
+                self.job_db.jobs_db_stats()
+            ),
+        )
+        return stats.model_dump(mode="json")
+
+    def get_status(self) -> dict:
+        """Return client identity, runtime paths, and security configuration."""
+        receiver_alive = bool(
+            getattr(self, "recv_thread", None) and self.recv_thread.is_alive()
+        )
+        return {
+            "name": self.name,
+            "role": "client",
+            "status": "active" if receiver_alive else "starting",
+            "zmq_name": self.zmq_name,
+            "broker": self.broker,
+            "directories": {
+                "base_dir": self.base_dir,
+                "public_keys_dir": self.public_keys_dir,
+                "private_keys_dir": self.private_keys_dir,
+            },
+            "security": {
+                "client_private_key_file": self.client_private_key_file,
+                "broker_public_key_file": self.broker_public_key_file,
+                "zmq_auth": self.zmq_auth,
+            },
+        }
+
     def ensure_bytes(self, value: Union[bytes, str]) -> bytes:
         """
         Helper function to convert value to bytes.
@@ -1393,7 +1438,7 @@ class NFPClient(object):
         self.broker_socket.connect(self.broker)
         self.poller.register(self.broker_socket, zmq.POLLIN)
         log.debug(f"{self.name} - client connected to broker at '{self.broker}'")
-        self.stats_reconnect_to_broker += 1
+        self.monitoring.record_reconnect()
 
     def send_to_broker(
         self, command: str, service, workers, uuid: str, request

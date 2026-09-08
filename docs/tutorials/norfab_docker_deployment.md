@@ -168,26 +168,57 @@ NorFan interactive shell should start:
 ```
 Welcome to NorFab Interactive Shell.
 
-nf#show norfab broker
+nf#show norfab broker status
+ name: NFPBroker
+ role: broker
  status: active
- keepalives:
-   interval: 2500
-   multiplier: 6
- workers count: 1
- services count: 1
+ endpoint: tcp://0.0.0.0:5555
  directories:
-   base-dir: /etc/norfab
-   private-keys-dir: /etc/norfab/__norfab__/files/broker/private_keys
-   public-keys-dir: /etc/norfab/__norfab__/files/broker/public_keys
+   base_dir: /etc/norfab
+   broker_base_dir: /etc/norfab/__norfab__/files/broker
+   private_keys_dir: /etc/norfab/__norfab__/files/broker/private_keys
+   public_keys_dir: /etc/norfab/__norfab__/files/broker/public_keys
  security:
-   broker-private-key-file: /etc/norfab/__norfab__/files/broker/private_keys/broker.key_secret
-   broker-public-key-file: /etc/norfab/__norfab__/files/broker/public_keys/broker.key
+   broker_private_key_file: /etc/norfab/__norfab__/files/broker/private_keys/broker.key_secret
+   broker_public_key_file: /etc/norfab/__norfab__/files/broker/public_keys/broker.key
+   zmq_auth: true
+   ip_allowlist:
+   - '*'
+nf#show norfab broker statistics
+ schema_version: '1.0'
+ collected_at: '2026-09-07T10:30:00Z'
+ name: NFPBroker
+ role: broker
+ status: active
+ process:
+   cpu_percent: 0.2
+   memory_rss_mbyte: 42.1
+   uptime_seconds: 2104
+ messaging:
+   sent: 1680
+   received: 1678
+   events_received: 0
+   send_failures: 0
+   receive_failures: 0
+ endpoint: tcp://0.0.0.0:5555
+ worker_count: 1
+ service_count: 1
+ keepalive_interval_ms: 2500
+ keepalive_multiplier: 6
+ workers:
+ - name: nornir-worker-1
+   service: nornir
+   status: alive
+   holdtime_seconds: 12.6
+   uptime_seconds: 2104
+   keepalives_sent: 835
+   keepalives_received: 835
 nf#show norfab broker workers
  name             service  status  holdtime  keepalives tx/rx  alive (s) 
  nornir-worker-1  nornir   alive   12.6      835 / 835         2104
 nf#
 ```
 
-Successfully running `show norfab broker` and `show norfab broker workers` commands is a good indication that everything works well and you did a great job setting up NorFab in a distributed dockerized fashion :smile:.
+Successfully running `show norfab broker status`, `show norfab broker statistics`, and `show norfab broker workers` is a good indication that everything works well and you did a great job setting up NorFab in a distributed dockerized fashion :smile:.
 
 Next steps would be to adjust `inventory.yaml` file on the docker host to configure Nornir Service workers to manage your environment, for further details on how to do it refer to [Nornir Service documentations](../workers/nornir/services_nornir_service.md). Good Luck 🤞

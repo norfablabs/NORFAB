@@ -1,9 +1,35 @@
+# 0.22.8
+
+## FEATURES
+
+1. Added strict, versioned Pydantic monitoring schemas for common process and messaging statistics and for broker, client, worker, job, database, and broker-side worker-connection data. The models provide a documented contract that can also be published as JSON Schema.
+2. Added thread-safe, process-lifetime monitoring of CPU, resident memory, uptime, messages sent and received, message failures, received events, and reconnects. Statistics remain in memory and reset when the owning process restarts.
+3. Added extensible worker monitoring models, with `NornirWorkerMonitoringStats` as the first service-specific schema. It exposes typed Nornir host counts, failed-host recovery, connection cleanup, and inventory-source status metrics as top-level fields.
+4. Added `get_status()` interfaces for the broker and clients and a `get_worker_status` task for workers to report component identity, endpoints, runtime directories, and CurveZMQ authentication configuration separately from performance statistics.
+5. Added the NetBox `sync_vrrp` task and `netbox sync vrrp` NFCLI command to reconcile TTP-parsed VRRPv2 and VRRPv3 groups, interface assignments, priorities, authentication, names, and virtual IP addresses. Existing unassigned IPs are reused, missing IPs are created with the `vrrp` role, and IPs assigned to other objects are reported without reassignment.
+
+## ENHANCEMENTS
+
+1. Added first-class `get_stats()` interfaces to clients, workers, and the broker. Their role-specific responses now consolidate connection, keepalive, queue, running-job, concurrency, client job, and SQLite database statistics where applicable.
+2. Updated NFWeb monitoring to consume and validate the unified statistics format directly, eliminating legacy numeric-string parsing while retaining its existing in-memory history and dashboard response contract.
+3. Updated NFCLI and the Textual monitoring client to display statistics through the unified interfaces, including the existing client job and database statistics commands.
+4. Split NFCLI broker, client, and worker inspection into explicit `status` and `statistics` commands. Status output restores environment and authentication information, while statistics output remains suitable for performance monitoring.
+
+## CHANGES
+
+1. Moved `WorkerWatchDog` from `norfab.core.worker` to `norfab.core.monitoring`. The watchdog now performs health checks and supplies worker-specific metric values, while `NFPWorker` builds and validates the complete monitoring response.
+2. Removed the broker `show_broker` management operation, worker `get_watchdog_stats` task, and old standalone client statistics attributes. This release does not provide backward compatibility for those interfaces.
+3. Changed `NFPClient.get_stats()` to return a JSON-ready dictionary after internal Pydantic validation.
+4. Removed the untyped worker `details` mapping from monitoring responses.
+
+---
+
 # 0.22.7
 
 ## ENHANCEMENTS
 
 1. Enhanced NetBox `sync_vlans` and `sync_device_interfaces` to skip and report each VLAN mapped to a missing VLAN group while continuing to synchronize the remaining VLANs instead of aborting the task.
-2. Increased default worker and client jobs queu size to 10000 from 1000 items.
+2. Increased default worker and client jobs queue size to 10000 from 1000 items.
 
 ---
 

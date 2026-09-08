@@ -28,6 +28,7 @@ from .connections_tasks import NetboxConnectionsTasks
 from .containerlab_inventory_tasks import NetboxContainerlabInventoryTasks
 from .design_tasks import NetboxDesignTasks
 from .devices_tasks import NetboxDevicesTasks
+from .fhrp_tasks import NetboxFhrpTasks
 from .graphql_tasks import NetboxGraphqlTasks
 from .interfaces_tasks import NetboxInterfacesTasks
 from .ip_tasks import NetboxIpTasks
@@ -80,6 +81,7 @@ class NetboxWorker(
     NetboxIpTasks,
     NetboxBranchTasks,
     NetboxCrudTasks,
+    NetboxFhrpTasks,
     NetboxVlansTasks,
     NetboxVrfsTasks,
 ):

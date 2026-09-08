@@ -4,14 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import math
-import os
 import time
 from collections import Counter, deque
 from datetime import datetime, timedelta
 from typing import Any, Awaitable, Callable
 
-import psutil
+import orjson
 from tornado.ioloop import PeriodicCallback
 
 from norfab.clients.nfweb.monitoring.config import MonitoringConfig
@@ -21,25 +19,15 @@ from norfab.clients.nfweb.monitoring.models import (
     MonitoringSnapshot,
     MonitoringWorkerDatabaseStats,
 )
+from norfab.core.monitoring import (
+    BrokerMonitoringStats,
+    ClientMonitoringStats,
+    WorkerMonitoringStats,
+)
 
 log = logging.getLogger(__name__)
 
 SnapshotCallback = Callable[[MonitoringSnapshot], Awaitable[None] | None]
-
-
-def _optional_float(value: Any) -> float | None:
-    if value in (None, ""):
-        return None
-    try:
-        number = float(value)
-        return number if math.isfinite(number) else None
-    except (TypeError, ValueError):
-        return None
-
-
-def _optional_int(value: Any) -> int | None:
-    number = _optional_float(value)
-    return int(number) if number is not None and number.is_integer() else None
 
 
 class MonitoringCollector:
@@ -56,8 +44,6 @@ class MonitoringCollector:
         self.on_snapshot = on_snapshot
         history_size = config.retention_minutes * 60 // config.collection_interval + 1
         self.history: deque[MonitoringSnapshot] = deque(maxlen=history_size)
-        self.process = psutil.Process(os.getpid())
-        self.process.cpu_percent(interval=None)
         self._periodic: PeriodicCallback | None = None
         self._collection_lock = asyncio.Lock()
         self._active_task: asyncio.Task | None = None
@@ -124,182 +110,130 @@ class MonitoringCollector:
             return snapshot
 
     def collect_once(self) -> MonitoringSnapshot:
-        """Poll broker, worker, and local-client status using existing interfaces."""
+        """Collect and validate broker, worker, and local-client statistics."""
         started = time.perf_counter()
         errors: list[str] = []
 
         broker_reply = self.client.mmi(
             "mmi.service.broker",
-            "show_broker",
+            "get_stats",
             timeout=self.config.request_timeout,
         )
-        if not isinstance(broker_reply, dict):
-            broker_reply = {
-                "status": "500",
-                "errors": ["broker returned an invalid status response"],
-            }
-        broker_data = (
-            broker_reply.get("results", {})
-            if broker_reply.get("status") == "200"
-            else {}
-        )
-        if not isinstance(broker_data, dict):
-            broker_data = {}
-        if not broker_data:
-            errors.extend(broker_reply.get("errors") or ["broker status unavailable"])
+        broker_stats = None
+        if broker_reply.get("status") == "200":
+            broker_stats = BrokerMonitoringStats.model_validate_json(
+                orjson.dumps(broker_reply["results"])
+            )
+        else:
+            errors.extend(
+                broker_reply.get("errors") or ["broker statistics unavailable"]
+            )
 
-        workers_reply = self.client.mmi(
-            "mmi.service.broker",
-            "show_workers",
-            timeout=self.config.request_timeout,
-        )
-        if not isinstance(workers_reply, dict):
-            workers_reply = {
-                "status": "500",
-                "errors": ["broker returned an invalid worker response"],
-            }
-        worker_rows = (
-            workers_reply.get("results", [])
-            if workers_reply.get("status") == "200"
-            else []
-        )
-        if not isinstance(worker_rows, list):
-            errors.append("broker returned invalid worker status data")
-            worker_rows = []
-        if workers_reply.get("status") != "200":
-            errors.extend(workers_reply.get("errors") or ["worker status unavailable"])
-
-        worker_stats = self.client.run_job(
+        worker_reply = self.client.run_job(
             service="all",
             workers="all",
-            task="get_watchdog_stats",
+            task="get_stats",
             timeout=self.config.request_timeout,
         )
-        stats_by_name: dict[str, dict[str, Any]] = {}
-        unavailable_worker_names: set[str] = set()
-        if not isinstance(worker_stats, dict):
-            errors.append("worker watchdog statistics returned an invalid response")
-            worker_stats = {}
-        for worker_name, job in worker_stats.items():
-            worker_name = str(worker_name)
-            if not isinstance(job, dict):
-                unavailable_worker_names.add(worker_name)
-                continue
-            if job.get("failed"):
-                unavailable_worker_names.add(worker_name)
-                continue
-            result = job.get("result") or {}
-            if not isinstance(result, dict):
-                unavailable_worker_names.add(worker_name)
-                continue
-            stats_by_name[worker_name] = result
+        stats_by_name: dict[str, WorkerMonitoringStats] = {}
+        for worker_name, response in worker_reply.items():
+            if response.get("failed"):
+                errors.append(
+                    f"{worker_name}: worker did not respond during this sample interval"
+                )
+            else:
+                stats_by_name[worker_name] = WorkerMonitoringStats.model_validate_json(
+                    orjson.dumps(response["result"])
+                )
 
-        broker = MonitoringComponent(
-            id="broker",
-            name="NFPBroker",
-            role="broker",
-            status="active" if broker_data else "unreachable",
-            cpu_percent=broker_data.get("cpu_percent"),
-            memory_mbyte=broker_data.get("memory_rss_mbyte"),
-            uptime_seconds=broker_data.get("uptime_seconds"),
-            worker_count=broker_data.get("workers count"),
-            service_count=broker_data.get("services count"),
-        )
+        if broker_stats is None:
+            broker = MonitoringComponent(
+                id="broker",
+                name="NFPBroker",
+                role="broker",
+                status="unreachable",
+            )
+            broker_workers = {}
+        else:
+            broker = MonitoringComponent(
+                id="broker",
+                name=broker_stats.name,
+                role="broker",
+                status=broker_stats.status,
+                cpu_percent=broker_stats.process.cpu_percent,
+                memory_mbyte=broker_stats.process.memory_rss_mbyte,
+                uptime_seconds=broker_stats.process.uptime_seconds,
+                messages_sent=broker_stats.messaging.sent,
+                messages_received=broker_stats.messaging.received,
+                worker_count=broker_stats.worker_count,
+                service_count=broker_stats.service_count,
+            )
+            broker_workers = {worker.name: worker for worker in broker_stats.workers}
 
-        memory = self.process.memory_info()
-        receiver_alive = bool(
-            getattr(self.client, "recv_thread", None)
-            and self.client.recv_thread.is_alive()
+        client_stats = ClientMonitoringStats.model_validate_json(
+            orjson.dumps(self.client.get_stats())
         )
         client = MonitoringComponent(
             id="client:nfweb",
-            name=self.client.name,
+            name=client_stats.name,
             role="client",
-            status="active" if broker_data and receiver_alive else "degraded",
-            cpu_percent=self.process.cpu_percent(interval=None),
-            memory_mbyte=memory.rss / 1024 / 1024,
-            messages_sent=self.client.stats_send_to_broker,
-            messages_received=self.client.stats_recv_from_broker,
-            reconnects=self.client.stats_reconnect_to_broker,
-            queue_depth=self.client.outbound_queue.qsize(),
+            status=client_stats.status if broker_stats else "degraded",
+            cpu_percent=client_stats.process.cpu_percent,
+            memory_mbyte=client_stats.process.memory_rss_mbyte,
+            uptime_seconds=client_stats.process.uptime_seconds,
+            messages_sent=client_stats.messaging.sent,
+            messages_received=client_stats.messaging.received,
+            reconnects=client_stats.reconnects,
+            queue_depth=client_stats.outbound_queue_depth,
+        )
+        database = MonitoringDatabaseStats.model_validate(
+            client_stats.jobs.model_dump()
         )
 
-        database = MonitoringDatabaseStats()
-        try:
-            job_stats = self.client.job_db.jobs_stats()
-            if isinstance(job_stats, dict):
-                database = MonitoringDatabaseStats.model_validate(job_stats)
-        except Exception as exc:
-            errors.append(f"local client job statistics unavailable: {exc}")
-
         workers: list[MonitoringComponent] = []
-        for row in worker_rows:
-            if not isinstance(row, dict):
-                errors.append("broker returned an invalid worker status row")
-                continue
-            worker_name = row.get("name")
-            if not worker_name:
-                continue
-            name = str(worker_name)
-            stats = stats_by_name.get(name, {})
-            if (
-                not stats
-                or stats.get("worker_cpu_percent") is None
-                or stats.get("worker_ram_usage_mbyte") is None
-            ):
-                unavailable_worker_names.add(name)
-            keepalives = str(row.get("keepalives tx/rx", "")).split("/")
-            holdtime = _optional_float(row.get("holdtime"))
-            keepalives_sent = (
-                _optional_int(keepalives[0].strip()) if len(keepalives) == 2 else None
-            )
-            keepalives_received = (
-                _optional_int(keepalives[1].strip()) if len(keepalives) == 2 else None
-            )
-            if row.get("holdtime") not in (None, "") and holdtime is None:
-                errors.append(f"{name}: invalid holdtime value")
-            if row.get("keepalives tx/rx") and (
-                keepalives_sent is None or keepalives_received is None
-            ):
-                errors.append(f"{name}: invalid keepalive counters")
+        for name, stats in stats_by_name.items():
+            connection = broker_workers.get(name)
             workers.append(
                 MonitoringComponent(
                     id=f"worker:{name}",
                     name=name,
                     role="worker",
-                    service=row.get("service") or stats.get("service"),
-                    status=row.get("status", "unknown"),
-                    cpu_percent=stats.get("worker_cpu_percent"),
-                    memory_mbyte=stats.get("worker_ram_usage_mbyte"),
-                    uptime_seconds=stats.get("uptime_seconds"),
-                    holdtime_seconds=holdtime,
-                    keepalives_sent=keepalives_sent,
-                    keepalives_received=keepalives_received,
+                    service=stats.service,
+                    status=connection.status if connection else stats.status,
+                    cpu_percent=stats.process.cpu_percent,
+                    memory_mbyte=stats.process.memory_rss_mbyte,
+                    uptime_seconds=stats.process.uptime_seconds,
+                    holdtime_seconds=(
+                        connection.holdtime_seconds if connection else None
+                    ),
+                    keepalives_sent=stats.keepalives_sent,
+                    keepalives_received=stats.keepalives_received,
+                    messages_sent=stats.messaging.sent,
+                    messages_received=stats.messaging.received,
+                    reconnects=stats.reconnects,
+                    queue_depth=stats.outbound_queue_depth,
                 )
             )
 
-        known_workers = {worker.name for worker in workers}
-        for name, stats in stats_by_name.items():
-            if name not in known_workers:
+        for name, connection in broker_workers.items():
+            if name not in stats_by_name:
+                errors.append(
+                    f"{name}: worker did not respond during this sample interval"
+                )
                 workers.append(
                     MonitoringComponent(
                         id=f"worker:{name}",
                         name=name,
                         role="worker",
-                        service=stats.get("service"),
-                        status="unknown",
-                        cpu_percent=stats.get("worker_cpu_percent"),
-                        memory_mbyte=stats.get("worker_ram_usage_mbyte"),
-                        uptime_seconds=stats.get("uptime_seconds"),
+                        service=connection.service,
+                        status=connection.status,
+                        holdtime_seconds=connection.holdtime_seconds,
+                        keepalives_sent=connection.keepalives_sent,
+                        keepalives_received=connection.keepalives_received,
                     )
                 )
 
-        errors.extend(
-            f"{name}: worker did not respond during this sample interval"
-            for name in sorted(unavailable_worker_names)
-        )
-
-        status = "complete" if not errors else "partial" if broker_data else "failed"
+        status = "complete" if not errors else "partial" if broker_stats else "failed"
         return MonitoringSnapshot(
             duration_ms=int((time.perf_counter() - started) * 1000),
             status=status,

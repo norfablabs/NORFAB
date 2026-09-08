@@ -347,19 +347,19 @@ class TestNFWebApplication(AsyncHTTPTestCase):
         assert " ws:;" not in response.headers["Content-Security-Policy"]
 
 
-def test_application_requires_built_frontend(tmp_path: Path) -> None:
-    class EmptyApplication:
-        name = "empty"
+class TestNFWebServerRuntime:
+    def test_application_requires_built_frontend(self, tmp_path: Path) -> None:
+        class EmptyApplication:
+            name = "empty"
 
-        def routes(self) -> list[Any]:
-            return []
+            def routes(self) -> list[Any]:
+                return []
 
-        def health(self) -> dict[str, str]:
-            return {"status": "ok"}
+            def health(self) -> dict[str, str]:
+                return {"status": "ok"}
 
-    with pytest.raises(FileNotFoundError, match="frontend is not built"):
-        make_nfweb_application([EmptyApplication()], static_path=tmp_path)
+        with pytest.raises(FileNotFoundError, match="frontend is not built"):
+            make_nfweb_application([EmptyApplication()], static_path=tmp_path)
 
-
-def test_websocket_accepts_any_origin() -> None:
-    assert TopologyWebSocket.check_origin(object(), "http://example.com") is True
+    def test_websocket_accepts_any_origin(self) -> None:
+        assert TopologyWebSocket.check_origin(object(), "http://example.com") is True

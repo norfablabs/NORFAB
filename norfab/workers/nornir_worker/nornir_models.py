@@ -1,8 +1,9 @@
 from enum import Enum
-from typing import Any, Dict, Union
+from typing import Any, Dict, Literal, Union
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     StrictBool,
     StrictFloat,
@@ -11,11 +12,38 @@ from pydantic import (
     model_validator,
 )
 
+from norfab.core.monitoring import WorkerMonitoringStats
 from norfab.models import Result
 
 # --------------------------------------------------------------------------
 # COMMON NORNIR TASK MODELS
 # --------------------------------------------------------------------------
+
+
+class NornirWorkerMonitoringStats(WorkerMonitoringStats):
+    """Validated monitoring statistics produced by a Nornir worker."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    dead_connections_cleaned: int = Field(
+        description="Dead Nornir connections closed by the watchdog"
+    )
+    idle_connections_cleaned: int = Field(
+        description="Idle Nornir connections closed by the watchdog"
+    )
+    failed_hosts_recovered: int = Field(
+        description="Failed hosts recovered by the watchdog"
+    )
+    errdisabled_hosts: int = Field(
+        description="Hosts currently held in Nornir's failed-host state"
+    )
+    nornir_hosts: int = Field(description="Hosts in the active Nornir inventory")
+    netbox_inventory_status: Literal["initialising", "failed", "completed"] | None = (
+        None
+    )
+    containerlab_inventory_status: (
+        Literal["initialising", "failed", "completed"] | None
+    ) = None
 
 
 class NornirHostsFilters(BaseModel, extra="forbid", use_enum_values=True):

@@ -3,6 +3,12 @@ name: NFIOSXR
 initial_prompt: "{base_prompt}#"
 
 commands:
+  show running-config formal router vrrp:
+    output: |
+      router vrrp interface GigabitEthernet0/0/0/3 address-family ipv4 vrrp 10 priority 110
+      router vrrp interface GigabitEthernet0/0/0/3 address-family ipv4 vrrp 10 address 198.18.250.1
+      router vrrp interface GigabitEthernet0/0/0/4 address-family ipv4 vrrp 30 priority 120
+      router vrrp interface GigabitEthernet0/0/0/4 address-family ipv4 vrrp 30 address 198.18.251.1
   show running-config:
     output: |
       Sun Mar 08 12:00:00.000 UTC

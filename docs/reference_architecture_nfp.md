@@ -378,7 +378,8 @@ Broker should use `mmi.service.broker` service endpoint to listen to client's re
 
 These MMI functions SHOULD be implemented:
 
-- `show_broker` - to return broker status and statistics
+- `get_status` - to return broker identity, environment, and security configuration
+- `get_stats` - to return validated broker monitoring statistics
 - `show_workers` - to return worker status and statistics 
 - `show_clients` - to return clients statistics
 - `show_services` - to return services status and statistics 
@@ -394,7 +395,8 @@ Worker should use `mmi.service.worker` service endpoint to listen to client's re
 
 These MMI functions SHOULD be implemented:
 
-- `show_broker` - to return broker status and statistics
+- `get_worker_status` - to return worker identity, environment, and security configuration
+- `get_stats` - to return validated worker monitoring statistics
 - `show_workers` - to return worker status and statistics 
 - `show_clients` - to return clients statistics
 - `restart` - restart worker
