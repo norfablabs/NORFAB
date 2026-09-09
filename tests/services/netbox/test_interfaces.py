@@ -1248,6 +1248,73 @@ class TestSyncDeviceInterfaces:
             delete_interfaces(nfclient, device, "Ethernet8")
             self._delete_vlan(nfclient, 510)
 
+    def test_sync_device_interfaces_updates_same_vid_from_wrong_scope(
+        self, nfclient: Any
+    ) -> None:
+        device = "fn-ceos-sp-1"
+        interface_name = "Ethernet8"
+        group_name = "SYNC_INTERFACES_SCOPED_SITE"
+        pynb = get_pynetbox(nfclient)
+        site = pynb.dcim.sites.get(name="NORFAB-LAB")
+        assert site is not None
+        old_group = pynb.ipam.vlan_groups.get(name=group_name)
+        if old_group:
+            for vlan in list(pynb.ipam.vlans.filter(group_id=old_group.id)):
+                vlan.delete()
+            old_group.delete()
+        self._cleanup(nfclient, [device])
+        self._delete_vlan(nfclient, 510)
+
+        try:
+            site_vlan = pynb.ipam.vlans.create(
+                vid=510,
+                name="VLAN_510",
+                site=site.id,
+            )
+            first_sync = self._sync(
+                nfclient,
+                [device],
+                filter_by_name=interface_name,
+            )
+            for worker, result in first_sync.items():
+                assert result["failed"] is False, f"{worker} failed: {result}"
+            assert (
+                self._get_nb_intf(nfclient, device, interface_name).untagged_vlan.id
+                == site_vlan.id
+            )
+
+            group = pynb.ipam.vlan_groups.create(
+                name=group_name,
+                slug="sync-interfaces-scoped-site",
+                scope_type="dcim.site",
+                scope_id=site.id,
+                vid_ranges=[[500, 599]],
+            )
+            group_vlan = pynb.ipam.vlans.create(
+                vid=510,
+                name="VLAN_510",
+                group=group.id,
+            )
+
+            second_sync = self._sync(
+                nfclient,
+                [device],
+                filter_by_name=interface_name,
+            )
+            for worker, result in second_sync.items():
+                assert result["failed"] is False, f"{worker} failed: {result}"
+                assert interface_name in result["result"][device]["updated"]
+            assert (
+                self._get_nb_intf(nfclient, device, interface_name).untagged_vlan.id
+                == group_vlan.id
+            )
+        finally:
+            delete_interfaces(nfclient, device, interface_name)
+            self._delete_vlan(nfclient, 510)
+            group = pynb.ipam.vlan_groups.get(name=group_name)
+            if group:
+                group.delete()
+
     def test_sync_device_interfaces_require_vlan_group_skips_unmapped_vlan(
         self, nfclient
     ):
@@ -1293,10 +1360,13 @@ class TestSyncDeviceInterfaces:
             nfclient,
             ["fn-ceos-sp-1"],
             ignore_vlans=True,
+            vlan_group="GROUP_THAT_DOES_NOT_EXIST",
+            vlan_map="nf://netbox/vlan-map-that-does-not-exist.yaml",
         )
         pprint.pprint(ret)
         for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
+            assert not res["failed"], f"{worker} failed - {res}"
+            assert res["errors"] == []
 
         nb_lag = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Port-Channel41")
         nb_access = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Ethernet8")

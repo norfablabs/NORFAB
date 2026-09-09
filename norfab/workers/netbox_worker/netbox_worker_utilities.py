@@ -35,9 +35,8 @@ def apply_description_policy(
 
 def prepare_vlan_map(
     vlan_map: Union[None, list],
-    vlan_groups: Union[None, dict] = None,
 ) -> list[dict]:
-    """Normalize VLAN map rules and resolve their effective VLAN IDs."""
+    """Normalize VLAN map rules and expand their VLAN ID criteria."""
     rules = []
     for rule in vlan_map or []:
         rule_data = rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
@@ -46,30 +45,7 @@ def prepare_vlan_map(
             for vlan_range in rule_data.get("match_vlan_ids") or []
             for vlan_id in expand_alphanumeric_range(f"[{vlan_range}]")
         }
-        if vlan_groups is None:
-            rule_data["expanded_vlan_ids"] = explicit_vlan_ids or None
-        else:
-            group = vlan_groups[rule_data["set_vlan_group"]]
-            group_ranges = getattr(group, "vid_ranges", None)
-            if group_ranges is None:
-                group_ranges = [[1, 4094]]
-            group_vlan_ids = set()
-            for bounds in group_ranges:
-                if (
-                    not isinstance(bounds, (list, tuple))
-                    or len(bounds) != 2
-                    or not all(isinstance(value, int) for value in bounds)
-                    or not 1 <= bounds[0] <= bounds[1] <= 4094
-                ):
-                    raise ValueError(
-                        f"invalid vid_ranges for VLAN group '{rule_data['set_vlan_group']}'"
-                    )
-                group_vlan_ids.update(range(bounds[0], bounds[1] + 1))
-            rule_data["expanded_vlan_ids"] = (
-                group_vlan_ids & explicit_vlan_ids
-                if explicit_vlan_ids
-                else group_vlan_ids
-            )
+        rule_data["expanded_vlan_ids"] = explicit_vlan_ids or None
         rules.append(rule_data)
     return rules
 
@@ -126,6 +102,181 @@ def match_vlan_map(
         ):
             return rule["set_vlan_group"]
     return None
+
+
+def load_device_vlan_scopes(devices: Iterable) -> dict[str, dict]:
+    """Load direct NetBox scope assignments used to resolve VLANs per device."""
+    # Reuse the related records already returned with each device. The caches
+    # avoid expanding the same pynetbox site or rack object more than once.
+    sites = {}
+    racks = {}
+    device_scopes = {}
+    for device in devices:
+        site_id = device.site.id
+        sites.setdefault(site_id, device.site)
+        site = sites[site_id]
+
+        rack = None
+        if device.rack:
+            racks.setdefault(device.rack.id, device.rack)
+            rack = racks[device.rack.id]
+
+        # Prefer the device location; a rack-assigned device inherits the rack's
+        # direct location when its own location field is empty.
+        location = device.location or (rack.location if rack else None)
+        rack_group = rack.group if rack else None
+
+        device_scopes[str(device.name)] = {
+            "device_name": str(device.name),
+            "site_id": site_id,
+            "site_name": str(site.name),
+            "region_id": site.region.id if site.region else None,
+            "region_name": str(site.region.name) if site.region else None,
+            "site_group_id": site.group.id if site.group else None,
+            "site_group_name": str(site.group.name) if site.group else None,
+            "location_id": location.id if location else None,
+            "location_name": str(location.name) if location else None,
+            "rack_id": rack.id if rack else None,
+            "rack_name": str(rack.name) if rack else None,
+            "rack_group_id": rack_group.id if rack_group else None,
+            "rack_group_name": str(rack_group.name) if rack_group else None,
+        }
+    return device_scopes
+
+
+def validate_vlan_group_scope(
+    vlan_group: Any,
+    device_scope: dict,
+    vid: int,
+) -> Union[str, None]:
+    """Return why a VLAN group is unavailable for a device and VID."""
+    # NetBox returns VID ranges as inclusive integer pairs. Check the intervals
+    # directly instead of expanding a potentially large range into every VID.
+    if not any(start <= vid <= end for start, end in vlan_group.vid_ranges):
+        return (
+            f"VLAN {vid} is outside VLAN group '{vlan_group.name}' VID ranges "
+            f"{vlan_group.vid_ranges}"
+        )
+
+    # An unscoped group is available to every device.
+    if not vlan_group.scope_type:
+        return None
+
+    scope_type = str(vlan_group.scope_type).split(".")[-1].replace("_", "")
+    device_name = device_scope["device_name"]
+    if scope_type in {"cluster", "clustergroup"}:
+        return (
+            f"VLAN group '{vlan_group.name}' uses ignored scope type "
+            f"'{scope_type}' for device '{device_name}'"
+        )
+
+    # Each supported group scope compares with one direct device value. There
+    # is deliberately no traversal through parent regions, groups, or locations.
+    scope_fields = {
+        "site": ("site_id", "site_name", "site"),
+        "region": ("region_id", "region_name", "region"),
+        "sitegroup": ("site_group_id", "site_group_name", "site group"),
+        "location": ("location_id", "location_name", "location"),
+        "rack": ("rack_id", "rack_name", "rack"),
+        "rackgroup": ("rack_group_id", "rack_group_name", "rack group"),
+    }
+    if scope_type not in scope_fields:
+        return (
+            f"VLAN group '{vlan_group.name}' uses unsupported scope type "
+            f"'{scope_type}' for device '{device_name}'"
+        )
+
+    id_field, name_field, display_type = scope_fields[scope_type]
+    device_scope_id = device_scope[id_field]
+    # A missing device value does not match a populated group scope.
+    if device_scope_id == vlan_group.scope_id:
+        return None
+
+    device_value = device_scope[name_field]
+    device_assignment = f"'{device_value}'" if device_value else "no assignment"
+    return (
+        f"VLAN group '{vlan_group.name}' is scoped to {display_type} "
+        f"'{vlan_group.scope.name}', but device '{device_name}' has "
+        f"{display_type} {device_assignment}"
+    )
+
+
+def resolve_live_vlans(
+    live_vlans: list[dict],
+    netbox_vlans: Iterable,
+    vlan_groups: dict[int, Any],
+    device_scopes: dict[str, dict],
+) -> list[dict]:
+    """Resolve live VLANs by VID/group against device-compatible NetBox VLANs."""
+    # One VID can exist in several NetBox sites and groups, so retain all
+    # candidates instead of selecting the first API result.
+    candidates_by_vid = {}
+    for vlan in netbox_vlans:
+        candidates_by_vid.setdefault(vlan.vid, []).append(vlan)
+
+    results = []
+    for live_vlan in live_vlans:
+        device_scope = device_scopes[live_vlan["device_name"]]
+        selected_group_id = live_vlan.get("selected_group_id")
+        selected_group = vlan_groups.get(selected_group_id)
+        error = None
+        # An explicit vlan_map/vlan_group selection is authoritative. Validate
+        # it before searching and never fall back when its scope is incompatible.
+        if selected_group_id:
+            if selected_group is None:
+                error = f"VLAN group ID '{selected_group_id}' was not loaded"
+            else:
+                error = validate_vlan_group_scope(
+                    selected_group, device_scope, live_vlan["vid"]
+                )
+
+        # These lists are ordered by preference below: any compatible group,
+        # the device's direct site, then a global VLAN.
+        group_matches = []
+        site_matches = []
+        global_matches = []
+        if error is None:
+            for vlan in candidates_by_vid.get(live_vlan["vid"], []):
+                vlan_group_id = vlan.group.id if vlan.group else None
+                if selected_group_id and vlan_group_id != selected_group_id:
+                    continue
+
+                if vlan_group_id:
+                    vlan_group = vlan_groups[vlan_group_id]
+                    if (
+                        validate_vlan_group_scope(
+                            vlan_group, device_scope, live_vlan["vid"]
+                        )
+                        is None
+                    ):
+                        group_matches.append(vlan)
+                elif vlan.site and vlan.site.id == device_scope["site_id"]:
+                    site_matches.append(vlan)
+                elif not vlan.site:
+                    global_matches.append(vlan)
+
+        # Only the highest non-empty preference level participates. Two VLANs
+        # within that level are ambiguous and therefore unsafe to choose.
+        matches = group_matches or site_matches or global_matches
+        matched_vlan = None
+        if len(matches) == 1:
+            matched_vlan = matches[0]
+        elif len(matches) > 1:
+            match_ids = ", ".join(str(vlan.id) for vlan in matches)
+            error = (
+                f"multiple equally preferred NetBox VLANs match VID "
+                f"{live_vlan['vid']} for device '{live_vlan['device_name']}' "
+                f"(VLAN IDs: {match_ids})"
+            )
+
+        results.append(
+            {
+                "live": live_vlan,
+                "vlan": matched_vlan,
+                "error": error,
+            }
+        )
+    return results
 
 
 def find_vlan(

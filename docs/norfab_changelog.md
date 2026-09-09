@@ -3,6 +3,7 @@
 ## ENHANCEMENTS
 
 1. Enhanced NetBox `sync_vrrp` handling of incomplete live records. Groups with a missing or empty virtual address are now reported explicitly and skipped, while a missing or empty priority uses the VRRP default of `100`.
+2. Enhanced NetBox `sync_vlans` and `sync_device_interfaces` with shared batch VLAN resolution by VID, VLAN-group VID ranges, configured VLAN group, and direct device-compatible NetBox scope. Native NetBox group ranges are checked as intervals without expansion, compatible VLAN groups take precedence over direct-site VLANs, global VLANs act as a final fallback, ambiguous matches are errors, and explicit incompatible group mappings are reported and skipped without fallback.
 
 ---
 

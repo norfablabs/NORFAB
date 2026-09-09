@@ -789,10 +789,12 @@ An empty NetBox interface set is valid, allowing a device to be initialized
 entirely from discovered live interfaces.
 Interface-name and VLAN-group mapping rules can be supplied inline or loaded
 from YAML through `nf://` URLs. Live interface VLAN values can be numeric VIDs
-or names; names are resolved against existing scoped NetBox VLANs before the
-desired/current diff is calculated. Optional strict group enforcement reports
-and skips VLAN associations that match neither a mapping rule nor the scalar
-VLAN-group fallback.
+or names; numeric VLANs use batch VID/group resolution that checks each VLAN's
+site, VLAN-group VID ranges, and direct VLAN-group scope against the device.
+Compatible groups take precedence over direct-site VLANs, global VLANs provide
+the final fallback, and wrong-scope associations are corrected.
+Optional strict group enforcement reports and skips VLAN associations that
+match neither a mapping rule nor the scalar VLAN-group fallback.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the `other` fallback. **Use cases:**
@@ -809,10 +811,14 @@ an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
 loaded from YAML through `nf://` URLs, using `match_device_names`,
 `match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
 and group selection. Existing descriptions support always, live-empty-only, or
-never preservation. VLANs are identified by VID per scope;
+never preservation. VLANs are identified by VID and group, with every same-VID
+candidate validated against the device site, group VID ranges, and the group's
+direct site, region, site group, location, rack, or rack group scope. Compatible groups take
+precedence over direct-site VLANs, with global VLANs used as a final fallback;
 the first device supplies values when later devices report a conflict. Optional
 strict group enforcement reports and skips VLANs that would otherwise fall back
-to their device site.
+to their device site. Explicit out-of-range or scope-incompatible group mappings
+are reported and skipped without fallback.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines
 live-state quality; the task does not delete VLANs because live data cannot

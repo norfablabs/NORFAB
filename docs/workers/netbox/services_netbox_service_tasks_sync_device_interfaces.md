@@ -143,9 +143,73 @@ interface_map: nf://netbox/interface_map.yaml
 
 By default `process_deletions=False` — interfaces present in NetBox but absent in live data are left untouched. Set `process_deletions=True` to enable deletion. Child interfaces are always deleted before their parents to avoid foreign-key constraint errors.
 
-## Ignoring VLANs and VRFs
+## VLAN resolution
 
-By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Numeric VLAN IDs are resolved by VID and can be created when missing. VLAN names are resolved to the VID of an existing VLAN in the selected group or device site before the interface diff is calculated. A missing named VLAN cannot be created because its VID is unknown. Set `require_vlan_group=True` to report and skip VLAN associations that do not resolve through `vlan_map` or `vlan_group`; other interface fields continue to synchronize. Set `ignore_vlans=True` to skip VLAN creation and leave all interface VLAN associations unchanged. Set `ignore_vrf=True` to skip VRF creation and leave interface VRF associations unchanged.
+Numeric live VLANs are collected from all live interfaces and resolved in one
+batch using the same resolver as `sync_vlans`. For every VID, all matching
+NetBox VLANs are evaluated. VLAN name is not used when choosing among these
+same-VID candidates.
+
+When `vlan_map` or `vlan_group` selects a group, the VID is validated against
+the group's VID ranges and its scope is validated against the device. An
+incompatible selection is an error and does not fall back. If valid, only a
+same-VID VLAN in that exact group can match.
+
+Without an explicit group selection, existing NetBox VLANs are preferred in
+this order:
+
+1. VLAN in any device-compatible group whose VID ranges include the live VID,
+   including an unscoped group.
+2. VLAN assigned directly to the device site.
+3. Global VLAN with neither a group nor a site.
+
+Only the first non-empty level is considered. More than one VLAN in that level
+is an error: the association is omitted and the candidate IDs are reported.
+An interface already associated with the right VID from a lower-preference or
+wrong scope is treated as needing an update.
+
+### VLAN group scope matching
+
+A scoped group must exactly match the corresponding direct device value:
+
+| Group scope | Device value |
+|-------------|--------------|
+| Site | Device site |
+| Region | Device site's region |
+| Site group | Device site's site group |
+| Location | Device location |
+| Rack | Device rack |
+| Rack group | Device rack's rack group |
+
+For location matching, the assigned rack's direct location is used when the
+device location is empty. Parent regions, site groups, locations, and rack
+groups are not searched. A missing required device value rejects the candidate.
+Cluster and cluster-group scopes are ignored.
+
+### VLAN group VID range matching
+
+Grouped VLANs must belong to their group's inclusive `vid_ranges`, returned by
+NetBox as integer pairs such as `[[1, 20], [50, 100]]`. The resolver checks the
+live VID against each interval directly; it does not expand the intervals into
+individual VLAN IDs.
+
+An automatically discovered out-of-range group VLAN is skipped and candidate
+search continues. If `vlan_map` or `vlan_group` explicitly selects an
+out-of-range group, the association is omitted with an error and no site or
+global fallback is used.
+
+### Named and missing VLANs
+
+A VLAN name returned by a live parser is first converted to the VID of an
+existing VLAN in the selected group or device site. A missing named VLAN cannot
+be created because its VID is unknown.
+
+Missing numeric VLANs are created in the selected group or, without a group,
+the device site. All missing VLANs use one all-or-nothing bulk request. If it
+fails, the error is returned and interface synchronization continues, but
+affected VLAN association fields are omitted because no NetBox VLAN IDs are
+available. A tagged VLAN field is omitted in full if any member lacks an ID;
+the task never applies a partial tagged set.
 
 ## VLAN Group Selection
 
@@ -178,9 +242,18 @@ Values within one criterion use OR logic and populated criteria use AND logic.
 Rules are checked in list order and the first match wins. Interface and device
 names use case-sensitive glob matching. VLAN ranges use plain strings such as
 `100-199`; bracket notation is not accepted. Interface sync applies
-`vlan_names` when the interfaces getter returns VLAN names. Each rule
-also uses the referenced NetBox group's `vid_ranges`; explicit `match_vlan_ids`
-narrow those group ranges. A rule containing only `set_vlan_group` is valid.
+`vlan_names` when the interfaces getter returns VLAN names. `match_vlan_ids`
+controls rule selection; the selected group's own `vid_ranges` are validated
+afterward. A rule containing only `set_vlan_group` is valid.
+
+## Ignoring VLANs and VRFs
+
+Set `require_vlan_group=True` to report and omit VLAN associations that do not
+select a group through `vlan_map` or `vlan_group`; unrelated interface fields
+continue to synchronize. Set `ignore_vlans=True` to skip VLAN resolution and
+creation and leave all interface VLAN associations unchanged. Set
+`ignore_vrf=True` to skip VRF creation and leave interface VRF associations
+unchanged.
 
 ## Branching Support
 
