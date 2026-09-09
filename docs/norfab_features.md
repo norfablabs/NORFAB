@@ -833,7 +833,8 @@ while addresses assigned to other objects are reported without reassignment.
 **Use cases:** first-hop redundancy inventory, priority drift detection,
 consistent group naming, and virtual-IP auditing. **Limitations:**
 synchronization is additive and does not delete stale FHRP data; an entirely
-empty parsed VRRP state fails before NetBox reconciliation begins.
+empty parsed VRRP state fails before NetBox reconciliation begins, and live
+group records without a virtual address are reported and skipped.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vrrp.md)
 
 ### Live VRF reconciliation

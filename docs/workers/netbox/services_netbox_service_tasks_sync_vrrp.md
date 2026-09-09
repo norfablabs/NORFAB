@@ -28,6 +28,11 @@ The parser must return a list per device with these fields:
   authentication_type: plaintext
 ```
 
+`virtual_address` is required. A record with a missing or empty virtual address
+is reported explicitly and skipped because every synchronized FHRP group must
+have a VIP. If `priority` is missing or empty, the task uses the VRRP default of
+`100`.
+
 ## Identity and comparison
 
 Each assignment is identified by `(device, interface, protocol, group_id)` and

@@ -216,9 +216,19 @@ class NetboxFhrpTasks:
                             raise ValueError(
                                 f"unsupported protocol '{record['protocol']}'"
                             )
-                        priority = int(record["priority"])
+                        priority_value = record.get("priority")
+                        priority = (
+                            100
+                            if priority_value is None or not str(priority_value).strip()
+                            else int(priority_value)
+                        )
+                        virtual_address_value = str(
+                            record.get("virtual_address") or ""
+                        ).strip()
+                        if not virtual_address_value:
+                            raise ValueError(f"{interface_name} virtual address is missing")
                         virtual_address = str(
-                            ipaddress.ip_interface(str(record["virtual_address"])).ip
+                            ipaddress.ip_interface(virtual_address_value).ip
                         )
                         authentication_type = getattr(
                             record.get("authentication_type"),

@@ -1,3 +1,11 @@
+# 0.23.2
+
+## ENHANCEMENTS
+
+1. Enhanced NetBox `sync_vrrp` handling of incomplete live records. Groups with a missing or empty virtual address are now reported explicitly and skipped, while a missing or empty priority uses the VRRP default of `100`.
+
+---
+
 # 0.23.1
 
 ## BUGS
