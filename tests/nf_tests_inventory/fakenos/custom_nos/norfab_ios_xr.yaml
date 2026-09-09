@@ -9,6 +9,13 @@ commands:
       router vrrp interface GigabitEthernet0/0/0/3 address-family ipv4 vrrp 10 address 198.18.250.1
       router vrrp interface GigabitEthernet0/0/0/4 address-family ipv4 vrrp 30 priority 120
       router vrrp interface GigabitEthernet0/0/0/4 address-family ipv4 vrrp 30 address 198.18.251.1
+      router vrrp interface BVI123 address-family ipv4 vrrp 1
+      router vrrp interface BVI123 address-family ipv4 vrrp 1 priority 123
+      router vrrp interface BVI123 address-family ipv4 vrrp 1 address 10.123.123.123
+      router vrrp interface BVI123 address-family ipv4 vrrp 1 text-authentication abcdefg
+      router vrrp interface BVI123 address-family ipv6 vrrp 1
+      router vrrp interface BVI123 address-family ipv6 vrrp 1 priority 123
+      router vrrp interface BVI123 address-family ipv6 vrrp 1 address global 2123:1111:1111:1111::1
   show running-config:
     output: |
       Sun Mar 08 12:00:00.000 UTC
@@ -78,6 +85,12 @@ commands:
        description VRRP LAN Segment - Customer-B
        mtu 1500
        ipv4 address 10.10.1.2 255.255.255.0
+       no shutdown
+      !
+      interface BVI123
+       description Dual-stack VRRP test interface
+       ipv4 address 10.123.123.2 255.255.255.0
+       ipv6 address 2123:1111:1111:1111::2/64
        no shutdown
       !
       router vrrp

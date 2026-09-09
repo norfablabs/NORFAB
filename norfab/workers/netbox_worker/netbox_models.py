@@ -1515,6 +1515,12 @@ class SyncDeviceInterfacesInput(
         description="Ordered interface VLAN mapping rules or nf:// YAML file reference",
         alias="vlan-map",
     )
+    require_vlan_group: StrictBool = Field(
+        False,
+        description="Require every interface VLAN to resolve to a VLAN group",
+        alias="require-vlan-group",
+        json_schema_extra={"presence": True},
+    )
     ignore_vlans: StrictBool = Field(
         False,
         description="Ignore discovered VLANs and leave interface VLAN associations unchanged",
@@ -2282,6 +2288,12 @@ class SyncVlansInput(
         None,
         description="Ordered live VLAN mapping rules or nf:// YAML file reference",
         alias="vlan-map",
+    )
+    require_vlan_group: StrictBool = Field(
+        False,
+        description="Require every live VLAN to resolve to a VLAN group",
+        alias="require-vlan-group",
+        json_schema_extra={"presence": True},
     )
     filter_by_vlan_ids: Union[None, List[StrictStr]] = Field(
         None,

@@ -8,8 +8,10 @@ synchronized values and do not form part of a VLAN's identity.
 
 Ordered `vlan_map` rules place matching VLANs into existing VLAN groups. VLANs
 which match no rule use the scalar `vlan_group` when supplied, otherwise they
-use their device site. VLAN groups are recommended for new deployments because
-direct VLAN-to-site assignment is deprecated in NetBox 4.4.
+use their device site. Set `require_vlan_group=True` to skip and report VLANs
+which do not resolve through either group selection mechanism. VLAN groups are
+recommended for new deployments because direct VLAN-to-site assignment is
+deprecated in NetBox 4.4.
 
 This task differs from `sync_device_interfaces`: `sync_vlans` manages VLAN names
 and descriptions, while `sync_device_interfaces` manages interface objects and
@@ -29,6 +31,7 @@ synchronization.
 | `branch` | `None` | NetBox Branching plugin branch name. |
 | `vlan_group` | `None` | Existing group for live VLANs not matched by `vlan_map`. |
 | `vlan_map` | `None` | Ordered rules mapping live VLANs to existing groups, inline or in an `nf://` YAML file. |
+| `require_vlan_group` | `False` | Require every VLAN to resolve through `vlan_map` or `vlan_group`; unmatched VLANs are reported and skipped. |
 | `filter_by_vlan_ids` | `None` | VLAN IDs or inclusive ranges such as `100` and `200-299`. |
 | `preserve_description` | `None` | Preserve NetBox descriptions only when live text is empty. Use `True` to always preserve or `False` to always use live text. |
 | Nornir filters | `None` | `FO`, `FB`, `FH`, `FC`, `FR`, `FG`, `FP`, `FL`, `FM`, `FX`, and `FN`. |
@@ -59,7 +62,9 @@ use case-sensitive glob matching. VLAN ranges are inclusive and must remain
 within `1..4094`. VLAN sync ignores `match_interface_names` because its live VLAN
 records have no interface context. Every rule also uses its NetBox VLAN group's
 configured `vid_ranges`; explicit `match_vlan_ids` narrow those ranges. An
-unmatched VLAN uses `vlan_group` when supplied, otherwise it uses its device site.
+unmatched VLAN uses `vlan_group` when supplied. Without either group match, it
+uses its device site unless `require_vlan_group=True`; strict mode reports and
+skips that VLAN instead.
 
 The task resolves groups by exact name and does not create or update groups.
 VLANs matching a group that does not exist are skipped and reported
@@ -188,6 +193,12 @@ installed and configured for branch use.
     nf# netbox sync vlans devices fn-ceos-lf-1 vlan-group CAMPUS
     ```
 
+    Require every VLAN to select a VLAN group:
+
+    ```bash
+    nf# netbox sync vlans devices fn-ceos-lf-1 vlan-map nf://netbox/vlan_map.yaml require-vlan-group
+    ```
+
 === "Python"
 
     ```python
@@ -274,6 +285,7 @@ root
             ├── with-approval:    Preview VLAN changes and ask for review before writing to NetBox, default 'False'
             ├── vlan-group:    Exact group name for live VLANs not matched by vlan-map
             ├── vlan-map:    Ordered rules mapping live VLANs to NetBox VLAN groups
+            ├── require-vlan-group:    Require every live VLAN to resolve to a VLAN group, default 'False'
             ├── vlan-ids:    VLAN IDs or inclusive ranges to reconcile
             ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── workers:    Filter worker to target, default 'any'

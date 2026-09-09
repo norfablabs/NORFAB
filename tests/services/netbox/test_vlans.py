@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 
+from norfab.workers.netbox_worker.netbox_models import SyncVlansInput
 from tests.services.netbox.common import get_pynetbox
 
 pytestmark = [
@@ -71,6 +72,11 @@ class TestSyncVlans:
 
     def _group_vlan(self, group: Any, vid: int) -> Any:
         return self.nb.ipam.vlans.get(vid=vid, group_id=group.id)
+
+    def test_require_vlan_group_defaults_and_alias(self) -> None:
+        assert SyncVlansInput().require_vlan_group is False
+        model = SyncVlansInput.model_validate({"require-vlan-group": True})
+        assert model.require_vlan_group is True
 
     def test_dry_run_create_and_second_sync_are_end_to_end(self, nfclient: Any) -> None:
         vlan_filter = ["110-111"]
@@ -269,6 +275,31 @@ class TestSyncVlans:
         assert self._site_vlan(121).name == "TEST_L2_TRUNK_B"
         assert self._group_vlan(self.group_1, 121) is None
 
+    def test_require_vlan_group_skips_unmapped_vlan(self, nfclient: Any) -> None:
+        response = self._sync(
+            nfclient,
+            [self.DEVICE_2],
+            filter_by_vlan_ids=["121"],
+            require_vlan_group=True,
+            vlan_map=[
+                {
+                    "set_vlan_group": self.GROUP_1_NAME,
+                    "match_device_names": [self.DEVICE_1],
+                }
+            ],
+        )
+
+        assert response
+        for worker, result in response.items():
+            assert result["failed"] is False, f"{worker} failed: {result}"
+            assert any(
+                "VLAN 121" in error and "no VLAN group mapping found" in error
+                for error in result["errors"]
+            )
+            assert result["result"][self._site_scope()]["created"] == []
+        assert self._site_vlan(121) is None
+        assert self._group_vlan(self.group_1, 121) is None
+
     def test_site_scope_uses_first_device_for_conflicting_vid(
         self, nfclient: Any
     ) -> None:
@@ -331,6 +362,7 @@ class TestSyncVlans:
             [self.DEVICE_1],
             filter_by_vlan_ids=["110", "210"],
             vlan_group=self.GROUP_2_NAME,
+            require_vlan_group=True,
             vlan_map=[
                 {
                     "set_vlan_group": self.GROUP_1_NAME,

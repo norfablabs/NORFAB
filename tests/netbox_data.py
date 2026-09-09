@@ -395,6 +395,8 @@ prefixes = [
     {"prefix": "198.18.250.0/24", "description": "TEST_SYNC_VRRP"},
     {"prefix": "198.18.251.0/24", "description": "TEST_SYNC_VRRP"},
     {"prefix": "198.18.252.0/24", "description": "TEST_SYNC_VRRP"},
+    {"prefix": "10.123.123.0/24", "description": "TEST_SYNC_VRRP"},
+    {"prefix": "2123:1111:1111:1111::/64", "description": "TEST_SYNC_VRRP"},
     {"prefix": "1.0.1.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.100.0/24", "description": "Loopback addresses"},
     {"prefix": "1.0.10.0/24", "description": "Subinterface addresses"},
@@ -993,6 +995,7 @@ interfaces.extend(
                 "1000base-t",
                 ["GigabitEthernet0/0/0/3", "GigabitEthernet0/0/0/4"],
             ),
+            ("xr1", "virtual", ["BVI123"]),
             ("fn-ceos-lf-1", "virtual", ["Vlan250"]),
             ("fn-ceos-lf-2", "virtual", ["Vlan250"]),
         ]

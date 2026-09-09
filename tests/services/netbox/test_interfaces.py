@@ -586,12 +586,18 @@ class TestSyncDeviceInterfaces:
         assert defaults.ignore_vlans is False
         assert defaults.ignore_vrf is False
         assert defaults.update_type is True
+        assert defaults.require_vlan_group is False
 
         enabled = SyncDeviceInterfacesInput.model_validate(
-            {"ignore-vlans": True, "ignore-vrf": True}
+            {
+                "ignore-vlans": True,
+                "ignore-vrf": True,
+                "require-vlan-group": True,
+            }
         )
         assert enabled.ignore_vlans is True
         assert enabled.ignore_vrf is True
+        assert enabled.require_vlan_group is True
 
     def test_sync_device_interfaces_models_accept_mapping_urls(self) -> None:
         model = SyncDeviceInterfacesInput.model_validate(
@@ -1118,6 +1124,7 @@ class TestSyncDeviceInterfaces:
                 nfclient,
                 ["fn-ceos-sp-1"],
                 vlan_group=vlan_group_name,
+                require_vlan_group=True,
             )
             pprint.pprint(ret)
             for worker, res in ret.items():
@@ -1141,9 +1148,9 @@ class TestSyncDeviceInterfaces:
                 nb_vlan_510.group is not None
                 and nb_vlan_510.group.name == vlan_group_name
             ), f"VLAN 510 group mismatch: got {nb_vlan_510.group!r}"
-            assert nb_vlan_510.site is None, (
-                f"VLAN 510 site mismatch: got {nb_vlan_510.site!r}"
-            )
+            assert (
+                nb_vlan_510.site is None
+            ), f"VLAN 510 site mismatch: got {nb_vlan_510.site!r}"
         finally:
             delete_interfaces_with_description(
                 nfclient, TestSyncDeviceInterfaces.ALL_DEVICES, "TEST_SYNC"
@@ -1237,6 +1244,43 @@ class TestSyncDeviceInterfaces:
             assert self._get_group_vlan(nfclient, mapped_group, 510) is None
             nb_interface = self._get_nb_intf(nfclient, device, "Ethernet8")
             assert nb_interface.untagged_vlan.id == fallback_vlan.id
+        finally:
+            delete_interfaces(nfclient, device, "Ethernet8")
+            self._delete_vlan(nfclient, 510)
+
+    def test_sync_device_interfaces_require_vlan_group_skips_unmapped_vlan(
+        self, nfclient
+    ):
+        device = "fn-ceos-sp-1"
+        mapped_group_name = "SYNC_INTERFACES_GROUP_1"
+        self._cleanup(nfclient, [device])
+        self._delete_vlan(nfclient, 510)
+
+        try:
+            ret = self._sync(
+                nfclient,
+                [device],
+                filter_by_name="Ethernet8",
+                require_vlan_group=True,
+                vlan_map=[
+                    {
+                        "set_vlan_group": mapped_group_name,
+                        "match_vlan_ids": ["520"],
+                    }
+                ],
+            )
+
+            for worker, res in ret.items():
+                assert res["failed"] is False, f"{worker} failed - {res}"
+                assert any(
+                    "VLAN '510'" in error and "no VLAN group mapping found" in error
+                    for error in res["errors"]
+                )
+
+            nb_interface = self._get_nb_intf(nfclient, device, "Ethernet8")
+            assert nb_interface is not None
+            assert nb_interface.untagged_vlan is None
+            assert self._get_vlan(nfclient, 510) is None
         finally:
             delete_interfaces(nfclient, device, "Ethernet8")
             self._delete_vlan(nfclient, 510)

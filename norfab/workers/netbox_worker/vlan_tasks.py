@@ -51,6 +51,7 @@ class NetboxVlansTasks:
         branch: Union[None, str] = None,
         vlan_group: Union[None, str] = None,
         vlan_map: Union[None, str, list] = None,
+        require_vlan_group: bool = False,
         filter_by_vlan_ids: Union[None, list[str]] = None,
         preserve_description: Union[None, bool] = None,
         **kwargs: Any,
@@ -61,7 +62,8 @@ class NetboxVlansTasks:
         match VLAN IDs, VLAN names, and device names; populated criteria are
         combined with AND. Interface name criteria are ignored because VLAN
         records have no interface context. VLANs which match no rule use
-        ``vlan_group`` when supplied, otherwise they use their device site.
+        ``vlan_group`` when supplied. Otherwise, they use their device site
+        unless ``require_vlan_group=True``.
 
         Args:
             job: NorFab job object.
@@ -74,6 +76,8 @@ class NetboxVlansTasks:
             vlan_group: Group for VLANs not matched by ``vlan_map``.
             vlan_map: Ordered VLAN-to-group mapping rules, or an ``nf://`` YAML
                 file containing them.
+            require_vlan_group: Require every VLAN to resolve to a VLAN group
+                instead of falling back to its device site.
             filter_by_vlan_ids: VLAN IDs or inclusive ranges to reconcile.
             preserve_description: Description preservation policy. ``None`` preserves
                 NetBox text when the live description is empty, ``True`` always
@@ -310,6 +314,19 @@ class NetboxVlansTasks:
                         ret.errors.append(msg)
                         continue
                     scope = group_scopes[selected_group_name]
+                elif require_vlan_group:
+                    msg = (
+                        f"VLAN {vlan['vid']} from device '{device_name}' skipped: "
+                        "no VLAN group mapping found"
+                    )
+                    job.event(
+                        f"skipping VLAN {vlan['vid']} from device "
+                        f"'{device_name}': no VLAN group mapping found",
+                        severity="ERROR",
+                    )
+                    log.error(f"{self.name} - Sync VLANs: {msg}")
+                    ret.errors.append(msg)
+                    continue
                 else:
                     scope = site_scopes[device_name]
                 observations[scope].setdefault(vlan["vid"], []).append(

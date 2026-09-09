@@ -903,6 +903,7 @@ class NetboxInterfacesTasks:
         update_type: bool = True,
         vlan_group: Union[None, str] = None,
         vlan_map: Union[None, str, list] = None,
+        require_vlan_group: bool = False,
         ignore_vlans: bool = False,
         ignore_vrf: bool = False,
         preserve_description: Union[None, bool] = None,
@@ -1013,6 +1014,9 @@ class NetboxInterfacesTasks:
                 containing them. Rules use VLAN ID, device name, and interface
                 name criteria. VLAN name criteria apply when interface parsing
                 supplies VLAN names instead of numeric VIDs.
+            require_vlan_group (bool, optional): If True, require every interface
+                VLAN to resolve to a VLAN group instead of falling back to the
+                device site. Defaults to False.
             ignore_vlans (bool, optional): If True, ignore discovered VLANs and
                 leave interface VLAN associations unchanged. Defaults to False.
             ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave
@@ -1340,6 +1344,22 @@ class NetboxInterfacesTasks:
                                         f"skipping VLAN '{vlan}' on "
                                         f"{device_name}:{intf_name}: "
                                         f"{group_data['skip_reason']}",
+                                        severity="ERROR",
+                                    )
+                                    log.error(
+                                        f"{self.name} - Sync device interfaces: {msg}"
+                                    )
+                                    ret.errors.append(msg)
+                                    resolved_vlan = None
+                                elif require_vlan_group and not selected_group:
+                                    msg = (
+                                        f"VLAN '{vlan}' on {device_name}:{intf_name} "
+                                        "skipped: no VLAN group mapping found"
+                                    )
+                                    job.event(
+                                        f"skipping VLAN '{vlan}' on "
+                                        f"{device_name}:{intf_name}: "
+                                        "no VLAN group mapping found",
                                         severity="ERROR",
                                     )
                                     log.error(

@@ -145,15 +145,16 @@ By default `process_deletions=False` — interfaces present in NetBox but absent
 
 ## Ignoring VLANs and VRFs
 
-By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Numeric VLAN IDs are resolved by VID and can be created when missing. VLAN names are resolved to the VID of an existing VLAN in the selected group or device site before the interface diff is calculated. A missing named VLAN cannot be created because its VID is unknown. Set `ignore_vlans=True` to skip VLAN creation and leave all interface VLAN associations unchanged. Set `ignore_vrf=True` to skip VRF creation and leave interface VRF associations unchanged.
+By default, discovered VLANs and VRFs are resolved or created in NetBox and associated with interfaces. Numeric VLAN IDs are resolved by VID and can be created when missing. VLAN names are resolved to the VID of an existing VLAN in the selected group or device site before the interface diff is calculated. A missing named VLAN cannot be created because its VID is unknown. Set `require_vlan_group=True` to report and skip VLAN associations that do not resolve through `vlan_map` or `vlan_group`; other interface fields continue to synchronize. Set `ignore_vlans=True` to skip VLAN creation and leave all interface VLAN associations unchanged. Set `ignore_vrf=True` to skip VRF creation and leave interface VRF associations unchanged.
 
 ## VLAN Group Selection
 
 `vlan_group` accepts one exact VLAN group name and acts as the fallback for
 VLANs not matched by `vlan_map`. Slugs and numeric IDs are not resolved. When
-neither argument match a group, the device site is used. VLAN associations
-that matches a missing group are skipped and reported individually without
-aborting the interface sync task.
+neither argument matches a group, the device site is used by default. With
+`require_vlan_group=True`, each unmatched VLAN association is skipped and
+reported instead. VLAN associations that select a missing group are also
+skipped and reported individually without aborting the interface sync task.
 
 `vlan_map` accepts the same ordered list of rules as VLAN sync, inline or as an
 `nf://` URL to a YAML file:
@@ -199,6 +200,12 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
 
     ```
     nf#netbox sync interfaces devices leaf-1 vlan-group DEFAULT_VLANS vlan-map '[{"set_vlan_group":"ACCESS_VLANS","match_vlan_ids":["100-199"],"match_interface_names":["Ethernet*"]}]'
+    ```
+
+    Require all interface VLANs to select a VLAN group:
+
+    ```
+    nf#netbox sync interfaces devices leaf-1 vlan-map nf://netbox/vlan_map.yaml require-vlan-group
     ```
 
     Preview changes without writing to NetBox (dry run):
@@ -421,6 +428,7 @@ root
             ├── update-type:    Safely update existing NetBox logical interface types, default 'True'
             ├── vlan-group:    Fallback VLAN group exact name
             ├── vlan-map:    Ordered VLAN-to-group mapping rules
+            ├── require-vlan-group:    Require every interface VLAN to resolve to a VLAN group, default 'False'
             ├── ignore-vlans:    Ignore discovered VLANs and leave interface VLAN associations unchanged
             ├── ignore-vrf:    Ignore discovered VRFs and leave interface VRF associations unchanged
             ├── branch:    Branching plugin branch name to push changes into

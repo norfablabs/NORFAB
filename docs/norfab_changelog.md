@@ -1,3 +1,16 @@
+# 0.23.1
+
+## BUGS
+
+1. Fixed NetBox `sync_vrrp` querying all IP addresses when live parsing returned no usable VRRP assignments. The task now fails before NetBox reconciliation or IP searching when the normalized live assignment count is zero.
+2. Fixed NetBox `sync_vrrp` diff-key collisions by including protocol in the per-device assignment key (`interface:protocol:group_id`). VRRPv2 IPv4 and VRRPv3 IPv6 assignments can now use the same interface and group ID without overwriting each other during normalization or comparison.
+
+## ENHANCEMENTS
+
+1. Added `require_vlan_group` to NetBox `sync_vlans` and `sync_device_interfaces`. When enabled, VLANs that match neither `vlan_map` nor the scalar `vlan_group` are reported and skipped instead of falling back to the device site.
+
+---
+
 # 0.23.0
 
 ## FEATURES

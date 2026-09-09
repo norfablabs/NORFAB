@@ -46,8 +46,8 @@ class NetboxFhrpTasks:
     ) -> Result:
         """Synchronize live VRRP state with NetBox.
 
-        An assignment is identified by device, interface, and group ID. Virtual
-        address, protocol version, assignment priority, and group
+        An assignment is identified by device, interface, protocol, and group
+        ID. Virtual address, assignment priority, and group
         authentication type are synchronized. Compatible peer assignments reuse
         a NetBox FHRP group when their protocol, group ID, virtual address, and
         authentication match.
@@ -263,33 +263,15 @@ class NetboxFhrpTasks:
                         ret.errors.append(msg)
                         continue
 
-                    key = f"{interface_name}:{group_id}"
-                    desired = device_state.get(key)
-                    if desired is None:
-                        device_state[key] = {
-                            "interface": interface_name,
-                            "group_id": group_id,
-                            "protocol": protocol,
-                            "virtual_address": virtual_address,
-                            "priority": priority,
-                            "authentication_type": authentication_type,
-                        }
-                        continue
-
-                    if (
-                        desired["protocol"] != protocol
-                        or desired["virtual_address"] != virtual_address
-                        or desired["priority"] != priority
-                        or desired["authentication_type"] != authentication_type
-                    ):
-                        msg = (
-                            f"device '{device_name}' VRRP assignment '{key}' has "
-                            "conflicting protocol, virtual address, priority, or "
-                            "authentication values"
-                        )
-                        job.event(msg, severity="ERROR")
-                        log.error(f"{self.name} - Sync VRRP: {msg}")
-                        ret.errors.append(msg)
+                    key = f"{interface_name}:{protocol}:{group_id}"
+                    device_state[key] = {
+                        "interface": interface_name,
+                        "group_id": group_id,
+                        "protocol": protocol,
+                        "virtual_address": virtual_address,
+                        "priority": priority,
+                        "authentication_type": authentication_type,
+                    }
 
         for device_name in devices:
             if device_name not in live_state and device_name not in failed_devices:
@@ -297,12 +279,15 @@ class NetboxFhrpTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - Sync VRRP: {msg}")
                 ret.errors.append(msg)
-        if not live_state:
-            log.error(f"{self.name} - Sync VRRP: no usable live data")
+        live_count = sum(len(records) for records in live_state.values())
+        if live_count == 0:
+            msg = "no usable live VRRP assignments returned"
+            job.event(msg, severity="ERROR")
+            log.error(f"{self.name} - Sync VRRP: {msg}")
+            ret.errors.append(msg)
             ret.failed = True
             return ret
 
-        live_count = sum(len(records) for records in live_state.values())
         job.event(
             f"normalized {live_count} VRRP assignment(s) from "
             f"{len(live_state)} device(s)"
@@ -406,18 +391,7 @@ class NetboxFhrpTasks:
             group = group_data["object"]
 
             device_name = interface.device.name
-            key = f"{interface.name}:{int(group.group_id)}"
-            if key in current_state[device_name]:
-                msg = (
-                    f"device '{device_name}' interface '{interface.name}' has "
-                    f"multiple VRRP group {group.group_id} assignments; using "
-                    "the lowest assignment ID"
-                )
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync VRRP: {msg}")
-                ret.errors.append(msg)
-                continue
-
+            key = f"{interface.name}:{group_data['protocol']}:{int(group.group_id)}"
             current_state[device_name][key] = {
                 "interface": interface.name,
                 "group_id": int(group.group_id),
@@ -608,8 +582,6 @@ class NetboxFhrpTasks:
                 else:
                     group = group_data["object"]
                     group_updates = {}
-                    if group_data["protocol"] != desired["protocol"]:
-                        group_updates["protocol"] = desired["protocol"]
                     if group_data["name"] != desired["name"]:
                         group_updates["name"] = desired["name"]
                     if (
@@ -620,7 +592,6 @@ class NetboxFhrpTasks:
                     if group_updates:
                         group.update(group_updates)
                         group_data["name"] = desired["name"]
-                        group_data["protocol"] = desired["protocol"]
                         group_data["authentication_type"] = desired[
                             "authentication_type"
                         ]

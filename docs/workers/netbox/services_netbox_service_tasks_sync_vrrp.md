@@ -30,17 +30,20 @@ The parser must return a list per device with these fields:
 
 ## Identity and comparison
 
-Each assignment is identified by `(device, interface, group_id)`.
+Each assignment is identified by `(device, interface, protocol, group_id)` and
+uses the normalized key `interface:protocol:group_id`.
 This is the correct synchronization key because NetBox stores priority on the
-interface-to-group assignment, not on the FHRP group. The task groups peers
+interface-to-group assignment and the same interface and group ID can run
+VRRPv2 for IPv4 alongside VRRPv3 for IPv6. The task groups peers
 which have the same protocol, group ID, virtual address, and authentication
 type into one NetBox FHRP group and creates an assignment for each participating
 interface. Getter values `vrrpv2` and `vrrpv3` map to NetBox protocols `vrrp2`
 and `vrrp3`, respectively.
 
-`protocol`, `virtual_address`, `priority`, and `authentication_type` are
-synchronized values. Common parser authentication values such as `text`,
-`simple`, and `cleartext` are normalized to NetBox's `plaintext` value.
+`protocol` is part of the assignment identity. `virtual_address`, `priority`,
+and `authentication_type` are synchronized values. Common parser authentication
+values such as `text`, `simple`, and `cleartext` are normalized to NetBox's
+`plaintext` value.
 
 Both live and NetBox data use a scalar `virtual_address` in the normalized
 comparison structure:
@@ -48,7 +51,7 @@ comparison structure:
 ```json
 {
   "router-1": {
-    "Ethernet1:10": {
+    "Ethernet1:vrrp2:10": {
       "interface": "Ethernet1",
       "group_id": 10,
       "protocol": "vrrp2",
@@ -182,5 +185,10 @@ because a VRRP group has one virtual IP. The task is additive: it does not
 delete FHRP groups, assignments, or virtual IP addresses that are absent from
 live parsing. Use `dry_run` to inspect the plan, or `with_approval` to review it
 before writes are applied.
+
+If parsing returns no usable VRRP assignments across the selected devices, the
+task fails before loading synchronization state or searching NetBox IP
+addresses. This prevents an empty address filter from becoming an unfiltered
+NetBox IP query.
 
 ::: norfab.workers.netbox_worker.fhrp_tasks.NetboxFhrpTasks.sync_vrrp

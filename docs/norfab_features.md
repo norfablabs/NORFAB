@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 8 September 2026*
+*Last updated: 9 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -790,7 +790,9 @@ entirely from discovered live interfaces.
 Interface-name and VLAN-group mapping rules can be supplied inline or loaded
 from YAML through `nf://` URLs. Live interface VLAN values can be numeric VIDs
 or names; names are resolved against existing scoped NetBox VLANs before the
-desired/current diff is calculated.
+desired/current diff is calculated. Optional strict group enforcement reports
+and skips VLAN associations that match neither a mapping rule nor the scalar
+VLAN-group fallback.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the `other` fallback. **Use cases:**
@@ -808,7 +810,9 @@ loaded from YAML through `nf://` URLs, using `match_device_names`,
 `match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
 and group selection. Existing descriptions support always, live-empty-only, or
 never preservation. VLANs are identified by VID per scope;
-the first device supplies values when later devices report a conflict.
+the first device supplies values when later devices report a conflict. Optional
+strict group enforcement reports and skips VLANs that would otherwise fall back
+to their device site.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines
 live-state quality; the task does not delete VLANs because live data cannot
@@ -819,7 +823,7 @@ reliably identify stale NetBox objects.
 
 Reconciles TTP-parsed VRRP state with NetBox FHRP groups, virtual IP addresses,
 and device-interface group assignments. Assignments are identified by device,
-interface, and group ID; priorities remain per-interface while peers with the
+interface, protocol, and group ID; priorities remain per-interface while peers with the
 same protocol version, group, virtual address, and authentication type share
 a NetBox FHRP group. Live VRRPv2 and VRRPv3 values map to NetBox's `vrrp2` and
 `vrrp3` protocols. Inline Jinja2 or `nf://` templates generate and synchronize
@@ -828,7 +832,8 @@ records are reused and assigned the `vrrp` role; missing virtual IPs are created
 while addresses assigned to other objects are reported without reassignment.
 **Use cases:** first-hop redundancy inventory, priority drift detection,
 consistent group naming, and virtual-IP auditing. **Limitations:**
-synchronization is additive and does not delete stale FHRP data.
+synchronization is additive and does not delete stale FHRP data; an entirely
+empty parsed VRRP state fails before NetBox reconciliation begins.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vrrp.md)
 
 ### Live VRF reconciliation
