@@ -2605,6 +2605,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../workers/netbox/services_netbox_service_tasks_sync_vrrp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRRP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../workers/netbox/services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
         
   
@@ -6948,6 +6976,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../adr_nfweb_scale_test_environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Scale-Test Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adr_nfweb_browser_terminal_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Browser-Native Terminal Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -7725,7 +7809,9 @@ Monitoring and 3D Topology; neither defines the final scope of NFWeb.</p>
 <li>Read <code>AGENTS.md</code> for repository-wide commands and conventions.</li>
 <li>Read the
    <a href="../adr_web_ui_topology_architecture/">NFWeb architecture decision</a> for accepted
-   product and security boundaries.</li>
+   product and security boundaries. When planning terminal work, also read the
+   proposed
+   <a href="../adr_nfweb_browser_terminal_application/">browser-native terminal decision</a>.</li>
 <li>Read the user-facing <a href="../../clients_nfweb_overview/">NFWeb overview</a>,
    <a href="../../clients_nfweb_monitoring/">monitoring dashboard guide</a>, and
    <a href="../../clients_nfweb_topology/">topology application guide</a>.</li>
@@ -7862,7 +7948,7 @@ nested configuration model:</p>
 <span class="w">      </span><span class="nt">netbox_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any</span>
 <span class="w">      </span><span class="nt">nornir_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
 <span class="w">      </span><span class="nt">layers</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">inventory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">lldp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">bgp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">interfaces</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -7882,14 +7968,10 @@ not be exposed to the browser. A <code>null</code> footer URL hides its pictogra
   -&gt; React filters the snapshot and updates ForceGraph3D
 </code></pre></div>
 <h3 id="discovery-is-separate-from-collection">Discovery Is Separate From Collection<a class="headerlink" href="#discovery-is-separate-from-collection" title="Permanent link">¤</a></h3>
-<p>Device discovery combines:</p>
-<ul>
-<li>NetBox <code>get_devices</code>, filtered by configured sites when present;</li>
-<li>Nornir <code>get_nornir_hosts</code>.</li>
-</ul>
-<p>Discovery returns the union of names and their sources. It does not collect graph
-data. The collector begins only after the operator applies a non-empty selection
-or <code>topology.devices</code> supplies a startup scope.</p>
+<p>Device discovery calls only Nornir <code>get_nornir_hosts</code>. NetBox-only devices are not
+selectable. Discovery does not collect graph data; collection begins only after
+the operator applies a non-empty selection or <code>topology.devices</code> supplies a
+startup scope.</p>
 <p>Changing the selected devices validates them against discovery, sorts and
 deduplicates them, clears all layer caches, and immediately performs a forced
 collection. Clearing the selection clears the active view and stops later
@@ -7905,14 +7987,14 @@ periodic cycles from submitting work.</p>
 </thead>
 <tbody>
 <tr>
-<td>Discover NetBox devices</td>
-<td><code>netbox.get_devices</code></td>
-<td><code>filters=[{"name__iregex": ".*"}]</code>; adds <code>site</code> when configured</td>
-</tr>
-<tr>
 <td>Discover Nornir devices</td>
 <td><code>nornir.get_nornir_hosts</code></td>
 <td>none</td>
+</tr>
+<tr>
+<td>Seed selected devices</td>
+<td><code>nornir.get_inventory</code></td>
+<td><code>FL=[...]</code></td>
 </tr>
 <tr>
 <td>Intended topology</td>
@@ -7953,7 +8035,8 @@ waits for their futures without blocking Tornado's event loop. An <code>asyncio.
 prevents overlapping topology collection cycles.</p>
 <p>Adapters run in dependency order:</p>
 <ol>
-<li>inventory;</li>
+<li>scoped Nornir inventory;</li>
+<li>scoped NetBox topology;</li>
 <li>LLDP;</li>
 <li>BGP;</li>
 <li>interface observations.</li>
@@ -7973,14 +8056,17 @@ change is incomplete until both sides and their tests are updated.</p>
 <li>A node can belong to multiple layers.</li>
 <li>Duplicate nodes merge by ID. Health becomes the worst reported health, layers
   are unioned, and stronger device metadata replaces placeholder metadata.</li>
-<li>Unresolved BGP addresses use the IP as an <code>external-peer</code> node ID.</li>
+<li>Nodes have no inferred kind. Unresolved BGP addresses use the IP as their ID.</li>
+<li>Every node carries a sorted union of <code>netbox</code>, <code>nornir</code>, and <code>live-lldp</code>
+  origins.</li>
 <li>Do not use labels as IDs unless the worker contract guarantees the label is the
   canonical device identity.</li>
 </ul>
 <h3 id="link-rules">Link Rules<a class="headerlink" href="#link-rules" title="Permanent link">¤</a></h3>
 <ul>
 <li><code>TopologyLink.id</code> is the merge identity.</li>
-<li>Link IDs include the layer, both devices, and available interfaces.</li>
+<li>Physical link IDs include normalized device and interface endpoints. BGP link
+  IDs use normalized session addresses.</li>
 <li><code>_link_id()</code> sorts its two <code>device:interface</code> endpoints. LLDP reverse
   advertisements with exactly matching names therefore produce one link.</li>
 <li><code>source</code> and <code>target</code> are required by ForceGraph but do not automatically mean a
@@ -7988,8 +8074,9 @@ change is incomplete until both sides and their tests are updated.</p>
 <li>Exact normalization matters. <code>Ethernet1</code> and <code>Eth1</code>, or a short hostname and an
   FQDN, create different endpoint IDs. Add an explicit normalization policy and
   tests before trying to collapse those variants.</li>
-<li>Layers intentionally remain separate. NetBox, LLDP, and BGP relationships
-  between the same devices render as separate blue, orange, and purple links.</li>
+<li>NetBox, cached Nornir connections, and live LLDP relationships with matching
+  endpoints merge into one topology link and union their origins. BGP remains a
+  protocol layer.</li>
 <li>Multiple real connections between the same devices remain distinct in the
   snapshot and inspector because interface names are part of their IDs.</li>
 <li>The interfaces adapter creates observations, not standalone graph links. During
@@ -8030,7 +8117,7 @@ database. Do not name the database after topology, and do not reuse the topology
 snapshot table for an unrelated domain model.</p>
 <h2 id="follow-monitoring-data-through-the-system">Follow Monitoring Data Through the System<a class="headerlink" href="#follow-monitoring-data-through-the-system" title="Permanent link">¤</a></h2>
 <p>Monitoring is deliberately smaller than Topology and does not use the database:</p>
-<div class="highlight"><pre><span></span><code>broker show_broker + show_workers and worker get_watchdog_stats
+<div class="highlight"><pre><span></span><code>broker get_stats + worker get_stats + local client get_stats
   -&gt; MonitoringCollector creates one MonitoringSnapshot
   -&gt; bounded deque retains at most the configured three-hour window
   -&gt; MonitoringBroadcaster publishes the sample over WebSocket
@@ -8108,7 +8195,7 @@ older response. WebSocket URLs follow the page scheme (<code>ws://</code> for HT
 <tr>
 <td><code>GET</code></td>
 <td><code>/api/v1/topology/devices</code></td>
-<td>Combined device discovery and active scope</td>
+<td>Nornir device discovery and active scope</td>
 </tr>
 <tr>
 <td><code>POST</code></td>
@@ -8241,12 +8328,10 @@ applications and remains a fixed-width shell column. Topology remains the defaul
 the URL hash selects Monitoring. Topology controls, including
 the snapshot selector, return-to-live action, and trailing stream-status badge,
 belong in one non-wrapping, horizontally scrollable application toolbar, not the
-navigation panel. Graph-producing layers
-use compact Mantine checkbox menus grouped by network purpose. The <strong>L1</strong> selector
-contains independently selectable <strong>NetBox</strong> and <strong>LLDP</strong> links, while the <strong>BGP</strong>
-selector contains <strong>Peerings</strong>. The <strong>L2</strong> selector controls the directional
-<strong>Traffic</strong> overlay. Selector keys and menu items reuse the matching graph-link
-colors. The remaining
+navigation panel. Link controls use compact Mantine menus. <strong>Topology</strong> is a union
+multi-select for NetBox, Nornir connections, LLDP, and circuits. <strong>Protocols</strong>
+contains BGP and is the extension point for later protocol layers. <strong>Stats</strong> is a
+single-value choice between Off, Traffic, Errors, and Flaps. The remaining
 desktop content width is split 80% for the topology stage and 20% for the
 inspector, and the inspector spans into the top-right corner above its content.
 The graph-control group includes a bloom toggle implemented with Three.js
@@ -8318,17 +8403,19 @@ memory. The initial <code>/logs</code> request restores retained events after pa
 <li>Do not recreate the graph solely to update controls or a snapshot. Preserve the
   camera, selection, and saved coordinates.</li>
 </ul>
-<p>LLDP and physical cabling remain undirected topology relationships. When the L2
-Traffic overlay is enabled, a link with interface telemetry is rendered as two
+<p>LLDP and physical cabling remain undirected topology relationships. When Traffic
+statistics are selected, a link with interface telemetry is rendered as two
 shallow curved visual lanes around that one relationship. The overlay applies to
-NetBox and LLDP links, leaving BGP peerings on their own layer paths. Forward
+physical topology links, leaving BGP peerings on their own layer paths. Forward
 traffic uses source output or target input telemetry; reverse traffic uses target
 output or source input telemetry. Particle speed is bounded and proportional to
 the reported bit rate, with utilization as a fallback. Lane color changes at
 warning and critical utilization thresholds. The reverse visual lane has zero D3
 link-force strength, so enabling traffic does not add another physical
-relationship to the layout. Links without directional telemetry remain single
-and are not animated; unknown traffic is never invented. Node spheres are fully
+relationship to the layout. Errors uses input, output, and CRC counters. Flaps is
+green through 10 transitions, yellow through 100, and red above 100. Links without
+the selected statistics remain visible in subdued grey; unknown values are never
+invented. Node spheres are fully
 opaque and use the same green, yellow, red, and gray health palette shown in the
 States dropdown. Traffic retains a separate teal, amber, and pink scale.</p>
 <h2 id="run-a-development-environment">Run a Development Environment<a class="headerlink" href="#run-a-development-environment" title="Permanent link">¤</a></h2>
@@ -8474,9 +8561,9 @@ application responsibilities.</p>
 </ol>
 <h3 id="add-or-change-a-monitoring-metric">Add or Change a Monitoring Metric<a class="headerlink" href="#add-or-change-a-monitoring-metric" title="Permanent link">¤</a></h3>
 <ol>
-<li>Confirm the value already exists on <code>show_broker</code>, <code>show_workers</code>, the worker
-   watchdog response, or the local native client.</li>
-<li>Add the field to <code>monitoring/models.py</code> and <code>frontend/src/types.ts</code>.</li>
+<li>Add and document the value in the appropriate Pydantic model in
+   <code>norfab/core/monitoring.py</code>.</li>
+<li>Add the presentation field to <code>monitoring/models.py</code> and <code>frontend/src/types.ts</code>.</li>
 <li>Merge it in <code>MonitoringCollector.collect_once()</code> without inventing fallbacks.</li>
 <li>Add it directly to the existing ECharts options, details, or worker table.</li>
 <li>Extend collector, server, and contract-parity tests.</li>
@@ -8514,11 +8601,11 @@ applications require a more general registry or router.</p>
 <p>A successful job does not guarantee its payload matches the adapter's expected
 shape.</p>
 <h3 id="multiple-connection-records-appear">Multiple Connection Records Appear<a class="headerlink" href="#multiple-connection-records-appear" title="Permanent link">¤</a></h3>
-<p>Rendered links are bundled per device pair and layer, but the inspector continues
-to show raw connection records. Inspect each record's <code>layer</code>, ID, device names,
-and interface names. Common valid cases are:</p>
+<p>Physical records with the same normalized endpoints merge and union their
+origins. Rendered links are then bundled per device pair and layer, while the
+inspector retains parallel interface records. Inspect each record's <code>layer</code>, ID,
+origin, device names, and interface names. Common valid cases are:</p>
 <ul>
-<li>NetBox and LLDP observations of the same cable;</li>
 <li>separate data and management links;</li>
 <li>two real parallel interfaces.</li>
 </ul>
@@ -8526,8 +8613,7 @@ and interface names. Common valid cases are:</p>
 resolve uniquely to the selected scope and interfaces use a supported common short
 or long spelling. If they are not, compare hostname qualification, ambiguous
 aliases, and vendor-specific interface names. Do not deduplicate the stored data
-by device pair. Rendering bundles additionally include the layer in their key so
-NetBox, LLDP, and BGP remain separate.</p>
+by device pair because real parallel interfaces must remain distinct.</p>
 <h3 id="the-graph-rearranges-on-every-snapshot">The Graph Rearranges on Every Snapshot<a class="headerlink" href="#the-graph-rearranges-on-every-snapshot" title="Permanent link">¤</a></h3>
 <p>Confirm that node IDs remain stable, coordinates are saved before replacing the
 snapshot, and new <code>graphData</code> nodes receive saved coordinates. Do not call
@@ -8554,11 +8640,8 @@ reconnects with exponential backoff up to ten seconds.</p>
   interface abbreviations. Ambiguous device aliases and vendor-specific interface
   spellings are deliberately preserved rather than guessed.</li>
 </ul>
-<p>NetBox intent and LLDP observations intentionally remain separate edges. This
-preserves independent layer visibility, source-specific properties, and the
-requested layer colors; combining them would require an explicit multi-source edge
-contract. Empty Overview and Admin navigation sections are reserved extension
-points, not incomplete application behavior.</p>
+<p>Empty Overview and Admin navigation sections are reserved extension points, not
+incomplete application behavior.</p>
 <p>Do not solve these gaps incidentally during an unrelated change. Make the smallest
 coherent change, add tests for the intended behavior, and update this list when a
 gap is deliberately resolved.</p>

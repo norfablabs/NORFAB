@@ -2611,6 +2611,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_vrrp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRRP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
         
   
@@ -6613,6 +6641,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_nfweb_scale_test_environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Scale-Test Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_nfweb_browser_terminal_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Browser-Native Terminal Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -7039,6 +7123,17 @@ devices:</p>
 <span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;2001:db8::1/128&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>The top-level <code>diff</code> field always contains a global reconciliation plan:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;global&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;2001:db8::1/128&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The task does not delete prefixes, so <code>delete</code> is always empty.</p>
 <p>Dry-run returns the same structure without writing to NetBox. With
 <code>with_approval=True</code>, the prepared result is shown for approval before any
 prefixes are written.</p>
@@ -7438,7 +7533,10 @@ the site of the alphabetically first device reporting a prefix is used.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Global <code>created</code>, <code>updated</code>, and <code>in_sync</code> prefix lists.</p>
+                <p>Global <code>created</code>, <code>updated</code>, and <code>in_sync</code> prefix lists.
+<code>Result.diff</code> contains a <code>global</code> reconciliation plan with
+<code>create</code>, <code>update</code>, <code>delete</code>, and <code>in_sync</code> actions;
+<code>delete</code> is always empty because this task does not delete prefixes.</p>
               </div>
             </td>
           </tr>
@@ -7448,54 +7546,7 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1172</span>
-<span class="normal">1173</span>
-<span class="normal">1174</span>
-<span class="normal">1175</span>
-<span class="normal">1176</span>
-<span class="normal">1177</span>
-<span class="normal">1178</span>
-<span class="normal">1179</span>
-<span class="normal">1180</span>
-<span class="normal">1181</span>
-<span class="normal">1182</span>
-<span class="normal">1183</span>
-<span class="normal">1184</span>
-<span class="normal">1185</span>
-<span class="normal">1186</span>
-<span class="normal">1187</span>
-<span class="normal">1188</span>
-<span class="normal">1189</span>
-<span class="normal">1190</span>
-<span class="normal">1191</span>
-<span class="normal">1192</span>
-<span class="normal">1193</span>
-<span class="normal">1194</span>
-<span class="normal">1195</span>
-<span class="normal">1196</span>
-<span class="normal">1197</span>
-<span class="normal">1198</span>
-<span class="normal">1199</span>
-<span class="normal">1200</span>
-<span class="normal">1201</span>
-<span class="normal">1202</span>
-<span class="normal">1203</span>
-<span class="normal">1204</span>
-<span class="normal">1205</span>
-<span class="normal">1206</span>
-<span class="normal">1207</span>
-<span class="normal">1208</span>
-<span class="normal">1209</span>
-<span class="normal">1210</span>
-<span class="normal">1211</span>
-<span class="normal">1212</span>
-<span class="normal">1213</span>
-<span class="normal">1214</span>
-<span class="normal">1215</span>
-<span class="normal">1216</span>
-<span class="normal">1217</span>
-<span class="normal">1218</span>
-<span class="normal">1219</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1219</span>
 <span class="normal">1220</span>
 <span class="normal">1221</span>
 <span class="normal">1222</span>
@@ -7696,7 +7747,89 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 <span class="normal">1417</span>
 <span class="normal">1418</span>
 <span class="normal">1419</span>
-<span class="normal">1420</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1420</span>
+<span class="normal">1421</span>
+<span class="normal">1422</span>
+<span class="normal">1423</span>
+<span class="normal">1424</span>
+<span class="normal">1425</span>
+<span class="normal">1426</span>
+<span class="normal">1427</span>
+<span class="normal">1428</span>
+<span class="normal">1429</span>
+<span class="normal">1430</span>
+<span class="normal">1431</span>
+<span class="normal">1432</span>
+<span class="normal">1433</span>
+<span class="normal">1434</span>
+<span class="normal">1435</span>
+<span class="normal">1436</span>
+<span class="normal">1437</span>
+<span class="normal">1438</span>
+<span class="normal">1439</span>
+<span class="normal">1440</span>
+<span class="normal">1441</span>
+<span class="normal">1442</span>
+<span class="normal">1443</span>
+<span class="normal">1444</span>
+<span class="normal">1445</span>
+<span class="normal">1446</span>
+<span class="normal">1447</span>
+<span class="normal">1448</span>
+<span class="normal">1449</span>
+<span class="normal">1450</span>
+<span class="normal">1451</span>
+<span class="normal">1452</span>
+<span class="normal">1453</span>
+<span class="normal">1454</span>
+<span class="normal">1455</span>
+<span class="normal">1456</span>
+<span class="normal">1457</span>
+<span class="normal">1458</span>
+<span class="normal">1459</span>
+<span class="normal">1460</span>
+<span class="normal">1461</span>
+<span class="normal">1462</span>
+<span class="normal">1463</span>
+<span class="normal">1464</span>
+<span class="normal">1465</span>
+<span class="normal">1466</span>
+<span class="normal">1467</span>
+<span class="normal">1468</span>
+<span class="normal">1469</span>
+<span class="normal">1470</span>
+<span class="normal">1471</span>
+<span class="normal">1472</span>
+<span class="normal">1473</span>
+<span class="normal">1474</span>
+<span class="normal">1475</span>
+<span class="normal">1476</span>
+<span class="normal">1477</span>
+<span class="normal">1478</span>
+<span class="normal">1479</span>
+<span class="normal">1480</span>
+<span class="normal">1481</span>
+<span class="normal">1482</span>
+<span class="normal">1483</span>
+<span class="normal">1484</span>
+<span class="normal">1485</span>
+<span class="normal">1486</span>
+<span class="normal">1487</span>
+<span class="normal">1488</span>
+<span class="normal">1489</span>
+<span class="normal">1490</span>
+<span class="normal">1491</span>
+<span class="normal">1492</span>
+<span class="normal">1493</span>
+<span class="normal">1494</span>
+<span class="normal">1495</span>
+<span class="normal">1496</span>
+<span class="normal">1497</span>
+<span class="normal">1498</span>
+<span class="normal">1499</span>
+<span class="normal">1500</span>
+<span class="normal">1501</span>
+<span class="normal">1502</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDevicePrefixesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDevicePrefixesResult</span><span class="p">,</span>
@@ -7753,6 +7886,9 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: Global ``created``, ``updated``, and ``in_sync`` prefix lists.</span>
+<span class="sd">            ``Result.diff`` contains a ``global`` reconciliation plan with</span>
+<span class="sd">            ``create``, ``update``, ``delete``, and ``in_sync`` actions;</span>
+<span class="sd">            ``delete`` is always empty because this task does not delete prefixes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
@@ -7760,6 +7896,14 @@ the site of the alphabetically first device reporting a prefix is used.</p>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_prefixes&quot;</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[]},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+        <span class="n">diff</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
@@ -7860,6 +8004,7 @@ the site of the alphabetically first device reporting a prefix is used.</p>
     <span class="p">)</span>
     <span class="n">create_prefixes</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">update_prefixes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">update_prefixes_diff</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">desired</span> <span class="ow">in</span> <span class="n">desired_prefixes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">matching</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">prefix</span>
@@ -7891,8 +8036,31 @@ the site of the alphabetically first device reporting a prefix is used.</p>
                 <span class="s2">&quot;scope_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;scope_id&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">],</span>
             <span class="p">}</span>
+            <span class="n">update_prefixes_diff</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">current_site</span><span class="p">,</span>
+                    <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">],</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">desired</span><span class="p">[</span><span class="s2">&quot;prefix&quot;</span><span class="p">])</span>
+
+    <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">create_prefixes</span><span class="p">}</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">]:</span> <span class="n">update_prefixes_diff</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+                    <span class="n">update_prefixes_diff</span><span class="p">,</span>
+                    <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">desired_prefixes</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="s2">&quot;prefix&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])),</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
     <span class="n">preview</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
     <span class="n">preview</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>

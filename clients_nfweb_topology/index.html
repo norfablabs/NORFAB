@@ -2605,6 +2605,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_vrrp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRRP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
         
   
@@ -6556,6 +6584,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_nfweb_scale_test_environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Scale-Test Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/adr_nfweb_browser_terminal_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Browser-Native Terminal Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -6920,6 +7004,11 @@ window into current and recent network state, not the complete scope of NFWeb.</
 one persistent Vasturiano 3D scene, and stores a bounded local history while the
 NFWeb process is running.</p>
 <h2 id="data-sources-and-layers">Data Sources and Layers<a class="headerlink" href="#data-sources-and-layers" title="Permanent link">¤</a></h2>
+<p>Nornir is the source of selectable devices. For selected hosts, NFWeb reads the
+running Nornir inventory and uses its host metadata, interfaces and addresses,
+connections, circuits, and BGP peerings as the initial graph. Passwords,
+usernames, connection options, and unrelated host data are not sent to the
+browser.</p>
 <table>
 <thead>
 <tr>
@@ -6930,31 +7019,29 @@ NFWeb process is running.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>inventory</code></td>
-<td>NetBox <code>get_topology</code></td>
-<td>Device metadata and intended physical cabling</td>
-</tr>
-<tr>
-<td><code>lldp</code></td>
-<td>Nornir <code>parse_ttp</code>, <code>get=lldp_neighbors</code></td>
-<td>Observed physical adjacency</td>
+<td><code>topology</code></td>
+<td>Nornir <code>get_inventory</code>, NetBox <code>get_topology</code>, and live LLDP</td>
+<td>Physical connections and circuits</td>
 </tr>
 <tr>
 <td><code>bgp</code></td>
-<td>Nornir <code>parse_ttp</code>, <code>get=bgp_neighbors</code> plus NetBox IP resolution</td>
-<td>Peer sessions and state</td>
+<td>Cached Nornir peerings and live Nornir <code>bgp_neighbors</code></td>
+<td>Peer sessions and current state</td>
 </tr>
 <tr>
 <td><code>interfaces</code></td>
-<td>Nornir <code>parse_ttp</code>, <code>get=interfaces_status</code></td>
-<td>Link state, counters, rates, and utilization when available</td>
+<td>Live Nornir <code>interfaces_status</code></td>
+<td>Link state, counters, rates, and utilization</td>
 </tr>
 </tbody>
 </table>
-<p>Graph-producing layers can be enabled independently. Interface observations do
-not have a separate visibility button because they decorate matching links with
-health, counters, rates, and utilization. Static inventory data can refresh less
-frequently than live operational layers.</p>
+<p>NetBox is queried only for topology related to the selected Nornir hosts and for
+unresolved BGP addresses. Adjacent nodes returned by NetBox, Nornir inventory, or
+LLDP remain visible even when they are outside the selected scope. Missing cached
+connections, circuits, peerings, or NetBox topology is a normal empty result.</p>
+<p>Connections reported by more than one source merge by device and interface
+endpoints. Their <code>origin</code> records <code>netbox</code>, <code>nornir</code>, and/or <code>live-lldp</code>. Cached
+and live BGP sessions merge by their local and remote session IP addresses.</p>
 <h2 id="configure-the-application">Configure the Application<a class="headerlink" href="#configure-the-application" title="Permanent link">¤</a></h2>
 <p>Topology settings live below the application-specific <code>client.nfweb.topology</code>
 section. Only the listener and browser behavior are configured at the NFWeb level:</p>
@@ -6972,21 +7059,19 @@ section. Only the listener and browser behavior are configured at the NFWeb leve
 <span class="w">      </span><span class="nt">retention_minutes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">180</span>
 <span class="w">      </span><span class="nt">request_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
 <span class="w">      </span><span class="nt">devices</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
-<span class="w">      </span><span class="nt">sites</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="w">      </span><span class="nt">netbox_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any</span>
 <span class="w">      </span><span class="nt">nornir_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
 <span class="w">      </span><span class="nt">layers</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">inventory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">lldp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">bgp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">interfaces</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <p><code>devices</code> is an optional startup selection. Its default is empty, so NFWeb does
 not collect topology data until the operator selects devices in the dashboard.
-The selector discovers the union of NetBox <code>get_devices</code> results and Nornir
-<code>get_nornir_hosts</code> results; a device also shows which inventory reported it.
-<code>sites</code> restricts NetBox discovery when configured, while Nornir still reports its
-available hosts.</p>
+The selector contains only Nornir <code>get_nornir_hosts</code> results. NetBox-only devices
+cannot be selected, although directly adjacent NetBox nodes can appear in the
+graph.</p>
 <p><code>collection_interval</code> controls live collection and cannot be less than five
 seconds. <code>inventory_refresh_interval</code> defaults to five minutes. The history window
 cannot exceed 180 minutes.</p>
@@ -7003,14 +7088,19 @@ NFWeb is running without an open browser. An empty scope performs no collection.
 <h2 id="dashboard-behavior">Dashboard Behavior<a class="headerlink" href="#dashboard-behavior" title="Permanent link">¤</a></h2>
 <p>The topology dashboard provides:</p>
 <ul>
-<li>a top-bar multi-device selector populated from combined NetBox and Nornir
-  discovery, with an empty initial scope by default;</li>
-<li>button-style checkbox controls for independently selecting NetBox, LLDP, and
-  BGP graph layers;</li>
+<li>a top-bar multi-device selector populated from Nornir, with an empty initial
+  scope by default;</li>
+<li>a <strong>Topology</strong> multi-select for NetBox, Nornir connections, LLDP, and circuits;</li>
+<li>a <strong>Protocols</strong> multi-select containing BGP;</li>
+<li>a mutually exclusive <strong>Stats</strong> selector with Off, Traffic, Errors, and Flaps;</li>
 <li>health and text filters across device metadata such as site, role, and address;</li>
 <li>node and link inspection with source properties, state, and available metrics;</li>
-<li>weather-map link colors and utilization-derived widths, with physical links
-  presented as undirected relationships;</li>
+<li>traffic animation and utilization coloring when Traffic statistics are selected;</li>
+<li>red error links when any reported input, output, or CRC error counter is non-zero;</li>
+<li>green links for 0–10 transitions, yellow for 11–100, and red above 100 in Flaps
+  mode;</li>
+<li>subdued grey links when the selected statistic is unavailable, without hiding
+  structural topology;</li>
 <li>stable node positions and a persistent 3D camera across live snapshots;</li>
 <li>automatic coordinate locking after layout convergence, with explicit controls
   to restart or pause layout calculation without refreshes rearranging the graph;</li>
@@ -7024,7 +7114,8 @@ NFWeb is running without an open browser. An empty scope performs no collection.
   NFCLI's timestamp, severity, worker, status, task, resource, and message layout;</li>
 <li>vertical and horizontal log scrolling so long terminal lines remain available
   without wrapping or truncation;</li>
-<li>a manual refresh action that bypasses layer caches and collects fresh data;</li>
+<li>a manual refresh action that bypasses NFWeb caches and repeats the scoped
+  inventory, topology, and live reads without refreshing Nornir inventory;</li>
 <li>a single-line, horizontally scrollable top toolbar containing live status, a
   three-hour timestamp snapshot selector, and a clear return-to-live action;</li>
 <li>an 80/20 topology-to-inspector desktop split, with the inspector extending into

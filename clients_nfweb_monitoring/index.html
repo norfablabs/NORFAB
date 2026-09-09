@@ -2605,6 +2605,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../workers/netbox/services_netbox_service_tasks_sync_vrrp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRRP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
         
   
@@ -6556,6 +6584,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../development/adr_nfweb_scale_test_environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Scale-Test Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/adr_nfweb_browser_terminal_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Browser-Native Terminal Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -6956,24 +7040,16 @@ transition journal, so decreases are not presented as invented transitions.</p>
 </thead>
 <tbody>
 <tr>
-<td>Broker state and process resources</td>
-<td><code>mmi.service.broker</code> / <code>show_broker</code></td>
+<td>Broker state, registered workers, and resources</td>
+<td><code>mmi.service.broker</code> / <code>get_stats</code></td>
 </tr>
 <tr>
-<td>Worker registration and keepalives</td>
-<td><code>mmi.service.broker</code> / <code>show_workers</code></td>
+<td>Worker resources, messages, and keepalives</td>
+<td><code>get_stats</code> on all workers</td>
 </tr>
 <tr>
-<td>Worker process resources and uptime</td>
-<td><code>get_watchdog_stats</code> on all workers</td>
-</tr>
-<tr>
-<td>Local client counters and process resources</td>
-<td>The NFWeb process and its native <code>NFPClient</code></td>
-</tr>
-<tr>
-<td>Job and event statistics</td>
-<td>The native client's existing job database</td>
+<td>Local client counters, resources, and job statistics</td>
+<td>Native <code>NFPClient.get_stats()</code></td>
 </tr>
 <tr>
 <td>Selected-worker job statistics</td>
@@ -6984,9 +7060,20 @@ transition journal, so decreases are not presented as invented transitions.</p>
 <p>The monitoring request traffic itself is included in the local client's job and
 message accounting. The dashboard reads aggregate database statistics; it does
 not capture or retain message payloads or create a separate monitoring database.
+Message, failure, reconnect, and watchdog counters are process-lifetime totals;
+each resets when its owning broker, client, or worker process restarts.
 Selecting a worker makes one targeted <code>job_list</code> request and summarizes at most
 the latest 1,000 returned records. The card labels a full window as truncated;
 it does not present the bounded result as an all-time worker total.</p>
+<p>Broker, client, and worker responses share a versioned Pydantic contract from
+<code>norfab.core.monitoring</code>. Every response contains <code>schema_version</code>, <code>collected_at</code>,
+component identity and status, <code>process</code>, and <code>messaging</code>. Role-specific sections
+add broker registrations, client database aggregates, or worker queues, jobs,
+and keepalives. Individual worker services subclass <code>WorkerMonitoringStats</code> to
+declare additional metrics as typed top-level fields; Nornir watchdog and
+inventory metrics are the first such extension. Service models reject unknown
+fields so format changes are explicit and can be published through Pydantic JSON
+Schema.</p>
 <h2 id="in-memory-history">In-memory History<a class="headerlink" href="#in-memory-history" title="Permanent link">¤</a></h2>
 <p>Samples are held in a bounded Python deque for up to 180 minutes. They are not
 written to SQLite, logs, or another database. Restarting NFWeb clears all

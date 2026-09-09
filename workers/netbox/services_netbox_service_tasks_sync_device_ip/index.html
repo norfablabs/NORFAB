@@ -2611,6 +2611,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_sync_vrrp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sync VRRP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_sync_bgp_asn/" class="md-nav__link">
         
   
@@ -6630,6 +6658,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/adr_nfweb_scale_test_environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Scale-Test Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/adr_nfweb_browser_terminal_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NFWeb Browser-Native Terminal Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_nornir_snmp_tasks/" class="md-nav__link">
         
   
@@ -7088,6 +7172,18 @@ over VRF and unassigned-record fallback matching.</p>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>The top-level <code>diff</code> field always contains the per-device reconciliation plan,
+including when every address is already synchronized:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;&lt;device&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">        </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.0.5/31&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;2001:db8::1/128&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The task does not delete IP addresses, so <code>delete</code> is always empty.</p>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) returns what <em>would</em> be created or updated without making any changes to NetBox.</p>
 <p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use interactive NFCLI workflow. Sync task displays its preview, and waits for approval before applying changes. Declining at that point will return dry-run result.</p>
 <div class="admonition note">
@@ -7704,7 +7800,10 @@ are included, e.g. <code>'10.0.*'</code>.</p>
             <td>
               <div class="doc-md-description">
                 <p>Per-device action summary with <code>created</code>, <code>updated</code>, and
-<code>in_sync</code> IP address lists.</p>
+<code>in_sync</code> IP address lists. <code>Result.diff</code> contains the
+corresponding <code>create</code>, <code>update</code>, <code>delete</code>, and <code>in_sync</code>
+reconciliation plan; <code>delete</code> is always empty because this task
+does not delete IP addresses.</p>
               </div>
             </td>
           </tr>
@@ -8216,7 +8315,54 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 <span class="normal">1167</span>
 <span class="normal">1168</span>
 <span class="normal">1169</span>
-<span class="normal">1170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1170</span>
+<span class="normal">1171</span>
+<span class="normal">1172</span>
+<span class="normal">1173</span>
+<span class="normal">1174</span>
+<span class="normal">1175</span>
+<span class="normal">1176</span>
+<span class="normal">1177</span>
+<span class="normal">1178</span>
+<span class="normal">1179</span>
+<span class="normal">1180</span>
+<span class="normal">1181</span>
+<span class="normal">1182</span>
+<span class="normal">1183</span>
+<span class="normal">1184</span>
+<span class="normal">1185</span>
+<span class="normal">1186</span>
+<span class="normal">1187</span>
+<span class="normal">1188</span>
+<span class="normal">1189</span>
+<span class="normal">1190</span>
+<span class="normal">1191</span>
+<span class="normal">1192</span>
+<span class="normal">1193</span>
+<span class="normal">1194</span>
+<span class="normal">1195</span>
+<span class="normal">1196</span>
+<span class="normal">1197</span>
+<span class="normal">1198</span>
+<span class="normal">1199</span>
+<span class="normal">1200</span>
+<span class="normal">1201</span>
+<span class="normal">1202</span>
+<span class="normal">1203</span>
+<span class="normal">1204</span>
+<span class="normal">1205</span>
+<span class="normal">1206</span>
+<span class="normal">1207</span>
+<span class="normal">1208</span>
+<span class="normal">1209</span>
+<span class="normal">1210</span>
+<span class="normal">1211</span>
+<span class="normal">1212</span>
+<span class="normal">1213</span>
+<span class="normal">1214</span>
+<span class="normal">1215</span>
+<span class="normal">1216</span>
+<span class="normal">1217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -8309,7 +8455,10 @@ are included, e.g. <code>'10.0.*'</code>.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Result: Per-device action summary with ``created``, ``updated``, and</span>
-<span class="sd">            ``in_sync`` IP address lists.</span>
+<span class="sd">            ``in_sync`` IP address lists. ``Result.diff`` contains the</span>
+<span class="sd">            corresponding ``create``, ``update``, ``delete``, and ``in_sync``</span>
+<span class="sd">            reconciliation plan; ``delete`` is always empty because this task</span>
+<span class="sd">            does not delete IP addresses.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
@@ -8317,6 +8466,7 @@ are included, e.g. <code>'10.0.*'</code>.</p>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_ip&quot;</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
+        <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
@@ -8428,6 +8578,15 @@ are included, e.g. <code>'10.0.*'</code>.</p>
         <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span>
     <span class="p">}</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">device_results</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span>
+    <span class="p">}</span>
 
     <span class="c1"># collect all discovered IP addresses</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;collecting live IP address candidates&quot;</span><span class="p">)</span>
@@ -8484,6 +8643,9 @@ are included, e.g. <code>'10.0.*'</code>.</p>
             <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
             <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">role</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+            <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="s2">&quot;dcim.interface&quot;</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
             <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="p">(</span>
                 <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
@@ -8652,6 +8814,37 @@ are included, e.g. <code>'10.0.*'</code>.</p>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
                 <span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="n">bulk_update_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Build the public diff after payload validation so it exactly describes</span>
+    <span class="c1"># the actions that remain eligible for application.</span>
+    <span class="n">full_diff</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">])),</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">device_results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="n">nb_ips_by_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">ip_data</span> <span class="k">for</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="n">nb_ips</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">bulk_create_ip</span><span class="p">:</span>
+        <span class="n">full_diff</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">bulk_update_ip</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">nb_ips_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="p">{}))</span>
+        <span class="k">if</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+            <span class="n">current</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">full_diff</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;update&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old_value&quot;</span><span class="p">:</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="s2">&quot;new_value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">payload</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="o">!=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">and</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span>
+        <span class="p">}</span>
+    <span class="k">for</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]))</span>
+        <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">address</span><span class="p">:</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">][</span><span class="n">address</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">address</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">])</span>
+        <span class="p">}</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">full_diff</span>
 
     <span class="k">if</span> <span class="n">with_approval</span><span class="p">:</span>
         <span class="n">ip_preview_result</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">device_results</span><span class="p">)</span>
