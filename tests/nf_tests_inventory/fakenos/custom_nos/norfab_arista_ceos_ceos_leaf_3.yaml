@@ -733,6 +733,23 @@ commands:
       !
       vlan 330
          name TEST_L3_SUBIF
+      !
+      interface Port-Channel33
+         switchport trunk native vlan 130
+         switchport trunk allowed vlan 130-131,230
+      !
+      interface Ethernet1.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet2.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet5
+         switchport access vlan 230
+      !
+      interface Ethernet6.330
+         encapsulation dot1q vlan 330
+      !
     prompt:
     - '{base_prompt}>'
     - '{base_prompt}#'

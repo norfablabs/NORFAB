@@ -1420,7 +1420,7 @@ class NetboxDevicesTasks:
     ) -> Result:
         """
         Synchronize all device data from live devices into NetBox in sequence:
-        inventory → VLANs → prefixes → VRFs → interfaces → MAC addresses →
+        inventory → prefixes → VRFs → interfaces → VLANs → MAC addresses →
         IP addresses → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
@@ -1523,32 +1523,6 @@ class NetboxDevicesTasks:
                 )
                 return ret
 
-        # --- sync VLANs ---
-        if sync_kwargs.get("sync_vlans") is False:
-            job.event("skipping VLAN sync")
-        else:
-            job.event("syncing VLANs")
-            vlan_result = self.sync_vlans(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-                with_approval=with_approval,
-                **(sync_kwargs.get("sync_vlans") or {}),
-            )
-            if vlan_result.errors:
-                job.event("VLAN sync completed with errors", severity="WARNING")
-                ret.errors.extend(vlan_result.errors)
-            for device in devices:
-                ret.result[device]["vlans"] = vlan_result.result
-            if vlan_result.status == "skipped" and vlan_result.dry_run:
-                ret.status = "skipped"
-                ret.dry_run = True
-                job.event("sync all stopped because VLAN review was declined")
-                return ret
-
         # --- sync prefixes ---
         if sync_kwargs.get("sync_device_prefixes") is False:
             job.event("skipping prefix sync")
@@ -1625,6 +1599,36 @@ class NetboxDevicesTasks:
                 ret.status = "skipped"
                 ret.dry_run = True
                 job.event("sync all stopped because interface review was declined")
+                return ret
+
+        # --- sync VLANs after interfaces exist ---
+        if sync_kwargs.get("sync_vlans") is False:
+            job.event("skipping VLAN sync")
+        else:
+            job.event("syncing VLANs")
+            vlan_result = self.sync_vlans(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_vlans") or {}),
+            )
+            if vlan_result.errors:
+                job.event("VLAN sync completed with errors", severity="WARNING")
+                ret.errors.extend(vlan_result.errors)
+            for device in devices:
+                ret.result[device]["vlans"] = vlan_result.result
+            if vlan_result.failed:
+                ret.failed = True
+                job.event("sync all stopped because VLAN sync failed", severity="ERROR")
+                return ret
+            if vlan_result.status == "skipped" and vlan_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because VLAN review was declined")
                 return ret
 
         # --- sync MAC addresses ---

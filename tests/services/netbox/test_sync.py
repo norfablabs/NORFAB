@@ -33,10 +33,10 @@ pytestmark = pytest.mark.netbox
 class TestSyncAllOrchestration:
     TASKS = [
         ("sync_device_inventory", {"device-1": {}}),
-        ("sync_vlans", {"site:test": {}}),
         ("sync_device_prefixes", {"created": [], "updated": [], "in_sync": []}),
         ("sync_vrfs", {"global": {}}),
         ("sync_device_interfaces", {"device-1": {}}),
+        ("sync_vlans", {"site:test": {}}),
         ("sync_mac_addresses", {"device-1": {}}),
         ("sync_device_ip", {"device-1": {}}),
         ("sync_bgp_peerings", {"device-1": {}}),
@@ -84,6 +84,29 @@ class TestSyncAllOrchestration:
         )
 
         assert calls == [task_name for task_name, _ in self.TASKS]
+
+    def test_sync_all_stops_after_failed_vlan_sync(self) -> None:
+        calls = []
+        worker = self._worker(calls)
+        worker.sync_vlans = lambda **kwargs: (
+            calls.append("sync_vlans")
+            or Result(task="sync_vlans", failed=True, errors=["create failed"])
+        )
+
+        result = NetboxDevicesTasks.sync_all(
+            worker,
+            self._job(),
+            devices=["device-1"],
+        )
+
+        assert result.failed
+        assert calls == [
+            "sync_device_inventory",
+            "sync_device_prefixes",
+            "sync_vrfs",
+            "sync_device_interfaces",
+            "sync_vlans",
+        ]
 
     @pytest.mark.parametrize("skipped_task", RESULT_CATEGORIES)
     def test_false_sync_kwarg_skips_task_and_continues(self, skipped_task: str) -> None:
@@ -167,8 +190,7 @@ class TestSyncResourcesFailed:
                 )
                 if task == "sync_vrrp":
                     assert not any(
-                        "missing a live VRRP result" in error
-                        and failed_device in error
+                        "missing a live VRRP result" in error and failed_device in error
                         for error in result["errors"]
                     )
                 assert result["failed"] is False
@@ -1006,7 +1028,6 @@ class TestSyncAll:
         "inventory",
         "vlans",
         "prefixes",
-        "vrfs",
         "interfaces",
         "mac_addresses",
         "ip_addresses",
@@ -1084,6 +1105,7 @@ class TestSyncAll:
     @staticmethod
     def _sync(nfclient, devices, **extra_kwargs):
         """Run sync_all and return the result dict."""
+        extra_kwargs.setdefault("sync_kwargs", {"sync_vrfs": False})
         return nfclient.run_job(
             "netbox",
             "sync_all",
@@ -1119,7 +1141,7 @@ class TestSyncAll:
     # ------------------------------------------------------------------ #
 
     def test_sync_all_result_structure(self, nfclient):
-        """All eight categories are present per device in dry-run mode."""
+        """All enabled categories are present per device in dry-run mode."""
         ret = self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
         pprint.pprint(ret, width=200)
 
@@ -1312,7 +1334,11 @@ class TestSyncAll:
             "netbox",
             "sync_all",
             workers="any",
-            kwargs={"FC": "spine", "dry_run": True},
+            kwargs={
+                "FC": "spine",
+                "dry_run": True,
+                "sync_kwargs": {"sync_vrfs": False},
+            },
         )
         pprint.pprint(ret, width=200)
 

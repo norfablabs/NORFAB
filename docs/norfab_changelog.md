@@ -1,3 +1,13 @@
+# 0.23.3
+
+## CHANGES
+
+1. Moved VLAN creation, resolution, tagged and untagged interface assignment, and VLAN-derived interface mode handling from `sync_device_interfaces` to `sync_vlans`. The VLAN task now accepts the shared `interface_map` rules and reports VLAN attribute and interface membership changes in one diff. Q-in-Q service VLAN assignments are not currently supported.
+2. Removed the `vlan_group`, `vlan_map`, `require_vlan_group`, and `ignore_vlans` arguments from `sync_device_interfaces` and its NFCLI command. The brief `get_interfaces` representation no longer includes tagged or untagged VLAN fields.
+3. Changed `sync_all` to run interface synchronization before VLAN synchronization and stop before later stages when VLAN synchronization fails.
+
+---
+
 # 0.23.2
 
 ## ENHANCEMENTS

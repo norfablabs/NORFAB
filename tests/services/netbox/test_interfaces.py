@@ -2,7 +2,6 @@ import pprint
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
 
 from norfab.workers.netbox_worker.netbox_models import (
     GetInterfacesInput,
@@ -581,95 +580,31 @@ class TestSyncDeviceInterfaces:
     def ensure_fakenos_netbox_devices(self):
         self._ensure_netbox_devices()
 
-    def test_sync_device_interfaces_ignore_flags_defaults_and_aliases(self):
+    def test_sync_device_interfaces_flags_defaults_and_aliases(self):
         defaults = SyncDeviceInterfacesInput()
-        assert defaults.ignore_vlans is False
         assert defaults.ignore_vrf is False
         assert defaults.update_type is True
-        assert defaults.require_vlan_group is False
 
         enabled = SyncDeviceInterfacesInput.model_validate(
             {
-                "ignore-vlans": True,
                 "ignore-vrf": True,
-                "require-vlan-group": True,
             }
         )
-        assert enabled.ignore_vlans is True
         assert enabled.ignore_vrf is True
-        assert enabled.require_vlan_group is True
 
-    def test_sync_device_interfaces_models_accept_mapping_urls(self) -> None:
+    def test_sync_device_interfaces_model_accepts_interface_mapping_url(self) -> None:
         model = SyncDeviceInterfacesInput.model_validate(
-            {
-                "interface-map": "nf://netbox/interface_map.yaml",
-                "vlan-map": "nf://netbox/vlan_map.yaml",
-            }
+            {"interface-map": "nf://netbox/interface_map.yaml"}
         )
         assert model.interface_map == "nf://netbox/interface_map.yaml"
-        assert model.vlan_map == "nf://netbox/vlan_map.yaml"
 
         sync_kwargs = {
             "sync_device_interfaces": {
-                "interface_map": "nf://netbox/interface_map.yaml",
-                "vlan_map": "nf://netbox/vlan_map.yaml",
+                "interface_map": "nf://netbox/interface_map.yaml"
             }
         }
         sync_all = SyncAllInput.model_validate({"sync-kwargs": sync_kwargs})
         assert sync_all.sync_kwargs == sync_kwargs
-
-    @pytest.mark.parametrize(
-        "criteria",
-        [
-            {"match_vlan_ids": ["4095"]},
-            {"match_vlan_ids": ["[400-499]"]},
-        ],
-    )
-    def test_sync_device_interfaces_rejects_invalid_vlan_map_criteria(
-        self,
-        criteria: dict,
-    ) -> None:
-        with pytest.raises(ValidationError):
-            SyncDeviceInterfacesInput.model_validate(
-                {"vlan_map": [{"set_vlan_group": "INVALID", **criteria}]}
-            )
-
-    def test_sync_device_interfaces_shell_accepts_vlan_map(
-        self,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        from norfab.clients.nfcli_shell.netbox import (
-            netbox_picle_shell_sync_interfaces,
-        )
-
-        vlan_map = [
-            {
-                "set_vlan_group": "ACCESS",
-                "match_vlan_ids": ["100-199"],
-                "match_interface_names": ["Ethernet*"],
-            }
-        ]
-        model = netbox_picle_shell_sync_interfaces.SyncInterfacesShell.model_validate(
-            {"vlan-map": vlan_map}
-        )
-        assert model.vlan_map[0].set_vlan_group == "ACCESS"
-        assert model.vlan_map[0].match_vlan_ids == ["100-199"]
-        assert model.vlan_map[0].match_interface_names == ["Ethernet*"]
-
-        calls = []
-        monkeypatch.setattr(
-            netbox_picle_shell_sync_interfaces,
-            "run_future_job",
-            lambda *args, **kwargs: calls.append((args, kwargs)) or {},
-        )
-        monkeypatch.setattr(
-            netbox_picle_shell_sync_interfaces,
-            "log_error_or_result",
-            lambda result, **kwargs: result,
-        )
-        netbox_picle_shell_sync_interfaces.SyncInterfacesShell.run(vlan_map=vlan_map)
-
-        assert calls[0][1]["kwargs"]["vlan_map"] == vlan_map
 
     # ------------------------------------------------------------------ #
     # Class-level helpers                                                  #
@@ -714,38 +649,10 @@ class TestSyncDeviceInterfaces:
 
     @staticmethod
     def _cleanup(nfclient, devices):
-        """Delete TEST_SYNC interfaces and VLAN 410 from NetBox."""
+        """Delete TEST_SYNC interfaces from NetBox."""
         delete_interfaces_with_description(
             nfclient, TestSyncDeviceInterfaces.ALL_DEVICES, "TEST_SYNC"
         )
-        TestSyncDeviceInterfaces._delete_vlan(nfclient, 410)
-
-    @staticmethod
-    def _delete_vlan(nfclient, vid):
-        """Delete all NetBox VLANs matching VID."""
-        pynb = get_pynetbox(nfclient)
-        for vlan in list(pynb.ipam.vlans.filter(vid=vid)):
-            vlan.delete()
-        print(f"Deleted VLAN '{vid}' from NetBox")
-
-    @staticmethod
-    def _get_vlan(nfclient, vid):
-        """Fetch a single VLAN by VID from NetBox via pynetbox."""
-        pynb = get_pynetbox(nfclient)
-        vlans = list(pynb.ipam.vlans.filter(vid=vid))
-        return vlans[0] if vlans else None
-
-    @staticmethod
-    def _get_vlan_group(nfclient, name):
-        """Fetch a single VLAN group by name from NetBox."""
-        pynb = get_pynetbox(nfclient)
-        return pynb.ipam.vlan_groups.get(name=name)
-
-    @staticmethod
-    def _get_group_vlan(nfclient, group, vid):
-        """Fetch a VLAN by group and VID from NetBox."""
-        pynb = get_pynetbox(nfclient)
-        return pynb.ipam.vlans.get(group_id=group.id, vid=vid)
 
     @staticmethod
     def _sync(nfclient, devices, **extra_kwargs):
@@ -1072,26 +979,8 @@ class TestSyncDeviceInterfaces:
         assert (
             nb_lag.type.value == "lag"
         ), f"Port-Channel41 type mismatch: got {nb_lag.type.value!r}"
-        assert (
-            nb_lag.mode is not None and nb_lag.mode.value == "tagged"
-        ), f"Port-Channel41 mode mismatch: got {nb_lag.mode!r}"
-        lag_vids = {v.vid for v in nb_lag.tagged_vlans}
-        assert {
-            410,
-            411,
-            510,
-        } <= lag_vids, f"Port-Channel41 tagged_vlans mismatch: expected {{410, 411, 510}} subset, got VIDs {lag_vids}"
-        nb_vlan_410 = self._get_vlan(nfclient, 410)
-        assert nb_vlan_410 is not None, "VLAN 410 not recreated in NetBox after sync"
-        assert (
-            nb_vlan_410.name == "VLAN_410"
-        ), f"VLAN 410 name mismatch: got {nb_vlan_410.name!r}"
-        assert (
-            nb_vlan_410.description == "VLAN_410"
-        ), f"VLAN 410 description mismatch: got {nb_vlan_410.description!r}"
-        assert (
-            nb_vlan_410.site is not None and nb_vlan_410.site.name == "NORFAB-LAB"
-        ), f"VLAN 410 site mismatch: got {nb_vlan_410.site!r}"
+        assert nb_lag.mode is None
+        assert list(nb_lag.tagged_vlans) == []
         # Validate LAG member Ethernet6
         nb_eth6 = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Ethernet6")
         assert nb_eth6 is not None, "Ethernet6 not found in NetBox after sync"
@@ -1110,270 +999,6 @@ class TestSyncDeviceInterfaces:
         assert (
             nb_eth7.lag is not None and nb_eth7.lag.name == "Port-Channel41"
         ), f"Ethernet7 lag association mismatch: got {nb_eth7.lag!r}"
-
-    def test_sync_device_interfaces_create_vlan_with_group(self, nfclient):
-        """Delete VLAN 510 then sync with vlan_group and verify it is recreated in that group."""
-        vlan_group_name = "VLAN_GROUP_1"
-        self._cleanup(nfclient, ["fn-ceos-sp-1"])
-        nb_vlan_group = self._get_vlan_group(nfclient, vlan_group_name)
-        assert nb_vlan_group is not None, f"{vlan_group_name} VLAN group not found"
-        self._delete_vlan(nfclient, 510)
-
-        try:
-            ret = self._sync(
-                nfclient,
-                ["fn-ceos-sp-1"],
-                vlan_group=vlan_group_name,
-                require_vlan_group=True,
-            )
-            pprint.pprint(ret)
-            for worker, res in ret.items():
-                assert res["failed"] == False, f"{worker} failed - {res}"
-                device_data = res["result"]["fn-ceos-sp-1"]
-                assert (
-                    "Ethernet8" in device_data["created"]
-                ), f"{worker} Ethernet8 not created during VLAN group sync"
-
-            nb_vlan_510 = self._get_vlan(nfclient, 510)
-            assert (
-                nb_vlan_510 is not None
-            ), "VLAN 510 not recreated in NetBox after sync"
-            assert (
-                nb_vlan_510.name == "VLAN_510"
-            ), f"VLAN 510 name mismatch: got {nb_vlan_510.name!r}"
-            assert (
-                nb_vlan_510.description == "VLAN_510"
-            ), f"VLAN 510 description mismatch: got {nb_vlan_510.description!r}"
-            assert (
-                nb_vlan_510.group is not None
-                and nb_vlan_510.group.name == vlan_group_name
-            ), f"VLAN 510 group mismatch: got {nb_vlan_510.group!r}"
-            assert (
-                nb_vlan_510.site is None
-            ), f"VLAN 510 site mismatch: got {nb_vlan_510.site!r}"
-        finally:
-            delete_interfaces_with_description(
-                nfclient, TestSyncDeviceInterfaces.ALL_DEVICES, "TEST_SYNC"
-            )
-            self._delete_vlan(nfclient, 510)
-            self._delete_vlan(nfclient, 411)
-
-    def test_sync_device_interfaces_vlan_map_precedes_fallback_group(self, nfclient):
-        """A matching VLAN map rule takes precedence over vlan_group."""
-        device = "fn-ceos-sp-1"
-        mapped_group_name = "SYNC_INTERFACES_GROUP_1"
-        fallback_group_name = "SYNC_INTERFACES_GROUP_2"
-        self._cleanup(nfclient, [device])
-        mapped_group = self._get_vlan_group(nfclient, mapped_group_name)
-        fallback_group = self._get_vlan_group(nfclient, fallback_group_name)
-        assert mapped_group is not None
-        assert fallback_group is not None
-        self._delete_vlan(nfclient, 510)
-
-        try:
-            ret = self._sync(
-                nfclient,
-                [device],
-                filter_by_name="Ethernet8",
-                vlan_group=fallback_group_name,
-                vlan_map=[
-                    {
-                        "set_vlan_group": mapped_group_name,
-                        "match_interface_names": ["Ethernet*"],
-                        "match_device_names": [device],
-                        "vlan_names": ["IGNORED_BY_INTERFACE_SYNC"],
-                    }
-                ],
-            )
-            pprint.pprint(ret)
-            for worker, res in ret.items():
-                assert res["failed"] == False, f"{worker} failed - {res}"
-
-            mapped_vlan = self._get_group_vlan(nfclient, mapped_group, 510)
-            assert mapped_vlan is not None
-            assert self._get_group_vlan(nfclient, fallback_group, 510) is None
-            nb_interface = self._get_nb_intf(nfclient, device, "Ethernet8")
-            assert nb_interface.untagged_vlan.id == mapped_vlan.id
-        finally:
-            delete_interfaces(nfclient, device, "Ethernet8")
-            self._delete_vlan(nfclient, 510)
-
-    @pytest.mark.parametrize(
-        "non_matching_criteria",
-        [
-            {"match_vlan_ids": ["520"]},
-            {"match_interface_names": ["Loopback*"]},
-            {"match_device_names": ["fn-ceos-sp-2"]},
-        ],
-    )
-    def test_sync_device_interfaces_vlan_map_mismatch_uses_fallback_group(
-        self,
-        nfclient,
-        non_matching_criteria,
-    ):
-        """A rule criterion mismatch uses the scalar vlan_group fallback."""
-        device = "fn-ceos-sp-1"
-        mapped_group_name = "SYNC_INTERFACES_GROUP_1"
-        fallback_group_name = "SYNC_INTERFACES_GROUP_2"
-        self._cleanup(nfclient, [device])
-        mapped_group = self._get_vlan_group(nfclient, mapped_group_name)
-        fallback_group = self._get_vlan_group(nfclient, fallback_group_name)
-        assert mapped_group is not None
-        assert fallback_group is not None
-        self._delete_vlan(nfclient, 510)
-
-        try:
-            ret = self._sync(
-                nfclient,
-                [device],
-                filter_by_name="Ethernet8",
-                vlan_group=fallback_group_name,
-                vlan_map=[
-                    {
-                        "set_vlan_group": mapped_group_name,
-                        **non_matching_criteria,
-                    }
-                ],
-            )
-            pprint.pprint(ret)
-            for worker, res in ret.items():
-                assert res["failed"] == False, f"{worker} failed - {res}"
-
-            fallback_vlan = self._get_group_vlan(nfclient, fallback_group, 510)
-            assert fallback_vlan is not None
-            assert self._get_group_vlan(nfclient, mapped_group, 510) is None
-            nb_interface = self._get_nb_intf(nfclient, device, "Ethernet8")
-            assert nb_interface.untagged_vlan.id == fallback_vlan.id
-        finally:
-            delete_interfaces(nfclient, device, "Ethernet8")
-            self._delete_vlan(nfclient, 510)
-
-    def test_sync_device_interfaces_updates_same_vid_from_wrong_scope(
-        self, nfclient: Any
-    ) -> None:
-        device = "fn-ceos-sp-1"
-        interface_name = "Ethernet8"
-        group_name = "SYNC_INTERFACES_SCOPED_SITE"
-        pynb = get_pynetbox(nfclient)
-        site = pynb.dcim.sites.get(name="NORFAB-LAB")
-        assert site is not None
-        old_group = pynb.ipam.vlan_groups.get(name=group_name)
-        if old_group:
-            for vlan in list(pynb.ipam.vlans.filter(group_id=old_group.id)):
-                vlan.delete()
-            old_group.delete()
-        self._cleanup(nfclient, [device])
-        self._delete_vlan(nfclient, 510)
-
-        try:
-            site_vlan = pynb.ipam.vlans.create(
-                vid=510,
-                name="VLAN_510",
-                site=site.id,
-            )
-            first_sync = self._sync(
-                nfclient,
-                [device],
-                filter_by_name=interface_name,
-            )
-            for worker, result in first_sync.items():
-                assert result["failed"] is False, f"{worker} failed: {result}"
-            assert (
-                self._get_nb_intf(nfclient, device, interface_name).untagged_vlan.id
-                == site_vlan.id
-            )
-
-            group = pynb.ipam.vlan_groups.create(
-                name=group_name,
-                slug="sync-interfaces-scoped-site",
-                scope_type="dcim.site",
-                scope_id=site.id,
-                vid_ranges=[[500, 599]],
-            )
-            group_vlan = pynb.ipam.vlans.create(
-                vid=510,
-                name="VLAN_510",
-                group=group.id,
-            )
-
-            second_sync = self._sync(
-                nfclient,
-                [device],
-                filter_by_name=interface_name,
-            )
-            for worker, result in second_sync.items():
-                assert result["failed"] is False, f"{worker} failed: {result}"
-                assert interface_name in result["result"][device]["updated"]
-            assert (
-                self._get_nb_intf(nfclient, device, interface_name).untagged_vlan.id
-                == group_vlan.id
-            )
-        finally:
-            delete_interfaces(nfclient, device, interface_name)
-            self._delete_vlan(nfclient, 510)
-            group = pynb.ipam.vlan_groups.get(name=group_name)
-            if group:
-                group.delete()
-
-    def test_sync_device_interfaces_require_vlan_group_skips_unmapped_vlan(
-        self, nfclient
-    ):
-        device = "fn-ceos-sp-1"
-        mapped_group_name = "SYNC_INTERFACES_GROUP_1"
-        self._cleanup(nfclient, [device])
-        self._delete_vlan(nfclient, 510)
-
-        try:
-            ret = self._sync(
-                nfclient,
-                [device],
-                filter_by_name="Ethernet8",
-                require_vlan_group=True,
-                vlan_map=[
-                    {
-                        "set_vlan_group": mapped_group_name,
-                        "match_vlan_ids": ["520"],
-                    }
-                ],
-            )
-
-            for worker, res in ret.items():
-                assert res["failed"] is False, f"{worker} failed - {res}"
-                assert any(
-                    "VLAN '510'" in error and "no VLAN group mapping found" in error
-                    for error in res["errors"]
-                )
-
-            nb_interface = self._get_nb_intf(nfclient, device, "Ethernet8")
-            assert nb_interface is not None
-            assert nb_interface.untagged_vlan is None
-            assert self._get_vlan(nfclient, 510) is None
-        finally:
-            delete_interfaces(nfclient, device, "Ethernet8")
-            self._delete_vlan(nfclient, 510)
-
-    def test_sync_device_interfaces_ignore_vlans(self, nfclient):
-        """ignore_vlans must not create VLANs or associate them with interfaces."""
-        self._cleanup(nfclient, ["fn-ceos-sp-1"])
-
-        ret = self._sync(
-            nfclient,
-            ["fn-ceos-sp-1"],
-            ignore_vlans=True,
-            vlan_group="GROUP_THAT_DOES_NOT_EXIST",
-            vlan_map="nf://netbox/vlan-map-that-does-not-exist.yaml",
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed - {res}"
-            assert res["errors"] == []
-
-        nb_lag = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Port-Channel41")
-        nb_access = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Ethernet8")
-        assert self._get_vlan(nfclient, 410) is None
-        assert nb_lag.untagged_vlan is None
-        assert list(nb_lag.tagged_vlans) == []
-        assert nb_access.untagged_vlan is None
 
     def test_sync_device_interfaces_ignore_vrf(self, nfclient):
         """ignore_vrf must not associate the discovered VRF with an interface."""
@@ -1520,158 +1145,6 @@ class TestSyncDeviceInterfaces:
         assert (
             nb_lb10.description == "TEST_SYNC_LOOPBACK_IPV4"
         ), f"Loopback10 description not restored in NetBox: got {nb_lb10.description!r}"
-
-    def test_sync_device_interfaces_update_mode(self, nfclient):
-        """Clean TEST_SYNC for spine-1, run sync to create Ethernet8 (TEST_SYNC_ACCESS_PORT,
-        mode=access), then corrupt mode to tagged and verify sync restores access mode.
-        """
-        self._cleanup(nfclient, ["fn-ceos-sp-1"])
-
-        # Create correct NB state
-        setup = self._sync(nfclient, ["fn-ceos-sp-1"])
-        for worker, res in setup.items():
-            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
-            assert (
-                "Ethernet8" in res["result"]["fn-ceos-sp-1"]["created"]
-            ), f"{worker} Ethernet8 not created during setup"
-
-        # Corrupt mode
-        intf_id = self._get_intf_id(nfclient, "fn-ceos-sp-1", "Ethernet8")
-        self._patch_intf(nfclient, intf_id, {"mode": "tagged", "untagged_vlan": None})
-
-        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["fn-ceos-sp-1"]
-            assert (
-                "Ethernet8" in device_data["updated"]
-            ), f"{worker} Ethernet8 not in updated list after mode corruption"
-
-        # Validate mode and untagged_vlan restored in NetBox
-        nb_eth8 = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Ethernet8")
-        assert nb_eth8 is not None, "Ethernet8 not found in NetBox after sync"
-        assert (
-            nb_eth8.mode is not None and nb_eth8.mode.value == "access"
-        ), f"Ethernet8 mode not restored in NetBox: got {nb_eth8.mode!r}"
-        assert (
-            nb_eth8.untagged_vlan is not None and nb_eth8.untagged_vlan.vid == 510
-        ), f"Ethernet8 untagged_vlan not restored in NetBox: got {nb_eth8.untagged_vlan!r}"
-
-    def test_sync_device_interfaces_update_tagged_vlans(self, nfclient):
-        """Clean TEST_SYNC for spine-1, run sync to create Port-Channel41
-        (TEST_SYNC_LAG_TRUNK, tagged_vlans=[410, 411, 510]), then clear VLANs and verify
-        sync restores the VLAN list."""
-        self._cleanup(nfclient, ["fn-ceos-sp-1"])
-
-        # Create correct NB state
-        setup = self._sync(nfclient, ["fn-ceos-sp-1"])
-        for worker, res in setup.items():
-            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
-            assert (
-                "Port-Channel41" in res["result"]["fn-ceos-sp-1"]["created"]
-            ), f"{worker} Port-Channel41 not created during setup"
-
-        # Clear tagged VLANs
-        intf_id = self._get_intf_id(nfclient, "fn-ceos-sp-1", "Port-Channel41")
-        self._patch_intf(nfclient, intf_id, {"tagged_vlans": []})
-
-        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["fn-ceos-sp-1"]
-            assert (
-                "Port-Channel41" in device_data["updated"]
-            ), f"{worker} Port-Channel41 not in updated list after tagged_vlans cleared"
-
-        # Validate tagged VLANs restored in NetBox
-        nb_lag = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Port-Channel41")
-        assert nb_lag is not None, "Port-Channel41 not found in NetBox after sync"
-        lag_vids = {v.vid for v in nb_lag.tagged_vlans}
-        assert {
-            410,
-            411,
-            510,
-        } <= lag_vids, f"Port-Channel41 tagged_vlans not restored in NetBox: expected {{410, 411, 510}} subset, got VIDs {lag_vids}"
-
-    def test_sync_device_interfaces_resolves_junos_vlan_names(self, nfclient):
-        """Initialize empty Junos interfaces and resolve mapped VLAN member names."""
-        device = "fn-junos-1"
-        vlan_group_name = "SYNC_NAMED_VLANS_GROUP_1"
-        trunk_parent = "ge-0/0/12"
-        access_parent = "ge-0/0/45"
-        trunk_name = f"{trunk_parent}.0"
-        access_name = f"{access_parent}.0"
-        for interface_name in (trunk_name, access_name, trunk_parent, access_parent):
-            delete_interfaces(nfclient, device, interface_name)
-
-        try:
-            ret = self._sync(
-                nfclient,
-                [device],
-                filter_by_name="ge-0/0/*",
-                vlan_map=[
-                    {
-                        "set_vlan_group": vlan_group_name,
-                        "vlan_names": ["VLANNAME*"],
-                        "match_device_names": [device],
-                        "match_interface_names": ["ge-0/0/*"],
-                    }
-                ],
-            )
-            for worker, res in ret.items():
-                assert res["failed"] is False, f"{worker} failed - {res}"
-                assert res["errors"] == [], f"{worker} returned errors - {res}"
-
-            nb_trunk = self._get_nb_intf(nfclient, device, trunk_name)
-            nb_access = self._get_nb_intf(nfclient, device, access_name)
-            nb_trunk_parent = self._get_nb_intf(nfclient, device, trunk_parent)
-            nb_access_parent = self._get_nb_intf(nfclient, device, access_parent)
-
-            assert nb_trunk.parent.name == trunk_parent
-            assert nb_trunk.mode.value == "tagged"
-            assert {vlan.name: vlan.vid for vlan in nb_trunk.tagged_vlans} == {
-                "VLANNAME1": 124,
-                "VLANNAME2": 125,
-            }
-            assert {vlan.group.name for vlan in nb_trunk.tagged_vlans} == {
-                vlan_group_name
-            }
-            assert nb_access.parent.name == access_parent
-            assert nb_access.mode.value == "access"
-            assert (
-                nb_access.untagged_vlan.name,
-                nb_access.untagged_vlan.vid,
-            ) == ("VLANNAME3", 126)
-            assert nb_access.untagged_vlan.group.name == vlan_group_name
-
-            dry_run = self._sync(
-                nfclient,
-                [device],
-                dry_run=True,
-                filter_by_name="ge-0/0/*",
-                vlan_map=[
-                    {
-                        "set_vlan_group": vlan_group_name,
-                        "vlan_names": ["VLANNAME*"],
-                        "match_device_names": [device],
-                        "match_interface_names": ["ge-0/0/*"],
-                    }
-                ],
-            )
-            for worker, res in dry_run.items():
-                assert res["failed"] is False, f"{worker} failed - {res}"
-                assert trunk_name in res["result"][device]["in_sync"]
-                assert access_name in res["result"][device]["in_sync"]
-        finally:
-            for interface_name in (
-                trunk_name,
-                access_name,
-                trunk_parent,
-                access_parent,
-            ):
-                delete_interfaces(nfclient, device, interface_name)
 
     # ------------------------------------------------------------------ #
     # Delete scenarios                                                     #

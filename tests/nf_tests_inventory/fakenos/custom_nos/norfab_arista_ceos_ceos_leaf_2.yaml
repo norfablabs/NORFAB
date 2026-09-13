@@ -760,6 +760,23 @@ commands:
       !
       vlan 320
          name TEST_L2_SUBIF
+      !
+      interface Port-Channel32
+         switchport trunk native vlan 120
+         switchport trunk allowed vlan 120-121,220
+      !
+      interface Ethernet1.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet2.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet5
+         switchport access vlan 220
+      !
+      interface Ethernet6.320
+         encapsulation dot1q vlan 320
+      !
     prompt:
     - '{base_prompt}>'
     - '{base_prompt}#'

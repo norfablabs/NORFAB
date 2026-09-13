@@ -22,16 +22,9 @@ from .netbox_models import (
     SyncMacAddressesResult,
     UpdateInterfacesDescriptionInput,
     UpdateInterfacesDescriptionResult,
-    VlanMapRule,
 )
 from .netbox_worker_utilities import (
     apply_description_policy,
-    build_vlan_payload,
-    load_device_vlan_scopes,
-    match_vlan_map,
-    prepare_vlan_map,
-    resolve_live_vlans,
-    resolve_vlan,
     resolve_vrf,
     review_sync_task_result,
 )
@@ -80,7 +73,7 @@ def make_interfaces_brief(result: dict) -> dict:
 
     Returned per-interface keys: id, name, description, type (value string), enabled,
     ip_addresses (id + address), connected_endpoints (device_name, device_id, id, name),
-    untagged_vlan (id, name, vid), tagged_vlans (id, name, vid), custom_fields, vrf.
+    custom_fields, vrf.
     """
     brief_result = {}
     for device_name, interfaces in result.items():
@@ -89,14 +82,6 @@ def make_interfaces_brief(result: dict) -> dict:
             intf_type = intf.get("type")
             if isinstance(intf_type, dict):
                 intf_type = intf_type.get("value")
-
-            untagged_vlan = None
-            if isinstance(intf.get("untagged_vlan"), dict):
-                untagged_vlan = {
-                    "id": intf["untagged_vlan"]["id"],
-                    "name": intf["untagged_vlan"]["name"],
-                    "vid": intf["untagged_vlan"]["vid"],
-                }
 
             vrf = None
             if isinstance(intf.get("vrf"), dict):
@@ -136,11 +121,6 @@ def make_interfaces_brief(result: dict) -> dict:
                     }
                     for ep in (intf.get("connected_endpoints") or [])
                 ],
-                "untagged_vlan": untagged_vlan,
-                "tagged_vlans": [
-                    {"id": v.get("id"), "name": v.get("name"), "vid": v.get("vid")}
-                    for v in (intf.get("tagged_vlans") or [])
-                ],
                 "custom_fields": intf.get("custom_fields"),
                 "vrf": vrf,
             }
@@ -158,7 +138,6 @@ def _build_interface_payload(
     intf_name: str = None,
     nb: object = None,
     _lookup_cache: Union[None, dict] = None,
-    resolved_vlans: Union[None, dict] = None,
 ) -> dict:
     """Build a NetBox interface API payload from desired state and changed fields.
 
@@ -167,8 +146,6 @@ def _build_interface_payload(
     """  # noqa: D205
     if _lookup_cache is None:
         _lookup_cache = {}
-    if resolved_vlans is None:
-        resolved_vlans = {}
 
     payload = {
         k: desired.get(k)
@@ -179,19 +156,10 @@ def _build_interface_payload(
             "speed",
             "duplex",
             "description",
-            "mode",
         )
         if k in changed_fields
     }
     payload["name"] = intf_name
-
-    def resolve_interface_vlan(vid: Union[None, int]) -> Union[int, None]:
-        # Payloads may contain only NetBox IDs. A tuple is a pending VLAN-create
-        # target and remains unresolved if the all-or-nothing create failed.
-        if vid is None:
-            return None
-        vlan_id = resolved_vlans.get((device["name"], intf_name, vid))
-        return vlan_id if isinstance(vlan_id, int) else None
 
     if "parent" in changed_fields:
         parent_name = desired["parent"]
@@ -200,39 +168,6 @@ def _build_interface_payload(
     if "lag" in changed_fields:
         lag_name = desired["lag"]
         payload["lag"] = name_to_id.get(lag_name) if lag_name else None
-
-    if "untagged_vlan" in changed_fields:
-        vid = desired["untagged_vlan"]
-        vlan_id = resolve_interface_vlan(vid)
-        if vlan_id is not None:
-            payload["untagged_vlan"] = vlan_id
-        else:
-            log.warning(
-                f"{device['name']}:{intf_name} untagged vlan "
-                f"'{vid}' could not be resolved or created in NetBox"
-            )
-
-    if "qinq_svlan" in changed_fields:
-        vid = desired["qinq_svlan"]
-        vlan_id = resolve_interface_vlan(vid)
-        if vlan_id is not None:
-            payload["qinq_svlan"] = vlan_id
-        else:
-            log.warning(
-                f"{device['name']}:{intf_name} qinq svlan "
-                f"'{vid}' could not be resolved or created in NetBox"
-            )
-
-    if "tagged_vlans" in changed_fields:
-        vlan_ids = [resolve_interface_vlan(vid) for vid in desired["tagged_vlans"]]
-        # Never replace a complete tagged set with a partially resolved set.
-        if all(vlan_id is not None for vlan_id in vlan_ids):
-            payload["tagged_vlans"] = vlan_ids
-        else:
-            log.warning(
-                f"{device['name']}:{intf_name} tagged VLANs could not all be "
-                "resolved or created in NetBox; omitting tagged VLAN association"
-            )
 
     if "vrf" in changed_fields:
         vrf_name = desired["vrf"]
@@ -890,10 +825,6 @@ class NetboxInterfacesTasks:
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         update_type: bool = True,
-        vlan_group: Union[None, str] = None,
-        vlan_map: Union[None, str, list] = None,
-        require_vlan_group: bool = False,
-        ignore_vlans: bool = False,
         ignore_vrf: bool = False,
         preserve_description: Union[None, bool] = None,
         **kwargs: Any,
@@ -920,13 +851,10 @@ class NetboxInterfacesTasks:
 
         - Sync interfaces task creates VRFs if they do not exist in Netbox unless
           ``ignore_vrf=True``
-        - Sync interfaces task creates VLANs if they do not exist in Netbox unless
-          ``ignore_vlans=True``
 
         **Prerequisites**
 
         - Device must exist in Netbox
-        - If specified, vlan group must exist in Netbox
 
         **Limitations**
 
@@ -996,18 +924,6 @@ class NetboxInterfacesTasks:
                 and transitions to ``other`` are ignored. Set to False to disable
                 all type updates. New interfaces can use any parsed type regardless
                 of this setting. Defaults to True.
-            vlan_group (str, optional): Exact VLAN group name used for interface
-                VLANs not matched by ``vlan_map``. When omitted, unmatched VLANs
-                use the device site.
-            vlan_map: Ordered VLAN group mapping rules, or an ``nf://`` YAML file
-                containing them. Rules use VLAN ID, device name, and interface
-                name criteria. VLAN name criteria apply when interface parsing
-                supplies VLAN names instead of numeric VIDs.
-            require_vlan_group (bool, optional): If True, require every interface
-                VLAN to resolve to a VLAN group instead of falling back to the
-                device site. Defaults to False.
-            ignore_vlans (bool, optional): If True, ignore discovered VLANs and
-                leave interface VLAN associations unchanged. Defaults to False.
             ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave
                 interface VRF associations unchanged. Defaults to False.
             **kwargs: Additional Nornir host filter keyword arguments passed to
@@ -1023,15 +939,10 @@ class NetboxInterfacesTasks:
             interface_map = TypeAdapter(list[InterfaceMapRule]).validate_python(
                 yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True))
             )
-        if not ignore_vlans and self.is_url(vlan_map):
-            vlan_map = TypeAdapter(list[VlanMapRule]).validate_python(
-                yaml.safe_load(self.fetch_file(vlan_map, raise_on_fail=True))
-            )
         interface_map = [
             rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
             for rule in interface_map or []
         ]
-        vlan_map = prepare_vlan_map(vlan_map) if not ignore_vlans else []
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_interfaces",
@@ -1041,22 +952,6 @@ class NetboxInterfacesTasks:
             diff={},
         )
         nb = self._get_pynetbox(instance, branch=branch, job=job)
-        vlan_groups = {}
-        if not ignore_vlans:
-            group_names = [rule["set_vlan_group"] for rule in vlan_map]
-            if vlan_group:
-                group_names.append(vlan_group)
-            for group_name in dict.fromkeys(group_names):
-                group = nb.ipam.vlan_groups.get(name=group_name)
-                vlan_groups[group_name] = {
-                    "group": group,
-                    "skip": group is None,
-                    "skip_reason": (
-                        f"VLAN group '{group_name}' does not exist in NetBox"
-                        if group is None
-                        else None
-                    ),
-                }
         log.info(
             f"{self.name} - Sync device interfaces: Processing {len(devices)} device(s) in '{instance}'"
         )
@@ -1112,12 +1007,6 @@ class NetboxInterfacesTasks:
             ret.failed = True
             return ret
         job.event(f"validated {len(devices)} device(s) in NetBox")
-        device_scopes = (
-            load_device_vlan_scopes(data["record"] for data in nb_devices_data.values())
-            if not ignore_vlans
-            else {}
-        )
-
         # Gather NetBox source of truth with interface IP/MAC details.
         job.event("fetching current interface data from NetBox")
         nb_interfaces_result = self.get_interfaces(
@@ -1147,11 +1036,6 @@ class NetboxInterfacesTasks:
                     str(data.get("description") or ""), filter_by_description
                 ):
                     continue
-                tagged_vlans = sorted(
-                    v.get("vid")
-                    for v in (data.get("tagged_vlans") or [])
-                    if isinstance(v, dict) and v.get("vid") is not None
-                )
                 parent_name = (
                     data["parent"].get("name")
                     if isinstance(data.get("parent"), dict)
@@ -1181,18 +1065,6 @@ class NetboxInterfacesTasks:
                         else data.get("duplex")
                     ),
                     "description": str(data.get("description") or ""),
-                    "mode": (data.get("mode") or {}).get("value"),
-                    "untagged_vlan": (
-                        data.get("untagged_vlan").get("vid")
-                        if data.get("untagged_vlan")
-                        else None
-                    ),
-                    "tagged_vlans": tagged_vlans,
-                    "qinq_svlan": (
-                        data.get("qinq_svlan").get("vid")
-                        if data.get("qinq_svlan")
-                        else None
-                    ),
                     "vrf": vrf_name,
                 }
         nb_interface_count = sum(len(v) for v in normalised_nb_all.values())
@@ -1242,9 +1114,6 @@ class NetboxInterfacesTasks:
         # Normalize live interface data per device.
         job.event("normalising live interface data")
         normalised_live_all = {}
-        unresolved_vlan_fields = set()
-        vlan_lookup_cache = {}
-        live_vlans = []
         for wname, wdata in parse_data.items():
             if wdata.get("failed"):
                 msg = f"{wname} - failed to parse interface data from devices"
@@ -1295,116 +1164,6 @@ class NetboxInterfacesTasks:
                     ):
                         continue
 
-                    # Live interface parsers may return VLAN names instead of
-                    # numeric VIDs. Resolve names to NetBox VIDs so live and
-                    # NetBox interface states use the same values for diffing.
-                    untagged_vlan = None
-                    tagged_vlans = []
-                    qinq_svlan = None
-                    if not ignore_vlans:
-                        for field in (
-                            "untagged_vlan",
-                            "tagged_vlans",
-                            "qinq_svlan",
-                        ):
-                            value = data.get(field)
-                            vlans = value or [] if field == "tagged_vlans" else [value]
-                            for vlan in vlans:
-                                if vlan is None:
-                                    continue
-                                resolved_vlan = vlan
-                                mapped_group = match_vlan_map(
-                                    vlan_map,
-                                    vlan_id=vlan if isinstance(vlan, int) else None,
-                                    vlan_name=vlan if isinstance(vlan, str) else None,
-                                    device_name=device_name,
-                                    interface_name=intf_name,
-                                )
-                                selected_group = mapped_group or vlan_group
-                                group_data = (
-                                    vlan_groups[selected_group]
-                                    if selected_group
-                                    else None
-                                )
-                                if group_data and group_data["skip"]:
-                                    msg = (
-                                        f"VLAN '{vlan}' on {device_name}:{intf_name} "
-                                        f"skipped: {group_data['skip_reason']}"
-                                    )
-                                    job.event(
-                                        f"skipping VLAN '{vlan}' on "
-                                        f"{device_name}:{intf_name}: "
-                                        f"{group_data['skip_reason']}",
-                                        severity="ERROR",
-                                    )
-                                    log.error(
-                                        f"{self.name} - Sync device interfaces: {msg}"
-                                    )
-                                    ret.errors.append(msg)
-                                    resolved_vlan = None
-                                elif require_vlan_group and not selected_group:
-                                    msg = (
-                                        f"VLAN '{vlan}' on {device_name}:{intf_name} "
-                                        "skipped: no VLAN group mapping found"
-                                    )
-                                    job.event(
-                                        f"skipping VLAN '{vlan}' on "
-                                        f"{device_name}:{intf_name}: "
-                                        "no VLAN group mapping found",
-                                        severity="ERROR",
-                                    )
-                                    log.error(
-                                        f"{self.name} - Sync device interfaces: {msg}"
-                                    )
-                                    ret.errors.append(msg)
-                                    resolved_vlan = None
-                                elif isinstance(vlan, str):
-                                    resolved_vlan = resolve_vlan(
-                                        vid=vlan,
-                                        nb=nb,
-                                        job=job,
-                                        ret=ret,
-                                        worker_name=self.name,
-                                        site_id=nb_devices_data[device_name]["site_id"],
-                                        vlan_group=(
-                                            group_data["group"].id
-                                            if selected_group
-                                            else None
-                                        ),
-                                        _lookup_cache=vlan_lookup_cache,
-                                        return_vid=True,
-                                    )
-                                if resolved_vlan is None:
-                                    unresolved_vlan_fields.add(
-                                        (device_name, intf_name, field)
-                                    )
-                                else:
-                                    resolved_vlan = int(resolved_vlan)
-                                    live_vlans.append(
-                                        {
-                                            "device_name": device_name,
-                                            "interface_name": intf_name,
-                                            "field": field,
-                                            "vid": resolved_vlan,
-                                            "selected_group_id": (
-                                                group_data["group"].id
-                                                if selected_group
-                                                else None
-                                            ),
-                                            "group_source": (
-                                                "vlan_map"
-                                                if mapped_group
-                                                else "vlan_group"
-                                            ),
-                                        }
-                                    )
-                                    if field == "tagged_vlans":
-                                        tagged_vlans.append(resolved_vlan)
-                                    elif field == "untagged_vlan":
-                                        untagged_vlan = resolved_vlan
-                                    elif field == "qinq_svlan":
-                                        qinq_svlan = resolved_vlan
-                        tagged_vlans = sorted(set(tagged_vlans))
                     normalised_live_all[device_name][intf_name] = {
                         "name": intf_name,
                         "type": data["type"],
@@ -1417,10 +1176,6 @@ class NetboxInterfacesTasks:
                         "speed": data.get("speed"),
                         "duplex": data.get("duplex"),
                         "description": str(data.get("description") or ""),
-                        "mode": data.get("mode"),
-                        "untagged_vlan": untagged_vlan,
-                        "tagged_vlans": tagged_vlans,
-                        "qinq_svlan": qinq_svlan,
                         "vrf": data.get("vrf"),
                     }
                     interface = normalised_live_all[device_name][intf_name]
@@ -1448,149 +1203,11 @@ class NetboxInterfacesTasks:
             f"normalised {live_interface_count} live interface(s) after applying filters"
         )
 
-        resolved_live_vlans = []
-        if not ignore_vlans:
-            # Resolve every numeric live VLAN in one batch. VLAN names returned
-            # by a parser were converted to VIDs above; names do not participate
-            # in the shared same-VID candidate selection.
-            live_vids = sorted({live_vlan["vid"] for live_vlan in live_vlans})
-            netbox_vlans = (
-                self.bulk_filter(
-                    nb.ipam.vlans,
-                    vid=live_vids,
-                    fields="id,vid,name,description,site,group",
-                )
-                if live_vids
-                else []
-            )
-            # Configured groups are already loaded. Load the groups referenced by
-            # other same-VID candidates as well so their scopes can be checked.
-            group_objects = {
-                data["group"].id: data["group"]
-                for data in vlan_groups.values()
-                if not data["skip"]
-            }
-            candidate_group_ids = {
-                candidate.group.id
-                for candidate in netbox_vlans
-                if getattr(candidate, "group", None)
-            }
-            missing_group_ids = sorted(candidate_group_ids - set(group_objects))
-            if missing_group_ids:
-                group_objects.update(
-                    {
-                        group.id: group
-                        for group in self.bulk_filter(
-                            nb.ipam.vlan_groups,
-                            id=missing_group_ids,
-                            fields="id,name,vid_ranges,scope_type,scope_id,scope",
-                        )
-                    }
-                )
-            resolved_live_vlans = resolve_live_vlans(
-                live_vlans=live_vlans,
-                netbox_vlans=netbox_vlans,
-                vlan_groups=group_objects,
-                device_scopes=device_scopes,
-            )
-
-        resolved_vlan_ids = {}
-        missing_vlan_targets = {}
-        expected_vlan_targets = {}
-        for resolved in resolved_live_vlans:
-            live_vlan = resolved["live"]
-            device_name = live_vlan["device_name"]
-            intf_name = live_vlan["interface_name"]
-            field = live_vlan["field"]
-            field_key = (device_name, intf_name, field)
-            if resolved["error"]:
-                msg = (
-                    f"vlan '{live_vlan['vid']}' on {device_name}:{intf_name} "
-                    f"skipped: {resolved['error']}"
-                )
-                if live_vlan["selected_group_id"]:
-                    mapping_fix = (
-                        "fix the VLAN map mapping"
-                        if live_vlan["group_source"] == "vlan_map"
-                        else "fix the vlan_group setting"
-                    )
-                    msg += f"; fix the VLAN group scope or VID ranges, or {mapping_fix}"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync device interfaces: {msg}")
-                ret.errors.append(msg)
-                unresolved_vlan_fields.add(field_key)
-                continue
-
-            netbox_vlan = resolved["vlan"]
-            vlan_key = (device_name, intf_name, live_vlan["vid"])
-            if netbox_vlan:
-                target = netbox_vlan.id
-                resolved_vlan_ids[vlan_key] = target
-            else:
-                # Keep one reusable target for each VLAN that must be created.
-                # The tuple also distinguishes it from a usable NetBox VLAN ID.
-                group_id = live_vlan["selected_group_id"]
-                site_id = None if group_id else device_scopes[device_name]["site_id"]
-                target = (
-                    "new",
-                    "group" if group_id else "site",
-                    group_id or site_id,
-                    live_vlan["vid"],
-                )
-                missing_vlan_targets.setdefault(
-                    target,
-                    {
-                        "vid": live_vlan["vid"],
-                        "group_id": group_id,
-                        "site_id": site_id,
-                    },
-                )
-                resolved_vlan_ids[vlan_key] = target
-            expected_vlan_targets.setdefault(field_key, set()).add(target)
-
-        # The normal interface diff compares VLAN VIDs. Compare resolved NetBox
-        # IDs separately so a right-VID/wrong-scope association is still updated.
-        vlan_scope_changes = set()
-        for field_key, expected_targets in expected_vlan_targets.items():
-            device_name, intf_name, field = field_key
-            nb_interface = nb_interfaces_result.result.get(device_name, {}).get(
-                intf_name, {}
-            )
-            if field == "tagged_vlans":
-                current_targets = {
-                    vlan["id"]
-                    for vlan in nb_interface.get(field) or []
-                    if isinstance(vlan, dict) and vlan.get("id") is not None
-                }
-            else:
-                current_vlan = nb_interface.get(field)
-                current_targets = {
-                    current_vlan["id"]
-                    for _ in [None]
-                    if isinstance(current_vlan, dict)
-                    and current_vlan.get("id") is not None
-                }
-            if current_targets != expected_targets:
-                vlan_scope_changes.add(field_key)
-
-        # Remove ignored associations from both sides so existing values stay untouched.
-        ignored_fields = []
-        if ignore_vlans:
-            ignored_fields.extend(("untagged_vlan", "tagged_vlans", "qinq_svlan"))
         if ignore_vrf:
-            ignored_fields.append("vrf")
-        if ignored_fields:
             for state in (normalised_nb_all, normalised_live_all):
                 for interfaces in state.values():
                     for interface in interfaces.values():
-                        for field in ignored_fields:
-                            interface.pop(field, None)
-
-        # Do not clear existing NetBox VLAN associations when a live VLAN name
-        # could not be resolved to a VID.
-        for device_name, intf_name, field in unresolved_vlan_fields:
-            for state in (normalised_nb_all, normalised_live_all):
-                state.get(device_name, {}).get(intf_name, {}).pop(field, None)
+                        interface.pop("vrf", None)
 
         # remove devices that returned no parsing results
         for device_name in devices:
@@ -1610,46 +1227,6 @@ class NetboxInterfacesTasks:
         # Single diff on the full normalised datasets
         job.event("calculating interface sync diff")
         full_diff = self.make_diff(normalised_live_all, normalised_nb_all)
-
-        for device_name, intf_name, field in vlan_scope_changes:
-            if (device_name, intf_name, field) in unresolved_vlan_fields:
-                continue
-            if intf_name not in normalised_live_all.get(
-                device_name, {}
-            ) or intf_name not in normalised_nb_all.get(device_name, {}):
-                continue
-            actions = full_diff[device_name]
-            if field not in actions["update"].get(intf_name, {}):
-                current_vlan = nb_interfaces_result.result[device_name][intf_name].get(
-                    field
-                )
-                current_ids = (
-                    sorted(
-                        vlan["id"]
-                        for vlan in current_vlan or []
-                        if isinstance(vlan, dict) and vlan.get("id") is not None
-                    )
-                    if field == "tagged_vlans"
-                    else (
-                        current_vlan["id"]
-                        if isinstance(current_vlan, dict)
-                        and current_vlan.get("id") is not None
-                        else None
-                    )
-                )
-                desired_targets = expected_vlan_targets[(device_name, intf_name, field)]
-                desired_ids = [
-                    target if isinstance(target, int) else list(target)
-                    for target in sorted(desired_targets, key=str)
-                ]
-                if field != "tagged_vlans":
-                    desired_ids = desired_ids[0] if desired_ids else None
-                actions["update"].setdefault(intf_name, {})[field] = {
-                    "old_value": current_ids,
-                    "new_value": desired_ids,
-                }
-            if intf_name in actions["in_sync"]:
-                actions["in_sync"].remove(intf_name)
 
         # Apply the existing-interface type update policy. Interface creation is
         # intentionally unrestricted and continues to use any parsed type.
@@ -1714,47 +1291,6 @@ class NetboxInterfacesTasks:
         # name appears across multiple interfaces.
         _lookup_cache: dict = {}
 
-        if missing_vlan_targets:
-            # NetBox validates this list as one all-or-nothing create request.
-            create_payloads = [
-                build_vlan_payload(
-                    vid=data["vid"],
-                    name=f"VLAN_{data['vid']}",
-                    description=f"VLAN_{data['vid']}",
-                    site_id=data["site_id"],
-                    group_id=data["group_id"],
-                )
-                for data in missing_vlan_targets.values()
-            ]
-            job.event(f"creating {len(create_payloads)} missing interface VLAN(s)")
-            try:
-                created_vlans = nb.ipam.vlans.create(create_payloads)
-                if not isinstance(created_vlans, (list, tuple)):
-                    created_vlans = [created_vlans]
-                created_by_target = {}
-                for vlan in created_vlans:
-                    group_id = vlan.group.id if getattr(vlan, "group", None) else None
-                    site_id = vlan.site.id if getattr(vlan, "site", None) else None
-                    target = (
-                        "new",
-                        "group" if group_id else "site",
-                        group_id or site_id,
-                        vlan.vid,
-                    )
-                    created_by_target[target] = vlan.id
-                # Replace pending targets with the IDs returned by NetBox.
-                for vlan_key, target in resolved_vlan_ids.items():
-                    if not isinstance(target, int):
-                        resolved_vlan_ids[vlan_key] = created_by_target.get(target)
-                job.event(f"created {len(created_vlans)} missing interface VLAN(s)")
-            except Exception as exc:
-                # Leave pending targets unresolved. Interface payload building
-                # then omits those VLAN fields while applying unrelated changes.
-                msg = f"failed to bulk create interface VLANs: {exc}"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync device interfaces: {msg}")
-                ret.errors.append(msg)
-
         # Per-device result tracking
         device_results = {
             device_name: {
@@ -1788,7 +1324,6 @@ class NetboxInterfacesTasks:
                         intf_name=intf_name,
                         nb=nb,
                         _lookup_cache=_lookup_cache,
-                        resolved_vlans=resolved_vlan_ids,
                     )
                     bulk_create_lag_interfaces.append(payload)
         job.event(
@@ -1842,7 +1377,6 @@ class NetboxInterfacesTasks:
                         intf_name=intf_name,
                         nb=nb,
                         _lookup_cache=_lookup_cache,
-                        resolved_vlans=resolved_vlan_ids,
                     )
                     bulk_create_parent_interfaces.append(payload)
         job.event(
@@ -1898,7 +1432,6 @@ class NetboxInterfacesTasks:
                         intf_name=intf_name,
                         nb=nb,
                         _lookup_cache=_lookup_cache,
-                        resolved_vlans=resolved_vlan_ids,
                     )
                     bulk_create_child_interfaces.append(payload)
         job.event(
@@ -1944,7 +1477,6 @@ class NetboxInterfacesTasks:
                     intf_name=intf_name,
                     nb=nb,
                     _lookup_cache=_lookup_cache,
-                    resolved_vlans=resolved_vlan_ids,
                 )
                 # skip if nothing else to update
                 if set(payload) == {"device", "name"}:

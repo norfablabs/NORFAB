@@ -1,7 +1,7 @@
 # Sync VLANs
 
-The `sync_vlans` task reconciles VLAN object names and descriptions from live
-devices into NetBox. It requests the normalized TTP `vlans` getter once for the
+The `sync_vlans` task reconciles VLAN names, descriptions, and tagged/untagged
+interface memberships from live devices into NetBox. It requests the normalized TTP `vlans` getter once for the
 validated device set, aggregates all successful worker results, then compares
 VLANs by VID and VLAN group. Names and descriptions are synchronized values and
 do not form part of a VLAN's identity.
@@ -13,11 +13,9 @@ which do not resolve through either group selection mechanism. VLAN groups are
 recommended for new deployments because direct VLAN-to-site assignment is
 deprecated in NetBox 4.4.
 
-This task differs from `sync_device_interfaces`: `sync_vlans` manages VLAN names
-and descriptions, while `sync_device_interfaces` manages interface objects and
-VLAN associations and may create placeholder VLANs. Run `sync_vlans` first when
-possible. A later `sync_vlans` run updates placeholders created by interface
-synchronization.
+`sync_device_interfaces` creates and reconciles interface objects. Run it first
+when interfaces are missing, then run `sync_vlans` to reconcile VLAN attributes,
+memberships, and VLAN-derived interface mode using the live VLAN getter.
 
 ## Inputs
 
@@ -29,6 +27,7 @@ synchronization.
 | `timeout` | `600` | Timeout in seconds for host resolution and TTP parsing. |
 | `devices` | `None` | Explicit NetBox and Nornir device names. |
 | `branch` | `None` | NetBox Branching plugin branch name. |
+| `interface_map` | `None` | Interface rename rules shared with interface sync, inline or in an `nf://` YAML file. |
 | `vlan_group` | `None` | Existing group for live VLANs not matched by `vlan_map`. |
 | `vlan_map` | `None` | Ordered rules mapping live VLANs to existing groups, inline or in an `nf://` YAML file. |
 | `require_vlan_group` | `False` | Require every VLAN to resolve through `vlan_map` or `vlan_group`; unmatched VLANs are reported and skipped. |
@@ -122,12 +121,20 @@ criteria are optional:
 Rules are evaluated in list order and the first match wins. Values inside one
 criterion use OR logic. Populated criteria use AND logic. VLAN and device names
 use case-sensitive glob matching. VLAN ranges are inclusive and must remain
-within `1..4094`. VLAN sync ignores `match_interface_names` because its live VLAN
-records have no interface context. `match_vlan_ids` controls whether the rule
+within `1..4094`. Each tagged or untagged interface membership is mapped
+individually using `match_interface_names`. A VLAN can therefore resolve to
+different groups for different interfaces; each group gets its own VLAN and
+memberships. For VLANs without interfaces, rules with interface-name criteria
+do not match. `match_vlan_ids` controls whether the rule
 selects its group; after selection, the group's own `vid_ranges` are validated
 separately. An unmatched VLAN uses `vlan_group` when supplied. Without either
 group match, it uses its device site unless `require_vlan_group=True`; strict
 mode reports and skips that VLAN instead.
+
+`interface_map` uses the same device name, device type, match, and replacement
+rules as `sync_device_interfaces`. The task applies the first matching rename
+rule before VLAN mapping and NetBox interface lookup. Pass the same interface
+map to both tasks when live interface names are renamed.
 
 The task resolves groups by exact name and does not create or update groups.
 VLANs matching a group that does not exist are skipped and reported
@@ -152,9 +159,13 @@ The task runs Nornir `parse_ttp` with `get="vlans"`, which returns:
 - vid: 100
   name: USERS
   description: User access VLAN
+  tagged_interfaces:
+    - Ethernet5
+  untagged_interfaces:
+    - Ethernet6
 ```
 
-Only `vid`, `name`, and `description` are managed. Names and descriptions are
+The getter must supply both interface lists, including empty lists. Names and descriptions are
 trimmed, null descriptions become an empty string, and case is preserved.
 `filter_by_vlan_ids` removes out-of-range records from both the complete live
 device dataset and NetBox before comparison.
@@ -174,6 +185,31 @@ using the first device's values. Results returned for the same device by
 multiple Nornir workers are aggregated before identical live records are
 collapsed.
 
+### Interface memberships
+
+Live and NetBox state use the same `scope -> VID -> fields` structure. Each VLAN
+has `name`, `description`, `tagged_interfaces`, and `untagged_interfaces` fields.
+Memberships are sorted, deduplicated lists of `device:interface` references.
+VLAN attribute conflicts do not discard memberships from other devices.
+
+The task adds reported memberships and removes stale memberships for each
+successfully collected device and resolved VLAN. Empty lists clear those
+memberships. Assignments on other devices and unresolved or unselected VLANs
+are preserved. VLAN objects and interfaces are never deleted or created as a
+side effect of membership removal; missing referenced interfaces are errors.
+
+An interface may carry the same VLAN both tagged and untagged, or use different
+VLANs for tagged and untagged traffic. Multiple different desired untagged VLANs
+on one interface are an error detected before writes. A new untagged assignment
+replaces the current assignment even when the old VLAN is outside the VID
+filter. That old VLAN's untagged membership removal appears in the same diff;
+its attributes and other memberships are preserved.
+
+An interface with any tagged VLAN uses `tagged` mode, including an interface
+that also has an untagged VLAN. An interface with only an untagged VLAN uses
+`access` mode. Removing every VLAN membership does not change the existing mode.
+Q-in-Q service VLAN assignments are not currently synchronized.
+
 ## Output
 
 Results are keyed by scope, for example `group:CAMPUS`, `site:NORFAB-LAB`, or
@@ -185,11 +221,23 @@ Dry-run returns the standard sync diff shape:
 {
   "site:NORFAB-LAB": {
     "create": [110],
+    "create_details": {
+      "110": {
+        "name": "VOICE",
+        "description": "",
+        "tagged_interfaces": ["leaf-1:Ethernet5"],
+        "untagged_interfaces": []
+      }
+    },
     "update": {
       "210": {
         "name": {
           "old_value": "VLAN_210",
           "new_value": "USERS"
+        },
+        "untagged_interfaces": {
+          "old_value": [],
+          "new_value": ["leaf-1:Ethernet6"]
         }
       }
     },
@@ -215,6 +263,11 @@ the top-level `diff` field:
 
 An existing VLAN with a stale name is updated directly because name is not part
 of identity matching.
+
+`create_details` displays the desired attributes and memberships of new VLANs
+alongside the standard `make_diff` actions. An existing VLAN with only membership
+changes is included in `update`/`updated`. Dry-run and approval show the complete
+preview before any writes. The same preview is retained in `diff`.
 
 ## Deletions
 
@@ -317,9 +370,11 @@ fall back to an unrelated same-VID VLAN.
 
 ### NetBox bulk failures
 
-NetBox validates bulk creates and updates atomically. Correct the
-reported validation or dependency error and rerun the dry-run. A write failure
-aborts the task and is not reported as an applied action.
+The task completes VLAN creation before updating VLAN attributes or interface
+assignments. A failed creation request stops the task immediately with an error.
+Successful creates from earlier requests remain recorded in `created`; there is
+no rollback across requests. Correct the reported validation or dependency error
+and rerun the dry-run.
 
 ## Task command shell reference
 
@@ -349,6 +404,7 @@ root
             ├── devices:    List of NetBox devices to collect VLANs from
             ├── timeout:    Job timeout
             ├── with-approval:    Preview VLAN changes and ask for review before writing to NetBox, default 'False'
+            ├── interface-map:    Interface name mapping rules shared with interface sync
             ├── vlan-group:    Exact group name for live VLANs not matched by vlan-map
             ├── vlan-map:    Ordered rules mapping live VLANs to NetBox VLAN groups
             ├── require-vlan-group:    Require every live VLAN to resolve to a VLAN group, default 'False'

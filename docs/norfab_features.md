@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 9 September 2026*
+*Last updated: 13 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -786,15 +786,9 @@ desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
 rename rules, and applies ordered create, update, and optional delete actions.
 An empty NetBox interface set is valid, allowing a device to be initialized
-entirely from discovered live interfaces.
-Interface-name and VLAN-group mapping rules can be supplied inline or loaded
-from YAML through `nf://` URLs. Live interface VLAN values can be numeric VIDs
-or names; numeric VLANs use batch VID/group resolution that checks each VLAN's
-site, VLAN-group VID ranges, and direct VLAN-group scope against the device.
-Compatible groups take precedence over direct-site VLANs, global VLANs provide
-the final fallback, and wrong-scope associations are corrected.
-Optional strict group enforcement reports and skips VLAN associations that
-match neither a mapping rule nor the scalar VLAN-group fallback.
+entirely from discovered live interfaces. Interface-name mapping rules can be
+supplied inline or loaded from YAML through `nf://` URLs. VLAN objects,
+memberships, and VLAN-derived interface mode are handled by VLAN sync.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the `other` fallback. **Use cases:**
@@ -805,8 +799,9 @@ reviewed with dry-run first.
 
 ### Live VLAN reconciliation
 
-Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
-NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
+Reconciles live VLAN names, descriptions, and tagged/untagged interface
+memberships with NetBox objects using ordered device, interface-name,
+VLAN-name, and VLAN-ID mapping rules plus
 an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
 loaded from YAML through `nf://` URLs, using `match_device_names`,
 `match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
@@ -819,10 +814,15 @@ the first device supplies values when later devices report a conflict. Optional
 strict group enforcement reports and skips VLANs that would otherwise fall back
 to their device site. Explicit out-of-range or scope-incompatible group mappings
 are reported and skipped without fallback.
+One scope/VID diff includes attribute and membership changes, including native
+VLAN replacements outside the selected VID set. Missing VLANs are created before
+interface assignments; a creation failure stops the task. Python, NFCLI, REST,
+and MCP expose the same dry-run and approval preview.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines
-live-state quality; the task does not delete VLANs because live data cannot
-reliably identify stale NetBox objects.
+live-state quality; referenced interfaces must already exist. Membership removal
+is limited to successfully collected devices and resolved VLANs. The task does
+not delete VLAN objects.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vlans.md)
 
 ### Live VRRP reconciliation

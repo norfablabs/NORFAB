@@ -849,6 +849,26 @@ commands:
       !
       vlan 610
          name TEST_S1_SUBIF
+      !
+      interface Port-Channel41
+         switchport trunk native vlan 410
+         switchport trunk allowed vlan 410-411,510
+      !
+      interface Ethernet2.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet3.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet4.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet8
+         switchport access vlan 510
+      !
+      interface Ethernet9.610
+         encapsulation dot1q vlan 610
+      !
     prompt:
     - '{base_prompt}>'
     - '{base_prompt}#'

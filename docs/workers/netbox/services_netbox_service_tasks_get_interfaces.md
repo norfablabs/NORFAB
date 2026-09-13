@@ -51,7 +51,9 @@ Normal mode returns a dictionary keyed by device name and interface name:
 - Supplying `branch` forces `cache=False` so main-context cached data cannot be returned for a branch read.
 - `interface_list` maps to the NFCLI alias `interface-list`.
 - `interface_regex` maps to the NFCLI alias `interface-regex`.
-- `brief=True` affects only the returned payload. The task still fetches full interface data before reducing it.
+- `brief=True` affects only the returned payload. The task still fetches full
+  interface data before reducing it. The brief payload excludes VLAN membership;
+  use `sync_vlans` results for the normalized VLAN membership view.
 - If no interface data is returned, the task raises an error by default. Set
   `raise_on_empty=False` to return the selected device keys with empty interface
   dictionaries instead.

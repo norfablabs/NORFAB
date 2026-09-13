@@ -913,6 +913,29 @@ commands:
       !
       vlan 620
          name TEST_S2_SUBIF
+      !
+      interface Port-Channel42
+         switchport trunk native vlan 420
+         switchport trunk allowed vlan 420-421,520
+      !
+      interface Ethernet2.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet3.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet4.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet5.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet8
+         switchport access vlan 520
+      !
+      interface Ethernet9.620
+         encapsulation dot1q vlan 620
+      !
     prompt:
     - '{base_prompt}>'
     - '{base_prompt}#'

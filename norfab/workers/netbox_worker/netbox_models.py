@@ -1505,28 +1505,6 @@ class SyncDeviceInterfacesInput(
         alias="update-type",
         json_schema_extra={"presence": True},
     )
-    vlan_group: Union[None, StrictStr] = Field(
-        None,
-        description="Exact VLAN group name used for interface VLANs not matched by vlan-map",
-        alias="vlan-group",
-    )
-    vlan_map: Union[None, StrictStr, List[VlanMapRule]] = Field(
-        None,
-        description="Ordered interface VLAN mapping rules or nf:// YAML file reference",
-        alias="vlan-map",
-    )
-    require_vlan_group: StrictBool = Field(
-        False,
-        description="Require every interface VLAN to resolve to a VLAN group",
-        alias="require-vlan-group",
-        json_schema_extra={"presence": True},
-    )
-    ignore_vlans: StrictBool = Field(
-        False,
-        description="Ignore discovered VLANs and leave interface VLAN associations unchanged",
-        alias="ignore-vlans",
-        json_schema_extra={"presence": True},
-    )
     ignore_vrf: StrictBool = Field(
         False,
         description="Ignore discovered VRFs and leave interface VRF associations unchanged",
@@ -2286,8 +2264,13 @@ class SyncVlansInput(
     )
     vlan_map: Union[None, StrictStr, List[VlanMapRule]] = Field(
         None,
-        description="Ordered live VLAN mapping rules or nf:// YAML file reference",
+        description="Ordered VLAN and interface membership mapping rules or nf:// YAML file reference",
         alias="vlan-map",
+    )
+    interface_map: Union[None, StrictStr, List[InterfaceMapRule]] = Field(
+        None,
+        description="Interface name mapping rules shared with interface sync",
+        alias="interface-map",
     )
     require_vlan_group: StrictBool = Field(
         False,
@@ -2333,7 +2316,7 @@ class SyncVlansInput(
 class SyncVlansResult(Result):
     result: Dict[StrictStr, Any] = Field(
         {},
-        description="VLAN sync actions keyed by NetBox VLAN scope",
+        description="VLAN attribute and interface membership actions keyed by NetBox VLAN scope",
     )
 
 

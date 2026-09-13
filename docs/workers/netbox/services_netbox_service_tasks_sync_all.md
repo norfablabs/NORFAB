@@ -11,10 +11,10 @@ The `sync_all` task synchronizes device data from live devices into NetBox in a
 fixed sequence:
 
 1. **inventory** — calls `sync_device_inventory`
-2. **vlans** — calls `sync_vlans`
-3. **prefixes** — calls `sync_device_prefixes`
-4. **vrfs** — calls `sync_vrfs`
-5. **interfaces** — calls `sync_device_interfaces`
+2. **prefixes** — calls `sync_device_prefixes`
+3. **vrfs** — calls `sync_vrfs`
+4. **interfaces** — calls `sync_device_interfaces`
+5. **vlans** — calls `sync_vlans`
 6. **mac_addresses** — calls `sync_mac_addresses`
 7. **ip_addresses** — calls `sync_device_ip`
 8. **bgp_peerings** — calls `sync_bgp_peerings`
@@ -24,6 +24,8 @@ fixed sequence:
 The `sync_all` task orchestrates eight subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When `dry_run=True`, all tasks preview changes
 without writing. When `with_approval=True`, each stage waits for user confirmation before applying changes.
+If VLAN synchronization fails, `sync_all` returns immediately and does not run
+MAC address, IP address, or BGP peering synchronization.
 
 ## Execution Modes
 
@@ -51,10 +53,6 @@ sync_device_inventory:
   inventory_map: nf://netbox/inventory_maps/iosxr.yaml
   message: sync all device data
 
-sync_vlans:
-  filter_by_vlan_ids:
-    - 100-299
-
 sync_device_prefixes:
   ignore_vrf: true
   ignore_site: true
@@ -64,6 +62,11 @@ sync_vrfs:
 
 sync_device_interfaces:
   process_deletions: true
+  interface_map: nf://netbox/interface_map.yaml
+
+sync_vlans:
+  filter_by_vlan_ids:
+    - 100-299
   interface_map: nf://netbox/interface_map.yaml
   vlan_map: nf://netbox/vlan_map.yaml
 
@@ -202,10 +205,13 @@ When `dry_run=True` the same structure is returned but no changes are written to
                     "create_module_types": True,
                     "inventory_map": "nf://netbox/inventory_maps/iosxr.yaml",
                 },
-                "sync_vlans": {"filter_by_vlan_ids": ["100-299"]},
                 "sync_device_prefixes": {"ignore_vrf": True},
                 "sync_vrfs": {"device_custom_field": "devices"},
                 "sync_device_interfaces": {
+                    "interface_map": "nf://netbox/interface_map.yaml",
+                },
+                "sync_vlans": {
+                    "filter_by_vlan_ids": ["100-299"],
                     "interface_map": "nf://netbox/interface_map.yaml",
                     "vlan_map": "nf://netbox/vlan_map.yaml",
                 },
@@ -228,7 +234,7 @@ nf# man tree netbox.sync.all
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, VLANs, prefixes, VRFs, interfaces, MAC addresses, IP addresses and BGP peerings
+        └── all:    Sync inventory, prefixes, VRFs, interfaces, VLANs, MAC addresses, IP addresses and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'
