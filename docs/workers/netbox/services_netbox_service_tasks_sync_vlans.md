@@ -118,14 +118,13 @@ criteria are optional:
     - Ethernet*
 ```
 
-Rules are evaluated in list order and the first match wins. Values inside one
-criterion use OR logic. Populated criteria use AND logic. VLAN and device names
-use case-sensitive glob matching. VLAN ranges are inclusive and must remain
-within `1..4094`. Each tagged or untagged interface membership is mapped
-individually using `match_interface_names`. A VLAN can therefore resolve to
-different groups for different interfaces; each group gets its own VLAN and
-memberships. For VLANs without interfaces, rules with interface-name criteria
-do not match. `match_vlan_ids` controls whether the rule
+Rules are evaluated in list order and the first match wins for the entire VLAN
+and all its memberships. Values inside one criterion use OR logic. Populated
+criteria use AND logic. VLAN and device names use case-sensitive glob matching.
+VLAN ranges are inclusive and must remain within `1..4094`.
+`match_interface_names` matches when any tagged or untagged interface on the
+VLAN matches the rule. For VLANs without interfaces, rules with interface-name
+criteria do not match. `match_vlan_ids` controls whether the rule
 selects its group; after selection, the group's own `vid_ranges` are validated
 separately. An unmatched VLAN uses `vlan_group` when supplied. Without either
 group match, it uses its device site unless `require_vlan_group=True`; strict
@@ -133,16 +132,20 @@ mode reports and skips that VLAN instead.
 
 `interface_map` uses the same device name, device type, match, and replacement
 rules as `sync_device_interfaces`. The task applies the first matching rename
-rule before VLAN mapping and NetBox interface lookup. Pass the same interface
+rule using substring containment before VLAN mapping and NetBox interface
+lookup. When different selected live names map to the same NetBox interface
+name, only the first name from a successfully resolved VLAN and its memberships
+are processed. Pass the same interface
 map to both tasks when live interface names are renamed.
 
 The task resolves groups by exact name and does not create or update groups.
-VLANs matching a group that does not exist are skipped and reported
-individually. A group selected by `vlan_map` or `vlan_group` is validated against
-both its VID ranges and the device scope. An incompatible selection is logged
-as an error, included in `errors`, and skipped without falling back to another
-VLAN; the error directs the operator to fix the group scope, VID ranges, or
-mapping.
+All groups named by `vlan_map` or `vlan_group` are checked before live data is
+collected. Missing groups are logged and included in `errors`. VLANs selecting a
+missing group are skipped while other VLANs continue. A selected group is
+validated against both its VID ranges and the device scope. An incompatible
+selection is logged as an error, included in `errors`, and skipped without
+falling back to another VLAN; the error directs the operator to fix the group
+scope, VID ranges, or mapping.
 
 Store the same YAML list in the File Sharing service and pass its URL when the
 rules are reused or maintained separately:
@@ -178,32 +181,32 @@ live description.
 
 Identical live records from multiple devices in one scope are collapsed. Live
 VLANs with the same VID but different names or descriptions are reported as
-source conflicts. The first device in sorted device-name order supplies the
-values to synchronize; each later conflicting device is identified in `errors`.
-A conflict does not fail or skip that VLAN: the task still creates or updates it
-using the first device's values. Results returned for the same device by
-multiple Nornir workers are aggregated before identical live records are
-collapsed.
+source conflicts. An automatically derived name matching `VLAN<VID>` yields to
+the first different name reported by a device. Otherwise, the first device in
+sorted device-name order supplies the value to synchronize. Each conflicting
+device is identified in `errors`. A conflict does not fail or skip that VLAN.
+Results returned for the same device by multiple Nornir workers are aggregated
+before identical live records are collapsed.
 
 ### Interface memberships
 
-Live and NetBox state use the same `scope -> VID -> fields` structure. Each VLAN
-has `name`, `description`, `tagged_interfaces`, and `untagged_interfaces` fields.
-Memberships are sorted, deduplicated lists of `device:interface` references.
-VLAN attribute conflicts do not discard memberships from other devices.
+VLAN attributes and interface assignments use separate snapshots. VLAN state is
+keyed by NetBox scope and VID. Interface state is keyed by device and interface
+name, with `mode`, `tagged_vlans`, and `untagged_vlan` fields. VLAN references
+use `scope/VID`, for example `site:NORFAB-LAB/110` or `group:CAMPUS/210`.
 
-The task adds reported memberships and removes stale memberships for each
-successfully collected device and resolved VLAN. Empty lists clear those
-memberships. Assignments on other devices and unresolved or unselected VLANs
-are preserved. VLAN objects and interfaces are never deleted or created as a
-side effect of membership removal; missing referenced interfaces are errors.
+The task adds reported memberships and preserves existing NetBox memberships.
+Empty live membership lists do not clear tagged or untagged assignments.
+Assignments on other devices and unresolved or unselected VLANs are also
+preserved. Missing referenced interfaces are reported and omitted from the
+interface diff while VLAN processing continues.
 
 An interface may carry the same VLAN both tagged and untagged, or use different
-VLANs for tagged and untagged traffic. Multiple different desired untagged VLANs
-on one interface are an error detected before writes. A new untagged assignment
-replaces the current assignment even when the old VLAN is outside the VID
-filter. That old VLAN's untagged membership removal appears in the same diff;
-its attributes and other memberships are preserved.
+VLANs for tagged and untagged traffic. A new untagged assignment replaces the
+current assignment even when the old VLAN is outside the VID filter. The
+interface diff reports the old and new `untagged_vlan` references directly.
+This native VLAN replacement is the only membership removal performed by the
+task.
 
 An interface with any tagged VLAN uses `tagged` mode, including an interface
 that also has an untagged VLAN. An interface with only an untagged VLAN uses
@@ -212,37 +215,59 @@ Q-in-Q service VLAN assignments are not currently synchronized.
 
 ## Output
 
-Results are keyed by scope, for example `group:CAMPUS`, `site:NORFAB-LAB`, or
-`global`.
+Results have two top-level keys. `vlans` contains VLAN attribute actions keyed
+by scope, such as `group:CAMPUS`, `site:NORFAB-LAB`, or `global`. `interfaces`
+contains mode and membership actions keyed by device and interface name.
 
-Dry-run returns the standard sync diff shape:
+Dry-run returns both standard sync diffs:
 
 ```json
 {
-  "site:NORFAB-LAB": {
-    "create": [110],
-    "create_details": {
-      "110": {
-        "name": "VOICE",
-        "description": "",
-        "tagged_interfaces": ["leaf-1:Ethernet5"],
-        "untagged_interfaces": []
-      }
-    },
-    "update": {
-      "210": {
-        "name": {
-          "old_value": "VLAN_210",
-          "new_value": "USERS"
-        },
-        "untagged_interfaces": {
-          "old_value": [],
-          "new_value": ["leaf-1:Ethernet6"]
+  "vlans": {
+    "site:NORFAB-LAB": {
+      "create": [110],
+      "create_details": {
+        "110": {
+          "name": "VOICE",
+          "description": ""
         }
-      }
-    },
-    "delete": [],
-    "in_sync": [310]
+      },
+      "update": {
+        "210": {
+          "name": {
+            "old_value": "VLAN_210",
+            "new_value": "USERS"
+          }
+        }
+      },
+      "delete": [],
+      "in_sync": [310]
+    }
+  },
+  "interfaces": {
+    "leaf-1": {
+      "create": [],
+      "update": {
+        "Ethernet6": {
+          "mode": {
+            "old_value": "tagged",
+            "new_value": "access"
+          },
+          "untagged_vlan": {
+            "old_value": "site:NORFAB-LAB/100",
+            "new_value": "site:NORFAB-LAB/110"
+          }
+        },
+        "Ethernet5": {
+          "tagged_vlans": {
+            "old_value": [],
+            "new_value": ["site:NORFAB-LAB/110"]
+          }
+        }
+      },
+      "delete": [],
+      "in_sync": []
+    }
   }
 }
 ```
@@ -252,11 +277,21 @@ the top-level `diff` field:
 
 ```json
 {
-  "site:NORFAB-LAB": {
-    "created": [110],
-    "updated": [210],
-    "deleted": [],
-    "in_sync": [310]
+  "vlans": {
+    "site:NORFAB-LAB": {
+      "created": [110],
+      "updated": [210],
+      "deleted": [],
+      "in_sync": [310]
+    }
+  },
+  "interfaces": {
+    "leaf-1": {
+      "created": [],
+      "updated": ["Ethernet5", "Ethernet6"],
+      "deleted": [],
+      "in_sync": []
+    }
   }
 }
 ```
@@ -264,10 +299,10 @@ the top-level `diff` field:
 An existing VLAN with a stale name is updated directly because name is not part
 of identity matching.
 
-`create_details` displays the desired attributes and memberships of new VLANs
-alongside the standard `make_diff` actions. An existing VLAN with only membership
-changes is included in `update`/`updated`. Dry-run and approval show the complete
-preview before any writes. The same preview is retained in `diff`.
+`create_details` displays the desired attributes of new VLANs alongside the
+standard `make_diff` actions. Membership-only changes appear under `interfaces`
+and do not mark the VLAN object as updated. Dry-run and approval show both diffs
+before any writes. The same preview is retained in `diff`.
 
 ## Deletions
 

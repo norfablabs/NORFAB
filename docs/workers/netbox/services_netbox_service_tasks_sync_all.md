@@ -102,7 +102,7 @@ at the `sync_all` level rather than repeating them inside a task dictionary.
 
 ## Output
 
-The result structure aggregates the outcomes of all eight subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device.
+The result structure aggregates the outcomes of all eight subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate `vlans` and `interfaces` sections; its `interfaces` section contains only the current device.
 
 ```python
 {
@@ -116,11 +116,21 @@ The result structure aggregates the outcomes of all eight subordinate sync tasks
                 "in_sync": [ ... ],
             },
             "vlans": {
-                "site:DC1": {
-                    "create": [ ... ],
-                    "update": { ... },
-                    "delete": [],
-                    "in_sync": [ ... ],
+                "vlans": {
+                    "site:DC1": {
+                        "create": [ ... ],
+                        "update": { ... },
+                        "delete": [],
+                        "in_sync": [ ... ],
+                    },
+                },
+                "interfaces": {
+                    "ceos-spine-1": {
+                        "create": [],
+                        "update": { ... },
+                        "delete": [],
+                        "in_sync": [ ... ],
+                    },
                 },
             },
             "prefixes": {

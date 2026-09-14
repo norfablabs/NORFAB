@@ -36,7 +36,13 @@ class TestSyncAllOrchestration:
         ("sync_device_prefixes", {"created": [], "updated": [], "in_sync": []}),
         ("sync_vrfs", {"global": {}}),
         ("sync_device_interfaces", {"device-1": {}}),
-        ("sync_vlans", {"site:test": {}}),
+        (
+            "sync_vlans",
+            {
+                "vlans": {"site:test": {}},
+                "interfaces": {"device-1": {}, "other-device": {}},
+            },
+        ),
         ("sync_mac_addresses", {"device-1": {}}),
         ("sync_device_ip", {"device-1": {}}),
         ("sync_bgp_peerings", {"device-1": {}}),
@@ -76,7 +82,7 @@ class TestSyncAllOrchestration:
     def test_sync_all_task_order(self) -> None:
         calls = []
 
-        NetboxDevicesTasks.sync_all(
+        result = NetboxDevicesTasks.sync_all(
             self._worker(calls),
             self._job(),
             devices=["device-1"],
@@ -84,6 +90,10 @@ class TestSyncAllOrchestration:
         )
 
         assert calls == [task_name for task_name, _ in self.TASKS]
+        assert result.result["device-1"]["vlans"] == {
+            "vlans": {"site:test": {}},
+            "interfaces": {"device-1": {}},
+        }
 
     def test_sync_all_stops_after_failed_vlan_sync(self) -> None:
         calls = []
@@ -1159,6 +1169,7 @@ class TestSyncAll:
                         f"{worker}:{device}:{category} result should be a dict, "
                         f"got {type(device_data[category])}"
                     )
+                assert set(device_data["vlans"]["interfaces"]) <= {device}
 
     def test_sync_all_dry_run_no_writes(self, nfclient):
         """dry_run=True must not write any sync-all stage changes."""

@@ -96,16 +96,20 @@ class TestSyncVlanMemberships:
             for index, name in enumerate(records, 1)
         ]
         nb = SimpleNamespace(
-            dcim=SimpleNamespace(devices=Mock(), interfaces=Mock()),
+            dcim=SimpleNamespace(
+                devices=Mock(), interfaces=Mock(), sites=Mock(), racks=Mock()
+            ),
             ipam=SimpleNamespace(vlans=Mock(), vlan_groups=Mock()),
         )
         nb.dcim.devices.filter.return_value = devices
         nb.dcim.interfaces.filter.return_value = interfaces
-        nb.ipam.vlan_groups.get.side_effect = lambda name: next(
-            (g for g in groups if g.name == name), None
-        )
-        nb.ipam.vlan_groups.filter.side_effect = lambda id, **_: [
-            g for g in groups if g.id in id
+        nb.dcim.sites.filter.return_value = [site]
+        nb.dcim.racks.filter.return_value = []
+        nb.ipam.vlan_groups.filter.side_effect = lambda **filters: [
+            group
+            for group in groups
+            if ("id" not in filters or group.id in filters["id"])
+            and ("name" not in filters or group.name in filters["name"])
         ]
         nb.ipam.vlans.filter.side_effect = lambda **filters: [
             v
@@ -167,17 +171,24 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        assert result.result["site:lab"]["created"] == [50]
+        assert result.result["vlans"]["site:lab"]["created"] == [50]
+        assert result.result["interfaces"]["leaf-1"]["updated"] == ["Ethernet6"]
         nb.ipam.vlans.create.assert_called_once()
         assert nb.dcim.interfaces.update.call_args.args[0] == [
             {"id": 10, "tagged_vlans": [2000], "untagged_vlan": 2000, "mode": "tagged"}
         ]
         nb.dcim.interfaces.update.reset_mock()
         second = worker.sync_vlans(job, devices=["leaf-1"])
-        assert second.result["site:lab"]["in_sync"] == [50]
+        assert second.result["vlans"]["site:lab"]["in_sync"] == [50]
+        assert second.result["interfaces"]["leaf-1"]["in_sync"] == ["Ethernet6"]
         nb.dcim.interfaces.update.assert_not_called()
+        assert nb.dcim.sites.filter.call_args_list[0].kwargs == {
+            "id": [1],
+            "fields": "id,name,region,group",
+        }
+        nb.dcim.racks.filter.assert_not_called()
 
-    def test_existing_membership_diff_preserves_unmanaged_tagged_vlan(self) -> None:
+    def test_membership_updates_are_additive(self) -> None:
         vlan, unmanaged = self._vlan(50), self._vlan(900)
         result, nb, _, _ = self._run(
             {"leaf-1": [self._live(tagged=("Ethernet5",))]},
@@ -189,16 +200,23 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        assert result.diff["site:lab"]["update"]["50"]["tagged_interfaces"] == {
-            "old_value": ["leaf-1:Ethernet6"],
-            "new_value": ["leaf-1:Ethernet5"],
+        assert result.diff["interfaces"]["leaf-1"]["update"]["Ethernet5"][
+            "tagged_vlans"
+        ] == {
+            "old_value": [],
+            "new_value": ["site:lab/50"],
         }
-        payloads = {p["id"]: p for p in nb.dcim.interfaces.update.call_args.args[0]}
-        assert payloads[10]["tagged_vlans"] == [unmanaged.id]
-        assert payloads[11]["tagged_vlans"] == [vlan.id]
+        assert nb.dcim.interfaces.update.call_args.args[0] == [
+            {
+                "id": 11,
+                "tagged_vlans": [vlan.id],
+                "untagged_vlan": None,
+                "mode": "tagged",
+            }
+        ]
         nb.ipam.vlans.update.assert_not_called()
 
-    def test_native_replacement_outside_filter_is_in_same_diff(self) -> None:
+    def test_native_replacement_outside_filter_is_in_interface_diff(self) -> None:
         previous = self._vlan(900, description="keep this")
         result, nb, _, _ = self._run(
             {"leaf-1": [self._live(untagged=("Ethernet6",))]},
@@ -208,20 +226,19 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        actions = result.diff["site:lab"]
-        assert actions["create"] == [50]
-        assert actions["create_details"]["50"]["untagged_interfaces"] == [
-            "leaf-1:Ethernet6"
-        ]
-        assert actions["update"]["900"] == {
-            "untagged_interfaces": {"old_value": ["leaf-1:Ethernet6"], "new_value": []}
+        assert result.diff["vlans"]["site:lab"]["create"] == [50]
+        assert result.diff["interfaces"]["leaf-1"]["update"]["Ethernet6"][
+            "untagged_vlan"
+        ] == {
+            "old_value": "site:lab/900",
+            "new_value": "site:lab/50",
         }
         payload = nb.dcim.interfaces.update.call_args.args[0][0]
         assert payload["untagged_vlan"] == 2001
         assert payload["tagged_vlans"] == [previous.id]
         nb.ipam.vlans.update.assert_not_called()
 
-    def test_mapping_splits_same_vid_by_interface(self) -> None:
+    def test_first_mapping_rule_applies_to_entire_vlan(self) -> None:
         groups = [TestVlanResolution._group(30), TestVlanResolution._group(40)]
         result, nb, _, _ = self._run(
             {"leaf-1": [self._live(tagged=("Ethernet5", "Ethernet6"))]},
@@ -237,11 +254,15 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        assert result.result["group:group-30"]["created"] == [50]
-        assert result.result["group:group-40"]["created"] == [50]
+        assert result.result["vlans"]["group:group-30"]["created"] == [50]
+        assert "group:group-40" not in result.result["vlans"]
+        assert nb.ipam.vlan_groups.filter.call_args_list[0].kwargs == {
+            "name": ["group-30", "group-40"],
+            "fields": "id,name,vid_ranges,scope_type,scope_id,scope",
+        }
         payloads = {p["id"]: p for p in nb.dcim.interfaces.update.call_args.args[0]}
         assert payloads[11]["tagged_vlans"] == [2000]
-        assert payloads[10]["tagged_vlans"] == [2001]
+        assert payloads[10]["tagged_vlans"] == [2000]
 
     def test_interface_map_is_applied_before_membership_lookup(self) -> None:
         result, nb, _, _ = self._run(
@@ -259,10 +280,93 @@ class TestSyncVlanMemberships:
         )
 
         assert not result.failed and not result.errors
-        assert result.diff["site:lab"]["create_details"]["50"]["tagged_interfaces"] == [
-            "leaf-1:Et6"
-        ]
+        assert result.diff["interfaces"]["leaf-1"]["update"]["Et6"]["tagged_vlans"][
+            "new_value"
+        ] == ["site:lab/50"]
         assert nb.dcim.interfaces.update.call_args.args[0][0]["tagged_vlans"] == [2000]
+
+    def test_interface_map_processes_first_name_when_mappings_collide(self) -> None:
+        result, nb, _, _ = self._run(
+            {
+                "leaf-1": [
+                    self._live(tagged=("Ethernet6",)),
+                    self._live(102, tagged=("Et6",)),
+                ]
+            },
+            interfaces=[self._interface(name="Et6")],
+            interface_map=[
+                {
+                    "device_name": "leaf-*",
+                    "device_type": "test",
+                    "match": "Ethernet",
+                    "replace": "Et",
+                }
+            ],
+            dry_run=False,
+        )
+
+        assert not result.failed and not result.errors
+        assert result.result["vlans"]["site:lab"]["created"] == [50, 102]
+        assert nb.dcim.interfaces.update.call_args.args[0] == [
+            {"id": 10, "tagged_vlans": [2000], "untagged_vlan": None, "mode": "tagged"}
+        ]
+
+    def test_filtered_vlan_does_not_claim_mapped_interface(self) -> None:
+        result, nb, _, _ = self._run(
+            {
+                "leaf-1": [
+                    self._live(tagged=("Ethernet6",)),
+                    self._live(102, tagged=("Et6",)),
+                ]
+            },
+            interfaces=[self._interface(name="Et6")],
+            interface_map=[
+                {
+                    "device_name": "leaf-*",
+                    "device_type": "test",
+                    "match": "Ethernet",
+                    "replace": "Et",
+                }
+            ],
+            filter_by_vlan_ids=["102"],
+            dry_run=False,
+        )
+
+        assert not result.failed and not result.errors
+        assert result.result["vlans"]["site:lab"]["created"] == [102]
+        assert nb.dcim.interfaces.update.call_args.args[0] == [
+            {"id": 10, "tagged_vlans": [2000], "untagged_vlan": None, "mode": "tagged"}
+        ]
+
+    def test_skipped_vlan_does_not_claim_mapped_interface(self) -> None:
+        group = TestVlanResolution._group(30, vid_ranges=[[102, 102]])
+        result, nb, _, _ = self._run(
+            {
+                "leaf-1": [
+                    self._live(tagged=("Ethernet6",)),
+                    self._live(102, tagged=("Et6",)),
+                ]
+            },
+            groups=[group],
+            interfaces=[self._interface(name="Et6")],
+            vlan_map=[{"set_vlan_group": "group-30", "match_vlan_ids": ["50"]}],
+            interface_map=[
+                {
+                    "device_name": "leaf-*",
+                    "device_type": "test",
+                    "match": "Ethernet",
+                    "replace": "Et",
+                }
+            ],
+            dry_run=False,
+        )
+
+        assert not result.failed
+        assert "outside VLAN group 'group-30' VID ranges" in result.errors[0]
+        assert result.result["vlans"]["site:lab"]["created"] == [102]
+        assert nb.dcim.interfaces.update.call_args.args[0] == [
+            {"id": 10, "tagged_vlans": [2000], "untagged_vlan": None, "mode": "tagged"}
+        ]
 
     def test_interface_rule_does_not_match_vlan_without_interfaces(self) -> None:
         result, nb, _, _ = self._run(
@@ -271,11 +375,11 @@ class TestSyncVlanMemberships:
             vlan_map=[{"set_vlan_group": "group-30", "match_interface_names": ["*"]}],
         )
         assert not result.failed and not result.errors
-        assert result.result["site:lab"]["create"] == [50]
-        assert result.result["group:group-30"]["create"] == []
+        assert result.result["vlans"]["site:lab"]["create"] == [50]
+        assert "group:group-30" not in result.result["vlans"]
         nb.ipam.vlans.create.assert_not_called()
 
-    def test_shared_vlan_keeps_all_devices_memberships_despite_name_conflict(
+    def test_shared_vlan_prefers_non_automatic_name_and_keeps_memberships(
         self,
     ) -> None:
         result, _, _, _ = self._run(
@@ -290,10 +394,17 @@ class TestSyncVlanMemberships:
         )
         assert not result.failed
         assert len(result.errors) == 1 and "source conflict" in result.errors[0]
-        desired = result.result["site:lab"]["create_details"]["50"]
-        assert desired["name"] == "VLAN50"
-        assert desired["tagged_interfaces"] == ["leaf-2:Ethernet6"]
-        assert desired["untagged_interfaces"] == ["leaf-1:Ethernet6"]
+        desired = result.result["vlans"]["site:lab"]["create_details"]["50"]
+        assert desired["name"] == "other"
+        assert result.result["interfaces"]["leaf-2"]["update"]["Ethernet6"][
+            "tagged_vlans"
+        ]["new_value"] == ["site:lab/50"]
+        assert (
+            result.result["interfaces"]["leaf-1"]["update"]["Ethernet6"][
+                "untagged_vlan"
+            ]["new_value"]
+            == "site:lab/50"
+        )
 
     def test_creation_failure_stops_attribute_and_interface_updates(self) -> None:
         result, nb, _, _ = self._run(
@@ -323,36 +434,31 @@ class TestSyncVlanMemberships:
             with_approval=with_approval,
         )
         assert result.dry_run and not result.failed
-        assert result.result["site:lab"]["create_details"]["50"][
-            "untagged_interfaces"
-        ] == ["leaf-1:Ethernet6"]
+        assert result.result["vlans"]["site:lab"]["create_details"]["50"] == {
+            "name": "VLAN50",
+            "description": "",
+        }
+        assert (
+            result.result["interfaces"]["leaf-1"]["update"]["Ethernet6"][
+                "untagged_vlan"
+            ]["new_value"]
+            == "site:lab/50"
+        )
         assert job.request_input.call_count == int(with_approval)
         nb.ipam.vlans.create.assert_not_called()
         nb.ipam.vlans.update.assert_not_called()
         nb.dcim.interfaces.update.assert_not_called()
 
-    def test_missing_interface_fails_before_writes(self) -> None:
+    def test_missing_interface_is_reported_and_vlan_is_created(self) -> None:
         result, nb, _, _ = self._run(
             {"leaf-1": [self._live(tagged=("Ethernet404",))]}, dry_run=False
         )
-        assert result.failed and "not found in NetBox" in result.errors[-1]
-        nb.ipam.vlans.create.assert_not_called()
+        assert not result.failed and "not found in NetBox" in result.errors[-1]
+        assert result.result["vlans"]["site:lab"]["created"] == [50]
+        assert result.result["interfaces"] == {}
+        nb.dcim.interfaces.update.assert_not_called()
 
-    def test_multiple_untagged_vlans_fail_before_writes(self) -> None:
-        result, nb, _, _ = self._run(
-            {
-                "leaf-1": [
-                    self._live(50, untagged=("Ethernet6",)),
-                    self._live(102, untagged=("Ethernet6",)),
-                ]
-            },
-            interfaces=[self._interface()],
-            dry_run=False,
-        )
-        assert result.failed and "multiple live untagged VLANs" in result.errors[-1]
-        nb.ipam.vlans.create.assert_not_called()
-
-    def test_empty_memberships_clear_only_managed_device_vlan(self) -> None:
+    def test_empty_memberships_preserve_netbox_assignments(self) -> None:
         vlan = self._vlan(50)
         result, nb, _, _ = self._run(
             {"leaf-1": [self._live()], "leaf-2": []},
@@ -364,11 +470,11 @@ class TestSyncVlanMemberships:
             dry_run=False,
         )
         assert not result.failed and not result.errors
-        assert nb.dcim.interfaces.update.call_args.args[0] == [
-            {"id": 10, "tagged_vlans": [], "untagged_vlan": None}
-        ]
+        assert result.result["vlans"]["site:lab"]["in_sync"] == [50]
+        assert result.result["interfaces"] == {}
+        nb.dcim.interfaces.update.assert_not_called()
 
-    def test_later_creation_failure_reports_earlier_created_vlan(self) -> None:
+    def test_bulk_creation_failure_stops_all_later_writes(self) -> None:
         groups = [TestVlanResolution._group(30), TestVlanResolution._group(40)]
         rules = [
             {"set_vlan_group": "group-30", "match_vlan_ids": ["50"]},
@@ -379,16 +485,35 @@ class TestSyncVlanMemberships:
             groups=groups,
             vlan_map=rules,
         )
-        nb.ipam.vlans.create.side_effect = [
-            [self._vlan(50, group=groups[0])],
-            RuntimeError("second scope failed"),
-        ]
+        nb.ipam.vlans.create.side_effect = RuntimeError("bulk creation failed")
         result = worker.sync_vlans(job, devices=["leaf-1"], vlan_map=rules)
         assert result.failed
-        assert result.result["group:group-30"]["created"] == [50]
-        assert result.result["group:group-40"]["created"] == []
+        assert result.result["vlans"]["group:group-30"]["created"] == []
+        assert result.result["vlans"]["group:group-40"]["created"] == []
+        assert nb.ipam.vlans.create.call_count == 1
         nb.ipam.vlans.update.assert_not_called()
         nb.dcim.interfaces.update.assert_not_called()
+
+    def test_vlan_attributes_are_updated_in_one_bulk_request(self) -> None:
+        groups = [TestVlanResolution._group(30), TestVlanResolution._group(40)]
+        result, nb, _, _ = self._run(
+            {"leaf-1": [self._live(), self._live(102)]},
+            vlans=[
+                self._vlan(50, group=groups[0], name="old-50"),
+                self._vlan(102, group=groups[1], name="old-102"),
+            ],
+            groups=groups,
+            vlan_map=[
+                {"set_vlan_group": "group-30", "match_vlan_ids": ["50"]},
+                {"set_vlan_group": "group-40", "match_vlan_ids": ["102"]},
+            ],
+            dry_run=False,
+        )
+
+        assert not result.failed and not result.errors
+        nb.ipam.vlans.update.assert_called_once_with(
+            [{"id": 1050, "name": "VLAN50"}, {"id": 1102, "name": "VLAN102"}]
+        )
 
     def test_different_tagged_and_untagged_vids_share_one_interface_payload(
         self,
@@ -434,18 +559,12 @@ class TestVlanResolution:
     def _device_scope(cls, **overrides: Any) -> dict[str, Any]:
         scope = {
             "device_name": "leaf-1",
-            "site_id": 1,
-            "site_name": "site-a",
-            "region_id": 10,
-            "region_name": "region-a",
-            "site_group_id": 20,
-            "site_group_name": "sites-a",
-            "location_id": 30,
-            "location_name": "location-a",
-            "rack_id": 40,
-            "rack_name": "rack-a",
-            "rack_group_id": 50,
-            "rack_group_name": "racks-a",
+            "site": cls._record(id=1, name="site-a"),
+            "region": cls._record(id=10, name="region-a"),
+            "sitegroup": cls._record(id=20, name="sites-a"),
+            "location": cls._record(id=30, name="location-a"),
+            "rack": cls._record(id=40, name="rack-a"),
+            "rackgroup": cls._record(id=50, name="racks-a"),
         }
         scope.update(overrides)
         return scope
@@ -568,17 +687,11 @@ class TestVlanResolution:
         )
 
     @pytest.mark.parametrize(
-        ("scope_type", "id_field", "name_field"),
-        [
-            ("location", "location_id", "location_name"),
-            ("rack", "rack_id", "rack_name"),
-            ("rackgroup", "rack_group_id", "rack_group_name"),
-        ],
+        "scope_type",
+        ["location", "rack", "rackgroup"],
     )
-    def test_missing_device_scope_rejects_group(
-        self, scope_type: str, id_field: str, name_field: str
-    ) -> None:
-        device_scope = self._device_scope(**{id_field: None, name_field: None})
+    def test_missing_device_scope_rejects_group(self, scope_type: str) -> None:
+        device_scope = self._device_scope(**{scope_type: None})
 
         error = validate_vlan_group_scope(
             self._group(30, scope_type, 999), device_scope, 100
@@ -778,7 +891,7 @@ class TestSyncVlans:
             filter_by_vlan_ids=vlan_filter,
         )
         for result in self._successful_results(dry_run):
-            actions = result["result"][self._site_scope()]
+            actions = result["result"]["vlans"][self._site_scope()]
             assert actions["create"] == [190, 191]
             assert actions["update"] == {}
             assert actions["delete"] == []
@@ -791,7 +904,10 @@ class TestSyncVlans:
             filter_by_vlan_ids=vlan_filter,
         )
         for result in self._successful_results(first_sync):
-            assert result["result"][self._site_scope()]["created"] == [190, 191]
+            assert result["result"]["vlans"][self._site_scope()]["created"] == [
+                190,
+                191,
+            ]
 
         assert self._site_vlan(190).name == "TEST_SYNC_CONFLICT_L1"
         assert self._site_vlan(191).name == "TEST_SYNC_SHARED"
@@ -802,7 +918,7 @@ class TestSyncVlans:
             filter_by_vlan_ids=vlan_filter,
         )
         for result in self._successful_results(second_sync):
-            actions = result["result"][self._site_scope()]
+            actions = result["result"]["vlans"][self._site_scope()]
             assert actions["created"] == []
             assert actions["updated"] == []
             assert actions["in_sync"] == [190, 191]
@@ -822,7 +938,7 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"][self._site_scope()]["updated"] == [120]
+            assert result["result"]["vlans"][self._site_scope()]["updated"] == [120]
         vlan = self._site_vlan(120)
         assert vlan.name == "TEST_L2_TRUNK_A"
         assert vlan.description == "stale description"
@@ -835,7 +951,7 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"][self._site_scope()]["updated"] == [120]
+            assert result["result"]["vlans"][self._site_scope()]["updated"] == [120]
         vlan = self._site_vlan(120)
         assert vlan.description == ""
 
@@ -860,7 +976,7 @@ class TestSyncVlans:
                 "VLAN 210 is outside VLAN group" in error and self.GROUP_1_NAME in error
                 for error in result["errors"]
             )
-            group_actions = result["result"][self._group_scope(self.group_1)]
+            group_actions = result["result"]["vlans"][self._group_scope(self.group_1)]
             assert group_actions["created"] == [110]
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._site_vlan(210) is None
@@ -876,7 +992,7 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert self._group_scope(self.group_1) in result["result"]
+            assert self._group_scope(self.group_1) in result["result"]["vlans"]
 
     def test_explicit_vlan_ids_narrow_vlan_map_match(self, nfclient: Any) -> None:
         response = self._sync(
@@ -892,12 +1008,15 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            group_actions = result["result"][self._group_scope(self.group_1)]
+            group_actions = result["result"]["vlans"][self._group_scope(self.group_1)]
             assert group_actions["created"] == [111]
-            assert result["result"]["global"]["updated"] == [110]
-            assert result["diff"]["global"]["update"]["110"]["tagged_interfaces"][
-                "new_value"
-            ] == [f"{self.DEVICE_1}:Port-Channel31"]
+            assert result["result"]["vlans"]["global"]["in_sync"] == [110]
+            assert result["diff"]["interfaces"][self.DEVICE_1]["update"][
+                "Port-Channel31"
+            ]["tagged_vlans"]["new_value"] == [
+                "global/110",
+                f"group:{self.GROUP_1_NAME}/111",
+            ]
         assert self._group_vlan(self.group_1, 111).name == "TEST_L1_TRUNK_B"
         assert self._site_vlan(110) is None
         assert self._global_vlan(110).name == "TEST_L1_TRUNK_A"
@@ -922,8 +1041,8 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            group_1_actions = result["result"][self._group_scope(self.group_1)]
-            group_2_actions = result["result"][self._group_scope(self.group_2)]
+            group_1_actions = result["result"]["vlans"][self._group_scope(self.group_1)]
+            group_2_actions = result["result"]["vlans"][self._group_scope(self.group_2)]
             assert group_1_actions["created"] == [110]
             assert group_2_actions["created"] == [111]
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
@@ -947,10 +1066,9 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            group_1_actions = result["result"][self._group_scope(self.group_1)]
-            group_2_actions = result["result"][self._group_scope(self.group_2)]
+            group_1_actions = result["result"]["vlans"][self._group_scope(self.group_1)]
             assert group_1_actions["created"] == [110]
-            assert group_2_actions["created"] == []
+            assert self._group_scope(self.group_2) not in result["result"]["vlans"]
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._group_vlan(self.group_2, 110) is None
 
@@ -968,10 +1086,13 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"]["global"]["updated"] == [121]
-            assert result["diff"]["global"]["update"]["121"]["tagged_interfaces"][
-                "new_value"
-            ] == [f"{self.DEVICE_2}:Port-Channel32"]
+            assert result["result"]["vlans"]["global"]["in_sync"] == [121]
+            assert (
+                "global/121"
+                in result["diff"]["interfaces"][self.DEVICE_2]["update"][
+                    "Port-Channel32"
+                ]["tagged_vlans"]["new_value"]
+            )
         assert self._site_vlan(121) is None
         assert self._global_vlan(121).name == "TEST_L2_TRUNK_B"
         assert self._group_vlan(self.group_1, 121) is None
@@ -997,7 +1118,7 @@ class TestSyncVlans:
                 "VLAN 121" in error and "no VLAN group mapping found" in error
                 for error in result["errors"]
             )
-            assert result["result"][self._site_scope()]["created"] == []
+            assert self._site_scope() not in result["result"]["vlans"]
         assert self._site_vlan(121) is None
         assert self._group_vlan(self.group_1, 121) is None
 
@@ -1013,7 +1134,10 @@ class TestSyncVlans:
         assert response
         for worker, result in response.items():
             assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"][self._site_scope()]["created"] == [190, 191]
+            assert result["result"]["vlans"][self._site_scope()]["created"] == [
+                190,
+                191,
+            ]
             conflict = next(
                 error
                 for error in result["errors"]
@@ -1048,7 +1172,9 @@ class TestSyncVlans:
         assert response
         for worker, result in response.items():
             assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"][self._group_scope(self.group_1)]["create"] == [190]
+            assert result["result"]["vlans"][self._group_scope(self.group_1)][
+                "create"
+            ] == [190]
             conflict = next(
                 error
                 for error in result["errors"]
@@ -1073,15 +1199,21 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            assert result["result"][self._group_scope(self.group_1)]["created"] == [110]
-            assert result["result"][self._group_scope(self.group_2)]["created"] == [210]
-            assert result["result"][self._site_scope()]["created"] == []
+            assert result["result"]["vlans"][self._group_scope(self.group_1)][
+                "created"
+            ] == [110]
+            assert result["result"]["vlans"][self._group_scope(self.group_2)][
+                "created"
+            ] == [210]
+            assert self._site_scope() not in result["result"]["vlans"]
         assert self._group_vlan(self.group_1, 110).name == "TEST_L1_TRUNK_A"
         assert self._group_vlan(self.group_2, 210).name == "TEST_L1_ACCESS"
         assert self._site_vlan(110) is None
         assert self._site_vlan(210) is None
 
-    def test_unknown_vlan_map_group_skips_matching_vlans(self, nfclient: Any) -> None:
+    def test_unknown_vlan_map_group_is_reported_and_skipped(
+        self, nfclient: Any
+    ) -> None:
         response = self._sync(
             nfclient,
             [self.DEVICE_1],
@@ -1098,9 +1230,7 @@ class TestSyncVlans:
         for worker, result in response.items():
             assert result["failed"] is False, f"{worker} failed: {result}"
             assert any(
-                "VLAN 110" in error
-                and "skipped" in error
-                and "does not exist in NetBox" in error
+                "vlan group 'DOES_NOT_EXIST' does not exist in NetBox" in error
                 for error in result["errors"]
             )
         assert self._site_vlan(110) is None
@@ -1123,9 +1253,8 @@ class TestSyncVlans:
         )
 
         for result in self._successful_results(response):
-            actions = result["result"][self._site_scope()]
-            assert actions["deleted"] == []
-            assert result["diff"][self._site_scope()]["delete"] == []
+            assert result["result"] == {"vlans": {}, "interfaces": {}}
+            assert result["diff"] == {"vlans": {}, "interfaces": {}}
         assert self._site_vlan(199).name == "KEEP_ME"
 
     def test_device_compatible_group_scope_precedes_direct_site_vlan(
@@ -1164,23 +1293,23 @@ class TestSyncVlans:
             )
 
             for result in self._successful_results(response):
-                assert result["result"][self._group_scope(group)]["update"] == {
+                assert result["result"]["vlans"][self._group_scope(group)][
+                    "update"
+                ] == {
                     "110": {
                         "name": {
                             "old_value": "STALE_GROUP_VLAN",
                             "new_value": "TEST_L1_TRUNK_A",
-                        },
-                        "tagged_interfaces": {
-                            "old_value": [],
-                            "new_value": [f"{self.DEVICE_1}:Port-Channel31"],
-                        },
-                        "untagged_interfaces": {
-                            "old_value": [],
-                            "new_value": [f"{self.DEVICE_1}:Port-Channel31"],
-                        },
+                        }
                     }
                 }
-                assert result["result"][self._site_scope()]["update"] == {}
+                assert (
+                    result["result"]["interfaces"][self.DEVICE_1]["update"][
+                        "Port-Channel31"
+                    ]["untagged_vlan"]["new_value"]
+                    == f"group:{group_name}/110"
+                )
+                assert self._site_scope() not in result["result"]["vlans"]
         finally:
             for vlan in list(self.nb.ipam.vlans.filter(group_id=group.id)):
                 vlan.delete()
@@ -1222,11 +1351,11 @@ class TestSyncVlans:
                 assert any(
                     "scoped to site 'SALTNORNIR-LAB2'" in error
                     and "device 'fn-ceos-lf-1'" in error
-                    and "fix the VLAN map mapping" in error
+                    and "fix the VLAN group scope, VID ranges, or group mapping"
+                    in error
                     for error in result["errors"]
                 )
-                assert result["result"][self._group_scope(group)]["create"] == []
-                assert result["result"][self._site_scope()]["create"] == []
+                assert result["result"] == {"vlans": {}, "interfaces": {}}
         finally:
             for vlan in list(self.nb.ipam.vlans.filter(group_id=group.id)):
                 vlan.delete()

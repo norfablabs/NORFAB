@@ -1432,7 +1432,10 @@ class NetboxDevicesTasks:
             {
                 "<device>": {
                     "inventory":     {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
-                    "vlans":         {"<scope>": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
+                    "vlans":         {
+                        "vlans": {"<scope>": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
+                        "interfaces": {"<device>": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},
+                    },
                     "prefixes":      {"created": [...], "updated": [...], "in_sync": [...]},
                     "vrfs":          {"global": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
                     "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
@@ -1619,12 +1622,18 @@ class NetboxDevicesTasks:
             if vlan_result.errors:
                 job.event("VLAN sync completed with errors", severity="WARNING")
                 ret.errors.extend(vlan_result.errors)
-            for device in devices:
-                ret.result[device]["vlans"] = vlan_result.result
             if vlan_result.failed:
                 ret.failed = True
                 job.event("sync all stopped because VLAN sync failed", severity="ERROR")
                 return ret
+            for device in devices:
+                device_interfaces = {}
+                if device in vlan_result.result["interfaces"]:
+                    device_interfaces[device] = vlan_result.result["interfaces"][device]
+                ret.result[device]["vlans"] = {
+                    "vlans": vlan_result.result["vlans"],
+                    "interfaces": device_interfaces,
+                }
             if vlan_result.status == "skipped" and vlan_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True

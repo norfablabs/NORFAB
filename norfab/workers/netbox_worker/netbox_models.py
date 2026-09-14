@@ -2316,7 +2316,7 @@ class SyncVlansInput(
 class SyncVlansResult(Result):
     result: Dict[StrictStr, Any] = Field(
         {},
-        description="VLAN attribute and interface membership actions keyed by NetBox VLAN scope",
+        description="VLAN actions by NetBox scope and interface actions by device",
     )
 
 

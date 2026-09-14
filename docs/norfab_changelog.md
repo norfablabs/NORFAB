@@ -2,9 +2,9 @@
 
 ## CHANGES
 
-1. Moved VLAN creation, resolution, tagged and untagged interface assignment, and VLAN-derived interface mode handling from `sync_device_interfaces` to `sync_vlans`. The VLAN task now accepts the shared `interface_map` rules and reports VLAN attribute and interface membership changes in one diff. Q-in-Q service VLAN assignments are not currently supported.
+1. Moved VLAN creation, resolution, tagged and untagged interface assignment, and VLAN-derived interface mode handling from `sync_device_interfaces` to `sync_vlans`. The VLAN task now accepts the shared `interface_map` rules and returns separate `vlans` and `interfaces` diffs for VLAN attributes and device interface assignments. Membership updates are additive; empty live lists preserve NetBox assignments, with native VLAN replacement as the only removal. The first matching `vlan_map` rule applies to the entire VLAN and all its memberships. Interface mapping uses substring containment and processes only the first selected name from a successfully resolved VLAN when multiple names map to the same NetBox interface. Invalid interface memberships and missing VLAN groups are reported without failing unrelated VLAN synchronization. Referenced device scopes and configured VLAN groups are fetched in bulk, and VLAN creation and attribute updates use single bulk requests. When devices report different names for one VLAN, a name matching `VLAN<VID>` yields to the first descriptive name. Q-in-Q service VLAN assignments are not currently supported.
 2. Removed the `vlan_group`, `vlan_map`, `require_vlan_group`, and `ignore_vlans` arguments from `sync_device_interfaces` and its NFCLI command. The brief `get_interfaces` representation no longer includes tagged or untagged VLAN fields.
-3. Changed `sync_all` to run interface synchronization before VLAN synchronization and stop before later stages when VLAN synchronization fails.
+3. Changed `sync_all` to run interface synchronization before VLAN synchronization and stop before later stages when VLAN synchronization fails. Each device's VLAN result includes only that device's VLAN-related interface actions.
 
 ---
 

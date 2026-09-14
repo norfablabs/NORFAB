@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 13 September 2026*
+*Last updated: 14 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -805,24 +805,28 @@ VLAN-name, and VLAN-ID mapping rules plus
 an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
 loaded from YAML through `nf://` URLs, using `match_device_names`,
 `match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
-and group selection. Existing descriptions support always, live-empty-only, or
-never preservation. VLANs are identified by VID and group, with every same-VID
+and group selection. The first matching mapping rule applies to the whole VLAN.
+Existing descriptions support always, live-empty-only, or never preservation.
+VLANs are identified by VID and group, with every same-VID
 candidate validated against the device site, group VID ranges, and the group's
 direct site, region, site group, location, rack, or rack group scope. Compatible groups take
 precedence over direct-site VLANs, with global VLANs used as a final fallback;
-the first device supplies values when later devices report a conflict. Optional
-strict group enforcement reports and skips VLANs that would otherwise fall back
-to their device site. Explicit out-of-range or scope-incompatible group mappings
-are reported and skipped without fallback.
-One scope/VID diff includes attribute and membership changes, including native
-VLAN replacements outside the selected VID set. Missing VLANs are created before
-interface assignments; a creation failure stops the task. Python, NFCLI, REST,
-and MCP expose the same dry-run and approval preview.
+the first device supplies values when later devices report a conflict, except an
+automatic `VLAN<VID>` name yields to the first descriptive name. Optional strict
+group enforcement reports and skips VLANs that would otherwise fall back to
+their device site. Configured groups are validated before collection; missing
+groups and affected VLANs are reported and skipped while other VLANs continue.
+Explicit out-of-range or scope-incompatible group mappings are reported and
+skipped without fallback.
+  Separate `vlans` and `interfaces` diffs report VLAN attributes by scope and
+  interface mode and membership by device. Missing VLANs are created before
+  interface assignments; a creation failure stops the task. Python, NFCLI, REST,
+  and MCP expose the same dry-run and approval preview.
 **Use cases:** correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. **Limitations:** parser coverage determines
-live-state quality; referenced interfaces must already exist. Membership removal
-is limited to successfully collected devices and resolved VLANs. The task does
-not delete VLAN objects.
+live-state quality. Missing interfaces are reported and omitted from the desired
+memberships. Membership updates are additive; native VLAN replacement is the
+only removal. The task does not delete VLAN objects.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vlans.md)
 
 ### Live VRRP reconciliation
