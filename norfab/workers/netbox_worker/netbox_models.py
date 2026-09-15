@@ -952,6 +952,12 @@ class CheckDeviceSyncInput(
         json_schema_extra={"presence": True},
         alias="check-interfaces",
     )
+    check_vrfs: StrictBool = Field(
+        True,
+        description="Check VRF and interface VRF assignment sync state",
+        json_schema_extra={"presence": True},
+        alias="check-vrfs",
+    )
     check_mac_addresses: StrictBool = Field(
         True,
         description="Check MAC address sync state",
@@ -1503,12 +1509,6 @@ class SyncDeviceInterfacesInput(
         True,
         description="Safely update existing NetBox logical interface types",
         alias="update-type",
-        json_schema_extra={"presence": True},
-    )
-    ignore_vrf: StrictBool = Field(
-        False,
-        description="Ignore discovered VRFs and leave interface VRF associations unchanged",
-        alias="ignore-vrf",
         json_schema_extra={"presence": True},
     )
 
@@ -2292,6 +2292,11 @@ class SyncVlansInput(
         ),
         alias="preserve-description",
     )
+    interface_map: Union[None, StrictStr, List[InterfaceMapRule]] = Field(
+        None,
+        description="Ordered interface name mapping rules or nf:// YAML file reference",
+        alias="interface-map",
+    )
 
     @model_validator(mode="after")
     def validate_sync_vlans(self) -> "SyncVlansInput":
@@ -2409,6 +2414,30 @@ class SyncVrfsInput(
         description="VRF custom field that stores associated NetBox devices",
         alias="device-custom-field",
     )
+    rpl_import_ipv4: StrictStr = Field(
+        "rpl_import_ipv4",
+        min_length=1,
+        description="VRF custom field for IPv4 import routing policies",
+        alias="rpl-import-ipv4",
+    )
+    rpl_import_ipv6: StrictStr = Field(
+        "rpl_import_ipv6",
+        min_length=1,
+        description="VRF custom field for IPv6 import routing policies",
+        alias="rpl-import-ipv6",
+    )
+    rpl_export_ipv4: StrictStr = Field(
+        "rpl_export_ipv4",
+        min_length=1,
+        description="VRF custom field for IPv4 export routing policies",
+        alias="rpl-export-ipv4",
+    )
+    rpl_export_ipv6: StrictStr = Field(
+        "rpl_export_ipv6",
+        min_length=1,
+        description="VRF custom field for IPv6 export routing policies",
+        alias="rpl-export-ipv6",
+    )
     preserve_description: Union[None, StrictBool] = Field(
         None,
         description=(
@@ -2417,12 +2446,17 @@ class SyncVrfsInput(
         ),
         alias="preserve-description",
     )
+    interface_map: Union[None, StrictStr, List[InterfaceMapRule]] = Field(
+        None,
+        description="Ordered interface name mapping rules or nf:// YAML file reference",
+        alias="interface-map",
+    )
 
 
 class SyncVrfsResult(Result):
     result: Dict[StrictStr, Any] = Field(
         {},
-        description="VRF synchronization actions keyed by global scope",
+        description="VRF, route-target, routing-policy, and interface assignment synchronization actions",
     )
 
 

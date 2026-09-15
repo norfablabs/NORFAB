@@ -582,15 +582,7 @@ class TestSyncDeviceInterfaces:
 
     def test_sync_device_interfaces_flags_defaults_and_aliases(self):
         defaults = SyncDeviceInterfacesInput()
-        assert defaults.ignore_vrf is False
         assert defaults.update_type is True
-
-        enabled = SyncDeviceInterfacesInput.model_validate(
-            {
-                "ignore-vrf": True,
-            }
-        )
-        assert enabled.ignore_vrf is True
 
     def test_sync_device_interfaces_model_accepts_interface_mapping_url(self) -> None:
         model = SyncDeviceInterfacesInput.model_validate(
@@ -806,7 +798,12 @@ class TestSyncDeviceInterfaces:
         cleaned interfaces under 'create' and expose correct key/type structure."""
         self._cleanup(nfclient, self.SPINE_DEVICES)
 
-        ret = self._sync(nfclient, self.SPINE_DEVICES, dry_run=True)
+        ret = self._sync(
+            nfclient,
+            self.SPINE_DEVICES,
+            dry_run=True,
+            with_approval=True,
+        )
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
@@ -1000,29 +997,20 @@ class TestSyncDeviceInterfaces:
             nb_eth7.lag is not None and nb_eth7.lag.name == "Port-Channel41"
         ), f"Ethernet7 lag association mismatch: got {nb_eth7.lag!r}"
 
-    def test_sync_device_interfaces_ignore_vrf(self, nfclient):
-        """ignore_vrf must not associate the discovered VRF with an interface."""
+    def test_sync_device_interfaces_does_not_assign_vrf(self, nfclient):
+        """VRF assignments are owned by sync_vrfs."""
         device = "fn-ceos-sp-1"
         interface = "Ethernet4.101"
         delete_interfaces(nfclient, device, interface)
 
         try:
-            ret = self._sync(
-                nfclient,
-                [device],
-                filter_by_name=interface,
-                ignore_vrf=True,
-            )
-            pprint.pprint(ret)
+            ret = self._sync(nfclient, [device], filter_by_name=interface)
             for worker, res in ret.items():
                 assert res["failed"] == False, f"{worker} failed - {res}"
                 assert interface in res["result"][device]["created"]
-
-            nb_interface = self._get_nb_intf(nfclient, device, interface)
-            assert nb_interface.vrf is None
+            assert self._get_nb_intf(nfclient, device, interface).vrf is None
         finally:
             delete_interfaces(nfclient, device, interface)
-            self._sync(nfclient, [device], filter_by_name=interface)
 
     # ------------------------------------------------------------------ #
     # Update scenarios                                                   #
@@ -1070,6 +1058,7 @@ class TestSyncDeviceInterfaces:
             assert not res["failed"], f"{worker} failed - {res}"
             field_diff = res["result"][device]["update"].get(interface, {})
             assert "type" not in field_diff
+            assert interface in res["result"][device]["in_sync"]
 
         assert self._get_nb_intf(nfclient, device, interface).type.value == "1000base-t"
 
@@ -1097,6 +1086,7 @@ class TestSyncDeviceInterfaces:
                 assert not res["failed"], f"{worker} failed - {res}"
                 field_diff = res["result"][device]["update"].get(interface, {})
                 assert "type" not in field_diff
+                assert interface in res["result"][device]["in_sync"]
             assert self._get_nb_intf(nfclient, device, interface).type.value == "other"
         finally:
             restore = self._sync(nfclient, [device], filter_by_name=interface)

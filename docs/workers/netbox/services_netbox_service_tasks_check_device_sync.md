@@ -15,6 +15,7 @@ Checks whether NetBox data is in sync with live device state without writing to 
 
 - **inventory** — calls `sync_device_inventory(dry_run=True)`
 - **interfaces** — calls `sync_device_interfaces(dry_run=True)`
+- **vrfs** — calls `sync_vrfs(dry_run=True)` for VRFs, missing route targets and routing policies, and interface assignments
 - **mac_addresses** — calls `sync_mac_addresses(dry_run=True)`
 - **ip_addresses** — calls `sync_device_ip(dry_run=True)`
 - **bgp_peerings** — calls `sync_bgp_peerings(dry_run=True)`
@@ -31,6 +32,7 @@ Each sub-check can be enabled or disabled independently.
 | `timeout` | No | Timeout in seconds for Nornir parse jobs |
 | `check_inventory` | No | Check device inventory sync state, default `True` |
 | `check_interfaces` | No | Check interface sync state, default `True` |
+| `check_vrfs` | No | Check VRF, route-target and routing-policy creation, and interface assignment sync state, default `True` |
 | `check_mac_addresses` | No | Check MAC address sync state, default `True` |
 | `check_ip_addresses` | No | Check IP address sync state, default `True` |
 | `check_bgp_peerings` | No | Check BGP peering sync state, default `True` |
@@ -47,6 +49,7 @@ At least one explicit device or Nornir host filter must resolve to a device.
             "in_sync": False,
             "inventory": True,
             "interfaces": True,
+            "vrfs": True,
             "mac_addresses": False,
             "ip_addresses": True,
             "bgp_peerings": True,
@@ -55,6 +58,7 @@ At least one explicit device or Nornir host filter must resolve to a device.
     "diff": {
         "inventory": {},
         "interfaces": {},
+        "vrfs": {},
         "mac_addresses": {},
         "ip_addresses": {},
         "bgp_peerings": {},
@@ -83,7 +87,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
     Check only interface and IP address sync:
 
     ```bash
-    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-mac-addresses false check-bgp-peerings false
+    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-vrfs false check-mac-addresses false check-bgp-peerings false
     ```
 
     Resolve devices using a Nornir group filter:
@@ -135,6 +139,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
             kwargs={
                 "devices": ["ceos-leaf-1"],
                 "check_inventory": False,
+                "check_vrfs": False,
                 "check_mac_addresses": False,
                 "check_bgp_peerings": False,
             },
@@ -171,6 +176,7 @@ root
             ├── devices:    List of NetBox devices to check sync state for
             ├── check-inventory:    Check device inventory sync state, default 'True'
             ├── check-interfaces:    Check interfaces sync state, default 'True'
+            ├── check-vrfs:    Check VRF and interface assignment sync state, default 'True'
             ├── check-mac-addresses:    Check MAC addresses sync state, default 'True'
             ├── check-ip-addresses:    Check IP addresses sync state, default 'True'
             ├── check-bgp-peerings:    Check BGP peerings sync state, default 'True'

@@ -25,7 +25,7 @@ from .netbox_models import (
 )
 from .netbox_worker_utilities import (
     apply_description_policy,
-    resolve_vrf,
+    map_interface_name,
     review_sync_task_result,
 )
 
@@ -128,25 +128,13 @@ def make_interfaces_brief(result: dict) -> dict:
 
 
 def _build_interface_payload(
-    job: object,
     desired: dict,
-    ret: Result,
-    worker_name: str,
-    changed_fields: set,
-    name_to_id: dict,
-    device: Union[None, dict] = None,
-    intf_name: str = None,
-    nb: object = None,
-    _lookup_cache: Union[None, dict] = None,
+    changed_fields: set[str],
+    object_cache: dict,
+    device_name: str,
+    intf_name: str,
 ) -> dict:
-    """Build a NetBox interface API payload from desired state and changed fields.
-
-    ``_lookup_cache`` is an optional dict shared across multiple calls within the
-    same task invocation to avoid redundant NetBox VRF lookups.
-    """  # noqa: D205
-    if _lookup_cache is None:
-        _lookup_cache = {}
-
+    """Build a NetBox interface API payload from desired state and changed fields."""
     payload = {
         k: desired.get(k)
         for k in (
@@ -163,20 +151,19 @@ def _build_interface_payload(
 
     if "parent" in changed_fields:
         parent_name = desired["parent"]
-        payload["parent"] = name_to_id.get(parent_name) if parent_name else None
+        payload["parent"] = (
+            object_cache.get(("interface", device_name, parent_name))
+            if parent_name
+            else None
+        )
 
     if "lag" in changed_fields:
         lag_name = desired["lag"]
-        payload["lag"] = name_to_id.get(lag_name) if lag_name else None
+        payload["lag"] = (
+            object_cache.get(("interface", device_name, lag_name)) if lag_name else None
+        )
 
-    if "vrf" in changed_fields:
-        vrf_name = desired["vrf"]
-        cache_key = ("vrf", vrf_name)
-        if cache_key not in _lookup_cache:
-            _lookup_cache[cache_key] = resolve_vrf(vrf_name, nb, job, ret, worker_name)
-        payload["vrf"] = _lookup_cache[cache_key]
-
-    payload["device"] = device["id"]
+    payload["device"] = object_cache[("device", device_name)]
     return payload
 
 
@@ -825,7 +812,6 @@ class NetboxInterfacesTasks:
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         update_type: bool = True,
-        ignore_vrf: bool = False,
         preserve_description: Union[None, bool] = None,
         **kwargs: Any,
     ) -> Result:
@@ -847,19 +833,14 @@ class NetboxInterfacesTasks:
            first, then parent interfaces, then child (sub)interfaces, then updates,
            and finally deletions (only when ``process_deletions=True``).
 
-        **Side-Effects**
-
-        - Sync interfaces task creates VRFs if they do not exist in Netbox unless
-          ``ignore_vrf=True``
-
         **Prerequisites**
 
         - Device must exist in Netbox
 
         **Limitations**
 
-        - Sync interfaces task does not handles IP Addresses
-        - Sync interfaces task does not handles MAC Addresses
+        - Interface sync does not handle IP addresses
+        - Interface sync does not handle MAC addresses
         - Sync interfaces uses device running configuration as the primary source;
           operational state only fills missing MTU, duplex, and speed values
 
@@ -924,8 +905,6 @@ class NetboxInterfacesTasks:
                 and transitions to ``other`` are ignored. Set to False to disable
                 all type updates. New interfaces can use any parsed type regardless
                 of this setting. Defaults to True.
-            ignore_vrf (bool, optional): If True, ignore discovered VRFs and leave
-                interface VRF associations unchanged. Defaults to False.
             **kwargs: Additional Nornir host filter keyword arguments passed to
                 ``parse_ttp`` (e.g. ``FL``, ``FC``, ``FB``).
 
@@ -934,7 +913,7 @@ class NetboxInterfacesTasks:
                 above. Diff details are available in ``res["diff"]`` for non
                 dry-run mode.
         """
-        devices = devices or []
+        devices = list(devices or [])
         if self.is_url(interface_map):
             interface_map = TypeAdapter(list[InterfaceMapRule]).validate_python(
                 yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True))
@@ -960,13 +939,12 @@ class NetboxInterfacesTasks:
         if kwargs:
             job.event("resolving devices from Nornir filters")
             nornir_hosts = self.get_nornir_hosts(kwargs, timeout)
-            for host in nornir_hosts:
-                if host not in devices:
-                    devices.append(host)
+            devices.extend(nornir_hosts)
             job.event(
                 f"resolved {len(nornir_hosts)} device(s) from Nornir filters, "
-                f"{len(devices)} total device(s) selected"
+                f"{len(set(devices))} total device(s) selected"
             )
+        devices = sorted(set(devices))
 
         if not devices:
             msg = "no devices specified"
@@ -982,24 +960,25 @@ class NetboxInterfacesTasks:
         nb_devices_data = {
             d.name: {
                 "id": d.id,
-                "site_id": d.site.id,
-                "name": d.name,
                 "device_type": d.device_type.model,
-                "record": d,
             }
             for d in self.bulk_filter(
                 nb.dcim.devices,
                 name=devices,
-                fields="id,name,site,location,rack,device_type",
+                fields="id,name,device_type",
             )
         }
-        for d in list(devices):
-            if d not in nb_devices_data:
-                msg = f"{d} - device not found in Netbox"
+        object_cache = {
+            ("device", device_name): data["id"]
+            for device_name, data in nb_devices_data.items()
+        }
+        for device_name in devices:
+            if device_name not in nb_devices_data:
+                msg = f"{device_name} - device not found in NetBox"
                 log.error(msg)
                 job.event(msg, severity="ERROR")
                 ret.errors.append(msg)
-                devices.remove(d)
+        devices = [name for name in devices if name in nb_devices_data]
         if not devices:
             job.event(
                 "no valid NetBox devices remain after validation", severity="ERROR"
@@ -1007,7 +986,7 @@ class NetboxInterfacesTasks:
             ret.failed = True
             return ret
         job.event(f"validated {len(devices)} device(s) in NetBox")
-        # Gather NetBox source of truth with interface IP/MAC details.
+        # Gather the current NetBox interface state.
         job.event("fetching current interface data from NetBox")
         nb_interfaces_result = self.get_interfaces(
             job=job,
@@ -1030,6 +1009,7 @@ class NetboxInterfacesTasks:
         for device_name, interfaces in nb_interfaces_result.result.items():
             normalised_nb_all[device_name] = {}
             for intf_name, data in (interfaces or {}).items():
+                object_cache[("interface", device_name, intf_name)] = data["id"]
                 if filter_by_name and not fnmatch.fnmatch(intf_name, filter_by_name):
                     continue
                 if filter_by_description and not fnmatch.fnmatch(
@@ -1046,13 +1026,7 @@ class NetboxInterfacesTasks:
                     if isinstance(data.get("lag"), dict)
                     else None
                 )
-                vrf_name = (
-                    data["vrf"].get("name")
-                    if isinstance(data.get("vrf"), dict)
-                    else None
-                )
                 normalised_nb_all[device_name][intf_name] = {
-                    "name": intf_name,
                     "type": data["type"]["value"],
                     "enabled": bool(data.get("enabled", True)),
                     "parent": parent_name,
@@ -1065,7 +1039,6 @@ class NetboxInterfacesTasks:
                         else data.get("duplex")
                     ),
                     "description": str(data.get("description") or ""),
-                    "vrf": vrf_name,
                 }
         nb_interface_count = sum(len(v) for v in normalised_nb_all.values())
         job.event(
@@ -1131,15 +1104,6 @@ class NetboxInterfacesTasks:
                 ret.errors.append(msg)
             for device_name, host_interfaces in wdata["result"].items():
                 normalised_live_all.setdefault(device_name, {})
-                device_interface_map = [
-                    rule
-                    for rule in interface_map
-                    if fnmatch.fnmatchcase(device_name, rule["device_name"])
-                    and fnmatch.fnmatchcase(
-                        nb_devices_data[device_name]["device_type"],
-                        rule["device_type"],
-                    )
-                ]
                 for data in host_interfaces or []:
                     status = interface_status.get(device_name, {}).get(
                         data.get("name"), {}
@@ -1148,12 +1112,12 @@ class NetboxInterfacesTasks:
                         field: data.get(field) for field in ("name", "parent", "lag")
                     }
                     for field, live_name in mapped_names.items():
-                        for rule in device_interface_map:
-                            if live_name and rule["match"] in live_name:
-                                mapped_names[field] = live_name.replace(
-                                    rule["match"], rule["replace"]
-                                )
-                                break
+                        mapped_names[field] = map_interface_name(
+                            live_name,
+                            interface_map,
+                            device_name,
+                            nb_devices_data[device_name]["device_type"],
+                        )
                     intf_name = mapped_names["name"]
                     if filter_by_name and not fnmatch.fnmatch(
                         intf_name, filter_by_name
@@ -1165,7 +1129,6 @@ class NetboxInterfacesTasks:
                         continue
 
                     normalised_live_all[device_name][intf_name] = {
-                        "name": intf_name,
                         "type": data["type"],
                         "enabled": bool(
                             data.get("enabled", data.get("is_enabled", True))
@@ -1176,7 +1139,6 @@ class NetboxInterfacesTasks:
                         "speed": data.get("speed"),
                         "duplex": data.get("duplex"),
                         "description": str(data.get("description") or ""),
-                        "vrf": data.get("vrf"),
                     }
                     interface = normalised_live_all[device_name][intf_name]
                     status_mtu = status.get("mtu")
@@ -1203,19 +1165,13 @@ class NetboxInterfacesTasks:
             f"normalised {live_interface_count} live interface(s) after applying filters"
         )
 
-        if ignore_vrf:
-            for state in (normalised_nb_all, normalised_live_all):
-                for interfaces in state.values():
-                    for interface in interfaces.values():
-                        interface.pop("vrf", None)
-
         # remove devices that returned no parsing results
         for device_name in devices:
             if device_name not in normalised_live_all:
                 msg = f"{device_name} - parsing returned no interfaces data, skipping device"
                 log.error(msg)
                 job.event(msg, severity="ERROR")
-                _ = normalised_nb_all.pop(device_name)
+                normalised_nb_all.pop(device_name)
         if not normalised_nb_all:
             job.event(
                 "no interface parsing results collected for devices", severity="ERROR"
@@ -1246,11 +1202,11 @@ class NetboxInterfacesTasks:
 
                     # Remove all existing-interface type changes when disabled.
                     if update_type is False:
-                        _ = intf_updates.pop("type")
+                        intf_updates.pop("type")
 
                     # Protect physical types and never transition to ``other``.
                     elif safe_type_transition is False:
-                        _ = intf_updates.pop("type")
+                        intf_updates.pop("type")
                         job.event(
                             f"skipping unsafe interface type transition for "
                             f"{dev_name}:{intf_name}: {old_type} -> {new_type}",
@@ -1258,7 +1214,9 @@ class NetboxInterfacesTasks:
                         )
                 # remove interface from updates if nothing remains to update
                 if not intf_updates:
-                    _ = dev_diff["update"].pop(intf_name)
+                    dev_diff["update"].pop(intf_name)
+                    dev_diff["in_sync"].append(intf_name)
+            dev_diff["in_sync"].sort()
         create_count = sum(len(actions["create"]) for actions in full_diff.values())
         update_count = sum(len(actions["update"]) for actions in full_diff.values())
         delete_count = sum(len(actions["delete"]) for actions in full_diff.values())
@@ -1269,6 +1227,13 @@ class NetboxInterfacesTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
+        if dry_run:
+            job.event(
+                "dry-run requested, returning interface sync diff without changes"
+            )
+            ret.result = full_diff
+            ret.dry_run = True
+            return ret
         if with_approval and not review_sync_task_result(
             job, "interface sync", full_diff
         ):
@@ -1277,22 +1242,10 @@ class NetboxInterfacesTasks:
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
-        elif dry_run is True:
-            job.event(
-                "dry-run requested, returning interface sync diff without changes"
-            )
-            ret.result = full_diff
-            ret.dry_run = True
-            return ret
-        else:
-            ret.diff = full_diff
-
-        # Shared lookup cache avoids redundant NetBox API calls when the same VRF
-        # name appears across multiple interfaces.
-        _lookup_cache: dict = {}
+        ret.diff = full_diff
 
         # Per-device result tracking
-        device_results = {
+        ret.result = {
             device_name: {
                 "created": [],
                 "updated": [],
@@ -1301,29 +1254,22 @@ class NetboxInterfacesTasks:
             }
             for device_name, actions in full_diff.items()
         }
-        ret.result = device_results
 
         # create LAG interfaces
         job.event("preparing LAG interface create payloads")
         bulk_create_lag_interfaces = []
         for device_name, actions in full_diff.items():
-            nb_device = nb_devices_data[device_name]
             for intf_name in actions["create"]:
                 desired = normalised_live_all[device_name][intf_name]
                 if desired["type"] == "lag":
                     payload = _build_interface_payload(
-                        job=job,
-                        ret=ret,
-                        worker_name=self.name,
                         desired=desired,
-                        changed_fields=[
+                        changed_fields={
                             k for k in desired.keys() if desired[k] is not None
-                        ],
-                        device=nb_device,
-                        name_to_id={},
+                        },
+                        object_cache=object_cache,
+                        device_name=device_name,
                         intf_name=intf_name,
-                        nb=nb,
-                        _lookup_cache=_lookup_cache,
                     )
                     bulk_create_lag_interfaces.append(payload)
         job.event(
@@ -1332,12 +1278,16 @@ class NetboxInterfacesTasks:
         if bulk_create_lag_interfaces:
             job.event("creating LAG interfaces")
             try:
-                nb.dcim.interfaces.create(bulk_create_lag_interfaces)
+                created_interfaces = nb.dcim.interfaces.create(
+                    bulk_create_lag_interfaces
+                )
                 job.event(f"created {len(bulk_create_lag_interfaces)} LAG interface(s)")
-                for device_name, device_data in nb_devices_data.items():
-                    for intf in bulk_create_lag_interfaces:
-                        if intf["device"] == device_data["id"]:
-                            device_results[device_name]["created"].append(intf["name"])
+                for interface in created_interfaces:
+                    device_name = interface.device.name
+                    object_cache[("interface", device_name, interface.name)] = (
+                        interface.id
+                    )
+                    ret.result[device_name]["created"].append(interface.name)
             except Exception as e:
                 msg = f"failed to bulk create LAG interfaces: {e}"
                 ret.errors.append(msg)
@@ -1347,36 +1297,21 @@ class NetboxInterfacesTasks:
         else:
             job.event("no LAG interfaces to create")
 
-        # re-fetch interface IDs after creating LAG interfaces
-        job.event("refreshing interface IDs after LAG interface creation")
-        nb_intf_ids = {device_name: {} for device_name in devices}
-        for intf in self.bulk_filter(
-            nb.dcim.interfaces, device=devices, fields="id,name,device"
-        ):
-            nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
-
         # create parent interfaces associating with LAG if required
         job.event("preparing non-child/main interface create payloads")
         bulk_create_parent_interfaces = []
         for device_name, actions in full_diff.items():
-            name_to_id = nb_intf_ids[device_name]
-            nb_device = nb_devices_data[device_name]
             for intf_name in actions["create"]:
                 desired = normalised_live_all[device_name][intf_name]
                 if not desired["parent"] and desired["type"] != "lag":
                     payload = _build_interface_payload(
-                        job=job,
-                        ret=ret,
-                        worker_name=self.name,
                         desired=desired,
-                        changed_fields=[
+                        changed_fields={
                             k for k in desired.keys() if desired[k] is not None
-                        ],
-                        device=nb_device,
-                        name_to_id=name_to_id,
+                        },
+                        object_cache=object_cache,
+                        device_name=device_name,
                         intf_name=intf_name,
-                        nb=nb,
-                        _lookup_cache=_lookup_cache,
                     )
                     bulk_create_parent_interfaces.append(payload)
         job.event(
@@ -1385,14 +1320,18 @@ class NetboxInterfacesTasks:
         if bulk_create_parent_interfaces:
             job.event("creating non-child/main interfaces")
             try:
-                nb.dcim.interfaces.create(bulk_create_parent_interfaces)
+                created_interfaces = nb.dcim.interfaces.create(
+                    bulk_create_parent_interfaces
+                )
                 job.event(
                     f"created {len(bulk_create_parent_interfaces)} non-child/main interface(s)"
                 )
-                for device_name, device_data in nb_devices_data.items():
-                    for intf in bulk_create_parent_interfaces:
-                        if intf["device"] == device_data["id"]:
-                            device_results[device_name]["created"].append(intf["name"])
+                for interface in created_interfaces:
+                    device_name = interface.device.name
+                    object_cache[("interface", device_name, interface.name)] = (
+                        interface.id
+                    )
+                    ret.result[device_name]["created"].append(interface.name)
             except Exception as e:
                 msg = f"failed to bulk create non-child/main interfaces: {e}"
                 ret.errors.append(msg)
@@ -1402,36 +1341,21 @@ class NetboxInterfacesTasks:
         else:
             job.event("no non-child/main interfaces to create")
 
-        # re-fetch interface IDs after creating parent interfaces
-        job.event("refreshing interface IDs after non-child/main interface creation")
-        nb_intf_ids = {device_name: {} for device_name in devices}
-        for intf in self.bulk_filter(
-            nb.dcim.interfaces, device=devices, fields="id,name,device"
-        ):
-            nb_intf_ids.setdefault(intf.device.name, {})[intf.name] = intf.id
-
         # create child interfaces associating with parent interfaces
         job.event("preparing child interface create payloads")
         bulk_create_child_interfaces = []
         for device_name, actions in full_diff.items():
-            name_to_id = nb_intf_ids[device_name]
-            nb_device = nb_devices_data[device_name]
             for intf_name in actions["create"]:
                 desired = normalised_live_all[device_name][intf_name]
                 if desired["parent"]:
                     payload = _build_interface_payload(
-                        job=job,
-                        ret=ret,
-                        worker_name=self.name,
                         desired=desired,
-                        changed_fields=[
+                        changed_fields={
                             k for k in desired.keys() if desired[k] is not None
-                        ],
-                        device=nb_device,
-                        name_to_id=name_to_id,
+                        },
+                        object_cache=object_cache,
+                        device_name=device_name,
                         intf_name=intf_name,
-                        nb=nb,
-                        _lookup_cache=_lookup_cache,
                     )
                     bulk_create_child_interfaces.append(payload)
         job.event(
@@ -1440,14 +1364,18 @@ class NetboxInterfacesTasks:
         if bulk_create_child_interfaces:
             job.event("creating child interfaces")
             try:
-                nb.dcim.interfaces.create(bulk_create_child_interfaces)
+                created_interfaces = nb.dcim.interfaces.create(
+                    bulk_create_child_interfaces
+                )
                 job.event(
                     f"created {len(bulk_create_child_interfaces)} child interface(s)"
                 )
-                for device_name, device_data in nb_devices_data.items():
-                    for intf in bulk_create_child_interfaces:
-                        if intf["device"] == device_data["id"]:
-                            device_results[device_name]["created"].append(intf["name"])
+                for interface in created_interfaces:
+                    device_name = interface.device.name
+                    object_cache[("interface", device_name, interface.name)] = (
+                        interface.id
+                    )
+                    ret.result[device_name]["created"].append(interface.name)
             except Exception as e:
                 msg = f"failed to bulk create child interfaces: {e}"
                 ret.errors.append(msg)
@@ -1461,27 +1389,16 @@ class NetboxInterfacesTasks:
         job.event("preparing interface update payloads")
         bulk_update_interfaces = {}
         for device_name, actions in full_diff.items():
-            nb_device = nb_devices_data[device_name]
-            name_to_id = nb_intf_ids[device_name]
             for intf_name, field_changes in actions["update"].items():
                 desired = normalised_live_all[device_name][intf_name]
-                intf_id = nb_intf_ids[device_name][intf_name]
                 payload = _build_interface_payload(
-                    job=job,
-                    ret=ret,
-                    worker_name=self.name,
                     desired=desired,
                     changed_fields=set(field_changes.keys()),
-                    device=nb_device,
-                    name_to_id=name_to_id,
+                    object_cache=object_cache,
+                    device_name=device_name,
                     intf_name=intf_name,
-                    nb=nb,
-                    _lookup_cache=_lookup_cache,
                 )
-                # skip if nothing else to update
-                if set(payload) == {"device", "name"}:
-                    continue
-                payload["id"] = intf_id
+                payload["id"] = object_cache[("interface", device_name, intf_name)]
                 bulk_update_interfaces[(device_name, intf_name)] = payload
         job.event(f"prepared {len(bulk_update_interfaces)} interface update payload(s)")
         if bulk_update_interfaces:
@@ -1491,7 +1408,7 @@ class NetboxInterfacesTasks:
                 job.event(f"updated {len(bulk_update_interfaces)} interface(s)")
                 for k in bulk_update_interfaces.keys():
                     device_name, intf_name = k
-                    device_results[device_name]["updated"].append(intf_name)
+                    ret.result[device_name]["updated"].append(intf_name)
             except Exception as e:
                 msg = f"failed to bulk update interfaces: {e}"
                 ret.errors.append(msg)
@@ -1511,7 +1428,7 @@ class NetboxInterfacesTasks:
                     actions["delete"], key=lambda x: (x.count("."), x), reverse=True
                 )
                 for intf_name in ordered_deletes:
-                    intf_id = nb_intf_ids[device_name][intf_name]
+                    intf_id = object_cache[("interface", device_name, intf_name)]
                     bulk_delete_interfaces[intf_id] = {
                         "device": device_name,
                         "interface": intf_name,
@@ -1531,7 +1448,7 @@ class NetboxInterfacesTasks:
                 for intf_data in bulk_delete_interfaces.values():
                     device_name = intf_data["device"]
                     intf_name = intf_data["interface"]
-                    device_results[device_name]["deleted"].append(intf_name)
+                    ret.result[device_name]["deleted"].append(intf_name)
             except Exception as exc:
                 msg = f"failed to bulk delete interfaces: {exc}"
                 ret.errors.append(msg)

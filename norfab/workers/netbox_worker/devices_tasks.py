@@ -1190,6 +1190,7 @@ class NetboxDevicesTasks:
         branch: str = None,
         check_inventory: bool = True,
         check_interfaces: bool = True,
+        check_vrfs: bool = True,
         check_mac_addresses: bool = True,
         check_ip_addresses: bool = True,
         check_bgp_peerings: bool = True,
@@ -1198,13 +1199,11 @@ class NetboxDevicesTasks:
         """
         Check if NetBox device data is in sync with live device data.
 
-        Calls ``sync_device_inventory``, ``sync_device_interfaces``,
-        ``sync_mac_addresses``, ``sync_device_ip``, and ``sync_bgp_peerings`` in
-        dry-run mode and produces a per-device report indicating which items are
-        in sync and which are not.
+        Calls the inventory, interface, VRF, MAC address, IP address, and BGP
+        peering synchronizers in dry-run mode and produces a per-device report.
 
         ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by
-        sub-task name (``inventory``, ``interfaces``, ``mac_addresses``,
+        sub-task name (``inventory``, ``interfaces``, ``vrfs``, ``mac_addresses``,
         ``ip_addresses``, ``bgp_peerings``).
 
         Args:
@@ -1215,6 +1214,7 @@ class NetboxDevicesTasks:
             branch (str, optional): NetBox branching plugin branch name.
             check_inventory (bool): Check device inventory sync state. Defaults to True.
             check_interfaces (bool): Check interface sync state. Defaults to True.
+            check_vrfs (bool): Check VRF and interface assignment sync state.
             check_mac_addresses (bool): Check MAC address sync state. Defaults to True.
             check_ip_addresses (bool): Check IP address sync state. Defaults to True.
             check_bgp_peerings (bool): Check BGP peering sync state. Defaults to True.
@@ -1228,6 +1228,7 @@ class NetboxDevicesTasks:
                         "in_sync": True | False,
                         "inventory":     True | False,
                         "interfaces":    True | False,
+                        "vrfs":          True | False,
                         "mac_addresses": True | False,
                         "ip_addresses":  True | False,
                         "bgp_peerings":  True | False,
@@ -1315,6 +1316,32 @@ class NetboxDevicesTasks:
                 ret.result.setdefault(device, {})["interfaces"] = in_sync
             ret.diff["interfaces"] = intf_result.result
 
+        # --- check VRFs and their interface assignments ---
+        if check_vrfs:
+            job.event("checking VRF sync state")
+            vrf_result = self.sync_vrfs(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+            if vrf_result.errors:
+                ret.errors.extend(vrf_result.errors)
+            global_actions = vrf_result.result.get("vrfs", {})
+            global_in_sync = not any(
+                global_actions.get(action) for action in ("create", "update", "delete")
+            )
+            interface_actions = vrf_result.result.get("interfaces", {})
+            for device in devices:
+                actions = interface_actions.get(device, {})
+                assignments_in_sync = not any(
+                    actions.get(action) for action in ("create", "update", "delete")
+                )
+                ret.result[device]["vrfs"] = global_in_sync and assignments_in_sync
+            ret.diff["vrfs"] = vrf_result.result
+
         # --- check MAC addresses ---
         if check_mac_addresses:
             job.event("checking MAC addresses sync state")
@@ -1376,6 +1403,7 @@ class NetboxDevicesTasks:
         checked_categories = {
             "inventory": check_inventory,
             "interfaces": check_interfaces,
+            "vrfs": check_vrfs,
             "mac_addresses": check_mac_addresses,
             "ip_addresses": check_ip_addresses,
             "bgp_peerings": check_bgp_peerings,
@@ -1420,7 +1448,7 @@ class NetboxDevicesTasks:
     ) -> Result:
         """
         Synchronize all device data from live devices into NetBox in sequence:
-        inventory → prefixes → VRFs → interfaces → VLANs → MAC addresses →
+        inventory → prefixes → interfaces → VRFs → VLANs → MAC addresses →
         IP addresses → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
@@ -1437,7 +1465,12 @@ class NetboxDevicesTasks:
                         "interfaces": {"<device>": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},
                     },
                     "prefixes":      {"created": [...], "updated": [...], "in_sync": [...]},
-                    "vrfs":          {"global": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]}},
+                    "vrfs":          {
+                        "vrfs": {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
+                        "route_targets": {"created": [...], "updated": [], "deleted": [], "in_sync": []},
+                        "routing_policies": {"created": [...], "updated": [], "deleted": [], "in_sync": []},
+                        "interfaces": {"<device>": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},
+                    },
                     "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
                     "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
                     "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
@@ -1552,33 +1585,7 @@ class NetboxDevicesTasks:
                 job.event("sync all stopped because prefix review was declined")
                 return ret
 
-        # --- sync VRFs ---
-        if sync_kwargs.get("sync_vrfs") is False:
-            job.event("skipping VRF sync")
-        else:
-            job.event("syncing VRFs")
-            vrf_result = self.sync_vrfs(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-                with_approval=with_approval,
-                **(sync_kwargs.get("sync_vrfs") or {}),
-            )
-            if vrf_result.errors:
-                job.event("VRF sync completed with errors", severity="WARNING")
-                ret.errors.extend(vrf_result.errors)
-            for device in devices:
-                ret.result[device]["vrfs"] = vrf_result.result
-            if vrf_result.status == "skipped" and vrf_result.dry_run:
-                ret.status = "skipped"
-                ret.dry_run = True
-                job.event("sync all stopped because VRF review was declined")
-                return ret
-
-        # --- sync interfaces ---
+        # --- sync interfaces before assigning them to VRFs ---
         if sync_kwargs.get("sync_device_interfaces") is False:
             job.event("skipping interface sync")
         else:
@@ -1602,6 +1609,40 @@ class NetboxDevicesTasks:
                 ret.status = "skipped"
                 ret.dry_run = True
                 job.event("sync all stopped because interface review was declined")
+                return ret
+
+        # --- sync VRFs and interface assignments ---
+        if sync_kwargs.get("sync_vrfs") is False:
+            job.event("skipping VRF sync")
+        else:
+            job.event("syncing VRFs")
+            vrf_result = self.sync_vrfs(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_vrfs") or {}),
+            )
+            if vrf_result.errors:
+                job.event("VRF sync completed with errors", severity="WARNING")
+                ret.errors.extend(vrf_result.errors)
+            for device in devices:
+                device_interfaces = {}
+                if device in vrf_result.result["interfaces"]:
+                    device_interfaces[device] = vrf_result.result["interfaces"][device]
+                ret.result[device]["vrfs"] = {
+                    "vrfs": vrf_result.result["vrfs"],
+                    "route_targets": vrf_result.result["route_targets"],
+                    "routing_policies": vrf_result.result["routing_policies"],
+                    "interfaces": device_interfaces,
+                }
+            if vrf_result.status == "skipped" and vrf_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because VRF review was declined")
                 return ret
 
         # --- sync VLANs after interfaces exist ---

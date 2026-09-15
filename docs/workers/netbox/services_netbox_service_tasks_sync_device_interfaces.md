@@ -7,7 +7,7 @@ tags:
 
 > task api name: `sync_device_interfaces`
 
-The Netbox Sync Device Interfaces Task synchronizes device interface configuration from live network devices into NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan and applies interface create, update, and delete operations in a safe dependency order.
+The Netbox Sync Device Interfaces Task synchronizes device interface configuration from live network devices into NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan and applies interface create, update, and delete operations in dependency order. VRF assignments are owned by `sync_vrfs`.
 
 Devices may begin with no interfaces in NetBox. The task treats an empty
 current interface set as valid and creates interfaces discovered from live data.
@@ -53,7 +53,9 @@ logical type correction:
 Loopback interfaces use NetBox type `virtual`; `loopback` is not submitted as
 an interface type. Set `update_type=False` to disable all type changes for
 existing interfaces. Unsafe transitions are omitted from the actionable diff
-and reported as warning events.
+and reported as warning events. When an ignored type transition is the only
+difference, the interface is reported as in sync for the fields managed by the
+task.
 
 ## Output
 
@@ -78,7 +80,8 @@ and reported as warning events.
 
 !!! note
     
-    When both `dry-run` and `with_approval` are `True`, `dry-run` logic ignored.
+    When both `dry-run` and `with_approval` are `True`, the task returns the
+    dry-run result without requesting approval.
 
 **Live-run mode** (`dry_run=False`, default) applies changes and returns a summary of actions taken:
 
@@ -150,8 +153,8 @@ VLAN, or Q-in-Q service VLAN fields. Run `sync_vlans` after interfaces exist to
 reconcile VLAN objects and tagged/untagged memberships. Q-in-Q membership is not
 supported by `sync_vlans`.
 
-Set `ignore_vrf=True` to skip VRF creation and leave interface VRF associations
-unchanged.
+The task does not create VRFs or update interface VRF assignments. Run
+`sync_vrfs` after interfaces exist to reconcile those relationships.
 
 ## Branching Support
 
@@ -201,12 +204,6 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
 
     ```
     nf#netbox sync interfaces devices ceos-spine-1 filter-by-description "TEST_SYNC_*"
-    ```
-
-    Sync interfaces without creating or associating VRFs:
-
-    ```
-    nf#netbox sync interfaces devices ceos-spine-1 ignore-vrf
     ```
 
     Sync interfaces into a NetBox branch:
@@ -304,17 +301,6 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
         },
     )
 
-    # sync interfaces without creating or associating VRFs
-    result = client.run_job(
-        "netbox",
-        "sync_device_interfaces",
-        workers="any",
-        kwargs={
-            "devices": ["ceos-spine-1"],
-            "ignore_vrf": True,
-        },
-    )
-
     # sync into a NetBox branch
     result = client.run_job(
         "netbox",
@@ -362,7 +348,6 @@ root
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
             ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
             ├── update-type:    Safely update existing NetBox logical interface types, default 'True'
-            ├── ignore-vrf:    Ignore discovered VRFs and leave interface VRF associations unchanged
             ├── branch:    Branching plugin branch name to push changes into
             ├── FO:    Filter Nornir hosts using Filter Object
             ├── FB:    Filter Nornir hosts by name using Glob Patterns

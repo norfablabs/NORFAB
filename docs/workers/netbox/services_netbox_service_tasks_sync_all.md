@@ -12,8 +12,8 @@ fixed sequence:
 
 1. **inventory** — calls `sync_device_inventory`
 2. **prefixes** — calls `sync_device_prefixes`
-3. **vrfs** — calls `sync_vrfs`
-4. **interfaces** — calls `sync_device_interfaces`
+3. **interfaces** — calls `sync_device_interfaces`
+4. **vrfs** — calls `sync_vrfs`
 5. **vlans** — calls `sync_vlans`
 6. **mac_addresses** — calls `sync_mac_addresses`
 7. **ip_addresses** — calls `sync_device_ip`
@@ -59,6 +59,7 @@ sync_device_prefixes:
 
 sync_vrfs:
   device_custom_field: devices
+  interface_map: nf://netbox/interface_map.yaml
 
 sync_device_interfaces:
   process_deletions: true
@@ -102,7 +103,7 @@ at the `sync_all` level rather than repeating them inside a task dictionary.
 
 ## Output
 
-The result structure aggregates the outcomes of all eight subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate `vlans` and `interfaces` sections; its `interfaces` section contains only the current device.
+The result structure aggregates the outcomes of all eight subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and `interfaces` sections. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. Each `interfaces` section contains only the current device.
 
 ```python
 {
@@ -139,11 +140,31 @@ The result structure aggregates the outcomes of all eight subordinate sync tasks
                 "in_sync": [ ... ],
             },
             "vrfs": {
-                "global": {
+                "vrfs": {
                     "create": [ ... ],
                     "update": { ... },
                     "delete": [],
                     "in_sync": [ ... ],
+                },
+                "route_targets": {
+                    "create": [ ... ],
+                    "update": {},
+                    "delete": [],
+                    "in_sync": [],
+                },
+                "routing_policies": {
+                    "create": [ ... ],
+                    "update": {},
+                    "delete": [],
+                    "in_sync": [],
+                },
+                "interfaces": {
+                    "ceos-spine-1": {
+                        "create": [],
+                        "update": { ... },
+                        "delete": [],
+                        "in_sync": [ ... ],
+                    },
                 },
             },
             "interfaces": {
@@ -216,7 +237,10 @@ When `dry_run=True` the same structure is returned but no changes are written to
                     "inventory_map": "nf://netbox/inventory_maps/iosxr.yaml",
                 },
                 "sync_device_prefixes": {"ignore_vrf": True},
-                "sync_vrfs": {"device_custom_field": "devices"},
+                "sync_vrfs": {
+                    "device_custom_field": "devices",
+                    "interface_map": "nf://netbox/interface_map.yaml",
+                },
                 "sync_device_interfaces": {
                     "interface_map": "nf://netbox/interface_map.yaml",
                 },
@@ -244,7 +268,7 @@ nf# man tree netbox.sync.all
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, prefixes, VRFs, interfaces, VLANs, MAC addresses, IP addresses and BGP peerings
+        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, MAC addresses, IP addresses and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'

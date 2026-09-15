@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 14 September 2026*
+*Last updated: 15 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -789,6 +789,7 @@ An empty NetBox interface set is valid, allowing a device to be initialized
 entirely from discovered live interfaces. Interface-name mapping rules can be
 supplied inline or loaded from YAML through `nf://` URLs. VLAN objects,
 memberships, and VLAN-derived interface mode are handled by VLAN sync.
+VRF objects and interface VRF assignments are handled by VRF sync.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the `other` fallback. **Use cases:**
@@ -849,17 +850,22 @@ group records without a virtual address are reported and skipped.
 
 ### Live VRF reconciliation
 
-Reconciles global VRFs and descriptions from live devices, and adds all observed
-import/export route targets to the existing NetBox associations. Missing route
-targets are created, and an optional multi-object custom field records the
+Reconciles global VRFs and descriptions from live devices, adds all observed
+import/export route targets and BGP routing policies, and assigns existing
+NetBox interfaces to their live VRFs. Separate `vrfs`, `route_targets`,
+`routing_policies`, and `interfaces` diffs report VRF and related-object actions
+directly under their sections, plus per-device assignments already in sync.
+Created targets and policies are reported in live results, and an
+optional multi-object custom field records the
 devices on which each VRF was observed. Existing descriptions support the same
 always, live-empty-only, or never preservation policy as interface and BGP
 peering synchronization. If multiple NetBox VRFs share a matched name, the
 lowest numeric ID is selected and a warning is logged. **Use cases:** VRF inventory,
-route-target aggregation, and device-to-VRF inventory. **Limitations:** route
-distinguishers and route policies are not stored; VRF objects, route-target
-objects, route-target associations, and device associations are not removed
-automatically.
+route-target and policy aggregation, interface assignment, and device-to-VRF
+inventory. **Limitations:** route distinguishers are not stored; BGP policies
+require the BGP plugin and VRF multi-object custom fields; VRF objects,
+route-target and routing-policy objects, their associations, and device
+associations are not removed automatically.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vrfs.md)
 
 ### Live IP and MAC reconciliation
@@ -929,8 +935,8 @@ validated in dry-run mode.
 ### Drift assessment and coordinated synchronization
 
 Runs selected synchronizers in read-only dry-run mode for drift reporting,
-including inventory, interface, MAC, IP, and BGP peering state, or executes the
-supported synchronizers in a fixed inventory, VLAN, prefix, VRF, interface,
+including inventory, interface, VRF, MAC, IP, and BGP peering state, or executes the
+supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
 MAC, IP, and BGP sequence. `sync_all` accepts per-task keyword arguments inline
 or from an `nf://` YAML file and can skip individual stages. **Use cases:** audit
 evidence, change planning, and scheduled source-of-truth maintenance.

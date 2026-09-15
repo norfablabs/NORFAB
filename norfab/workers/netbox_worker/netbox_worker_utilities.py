@@ -1,3 +1,4 @@
+import fnmatch
 import ipaddress
 import logging
 from typing import Any, Union
@@ -6,6 +7,24 @@ from norfab.core.worker import Job
 from norfab.models import Result
 
 log = logging.getLogger(__name__)
+
+
+def map_interface_name(
+    name: Union[None, str],
+    rules: list[dict],
+    device_name: str,
+    device_type: str,
+) -> Union[None, str]:
+    """Apply the first matching interface-name mapping rule."""
+    for rule in rules:
+        if (
+            name
+            and fnmatch.fnmatchcase(device_name, rule["device_name"])
+            and fnmatch.fnmatchcase(device_type, rule["device_type"])
+            and rule["match"] in name
+        ):
+            return name.replace(rule["match"], rule["replace"])
+    return name
 
 
 def apply_description_policy(

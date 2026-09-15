@@ -34,8 +34,16 @@ class TestSyncAllOrchestration:
     TASKS = [
         ("sync_device_inventory", {"device-1": {}}),
         ("sync_device_prefixes", {"created": [], "updated": [], "in_sync": []}),
-        ("sync_vrfs", {"global": {}}),
         ("sync_device_interfaces", {"device-1": {}}),
+        (
+            "sync_vrfs",
+            {
+                "vrfs": {},
+                "route_targets": {},
+                "routing_policies": {},
+                "interfaces": {"device-1": {}, "other-device": {}},
+            },
+        ),
         (
             "sync_vlans",
             {
@@ -94,6 +102,40 @@ class TestSyncAllOrchestration:
             "vlans": {"site:test": {}},
             "interfaces": {"device-1": {}},
         }
+        assert result.result["device-1"]["vrfs"] == {
+            "vrfs": {},
+            "route_targets": {},
+            "routing_policies": {},
+            "interfaces": {"device-1": {}},
+        }
+
+    def test_check_sync_keeps_routing_policy_plan(self) -> None:
+        worker = self._worker([])
+        vrf_plan = {
+            "vrfs": {
+                "create": [],
+                "update": {"TENANT_A": {"rpl_import_ipv4": {"new_value": ["RPL1"]}}},
+                "delete": [],
+            },
+            "route_targets": {"create": []},
+            "routing_policies": {"create": ["RPL1"]},
+            "interfaces": {},
+        }
+        worker.sync_vrfs = lambda **kwargs: Result(task="sync_vrfs", result=vrf_plan)
+
+        result = NetboxDevicesTasks.check_device_sync(
+            worker,
+            self._job(),
+            devices=["device-1"],
+            check_inventory=False,
+            check_interfaces=False,
+            check_mac_addresses=False,
+            check_ip_addresses=False,
+            check_bgp_peerings=False,
+        )
+
+        assert result.result["device-1"] == {"vrfs": False, "in_sync": False}
+        assert result.diff["vrfs"]["routing_policies"]["create"] == ["RPL1"]
 
     def test_sync_all_stops_after_failed_vlan_sync(self) -> None:
         calls = []
@@ -113,8 +155,8 @@ class TestSyncAllOrchestration:
         assert calls == [
             "sync_device_inventory",
             "sync_device_prefixes",
-            "sync_vrfs",
             "sync_device_interfaces",
+            "sync_vrfs",
             "sync_vlans",
         ]
 
@@ -806,13 +848,14 @@ class TestCheckDeviceSync:
     ALL_CATEGORIES = {
         "inventory",
         "interfaces",
+        "vrfs",
         "mac_addresses",
         "ip_addresses",
         "bgp_peerings",
     }
 
     def test_check_device_sync_result_structure(self, nfclient):
-        """Result has a dict per device with all five sync categories."""
+        """Result has a dict per device with all six sync categories."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
@@ -892,6 +935,7 @@ class TestCheckDeviceSync:
                 "devices": self.DEVICES,
                 "check_inventory": False,
                 "check_interfaces": True,
+                "check_vrfs": False,
                 "check_mac_addresses": False,
                 "check_ip_addresses": False,
                 "check_bgp_peerings": False,
@@ -937,6 +981,7 @@ class TestCheckDeviceSync:
                 "devices": self.DEVICES,
                 "check_inventory": False,
                 "check_interfaces": False,
+                "check_vrfs": False,
                 "check_mac_addresses": True,
                 "check_ip_addresses": True,
                 "check_bgp_peerings": False,
@@ -974,6 +1019,7 @@ class TestCheckDeviceSync:
                 "devices": self.DEVICES,
                 "check_inventory": True,
                 "check_interfaces": False,
+                "check_vrfs": False,
                 "check_mac_addresses": False,
                 "check_ip_addresses": False,
                 "check_bgp_peerings": False,

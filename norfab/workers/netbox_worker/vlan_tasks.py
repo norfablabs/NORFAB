@@ -19,6 +19,7 @@ from .netbox_models import (
 )
 from .netbox_worker_utilities import (
     apply_description_policy,
+    map_interface_name,
     review_sync_task_result,
 )
 
@@ -451,13 +452,6 @@ class NetboxVlansTasks:
         interface_names_by_device = {}
         for device, records in sorted(live_by_device.items()):
             device_model = str(nb_devices[device].device_type.model)
-            interface_rules = []
-            for rule in interface_map:
-                if not fnmatch.fnmatchcase(device, rule["device_name"]):
-                    continue
-                if not fnmatch.fnmatchcase(device_model, rule["device_type"]):
-                    continue
-                interface_rules.append(rule)
             interface_names = {}
             device_vlans = {}
             for record in records:
@@ -469,14 +463,12 @@ class NetboxVlansTasks:
                     for live_interface in record[field]:
                         if live_interface in interface_names:
                             continue
-                        interface = live_interface
-                        for rule in interface_rules:
-                            if rule["match"] in interface:
-                                interface = interface.replace(
-                                    rule["match"], rule["replace"]
-                                )
-                                break
-                        interface_names[live_interface] = interface
+                        interface_names[live_interface] = map_interface_name(
+                            live_interface,
+                            interface_map,
+                            device,
+                            device_model,
+                        )
 
                 name = record["name"].strip()
                 vlan = device_vlans.setdefault(

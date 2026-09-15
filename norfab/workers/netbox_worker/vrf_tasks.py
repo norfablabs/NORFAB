@@ -1,11 +1,23 @@
 import logging
 from typing import Any, Union
 
+import yaml
+from pydantic import TypeAdapter
+
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .netbox_models import NetboxFastApiArgs, SyncVrfsInput, SyncVrfsResult
-from .netbox_worker_utilities import apply_description_policy, review_sync_task_result
+from .netbox_models import (
+    InterfaceMapRule,
+    NetboxFastApiArgs,
+    SyncVrfsInput,
+    SyncVrfsResult,
+)
+from .netbox_worker_utilities import (
+    apply_description_policy,
+    map_interface_name,
+    review_sync_task_result,
+)
 
 log = logging.getLogger(__name__)
 
@@ -35,16 +47,23 @@ class NetboxVrfsTasks:
         devices: Union[None, list] = None,
         branch: Union[None, str] = None,
         device_custom_field: str = "devices",
+        rpl_import_ipv4: str = "rpl_import_ipv4",
+        rpl_import_ipv6: str = "rpl_import_ipv6",
+        rpl_export_ipv4: str = "rpl_export_ipv4",
+        rpl_export_ipv6: str = "rpl_export_ipv6",
         preserve_description: Union[None, bool] = None,
+        interface_map: Union[None, str, list] = None,
         **kwargs: Any,
     ) -> Result:
-        """Synchronize live VRFs and their route targets with NetBox.
+        """Synchronize live VRFs, route targets, and interface assignments with NetBox.
 
         VRFs have global scope and are identified by name. Descriptions are
         synchronized, while live import/export route targets extend the
-        existing NetBox associations. Route distinguishers and route policies
-        returned by the parser are not stored. The selected VRF custom field
-        records devices on which each VRF was observed.
+        existing NetBox associations. Routing-policy references are added to
+        the configured VRF custom fields when the BGP plugin is installed.
+        Route distinguishers returned by the parser are not stored. The selected VRF custom field
+        records devices on which each VRF was observed. Interfaces listed by
+        the parser are assigned to their VRFs when they exist in NetBox.
 
         Args:
             job: NorFab job object.
@@ -55,39 +74,64 @@ class NetboxVrfsTasks:
             devices: Explicit NetBox and Nornir device names.
             branch: NetBox Branching plugin branch name.
             device_custom_field: VRF custom field containing associated devices.
+            rpl_import_ipv4: VRF custom field for IPv4 import routing policies.
+            rpl_import_ipv6: VRF custom field for IPv6 import routing policies.
+            rpl_export_ipv4: VRF custom field for IPv4 export routing policies.
+            rpl_export_ipv6: VRF custom field for IPv6 export routing policies.
             preserve_description: Description preservation policy. ``None`` preserves
                 NetBox text when the live description is empty, ``True`` always
                 preserves NetBox text, and ``False`` always uses live text.
+            interface_map: Ordered interface rename rules, or an ``nf://`` YAML
+                file containing them.
             **kwargs: Nornir FFun host filters.
 
         Returns:
-            Result: Global VRF synchronization actions.
+            Result: VRF, route-target, routing-policy, and interface assignment actions.
         """
+        # Normalize task inputs before resolving the selected NetBox devices.
         devices = list(devices or [])
         instance = instance or self.default_instance
+        if self.is_url(interface_map):
+            interface_map = TypeAdapter(list[InterfaceMapRule]).validate_python(
+                yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True))
+            )
+        interface_map = [
+            rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
+            for rule in interface_map or []
+        ]
         ret = Result(
             task=f"{self.name}:sync_vrfs",
-            result={},
+            result={
+                "vrfs": {},
+                "route_targets": {},
+                "routing_policies": {},
+                "interfaces": {},
+            },
             resources=[instance],
             dry_run=dry_run,
-            diff={},
+            diff={
+                "vrfs": {},
+                "route_targets": {},
+                "routing_policies": {},
+                "interfaces": {},
+            },
         )
 
-        job.event(
+        msg = (
             f"starting VRF sync using NetBox instance '{instance}' for "
-            f"{len(devices)} explicit device(s)"
+            f"{len(devices)} explicit device(s), dry_run={dry_run}"
         )
-        log.info(f"{self.name} - Sync VRFs: instance '{instance}', dry_run={dry_run}")
+        job.event(msg)
+        log.info(f"Sync VRFs: {msg}")
         nb = self._get_pynetbox(instance, branch=branch, job=job)
 
         if kwargs:
-            job.event("resolving devices from Nornir filters")
             devices.extend(self.get_nornir_hosts(kwargs, timeout))
         devices = sorted(set(devices))
         if not devices:
             msg = "no devices specified"
             job.event(msg, severity="ERROR")
-            log.error(f"{self.name} - Sync VRFs: {msg}")
+            log.error(f"Sync VRFs: {msg}")
             ret.errors.append(msg)
             ret.failed = True
             return ret
@@ -97,26 +141,44 @@ class NetboxVrfsTasks:
             for device in self.bulk_filter(
                 nb.dcim.devices,
                 name=devices,
-                fields="id,name",
+                fields="id,name,device_type",
             )
         }
         for device_name in [name for name in devices if name not in nb_devices]:
             msg = f"device '{device_name}' not found in NetBox"
             job.event(msg, severity="ERROR")
-            log.error(f"{self.name} - Sync VRFs: {msg}")
+            log.error(f"Sync VRFs: {msg}")
             ret.errors.append(msg)
         devices = [name for name in devices if name in nb_devices]
         if not devices:
             ret.failed = True
             return ret
-        job.event(f"validated {len(devices)} NetBox device(s)")
 
-        custom_field = nb.extras.custom_fields.get(name=device_custom_field)
-        if not custom_field:
+        if not nb.extras.custom_fields.get(name=device_custom_field):
             device_custom_field = None
+        policy_fields = {
+            ("ipv4", "import"): rpl_import_ipv4,
+            ("ipv6", "import"): rpl_import_ipv6,
+            ("ipv4", "export"): rpl_export_ipv4,
+            ("ipv6", "export"): rpl_export_ipv6,
+        }
+        if self.has_plugin("netbox_bgp", instance):
+            policy_fields = {
+                key: name
+                for key, name in policy_fields.items()
+                if nb.extras.custom_fields.get(name=name)
+            }
+        else:
+            policy_fields = {}
+            msg = "netbox BGP plugin is not installed; skipping VRF routing policies"
+            job.event(msg, severity="WARNING")
+            log.warning(f"Sync VRFs: {msg}")
 
-        job.event(f"collecting live VRFs from {len(devices)} device(s)")
-        log.info(f"{self.name} - Sync VRFs: collecting from {len(devices)} device(s)")
+        # Collect per-device observations. Address-family route targets and
+        # policies are flattened here for the global VRF reconciliation.
+        msg = f"collecting live VRFs from {len(devices)} device(s)"
+        job.event(msg)
+        log.info(f"Sync VRFs: {msg}")
         parse_data = self.client.run_job(
             "nornir",
             "parse_ttp",
@@ -124,16 +186,14 @@ class NetboxVrfsTasks:
             workers="all",
             timeout=timeout,
         )
-        job.event(f"received VRF data from {len(parse_data)} Nornir worker(s)")
         observations = {}
         result_devices = set()
         failed_devices = set()
-        parsed_count = 0
         for worker_name, worker_data in parse_data.items():
             if worker_data["failed"]:
                 msg = f"worker '{worker_name}' failed to collect live VRF data"
                 job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync VRFs: {msg}")
+                log.error(f"Sync VRFs: {msg}")
                 ret.errors.append(msg)
                 continue
             resources_failed = worker_data.get("resources_failed") or []
@@ -144,25 +204,36 @@ class NetboxVrfsTasks:
                     f"{', '.join(sorted(resources_failed))}"
                 )
                 job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync VRFs: {msg}")
+                log.error(f"Sync VRFs: {msg}")
                 ret.errors.append(msg)
             for device_name, records in worker_data["result"].items():
                 if device_name not in nb_devices:
                     continue
                 result_devices.add(device_name)
                 for record in records:
-                    if (
-                        record.get("instance_type")
-                        and record["instance_type"] != "vrf"
-                    ):
+                    if record.get("instance_type") and record["instance_type"] != "vrf":
                         continue
-                    parsed_count += 1
+                    address_families = record["address_families"]
+                    policies = {}
+                    for (family, direction), field_name in policy_fields.items():
+                        policy = address_families[family][f"route_policy_{direction}"]
+                        policies[field_name] = [policy] if policy else []
                     observations.setdefault(record["name"], []).append(
                         {
                             "device": device_name,
                             "description": record["description"] or "",
-                            "import_targets": record["rt_import"],
-                            "export_targets": record["rt_export"],
+                            "import_targets": [
+                                target
+                                for family in address_families.values()
+                                for target in family["rt_import"]
+                            ],
+                            "export_targets": [
+                                target
+                                for family in address_families.values()
+                                for target in family["rt_export"]
+                            ],
+                            "routing_policies": policies,
+                            "interfaces": record["interfaces"],
                         }
                     )
 
@@ -170,18 +241,19 @@ class NetboxVrfsTasks:
             if device_name not in result_devices and device_name not in failed_devices:
                 msg = f"device '{device_name}' is missing a live VRF result"
                 job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync VRFs: {msg}")
+                log.error(f"Sync VRFs: {msg}")
                 ret.errors.append(msg)
         if not result_devices:
-            log.error(f"{self.name} - Sync VRFs: no usable live VRF data")
+            msg = "no usable live VRF data"
+            job.event(msg, severity="ERROR")
+            log.error(f"Sync VRFs: {msg}")
             ret.failed = True
             return ret
-        job.event(
-            f"parsed {parsed_count} live VRF record(s) from "
-            f"{len(result_devices)} device(s)"
-        )
 
+        # Build the global desired VRF state and a separate interface assignment
+        # index. Sorting observations makes description precedence deterministic.
         live_vrfs = {}
+        interface_targets = {}
         for vrf_name in sorted(observations):
             records = sorted(observations[vrf_name], key=lambda item: item["device"])
             live_vrfs[vrf_name] = {
@@ -193,21 +265,50 @@ class NetboxVrfsTasks:
                     ),
                     "",
                 ),
-                "import_targets": [
-                    target for record in records for target in record["import_targets"]
-                ],
-                "export_targets": [
-                    target for record in records for target in record["export_targets"]
-                ],
+                "import_targets": list(
+                    dict.fromkeys(
+                        target
+                        for record in records
+                        for target in record["import_targets"]
+                    )
+                ),
+                "export_targets": list(
+                    dict.fromkeys(
+                        target
+                        for record in records
+                        for target in record["export_targets"]
+                    )
+                ),
             }
             if device_custom_field:
                 live_vrfs[vrf_name][device_custom_field] = sorted(
                     {nb_devices[record["device"]].id for record in records}
                 )
+            for field_name in policy_fields.values():
+                live_vrfs[vrf_name][field_name] = list(
+                    dict.fromkeys(
+                        policy
+                        for record in records
+                        for policy in record["routing_policies"][field_name]
+                    )
+                )
+            for record in records:
+                device_name = record["device"]
+                device_type = str(nb_devices[device_name].device_type.model)
+                for live_name in record["interfaces"]:
+                    interface_name = map_interface_name(
+                        live_name,
+                        interface_map,
+                        device_name,
+                        device_type,
+                    )
+                    key = (device_name, interface_name)
+                    interface_targets[key] = vrf_name
 
-        job.event("loading global NetBox VRFs")
+        # Load only live VRF names. NetBox can return duplicate names, so retain
+        # the lowest-ID record as the task's authoritative object and warn.
         netbox_vrfs = {}
-        netbox_objects = {}
+        object_cache = {}
         vrf_names = list(live_vrfs)
         netbox_vrfs_records = (
             self.bulk_filter(
@@ -238,25 +339,33 @@ class NetboxVrfsTasks:
                     set(current[device_custom_field])
                     | set(live_vrfs[vrf.name][device_custom_field])
                 )
-            existing_vrf = netbox_objects.get(vrf.name)
+            for field_name in policy_fields.values():
+                current[field_name] = [
+                    policy.get("name") or policy["display"]
+                    for policy in (vrf.custom_fields[field_name] or [])
+                ]
+            existing_vrf = object_cache.get(("vrf", vrf.name))
             if existing_vrf:
-                log.warning(
-                    f"{self.name} - Sync VRFs: Multiple NetBox VRFs matched "
+                msg = (
+                    f"multiple NetBox VRFs matched "
                     f"by name '{vrf.name}', using lowest ID from "
                     f"{existing_vrf.id} and {vrf.id}"
                 )
+                job.event(msg, severity="WARNING")
+                log.warning(f"Sync VRFs: {msg}")
             if existing_vrf is None or int(vrf.id) < int(existing_vrf.id):
                 netbox_vrfs[vrf.name] = current
-                netbox_objects[vrf.name] = vrf
-        job.event(f"loaded {len(netbox_vrfs)} matching NetBox VRF(s)")
+                object_cache[("vrf", vrf.name)] = vrf
 
-        job.event("calculating VRF sync diff")
+        # Diff route-target and routing-policy lists before applying the
+        # additive policy. Only fields reported by make_diff are later written;
+        # changed lists retain NetBox values plus targets newly observed live.
         vrf_diff = self.make_diff(
             {"vrfs": live_vrfs},
             {"vrfs": netbox_vrfs},
         )["vrfs"]
         for vrf_name, changes in vrf_diff["update"].items():
-            for field in ("import_targets", "export_targets"):
+            for field in ("import_targets", "export_targets", *policy_fields.values()):
                 if field in changes:
                     live_vrfs[vrf_name][field] = netbox_vrfs[vrf_name][field] + [
                         target
@@ -265,72 +374,203 @@ class NetboxVrfsTasks:
                     ]
                     changes[field]["new_value"] = live_vrfs[vrf_name][field]
         vrf_diff["delete"] = []
-        full_diff = {"global": vrf_diff}
+
         create_names = vrf_diff["create"]
         update = vrf_diff["update"]
         in_sync = vrf_diff["in_sync"]
-        job.event(
+
+        # Resolve route targets referenced by actionable VRF changes. Missing
+        # objects become part of the plan but are not created until after review.
+        route_target_names = list(
+            dict.fromkeys(
+                target
+                for vrf_name in [*create_names, *sorted(update)]
+                for field in ("import_targets", "export_targets")
+                for target in live_vrfs[vrf_name][field]
+            )
+        )
+        if route_target_names:
+            object_cache.update(
+                {
+                    ("route_target", target.name): target
+                    for target in self.bulk_filter(
+                        nb.ipam.route_targets,
+                        name=route_target_names,
+                        fields="id,name",
+                    )
+                }
+            )
+        missing_route_targets = [
+            name
+            for name in route_target_names
+            if ("route_target", name) not in object_cache
+        ]
+        route_target_diff = {
+            "create": missing_route_targets,
+            "update": {},
+            "delete": [],
+            "in_sync": [],
+        }
+        # Include missing BGP policy objects in the review plan; resolve IDs
+        # only for policies referenced by VRFs that need creation or update.
+        policy_names = list(
+            dict.fromkeys(
+                policy
+                for vrf_name in [*create_names, *sorted(update)]
+                for field_name in policy_fields.values()
+                for policy in live_vrfs[vrf_name][field_name]
+            )
+        )
+        if policy_names:
+            object_cache.update(
+                {
+                    ("routing_policy", policy.name): policy
+                    for policy in self.bulk_filter(
+                        nb.plugins.bgp.routing_policy,
+                        name=policy_names,
+                        fields="id,name",
+                    )
+                }
+            )
+        missing_policies = [
+            name
+            for name in policy_names
+            if ("routing_policy", name) not in object_cache
+        ]
+        policy_diff = {
+            "create": missing_policies,
+            "update": {},
+            "delete": [],
+            "in_sync": [],
+        }
+
+        # Fetch the cross-product of referenced devices and names in one request,
+        # then retain exact (device, interface) matches for assignment comparison.
+        interface_objects = {}
+        if interface_targets:
+            interface_records = self.bulk_filter(
+                nb.dcim.interfaces,
+                device_id=sorted(
+                    {nb_devices[device].id for device, _ in interface_targets}
+                ),
+                name=sorted({name for _, name in interface_targets}),
+                fields="id,name,device,vrf",
+            )
+            interface_objects = {
+                (str(interface.device.name), str(interface.name)): interface
+                for interface in interface_records
+                if (str(interface.device.name), str(interface.name))
+                in interface_targets
+            }
+
+        for device_name, interface_name in sorted(
+            interface_targets.keys() - interface_objects.keys()
+        ):
+            msg = f"interface '{device_name}:{interface_name}' not found in NetBox"
+            job.event(msg, severity="ERROR")
+            log.error(f"Sync VRFs: {msg}")
+            ret.errors.append(msg)
+
+        interface_live = {}
+        interface_current = {}
+        for key in sorted(interface_targets.keys() & interface_objects.keys()):
+            device_name, interface_name = key
+            interface = interface_objects[key]
+            interface_live.setdefault(device_name, {})[interface_name] = {
+                "vrf": interface_targets[key]
+            }
+            interface_current.setdefault(device_name, {})[interface_name] = {
+                "vrf": str(interface.vrf.name) if interface.vrf else None
+            }
+
+        # Interface identity is scoped by device. A different current VRF becomes
+        # a normal update, while an equal assignment is reported as in sync.
+        interface_diff = self.make_diff(interface_live, interface_current)
+        full_diff = {
+            "vrfs": vrf_diff,
+            "route_targets": route_target_diff,
+            "routing_policies": policy_diff,
+            "interfaces": interface_diff,
+        }
+        interface_updates = sum(
+            len(actions["update"]) for actions in interface_diff.values()
+        )
+        interface_in_sync = sum(
+            len(actions["in_sync"]) for actions in interface_diff.values()
+        )
+        msg = (
             "vrf sync diff complete: "
             f"{len(create_names)} create, {len(update)} update, "
             f"{len(in_sync)} in sync"
         )
+        job.event(msg)
+        log.info(f"Sync VRFs: {msg}")
 
         if dry_run:
-            job.event("dry-run requested, returning VRF sync diff without changes")
-            log.info(f"{self.name} - Sync VRFs: dry-run complete")
             ret.result = full_diff
             ret.dry_run = True
             return ret
-        if with_approval:
-            job.event("requesting approval for the prepared VRF sync plan")
         if with_approval and not review_sync_task_result(job, "VRF sync", full_diff):
             ret.status = "skipped"
             ret.result = full_diff
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
-            log.info(f"{self.name} - Sync VRFs: approval declined")
+            msg = "vrf sync approval declined"
+            job.event(msg)
+            log.info(f"Sync VRFs: {msg}")
             return ret
 
-        route_target_names = list(
-            dict.fromkeys(
-                target
-                for vrf in live_vrfs.values()
-                for field in ("import_targets", "export_targets")
-                for target in vrf[field]
-            )
-        )
-        route_targets = (
-            {
-                target.name: target
-                for target in self.bulk_filter(
-                    nb.ipam.route_targets,
-                    name=route_target_names,
-                    fields="id,name",
-                )
-            }
-            if route_target_names
-            else {}
-        )
-        missing_route_targets = [
-            name for name in route_target_names if name not in route_targets
-        ]
+        # Apply global VRF changes first so every desired VRF ID is cached before
+        # building the dependent interface assignment updates.
+        ret.diff = full_diff
+        ret.result = {
+            "vrfs": {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": in_sync,
+            },
+            "route_targets": {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": [],
+            },
+            "routing_policies": {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": [],
+            },
+            "interfaces": {
+                device_name: {
+                    "created": [],
+                    "updated": sorted(actions["update"]),
+                    "deleted": [],
+                    "in_sync": actions["in_sync"],
+                }
+                for device_name, actions in interface_diff.items()
+            },
+        }
         if missing_route_targets:
             created_targets = nb.ipam.route_targets.create(
                 [{"name": name} for name in missing_route_targets]
             )
             for target in created_targets:
-                route_targets[target.name] = target
-            job.event(f"created {len(created_targets)} NetBox route target(s)")
+                object_cache[("route_target", target.name)] = target
+            ret.result["route_targets"]["created"].extend(
+                target.name for target in created_targets
+            )
+        if missing_policies:
+            created_policies = nb.plugins.bgp.routing_policy.create(
+                [{"name": name} for name in missing_policies]
+            )
+            for policy in created_policies:
+                object_cache[("routing_policy", policy.name)] = policy
+            ret.result["routing_policies"]["created"].extend(
+                policy.name for policy in created_policies
+            )
 
-        ret.diff = full_diff
-        ret.result = {
-            "global": {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": in_sync,
-            }
-        }
         create_payloads = []
         for vrf_name in create_names:
             desired = live_vrfs[vrf_name]
@@ -338,44 +578,73 @@ class NetboxVrfsTasks:
                 "name": vrf_name,
                 "description": desired["description"],
                 "import_targets": [
-                    route_targets[name].id for name in desired["import_targets"]
+                    object_cache[("route_target", name)].id
+                    for name in desired["import_targets"]
                 ],
                 "export_targets": [
-                    route_targets[name].id for name in desired["export_targets"]
+                    object_cache[("route_target", name)].id
+                    for name in desired["export_targets"]
                 ],
             }
+            custom_fields = {}
             if device_custom_field:
-                payload["custom_fields"] = {
-                    device_custom_field: desired[device_custom_field]
-                }
+                custom_fields[device_custom_field] = desired[device_custom_field]
+            for field_name in policy_fields.values():
+                custom_fields[field_name] = [
+                    object_cache[("routing_policy", name)].id
+                    for name in desired[field_name]
+                ]
+            if custom_fields:
+                payload["custom_fields"] = custom_fields
             create_payloads.append(payload)
         if create_payloads:
-            nb.ipam.vrfs.create(create_payloads)
-            ret.result["global"]["created"].extend(create_names)
-            job.event(f"created {len(create_payloads)} NetBox VRF(s)")
+            created_vrfs = nb.ipam.vrfs.create(create_payloads)
+            object_cache.update({("vrf", vrf.name): vrf for vrf in created_vrfs})
+            ret.result["vrfs"]["created"].extend(create_names)
 
         update_payloads = []
         for vrf_name in sorted(update):
             desired = live_vrfs[vrf_name]
-            payload = {"id": netbox_objects[vrf_name].id}
+            payload = {"id": object_cache[("vrf", vrf_name)].id}
             for field in update[vrf_name]:
                 if field == "description":
                     payload[field] = desired[field]
                 elif field in ("import_targets", "export_targets"):
-                    payload[field] = [route_targets[name].id for name in desired[field]]
+                    payload[field] = [
+                        object_cache[("route_target", name)].id
+                        for name in desired[field]
+                    ]
                 elif field == device_custom_field:
-                    payload["custom_fields"] = {
-                        device_custom_field: desired[device_custom_field]
-                    }
+                    payload.setdefault("custom_fields", {})[field] = desired[field]
+                elif field in policy_fields.values():
+                    payload.setdefault("custom_fields", {})[field] = [
+                        object_cache[("routing_policy", name)].id
+                        for name in desired[field]
+                    ]
             update_payloads.append(payload)
         if update_payloads:
             nb.ipam.vrfs.update(update_payloads)
-            ret.result["global"]["updated"].extend(sorted(update))
-            job.event(f"updated {len(update_payloads)} NetBox VRF(s)")
+            ret.result["vrfs"]["updated"].extend(sorted(update))
 
-        job.event("vrf sync complete")
-        log.info(
-            f"{self.name} - Sync VRFs complete: {len(create_names)} created, "
-            f"{len(update)} updated, {len(in_sync)} in sync"
+        # Assign only interfaces classified as updates; matching assignments have
+        # already been retained in the result's in_sync lists.
+        interface_payloads = []
+        for device_name, actions in sorted(interface_diff.items()):
+            for interface_name in sorted(actions["update"]):
+                vrf_name = interface_live[device_name][interface_name]["vrf"]
+                interface_payloads.append(
+                    {
+                        "id": interface_objects[(device_name, interface_name)].id,
+                        "vrf": object_cache[("vrf", vrf_name)].id,
+                    }
+                )
+        if interface_payloads:
+            nb.dcim.interfaces.update(interface_payloads)
+        msg = (
+            "vrf sync complete: "
+            f"{len(create_names)} VRF created, {len(update)} updated, "
+            f"{len(in_sync)} in sync"
         )
+        job.event(msg)
+        log.info(f"Sync VRFs: {msg}")
         return ret

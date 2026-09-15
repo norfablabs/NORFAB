@@ -796,6 +796,15 @@ commands:
       ip routing vrf TENANT_A
       ip routing vrf TENANT_B
       !
+      interface Ethernet1.101
+         vrf CONTROL_PLANE
+      !
+      interface Ethernet2.101
+         vrf CONTROL_PLANE
+      !
+      interface Loopback101
+         vrf CONTROL_PLANE
+      !
       router bgp 65102
          vrf CONTROL_PLANE
             rd 65102:101
@@ -803,8 +812,8 @@ commands:
             route-target import vpn-ipv4 65000:101
             route-target export vpn-ipv6 65000:101
             route-target export vpn-ipv4 65000:101
-            route-target import vpn-ipv4 route-map CONTROL_PLANE_IMPORT
-            route-target export vpn-ipv4 route-map CONTROL_PLANE_EXPORT
+            import map CONTROL_PLANE_IMPORT
+            export map CONTROL_PLANE_EXPORT
          !
          vrf TENANT_A
             rd 65102:201
@@ -817,8 +826,8 @@ commands:
             route-target export vpn-ipv4 65000:201
             route-target export vpn-ipv6 65000:302
             route-target export vpn-ipv4 65000:302
-            route-target import vpn-ipv4 route-map TENANT_A_IMPORT
-            route-target export vpn-ipv4 route-map TENANT_A_EXPORT
+            import map TENANT_A_IMPORT
+            export map TENANT_A_EXPORT
             redistribute connected
          !
          vrf TENANT_B
@@ -827,8 +836,8 @@ commands:
             route-target import vpn-ipv4 65000:202
             route-target export vpn-ipv6 65000:202
             route-target export vpn-ipv4 65000:202
-            route-target import vpn-ipv4 route-map TENANT_B_IMPORT
-            route-target export vpn-ipv4 route-map TENANT_B_EXPORT
+            import map TENANT_B_IMPORT
+            export map TENANT_B_EXPORT
             redistribute connected
     prompt:
     - '{base_prompt}>'
@@ -1098,8 +1107,8 @@ commands:
             route-target import vpn-ipv4 65000:101
             route-target export vpn-ipv6 65000:101
             route-target export vpn-ipv4 65000:101
-            route-target import vpn-ipv4 route-map CONTROL_PLANE_IMPORT
-            route-target export vpn-ipv4 route-map CONTROL_PLANE_EXPORT
+            import map CONTROL_PLANE_IMPORT
+            export map CONTROL_PLANE_EXPORT
             router-id 10.101.1.12
             neighbor 10.101.0.4 remote-as 65001
             neighbor 10.101.0.4 description ceos-spine-1 Ethernet3.101
@@ -1117,8 +1126,8 @@ commands:
             route-target export vpn-ipv4 65000:201
             route-target export vpn-ipv6 65000:302
             route-target export vpn-ipv4 65000:302
-            route-target import vpn-ipv4 route-map TENANT_A_IMPORT
-            route-target export vpn-ipv4 route-map TENANT_A_EXPORT
+            import map TENANT_A_IMPORT
+            export map TENANT_A_EXPORT
             redistribute connected
          !
          vrf TENANT_B
@@ -1127,8 +1136,8 @@ commands:
             route-target import vpn-ipv4 65000:202
             route-target export vpn-ipv6 65000:202
             route-target export vpn-ipv4 65000:202
-            route-target import vpn-ipv4 route-map TENANT_B_IMPORT
-            route-target export vpn-ipv4 route-map TENANT_B_EXPORT
+            import map TENANT_B_IMPORT
+            export map TENANT_B_EXPORT
             redistribute connected
       !
       end

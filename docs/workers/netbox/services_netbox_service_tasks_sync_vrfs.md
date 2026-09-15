@@ -1,13 +1,15 @@
 # Sync VRFs
 
 The `sync_vrfs` task reconciles VRFs from live devices with global NetBox VRF
-objects. A VRF name is its identity. The task synchronizes its description and
-adds live import and export route targets to the existing NetBox associations.
-Route-target and device associations are additive.
+objects and assigns existing NetBox interfaces to their live VRFs. A VRF name
+is its identity. The task synchronizes its description and adds live import and
+export route targets to the existing NetBox associations. Route-target and
+device and routing-policy associations are additive.
 
-The task creates missing NetBox route targets before it creates or updates
-VRFs. Route distinguishers and import/export route policies returned by the TTP
-getter are not stored in NetBox.
+The task creates missing NetBox route targets and BGP routing-policy objects
+before it creates or updates VRFs. Route distinguishers returned by the TTP
+getter are not stored in NetBox. If the BGP plugin is absent, routing-policy
+processing is skipped while the rest of VRF synchronization continues.
 
 If multiple existing NetBox VRFs match the same live VRF name, the task logs a
 warning and reconciles against the matched VRF with the numerically lowest
@@ -24,7 +26,12 @@ NetBox ID. Other same-name VRFs are left unchanged.
 | `devices` | `None` | Explicit NetBox and Nornir device names. |
 | `branch` | `None` | NetBox Branching plugin branch name. |
 | `device_custom_field` | `devices` | Multi-object VRF custom field related to `dcim.device`. |
+| `rpl_import_ipv4` | `rpl_import_ipv4` | VRF multi-object custom field for IPv4 import routing policies. |
+| `rpl_import_ipv6` | `rpl_import_ipv6` | VRF multi-object custom field for IPv6 import routing policies. |
+| `rpl_export_ipv4` | `rpl_export_ipv4` | VRF multi-object custom field for IPv4 export routing policies. |
+| `rpl_export_ipv6` | `rpl_export_ipv6` | VRF multi-object custom field for IPv6 export routing policies. |
 | `preserve_description` | `None` | Preserve NetBox descriptions only when live text is empty. Use `True` to always preserve or `False` to always use live text. |
+| `interface_map` | `None` | Ordered interface-name mapping rules or an `nf://` YAML file. |
 | Nornir filters | `None` | `FO`, `FB`, `FH`, `FC`, `FR`, `FG`, `FP`, `FL`, `FM`, `FX`, and `FN`. |
 
 Provide `devices` or at least one Nornir host filter.
@@ -46,6 +53,18 @@ does not have a custom field named `vrf_devices`, VRFs and route targets are
 still synchronized. The task does not fail and does not add a device custom
 field value to the VRF.
 
+## Routing-policy custom fields
+
+Configure each selected policy field on `ipam.vrf` as a multi-object custom
+field related to `netbox_bgp.routingpolicy`. The four arguments select the
+custom-field names; missing fields are skipped. The task combines policy names
+reported for each address family across selected devices, compares them with
+the NetBox references by name, and adds new associations without removing
+NetBox-only policies. An empty live policy does not clear an existing field.
+Missing policy objects are included in dry-run and approval plans and created
+before VRF writes. The BGP plugin must be installed for this processing; its
+absence produces a warning and leaves policy fields out of the VRF diff.
+
 ## Live data
 
 The task runs Nornir `parse_ttp` with `get="vrfs"`, which returns:
@@ -54,20 +73,39 @@ The task runs Nornir `parse_ttp` with `get="vrfs"`, which returns:
 - name: TENANT_A
   description: Tenant A services
   rd: 65000:201
-  rt_import:
-    - 65000:201
-    - 65000:301
-  rt_export:
-    - 65000:201
-    - 65000:302
-  route_policy_import: TENANT_A_IMPORT
-  route_policy_export: TENANT_A_EXPORT
+  interfaces:
+    - Ethernet1.201
+  address_families:
+    ipv4:
+      rt_import:
+        - 65000:201
+        - 65000:301
+      rt_export:
+        - 65000:201
+        - 65000:302
+      route_policy_import: TENANT_A_IMPORT
+      route_policy_export: TENANT_A_EXPORT
+    ipv6:
+      rt_import: []
+      rt_export: []
+      route_policy_import: null
+      route_policy_export: null
 ```
 
-Only `name`, `description`, `rt_import`, and `rt_export` are used. When
+The task uses `name`, `description`, `interfaces`, and the import/export route
+targets and policies from every address family. When
 `instance_type` is present, records whose value is not `vrf` are silently
 skipped. Description text and route-target values are used without string
 normalization, and null descriptions become an empty string.
+
+## Interface assignments
+
+The task maps each parsed interface name with `interface_map`, then compares a
+normalized `{device: {interface: {vrf: name}}}` live state with the matching
+NetBox interfaces. Changed assignments are updated in bulk and matching
+assignments are reported under `in_sync`. Missing interfaces are reported and
+skipped. Interfaces not named by live VRF data are outside the task scope and
+their existing assignments are retained.
 
 For each VRF, devices are ordered alphabetically. The first non-empty
 description in that order becomes the NetBox description; the description is
@@ -78,8 +116,8 @@ or `False` to always apply the live value, including an empty string. Different
 descriptions from multiple devices are resolved by this rule and are not
 reported as conflicts.
 
-Import and export route-target lists from every reporting device are
-concatenated to form the live aggregate. The shared `make_diff` method compares
+Import and export route-target lists from every reporting device and address
+family are combined and deduplicated in first-seen order. The shared `make_diff` method compares
 that aggregate with NetBox and ignores route-target order. If it finds an
 import or export route-target difference for an existing VRF, the task combines
 the current NetBox list with live targets that are not already in that list and
@@ -87,6 +125,9 @@ places the combined list in the update. For a new VRF, or an existing VRF with
 an empty target set, the live aggregate populates the association. Route-target
 differences are not reported as errors, and all reporting devices are added to
 the device custom field.
+
+Routing-policy lists use the same first-seen deduplication and additive update
+policy. Only changed custom fields are written for an existing VRF.
 
 ## Multi-device aggregation example
 
@@ -97,11 +138,11 @@ Assume the selected devices return the following records for the same VRF:
     ```yaml
     - name: TENANT_A
       description:
-      rt_import:
-        - 65000:100
-        - 65000:200
-      rt_export:
-        - 65000:100
+      interfaces: [Ethernet1.100]
+      address_families:
+        ipv4:
+          rt_import: [65000:100, 65000:200]
+          rt_export: [65000:100]
     ```
 
 === "edge-b"
@@ -109,17 +150,16 @@ Assume the selected devices return the following records for the same VRF:
     ```yaml
     - name: TENANT_A
       description: Tenant A services
-      rt_import:
-        - 65000:100
-        - 65000:300
-      rt_export:
-        - 65000:100
-        - 65000:400
+      interfaces: [Ethernet1.100]
+      address_families:
+        ipv4:
+          rt_import: [65000:100, 65000:300]
+          rt_export: [65000:100, 65000:400]
     ```
 
 The task processes `edge-a` before `edge-b` because device names are sorted.
 The empty description from `edge-a` is skipped, so `Tenant A services` from
-`edge-b` becomes the desired description. It concatenates the live lists as
+`edge-b` becomes the desired description. It combines the live lists as
 follows:
 
 ```yaml
@@ -128,10 +168,8 @@ TENANT_A:
   import_targets:
     - 65000:100
     - 65000:200
-    - 65000:100
     - 65000:300
   export_targets:
-    - 65000:100
     - 65000:100
     - 65000:400
   devices:
@@ -139,11 +177,10 @@ TENANT_A:
     - edge-b
 ```
 
-The task does not sort or deduplicate these aggregate lists. NetBox stores VRF
-route targets as object relationships, so the resulting VRF is associated with
+The task preserves first-seen order while removing duplicate aggregate values.
+NetBox stores VRF route targets as object relationships, so the resulting VRF is associated with
 import targets `65000:100`, `65000:200`, and `65000:300`, and export targets
-`65000:100` and `65000:400`. Repeated live references do not create duplicate
-route-target objects or relationships.
+`65000:100` and `65000:400`.
 
 If NetBox initially associates `TENANT_A` with import target `65000:999` and
 export targets `65000:100` and `65000:999`, the task produces this state:
@@ -172,11 +209,13 @@ is never removed.
 
 ## Output
 
-Results use one `global` scope. Dry-run returns the standard sync diff:
+Results contain separate `vrfs`, `route_targets`, `routing_policies`, and
+`interfaces` sections.
+Dry-run returns the standard sync diff:
 
 ```json
 {
-  "global": {
+  "vrfs": {
     "create": ["TENANT_A"],
     "update": {
       "TENANT_B": {
@@ -188,6 +227,26 @@ Results use one `global` scope. Dry-run returns the standard sync diff:
     },
     "delete": [],
     "in_sync": ["CONTROL_PLANE"]
+  },
+  "route_targets": {
+    "create": ["65000:201", "65000:202"],
+    "update": {},
+    "delete": [],
+    "in_sync": []
+  },
+  "routing_policies": {
+    "create": ["TENANT_A_IMPORT", "TENANT_A_EXPORT"],
+    "update": {},
+    "delete": [],
+    "in_sync": []
+  },
+  "interfaces": {
+    "edge-a": {
+      "create": [],
+      "update": {},
+      "delete": [],
+      "in_sync": ["Ethernet1.100"]
+    }
   }
 }
 ```
@@ -197,25 +256,52 @@ the top-level `diff` field:
 
 ```json
 {
-  "global": {
+  "vrfs": {
     "created": ["TENANT_A"],
     "updated": ["TENANT_B"],
     "deleted": [],
     "in_sync": ["CONTROL_PLANE"]
+  },
+  "route_targets": {
+    "created": ["65000:201", "65000:202"],
+    "updated": [],
+    "deleted": [],
+    "in_sync": []
+  },
+  "routing_policies": {
+    "created": ["TENANT_A_IMPORT", "TENANT_A_EXPORT"],
+    "updated": [],
+    "deleted": [],
+    "in_sync": []
+  },
+  "interfaces": {
+    "edge-a": {
+      "created": [],
+      "updated": ["Ethernet1.201"],
+      "deleted": [],
+      "in_sync": []
+    }
   }
 }
 ```
 
+The `route_targets` and `routing_policies` sections report only missing
+objects that the task plans to create or has created. Their update, delete,
+and in-sync categories remain empty. Association changes are reported as
+fields of the corresponding VRF update.
+
 ## Deletions
 
-The task does not delete VRFs, route-target objects, route-target associations,
-or device associations. A selected device set does not prove that existing
-NetBox data is stale, so `delete` and `deleted` remain empty.
+The task does not delete VRFs, route-target or routing-policy objects, their
+associations, device associations, or interface assignments that are absent from live VRF
+data. A selected device set does not prove that existing NetBox data is stale,
+so `delete` and `deleted` remain empty.
 
 | Condition | Action |
 |-----------|--------|
 | Live VRF is missing from NetBox | Create the VRF. |
 | Live route target is missing from NetBox | Create the route-target object and associate it with the VRF. |
+| Live routing policy is missing from NetBox | Create the routing-policy object and associate it with the VRF custom field. |
 | NetBox VRF association is absent from the live aggregate | Keep the existing association on the VRF. |
 | Existing route-target object is not reported by live data | Keep the route-target object. |
 | NetBox VRF is absent from the selected devices | Keep the NetBox VRF. |
@@ -263,7 +349,12 @@ installed and configured for branch use.
                 "devices": ["fn-ceos-lf-1", "fn-ceos-lf-2"],
                 "dry_run": True,
                 "device_custom_field": "devices",
+                "rpl_import_ipv4": "rpl_import_ipv4",
+                "rpl_import_ipv6": "rpl_import_ipv6",
+                "rpl_export_ipv4": "rpl_export_ipv4",
+                "rpl_export_ipv6": "rpl_export_ipv6",
                 "preserve_description": None,
+                "interface_map": [],
             },
         )
         print(result)
@@ -288,6 +379,20 @@ descriptions, the first non-empty value in sorted device-name order is used.
 Confirm that the field is assigned to `ipam.vrf`, uses the multi-object type,
 and relates to `dcim.device`. The field name must match `device_custom_field`
 exactly.
+
+### Routing-policy custom fields
+
+Confirm the BGP plugin is installed and the selected VRF fields use
+`multiobject` references to `netbox_bgp.routingpolicy`. The Arista EOS VRF
+getter maps `import map` and `export map` to IPv4 policy values and returns
+empty IPv6 policy values; platforms with explicit IPv6 address-family policies
+can populate the IPv6 fields.
+
+### Missing interfaces
+
+Run `sync_device_interfaces` first and use the same `interface_map` in both
+tasks. VRF sync reports a referenced interface that does not exist in NetBox
+and continues with the remaining assignments.
 
 ### NetBox write failures
 
@@ -324,7 +429,12 @@ root
             ├── timeout:    Job timeout
             ├── with-approval:    Preview VRF changes and ask for review before writing to NetBox, default 'False'
             ├── device-custom-field:    VRF custom field that stores associated NetBox devices, default 'devices'
+            ├── rpl-import-ipv4:    VRF custom field for IPv4 import routing policies, default 'rpl_import_ipv4'
+            ├── rpl-import-ipv6:    VRF custom field for IPv6 import routing policies, default 'rpl_import_ipv6'
+            ├── rpl-export-ipv4:    VRF custom field for IPv4 export routing policies, default 'rpl_export_ipv4'
+            ├── rpl-export-ipv6:    VRF custom field for IPv6 export routing policies, default 'rpl_export_ipv6'
             ├── preserve-description:    Preserve NetBox descriptions always (true), when live text is empty (null), or never (false)
+            ├── interface-map:    Ordered interface name mapping rules or nf:// YAML file reference
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'
             └── nowait:    Do not wait for job to complete, default 'False'
