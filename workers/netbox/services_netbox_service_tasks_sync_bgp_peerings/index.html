@@ -2938,6 +2938,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bulk-request-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Request Batching
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7086,6 +7097,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bulk-request-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Request Batching
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7337,6 +7359,12 @@ live description.</p>
 </div>
 <h2 id="branching-support">Branching Support<a class="headerlink" href="#branching-support" title="Permanent link">¤</a></h2>
 <p><code>sync_bgp_peerings</code> is branch-aware. Pass <code>branch=&lt;name&gt;</code> to write all changes into a <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a> branch instead of main.</p>
+<h2 id="bulk-request-batching">Bulk Request Batching<a class="headerlink" href="#bulk-request-batching" title="Permanent link">¤</a></h2>
+<p>List-based NetBox writes are sent as sequential requests containing at most
+<code>batch_size</code> objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
@@ -7955,29 +7983,7 @@ live text.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1860</span>
-<span class="normal">1861</span>
-<span class="normal">1862</span>
-<span class="normal">1863</span>
-<span class="normal">1864</span>
-<span class="normal">1865</span>
-<span class="normal">1866</span>
-<span class="normal">1867</span>
-<span class="normal">1868</span>
-<span class="normal">1869</span>
-<span class="normal">1870</span>
-<span class="normal">1871</span>
-<span class="normal">1872</span>
-<span class="normal">1873</span>
-<span class="normal">1874</span>
-<span class="normal">1875</span>
-<span class="normal">1876</span>
-<span class="normal">1877</span>
-<span class="normal">1878</span>
-<span class="normal">1879</span>
-<span class="normal">1880</span>
-<span class="normal">1881</span>
-<span class="normal">1882</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1882</span>
 <span class="normal">1883</span>
 <span class="normal">1884</span>
 <span class="normal">1885</span>
@@ -8522,7 +8528,38 @@ live text.</p>
 <span class="normal">2424</span>
 <span class="normal">2425</span>
 <span class="normal">2426</span>
-<span class="normal">2427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2427</span>
+<span class="normal">2428</span>
+<span class="normal">2429</span>
+<span class="normal">2430</span>
+<span class="normal">2431</span>
+<span class="normal">2432</span>
+<span class="normal">2433</span>
+<span class="normal">2434</span>
+<span class="normal">2435</span>
+<span class="normal">2436</span>
+<span class="normal">2437</span>
+<span class="normal">2438</span>
+<span class="normal">2439</span>
+<span class="normal">2440</span>
+<span class="normal">2441</span>
+<span class="normal">2442</span>
+<span class="normal">2443</span>
+<span class="normal">2444</span>
+<span class="normal">2445</span>
+<span class="normal">2446</span>
+<span class="normal">2447</span>
+<span class="normal">2448</span>
+<span class="normal">2449</span>
+<span class="normal">2450</span>
+<span class="normal">2451</span>
+<span class="normal">2452</span>
+<span class="normal">2453</span>
+<span class="normal">2454</span>
+<span class="normal">2455</span>
+<span class="normal">2456</span>
+<span class="normal">2457</span>
+<span class="normal">2458</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpPeeringsResult</span><span class="p">,</span>
@@ -8556,6 +8593,7 @@ live text.</p>
     <span class="n">ignore_peer_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vrf_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
     <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8955,6 +8993,7 @@ live text.</p>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">device_results</span>
 
     <span class="c1"># Build bulk_create list from full_diff — split pipe-separated policies to lists</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;preparing BGP session create payloads&quot;</span><span class="p">)</span>
@@ -9014,6 +9053,7 @@ live text.</p>
             <span class="n">create_reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">vrf_custom_field</span><span class="o">=</span><span class="n">vrf_custom_field</span><span class="p">,</span>
             <span class="n">lookup_cache</span><span class="o">=</span><span class="n">lookup_cache</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">create_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">created_names</span> <span class="o">=</span> <span class="n">create_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created&quot;</span><span class="p">,</span> <span class="p">[])</span>
@@ -9021,6 +9061,9 @@ live text.</p>
             <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">created_names</span><span class="p">:</span>
                     <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">create_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">ret</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to create&quot;</span><span class="p">)</span>
 
@@ -9035,6 +9078,7 @@ live text.</p>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
             <span class="n">vrf_custom_field</span><span class="o">=</span><span class="n">vrf_custom_field</span><span class="p">,</span>
             <span class="n">lookup_cache</span><span class="o">=</span><span class="n">lookup_cache</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">updated_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated&quot;</span><span class="p">,</span> <span class="p">[]))</span>
@@ -9042,6 +9086,9 @@ live text.</p>
             <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]:</span>
                 <span class="k">if</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">updated_names</span><span class="p">:</span>
                     <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">update_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">ret</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to update&quot;</span><span class="p">)</span>
 
@@ -9086,7 +9133,6 @@ live text.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no BGP sessions to delete&quot;</span><span class="p">)</span>
 
-    <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">device_results</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;BGP peerings sync complete&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>

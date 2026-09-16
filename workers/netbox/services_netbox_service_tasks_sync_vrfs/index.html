@@ -2665,10 +2665,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#routing-policy-custom-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing-policy custom fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#live-data" class="md-nav__link">
     <span class="md-ellipsis">
       
         Live data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface-assignments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface assignments
       
     </span>
   </a>
@@ -2713,6 +2735,17 @@
     <span class="md-ellipsis">
       
         Branches
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bulk-request-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Request Batching
       
     </span>
   </a>
@@ -2769,6 +2802,28 @@
     <span class="md-ellipsis">
       
         Device custom field
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#routing-policy-custom-fields_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing-policy custom fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#missing-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Missing interfaces
       
     </span>
   </a>
@@ -7037,10 +7092,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#routing-policy-custom-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing-policy custom fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#live-data" class="md-nav__link">
     <span class="md-ellipsis">
       
         Live data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface-assignments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface assignments
       
     </span>
   </a>
@@ -7085,6 +7162,17 @@
     <span class="md-ellipsis">
       
         Branches
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bulk-request-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Request Batching
       
     </span>
   </a>
@@ -7141,6 +7229,28 @@
     <span class="md-ellipsis">
       
         Device custom field
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#routing-policy-custom-fields_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing-policy custom fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#missing-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Missing interfaces
       
     </span>
   </a>
@@ -7207,12 +7317,14 @@
 
 <h1 id="sync-vrfs">Sync VRFs<a class="headerlink" href="#sync-vrfs" title="Permanent link">¤</a></h1>
 <p>The <code>sync_vrfs</code> task reconciles VRFs from live devices with global NetBox VRF
-objects. A VRF name is its identity. The task synchronizes its description and
-adds live import and export route targets to the existing NetBox associations.
-Route-target and device associations are additive.</p>
-<p>The task creates missing NetBox route targets before it creates or updates
-VRFs. Route distinguishers and import/export route policies returned by the TTP
-getter are not stored in NetBox.</p>
+objects and assigns existing NetBox interfaces to their live VRFs. A VRF name
+is its identity. The task synchronizes its description and adds live import and
+export route targets to the existing NetBox associations. Route-target and
+device and routing-policy associations are additive.</p>
+<p>The task creates missing NetBox route targets and BGP routing-policy objects
+before it creates or updates VRFs. Route distinguishers returned by the TTP
+getter are not stored in NetBox. If the BGP plugin is absent, routing-policy
+processing is skipped while the rest of VRF synchronization continues.</p>
 <p>If multiple existing NetBox VRFs match the same live VRF name, the task logs a
 warning and reconciles against the matched VRF with the numerically lowest
 NetBox ID. Other same-name VRFs are left unchanged.</p>
@@ -7262,9 +7374,34 @@ NetBox ID. Other same-name VRFs are left unchanged.</p>
 <td>Multi-object VRF custom field related to <code>dcim.device</code>.</td>
 </tr>
 <tr>
+<td><code>rpl_import_ipv4</code></td>
+<td><code>rpl_import_ipv4</code></td>
+<td>VRF multi-object custom field for IPv4 import routing policies.</td>
+</tr>
+<tr>
+<td><code>rpl_import_ipv6</code></td>
+<td><code>rpl_import_ipv6</code></td>
+<td>VRF multi-object custom field for IPv6 import routing policies.</td>
+</tr>
+<tr>
+<td><code>rpl_export_ipv4</code></td>
+<td><code>rpl_export_ipv4</code></td>
+<td>VRF multi-object custom field for IPv4 export routing policies.</td>
+</tr>
+<tr>
+<td><code>rpl_export_ipv6</code></td>
+<td><code>rpl_export_ipv6</code></td>
+<td>VRF multi-object custom field for IPv6 export routing policies.</td>
+</tr>
+<tr>
 <td><code>preserve_description</code></td>
 <td><code>None</code></td>
 <td>Preserve NetBox descriptions only when live text is empty. Use <code>True</code> to always preserve or <code>False</code> to always use live text.</td>
+</tr>
+<tr>
+<td><code>interface_map</code></td>
+<td><code>None</code></td>
+<td>Ordered interface-name mapping rules or an <code>nf://</code> YAML file.</td>
 </tr>
 <tr>
 <td>Nornir filters</td>
@@ -7287,24 +7424,51 @@ without device association changes.</p>
 does not have a custom field named <code>vrf_devices</code>, VRFs and route targets are
 still synchronized. The task does not fail and does not add a device custom
 field value to the VRF.</p>
+<h2 id="routing-policy-custom-fields">Routing-policy custom fields<a class="headerlink" href="#routing-policy-custom-fields" title="Permanent link">¤</a></h2>
+<p>Configure each selected policy field on <code>ipam.vrf</code> as a multi-object custom
+field related to <code>netbox_bgp.routingpolicy</code>. The four arguments select the
+custom-field names; missing fields are skipped. The task combines policy names
+reported for each address family across selected devices, compares them with
+the NetBox references by name, and adds new associations without removing
+NetBox-only policies. An empty live policy does not clear an existing field.
+Missing policy objects are included in dry-run and approval plans and created
+before VRF writes. The BGP plugin must be installed for this processing; its
+absence produces a warning and leaves policy fields out of the VRF diff.</p>
 <h2 id="live-data">Live data<a class="headerlink" href="#live-data" title="Permanent link">¤</a></h2>
 <p>The task runs Nornir <code>parse_ttp</code> with <code>get="vrfs"</code>, which returns:</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A</span>
 <span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tenant A services</span>
 <span class="w">  </span><span class="nt">rd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:201</span>
-<span class="w">  </span><span class="nt">rt_import</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:201</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:301</span>
-<span class="w">  </span><span class="nt">rt_export</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:201</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:302</span>
-<span class="w">  </span><span class="nt">route_policy_import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A_IMPORT</span>
-<span class="w">  </span><span class="nt">route_policy_export</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A_EXPORT</span>
+<span class="w">  </span><span class="nt">interfaces</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1.201</span>
+<span class="w">  </span><span class="nt">address_families</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ipv4</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rt_import</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:201</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:301</span>
+<span class="w">      </span><span class="nt">rt_export</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:201</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:302</span>
+<span class="w">      </span><span class="nt">route_policy_import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A_IMPORT</span>
+<span class="w">      </span><span class="nt">route_policy_export</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A_EXPORT</span>
+<span class="w">    </span><span class="nt">ipv6</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rt_import</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">      </span><span class="nt">rt_export</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">      </span><span class="nt">route_policy_import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">route_policy_export</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 </code></pre></div>
-<p>Only <code>name</code>, <code>description</code>, <code>rt_import</code>, and <code>rt_export</code> are used. When
+<p>The task uses <code>name</code>, <code>description</code>, <code>interfaces</code>, and the import/export route
+targets and policies from every address family. When
 <code>instance_type</code> is present, records whose value is not <code>vrf</code> are silently
 skipped. Description text and route-target values are used without string
 normalization, and null descriptions become an empty string.</p>
+<h2 id="interface-assignments">Interface assignments<a class="headerlink" href="#interface-assignments" title="Permanent link">¤</a></h2>
+<p>The task maps each parsed interface name with <code>interface_map</code>, then compares a
+normalized <code>{device: {interface: {vrf: name}}}</code> live state with the matching
+NetBox interfaces. Changed assignments are updated in bulk and matching
+assignments are reported under <code>in_sync</code>. Missing interfaces are reported and
+skipped. Interfaces not named by live VRF data are outside the task scope and
+their existing assignments are retained.</p>
 <p>For each VRF, devices are ordered alphabetically. The first non-empty
 description in that order becomes the NetBox description; the description is
 empty when no device supplies one. For existing VRFs, the default
@@ -7313,8 +7477,8 @@ live description is empty. Set it to <code>True</code> to always retain the NetB
 or <code>False</code> to always apply the live value, including an empty string. Different
 descriptions from multiple devices are resolved by this rule and are not
 reported as conflicts.</p>
-<p>Import and export route-target lists from every reporting device are
-concatenated to form the live aggregate. The shared <code>make_diff</code> method compares
+<p>Import and export route-target lists from every reporting device and address
+family are combined and deduplicated in first-seen order. The shared <code>make_diff</code> method compares
 that aggregate with NetBox and ignores route-target order. If it finds an
 import or export route-target difference for an existing VRF, the task combines
 the current NetBox list with live targets that are not already in that list and
@@ -7322,6 +7486,8 @@ places the combined list in the update. For a new VRF, or an existing VRF with
 an empty target set, the live aggregate populates the association. Route-target
 differences are not reported as errors, and all reporting devices are added to
 the device custom field.</p>
+<p>Routing-policy lists use the same first-seen deduplication and additive update
+policy. Only changed custom fields are written for an existing VRF.</p>
 <h2 id="multi-device-aggregation-example">Multi-device aggregation example<a class="headerlink" href="#multi-device-aggregation-example" title="Permanent link">¤</a></h2>
 <p>Assume the selected devices return the following records for the same VRF:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">edge-a</label><label for="__tabbed_1_2">edge-b</label></div>
@@ -7329,50 +7495,46 @@ the device custom field.</p>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A</span>
 <span class="w">  </span><span class="nt">description</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">rt_import</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:200</span>
-<span class="w">  </span><span class="nt">rt_export</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
+<span class="w">  </span><span class="nt">interfaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">Ethernet1.100</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">address_families</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ipv4</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rt_import</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">65000</span><span class="p p-Indicator">:</span><span class="nv">100</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">65000</span><span class="p p-Indicator">:</span><span class="nv">200</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">rt_export</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">65000</span><span class="p p-Indicator">:</span><span class="nv">100</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TENANT_A</span>
 <span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tenant A services</span>
-<span class="w">  </span><span class="nt">rt_import</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:300</span>
-<span class="w">  </span><span class="nt">rt_export</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:400</span>
+<span class="w">  </span><span class="nt">interfaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">Ethernet1.100</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">address_families</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ipv4</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">rt_import</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">65000</span><span class="p p-Indicator">:</span><span class="nv">100</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">65000</span><span class="p p-Indicator">:</span><span class="nv">300</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">rt_export</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">65000</span><span class="p p-Indicator">:</span><span class="nv">100</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">65000</span><span class="p p-Indicator">:</span><span class="nv">400</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 </div>
 </div>
 </div>
 <p>The task processes <code>edge-a</code> before <code>edge-b</code> because device names are sorted.
 The empty description from <code>edge-a</code> is skipped, so <code>Tenant A services</code> from
-<code>edge-b</code> becomes the desired description. It concatenates the live lists as
+<code>edge-b</code> becomes the desired description. It combines the live lists as
 follows:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">TENANT_A</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tenant A services</span>
 <span class="w">  </span><span class="nt">import_targets</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:200</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:300</span>
 <span class="w">  </span><span class="nt">export_targets</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:100</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000:400</span>
 <span class="w">  </span><span class="nt">devices</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">edge-a</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">edge-b</span>
 </code></pre></div>
-<p>The task does not sort or deduplicate these aggregate lists. NetBox stores VRF
-route targets as object relationships, so the resulting VRF is associated with
+<p>The task preserves first-seen order while removing duplicate aggregate values.
+NetBox stores VRF route targets as object relationships, so the resulting VRF is associated with
 import targets <code>65000:100</code>, <code>65000:200</code>, and <code>65000:300</code>, and export targets
-<code>65000:100</code> and <code>65000:400</code>. Repeated live references do not create duplicate
-route-target objects or relationships.</p>
+<code>65000:100</code> and <code>65000:400</code>.</p>
 <p>If NetBox initially associates <code>TENANT_A</code> with import target <code>65000:999</code> and
 export targets <code>65000:100</code> and <code>65000:999</code>, the task produces this state:</p>
 <table>
@@ -7424,9 +7586,11 @@ NetBox-only route target remains a difference on later runs. The task can report
 the VRF as updated again, but the NetBox-only association remains attached and
 is never removed.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
-<p>Results use one <code>global</code> scope. Dry-run returns the standard sync diff:</p>
+<p>Results contain separate <code>vrfs</code>, <code>route_targets</code>, <code>routing_policies</code>, and
+<code>interfaces</code> sections.
+Dry-run returns the standard sync diff:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;global&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;vrfs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;TENANT_A&quot;</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;TENANT_B&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -7438,24 +7602,69 @@ is never removed.</p>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;CONTROL_PLANE&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;route_targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;65000:201&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;65000:202&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;routing_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;TENANT_A_IMPORT&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TENANT_A_EXPORT&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;edge-a&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">&quot;update&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nt">&quot;delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Ethernet1.100&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Live runs use completed-action verbs. The prepared plan remains available in
 the top-level <code>diff</code> field:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;global&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;vrfs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;TENANT_A&quot;</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;TENANT_B&quot;</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;deleted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;CONTROL_PLANE&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;route_targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;65000:201&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;65000:202&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;deleted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;routing_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;TENANT_A_IMPORT&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TENANT_A_EXPORT&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;deleted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;edge-a&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Ethernet1.201&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;deleted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">&quot;in_sync&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>The <code>route_targets</code> and <code>routing_policies</code> sections report only missing
+objects that the task plans to create or has created. Their update, delete,
+and in-sync categories remain empty. Association changes are reported as
+fields of the corresponding VRF update.</p>
 <h2 id="deletions">Deletions<a class="headerlink" href="#deletions" title="Permanent link">¤</a></h2>
-<p>The task does not delete VRFs, route-target objects, route-target associations,
-or device associations. A selected device set does not prove that existing
-NetBox data is stale, so <code>delete</code> and <code>deleted</code> remain empty.</p>
+<p>The task does not delete VRFs, route-target or routing-policy objects, their
+associations, device associations, or interface assignments that are absent from live VRF
+data. A selected device set does not prove that existing NetBox data is stale,
+so <code>delete</code> and <code>deleted</code> remain empty.</p>
 <table>
 <thead>
 <tr>
@@ -7471,6 +7680,10 @@ NetBox data is stale, so <code>delete</code> and <code>deleted</code> remain emp
 <tr>
 <td>Live route target is missing from NetBox</td>
 <td>Create the route-target object and associate it with the VRF.</td>
+</tr>
+<tr>
+<td>Live routing policy is missing from NetBox</td>
+<td>Create the routing-policy object and associate it with the VRF custom field.</td>
 </tr>
 <tr>
 <td>NetBox VRF association is absent from the live aggregate</td>
@@ -7490,6 +7703,12 @@ NetBox data is stale, so <code>delete</code> and <code>deleted</code> remain emp
 <p>The task obtains its NetBox client with the requested branch. Reads and writes
 therefore remain inside that branch. The NetBox Branching plugin must be
 installed and configured for branch use.</p>
+<h2 id="bulk-request-batching">Bulk Request Batching<a class="headerlink" href="#bulk-request-batching" title="Permanent link">¤</a></h2>
+<p>List-based NetBox writes are sent as sequential requests containing at most
+<code>batch_size</code> objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
 <div class="tabbed-content">
@@ -7517,7 +7736,12 @@ installed and configured for branch use.</p>
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fn-ceos-lf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;fn-ceos-lf-2&quot;</span><span class="p">],</span>
             <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;device_custom_field&quot;</span><span class="p">:</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rpl_import_ipv4&quot;</span><span class="p">:</span> <span class="s2">&quot;rpl_import_ipv4&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rpl_import_ipv6&quot;</span><span class="p">:</span> <span class="s2">&quot;rpl_import_ipv6&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rpl_export_ipv4&quot;</span><span class="p">:</span> <span class="s2">&quot;rpl_export_ipv4&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;rpl_export_ipv6&quot;</span><span class="p">:</span> <span class="s2">&quot;rpl_export_ipv6&quot;</span><span class="p">,</span>
             <span class="s2">&quot;preserve_description&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;interface_map&quot;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="p">},</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
@@ -7538,6 +7762,16 @@ descriptions, the first non-empty value in sorted device-name order is used.</p>
 <p>Confirm that the field is assigned to <code>ipam.vrf</code>, uses the multi-object type,
 and relates to <code>dcim.device</code>. The field name must match <code>device_custom_field</code>
 exactly.</p>
+<h3 id="routing-policy-custom-fields_1">Routing-policy custom fields<a class="headerlink" href="#routing-policy-custom-fields_1" title="Permanent link">¤</a></h3>
+<p>Confirm the BGP plugin is installed and the selected VRF fields use
+<code>multiobject</code> references to <code>netbox_bgp.routingpolicy</code>. The Arista EOS VRF
+getter maps <code>import map</code> and <code>export map</code> to IPv4 policy values and returns
+empty IPv6 policy values; platforms with explicit IPv6 address-family policies
+can populate the IPv6 fields.</p>
+<h3 id="missing-interfaces">Missing interfaces<a class="headerlink" href="#missing-interfaces" title="Permanent link">¤</a></h3>
+<p>Run <code>sync_device_interfaces</code> first and use the same <code>interface_map</code> in both
+tasks. VRF sync reports a referenced interface that does not exist in NetBox
+and continues with the remaining assignments.</p>
 <h3 id="netbox-write-failures">NetBox write failures<a class="headerlink" href="#netbox-write-failures" title="Permanent link">¤</a></h3>
 <p>Confirm route-target values are valid NetBox route-target names and that the
 custom field accepts device object IDs. Correct the validation error and rerun
@@ -7569,7 +7803,12 @@ root
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
 <span class="w">            </span>├──<span class="w"> </span>with-approval:<span class="w">    </span>Preview<span class="w"> </span>VRF<span class="w"> </span>changes<span class="w"> </span>and<span class="w"> </span>ask<span class="w"> </span><span class="k">for</span><span class="w"> </span>review<span class="w"> </span>before<span class="w"> </span>writing<span class="w"> </span>to<span class="w"> </span>NetBox,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>device-custom-field:<span class="w">    </span>VRF<span class="w"> </span>custom<span class="w"> </span>field<span class="w"> </span>that<span class="w"> </span>stores<span class="w"> </span>associated<span class="w"> </span>NetBox<span class="w"> </span>devices,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;devices&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>rpl-import-ipv4:<span class="w">    </span>VRF<span class="w"> </span>custom<span class="w"> </span>field<span class="w"> </span><span class="k">for</span><span class="w"> </span>IPv4<span class="w"> </span>import<span class="w"> </span>routing<span class="w"> </span>policies,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;rpl_import_ipv4&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>rpl-import-ipv6:<span class="w">    </span>VRF<span class="w"> </span>custom<span class="w"> </span>field<span class="w"> </span><span class="k">for</span><span class="w"> </span>IPv6<span class="w"> </span>import<span class="w"> </span>routing<span class="w"> </span>policies,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;rpl_import_ipv6&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>rpl-export-ipv4:<span class="w">    </span>VRF<span class="w"> </span>custom<span class="w"> </span>field<span class="w"> </span><span class="k">for</span><span class="w"> </span>IPv4<span class="w"> </span><span class="nb">export</span><span class="w"> </span>routing<span class="w"> </span>policies,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;rpl_export_ipv4&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>rpl-export-ipv6:<span class="w">    </span>VRF<span class="w"> </span>custom<span class="w"> </span>field<span class="w"> </span><span class="k">for</span><span class="w"> </span>IPv6<span class="w"> </span><span class="nb">export</span><span class="w"> </span>routing<span class="w"> </span>policies,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;rpl_export_ipv6&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>preserve-description:<span class="w">    </span>Preserve<span class="w"> </span>NetBox<span class="w"> </span>descriptions<span class="w"> </span>always<span class="w"> </span><span class="o">(</span><span class="nb">true</span><span class="o">)</span>,<span class="w"> </span>when<span class="w"> </span>live<span class="w"> </span>text<span class="w"> </span>is<span class="w"> </span>empty<span class="w"> </span><span class="o">(</span>null<span class="o">)</span>,<span class="w"> </span>or<span class="w"> </span>never<span class="w"> </span><span class="o">(</span><span class="nb">false</span><span class="o">)</span>
+<span class="w">            </span>├──<span class="w"> </span>interface-map:<span class="w">    </span>Ordered<span class="w"> </span>interface<span class="w"> </span>name<span class="w"> </span>mapping<span class="w"> </span>rules<span class="w"> </span>or<span class="w"> </span>nf://<span class="w"> </span>YAML<span class="w"> </span>file<span class="w"> </span>reference
 <span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 <span class="w">            </span>└──<span class="w"> </span>nowait:<span class="w">    </span>Do<span class="w"> </span>not<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>job<span class="w"> </span>to<span class="w"> </span>complete,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
@@ -7585,12 +7824,14 @@ nf#
 
     <div class="doc doc-contents first">
 
-        <p>Synchronize live VRFs and their route targets with NetBox.</p>
+        <p>Synchronize live VRFs, route targets, and interface assignments with NetBox.</p>
 <p>VRFs have global scope and are identified by name. Descriptions are
 synchronized, while live import/export route targets extend the
-existing NetBox associations. Route distinguishers and route policies
-returned by the parser are not stored. The selected VRF custom field
-records devices on which each VRF was observed.</p>
+existing NetBox associations. Routing-policy references are added to
+the configured VRF custom fields when the BGP plugin is installed.
+Route distinguishers returned by the parser are not stored. The selected VRF custom field
+records devices on which each VRF was observed. Interfaces listed by
+the parser are assigned to their VRFs when they exist in NetBox.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -7734,6 +7975,70 @@ records devices on which each VRF was observed.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>rpl_import_ipv4</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>VRF custom field for IPv4 import routing policies.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;rpl_import_ipv4&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>rpl_import_ipv6</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>VRF custom field for IPv6 import routing policies.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;rpl_import_ipv6&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>rpl_export_ipv4</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>VRF custom field for IPv4 export routing policies.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;rpl_export_ipv4&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>rpl_export_ipv6</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>VRF custom field for IPv6 export routing policies.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;rpl_export_ipv6&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>preserve_description</code>
             </td>
             <td>
@@ -7744,6 +8049,23 @@ records devices on which each VRF was observed.</p>
                 <p>Description preservation policy. <code>None</code> preserves
 NetBox text when the live description is empty, <code>True</code> always
 preserves NetBox text, and <code>False</code> always uses live text.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>interface_map</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>, <span title="list">list</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ordered interface rename rules, or an <code>nf://</code> YAML
+file containing them.</p>
               </div>
             </td>
             <td>
@@ -7785,7 +8107,7 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Global VRF synchronization actions.</p>
+                <p>VRF, route-target, routing-policy, and interface assignment actions.</p>
               </div>
             </td>
           </tr>
@@ -7795,19 +8117,7 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\vrf_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 14</span>
-<span class="normal"> 15</span>
-<span class="normal"> 16</span>
-<span class="normal"> 17</span>
-<span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 26</span>
 <span class="normal"> 27</span>
 <span class="normal"> 28</span>
 <span class="normal"> 29</span>
@@ -8162,7 +8472,348 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
 <span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
-<span class="normal">381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncVrfsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncVrfsResult</span><span class="p">,</span>
@@ -8186,16 +8837,24 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">device_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;devices&quot;</span><span class="p">,</span>
+    <span class="n">rpl_import_ipv4</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rpl_import_ipv4&quot;</span><span class="p">,</span>
+    <span class="n">rpl_import_ipv6</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rpl_import_ipv6&quot;</span><span class="p">,</span>
+    <span class="n">rpl_export_ipv4</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rpl_export_ipv4&quot;</span><span class="p">,</span>
+    <span class="n">rpl_export_ipv6</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rpl_export_ipv6&quot;</span><span class="p">,</span>
     <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">interface_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize live VRFs and their route targets with NetBox.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Synchronize live VRFs, route targets, and interface assignments with NetBox.</span>
 
 <span class="sd">    VRFs have global scope and are identified by name. Descriptions are</span>
 <span class="sd">    synchronized, while live import/export route targets extend the</span>
-<span class="sd">    existing NetBox associations. Route distinguishers and route policies</span>
-<span class="sd">    returned by the parser are not stored. The selected VRF custom field</span>
-<span class="sd">    records devices on which each VRF was observed.</span>
+<span class="sd">    existing NetBox associations. Routing-policy references are added to</span>
+<span class="sd">    the configured VRF custom fields when the BGP plugin is installed.</span>
+<span class="sd">    Route distinguishers returned by the parser are not stored. The selected VRF custom field</span>
+<span class="sd">    records devices on which each VRF was observed. Interfaces listed by</span>
+<span class="sd">    the parser are assigned to their VRFs when they exist in NetBox.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab job object.</span>
@@ -8206,39 +8865,64 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
 <span class="sd">        devices: Explicit NetBox and Nornir device names.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
 <span class="sd">        device_custom_field: VRF custom field containing associated devices.</span>
+<span class="sd">        rpl_import_ipv4: VRF custom field for IPv4 import routing policies.</span>
+<span class="sd">        rpl_import_ipv6: VRF custom field for IPv6 import routing policies.</span>
+<span class="sd">        rpl_export_ipv4: VRF custom field for IPv4 export routing policies.</span>
+<span class="sd">        rpl_export_ipv6: VRF custom field for IPv6 export routing policies.</span>
 <span class="sd">        preserve_description: Description preservation policy. ``None`` preserves</span>
 <span class="sd">            NetBox text when the live description is empty, ``True`` always</span>
 <span class="sd">            preserves NetBox text, and ``False`` always uses live text.</span>
+<span class="sd">        interface_map: Ordered interface rename rules, or an ``nf://`` YAML</span>
+<span class="sd">            file containing them.</span>
 <span class="sd">        **kwargs: Nornir FFun host filters.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: Global VRF synchronization actions.</span>
+<span class="sd">        Result: VRF, route-target, routing-policy, and interface assignment actions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Normalize task inputs before resolving the selected NetBox devices.</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span> <span class="ow">or</span> <span class="p">[])</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">interface_map</span><span class="p">):</span>
+        <span class="n">interface_map</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">InterfaceMapRule</span><span class="p">])</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">interface_map</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="n">interface_map</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">rule</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">interface_map</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="p">]</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_vrfs&quot;</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">result</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;routing_policies&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">},</span>
         <span class="n">resources</span><span class="o">=</span><span class="p">[</span><span class="n">instance</span><span class="p">],</span>
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
-        <span class="n">diff</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">diff</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;routing_policies&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">},</span>
     <span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;starting VRF sync using NetBox instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39; for &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> explicit device(s)&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> explicit device(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: instance &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;resolving devices from Nornir filters&quot;</span><span class="p">)</span>
         <span class="n">devices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_nornir_hosts</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">timeout</span><span class="p">))</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;no devices specified&quot;</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -8248,26 +8932,44 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device_type&quot;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">]:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox device(s)&quot;</span><span class="p">)</span>
 
-    <span class="n">custom_field</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device_custom_field</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">custom_field</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device_custom_field</span><span class="p">):</span>
         <span class="n">device_custom_field</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">policy_fields</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="s2">&quot;ipv4&quot;</span><span class="p">,</span> <span class="s2">&quot;import&quot;</span><span class="p">):</span> <span class="n">rpl_import_ipv4</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">&quot;ipv6&quot;</span><span class="p">,</span> <span class="s2">&quot;import&quot;</span><span class="p">):</span> <span class="n">rpl_import_ipv6</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">&quot;ipv4&quot;</span><span class="p">,</span> <span class="s2">&quot;export&quot;</span><span class="p">):</span> <span class="n">rpl_export_ipv4</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">&quot;ipv6&quot;</span><span class="p">,</span> <span class="s2">&quot;export&quot;</span><span class="p">):</span> <span class="n">rpl_export_ipv6</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_plugin</span><span class="p">(</span><span class="s2">&quot;netbox_bgp&quot;</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">policy_fields</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">name</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">policy_fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">policy_fields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;netbox BGP plugin is not installed; skipping VRF routing policies&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;collecting live VRFs from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: collecting from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
+    <span class="c1"># Collect per-device observations. Address-family route targets and</span>
+    <span class="c1"># policies are flattened here for the global VRF reconciliation.</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;collecting live VRFs from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">parse_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
         <span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
         <span class="s2">&quot;parse_ttp&quot;</span><span class="p">,</span>
@@ -8275,16 +8977,14 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;received VRF data from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">parse_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> Nornir worker(s)&quot;</span><span class="p">)</span>
     <span class="n">observations</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">result_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">failed_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="n">parsed_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">worker_name</span><span class="p">,</span> <span class="n">worker_data</span> <span class="ow">in</span> <span class="n">parse_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;worker &#39;</span><span class="si">{</span><span class="n">worker_name</span><span class="si">}</span><span class="s2">&#39; failed to collect live VRF data&quot;</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="n">resources_failed</span> <span class="o">=</span> <span class="n">worker_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resources_failed&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -8295,25 +8995,36 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">resources_failed</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">records</span> <span class="ow">in</span> <span class="n">worker_data</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="n">result_devices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">device_name</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instance_type&quot;</span><span class="p">)</span>
-                    <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;instance_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;vrf&quot;</span>
-                <span class="p">):</span>
+                <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instance_type&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;instance_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;vrf&quot;</span><span class="p">:</span>
                     <span class="k">continue</span>
-                <span class="n">parsed_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">address_families</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;address_families&quot;</span><span class="p">]</span>
+                <span class="n">policies</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="n">direction</span><span class="p">),</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">policy_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">policy</span> <span class="o">=</span> <span class="n">address_families</span><span class="p">[</span><span class="n">family</span><span class="p">][</span><span class="sa">f</span><span class="s2">&quot;route_policy_</span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+                    <span class="n">policies</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">policy</span><span class="p">]</span> <span class="k">if</span> <span class="n">policy</span> <span class="k">else</span> <span class="p">[]</span>
                 <span class="n">observations</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
                         <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
                         <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;import_targets&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;rt_import&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;export_targets&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;rt_export&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;import_targets&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="n">target</span>
+                            <span class="k">for</span> <span class="n">family</span> <span class="ow">in</span> <span class="n">address_families</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">family</span><span class="p">[</span><span class="s2">&quot;rt_import&quot;</span><span class="p">]</span>
+                        <span class="p">],</span>
+                        <span class="s2">&quot;export_targets&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="n">target</span>
+                            <span class="k">for</span> <span class="n">family</span> <span class="ow">in</span> <span class="n">address_families</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">family</span><span class="p">[</span><span class="s2">&quot;rt_export&quot;</span><span class="p">]</span>
+                        <span class="p">],</span>
+                        <span class="s2">&quot;routing_policies&quot;</span><span class="p">:</span> <span class="n">policies</span><span class="p">,</span>
+                        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">],</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
 
@@ -8321,18 +9032,19 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
         <span class="k">if</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result_devices</span> <span class="ow">and</span> <span class="n">device_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">failed_devices</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; is missing a live VRF result&quot;</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">result_devices</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: no usable live VRF data&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;no usable live VRF data&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;parsed </span><span class="si">{</span><span class="n">parsed_count</span><span class="si">}</span><span class="s2"> live VRF record(s) from &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result_devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
-    <span class="p">)</span>
 
+    <span class="c1"># Build the global desired VRF state and a separate interface assignment</span>
+    <span class="c1"># index. Sorting observations makes description precedence deterministic.</span>
     <span class="n">live_vrfs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">interface_targets</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">vrf_name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">):</span>
         <span class="n">records</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">observations</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">])</span>
         <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -8344,21 +9056,50 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
                 <span class="p">),</span>
                 <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="p">),</span>
-            <span class="s2">&quot;import_targets&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">target</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;import_targets&quot;</span><span class="p">]</span>
-            <span class="p">],</span>
-            <span class="s2">&quot;export_targets&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">target</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;export_targets&quot;</span><span class="p">]</span>
-            <span class="p">],</span>
+            <span class="s2">&quot;import_targets&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+                    <span class="n">target</span>
+                    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span>
+                    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;import_targets&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;export_targets&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+                    <span class="n">target</span>
+                    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span>
+                    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;export_targets&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
             <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
                 <span class="p">{</span><span class="n">nb_devices</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">}</span>
             <span class="p">)</span>
+        <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">policy_fields</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+                    <span class="n">policy</span>
+                    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span>
+                    <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;routing_policies&quot;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
+            <span class="n">device_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_devices</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">live_name</span> <span class="ow">in</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]:</span>
+                <span class="n">interface_name</span> <span class="o">=</span> <span class="n">map_interface_name</span><span class="p">(</span>
+                    <span class="n">live_name</span><span class="p">,</span>
+                    <span class="n">interface_map</span><span class="p">,</span>
+                    <span class="n">device_name</span><span class="p">,</span>
+                    <span class="n">device_type</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">interface_name</span><span class="p">)</span>
+                <span class="n">interface_targets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_name</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;loading global NetBox VRFs&quot;</span><span class="p">)</span>
+    <span class="c1"># Load only live VRF names. NetBox can return duplicate names, so retain</span>
+    <span class="c1"># the lowest-ID record as the task&#39;s authoritative object and warn.</span>
     <span class="n">netbox_vrfs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">netbox_objects</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">object_cache</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">vrf_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">live_vrfs</span><span class="p">)</span>
     <span class="n">netbox_vrfs_records</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
@@ -8389,25 +9130,33 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
                 <span class="nb">set</span><span class="p">(</span><span class="n">current</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">])</span>
                 <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">device_custom_field</span><span class="p">])</span>
             <span class="p">)</span>
-        <span class="n">existing_vrf</span> <span class="o">=</span> <span class="n">netbox_objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">policy_fields</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">current</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">policy</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">policy</span><span class="p">[</span><span class="s2">&quot;display&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="p">(</span><span class="n">vrf</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[])</span>
+            <span class="p">]</span>
+        <span class="n">existing_vrf</span> <span class="o">=</span> <span class="n">object_cache</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">existing_vrf</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: Multiple NetBox VRFs matched &quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;multiple NetBox VRFs matched &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;by name &#39;</span><span class="si">{</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, using lowest ID from &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">existing_vrf</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">existing_vrf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">existing_vrf</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
             <span class="n">netbox_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span>
-            <span class="n">netbox_objects</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">netbox_vrfs</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching NetBox VRF(s)&quot;</span><span class="p">)</span>
+            <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">vrf</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;calculating VRF sync diff&quot;</span><span class="p">)</span>
+    <span class="c1"># Diff route-target and routing-policy lists before applying the</span>
+    <span class="c1"># additive policy. Only fields reported by make_diff are later written;</span>
+    <span class="c1"># changed lists retain NetBox values plus targets newly observed live.</span>
     <span class="n">vrf_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="n">live_vrfs</span><span class="p">},</span>
         <span class="p">{</span><span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="n">netbox_vrfs</span><span class="p">},</span>
     <span class="p">)[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">vrf_name</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;import_targets&quot;</span><span class="p">,</span> <span class="s2">&quot;export_targets&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;import_targets&quot;</span><span class="p">,</span> <span class="s2">&quot;export_targets&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">policy_fields</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
             <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
                 <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">netbox_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
                     <span class="n">target</span>
@@ -8416,72 +9165,221 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
                 <span class="p">]</span>
                 <span class="n">changes</span><span class="p">[</span><span class="n">field</span><span class="p">][</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span>
     <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">full_diff</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="n">vrf_diff</span><span class="p">}</span>
+
     <span class="n">create_names</span> <span class="o">=</span> <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span>
     <span class="n">update</span> <span class="o">=</span> <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span>
     <span class="n">in_sync</span> <span class="o">=</span> <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+
+    <span class="c1"># Resolve route targets referenced by actionable VRF changes. Missing</span>
+    <span class="c1"># objects become part of the plan but are not created until after review.</span>
+    <span class="n">route_target_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+            <span class="n">target</span>
+            <span class="k">for</span> <span class="n">vrf_name</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="n">create_names</span><span class="p">,</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">update</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;import_targets&quot;</span><span class="p">,</span> <span class="s2">&quot;export_targets&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">route_target_names</span><span class="p">:</span>
+        <span class="n">object_cache</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="p">(</span><span class="s2">&quot;route_target&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="n">target</span>
+                <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                    <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">route_targets</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">route_target_names</span><span class="p">,</span>
+                    <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="n">missing_route_targets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">name</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">route_target_names</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;route_target&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">object_cache</span>
+    <span class="p">]</span>
+    <span class="n">route_target_diff</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="n">missing_route_targets</span><span class="p">,</span>
+        <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+    <span class="c1"># Include missing BGP policy objects in the review plan; resolve IDs</span>
+    <span class="c1"># only for policies referenced by VRFs that need creation or update.</span>
+    <span class="n">policy_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+            <span class="n">policy</span>
+            <span class="k">for</span> <span class="n">vrf_name</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="n">create_names</span><span class="p">,</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">update</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">policy_fields</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">policy_names</span><span class="p">:</span>
+        <span class="n">object_cache</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="p">(</span><span class="s2">&quot;routing_policy&quot;</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="n">policy</span>
+                <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                    <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">routing_policy</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">policy_names</span><span class="p">,</span>
+                    <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="n">missing_policies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">name</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">policy_names</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;routing_policy&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">object_cache</span>
+    <span class="p">]</span>
+    <span class="n">policy_diff</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="n">missing_policies</span><span class="p">,</span>
+        <span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;delete&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Fetch the cross-product of referenced devices and names in one request,</span>
+    <span class="c1"># then retain exact (device, interface) matches for assignment comparison.</span>
+    <span class="n">interface_objects</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">interface_targets</span><span class="p">:</span>
+        <span class="n">interface_records</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="p">,</span>
+            <span class="n">device_id</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">nb_devices</span><span class="p">[</span><span class="n">device</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">interface_targets</span><span class="p">}</span>
+            <span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="nb">sorted</span><span class="p">({</span><span class="n">name</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">interface_targets</span><span class="p">}),</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device,vrf&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">interface_objects</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">)):</span> <span class="n">interface</span>
+            <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">interface_records</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="ow">in</span> <span class="n">interface_targets</span>
+        <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">interface_name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="n">interface_targets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">interface_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;interface &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface_name</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">interface_live</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">interface_current</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">interface_targets</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">interface_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">device_name</span><span class="p">,</span> <span class="n">interface_name</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="n">interface</span> <span class="o">=</span> <span class="n">interface_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">interface_live</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})[</span><span class="n">interface_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">interface_targets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">interface_current</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">{})[</span><span class="n">interface_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">interface</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">}</span>
+
+    <span class="c1"># Interface identity is scoped by device. A different current VRF becomes</span>
+    <span class="c1"># a normal update, while an equal assignment is reported as in sync.</span>
+    <span class="n">interface_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span><span class="n">interface_live</span><span class="p">,</span> <span class="n">interface_current</span><span class="p">)</span>
+    <span class="n">full_diff</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="n">vrf_diff</span><span class="p">,</span>
+        <span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="n">route_target_diff</span><span class="p">,</span>
+        <span class="s2">&quot;routing_policies&quot;</span><span class="p">:</span> <span class="n">policy_diff</span><span class="p">,</span>
+        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">interface_diff</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">&quot;vrf sync diff complete: &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> create, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> update, &quot;</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
     <span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;dry-run requested, returning VRF sync diff without changes&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: dry-run complete&quot;</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
-    <span class="k">if</span> <span class="n">with_approval</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;requesting approval for the prepared VRF sync plan&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">with_approval</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">review_sync_task_result</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s2">&quot;VRF sync&quot;</span><span class="p">,</span> <span class="n">full_diff</span><span class="p">):</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">full_diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs: approval declined&quot;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;vrf sync approval declined&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="n">route_target_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-        <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
-            <span class="n">target</span>
-            <span class="k">for</span> <span class="n">vrf</span> <span class="ow">in</span> <span class="n">live_vrfs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;import_targets&quot;</span><span class="p">,</span> <span class="s2">&quot;export_targets&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">vrf</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">route_targets</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">{</span>
-            <span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">target</span>
-            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
-                <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">route_targets</span><span class="p">,</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">route_target_names</span><span class="p">,</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="p">}</span>
-        <span class="k">if</span> <span class="n">route_target_names</span>
-        <span class="k">else</span> <span class="p">{}</span>
-    <span class="p">)</span>
-    <span class="n">missing_route_targets</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">route_target_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">route_targets</span>
-    <span class="p">]</span>
-    <span class="k">if</span> <span class="n">missing_route_targets</span><span class="p">:</span>
-        <span class="n">created_targets</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">route_targets</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-            <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">missing_route_targets</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">created_targets</span><span class="p">:</span>
-            <span class="n">route_targets</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">created_targets</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox route target(s)&quot;</span><span class="p">)</span>
-
+    <span class="c1"># Apply global VRF changes first so every desired VRF ID is cached before</span>
+    <span class="c1"># building the dependent interface assignment updates.</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="n">full_diff</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span>
             <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span>
             <span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">[],</span>
             <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="n">in_sync</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;routing_policies&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="n">device_name</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;in_sync&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">interface_diff</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">},</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="n">missing_route_targets</span><span class="p">:</span>
+        <span class="n">target_payloads</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">missing_route_targets</span><span class="p">]</span>
+        <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_payloads</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+        <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_payloads</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="n">target_payloads</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+            <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;creating route target batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> target(s))&quot;</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">created_targets</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">route_targets</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create route target batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">created_targets</span><span class="p">:</span>
+                <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;route_target&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">target</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;route_targets&quot;</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">missing_policies</span><span class="p">:</span>
+        <span class="n">policy_payloads</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">missing_policies</span><span class="p">]</span>
+        <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">policy_payloads</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+        <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">policy_payloads</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="n">policy_payloads</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+            <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;creating routing policy batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> policy(s))&quot;</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">created_policies</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">routing_policy</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create routing policy batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">for</span> <span class="n">policy</span> <span class="ow">in</span> <span class="n">created_policies</span><span class="p">:</span>
+                <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;routing_policy&quot;</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">policy</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;routing_policies&quot;</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
     <span class="n">create_payloads</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">vrf_name</span> <span class="ow">in</span> <span class="n">create_names</span><span class="p">:</span>
         <span class="n">desired</span> <span class="o">=</span> <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]</span>
@@ -8489,46 +9387,128 @@ preserves NetBox text, and <code>False</code> always uses live text.</p>
             <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">vrf_name</span><span class="p">,</span>
             <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
             <span class="s2">&quot;import_targets&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">route_targets</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;import_targets&quot;</span><span class="p">]</span>
+                <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;route_target&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;import_targets&quot;</span><span class="p">]</span>
             <span class="p">],</span>
             <span class="s2">&quot;export_targets&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">route_targets</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;export_targets&quot;</span><span class="p">]</span>
+                <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;route_target&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;export_targets&quot;</span><span class="p">]</span>
             <span class="p">],</span>
         <span class="p">}</span>
+        <span class="n">custom_fields</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">device_custom_field</span><span class="p">:</span>
-            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">device_custom_field</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span>
-            <span class="p">}</span>
+            <span class="n">custom_fields</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">desired</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">policy_fields</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">custom_fields</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;routing_policy&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
+            <span class="p">]</span>
+        <span class="k">if</span> <span class="n">custom_fields</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_fields</span>
         <span class="n">create_payloads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">create_payloads</span><span class="p">:</span>
-        <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vrfs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">create_payloads</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;global&quot;</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">create_names</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox VRF(s)&quot;</span><span class="p">)</span>
+        <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">create_payloads</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+        <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">create_payloads</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="n">create_payloads</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+            <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;creating VRF batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> VRF(s))&quot;</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">created_vrfs</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vrfs</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create VRF batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">for</span> <span class="n">vrf</span> <span class="ow">in</span> <span class="n">created_vrfs</span><span class="p">:</span>
+                <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">vrf</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="n">update_payloads</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">vrf_name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">update</span><span class="p">):</span>
         <span class="n">desired</span> <span class="o">=</span> <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]</span>
-        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">netbox_objects</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">}</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="n">vrf_name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span><span class="p">}</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">update</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span>
                 <span class="n">payload</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">desired</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;import_targets&quot;</span><span class="p">,</span> <span class="s2">&quot;export_targets&quot;</span><span class="p">):</span>
-                <span class="n">payload</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">route_targets</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="n">field</span><span class="p">]]</span>
+                <span class="n">payload</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;route_target&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span>
+                    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                <span class="p">]</span>
             <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="n">device_custom_field</span><span class="p">:</span>
-                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="n">device_custom_field</span><span class="p">:</span> <span class="n">desired</span><span class="p">[</span><span class="n">device_custom_field</span><span class="p">]</span>
-                <span class="p">}</span>
-        <span class="n">update_payloads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+                <span class="n">payload</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">desired</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">policy_fields</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">payload</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">,</span> <span class="p">{})[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;routing_policy&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span>
+                    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">desired</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                <span class="p">]</span>
+        <span class="n">update_payloads</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">vrf_name</span><span class="p">,</span> <span class="n">payload</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">update_payloads</span><span class="p">:</span>
-        <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vrfs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;global&quot;</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">update</span><span class="p">))</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span><span class="si">}</span><span class="s2"> NetBox VRF(s)&quot;</span><span class="p">)</span>
+        <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+        <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">update_payloads</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="n">update_payloads</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+            <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updating VRF batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> VRF(s))&quot;</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vrfs</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update VRF batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">)</span>
 
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;vrf sync complete&quot;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Sync VRFs complete: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> created, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
+    <span class="c1"># Assign only interfaces classified as updates; matching assignments have</span>
+    <span class="c1"># already been retained in the result&#39;s in_sync lists.</span>
+    <span class="n">interface_payloads</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">interface_diff</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">interface_name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]):</span>
+            <span class="n">vrf_name</span> <span class="o">=</span> <span class="n">interface_live</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">interface_name</span><span class="p">][</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
+            <span class="n">interface_payloads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">interface_name</span><span class="p">),</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">interface_objects</span><span class="p">[(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">interface_name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="n">vrf_name</span><span class="p">)]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="n">interface_payloads</span><span class="p">:</span>
+        <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interface_payloads</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+        <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">interface_payloads</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">batch</span> <span class="o">=</span> <span class="n">interface_payloads</span><span class="p">[</span><span class="n">batch_start</span> <span class="p">:</span> <span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">]</span>
+            <span class="n">batch_number</span> <span class="o">=</span> <span class="n">batch_start</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updating VRF interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s))&quot;</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update VRF interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="n">ret</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">interface_name</span><span class="p">),</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">][</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">interface_name</span>
+                <span class="p">)</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;vrf sync complete: &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">create_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> VRF created, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated, &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_sync</span><span class="p">)</span><span class="si">}</span><span class="s2"> in sync&quot;</span>
     <span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sync VRFs: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
             </details>

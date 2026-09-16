@@ -9894,7 +9894,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 9 September 2026</em></p>
+<p><em>Last updated: 16 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10585,7 +10585,10 @@ from the originating task result.
 <a href="../workers/nornir/services_nornir_service_tasks_errdisabled_hosts/">Errdisabled-host task details</a></p>
 <h2 id="netbox-service">NetBox service<a class="headerlink" href="#netbox-service" title="Permanent link">¤</a></h2>
 <p>The <a href="../workers/netbox/services_netbox_service/">NetBox service</a> reads, provisions,
-and reconciles NetBox data, including live-state collection through Nornir.</p>
+and reconciles NetBox data, including live-state collection through Nornir.
+Sync tasks split list-based NetBox writes into sequential batches of at most
+1000 objects by default, with a validated per-run <code>batch_size</code> override and
+per-batch progress events and logs.</p>
 <h3 id="multiple-netbox-instances">Multiple NetBox instances<a class="headerlink" href="#multiple-netbox-instances" title="Permanent link">¤</a></h3>
 <p>Names and connects to multiple NetBox instances from one worker, with a default
 instance and per-call selection. <strong>Use cases:</strong> production/lab separation,
@@ -10597,8 +10600,10 @@ can differ between instances and must be managed explicitly.</p>
 certificate verification, GraphQL parallelism, cache mode/TTL, and branch
 creation timeout. <strong>Use cases:</strong> slow or distant instances, transient API
 failures, high-volume inventory reads, self-signed labs, and predictable
-failure bounds. <strong>Limitations:</strong> aggressive retries or parallelism can increase
-load on NetBox; disabling TLS verification is for controlled environments.
+failure bounds. POST requests are excluded from automatic retries to avoid
+repeating an uncertain create operation. <strong>Limitations:</strong> aggressive retries or
+parallelism can increase load on NetBox; disabling TLS verification is for
+controlled environments.
 <a href="../workers/netbox/services_netbox_service_inventory/">Inventory details</a></p>
 <h3 id="status-and-compatibility-checks">Status and compatibility checks<a class="headerlink" href="#status-and-compatibility-checks" title="Permanent link">¤</a></h3>
 <p>Reports reachability/status, installed NetBox and plugin versions, and
@@ -10707,17 +10712,16 @@ values. Existing descriptions can be preserved always, preserved only when
 live text is empty, or overwritten by live text. The task computes a
 desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
-rename rules, and applies ordered create, update, and optional delete actions.
+rename rules, reconciles the parsed 802.1Q interface mode independently of VLAN
+assignments, and applies ordered create, update, and optional delete actions.
+Bulk interface writes use sequential requests of 1000 items by default, with a
+configurable positive <code>batch_size</code> for each run; each
+batch reports progress in events and logs.
 An empty NetBox interface set is valid, allowing a device to be initialized
-entirely from discovered live interfaces.
-Interface-name and VLAN-group mapping rules can be supplied inline or loaded
-from YAML through <code>nf://</code> URLs. Live interface VLAN values can be numeric VIDs
-or names; numeric VLANs use batch VID/group resolution that checks each VLAN's
-site, VLAN-group VID ranges, and direct VLAN-group scope against the device.
-Compatible groups take precedence over direct-site VLANs, global VLANs provide
-the final fallback, and wrong-scope associations are corrected.
-Optional strict group enforcement reports and skips VLAN associations that
-match neither a mapping rule nor the scalar VLAN-group fallback.
+entirely from discovered live interfaces. Interface-name mapping rules can be
+supplied inline or loaded from YAML through <code>nf://</code> URLs. VLAN objects and
+tagged/untagged memberships are handled by VLAN sync.
+VRF objects and interface VRF assignments are handled by VRF sync.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
 the <code>other</code> fallback. <strong>Use cases:</strong>
@@ -10726,24 +10730,35 @@ coverage determines live-state quality; deletion is opt-in and should be
 reviewed with dry-run first.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_interfaces/">Task details</a></p>
 <h3 id="live-vlan-reconciliation">Live VLAN reconciliation<a class="headerlink" href="#live-vlan-reconciliation" title="Permanent link">¤</a></h3>
-<p>Reconciles live VLAN names and descriptions with site- or VLAN-group-scoped
-NetBox objects using ordered device, VLAN-name, and VLAN-ID mapping rules plus
+<p>Reconciles live VLAN names, descriptions, and tagged/untagged interface
+memberships with NetBox objects using ordered device, interface-name,
+VLAN-name, and VLAN-ID mapping rules plus
 an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
 loaded from YAML through <code>nf://</code> URLs, using <code>match_device_names</code>,
 <code>match_interface_names</code>, <code>match_vlan_ids</code>, and <code>set_vlan_group</code> for matching
-and group selection. Existing descriptions support always, live-empty-only, or
-never preservation. VLANs are identified by VID and group, with every same-VID
+and group selection. The first matching mapping rule applies to the whole VLAN.
+Existing descriptions support always, live-empty-only, or never preservation.
+VLANs are identified by VID and group, with every same-VID
 candidate validated against the device site, group VID ranges, and the group's
 direct site, region, site group, location, rack, or rack group scope. Compatible groups take
 precedence over direct-site VLANs, with global VLANs used as a final fallback;
-the first device supplies values when later devices report a conflict. Optional
-strict group enforcement reports and skips VLANs that would otherwise fall back
-to their device site. Explicit out-of-range or scope-incompatible group mappings
-are reported and skipped without fallback.
+the first device supplies values when later devices report a conflict, except an
+automatic <code>VLAN&lt;VID&gt;</code> name yields to the first descriptive live name or, when
+none is observed, the existing NetBox VLAN name. Optional strict group
+enforcement reports and skips VLANs that would otherwise fall back to their
+device site. Configured groups are validated before collection; missing
+groups and affected VLANs are reported and skipped while other VLANs continue.
+Explicit out-of-range or scope-incompatible group mappings are reported and
+skipped without fallback.
+  Separate <code>vlans</code> and <code>interfaces</code> diffs report VLAN attributes by scope and
+  interface mode and membership by device. Missing VLANs are created before
+  interface assignments; a creation failure stops the task. Python, NFCLI, REST,
+  and MCP expose the same dry-run and approval preview.
 <strong>Use cases:</strong> correct placeholder VLANs, maintain shared VLAN naming, and audit
 layer-two source-of-truth drift. <strong>Limitations:</strong> parser coverage determines
-live-state quality; the task does not delete VLANs because live data cannot
-reliably identify stale NetBox objects.
+live-state quality. Missing interfaces are reported and omitted from the desired
+memberships. Membership updates are additive; native VLAN replacement is the
+only removal. The task does not delete VLAN objects.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_vlans/">Task details</a></p>
 <h3 id="live-vrrp-reconciliation">Live VRRP reconciliation<a class="headerlink" href="#live-vrrp-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles TTP-parsed VRRP state with NetBox FHRP groups, virtual IP addresses,
@@ -10762,17 +10777,22 @@ empty parsed VRRP state fails before NetBox reconciliation begins, and live
 group records without a virtual address are reported and skipped.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_vrrp/">Task details</a></p>
 <h3 id="live-vrf-reconciliation">Live VRF reconciliation<a class="headerlink" href="#live-vrf-reconciliation" title="Permanent link">¤</a></h3>
-<p>Reconciles global VRFs and descriptions from live devices, and adds all observed
-import/export route targets to the existing NetBox associations. Missing route
-targets are created, and an optional multi-object custom field records the
+<p>Reconciles global VRFs and descriptions from live devices, adds all observed
+import/export route targets and BGP routing policies, and assigns existing
+NetBox interfaces to their live VRFs. Separate <code>vrfs</code>, <code>route_targets</code>,
+<code>routing_policies</code>, and <code>interfaces</code> diffs report VRF and related-object actions
+directly under their sections, plus per-device assignments already in sync.
+Created targets and policies are reported in live results, and an
+optional multi-object custom field records the
 devices on which each VRF was observed. Existing descriptions support the same
 always, live-empty-only, or never preservation policy as interface and BGP
 peering synchronization. If multiple NetBox VRFs share a matched name, the
 lowest numeric ID is selected and a warning is logged. <strong>Use cases:</strong> VRF inventory,
-route-target aggregation, and device-to-VRF inventory. <strong>Limitations:</strong> route
-distinguishers and route policies are not stored; VRF objects, route-target
-objects, route-target associations, and device associations are not removed
-automatically.
+route-target and policy aggregation, interface assignment, and device-to-VRF
+inventory. <strong>Limitations:</strong> route distinguishers are not stored; BGP policies
+require the BGP plugin and VRF multi-object custom fields; VRF objects,
+route-target and routing-policy objects, their associations, and device
+associations are not removed automatically.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_vrfs/">Task details</a></p>
 <h3 id="live-ip-and-mac-reconciliation">Live IP and MAC reconciliation<a class="headerlink" href="#live-ip-and-mac-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles device IP assignments, derived prefixes, and interface MAC addresses
@@ -10828,8 +10848,8 @@ validated in dry-run mode.
 <a href="../workers/netbox/services_netbox_service_tasks_update_interfaces_description/">Task details</a></p>
 <h3 id="drift-assessment-and-coordinated-synchronization">Drift assessment and coordinated synchronization<a class="headerlink" href="#drift-assessment-and-coordinated-synchronization" title="Permanent link">¤</a></h3>
 <p>Runs selected synchronizers in read-only dry-run mode for drift reporting,
-including inventory, interface, MAC, IP, and BGP peering state, or executes the
-supported synchronizers in a fixed inventory, VLAN, prefix, VRF, interface,
+including inventory, interface, VRF, MAC, IP, and BGP peering state, or executes the
+supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
 MAC, IP, and BGP sequence. <code>sync_all</code> accepts per-task keyword arguments inline
 or from an <code>nf://</code> YAML file and can skip individual stages. <strong>Use cases:</strong> audit
 evidence, change planning, and scheduled source-of-truth maintenance.

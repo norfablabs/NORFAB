@@ -7515,12 +7515,12 @@ nf#
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections_lock</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">nr</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task_plugin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">connections_update</span><span class="p">(</span><span class="n">nr</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">update_nornir_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
 
     <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">failed</span>  <span class="c1"># failed is true if any of the hosts failed</span>
     <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">ResultSerializer</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span> <span class="n">add_details</span><span class="o">=</span><span class="n">add_details</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">connections_update</span><span class="p">(</span><span class="n">nr</span><span class="p">,</span> <span class="n">plugin</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">connections_clean</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">ret</span>

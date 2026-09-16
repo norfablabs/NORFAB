@@ -6981,12 +6981,12 @@ nfcli --show-broker-shared-key
 <tr>
 <td><code>netbox_read_timeout</code></td>
 <td><code>300</code></td>
-<td>Netbox API read timeout in seconds.</td>
+<td>Netbox API response timeout in seconds.</td>
 </tr>
 <tr>
 <td><code>netbox_retries</code></td>
 <td><code>3</code></td>
-<td>Number of retries for Netbox API requests made through <code>requests</code> sessions and <code>pynetbox</code> sessions.</td>
+<td>Number of retries for retryable Netbox API requests made through <code>requests</code> and <code>pynetbox</code> sessions. POST requests are not retried automatically.</td>
 </tr>
 <tr>
 <td><code>netbox_retry_backoff</code></td>
