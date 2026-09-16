@@ -327,7 +327,11 @@ class TestSyncBgpPeerings:
             "netbox",
             "sync_bgp_peerings",
             workers="any",
-            kwargs={"devices": BGP_CREATE_SESSIONS_TEST_DEVICES, "rir": "lab"},
+            kwargs={
+                "devices": BGP_CREATE_SESSIONS_TEST_DEVICES,
+                "rir": "lab",
+                "batch_size": 1,
+            },
         )
         pprint.pprint(ret)
         nb = get_pynetbox(nfclient)
@@ -1605,7 +1609,7 @@ class TestCreateBgpPeering:
             "netbox",
             "create_bgp_peering",
             workers="any",
-            kwargs={"bulk_create": sessions, "rir": "lab"},
+            kwargs={"bulk_create": sessions, "rir": "lab", "batch_size": 1},
         )
         pprint.pprint(ret)
         for worker, res in ret.items():
@@ -2330,7 +2334,7 @@ class TestUpdateBgpPeering:
             "netbox",
             "update_bgp_peering",
             workers="any",
-            kwargs={"bulk_update": bulk},
+            kwargs={"bulk_update": bulk, "batch_size": 1},
         )
         pprint.pprint(ret)
         for worker, res in ret.items():

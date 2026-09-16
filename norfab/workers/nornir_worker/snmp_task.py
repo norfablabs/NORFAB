@@ -95,6 +95,7 @@ class SnmpTask:
 
         with self.connections_lock:
             result = nr.run(task=puresnmp_call, call=call, **kwargs)
+            self.watchdog.connections_update(nr, "puresnmp")
         self.update_nornir_result(result, ret)
 
         ret.failed = result.failed
@@ -104,7 +105,6 @@ class SnmpTask:
             add_details=add_details,
         )
 
-        self.watchdog.connections_update(nr, "puresnmp")
         self.watchdog.connections_clean()
         return ret
 

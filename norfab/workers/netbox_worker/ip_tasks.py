@@ -21,7 +21,10 @@ from .netbox_models import (
     SyncDevicePrefixesInput,
     SyncDevicePrefixesResult,
 )
-from .netbox_worker_utilities import resolve_vrf, review_sync_task_result
+from .netbox_worker_utilities import (
+    resolve_vrf,
+    review_sync_task_result,
+)
 
 log = logging.getLogger(__name__)
 
@@ -293,7 +296,7 @@ class NetboxIpTasks:
                         )
                         if candidate.failed is False and candidate.result.get("prefix"):
                             break
-                    except Exceptions as e:
+                    except Exception as e:
                         # error might be expected
                         log.debug(f"Error while trying to allocate child subnet: {e}")
                         continue
@@ -695,6 +698,7 @@ class NetboxIpTasks:
         filter_by_description: Union[None, str] = None,
         filter_by_prefix: Union[None, str] = None,
         filter_by_ip: Union[None, str] = None,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """
@@ -1179,36 +1183,56 @@ class NetboxIpTasks:
         # update first, since existing IPs might change role to anycast
         if bulk_update_ip:
             job.event(f"updating {len(bulk_update_ip)} IP address(es)")
-            try:
-                nb.ipam.ip_addresses.update(list(bulk_update_ip.values()))
-                job.event(f"updated {len(bulk_update_ip)} IP addresses")
-                for key in bulk_update_ip:
+            update_items = list(bulk_update_ip.items())
+            total_batches = (len(update_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_items), batch_size):
+                batch = update_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating IP address batch {batch_number}/{total_batches} ({len(batch)} address(es))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.ip_addresses.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update IP address batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                for key, _ in batch:
                     device_name = key[0]
                     ip_address = key[2]
                     device_results[device_name]["updated"].append(ip_address)
-            except Exception as e:
-                msg = f"failed to bulk update IP addresses: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
+            job.event(f"updated {len(bulk_update_ip)} IP addresses")
         else:
             job.event("no IP addresses to update")
 
         # create new IPs next
         if bulk_create_ip:
             job.event(f"creating {len(bulk_create_ip)} IP address(es)")
-            try:
-                nb.ipam.ip_addresses.create(list(bulk_create_ip.values()))
-                job.event(f"created {len(bulk_create_ip)} IP addresses")
-                for key in bulk_create_ip:
+            create_items = list(bulk_create_ip.items())
+            total_batches = (len(create_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(create_items), batch_size):
+                batch = create_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating IP address batch {batch_number}/{total_batches} ({len(batch)} address(es))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.ip_addresses.create([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to create IP address batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                for key, _ in batch:
                     device_name = key[0]
                     ip_address = key[2]
                     device_results[device_name]["created"].append(ip_address)
-            except Exception as e:
-                msg = f"failed to bulk create IP addresses: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
+            job.event(f"created {len(bulk_create_ip)} IP addresses")
         else:
             job.event("no IP addresses to create")
 
@@ -1245,6 +1269,7 @@ class NetboxIpTasks:
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         filter_by_prefix: Union[None, str] = None,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """Synchronize prefixes derived from live interface addresses into NetBox.
@@ -1483,16 +1508,48 @@ class NetboxIpTasks:
             create_prefixes[key]["vrf"] = vrf_ids[vrf_name]
 
         if update_prefixes:
-            nb.ipam.prefixes.update(list(update_prefixes.values()))
-            ret.result["updated"].extend(
-                desired_prefixes[key]["prefix"] for key in update_prefixes
-            )
+            update_items = list(update_prefixes.items())
+            total_batches = (len(update_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_items), batch_size):
+                batch = update_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating prefix batch {batch_number}/{total_batches} ({len(batch)} prefix(es))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.prefixes.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update prefix batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                ret.result["updated"].extend(
+                    desired_prefixes[key]["prefix"] for key, _ in batch
+                )
             job.event(f"updated {len(update_prefixes)} prefix(es)")
         if create_prefixes:
-            nb.ipam.prefixes.create(list(create_prefixes.values()))
-            ret.result["created"].extend(
-                desired_prefixes[key]["prefix"] for key in create_prefixes
-            )
+            create_items = list(create_prefixes.items())
+            total_batches = (len(create_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(create_items), batch_size):
+                batch = create_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating prefix batch {batch_number}/{total_batches} ({len(batch)} prefix(es))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.prefixes.create([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to create prefix batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                ret.result["created"].extend(
+                    desired_prefixes[key]["prefix"] for key, _ in batch
+                )
             job.event(f"created {len(create_prefixes)} prefix(es)")
 
         for action in ret.result:

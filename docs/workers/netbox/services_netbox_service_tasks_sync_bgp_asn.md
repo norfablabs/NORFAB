@@ -40,6 +40,14 @@ Results are grouped under `global` and contain `created`, `updated`, `deleted`,
 and `in_sync` ASN lists. Dry-run output uses `create`, `update`, `delete`, and
 `in_sync`. The `delete` list is always empty.
 
+## Bulk Request Batching
+
+List-based NetBox writes are sent as sequential requests containing at most
+`batch_size` objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.
+
 ## Examples
 
 === "CLI"

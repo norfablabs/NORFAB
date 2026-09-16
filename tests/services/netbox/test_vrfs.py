@@ -287,7 +287,7 @@ class TestSyncVrfs:
         assert self.nb.ipam.route_targets.get(name="65000:201") is None
         assert self.nb.plugins.bgp.routing_policy.get(name="TENANT_A_IMPORT") is None
 
-        first_sync = self._sync(nfclient, [self.DEVICE_1])
+        first_sync = self._sync(nfclient, [self.DEVICE_1], batch_size=1)
         for result in self._successful_results(first_sync):
             assert result["result"]["vrfs"]["created"] == sorted(self.VRF_NAMES)
             assert (

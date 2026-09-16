@@ -108,7 +108,7 @@ class TestSyncBgpAsn:
             assert result["result"]["global"]["delete"] == []
         assert self.nb.ipam.asns.get(asn=4200000200) is None
 
-        first_sync = self._sync(nfclient, rir=self.RIR)
+        first_sync = self._sync(nfclient, rir=self.RIR, batch_size=1)
         for result in self._successful_results(first_sync):
             assert set(result["result"]["global"]["created"]) == self.DEVICE_1_ASNS
 

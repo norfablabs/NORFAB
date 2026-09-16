@@ -6,7 +6,10 @@ from norfab.models import Result
 from norfab.utils.text import expand_alphanumeric_range
 
 from .netbox_models import NetboxFastApiArgs, SyncBgpAsnInput, SyncBgpAsnResult
-from .netbox_worker_utilities import apply_description_policy, review_sync_task_result
+from .netbox_worker_utilities import (
+    apply_description_policy,
+    review_sync_task_result,
+)
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +42,7 @@ class NetboxBgpAsnTasks:
         device_custom_field: str = "devices",
         ignore_asn_by_range: Union[None, list] = None,
         preserve_description: bool = True,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """Synchronize globally unique live BGP ASNs with NetBox.
@@ -287,7 +291,7 @@ class NetboxBgpAsnTasks:
                 "in_sync": in_sync,
             }
         }
-        create_payloads = []
+        create_items = []
         if rir_obj:
             for asn in create_numbers:
                 desired = live_asns[asn]
@@ -300,16 +304,31 @@ class NetboxBgpAsnTasks:
                     payload["custom_fields"] = {
                         device_custom_field: desired[device_custom_field]
                     }
-                create_payloads.append(payload)
+                create_items.append((asn, payload))
         elif create_numbers and not rir:
             msg = "cannot create missing ASNs: no RIR provided, use 'rir' parameter"
             job.event(msg, severity="WARNING")
             log.warning(f"{self.name} - {msg}")
             ret.errors.append(msg)
-        if create_payloads:
-            nb.ipam.asns.create(create_payloads)
-            ret.result["global"]["created"].extend(create_numbers)
-            job.event(f"created {len(create_payloads)} NetBox ASN(s)")
+        if create_items:
+            total_batches = (len(create_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(create_items), batch_size):
+                batch = create_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating ASN batch {batch_number}/{total_batches} ({len(batch)} ASN(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.asns.create([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to create ASN batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                ret.result["global"]["created"].extend(asn for asn, _ in batch)
+            job.event(f"created {len(create_items)} NetBox ASN(s)")
 
         update_payloads = []
         for asn in sorted(update):
@@ -322,10 +341,25 @@ class NetboxBgpAsnTasks:
                     payload["custom_fields"] = {
                         device_custom_field: desired[device_custom_field]
                     }
-            update_payloads.append(payload)
+            update_payloads.append((asn, payload))
         if update_payloads:
-            nb.ipam.asns.update(update_payloads)
-            ret.result["global"]["updated"].extend(sorted(update))
+            total_batches = (len(update_payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_payloads), batch_size):
+                batch = update_payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating ASN batch {batch_number}/{total_batches} ({len(batch)} ASN(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.asns.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update ASN batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                ret.result["global"]["updated"].extend(asn for asn, _ in batch)
             job.event(f"updated {len(update_payloads)} NetBox ASN(s)")
 
         job.event("bgp asn sync complete")

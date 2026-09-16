@@ -8,6 +8,7 @@ from pydantic import (
     Field,
     RootModel,
     StrictBool,
+    StrictFloat,
     StrictInt,
     StrictStr,
     model_validator,
@@ -32,7 +33,7 @@ class NetboxInstanceConfig(BaseModel):
     )
     url: StrictStr = Field(None, description="Netbox URL")
     token: StrictStr = Field(None, description="Netbox auth token")
-    ssl_verify: StrictBool = Field(True, description="Verify SSL vertsor not")
+    ssl_verify: StrictBool = Field(True, description="Verify SSL certificates")
 
 
 class NetboxConfigModel(BaseModel):
@@ -40,6 +41,26 @@ class NetboxConfigModel(BaseModel):
         True, description="Use cache or not"
     )
     cache_ttl: StrictInt = Field(True, description="Cache TTL")
+    netbox_connect_timeout: StrictInt = Field(
+        10,
+        gt=0,
+        description="NetBox API connection timeout in seconds",
+    )
+    netbox_read_timeout: StrictInt = Field(
+        300,
+        gt=0,
+        description="NetBox API response timeout in seconds",
+    )
+    netbox_retries: StrictInt = Field(
+        3,
+        ge=0,
+        description="Number of retries for retryable NetBox API requests",
+    )
+    netbox_retry_backoff: Union[StrictInt, StrictFloat] = Field(
+        0.5,
+        ge=0,
+        description="Backoff factor between NetBox API retries",
+    )
     instances: Dict[StrictStr, NetboxInstanceConfig] = Field(
         None, description="Netbox instance config keyed by instance name"
     )
@@ -74,6 +95,17 @@ class NetboxCommonArgs(BaseModel, use_enum_values=True, populate_by_name=True):
         reply = NFCLIENT.run_job("netbox", "get_inventory", workers="any")
         for worker_name, inventory in reply.items():
             return list(inventory["result"]["instances"])
+
+
+class NetboxBulkBatchArgs(BaseModel, use_enum_values=True, populate_by_name=True):
+    """Common batch-size control for NetBox bulk write tasks."""
+
+    batch_size: StrictInt = Field(
+        1000,
+        ge=1,
+        description="Number of objects per NetBox bulk request",
+        alias="batch-size",
+    )
 
 
 class NetboxFastApiArgs(
@@ -164,7 +196,10 @@ class GetBgpPeeringsInput(
 
 
 class SyncBgpPeeringsInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+    NetboxBulkBatchArgs,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     devices: Union[None, List] = Field(
         None,
@@ -298,7 +333,10 @@ class BgpSessionBulkCreateFields(BgpSessionCommonFields):
 
 
 class CreateBgpPeeringInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+    NetboxBulkBatchArgs,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     """Input model for create_bgp_peering task."""
 
@@ -388,7 +426,10 @@ class CreateBgpPeeringInput(
 
 
 class UpdateBgpPeeringInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+    NetboxBulkBatchArgs,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     """Input model for update_bgp_peering task."""
 
@@ -852,6 +893,7 @@ class DeviceInventoryRecords(RootModel[List[DeviceInventoryRecord]]):
 
 class SyncDeviceInventoryInput(
     NetboxNornirHostsFilters,
+    NetboxBulkBatchArgs,
     NetboxCommonArgs,
     use_enum_values=True,
     populate_by_name=True,
@@ -1460,7 +1502,10 @@ class InterfaceMapRule(BaseModel, extra="forbid", populate_by_name=True):
 
 
 class SyncDeviceInterfacesInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True  # ignore aliases
+    NetboxBulkBatchArgs,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,  # ignore aliases
 ):
     devices: Union[None, list[StrictStr]] = Field(
         None,
@@ -1514,7 +1559,10 @@ class SyncDeviceInterfacesInput(
 
 
 class SyncMacAddressesInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+    NetboxBulkBatchArgs,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     devices: Union[None, list[StrictStr]] = Field(
         None,
@@ -1587,7 +1635,12 @@ class SyncMacAddressesResult(Result):
 # --------------------------------------------------------------------------
 
 
-class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+class SyncDeviceIpInput(
+    NetboxBulkBatchArgs,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
+):
     devices: Union[None, list[StrictStr]] = Field(
         None,
         description="List of NetBox devices to sync IP addresses for",
@@ -1640,7 +1693,10 @@ class SyncDeviceIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
 
 
 class SyncDevicePrefixesInput(
-    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+    NetboxBulkBatchArgs,
+    NetboxCommonArgs,
+    use_enum_values=True,
+    populate_by_name=True,
 ):
     devices: Union[None, list[StrictStr]] = Field(
         None,
@@ -2231,6 +2287,7 @@ class GetNornirInventoryResult(Result):
 
 class SyncVlansInput(
     NetboxNornirHostsFilters,
+    NetboxBulkBatchArgs,
     NetboxCommonArgs,
     use_enum_values=True,
     populate_by_name=True,
@@ -2291,11 +2348,6 @@ class SyncVlansInput(
             "text is empty (null), or never (false)"
         ),
         alias="preserve-description",
-    )
-    interface_map: Union[None, StrictStr, List[InterfaceMapRule]] = Field(
-        None,
-        description="Ordered interface name mapping rules or nf:// YAML file reference",
-        alias="interface-map",
     )
 
     @model_validator(mode="after")
@@ -2383,6 +2435,7 @@ class SyncVrrpResult(Result):
 
 class SyncVrfsInput(
     NetboxNornirHostsFilters,
+    NetboxBulkBatchArgs,
     NetboxCommonArgs,
     use_enum_values=True,
     populate_by_name=True,
@@ -2467,6 +2520,7 @@ class SyncVrfsResult(Result):
 
 class SyncBgpAsnInput(
     NetboxNornirHostsFilters,
+    NetboxBulkBatchArgs,
     NetboxCommonArgs,
     use_enum_values=True,
     populate_by_name=True,
@@ -2529,6 +2583,7 @@ class SyncBgpAsnResult(Result):
 
 class SyncBgpCommunityInput(
     NetboxNornirHostsFilters,
+    NetboxBulkBatchArgs,
     NetboxCommonArgs,
     use_enum_values=True,
     populate_by_name=True,

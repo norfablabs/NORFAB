@@ -1,3 +1,20 @@
+# 0.23.4
+
+## BUGS
+
+1. Fixed NetBox bulk sync failure handling to mark tasks failed, stop later `sync_all` stages, and preserve results from batches completed before an error, including BGP peering synchronization.
+2. Fixed an invalid exception reference in NetBox IP allocation fallback handling.
+3. Fixed NetBox VLAN synchronization to preserve an existing VLAN name when live data only supplies the generated `VLAN<VID>` name.
+4. Restored live 802.1Q mode reconciliation in `sync_device_interfaces`, including access interfaces without VLAN assignments, while keeping tagged and untagged VLAN membership in `sync_vlans`.
+5. Fixed Nornir watchdog connection tracking to remove stale hosts from a stable dictionary snapshot and record connection-use timestamps under the task's existing connection lock before it is released. Dry-run tasks no longer update connection-use timestamps.
+
+## ENHANCEMENTS
+
+1. Added configurable `batch_size` handling to all NetBox sync operations that perform bulk writes, covering device inventory, interfaces, IPAM, VLAN, VRF, and BGP resources. Bulk creates, updates, and interface deletes use sequential requests of 1000 objects by default, accept any positive integer override, and report progress for each batch.
+2. Automatic HTTP retries no longer include POST requests, avoiding repeated create operations when the outcome of a timed-out request is uncertain.
+
+---
+
 # 0.23.3
 
 ## CHANGES

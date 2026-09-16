@@ -62,6 +62,7 @@ class NetboxBgpCommunityTasks:
         branch: Union[None, str] = None,
         community_name_field: Union[str, bool] = "community_name",
         device_custom_field: str = "devices",
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """Synchronize live BGP communities with NetBox.
@@ -526,37 +527,69 @@ class NetboxBgpCommunityTasks:
             for scope, actions in full_diff.items()
         }
         create_snames = full_diff["route_targets"]["create"]
-        create_payloads = []
+        create_items = []
         for sname in create_snames:
             payload = {"name": sname}
             if normalised_live["route_targets"][sname]:
                 payload["custom_fields"] = normalised_live["route_targets"][sname]
-            create_payloads.append(payload)
-        if create_payloads:
-            msg = f"creating {len(create_payloads)} route target(s) in NetBox"
+            create_items.append((sname, payload))
+        if create_items:
+            msg = f"creating {len(create_items)} route target(s) in NetBox"
             job.event(msg)
             log.info(f"{self.name} - {msg}")
-            nb.ipam.route_targets.create(create_payloads)
-            ret.result["route_targets"]["created"].extend(create_snames)
+            total_batches = (len(create_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(create_items), batch_size):
+                batch = create_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating route target batch {batch_number}/{total_batches} ({len(batch)} target(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.route_targets.create([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to create route target batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                ret.result["route_targets"]["created"].extend(name for name, _ in batch)
 
-        update_snames = list(full_diff["route_targets"]["update"])
-        update_payloads = [
-            {
-                "id": nb_community_objects["route_targets"][sname].id,
-                "custom_fields": normalised_live["route_targets"][sname],
-            }
-            for sname in update_snames
+        update_items = [
+            (
+                sname,
+                {
+                    "id": nb_community_objects["route_targets"][sname].id,
+                    "custom_fields": normalised_live["route_targets"][sname],
+                },
+            )
+            for sname in full_diff["route_targets"]["update"]
         ]
-        if update_payloads:
-            msg = f"updating {len(update_payloads)} route target(s) in NetBox"
+        if update_items:
+            msg = f"updating {len(update_items)} route target(s) in NetBox"
             job.event(msg)
             log.info(f"{self.name} - {msg}")
-            nb.ipam.route_targets.update(update_payloads)
-            ret.result["route_targets"]["updated"].extend(update_snames)
+            total_batches = (len(update_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_items), batch_size):
+                batch = update_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating route target batch {batch_number}/{total_batches} ({len(batch)} target(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.route_targets.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update route target batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                ret.result["route_targets"]["updated"].extend(name for name, _ in batch)
 
         if has_bgp_plugin:
             create_snames = full_diff["communities"]["create"]
-            create_payloads = []
+            create_items = []
             for sname in create_snames:
                 community_data = community_key_data[sname]
                 payload = {"value": community_data["value"]}
@@ -564,32 +597,68 @@ class NetboxBgpCommunityTasks:
                     payload["description"] = community_data["name"]
                 if normalised_live["communities"][sname]:
                     payload["custom_fields"] = normalised_live["communities"][sname]
-                create_payloads.append(payload)
-            if create_payloads:
-                msg = (
-                    f"creating {len(create_payloads)} BGP community object(s) in NetBox"
-                )
+                create_items.append((sname, payload))
+            if create_items:
+                msg = f"creating {len(create_items)} BGP community object(s) in NetBox"
                 job.event(msg)
                 log.info(f"{self.name} - {msg}")
-                nb.plugins.bgp.community.create(create_payloads)
-                ret.result["communities"]["created"].extend(create_snames)
+                total_batches = (len(create_items) + batch_size - 1) // batch_size
+                for batch_start in range(0, len(create_items), batch_size):
+                    batch = create_items[batch_start : batch_start + batch_size]
+                    batch_number = batch_start // batch_size + 1
+                    msg = f"creating BGP community batch {batch_number}/{total_batches} ({len(batch)} community object(s))"
+                    job.event(msg)
+                    log.info(msg)
+                    try:
+                        nb.plugins.bgp.community.create(
+                            [payload for _, payload in batch]
+                        )
+                    except Exception as exc:
+                        msg = f"failed to create BGP community batch {batch_number}/{total_batches}: {exc}"
+                        job.event(msg, severity="ERROR")
+                        log.error(msg)
+                        ret.errors.append(msg)
+                        ret.failed = True
+                        return ret
+                    ret.result["communities"]["created"].extend(
+                        name for name, _ in batch
+                    )
 
-            update_snames = list(full_diff["communities"]["update"])
-            update_payloads = [
-                {
-                    "id": nb_community_objects["communities"][sname].id,
-                    "custom_fields": normalised_live["communities"][sname],
-                }
-                for sname in update_snames
-            ]
-            if update_payloads:
-                msg = (
-                    f"updating {len(update_payloads)} BGP community object(s) in NetBox"
+            update_items = [
+                (
+                    sname,
+                    {
+                        "id": nb_community_objects["communities"][sname].id,
+                        "custom_fields": normalised_live["communities"][sname],
+                    },
                 )
+                for sname in full_diff["communities"]["update"]
+            ]
+            if update_items:
+                msg = f"updating {len(update_items)} BGP community object(s) in NetBox"
                 job.event(msg)
                 log.info(f"{self.name} - {msg}")
-                nb.plugins.bgp.community.update(update_payloads)
-                ret.result["communities"]["updated"].extend(update_snames)
+                total_batches = (len(update_items) + batch_size - 1) // batch_size
+                for batch_start in range(0, len(update_items), batch_size):
+                    batch = update_items[batch_start : batch_start + batch_size]
+                    batch_number = batch_start // batch_size + 1
+                    msg = f"updating BGP community batch {batch_number}/{total_batches} ({len(batch)} community object(s))"
+                    job.event(msg)
+                    log.info(msg)
+                    try:
+                        nb.plugins.bgp.community.update(
+                            [payload for _, payload in batch]
+                        )
+                    except Exception as exc:
+                        msg = f"failed to update BGP community batch {batch_number}/{total_batches}: {exc}"
+                        job.event(msg, severity="ERROR")
+                        log.error(msg)
+                        ret.errors.append(msg)
+                        ret.failed = True
+                        return ret
+                    ret.result["communities"]["updated"].extend(
+                        name for name, _ in batch
+                    )
 
         msg = (
             f"bgp community sync complete: {create_count} created, "

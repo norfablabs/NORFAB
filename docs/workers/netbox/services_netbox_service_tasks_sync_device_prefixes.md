@@ -128,6 +128,14 @@ data is left unchanged in NetBox.
 Pass `branch=<name>` to create or update prefixes in a NetBox Branching Plugin
 branch. The task creates the branch when it does not already exist.
 
+## Bulk Request Batching
+
+List-based NetBox writes are sent as sequential requests containing at most
+`batch_size` objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.
+
 ## Examples
 
 === "CLI"

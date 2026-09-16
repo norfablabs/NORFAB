@@ -20,13 +20,20 @@ The task follows a four-step pipeline:
 2. **Collect live state** — Run Nornir [`parse_ttp`](../nornir/services_nornir_service_tasks_parse.md) jobs using the `interfaces` configuration getter first, followed by the `interfaces_status` operational getter. Configuration remains authoritative; operational state fills only MTU, duplex, and speed values that configuration parsing returned as `null`. Operational `speed_bps` is converted to the Kbit/s value expected by NetBox.
     For existing interfaces, live MTU or speed values of `null` or `0` do not
     overwrite a value already set in NetBox.
-3. **Diff** — Normalize both sides to a common schema, apply `interface_map` to live interface names, and compare using DeepDiff to classify each interface as `create`, `update`, `delete`, or `in_sync`.
+3. **Diff** — Normalize both sides to a common schema, including the parsed 802.1Q interface mode, apply `interface_map` to live interface names, and compare using DeepDiff to classify each interface as `create`, `update`, `delete`, or `in_sync`.
 4. **Reconcile** — Apply changes to NetBox in dependency order to avoid constraint errors:
     1. Create LAG interfaces first
     2. Create parent (non-child) interfaces
     3. Create child (sub)interfaces referencing their parents
-    4. Bulk update changed interfaces
+    4. Update changed interfaces
     5. Delete interfaces present in NetBox but absent in live data (only when `process_deletions=True`)
+
+Each create, update, and delete phase sends sequential bulk requests of at most
+`batch_size` interfaces. The default is 1000; set any integer greater than zero
+to tune the request size. Successful batches are recorded in the result before
+the next request, so a failure can leave earlier batches applied in NetBox.
+Each batch emits a progress event and an info log before the request, with its batch
+number, total batches, and interface count.
 
 ![Netbox Sync Device Interfaces](../../images/Netbox_Service_Sync_Interfaces.jpg)
 
@@ -148,10 +155,11 @@ By default `process_deletions=False` — interfaces present in NetBox but absent
 
 ## VLAN ownership
 
-The task does not create VLANs or update interface mode, tagged VLANs, untagged
-VLAN, or Q-in-Q service VLAN fields. Run `sync_vlans` after interfaces exist to
-reconcile VLAN objects and tagged/untagged memberships. Q-in-Q membership is not
-supported by `sync_vlans`.
+The task synchronizes the 802.1Q interface mode directly from the live interface
+parser, including an access mode with no VLAN assigned. It does not create VLANs
+or update tagged VLANs, untagged VLAN, or Q-in-Q service VLAN fields. Run
+`sync_vlans` after interfaces exist to reconcile VLAN objects and tagged/untagged
+memberships. Q-in-Q membership is not supported by `sync_vlans`.
 
 The task does not create VRFs or update interface VRF assignments. Run
 `sync_vrfs` after interfaces exist to reconcile those relationships.
@@ -168,6 +176,12 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
 
     ```
     nf#netbox sync interfaces devices ceos-spine-1 ceos-spine-2
+    ```
+
+    Use smaller NetBox bulk requests:
+
+    ```
+    nf#netbox sync interfaces devices ceos-spine-1 batch-size 250
     ```
 
     Preview changes without writing to NetBox (dry run):
@@ -234,6 +248,7 @@ The task is branch-aware and can push changes into a NetBox branch. The [Netbox 
         workers="any",
         kwargs={
             "devices": ["ceos-spine-1", "ceos-spine-2"],
+            "batch_size": 250,
         },
     )
 
@@ -342,6 +357,7 @@ root
             ├── instance:    Netbox instance name to target
             ├── dry-run:    Return diff plan without pushing changes to NetBox
             ├── devices:    List of NetBox device names to sync
+            ├── batch-size:    Maximum interfaces per NetBox bulk request, default '1000'
             ├── process-deletions:    Delete interfaces present in NetBox but absent in live data
             ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'

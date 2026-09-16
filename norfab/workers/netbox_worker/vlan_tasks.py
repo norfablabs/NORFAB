@@ -275,6 +275,7 @@ class NetboxVlansTasks:
         require_vlan_group: bool = False,
         filter_by_vlan_ids: Union[None, list[str]] = None,
         preserve_description: Union[None, bool] = None,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """Synchronize live VLAN attributes and interface memberships with NetBox.
@@ -643,6 +644,13 @@ class NetboxVlansTasks:
                         target["tagged_vlans"].add(vlan_reference)
                     else:
                         target["untagged_vlan"] = vlan_reference
+
+        # Keep a descriptive NetBox name when live data only supplies VLAN<VID>.
+        for scope, vid in vlan_objects:
+            live_name = vlan_live[scope][vid]["name"]
+            if live_name.upper() == f"VLAN{vid}".upper():
+                vlan_live[scope][vid]["name"] = vlan_current[scope][vid]["name"]
+
         message = (
             f"resolved {sum(len(vlans) for vlans in vlan_live.values())} VLAN(s) "
             f"across {len(vlan_live)} NetBox scope(s)"
@@ -806,90 +814,129 @@ class NetboxVlansTasks:
         ret.result = {"vlans": vlan_result, "interfaces": interface_result}
 
         # Complete all creations before any VLAN updates or interface writes.
-        create_keys = []
-        create_payloads = []
+        create_items = []
         for scope, actions in sorted(vlan_diff.items()):
             for vid in actions["create"]:
-                create_keys.append((scope, vid))
-                create_payloads.append(
-                    {
-                        "vid": vid,
-                        "name": vlan_live[scope][vid]["name"],
-                        "description": vlan_live[scope][vid]["description"],
-                        **scope_payloads[scope],
-                    }
+                create_items.append(
+                    (
+                        (scope, vid),
+                        {
+                            "vid": vid,
+                            "name": vlan_live[scope][vid]["name"],
+                            "description": vlan_live[scope][vid]["description"],
+                            **scope_payloads[scope],
+                        },
+                    )
                 )
-        stage = "create VLANs"
-        try:
-            if create_payloads:
-                created = nb.ipam.vlans.create(create_payloads)
-                for key, vlan in zip(create_keys, created):
+        if create_items:
+            total_batches = (len(create_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(create_items), batch_size):
+                batch = create_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                message = f"creating VLAN batch {batch_number}/{total_batches} ({len(batch)} VLAN(s))"
+                job.event(message)
+                log.info(message)
+                try:
+                    created = nb.ipam.vlans.create([payload for _, payload in batch])
+                except Exception as exc:
+                    message = f"failed to create VLAN batch {batch_number}/{total_batches}: {exc}"
+                    job.event(message, severity="ERROR")
+                    log.error(message)
+                    ret.errors.append(message)
+                    ret.failed = True
+                    return ret
+                for (key, _), vlan in zip(batch, created):
                     scope, vid = key
                     vlan_objects[key] = vlan
                     vlan_id_by_reference[f"{scope}/{vid}"] = vlan.id
                     ret.result["vlans"][scope]["created"].append(vid)
-                message = f"created {len(created)} VLAN(s)"
-                job.event(message)
-                log.info(message)
+            message = f"created {len(create_items)} VLAN(s)"
+            job.event(message)
+            log.info(message)
 
-            stage = "update VLANs"
-            vlan_updates = []
-            for scope, actions in sorted(vlan_diff.items()):
-                for vid, changes in actions["update"].items():
-                    values = {}
-                    for field in ("name", "description"):
-                        if field in changes:
-                            values[field] = vlan_live[scope][vid][field]
-                    if values:
-                        vlan_updates.append(
-                            {"id": vlan_objects[(scope, vid)].id, **values}
+        vlan_updates = []
+        for scope, actions in sorted(vlan_diff.items()):
+            for vid, changes in actions["update"].items():
+                values = {}
+                for field in ("name", "description"):
+                    if field in changes:
+                        values[field] = vlan_live[scope][vid][field]
+                if values:
+                    vlan_updates.append(
+                        (
+                            (scope, vid),
+                            {"id": vlan_objects[(scope, vid)].id, **values},
                         )
-            if vlan_updates:
-                nb.ipam.vlans.update(vlan_updates)
-                message = f"updated {len(vlan_updates)} VLAN object(s)"
+                    )
+        if vlan_updates:
+            total_batches = (len(vlan_updates) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(vlan_updates), batch_size):
+                batch = vlan_updates[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                message = f"updating VLAN batch {batch_number}/{total_batches} ({len(batch)} VLAN(s))"
                 job.event(message)
                 log.info(message)
-            for scope, actions in vlan_diff.items():
-                ret.result["vlans"][scope]["updated"] = sorted(actions["update"])
+                try:
+                    nb.ipam.vlans.update([payload for _, payload in batch])
+                except Exception as exc:
+                    message = f"failed to update VLAN batch {batch_number}/{total_batches}: {exc}"
+                    job.event(message, severity="ERROR")
+                    log.error(message)
+                    ret.errors.append(message)
+                    ret.failed = True
+                    return ret
+                for (scope, vid), _ in batch:
+                    ret.result["vlans"][scope]["updated"].append(vid)
+            message = f"updated {len(vlan_updates)} VLAN object(s)"
+            job.event(message)
+            log.info(message)
 
-            stage = "update interfaces"
-            interface_updates = []
-            for device, actions in sorted(interface_diff.items()):
-                for name in sorted(actions["update"]):
-                    desired = interface_live[device][name]
-                    tagged_vlan_ids = [
-                        vlan_id_by_reference[reference]
-                        for reference in desired["tagged_vlans"]
-                    ]
-                    untagged_vlan_id = None
-                    if desired["untagged_vlan"]:
-                        untagged_vlan_id = vlan_id_by_reference[
-                            desired["untagged_vlan"]
-                        ]
-                    interface_updates.append(
+        interface_updates = []
+        for device, actions in sorted(interface_diff.items()):
+            for name in sorted(actions["update"]):
+                desired = interface_live[device][name]
+                tagged_vlan_ids = [
+                    vlan_id_by_reference[reference]
+                    for reference in desired["tagged_vlans"]
+                ]
+                untagged_vlan_id = None
+                if desired["untagged_vlan"]:
+                    untagged_vlan_id = vlan_id_by_reference[desired["untagged_vlan"]]
+                interface_updates.append(
+                    (
+                        (device, name),
                         {
                             "id": interfaces[(device, name)].id,
                             "mode": desired["mode"],
                             "tagged_vlans": tagged_vlan_ids,
                             "untagged_vlan": untagged_vlan_id,
-                        }
+                        },
                     )
-            if interface_updates:
-                nb.dcim.interfaces.update(interface_updates)
-                message = (
-                    f"updated VLAN membership on {len(interface_updates)} interface(s)"
                 )
+        if interface_updates:
+            total_batches = (len(interface_updates) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(interface_updates), batch_size):
+                batch = interface_updates[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                message = f"updating VLAN membership batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
                 job.event(message)
                 log.info(message)
-            for device, actions in interface_diff.items():
-                ret.result["interfaces"][device]["updated"] = sorted(actions["update"])
-        except Exception as exc:
-            message = f"failed to {stage}: {exc}"
-            job.event(message, severity="ERROR")
-            log.error(message)
-            ret.errors.append(message)
-            ret.failed = True
-            return ret
+                try:
+                    nb.dcim.interfaces.update([payload for _, payload in batch])
+                except Exception as exc:
+                    message = f"failed to update VLAN membership batch {batch_number}/{total_batches}: {exc}"
+                    job.event(message, severity="ERROR")
+                    log.error(message)
+                    ret.errors.append(message)
+                    ret.failed = True
+                    return ret
+                for (device, name), _ in batch:
+                    ret.result["interfaces"][device]["updated"].append(name)
+            message = (
+                f"updated VLAN membership on {len(interface_updates)} interface(s)"
+            )
+            job.event(message)
+            log.info(message)
         message = "vlan sync complete"
         job.event(message)
         log.info(message)

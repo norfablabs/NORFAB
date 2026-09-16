@@ -3,9 +3,17 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from norfab.models import Result
+from norfab.workers.netbox_worker import netbox_models
 from norfab.workers.netbox_worker.devices_tasks import NetboxDevicesTasks
+from norfab.workers.netbox_worker.netbox_worker import (
+    RETRYABLE_HTTP_METHODS,
+    NetboxWorker,
+)
 
 try:
     from tests.services.netbox.common import (
@@ -28,6 +36,69 @@ except ModuleNotFoundError as exc:
     )
 
 pytestmark = pytest.mark.netbox
+
+
+@pytest.mark.parametrize(
+    "model, required_data",
+    [
+        (netbox_models.SyncDeviceInventoryInput, {}),
+        (netbox_models.SyncDeviceInterfacesInput, {}),
+        (netbox_models.SyncMacAddressesInput, {}),
+        (netbox_models.SyncDeviceIpInput, {}),
+        (netbox_models.SyncDevicePrefixesInput, {}),
+        (netbox_models.SyncVlansInput, {}),
+        (netbox_models.SyncVrfsInput, {}),
+        (netbox_models.SyncBgpAsnInput, {}),
+        (netbox_models.SyncBgpCommunityInput, {}),
+        (netbox_models.SyncBgpPeeringsInput, {}),
+        (netbox_models.CreateBgpPeeringInput, {"bulk_create": []}),
+        (netbox_models.UpdateBgpPeeringInput, {"bulk_update": []}),
+    ],
+)
+def test_bulk_sync_batch_size_models(model: Any, required_data: dict) -> None:
+    assert model.model_validate(required_data).batch_size == 1000
+    assert model.model_validate({**required_data, "batch-size": 1}).batch_size == 1
+    assert (
+        model.model_validate({**required_data, "batch-size": 10_000}).batch_size
+        == 10_000
+    )
+    for value in (0, -1, True, 1.5, "2"):
+        with pytest.raises(ValidationError):
+            model.model_validate({**required_data, "batch-size": value})
+
+
+def test_pynetbox_session_uses_retry_adapter() -> None:
+    worker = object.__new__(NetboxWorker)
+    worker.netbox_retry = Retry(total=0)
+    worker._get_instance_params = lambda instance: {
+        "url": "https://netbox.example",
+        "token": "token",
+        "ssl_verify": True,
+    }
+
+    nb = worker._get_pynetbox("test")
+    adapter = nb.http_session.get_adapter("https://")
+
+    assert type(adapter) is HTTPAdapter
+    assert adapter.max_retries is worker.netbox_retry
+    assert "POST" not in RETRYABLE_HTTP_METHODS
+
+
+def test_netbox_inventory_timeout_and_retry_model() -> None:
+    config = netbox_models.NetboxConfigModel.model_validate(
+        {
+            "netbox_connect_timeout": 12,
+            "netbox_read_timeout": 345,
+            "netbox_retries": 2,
+            "netbox_retry_backoff": 1.5,
+            "instances": {},
+        }
+    )
+
+    assert config.netbox_connect_timeout == 12
+    assert config.netbox_read_timeout == 345
+    assert config.netbox_retries == 2
+    assert config.netbox_retry_backoff == 1.5
 
 
 class TestSyncAllOrchestration:
@@ -137,12 +208,24 @@ class TestSyncAllOrchestration:
         assert result.result["device-1"] == {"vrfs": False, "in_sync": False}
         assert result.diff["vrfs"]["routing_policies"]["create"] == ["RPL1"]
 
-    def test_sync_all_stops_after_failed_vlan_sync(self) -> None:
+    @pytest.mark.parametrize("failed_task, failed_result", TASKS)
+    def test_sync_all_stops_after_failed_stage(
+        self, failed_task: str, failed_result: dict
+    ) -> None:
         calls = []
         worker = self._worker(calls)
-        worker.sync_vlans = lambda **kwargs: (
-            calls.append("sync_vlans")
-            or Result(task="sync_vlans", failed=True, errors=["create failed"])
+        setattr(
+            worker,
+            failed_task,
+            lambda _task=failed_task, _result=failed_result, **kwargs: (
+                calls.append(_task)
+                or Result(
+                    task=_task,
+                    result=_result,
+                    failed=True,
+                    errors=["batch failed"],
+                )
+            ),
         )
 
         result = NetboxDevicesTasks.sync_all(
@@ -152,13 +235,8 @@ class TestSyncAllOrchestration:
         )
 
         assert result.failed
-        assert calls == [
-            "sync_device_inventory",
-            "sync_device_prefixes",
-            "sync_device_interfaces",
-            "sync_vrfs",
-            "sync_vlans",
-        ]
+        task_names = [task_name for task_name, _ in self.TASKS]
+        assert calls == task_names[: task_names.index(failed_task) + 1]
 
     @pytest.mark.parametrize("skipped_task", RESULT_CATEGORIES)
     def test_false_sync_kwarg_skips_task_and_continues(self, skipped_task: str) -> None:
@@ -361,7 +439,7 @@ class TestSyncMacAddresses:
         result must carry the correct RESULT_KEYS per device."""
         self._cleanup(nfclient, self.SPINE_DEVICES)
 
-        ret = self._sync(nfclient, self.SPINE_DEVICES)
+        ret = self._sync(nfclient, self.SPINE_DEVICES, batch_size=1)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"

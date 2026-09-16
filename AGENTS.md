@@ -212,7 +212,7 @@ poetry run inv dead-code
 ### Important formatting Rules
 
 1. Workers `job.event` call messages must start with lowercase letters; `job.event` calls support setting event severity through `severity=WARNING/INFO/ERROR`
-2. Logging calls, e.g. `log.info`, must start with uppercase letters
+2. Logging calls, e.g. `log.info`, must start with lowercase letters
 3. Any spelling mistakes in docstrings, comments or variable names must be fixed
 
 ### Documentation

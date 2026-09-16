@@ -113,7 +113,9 @@ class TestSyncBgpCommunity:
             assert result["result"]["communities"]["create"] == self.COMMUNITY_KEYS
         assert self.nb.ipam.route_targets.get(name="65000:200") is None
 
-        response = self._sync(nfclient, device_custom_field="community_devices")
+        response = self._sync(
+            nfclient, device_custom_field="community_devices", batch_size=1
+        )
         for result in self._successful_results(response):
             assert result["result"]["route_targets"]["created"] == ["65000:200"]
             assert result["result"]["communities"]["created"] == self.COMMUNITY_KEYS

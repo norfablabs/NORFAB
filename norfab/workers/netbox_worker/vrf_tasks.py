@@ -53,6 +53,7 @@ class NetboxVrfsTasks:
         rpl_export_ipv6: str = "rpl_export_ipv6",
         preserve_description: Union[None, bool] = None,
         interface_map: Union[None, str, list] = None,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """Synchronize live VRFs, route targets, and interface assignments with NetBox.
@@ -492,12 +493,6 @@ class NetboxVrfsTasks:
             "routing_policies": policy_diff,
             "interfaces": interface_diff,
         }
-        interface_updates = sum(
-            len(actions["update"]) for actions in interface_diff.values()
-        )
-        interface_in_sync = sum(
-            len(actions["in_sync"]) for actions in interface_diff.values()
-        )
         msg = (
             "vrf sync diff complete: "
             f"{len(create_names)} create, {len(update)} update, "
@@ -545,7 +540,7 @@ class NetboxVrfsTasks:
             "interfaces": {
                 device_name: {
                     "created": [],
-                    "updated": sorted(actions["update"]),
+                    "updated": [],
                     "deleted": [],
                     "in_sync": actions["in_sync"],
                 }
@@ -553,23 +548,47 @@ class NetboxVrfsTasks:
             },
         }
         if missing_route_targets:
-            created_targets = nb.ipam.route_targets.create(
-                [{"name": name} for name in missing_route_targets]
-            )
-            for target in created_targets:
-                object_cache[("route_target", target.name)] = target
-            ret.result["route_targets"]["created"].extend(
-                target.name for target in created_targets
-            )
+            target_payloads = [{"name": name} for name in missing_route_targets]
+            total_batches = (len(target_payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(target_payloads), batch_size):
+                batch = target_payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating route target batch {batch_number}/{total_batches} ({len(batch)} target(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    created_targets = nb.ipam.route_targets.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create route target batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                for target in created_targets:
+                    object_cache[("route_target", target.name)] = target
+                    ret.result["route_targets"]["created"].append(target.name)
         if missing_policies:
-            created_policies = nb.plugins.bgp.routing_policy.create(
-                [{"name": name} for name in missing_policies]
-            )
-            for policy in created_policies:
-                object_cache[("routing_policy", policy.name)] = policy
-            ret.result["routing_policies"]["created"].extend(
-                policy.name for policy in created_policies
-            )
+            policy_payloads = [{"name": name} for name in missing_policies]
+            total_batches = (len(policy_payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(policy_payloads), batch_size):
+                batch = policy_payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating routing policy batch {batch_number}/{total_batches} ({len(batch)} policy(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    created_policies = nb.plugins.bgp.routing_policy.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create routing policy batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                for policy in created_policies:
+                    object_cache[("routing_policy", policy.name)] = policy
+                    ret.result["routing_policies"]["created"].append(policy.name)
 
         create_payloads = []
         for vrf_name in create_names:
@@ -598,9 +617,25 @@ class NetboxVrfsTasks:
                 payload["custom_fields"] = custom_fields
             create_payloads.append(payload)
         if create_payloads:
-            created_vrfs = nb.ipam.vrfs.create(create_payloads)
-            object_cache.update({("vrf", vrf.name): vrf for vrf in created_vrfs})
-            ret.result["vrfs"]["created"].extend(create_names)
+            total_batches = (len(create_payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(create_payloads), batch_size):
+                batch = create_payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating VRF batch {batch_number}/{total_batches} ({len(batch)} VRF(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    created_vrfs = nb.ipam.vrfs.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create VRF batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                for vrf in created_vrfs:
+                    object_cache[("vrf", vrf.name)] = vrf
+                    ret.result["vrfs"]["created"].append(vrf.name)
 
         update_payloads = []
         for vrf_name in sorted(update):
@@ -621,10 +656,25 @@ class NetboxVrfsTasks:
                         object_cache[("routing_policy", name)].id
                         for name in desired[field]
                     ]
-            update_payloads.append(payload)
+            update_payloads.append((vrf_name, payload))
         if update_payloads:
-            nb.ipam.vrfs.update(update_payloads)
-            ret.result["vrfs"]["updated"].extend(sorted(update))
+            total_batches = (len(update_payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_payloads), batch_size):
+                batch = update_payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating VRF batch {batch_number}/{total_batches} ({len(batch)} VRF(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.ipam.vrfs.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update VRF batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                ret.result["vrfs"]["updated"].extend(name for name, _ in batch)
 
         # Assign only interfaces classified as updates; matching assignments have
         # already been retained in the result's in_sync lists.
@@ -633,13 +683,35 @@ class NetboxVrfsTasks:
             for interface_name in sorted(actions["update"]):
                 vrf_name = interface_live[device_name][interface_name]["vrf"]
                 interface_payloads.append(
-                    {
-                        "id": interface_objects[(device_name, interface_name)].id,
-                        "vrf": object_cache[("vrf", vrf_name)].id,
-                    }
+                    (
+                        (device_name, interface_name),
+                        {
+                            "id": interface_objects[(device_name, interface_name)].id,
+                            "vrf": object_cache[("vrf", vrf_name)].id,
+                        },
+                    )
                 )
         if interface_payloads:
-            nb.dcim.interfaces.update(interface_payloads)
+            total_batches = (len(interface_payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(interface_payloads), batch_size):
+                batch = interface_payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating VRF interface batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.dcim.interfaces.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update VRF interface batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    log.error(msg)
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    return ret
+                for (device_name, interface_name), _ in batch:
+                    ret.result["interfaces"][device_name]["updated"].append(
+                        interface_name
+                    )
         msg = (
             "vrf sync complete: "
             f"{len(create_names)} VRF created, {len(update)} updated, "

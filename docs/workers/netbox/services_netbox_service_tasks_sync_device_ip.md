@@ -146,6 +146,14 @@ By default, all discovered live IP addresses are managed by this task. Addresses
 
 The task is branch-aware and can push changes into a NetBox branch. The [Netbox Branching Plugin](https://github.com/netboxlabs/netbox-branching) must be installed. Specify the `branch` parameter; the branch is created automatically if it does not already exist.
 
+## Bulk Request Batching
+
+List-based NetBox writes are sent as sequential requests containing at most
+`batch_size` objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.
+
 ## Examples
 
 === "CLI"

@@ -355,6 +355,7 @@ class NetboxDevicesTasks:
         ignore_modules: Union[None, list] = None,
         ignore_slots: Union[None, list] = None,
         message: Union[None, str] = None,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """Synchronize chassis serial and installed module inventory into NetBox.
@@ -1123,16 +1124,26 @@ class NetboxDevicesTasks:
         job.event(f"prepared {len(bulk_update_modules)} module update payload(s)")
         if bulk_update_modules:
             job.event(f"updating {len(bulk_update_modules)} module(s)")
-            try:
-                nb.dcim.modules.update(list(bulk_update_modules.values()))
-                job.event(f"updated {len(bulk_update_modules)} module(s)")
-                for device_name, slot in bulk_update_modules:
+            update_items = list(bulk_update_modules.items())
+            total_batches = (len(update_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_items), batch_size):
+                batch = update_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating module batch {batch_number}/{total_batches} ({len(batch)} module(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.dcim.modules.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update module batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                for (device_name, slot), _ in batch:
                     device_results[device_name]["updated"].append(slot)
-            except Exception as exc:
-                msg = f"failed to bulk update modules: {exc}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
+            job.event(f"updated {len(bulk_update_modules)} module(s)")
 
         # Optional module deletions.
         if process_deletions:
@@ -1551,6 +1562,13 @@ class NetboxDevicesTasks:
                 ret.errors.extend(inventory_result.errors)
             for device, data in inventory_result.result.items():
                 ret.result.setdefault(device, {})["inventory"] = data
+            if inventory_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because device inventory sync failed",
+                    severity="ERROR",
+                )
+                return ret
             if inventory_result.status == "skipped" and inventory_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
@@ -1579,6 +1597,12 @@ class NetboxDevicesTasks:
                 ret.errors.extend(prefix_result.errors)
             for device in devices:
                 ret.result[device]["prefixes"] = prefix_result.result
+            if prefix_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because prefix sync failed", severity="ERROR"
+                )
+                return ret
             if prefix_result.status == "skipped" and prefix_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
@@ -1605,6 +1629,12 @@ class NetboxDevicesTasks:
                 ret.errors.extend(intf_result.errors)
             for device, data in intf_result.result.items():
                 ret.result.setdefault(device, {})["interfaces"] = data
+            if intf_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because interface sync failed", severity="ERROR"
+                )
+                return ret
             if intf_result.status == "skipped" and intf_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
@@ -1639,6 +1669,10 @@ class NetboxDevicesTasks:
                     "routing_policies": vrf_result.result["routing_policies"],
                     "interfaces": device_interfaces,
                 }
+            if vrf_result.failed:
+                ret.failed = True
+                job.event("sync all stopped because VRF sync failed", severity="ERROR")
+                return ret
             if vrf_result.status == "skipped" and vrf_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
@@ -1701,6 +1735,12 @@ class NetboxDevicesTasks:
                 ret.errors.extend(mac_result.errors)
             for device, data in mac_result.result.items():
                 ret.result.setdefault(device, {})["mac_addresses"] = data
+            if mac_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because MAC address sync failed", severity="ERROR"
+                )
+                return ret
             if mac_result.status == "skipped" and mac_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
@@ -1727,6 +1767,12 @@ class NetboxDevicesTasks:
                 ret.errors.extend(ip_result.errors)
             for device, data in ip_result.result.items():
                 ret.result.setdefault(device, {})["ip_addresses"] = data
+            if ip_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because IP address sync failed", severity="ERROR"
+                )
+                return ret
             if ip_result.status == "skipped" and ip_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
@@ -1753,6 +1799,12 @@ class NetboxDevicesTasks:
                 ret.errors.extend(bgp_result.errors)
             for device, data in bgp_result.result.items():
                 ret.result.setdefault(device, {})["bgp_peerings"] = data
+            if bgp_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because BGP peering sync failed", severity="ERROR"
+                )
+                return ret
             if bgp_result.status == "skipped" and bgp_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True

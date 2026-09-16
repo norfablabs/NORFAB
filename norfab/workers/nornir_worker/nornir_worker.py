@@ -236,7 +236,7 @@ class WatchDog(WorkerWatchDog):
 
     def connections_update(self, nr: Any, plugin: str) -> None:
         """
-        Function to update connection use timestamps for each host
+        Update connection use timestamps while the caller holds connections_lock.
 
         Args:
             nr: Nornir object
@@ -349,7 +349,7 @@ class WatchDog(WorkerWatchDog):
             stats = HostsKeepalive(self.worker.nr)
             self.dead_connections_cleaned += stats["dead_connections_cleaned"]
             # remove connections that are no longer present in Nornir inventory
-            for host_name, host_connections in self.connections_data.items():
+            for host_name, host_connections in list(self.connections_data.items()):
                 # check if host is still in Nornir inventory
                 if host_name not in self.worker.nr.inventory.hosts:
                     self.connections_data.pop(host_name, None)

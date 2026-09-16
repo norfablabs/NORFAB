@@ -182,9 +182,11 @@ live description.
 Identical live records from multiple devices in one scope are collapsed. Live
 VLANs with the same VID but different names or descriptions are reported as
 source conflicts. An automatically derived name matching `VLAN<VID>` yields to
-the first different name reported by a device. Otherwise, the first device in
-sorted device-name order supplies the value to synchronize. Each conflicting
-device is identified in `errors`. A conflict does not fail or skip that VLAN.
+the first different name reported by a device. If all live observations retain
+the automatic name, an existing NetBox VLAN name is preserved. Otherwise, the
+first device in sorted device-name order supplies the value to synchronize.
+Each conflicting device is identified in `errors`. A conflict does not fail or
+skip that VLAN.
 Results returned for the same device by multiple Nornir workers are aggregated
 before identical live records are collapsed.
 
@@ -315,6 +317,14 @@ therefore retains empty `delete` and `deleted` lists.
 The task obtains its NetBox client with the requested branch. Reads and writes
 therefore remain inside that branch. The NetBox Branching plugin must be
 installed and configured for branch use.
+
+## Bulk Request Batching
+
+List-based NetBox writes are sent as sequential requests containing at most
+`batch_size` objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.
 
 ## Examples
 

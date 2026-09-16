@@ -704,6 +704,7 @@ class TestSyncDeviceInventory:
             nfclient,
             create_module_bays=True,
             create_module_types=True,
+            batch_size=1,
         )
         pprint.pprint(ret, width=200)
 
@@ -1020,6 +1021,7 @@ class TestSyncDeviceInventory:
             nfclient,
             create_module_bays=True,
             create_module_types=True,
+            batch_size=1,
         )
         pprint.pprint(ret, width=200)
 

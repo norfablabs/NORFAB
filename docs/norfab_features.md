@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 15 September 2026*
+*Last updated: 16 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -628,6 +628,9 @@ from the originating task result.
 
 The [NetBox service](workers/netbox/services_netbox_service.md) reads, provisions,
 and reconciles NetBox data, including live-state collection through Nornir.
+Sync tasks split list-based NetBox writes into sequential batches of at most
+1000 objects by default, with a validated per-run `batch_size` override and
+per-batch progress events and logs.
 
 ### Multiple NetBox instances
 
@@ -643,8 +646,10 @@ Configures connect/read timeouts, request retry count and backoff, TLS
 certificate verification, GraphQL parallelism, cache mode/TTL, and branch
 creation timeout. **Use cases:** slow or distant instances, transient API
 failures, high-volume inventory reads, self-signed labs, and predictable
-failure bounds. **Limitations:** aggressive retries or parallelism can increase
-load on NetBox; disabling TLS verification is for controlled environments.
+failure bounds. POST requests are excluded from automatic retries to avoid
+repeating an uncertain create operation. **Limitations:** aggressive retries or
+parallelism can increase load on NetBox; disabling TLS verification is for
+controlled environments.
 [Inventory details](workers/netbox/services_netbox_service_inventory.md)
 
 ### Status and compatibility checks
@@ -784,11 +789,15 @@ values. Existing descriptions can be preserved always, preserved only when
 live text is empty, or overwritten by live text. The task computes a
 desired/current diff, optionally maps live
 interface names through ordered device- and model-aware
-rename rules, and applies ordered create, update, and optional delete actions.
+rename rules, reconciles the parsed 802.1Q interface mode independently of VLAN
+assignments, and applies ordered create, update, and optional delete actions.
+Bulk interface writes use sequential requests of 1000 items by default, with a
+configurable positive `batch_size` for each run; each
+batch reports progress in events and logs.
 An empty NetBox interface set is valid, allowing a device to be initialized
 entirely from discovered live interfaces. Interface-name mapping rules can be
-supplied inline or loaded from YAML through `nf://` URLs. VLAN objects,
-memberships, and VLAN-derived interface mode are handled by VLAN sync.
+supplied inline or loaded from YAML through `nf://` URLs. VLAN objects and
+tagged/untagged memberships are handled by VLAN sync.
 VRF objects and interface VRF assignments are handled by VRF sync.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
@@ -813,9 +822,10 @@ candidate validated against the device site, group VID ranges, and the group's
 direct site, region, site group, location, rack, or rack group scope. Compatible groups take
 precedence over direct-site VLANs, with global VLANs used as a final fallback;
 the first device supplies values when later devices report a conflict, except an
-automatic `VLAN<VID>` name yields to the first descriptive name. Optional strict
-group enforcement reports and skips VLANs that would otherwise fall back to
-their device site. Configured groups are validated before collection; missing
+automatic `VLAN<VID>` name yields to the first descriptive live name or, when
+none is observed, the existing NetBox VLAN name. Optional strict group
+enforcement reports and skips VLANs that would otherwise fall back to their
+device site. Configured groups are validated before collection; missing
 groups and affected VLANs are reported and skipped while other VLANs continue.
 Explicit out-of-range or scope-incompatible group mappings are reported and
 skipped without fallback.

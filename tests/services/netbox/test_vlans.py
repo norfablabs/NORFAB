@@ -76,6 +76,7 @@ class TestSyncVlanMemberships:
         groups: list | None = None,
         dry_run: bool = True,
         create_error: bool = False,
+        create_error_on_call: int | None = None,
         **kwargs: Any,
     ) -> tuple:
         vlans, interfaces, groups = (
@@ -118,8 +119,12 @@ class TestSyncVlanMemberships:
             and ("id" not in filters or v.id in filters["id"])
         ]
 
+        create_calls = 0
+
         def create(payloads: list) -> list:
-            if create_error:
+            nonlocal create_calls
+            create_calls += 1
+            if create_error or create_calls == create_error_on_call:
                 raise RuntimeError("creation failed")
             created = []
             for payload in payloads:
@@ -187,6 +192,68 @@ class TestSyncVlanMemberships:
             "fields": "id,name,region,group",
         }
         nb.dcim.racks.filter.assert_not_called()
+
+    def test_creates_vlans_in_batches(self) -> None:
+        result, nb, _, _ = self._run(
+            {"leaf-1": [self._live(vid) for vid in (50, 51, 52)]},
+            dry_run=False,
+            batch_size=2,
+        )
+
+        assert not result.failed and not result.errors
+        assert result.result["vlans"]["site:lab"]["created"] == [50, 51, 52]
+        assert [len(call.args[0]) for call in nb.ipam.vlans.create.call_args_list] == [
+            2,
+            1,
+        ]
+
+    def test_stops_after_failed_batch_and_keeps_successful_results(self) -> None:
+        result, nb, _, _ = self._run(
+            {"leaf-1": [self._live(vid) for vid in (50, 51, 52)]},
+            dry_run=False,
+            batch_size=1,
+            create_error_on_call=2,
+        )
+
+        assert result.failed
+        assert "batch 2/3" in result.errors[0]
+        assert result.result["vlans"]["site:lab"]["created"] == [50]
+        assert nb.ipam.vlans.create.call_count == 2
+
+    @pytest.mark.parametrize("live_name", ["VLAN50", "vlan50", "VlAn50"])
+    def test_generated_live_name_preserves_netbox_name(self, live_name: str) -> None:
+        result, _, _, _ = self._run(
+            {"leaf-1": [self._live(name=live_name)]},
+            vlans=[self._vlan(50, name="User access")],
+        )
+
+        actions = result.result["vlans"]["site:lab"]
+        assert actions["update"] == {}
+        assert actions["in_sync"] == [50]
+
+    def test_descriptive_live_name_overrides_netbox_name(self) -> None:
+        result, _, _, _ = self._run(
+            {"leaf-1": [self._live(name="Live user access")]},
+            vlans=[self._vlan(50, name="NetBox user access")],
+        )
+
+        changes = result.result["vlans"]["site:lab"]["update"]["50"]
+        assert changes["name"] == {
+            "old_value": "NetBox user access",
+            "new_value": "Live user access",
+        }
+
+    def test_descriptive_live_name_wins_over_generated_and_netbox_names(self) -> None:
+        result, _, _, _ = self._run(
+            {
+                "leaf-1": [self._live(name="VLAN50")],
+                "leaf-2": [self._live(name="Live user access")],
+            },
+            vlans=[self._vlan(50, name="NetBox user access")],
+        )
+
+        changes = result.result["vlans"]["site:lab"]["update"]["50"]
+        assert changes["name"]["new_value"] == "Live user access"
 
     def test_membership_updates_are_additive(self) -> None:
         vlan, unmanaged = self._vlan(50), self._vlan(900)
@@ -497,7 +564,12 @@ class TestSyncVlanMemberships:
     def test_vlan_attributes_are_updated_in_one_bulk_request(self) -> None:
         groups = [TestVlanResolution._group(30), TestVlanResolution._group(40)]
         result, nb, _, _ = self._run(
-            {"leaf-1": [self._live(), self._live(102)]},
+            {
+                "leaf-1": [
+                    self._live(name="new-50"),
+                    self._live(102, name="new-102"),
+                ]
+            },
             vlans=[
                 self._vlan(50, group=groups[0], name="old-50"),
                 self._vlan(102, group=groups[1], name="old-102"),
@@ -512,7 +584,7 @@ class TestSyncVlanMemberships:
 
         assert not result.failed and not result.errors
         nb.ipam.vlans.update.assert_called_once_with(
-            [{"id": 1050, "name": "VLAN50"}, {"id": 1102, "name": "VLAN102"}]
+            [{"id": 1050, "name": "new-50"}, {"id": 1102, "name": "new-102"}]
         )
 
     def test_different_tagged_and_untagged_vids_share_one_interface_payload(

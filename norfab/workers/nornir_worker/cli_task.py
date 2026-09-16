@@ -423,6 +423,7 @@ class CliTask:
         else:
             with self.connections_lock:
                 result = nr.run(task=task_plugin, **kwargs)
+                self.watchdog.connections_update(nr, plugin)
         self.update_nornir_result(result, ret)
 
         ret.failed = result.failed  # failed is true if any of the hosts failed
@@ -432,7 +433,6 @@ class CliTask:
         for host_name, host_object in nr.inventory.hosts.items():
             _ = host_object.data.pop("__task__", None)
 
-        self.watchdog.connections_update(nr, plugin)
         self.watchdog.connections_clean()
 
         return ret

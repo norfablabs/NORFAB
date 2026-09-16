@@ -457,7 +457,7 @@ class TestSyncDeviceIP:
         result must carry the correct RESULT_KEYS per device."""
         self._cleanup(nfclient, self.SPINE_DEVICES)
 
-        ret = self._sync(nfclient, self.SPINE_DEVICES)
+        ret = self._sync(nfclient, self.SPINE_DEVICES, batch_size=1)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"

@@ -143,6 +143,14 @@ Set `process_deletions=True` to delete stale sessions. Only sessions for the exp
 
 `sync_bgp_peerings` is branch-aware. Pass `branch=<name>` to write all changes into a [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching) branch instead of main.
 
+## Bulk Request Batching
+
+List-based NetBox writes are sent as sequential requests containing at most
+`batch_size` objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.
+
 ## Examples
 
 === "CLI"

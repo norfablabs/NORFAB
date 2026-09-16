@@ -55,14 +55,14 @@ class TestSyncVrrp:
         device = nb.dcim.devices.get(name=cls.DEVICE)
         assert device is not None, (
             f"seeded NetBox device '{cls.DEVICE}' is missing; "
-            "run tests/netbox_data.py --sync-vrrp"
+            "run tests/netbox_data.py --vrrp"
         )
         group_ids = set()
         for interface_name in cls.ALL_INTERFACES:
             interface = nb.dcim.interfaces.get(device_id=device.id, name=interface_name)
             assert interface is not None, (
                 f"seeded NetBox interface '{cls.DEVICE}:{interface_name}' is missing; "
-                "run tests/netbox_data.py --sync-vrrp"
+                "run tests/netbox_data.py --vrrp"
             )
             for assignment in nb.ipam.fhrp_group_assignments.filter(
                 interface_id=interface.id
@@ -544,7 +544,7 @@ class TestSyncVrrpAristaPeers:
             )
             assert interface is not None, (
                 f"seeded NetBox interface '{device_name}:{self.INTERFACE}' is "
-                "missing; run tests/netbox_data.py --sync-vrrp"
+                "missing; run tests/netbox_data.py --vrrp"
             )
             for assignment in self.nb.ipam.fhrp_group_assignments.filter(
                 interface_id=interface.id

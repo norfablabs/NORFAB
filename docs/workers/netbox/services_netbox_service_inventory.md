@@ -59,8 +59,8 @@ instances:
 | `cache_use` | `True` | Controls whether Netbox query results are cached. Supports `True`, `False`, `refresh`, and `force`. |
 | `cache_ttl` | `31557600` | Cache entry TTL in seconds. Default is one year. |
 | `netbox_connect_timeout` | `10` | Netbox API connection timeout in seconds. |
-| `netbox_read_timeout` | `300` | Netbox API read timeout in seconds. |
-| `netbox_retries` | `3` | Number of retries for Netbox API requests made through `requests` sessions and `pynetbox` sessions. |
+| `netbox_read_timeout` | `300` | Netbox API response timeout in seconds. |
+| `netbox_retries` | `3` | Number of retries for retryable Netbox API requests made through `requests` and `pynetbox` sessions. POST requests are not retried automatically. |
 | `netbox_retry_backoff` | `0.5` | Retry backoff factor for Netbox API requests. |
 | `branch_create_timeout` | `120` | Maximum wait time in seconds for a Netbox branching plugin branch to become ready. |
 | `grapqhl_max_workers` | `4` | Maximum number of parallel workers used by paginated Netbox GraphQL queries. |

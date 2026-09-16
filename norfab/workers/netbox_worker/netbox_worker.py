@@ -62,6 +62,10 @@ SERVICE = "netbox"
 
 log = logging.getLogger(__name__)
 
+RETRYABLE_HTTP_METHODS = frozenset(
+    {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "PUT", "TRACE"}
+)
+
 
 class NetboxWorker(
     NFPWorker,
@@ -140,7 +144,7 @@ class NetboxWorker(
             "instances"
         ), f"{self.name} - inventory has no Netbox instances"
 
-        # extract parameters from imvemtory
+        # extract parameters from inventory
         self.netbox_connect_timeout = self.netbox_inventory.get(
             "netbox_connect_timeout", 10
         )
@@ -152,7 +156,7 @@ class NetboxWorker(
             status=self.netbox_inventory.get("netbox_retries", 3),
             backoff_factor=self.netbox_inventory.get("netbox_retry_backoff", 0.5),
             status_forcelist=(429, 500, 502, 503, 504),
-            allowed_methods=None,
+            allowed_methods=RETRYABLE_HTTP_METHODS,
         )
         self.netbox_http_session = requests.Session()
         self.netbox_http_session.mount(

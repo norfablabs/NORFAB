@@ -1076,6 +1076,7 @@ class NetboxBgpPeeringsTasks:
         self,
         job: Job,
         instance: Union[None, str] = None,
+        batch_size: int = 1000,
         # single-session mode
         name: Union[None, str] = None,
         device: Union[None, str] = None,
@@ -1567,17 +1568,27 @@ class NetboxBgpPeeringsTasks:
         # Bulk create (step 7)
         if payloads:
             job.event(f"creating {len(payloads)} BGP session(s)")
-            try:
-                nb.plugins.bgp.session.create(payloads)
-                result["created"].extend(p["name"] for p in payloads)
-                msg = f"created {len(payloads)} BGP session(s)"
+            total_batches = (len(payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(payloads), batch_size):
+                batch = payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating BGP session batch {batch_number}/{total_batches} ({len(batch)} session(s))"
                 job.event(msg)
-                log.info(f"{self.name} - {msg}")
-            except Exception as e:
-                msg = f"failed to create BGP sessions: {e}"
-                job.event(msg, severity="ERROR")
-                ret.errors.append(msg)
-                log.error(f"{self.name} - {msg}")
+                log.info(msg)
+                try:
+                    nb.plugins.bgp.session.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create BGP session batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    ret.result = result
+                    log.error(f"{self.name} - {msg}")
+                    return ret
+                result["created"].extend(payload["name"] for payload in batch)
+            msg = f"created {len(payloads)} BGP session(s)"
+            job.event(msg)
+            log.info(f"{self.name} - {msg}")
         else:
             job.event("no BGP sessions to create")
 
@@ -1602,6 +1613,7 @@ class NetboxBgpPeeringsTasks:
     def update_bgp_peering(
         self,
         job: Job,
+        batch_size: int = 1000,
         # single-session mode
         name: Union[None, str] = None,
         description: Union[None, str] = None,
@@ -1833,23 +1845,33 @@ class NetboxBgpPeeringsTasks:
                     vrf_custom_field=vrf_custom_field,
                 )
             )
-            update_payloads.append(payload)
+            update_payloads.append((sname, payload))
         job.event(f"prepared {len(update_payloads)} BGP session update payload(s)")
 
-        # Bulk update in a single pynetbox call
+        # Bulk update
         if update_payloads:
             job.event(f"updating {len(update_payloads)} BGP session(s)")
-            try:
-                nb.plugins.bgp.session.update(update_payloads)
-                result["updated"].extend(changed_snames)
-                msg = f"updated {len(update_payloads)} BGP session(s)"
+            total_batches = (len(update_payloads) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_payloads), batch_size):
+                batch = update_payloads[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating BGP session batch {batch_number}/{total_batches} ({len(batch)} session(s))"
                 job.event(msg)
-                log.info(f"{self.name} - {msg}")
-            except Exception as e:
-                msg = f"failed to bulk update BGP sessions: {e}"
-                job.event(msg, severity="ERROR")
-                ret.errors.append(msg)
-                log.error(f"{self.name} - {msg}")
+                log.info(msg)
+                try:
+                    nb.plugins.bgp.session.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update BGP session batch {batch_number}/{total_batches}: {exc}"
+                    job.event(msg, severity="ERROR")
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    ret.result = result
+                    log.error(f"{self.name} - {msg}")
+                    return ret
+                result["updated"].extend(name for name, _ in batch)
+            msg = f"updated {len(update_payloads)} BGP session(s)"
+            job.event(msg)
+            log.info(f"{self.name} - {msg}")
         else:
             job.event("no BGP sessions to update")
 
@@ -1891,6 +1913,7 @@ class NetboxBgpPeeringsTasks:
         ignore_peer_ranges: Union[None, list] = None,
         vrf_custom_field: str = "vrf",
         preserve_description: Union[None, bool] = None,
+        batch_size: int = 1000,
         **kwargs: object,
     ) -> Result:
         """
@@ -2290,6 +2313,7 @@ class NetboxBgpPeeringsTasks:
             }
             for device_name, actions in full_diff.items()
         }
+        ret.result = device_results
 
         # Build bulk_create list from full_diff — split pipe-separated policies to lists
         job.event("preparing BGP session create payloads")
@@ -2349,6 +2373,7 @@ class NetboxBgpPeeringsTasks:
                 create_reverse=False,
                 vrf_custom_field=vrf_custom_field,
                 lookup_cache=lookup_cache,
+                batch_size=batch_size,
             )
             ret.errors.extend(create_result.errors)
             created_names = create_result.result.get("created", [])
@@ -2356,6 +2381,9 @@ class NetboxBgpPeeringsTasks:
                 for sname in actions["create"]:
                     if sname in created_names:
                         device_results[device_name]["created"].append(sname)
+            if create_result.failed:
+                ret.failed = True
+                return ret
         else:
             job.event("no BGP sessions to create")
 
@@ -2370,6 +2398,7 @@ class NetboxBgpPeeringsTasks:
                 branch=branch,
                 vrf_custom_field=vrf_custom_field,
                 lookup_cache=lookup_cache,
+                batch_size=batch_size,
             )
             ret.errors.extend(update_result.errors)
             updated_names = set(update_result.result.get("updated", []))
@@ -2377,6 +2406,9 @@ class NetboxBgpPeeringsTasks:
                 for sname in actions["update"]:
                     if sname in updated_names:
                         device_results[device_name]["updated"].append(sname)
+            if update_result.failed:
+                ret.failed = True
+                return ret
         else:
             job.event("no BGP sessions to update")
 
@@ -2421,7 +2453,6 @@ class NetboxBgpPeeringsTasks:
         else:
             job.event("no BGP sessions to delete")
 
-        ret.result = device_results
         job.event("BGP peerings sync complete")
 
         return ret

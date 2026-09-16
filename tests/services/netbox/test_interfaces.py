@@ -2,6 +2,7 @@ import pprint
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from norfab.workers.netbox_worker.netbox_models import (
     GetInterfacesInput,
@@ -583,6 +584,17 @@ class TestSyncDeviceInterfaces:
     def test_sync_device_interfaces_flags_defaults_and_aliases(self):
         defaults = SyncDeviceInterfacesInput()
         assert defaults.update_type is True
+        assert defaults.batch_size == 1000
+        assert (
+            SyncDeviceInterfacesInput.model_validate({"batch-size": 1}).batch_size == 1
+        )
+        assert (
+            SyncDeviceInterfacesInput.model_validate({"batch-size": 10_000}).batch_size
+            == 10_000
+        )
+        for value in (0, -1, True, 1.5, "2"):
+            with pytest.raises(ValidationError):
+                SyncDeviceInterfacesInput.model_validate({"batch-size": value})
 
     def test_sync_device_interfaces_model_accepts_interface_mapping_url(self) -> None:
         model = SyncDeviceInterfacesInput.model_validate(
@@ -872,6 +884,32 @@ class TestSyncDeviceInterfaces:
             nb_lb11.type.value == "virtual"
         ), f"Loopback11 type mismatch: got {nb_lb11.type.value!r}"
 
+    def test_sync_device_interfaces_create_in_single_item_batches(self, nfclient):
+        """One-item batches account for every interface and create dependencies."""
+        device = "fn-ceos-sp-1"
+        self._cleanup(nfclient, [device])
+
+        ret = self._sync(nfclient, [device], batch_size=1)
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            actions = res["result"][device]
+            accounted_for = set(
+                actions["created"] + actions["updated"] + actions["in_sync"]
+            )
+            assert self.TEST_SYNC_INTERFACES <= accounted_for
+            assert {"Port-Channel41", "Ethernet6", "Ethernet7", "Ethernet9.610"} <= set(
+                actions["created"]
+            )
+
+        for name in self.TEST_SYNC_INTERFACES:
+            assert self._get_nb_intf(nfclient, device, name) is not None, name
+        assert self._get_nb_intf(nfclient, device, "Ethernet9.610").parent.name == (
+            "Ethernet9"
+        )
+        assert self._get_nb_intf(nfclient, device, "Ethernet6").lag.name == (
+            "Port-Channel41"
+        )
+
     def test_sync_device_interfaces_fills_missing_values_from_status(self, nfclient):
         """Use FakeNOS operational output to fill values absent from config."""
         device = "fn-ceos-sp-1"
@@ -976,7 +1014,7 @@ class TestSyncDeviceInterfaces:
         assert (
             nb_lag.type.value == "lag"
         ), f"Port-Channel41 type mismatch: got {nb_lag.type.value!r}"
-        assert nb_lag.mode is None
+        assert nb_lag.mode.value == "tagged"
         assert list(nb_lag.tagged_vlans) == []
         # Validate LAG member Ethernet6
         nb_eth6 = self._get_nb_intf(nfclient, "fn-ceos-sp-1", "Ethernet6")
@@ -1015,6 +1053,41 @@ class TestSyncDeviceInterfaces:
     # ------------------------------------------------------------------ #
     # Update scenarios                                                   #
     # ------------------------------------------------------------------ #
+
+    def test_sync_device_interfaces_updates_mode_without_vlans(
+        self, nfclient: Any
+    ) -> None:
+        """Reconcile live mode without managing interface VLAN assignments."""
+        device = "fn-ceos-sp-1"
+        interface = "Ethernet8"
+        self._cleanup(nfclient, [device])
+
+        setup = self._sync(nfclient, [device], filter_by_name=interface)
+        for worker, res in setup.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            assert interface in res["result"][device]["created"]
+
+        nb_interface = self._get_nb_intf(nfclient, device, interface)
+        assert nb_interface.mode.value == "access"
+        assert nb_interface.untagged_vlan is None
+        assert list(nb_interface.tagged_vlans) == []
+
+        self._patch_intf(nfclient, nb_interface.id, {"mode": "tagged"})
+        ret = self._sync(nfclient, [device], filter_by_name=interface)
+        for worker, res in ret.items():
+            assert not res["failed"], f"{worker} failed - {res}"
+            changes = res["diff"][device]["update"][interface]
+            assert changes["mode"] == {
+                "old_value": "tagged",
+                "new_value": "access",
+            }
+            assert "untagged_vlan" not in changes
+            assert "tagged_vlans" not in changes
+
+        nb_interface = self._get_nb_intf(nfclient, device, interface)
+        assert nb_interface.mode.value == "access"
+        assert nb_interface.untagged_vlan is None
+        assert list(nb_interface.tagged_vlans) == []
 
     def test_sync_device_interfaces_updates_other_to_virtual_by_default(self, nfclient):
         """The default policy repairs a logical interface stored as ``other``."""
@@ -1109,11 +1182,12 @@ class TestSyncDeviceInterfaces:
                 "Loopback10" in res["result"]["fn-ceos-sp-2"]["created"]
             ), f"{worker} Loopback10 not created during setup"
 
-        # Corrupt description
-        intf_id = self._get_intf_id(nfclient, "fn-ceos-sp-2", "Loopback10")
-        self._patch_intf(nfclient, intf_id, {"description": "corrupted-by-test"})
+        # Corrupt two descriptions to exercise multiple one-item update batches.
+        for name in ("Loopback10", "Loopback11"):
+            intf_id = self._get_intf_id(nfclient, "fn-ceos-sp-2", name)
+            self._patch_intf(nfclient, intf_id, {"description": "corrupted-by-test"})
 
-        ret = self._sync(nfclient, ["fn-ceos-sp-2"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-2"], batch_size=1)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
@@ -1121,6 +1195,7 @@ class TestSyncDeviceInterfaces:
             assert (
                 "Loopback10" in device_data["updated"]
             ), f"{worker} Loopback10 not in updated list after description corruption"
+            assert "Loopback11" in device_data["updated"]
             assert "fn-ceos-sp-2" in res["diff"], f"{worker} diff not populated"
             assert (
                 "Loopback10" in res["diff"]["fn-ceos-sp-2"]["update"]
@@ -1135,42 +1210,45 @@ class TestSyncDeviceInterfaces:
         assert (
             nb_lb10.description == "TEST_SYNC_LOOPBACK_IPV4"
         ), f"Loopback10 description not restored in NetBox: got {nb_lb10.description!r}"
+        assert self._get_nb_intf(
+            nfclient, "fn-ceos-sp-2", "Loopback11"
+        ).description == ("TEST_SYNC_LOOPBACK_IPV6")
 
     # ------------------------------------------------------------------ #
     # Delete scenarios                                                     #
     # ------------------------------------------------------------------ #
 
     def test_sync_device_interfaces_delete(self, nfclient):
-        """Create a stray non-TEST_SYNC interface on spine-1 then verify
-        process_deletions=True removes it."""
-        stray = "TestSyncStrayInterface"
-        delete_interfaces(nfclient, "fn-ceos-sp-1", stray)
+        """Delete two stray interfaces using one-item bulk requests."""
+        strays = ("TestSyncStrayInterface", "TestSyncStrayInterface2")
+        for stray in strays:
+            delete_interfaces(nfclient, "fn-ceos-sp-1", stray)
 
-        nfclient.run_job(
-            "netbox",
-            "create_device_interfaces",
-            workers="any",
-            kwargs={
-                "devices": ["fn-ceos-sp-1"],
-                "interface_name": stray,
-                "interface_type": "virtual",
-            },
+            nfclient.run_job(
+                "netbox",
+                "create_device_interfaces",
+                workers="any",
+                kwargs={
+                    "devices": ["fn-ceos-sp-1"],
+                    "interface_name": stray,
+                    "interface_type": "virtual",
+                },
+            )
+
+        ret = self._sync(
+            nfclient, ["fn-ceos-sp-1"], process_deletions=True, batch_size=1
         )
-
-        ret = self._sync(nfclient, ["fn-ceos-sp-1"], process_deletions=True)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
             device_data = res["result"]["fn-ceos-sp-1"]
-            assert (
-                stray in device_data["deleted"]
-            ), f"{worker} stray interface {stray!r} not in deleted list"
+            for stray in strays:
+                assert (
+                    stray in device_data["deleted"]
+                ), f"{worker} did not delete {stray}"
 
-        # Validate the stray interface is gone from NetBox
-        nb_stray = self._get_nb_intf(nfclient, "fn-ceos-sp-1", stray)
-        assert (
-            nb_stray is None
-        ), f"Stray interface {stray!r} still exists in NetBox after process_deletions sync"
+        for stray in strays:
+            assert self._get_nb_intf(nfclient, "fn-ceos-sp-1", stray) is None
 
     def test_sync_device_interfaces_no_deletions_by_default(self, nfclient):
         """A stray interface in NetBox must NOT be deleted when process_deletions is

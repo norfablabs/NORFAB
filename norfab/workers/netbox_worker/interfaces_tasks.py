@@ -144,6 +144,7 @@ def _build_interface_payload(
             "speed",
             "duplex",
             "description",
+            "mode",
         )
         if k in changed_fields
     }
@@ -813,6 +814,7 @@ class NetboxInterfacesTasks:
         filter_by_description: Union[None, str] = None,
         update_type: bool = True,
         preserve_description: Union[None, bool] = None,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """
@@ -899,6 +901,8 @@ class NetboxInterfacesTasks:
                 ``None`` preserves NetBox text when the live description is empty,
                 ``True`` always preserves NetBox text, and ``False`` always uses
                 live text.
+            batch_size (int, optional): Maximum interfaces in each NetBox bulk
+                create, update, or delete request. Defaults to 1000.
             update_type (bool): Safely update existing interface types. Updates are
                 allowed from ``other`` to ``virtual``, ``bridge``, or ``lag``, and
                 between those logical types. Specific physical types are protected,
@@ -1039,6 +1043,7 @@ class NetboxInterfacesTasks:
                         else data.get("duplex")
                     ),
                     "description": str(data.get("description") or ""),
+                    "mode": (data.get("mode") or {}).get("value"),
                 }
         nb_interface_count = sum(len(v) for v in normalised_nb_all.values())
         job.event(
@@ -1139,6 +1144,7 @@ class NetboxInterfacesTasks:
                         "speed": data.get("speed"),
                         "duplex": data.get("duplex"),
                         "description": str(data.get("description") or ""),
+                        "mode": data.get("mode"),
                     }
                     interface = normalised_live_all[device_name][intf_name]
                     status_mtu = status.get("mtu")
@@ -1277,23 +1283,33 @@ class NetboxInterfacesTasks:
         )
         if bulk_create_lag_interfaces:
             job.event("creating LAG interfaces")
-            try:
-                created_interfaces = nb.dcim.interfaces.create(
-                    bulk_create_lag_interfaces
-                )
-                job.event(f"created {len(bulk_create_lag_interfaces)} LAG interface(s)")
+            total_batches = (
+                len(bulk_create_lag_interfaces) + batch_size - 1
+            ) // batch_size
+            for batch_start in range(0, len(bulk_create_lag_interfaces), batch_size):
+                batch = bulk_create_lag_interfaces[
+                    batch_start : batch_start + batch_size
+                ]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating LAG interface batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    created_interfaces = nb.dcim.interfaces.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create LAG interface batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
                 for interface in created_interfaces:
                     device_name = interface.device.name
                     object_cache[("interface", device_name, interface.name)] = (
                         interface.id
                     )
                     ret.result[device_name]["created"].append(interface.name)
-            except Exception as e:
-                msg = f"failed to bulk create LAG interfaces: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
-                return ret
+            job.event(f"created {len(bulk_create_lag_interfaces)} LAG interface(s)")
         else:
             job.event("no LAG interfaces to create")
 
@@ -1319,25 +1335,35 @@ class NetboxInterfacesTasks:
         )
         if bulk_create_parent_interfaces:
             job.event("creating non-child/main interfaces")
-            try:
-                created_interfaces = nb.dcim.interfaces.create(
-                    bulk_create_parent_interfaces
-                )
-                job.event(
-                    f"created {len(bulk_create_parent_interfaces)} non-child/main interface(s)"
-                )
+            total_batches = (
+                len(bulk_create_parent_interfaces) + batch_size - 1
+            ) // batch_size
+            for batch_start in range(0, len(bulk_create_parent_interfaces), batch_size):
+                batch = bulk_create_parent_interfaces[
+                    batch_start : batch_start + batch_size
+                ]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating non-child/main interface batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    created_interfaces = nb.dcim.interfaces.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create non-child/main interface batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
                 for interface in created_interfaces:
                     device_name = interface.device.name
                     object_cache[("interface", device_name, interface.name)] = (
                         interface.id
                     )
                     ret.result[device_name]["created"].append(interface.name)
-            except Exception as e:
-                msg = f"failed to bulk create non-child/main interfaces: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
-                return ret
+            job.event(
+                f"created {len(bulk_create_parent_interfaces)} non-child/main interface(s)"
+            )
         else:
             job.event("no non-child/main interfaces to create")
 
@@ -1363,25 +1389,33 @@ class NetboxInterfacesTasks:
         )
         if bulk_create_child_interfaces:
             job.event("creating child interfaces")
-            try:
-                created_interfaces = nb.dcim.interfaces.create(
-                    bulk_create_child_interfaces
-                )
-                job.event(
-                    f"created {len(bulk_create_child_interfaces)} child interface(s)"
-                )
+            total_batches = (
+                len(bulk_create_child_interfaces) + batch_size - 1
+            ) // batch_size
+            for batch_start in range(0, len(bulk_create_child_interfaces), batch_size):
+                batch = bulk_create_child_interfaces[
+                    batch_start : batch_start + batch_size
+                ]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating child interface batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    created_interfaces = nb.dcim.interfaces.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create child interface batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
                 for interface in created_interfaces:
                     device_name = interface.device.name
                     object_cache[("interface", device_name, interface.name)] = (
                         interface.id
                     )
                     ret.result[device_name]["created"].append(interface.name)
-            except Exception as e:
-                msg = f"failed to bulk create child interfaces: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
-                return ret
+            job.event(f"created {len(bulk_create_child_interfaces)} child interface(s)")
         else:
             job.event("no child interfaces to create")
 
@@ -1403,18 +1437,26 @@ class NetboxInterfacesTasks:
         job.event(f"prepared {len(bulk_update_interfaces)} interface update payload(s)")
         if bulk_update_interfaces:
             job.event(f"updating {len(bulk_update_interfaces)} interface(s)")
-            try:
-                nb.dcim.interfaces.update(list(bulk_update_interfaces.values()))
-                job.event(f"updated {len(bulk_update_interfaces)} interface(s)")
-                for k in bulk_update_interfaces.keys():
-                    device_name, intf_name = k
+            update_items = list(bulk_update_interfaces.items())
+            total_batches = (len(update_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(update_items), batch_size):
+                batch = update_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating interface batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.dcim.interfaces.update([payload for _, payload in batch])
+                except Exception as exc:
+                    msg = f"failed to update interface batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                for (device_name, intf_name), _ in batch:
                     ret.result[device_name]["updated"].append(intf_name)
-            except Exception as e:
-                msg = f"failed to bulk update interfaces: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
-                return ret
+            job.event(f"updated {len(bulk_update_interfaces)} interface(s)")
         else:
             job.event("no interfaces to update")
 
@@ -1442,18 +1484,28 @@ class NetboxInterfacesTasks:
             )
         if bulk_delete_interfaces:
             job.event(f"deleting {len(bulk_delete_interfaces)} interface(s)")
-            try:
-                nb.dcim.interfaces.delete(list(bulk_delete_interfaces.keys()))
-                job.event(f"deleted {len(bulk_delete_interfaces)} interface(s)")
-                for intf_data in bulk_delete_interfaces.values():
+            delete_items = list(bulk_delete_interfaces.items())
+            total_batches = (len(delete_items) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(delete_items), batch_size):
+                batch = delete_items[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"deleting interface batch {batch_number}/{total_batches} ({len(batch)} interface(s))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.dcim.interfaces.delete([intf_id for intf_id, _ in batch])
+                except Exception as exc:
+                    msg = f"failed to delete interface batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                for _, intf_data in batch:
                     device_name = intf_data["device"]
                     intf_name = intf_data["interface"]
                     ret.result[device_name]["deleted"].append(intf_name)
-            except Exception as exc:
-                msg = f"failed to bulk delete interfaces: {exc}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
+            job.event(f"deleted {len(bulk_delete_interfaces)} interface(s)")
         elif process_deletions:
             job.event("no interfaces to delete")
 
@@ -1486,6 +1538,7 @@ class NetboxInterfacesTasks:
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         filter_by_mac: Union[None, str] = None,
+        batch_size: int = 1000,
         **kwargs: Any,
     ) -> Result:
         """
@@ -1806,32 +1859,50 @@ class NetboxInterfacesTasks:
 
         if bulk_create_mac:
             job.event(f"creating {len(bulk_create_mac)} MAC address(es)")
-            try:
-                nb.dcim.mac_addresses.create(bulk_create_mac)
-                job.event(f"created {len(bulk_create_mac)} MAC addresses")
-                for m in bulk_create_mac:
-                    device_name = all_mac_live[m["mac_address"]]["device"]
-                    device_results[device_name]["created"].append(m["mac_address"])
-            except Exception as e:
-                msg = f"failed to bulk create MAC addresses: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
+            total_batches = (len(bulk_create_mac) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(bulk_create_mac), batch_size):
+                batch = bulk_create_mac[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"creating MAC address batch {batch_number}/{total_batches} ({len(batch)} address(es))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.dcim.mac_addresses.create(batch)
+                except Exception as exc:
+                    msg = f"failed to create MAC address batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                for item in batch:
+                    device_name = all_mac_live[item["mac_address"]]["device"]
+                    device_results[device_name]["created"].append(item["mac_address"])
+            job.event(f"created {len(bulk_create_mac)} MAC addresses")
         else:
             job.event("no MAC addresses to create")
         if bulk_update_mac:
             job.event(f"updating {len(bulk_update_mac)} MAC address(es)")
-            try:
-                nb.dcim.mac_addresses.update(bulk_update_mac)
-                job.event(f"updated {len(bulk_update_mac)} MAC addresses")
-                for m in bulk_update_mac:
-                    device_name = all_mac_live[m["mac_address"]]["device"]
-                    device_results[device_name]["updated"].append(m["mac_address"])
-            except Exception as e:
-                msg = f"failed to bulk update MAC addresses: {e}"
-                ret.errors.append(msg)
-                log.error(msg)
-                job.event(msg, severity="ERROR")
+            total_batches = (len(bulk_update_mac) + batch_size - 1) // batch_size
+            for batch_start in range(0, len(bulk_update_mac), batch_size):
+                batch = bulk_update_mac[batch_start : batch_start + batch_size]
+                batch_number = batch_start // batch_size + 1
+                msg = f"updating MAC address batch {batch_number}/{total_batches} ({len(batch)} address(es))"
+                job.event(msg)
+                log.info(msg)
+                try:
+                    nb.dcim.mac_addresses.update(batch)
+                except Exception as exc:
+                    msg = f"failed to update MAC address batch {batch_number}/{total_batches}: {exc}"
+                    ret.errors.append(msg)
+                    ret.failed = True
+                    log.error(msg)
+                    job.event(msg, severity="ERROR")
+                    return ret
+                for item in batch:
+                    device_name = all_mac_live[item["mac_address"]]["device"]
+                    device_results[device_name]["updated"].append(item["mac_address"])
+            job.event(f"updated {len(bulk_update_mac)} MAC addresses")
         else:
             job.event("no MAC addresses to update")
 

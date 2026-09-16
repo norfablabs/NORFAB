@@ -312,6 +312,14 @@ The task obtains its NetBox client with the requested branch. Reads and writes
 therefore remain inside that branch. The NetBox Branching plugin must be
 installed and configured for branch use.
 
+## Bulk Request Batching
+
+List-based NetBox writes are sent as sequential requests containing at most
+`batch_size` objects. The default is 1000; set any integer greater than zero to
+tune the request size. Each batch emits matching progress event and log messages. If
+a request fails, the task stops and returns the results recorded for earlier
+successful batches.
+
 ## Examples
 
 === "CLI"

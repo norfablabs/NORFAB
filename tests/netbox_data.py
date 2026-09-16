@@ -4464,7 +4464,7 @@ def main():
     parser.add_argument("--bgp-asn", action="store_true")
     parser.add_argument("--bgp-peer-groups", action="store_true")
     parser.add_argument("--bgp-peerings", action="store_true")
-    parser.add_argument("--sync-vrrp", action="store_true")
+    parser.add_argument("--vrrp", action="store_true")
     args = parser.parse_args()
     try:
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN, threading=True)
@@ -4497,7 +4497,7 @@ def main():
         return
 
     if todo in ("1", "3"):
-        if args.sync_vrrp:
+        if args.vrrp:
             delete_sync_vrrp_data()
         if args.bgp_peerings:
             delete_bgp_peerings()
@@ -4645,7 +4645,7 @@ def main():
             create_bgp_peer_groups()
         if args.bgp_peerings:
             create_bgp_peerings()
-        if args.sync_vrrp:
+        if args.vrrp:
             create_sync_vrrp_data()
 
 
