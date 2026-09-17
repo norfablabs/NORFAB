@@ -38,7 +38,7 @@ DEFAULT_IGNORE_RANGES = [
 ]
 
 
-def resolve_ip_role(ip: str, intf_name: str, anycast_nets: list):
+def resolve_ip_role(ip: str, intf_name: str, anycast_nets: list) -> Union[None, str]:
     # check if IP is part of anycast ranges
     if anycast_nets:
         ip_addr = ipaddress.ip_interface(str(ip)).ip
@@ -60,7 +60,7 @@ def _ip_payload(ip_data: dict, ignore_vrf: bool) -> dict:
 
 
 def collect_live_interface_ip_data(
-    client,
+    client: Any,
     job: Job,
     ret: Result,
     devices: list,
@@ -732,6 +732,9 @@ class NetboxIpTasks:
 
         1. When overlapping IP discovered in Netbox and it is part of anycast range,
             existing IP role update to `anycast`
+        2. Parsed TTP IP roles are synchronized to NetBox. VRRP addresses are
+            created or reused without an interface assignment so that `sync_vrrp`
+            can associate them with an FHRP group.
 
         Args:
             job: NorFab Job object containing relevant metadata.
@@ -905,9 +908,11 @@ class NetboxIpTasks:
             for intf_name, intf_data in interfaces.items():
                 if intf_name not in nb_raw:
                     continue
-                for ip in (intf_data.get("ipv4_addresses") or []) + (
+                for ip_data in (intf_data.get("ipv4_addresses") or []) + (
                     intf_data.get("ipv6_addresses") or []
                 ):
+                    ip = ip_data["ip"]
+                    parsed_ip_role = ip_data.get("ip_address_role") or None
                     host_address = ipaddress.ip_interface(str(ip)).ip
                     if filter_prefix_net and host_address not in filter_prefix_net:
                         continue
@@ -922,17 +927,29 @@ class NetboxIpTasks:
                         if ignore_vrf
                         else resolve_vrf(intf_data["vrf"], nb, job, ret, self.name)
                     )
-                    all_ip_live.append(
-                        {
-                            "device": device_name,
-                            "interface": intf_name,
-                            "address": ip,
-                            "vrf": vrf,
-                            "role": resolve_ip_role(ip, intf_name, anycast_nets),
-                            "assigned_object_type": "dcim.interface",
-                            "assigned_object_id": nb_raw[intf_name]["id"],
-                        }
-                    )
+                    resolved_ip_role = resolve_ip_role(ip, intf_name, anycast_nets)
+                    # Preserve explicit roles parsed from the device, while anycast
+                    # detection remains authoritative for configured anycast ranges.
+                    if parsed_ip_role and resolved_ip_role != "anycast":
+                        resolved_ip_role = parsed_ip_role
+                    ip_live = {
+                        "device": device_name,
+                        "interface": intf_name,
+                        "address": ip,
+                        "vrf": vrf,
+                        "role": resolved_ip_role,
+                        # VRRP IPs are created unassigned; sync_vrrp associates them
+                        # with the corresponding NetBox FHRP group.
+                        "assigned_object_type": (
+                            None if resolved_ip_role == "vrrp" else "dcim.interface"
+                        ),
+                        "assigned_object_id": (
+                            None
+                            if resolved_ip_role == "vrrp"
+                            else nb_raw[intf_name]["id"]
+                        ),
+                    }
+                    all_ip_live.append(ip_live)
 
         if not all_ip_live:
             log.info(
@@ -950,21 +967,30 @@ class NetboxIpTasks:
                 "address": ip.address,
                 "vrf": ip.vrf.id if ip.vrf else None,
                 "role": str(ip.role).lower(),
-                "assigned_object_type": (
-                    "dcim.interface" if ip.assigned_object else None
-                ),
+                "assigned_object_type": ip.assigned_object_type,
                 "assigned_object_id": (
                     ip.assigned_object.id if ip.assigned_object else None
                 ),
                 "device": (
-                    ip.assigned_object.device.name if ip.assigned_object else None
+                    ip.assigned_object.device.name
+                    if ip.assigned_object
+                    and ip.assigned_object_type == "dcim.interface"
+                    else None
                 ),
-                "interface": ip.assigned_object.name if ip.assigned_object else None,
+                "interface": (
+                    ip.assigned_object.name
+                    if ip.assigned_object
+                    and ip.assigned_object_type == "dcim.interface"
+                    else None
+                ),
             }
             for ip in self.bulk_filter(
                 endpoint=nb.ipam.ip_addresses,
                 address=[i["address"].split("/")[0] for i in all_ip_live],
-                fields="id,address,vrf,role,assigned_object",
+                fields=(
+                    "id,address,vrf,role,assigned_object,"
+                    "assigned_object_type,assigned_object_id"
+                ),
             )
         ]
         job.event(f"retrieved {len(nb_ips)} matching IP address object(s) from NetBox")
@@ -1034,6 +1060,15 @@ class NetboxIpTasks:
                         nb_ip = candidate_nb_ip
                         break
                 if nb_ip:
+                    if (
+                        ip_live["assigned_object_id"] is None
+                        and nb_ip["role"] == ip_live["role"]
+                        and (ignore_vrf or nb_ip["vrf"] == ip_live["vrf"])
+                    ):
+                        device_results[device_name]["in_sync"].append(
+                            ip_live["address"]
+                        )
+                        continue
                     payload = _ip_payload(ip_live, ignore_vrf)
                     payload["id"] = nb_ip["id"]
                     bulk_update_ip[key] = payload
@@ -1053,6 +1088,17 @@ class NetboxIpTasks:
                 for nb_ip in matching_nb_ips:
                     # existing NB IP already assigned to an interface
                     if nb_ip["assigned_object_id"]:
+                        # sync_vrrp owns the FHRP assignment, so IP sync must not
+                        # move an existing VRRP address back onto an interface.
+                        if (
+                            ip_live["role"] == "vrrp"
+                            and nb_ip["role"] == "vrrp"
+                            and nb_ip["assigned_object_type"] == "ipam.fhrpgroup"
+                        ):
+                            device_results[device_name]["in_sync"].append(
+                                ip_live["address"]
+                            )
+                            break
                         # if existing Netbox IP role is anycast - override live IP role to anycast too
                         if nb_ip["role"] == "anycast":
                             msg = f"Found existing Netbox IP with 'anycast' role {nb_ip['address']}, assigning anycast role to live IP"
@@ -1110,6 +1156,16 @@ class NetboxIpTasks:
                 },
             )
 
+        # Multiple VRRP peers report the same virtual IP. Create it once and leave
+        # peer-to-group association to sync_vrrp.
+        vrrp_address_seen = set()
+        for key, ip_data in list(bulk_create_ip.items()):
+            addr = str(ipaddress.ip_interface(key[2]).ip)
+            if ip_data.get("role") == "vrrp":
+                if addr in vrrp_address_seen:
+                    bulk_create_ip.pop(key)
+                else:
+                    vrrp_address_seen.add(addr)
         # check that update and create payloads have no non-anycast duplicate IPs
         # Netbox has a bug allowing to create duplicate IPs in single create request
         job.event("checking IP address payloads for duplicate non-anycast addresses")
@@ -1393,9 +1449,10 @@ class NetboxIpTasks:
                     vrf_name = None
                 elif vrf_name and vrf_name.lower() in ["global", "default"]:
                     vrf_name = None
-                for address in (interface_data.get("ipv4_addresses") or []) + (
+                for address_data in (interface_data.get("ipv4_addresses") or []) + (
                     interface_data.get("ipv6_addresses") or []
                 ):
+                    address = address_data["ip"]
                     prefix_net = ipaddress.ip_interface(str(address)).network
                     if any(
                         prefix_net.version == ignore_net.version

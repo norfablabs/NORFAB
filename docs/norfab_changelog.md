@@ -4,6 +4,7 @@
 
 1. Fixed NetBox anycast IP synchronization to reuse an unassigned IP record only once per sync, creating separate records for later device assignments within same sync.
 2. Fixed NetBox VLAN, VRF, and interface synchronization to treat empty downloaded VLAN or interface maps as no mapping rules instead of failing Pydantic validation.
+3. Updated NetBox IP and prefix synchronization for dictionary-shaped TTP interface addresses, including parsed IP role reconciliation and unassigned VRRP address creation for later FHRP-group synchronization.
 
 ---
 

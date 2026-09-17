@@ -47,4 +47,4 @@ hosts:
     port: 6206
     platform: juniper_junos
     nos:
-      plugin: fn-junos-1
+      plugin: fn-junos-2

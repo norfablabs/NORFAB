@@ -44,6 +44,11 @@ commands:
       set policy-options community NOEXPORT members no-export
     prompt: 'nornir@{base_prompt}>'
     help: targeted BGP community sync test data
+  'show configuration | display set | match vrrp':
+    output: |
+      set interfaces ge-0/0/46 unit 0 family inet address 198.51.100.2/24 vrrp-group 10 virtual-address 198.51.100.1
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted VRRP sync test data
   'show configuration interfaces | display set':
     output: |
       set interfaces ge-0/0/12 description "description 1"
@@ -56,8 +61,19 @@ commands:
       set interfaces ge-0/0/45 speed 1g
       set interfaces ge-0/0/45 unit 0 family ethernet-switching interface-mode access
       set interfaces ge-0/0/45 unit 0 family ethernet-switching vlan members VLANNAME3
+
+      set interfaces ge-0/0/46 unit 0 description TEST_SYNC_VRRP_IPV4
+      set interfaces ge-0/0/46 unit 0 family inet address 198.51.100.2/24 vrrp-group 10 virtual-address 198.51.100.1
     prompt: 'nornir@{base_prompt}>'
     help: targeted interface VLAN-name sync test data
+  'show configuration routing-instances | display set | match interface':
+    output: ''
+    prompt: 'nornir@{base_prompt}>'
+    help: no routing-instance interface assignments in targeted sync test data
+  'show interfaces':
+    output: ''
+    prompt: 'nornir@{base_prompt}>'
+    help: no operational interface overrides in targeted sync test data
   exit:
     output: true
     prompt: 'nornir@{base_prompt}>'

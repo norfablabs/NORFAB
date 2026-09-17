@@ -24,11 +24,22 @@ NetBox candidates are searched by host address without using the prefix length.
 When several records have the same address, interface assignment takes priority
 over VRF and unassigned-record fallback matching.
 
-Roles are assigned automatically:
+Roles are synchronized from the normalized TTP interface data. The
+`ip_address_role` value is written to NetBox when present, including roles such
+as `secondary`, `anycast`, and `vrrp`. The task also applies these fallbacks:
 
 - Interfaces whose name starts with `loopback` or `lo` → role `loopback`
 - Addresses that fall within any configured `anycast_ranges` prefix → role `anycast`
 - All other addresses → no role (standard unicast)
+
+Configured `anycast_ranges` take precedence over the parsed role. A parsed role
+takes precedence over loopback-name inference.
+
+Addresses with the parsed `vrrp` role are created or reused without an
+interface assignment. The [`sync_vrrp`](services_netbox_service_tasks_sync_vrrp.md)
+task assigns those addresses to the appropriate NetBox FHRP group. If the
+address is already assigned to an FHRP group, IP synchronization leaves it
+unchanged.
 
 ![Netbox Sync Device Interfaces](../../images/Netbox_Service_Sync_Interfaces.jpg)
 

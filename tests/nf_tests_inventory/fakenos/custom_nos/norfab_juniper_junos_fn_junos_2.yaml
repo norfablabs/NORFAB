@@ -1,0 +1,35 @@
+name: fn-junos-2
+initial_prompt: 'nornir@{base_prompt}>'
+
+commands:
+  set cli screen-length 0:
+    output: Screen length set to 0
+    prompt: 'nornir@{base_prompt}>'
+  set cli screen-width 511:
+    output: Screen width set to 511
+    prompt: 'nornir@{base_prompt}>'
+  set cli complete-on-space off:
+    output: Disabling complete-on-space
+    prompt: 'nornir@{base_prompt}>'
+  'show configuration | display set | match vrrp':
+    output: |
+      set interfaces ge-0/0/46 unit 0 family inet address 198.51.100.3/24 vrrp-group 10 virtual-address 198.51.100.1
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted VRRP peer sync test data
+  'show configuration interfaces | display set':
+    output: |
+      set interfaces ge-0/0/46 unit 0 description TEST_SYNC_VRRP_IPV4
+      set interfaces ge-0/0/46 unit 0 family inet address 198.51.100.3/24 vrrp-group 10 virtual-address 198.51.100.1
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted interface VRRP peer sync test data
+  'show configuration routing-instances | display set | match interface':
+    output: ''
+    prompt: 'nornir@{base_prompt}>'
+    help: no routing-instance interface assignments in targeted sync test data
+  'show interfaces':
+    output: ''
+    prompt: 'nornir@{base_prompt}>'
+    help: no operational interface overrides in targeted sync test data
+  exit:
+    output: true
+    prompt: 'nornir@{base_prompt}>'
