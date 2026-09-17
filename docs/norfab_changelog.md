@@ -1,3 +1,12 @@
+# 0.23.5
+
+## BUGS
+
+1. Fixed NetBox anycast IP synchronization to reuse an unassigned IP record only once per sync, creating separate records for later device assignments within same sync.
+2. Fixed NetBox VLAN, VRF, and interface synchronization to treat empty downloaded VLAN or interface maps as no mapping rules instead of failing Pydantic validation.
+
+---
+
 # 0.23.4
 
 ## BUGS

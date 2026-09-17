@@ -361,6 +361,16 @@ class TestSyncVrfs:
                 == self.CONTROL_PLANE_INTERFACES
             )
 
+    def test_empty_interface_map_from_nf_url(self, nfclient: Any) -> None:
+        response = self._sync(
+            nfclient,
+            [self.DEVICE_1],
+            dry_run=True,
+            interface_map="nf://netbox/interface_map_empty.yaml",
+        )
+
+        self._successful_results(response)
+
     def test_extends_route_targets_and_updates_description(self, nfclient: Any) -> None:
         existing_target = self.nb.ipam.route_targets.create(name="65000:999")
         self.nb.ipam.route_targets.create(name="65000:201")

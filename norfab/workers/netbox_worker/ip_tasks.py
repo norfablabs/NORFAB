@@ -1037,6 +1037,17 @@ class NetboxIpTasks:
                     payload = _ip_payload(ip_live, ignore_vrf)
                     payload["id"] = nb_ip["id"]
                     bulk_update_ip[key] = payload
+
+                    # Reflect the planned assignment in the local NetBox snapshot so
+                    # that another live interface cannot reuse the same unassigned
+                    # record before the bulk update is applied.
+                    nb_ip["assigned_object_type"] = ip_live["assigned_object_type"]
+                    nb_ip["assigned_object_id"] = ip_live["assigned_object_id"]
+                    nb_ip["device"] = device_name
+                    nb_ip["interface"] = intf_name
+                    nb_ip["role"] = ip_live["role"]
+                    if not ignore_vrf:
+                        nb_ip["vrf"] = ip_live["vrf"]
                     continue
 
                 for nb_ip in matching_nb_ips:

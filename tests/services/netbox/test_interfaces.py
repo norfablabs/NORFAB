@@ -1567,6 +1567,22 @@ class TestSyncDeviceInterfaces:
             assert res["failed"] is False, f"{worker} failed - {res}"
             assert res["errors"] == [], f"{worker} returned errors - {res}"
 
+    def test_sync_device_interfaces_empty_interface_map_from_nf_url(
+        self, nfclient: Any
+    ) -> None:
+        """Treat an empty downloaded interface map as no mapping rules."""
+        ret = self._sync(
+            nfclient,
+            ["fn-ceos-sp-1"],
+            dry_run=True,
+            interface_map="nf://netbox/interface_map_empty.yaml",
+            filter_by_description="TEST_SYNC_*",
+        )
+
+        for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker} failed - {res}"
+            assert res["errors"] == [], f"{worker} returned errors - {res}"
+
     def test_sync_device_interfaces_filter_by_description(self, nfclient):
         """Clean TEST_SYNC from spine-1 then run dry_run with filter_by_description='TEST_SYNC_*'.
         All known TEST_SYNC interfaces must appear in create (they were cleaned).

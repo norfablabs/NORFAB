@@ -920,7 +920,7 @@ class NetboxInterfacesTasks:
         devices = list(devices or [])
         if self.is_url(interface_map):
             interface_map = TypeAdapter(list[InterfaceMapRule]).validate_python(
-                yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True))
+                yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True)) or []
             )
         interface_map = [
             rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)

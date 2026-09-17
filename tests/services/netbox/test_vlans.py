@@ -1066,6 +1066,18 @@ class TestSyncVlans:
         for result in self._successful_results(response):
             assert self._group_scope(self.group_1) in result["result"]["vlans"]
 
+    @pytest.mark.parametrize("map_name", ["vlan_map", "interface_map"])
+    def test_empty_map_from_nf_url(self, nfclient: Any, map_name: str) -> None:
+        response = self._sync(
+            nfclient,
+            [self.DEVICE_1],
+            dry_run=True,
+            filter_by_vlan_ids=["110"],
+            **{map_name: "nf://netbox/interface_map_empty.yaml"},
+        )
+
+        self._successful_results(response)
+
     def test_explicit_vlan_ids_narrow_vlan_map_match(self, nfclient: Any) -> None:
         response = self._sync(
             nfclient,

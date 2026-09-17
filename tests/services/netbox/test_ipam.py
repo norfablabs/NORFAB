@@ -666,6 +666,49 @@ class TestSyncDeviceIP:
 
         self._cleanup(nfclient, self.ALL_DEVICES)
 
+    def test_sync_device_ip_anycast_reuses_unassigned_once(self, nfclient):
+        """An unassigned anycast record is reused by only one device per sync."""
+        devices = self.SPINE_DEVICES
+        self._cleanup(nfclient, devices)
+
+        pynb = get_pynetbox(nfclient)
+        unassigned_ip = pynb.ipam.ip_addresses.create(address=self.ANYCAST_IP)
+
+        ret = self._sync(
+            nfclient,
+            devices,
+            anycast_ranges=self.ANYCAST_RANGE,
+            batch_size=1,
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed - {res}"
+            updated = [
+                device
+                for device in devices
+                if self.ANYCAST_IP in res["result"][device]["updated"]
+            ]
+            created = [
+                device
+                for device in devices
+                if self.ANYCAST_IP in res["result"][device]["created"]
+            ]
+            assert len(updated) == 1, f"{worker} expected one reuse, got {updated}"
+            assert len(created) == len(devices) - 1, (
+                f"{worker} expected {len(devices) - 1} create(s), got {created}"
+            )
+
+        nb_anycast_ips = list(pynb.ipam.ip_addresses.filter(address=self.ANYCAST_IP))
+        assert len(nb_anycast_ips) == len(devices)
+        assert unassigned_ip.id in {ip.id for ip in nb_anycast_ips}
+        assert len({ip.id for ip in nb_anycast_ips}) == len(devices)
+        assert {
+            ip.assigned_object.device.name for ip in nb_anycast_ips
+        } == set(devices)
+        assert all(str(ip.role).lower() == "anycast" for ip in nb_anycast_ips)
+
+        self._cleanup(nfclient, devices)
+
     def test_sync_device_ip_anycast_ranges_nf_url(self, nfclient):
         """Sync anycast IPs using anycast_ranges from an nf:// YAML file."""
         self._cleanup(nfclient, self.ALL_DEVICES)

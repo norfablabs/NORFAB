@@ -363,11 +363,12 @@ class NetboxVlansTasks:
         try:
             if self.is_url(vlan_map):
                 vlan_map = TypeAdapter(list[VlanMapRule]).validate_python(
-                    yaml.safe_load(self.fetch_file(vlan_map, raise_on_fail=True))
+                    yaml.safe_load(self.fetch_file(vlan_map, raise_on_fail=True)) or []
                 )
             if self.is_url(interface_map):
                 interface_map = TypeAdapter(list[InterfaceMapRule]).validate_python(
                     yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True))
+                    or []
                 )
         except Exception as exc:
             message = f"failed to load VLAN sync mapping: {exc}"
