@@ -14,6 +14,7 @@ poetry run inv docker-tests-nornir
 poetry run inv docker-tests-netbox --parallel-runs=2
 poetry run inv docker-tests-all
 poetry run inv docker-tests-distributed
+poetry run inv docker-profile-idle
 ```
 
 Run `poetry run inv --help docker-tests-nornir` for test selector, marker,
@@ -177,6 +178,40 @@ fastapi-service-tests  -m fastapi
 filesharing-service-tests -m filesharing
 dummy-service-tests    -m dummy
 nfcli-tests            -m nfcli
+```
+
+Each marker-based runner sets `NORFAB_TEST_WORKERS` so the shared fixture starts
+only the workers used by that suite. Without this variable, the fixture retains
+its local-development behavior and starts the complete inventory topology.
+
+## Profile Idle NorFab Resources
+
+The `idle-norfab` service starts a broker and one worker for every service
+configured in the shared test inventory: FileSharing, NetBox, Nornir, Agent,
+FastAPI, DummyService, Workflow, FastMCP, and FakeNOS. It does not run pytest or
+submit jobs. The worker list is defined only in `compose.yaml`. The Invoke
+profiler samples Docker CPU, memory, and block I/O for ten minutes by default,
+excludes the first 30 seconds as warm-up, then reports whether the post-warm-up
+measurements are stable:
+
+```bash
+poetry run inv docker-profile-idle
+poetry run inv docker-profile-idle --duration=120 --interval=2
+```
+
+The default limits are 10% average CPU, 20% p95 CPU, 32 MiB memory growth, and
+10 MiB block-write growth. All limits are configurable; use
+`poetry run inv --help docker-profile-idle` for the complete option list. Add
+`--fail-unstable` when threshold violations should fail automation. Samples are
+written to `idle-norfab/__norfab__/artifacts/idle-profile.csv`, and the profiling
+container is removed after every run, including interrupted or failed runs.
+
+All test-runner containers export `NORFAB_INVENTORY_DIR` pointing at the mounted
+inventory directory. This allows an interactive client to be opened in a
+running container without repeating the inventory path:
+
+```bash
+nfcli -c
 ```
 
 The distributed services are not marker-based pytest runners. They start

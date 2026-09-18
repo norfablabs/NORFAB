@@ -252,14 +252,8 @@ class WorkerWatchDog(threading.Thread):
 
     def run(self) -> None:
         """Run watchdog checks until the worker exits."""
-        slept = 0.0
-        while not self.worker.exit_event.is_set():
-            if slept < self.watchdog_interval:
-                time.sleep(0.1)
-                slept += 0.1
-                continue
+        while not self.worker.exit_event.wait(self.watchdog_interval):
             self.check_ram()
             for task in self.watchdog_tasks:
                 task()
             self.runs += 1
-            slept = 0.0

@@ -80,6 +80,7 @@ from typing import Any, Dict, List
 import yaml
 from jinja2 import Environment
 
+from norfab.models.norfab_configuration_topology import TopologyConfig
 from norfab.utils.nflogging import make_logging_config as make_norfab_logging_config
 
 log = logging.getLogger(__name__)
@@ -406,6 +407,7 @@ class NorFabInventory:
         self.client = data.pop("client", {})
         self.workers = WorkersInventory(self.base_dir, data.pop("workers", {}))
         self.topology = data.pop("topology", {})
+        TopologyConfig.model_validate(self.topology)
         self.logging = self.make_logging_config(data.pop("logging", {}))
         self.hooks = make_hooks(self.base_dir, data.pop("hooks", {}))
         self.plugins = data.pop("plugins", {})

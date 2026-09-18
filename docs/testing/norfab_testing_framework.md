@@ -281,6 +281,27 @@ fastmcp-service-tests      -m fastmcp
 fastapi-service-tests      -m fastapi
 ```
 
+Docker runners can set `NORFAB_TEST_WORKERS` to a comma-separated worker
+allowlist. The shared `nfclient` fixture preserves any dependency metadata from
+the inventory topology while starting that subset. Each marker-based Docker
+runner uses this to avoid starting unrelated workers; local pytest runs still
+start the complete topology by default.
+
+An idle resource baseline is available with `poetry run inv
+docker-profile-idle`. It starts the dedicated `idle-norfab` Compose service
+with a broker and one worker for every service configured in the shared test
+inventory, samples Docker CPU, memory, and block I/O for ten minutes, and writes
+the measurements to
+`docker/norfab-docker-tests/idle-norfab/__norfab__/artifacts/idle-profile.csv`.
+The worker list is sourced only from the service's `compose.yaml` command.
+Duration, sample interval, warm-up, stability thresholds, and whether an
+unstable result fails the task are configurable; see
+`poetry run inv --help docker-profile-idle`.
+
+Every runner exports `NORFAB_INVENTORY_DIR` with the mounted inventory directory,
+so `nfcli -c` launched inside a running container resolves both the inventory
+file and its base directory automatically.
+
 Pass pytest selectors after the Compose service name to run narrower slices:
 
 ```bash

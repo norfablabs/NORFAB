@@ -1,4 +1,5 @@
 import builtins
+import os
 import sys
 import time
 import unittest
@@ -14,6 +15,30 @@ from norfab.clients.nfcli_shell.nfcli_shell_client import (
 from norfab.core.nfapi import NorFab
 
 
+def _get_test_workers(nf: NorFab) -> list | bool:
+    """Return the Docker-requested worker subset, preserving topology metadata."""
+    requested = {
+        name.strip()
+        for name in os.environ.get("NORFAB_TEST_WORKERS", "").split(",")
+        if name.strip()
+    }
+    if not requested:
+        return True
+
+    workers = []
+    selected = set()
+    for worker in nf.inventory.topology.get("workers", []):
+        worker_name = next(iter(worker)) if isinstance(worker, dict) else worker
+        if worker_name in requested:
+            workers.append(worker)
+            selected.add(worker_name)
+
+    # Built-in workers such as filesharing are added by NorFab during start-up
+    # and therefore are not necessarily present in the original topology.
+    workers.extend(sorted(requested - selected))
+    return workers
+
+
 @pytest.fixture(scope="module")
 def nfclient():
     """
@@ -21,7 +46,7 @@ def nfclient():
     once tests done destroys NorFab
     """
     nf = NorFab(inventory="./nf_tests_inventory/inventory.yaml")
-    nf.start()
+    nf.start(run_workers=_get_test_workers(nf))
     time.sleep(3)  # wait for workers to start
     yield nf.make_client()  # return nf client
     nf.destroy()  # teardown

@@ -1165,14 +1165,14 @@ def _put(worker, put_queue, destroy_event) -> None:
         destroy_event (threading.Event): An event used to signal when the loop should stop
 
     Behavior:
-        - The function retrieves work items from the `put_queue` with a timeout of 0.1 seconds.
+        - The function retrieves work items from the `put_queue` with a bounded timeout.
         - If the queue is empty, it continues to the next iteration.
         - For each work item, it decodes the job data and updates the corresponding job's
           input queue in the `worker.running_jobs` dictionary.
     """
     while not destroy_event.is_set():
         try:
-            work = put_queue.get(block=True, timeout=0.1)
+            work = put_queue.get(block=True, timeout=NFP.WORK_QUEUE_TIMEOUT)
         except queue.Empty:
             continue
 
@@ -1208,7 +1208,7 @@ def _post(worker, post_queue, destroy_event) -> None:
     """
     while not destroy_event.is_set():
         try:
-            work = post_queue.get(block=True, timeout=0.1)
+            work = post_queue.get(block=True, timeout=NFP.WORK_QUEUE_TIMEOUT)
         except queue.Empty:
             continue
 
@@ -1236,6 +1236,7 @@ def _post(worker, post_queue, destroy_event) -> None:
             log.debug(
                 f"{worker.name} - '{suuid.decode('utf-8')}' job added to database"
             )
+            worker.pending_job_event.set()
         except Exception as e:
             log.error(f"{worker.name} - failed to add job to database: {e}")
             post_queue.task_done()
@@ -1282,7 +1283,7 @@ def _get(worker, get_queue, destroy_event) -> None:
     """
     while not destroy_event.is_set():
         try:
-            work = get_queue.get(block=True, timeout=0.1)
+            work = get_queue.get(block=True, timeout=NFP.WORK_QUEUE_TIMEOUT)
         except queue.Empty:
             continue
 
@@ -1341,7 +1342,7 @@ def _event(worker, event_queue, destroy_event) -> None:
     """
     while not destroy_event.is_set():
         try:
-            event_data = event_queue.get(block=True, timeout=0.1)
+            event_data = event_queue.get(block=True, timeout=NFP.WORK_QUEUE_TIMEOUT)
         except queue.Empty:
             continue
         uuid = event_data.pop("juuid")
@@ -1512,6 +1513,7 @@ class NFPWorker:
 
     keepaliver = None
     monitoring_model = WorkerMonitoringStats
+    autostart_base_watchdog = True
 
     def __init__(
         self,
@@ -1562,6 +1564,7 @@ class NFPWorker:
 
         # create events and queues
         self.destroy_event = threading.Event()
+        self.pending_job_event = threading.Event()
         self.request_thread = None
         self.reply_thread = None
         self.recv_thread = None
@@ -1606,7 +1609,7 @@ class NFPWorker:
         self.tasks = NORFAB_WORKER_TASKS
 
         # initiate watchdog
-        if self.autostart_watchdog:
+        if self.autostart_watchdog and self.autostart_base_watchdog:
             self.watchdog = WorkerWatchDog(self)
             self.watchdog.start()
 
@@ -1860,6 +1863,8 @@ class NFPWorker:
             self.reply_thread.join()
         if self.event_thread is not None:
             self.event_thread.join()
+        if self.put_thread is not None:
+            self.put_thread.join()
         if self.recv_thread:
             self.recv_thread.join()
 
@@ -2586,8 +2591,10 @@ class NFPWorker:
                 job_info = self.db.get_next_pending_job()
 
                 if job_info is None:
-                    # No pending jobs, wait a bit
-                    time.sleep(0.1)
+                    # Sleep until a POST adds work, while retaining a bounded
+                    # wait so shutdown events are observed promptly.
+                    self.pending_job_event.wait(timeout=1)
+                    self.pending_job_event.clear()
                     continue
 
                 uuid, received_timestamp = job_info

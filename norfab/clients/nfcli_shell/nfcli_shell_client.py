@@ -545,15 +545,17 @@ def mount_shell_plugins(shell: App, inventory: object) -> None:
 
 
 def start_picle_shell(
-    inventory="./inventory.yaml",
-    run_workers=None,
-    run_broker=None,
+    inventory: str = "./inventory.yaml",
+    run_workers: bool | list | None = None,
+    run_broker: bool | None = None,
     log_level: str = "WARNING",
+    base_dir: str | None = None,
 ) -> None:
     global NFCLIENT
     # initiate NorFab
     with NorFab(
         inventory=inventory,
+        base_dir=base_dir,
         log_level=log_level,
         configure_logging=True,
         logging_name="nfcli",

@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 17 September 2026*
+*Last updated: 18 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -218,11 +218,11 @@ excluded from source control and protected appropriately.
 ### Topology dependencies and lifecycle hooks
 
 Starts an ordered selection of broker/workers, lets workers declare
-`depends_on` relationships, and runs configured startup, exit, Nornir-startup,
-and Nornir-exit Python hooks. **Use cases:** waiting for a source-of-truth
-service, preloading data, registering integrations, and cleanup. **Limitations:**
-hooks are trusted code; dependency ordering does not replace external service
-health orchestration.
+`depends_on` relationships, staggers worker process creation to control peak
+startup CPU, and runs configured startup, exit, Nornir-startup, and Nornir-exit
+Python hooks. **Use cases:** waiting for a source-of-truth service, preloading
+data, registering integrations, and cleanup. **Limitations:** hooks are trusted
+code; dependency ordering does not replace external service health orchestration.
 [Hook details](customization/norfab_hooks.md)
 
 ### Worker capacity and resource controls
@@ -286,6 +286,9 @@ packaging, dependency, schema, security, and lifecycle ownership.
 
 The [NFCLI client](clients_nfcli_overview.md) provides a model-driven operations
 shell over the same task contracts used by the Python, REST, and MCP interfaces.
+When `--inventory` is omitted, `NORFAB_INVENTORY_DIR` can locate
+`inventory.yaml` and establish its base directory, which is useful for
+containerized clients.
 
 ### Hierarchical operating modes
 
@@ -1249,7 +1252,8 @@ HTTP/JSON gateway.
 
 Discovers eligible service tasks and generates REST endpoints from their
 schemas, descriptions, paths, and declared GET/POST/PATCH/DELETE methods. Tasks
-can be rediscovered at runtime. **Interfaces:** REST is the delivered interface;
+can be rediscovered at runtime; each discovery batch rebuilds OpenAPI once after
+all new routes are registered. **Interfaces:** REST is the delivered interface;
 NFCLI and Python API administer the service. **Use cases:** portals, OSS/BSS,
 ITSM, webhooks, CI pipelines, and non-Python consumers. **Limitations:** only
 tasks declaring REST exposure are published.

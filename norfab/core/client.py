@@ -1195,7 +1195,12 @@ def dispatcher(client) -> None:
             poll_active_jobs(client)
         except Exception as e:
             log.error(f"{client.name} - dispatcher error: {e}", exc_info=True)
-        time.sleep(0.1)
+        has_active_jobs = any(
+            not future.done_event.is_set()
+            for future in list(client.job_futures.values())
+        )
+        client.dispatcher_event.wait(timeout=0.1 if has_active_jobs else 1)
+        client.dispatcher_event.clear()
 
 
 class NFPClient(object):
@@ -1311,6 +1316,7 @@ class NFPClient(object):
         self.mmi_queue = queue.Queue(maxsize=0)
         self.outbound_queue = queue.Queue(maxsize=NFP.OUTBOUND_QUEUE_SIZE)
         self.job_futures = {}
+        self.dispatcher_event = threading.Event()
 
         # Configuration for dispatcher
         self.poll_interval = 0.5  # Seconds between GET polls for same job (throttling)
@@ -1874,6 +1880,7 @@ class NFPClient(object):
             kwargs=kwargs,
         )
         self.job_futures[uuid] = future
+        self.dispatcher_event.set()
         log.info(
             f"{self.name} - Submitted job {uuid} to service '{service}', task '{task}', workers '{workers}'"
         )

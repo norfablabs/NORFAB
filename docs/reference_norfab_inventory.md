@@ -16,10 +16,11 @@ workers: # (3)!
 
 topology: # (6)!
   broker: True # (7)!
-  workers: # (8)!
+  workers_start_interval: 0.5 # (8)!
+  workers: # (9)!
     - nornir-worker-1
 
-logging: # (9)!
+logging: # (10)!
   log_events: True
   handlers:
     terminal:
@@ -35,8 +36,9 @@ logging: # (9)!
 5.  Worker definition to map inventory file to a specific worker that has name ``nornir-worker-1``
 6.  Topology section to define what components to run
 7.  Start broker process
-8.  List of workers names to start processes for
-9.  Logging configuration section
+8.  Delay in seconds between worker process starts; defaults to `0.5`. Set it to `0` for fully parallel startup, or increase it to reduce peak startup CPU.
+9.  List of workers names to start processes for
+10. Logging configuration section
 
 ## Broker Inventory Section
 

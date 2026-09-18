@@ -1,6 +1,8 @@
 import json
 import logging
 import pprint
+from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
@@ -11,6 +13,132 @@ pytestmark = pytest.mark.core
 
 
 class TestNfApi:
+    def test_start_can_only_be_called_once(self, tmp_path: Path) -> None:
+        nf = NorFab(
+            inventory_data={"broker": {"endpoint": "tcp://127.0.0.1:5555"}},
+            base_dir=str(tmp_path),
+            run_broker=False,
+            run_workers=False,
+        )
+
+        nf.start()
+
+        with pytest.raises(RuntimeError, match="can only be called once"):
+            nf.start()
+
+    def test_failed_start_cannot_be_retried(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        nf = NorFab(
+            inventory_data={
+                "broker": {"endpoint": "tcp://127.0.0.1:5555"},
+                "topology": {"broker": True, "workers": []},
+            },
+            base_dir=str(tmp_path),
+            run_broker=True,
+            run_workers=False,
+        )
+        monkeypatch.setattr(
+            nf, "start_broker", Mock(side_effect=RuntimeError("startup failed"))
+        )
+
+        with pytest.raises(RuntimeError, match="startup failed"):
+            nf.start()
+        with pytest.raises(RuntimeError, match="can only be called once"):
+            nf.start()
+
+    def test_destroyed_instance_cannot_be_started(self, tmp_path: Path) -> None:
+        nf = NorFab(
+            inventory_data={"broker": {"endpoint": "tcp://127.0.0.1:5555"}},
+            base_dir=str(tmp_path),
+            run_broker=False,
+            run_workers=False,
+        )
+        nf.destroy()
+
+        with pytest.raises(RuntimeError, match="cannot be started after.*destroyed"):
+            nf.start()
+
+    def test_runtime_state_is_isolated_between_instances(self, tmp_path: Path) -> None:
+        inventory_data = {"broker": {"endpoint": "tcp://127.0.0.1:5555"}}
+        first = NorFab(
+            inventory_data=inventory_data.copy(),
+            base_dir=str(tmp_path / "first"),
+            run_broker=False,
+            run_workers=False,
+        )
+        second = NorFab(
+            inventory_data=inventory_data.copy(),
+            base_dir=str(tmp_path / "second"),
+            run_broker=False,
+            run_workers=False,
+        )
+
+        assert first.workers_processes is not second.workers_processes
+        assert first.worker_plugins is not second.worker_plugins
+
+        first_process = Mock()
+        second_process = Mock()
+        first.workers_processes["first-worker"] = {"process": first_process}
+        second.workers_processes["second-worker"] = {"process": second_process}
+        first.worker_plugins["first-only"] = object()
+
+        first.destroy()
+
+        first_process.join.assert_called_once_with()
+        assert "second-worker" in second.workers_processes
+        assert "first-only" not in second.worker_plugins
+
+        second.destroy()
+
+    def test_start_preserves_explicit_false_overrides(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        nf = NorFab(
+            inventory_data={
+                "broker": {"endpoint": "tcp://127.0.0.1:5555"},
+                "topology": {"broker": True, "workers": ["test-worker"]},
+            },
+            base_dir=str(tmp_path),
+            run_broker=True,
+            run_workers=True,
+        )
+
+        monkeypatch.setattr(
+            nf,
+            "start_broker",
+            lambda: pytest.fail("explicit run_broker=False was ignored"),
+        )
+        monkeypatch.setattr(
+            nf,
+            "start_worker",
+            lambda *_args, **_kwargs: pytest.fail(
+                "explicit run_workers=False was ignored"
+            ),
+        )
+
+        nf.start(run_broker=False, run_workers=False)
+
+    def test_worker_start_interval_configuration(self, tmp_path):
+        default_nf = NorFab(
+            inventory_data={"broker": {"endpoint": "tcp://127.0.0.1:5555"}},
+            base_dir=str(tmp_path),
+            run_broker=False,
+            run_workers=False,
+        )
+        configured_nf = NorFab(
+            inventory_data={
+                "broker": {"endpoint": "tcp://127.0.0.1:5555"},
+                "topology": {"workers_start_interval": 0},
+            },
+            base_dir=str(tmp_path),
+            run_broker=False,
+            run_workers=False,
+        )
+
+        assert default_nf.workers_start_interval == 0.5
+        assert configured_nf.workers_start_interval == 0
+
     def test_load_dot_env_before_inventory(self, monkeypatch):
         monkeypatch.delenv("NFAPI_TEST_VARIABLE", raising=False)
 

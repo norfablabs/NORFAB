@@ -128,10 +128,12 @@ class _ShutdownSignals:
 async def serve(
     inventory: str,
     log_level: str | None = None,
+    base_dir: str | None = None,
 ) -> None:
     """Run NFWeb until interrupted and release every local resource."""
     nf = NorFab(
         inventory=inventory,
+        base_dir=base_dir,
         log_level=log_level,
         configure_logging=True,
         logging_name="nfweb",

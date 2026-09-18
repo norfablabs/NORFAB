@@ -6,6 +6,7 @@ x-test-runner-build: &test-runner-build
 
 x-test-runner-env: &test-runner-env
   PYTHONPATH: /workspace
+  NORFAB_INVENTORY_DIR: /workspace/tests/nf_tests_inventory
 
 x-test-runner-entrypoint: &test-runner-entrypoint
   - python
@@ -51,6 +52,28 @@ x-test-runner-common: &test-runner-common
   entrypoint: *test-runner-entrypoint
 
 services:
+  idle-norfab:
+    build: *test-runner-build
+    image: norfab:idle-profile-py${PYTHON_VERSION:-3.12}
+    working_dir: /workspace/tests
+    environment:
+      <<: *test-runner-env
+    entrypoint:
+      - nfcli
+    command:
+      - -b
+      - -wl
+      - filesharing-worker-1,netbox-worker-1.1,nornir-worker-1,agent-worker-1,fastapi-worker-1,dummy-worker-1,workflow-worker-1,fastmcp-worker-1,fakenos-worker-1
+      - -l
+      - WARNING
+    stop_grace_period: 30s
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./idle-norfab/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
   core-tests:
     <<: *test-runner-common
     image: norfab:core-tests-py${PYTHON_VERSION:-3.12}
@@ -59,6 +82,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/core-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,nornir-worker-1,nornir-worker-2,dummy-worker-1
     command:
       - -m
       - core
@@ -77,6 +101,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/nornir-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,netbox-worker-1.1,netbox-worker-1.2,nornir-worker-1,nornir-worker-2,nornir-worker-4,nornir-worker-5,nornir-worker-6,fakenos-worker-1,containerlab-worker-1
     command:
       - -m
       - nornir
@@ -95,6 +120,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/netbox-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,netbox-worker-1.1,netbox-worker-1.2,nornir-worker-4,fakenos-worker-1
     command:
       - -m
       - netbox
@@ -113,6 +139,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/fakenos-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,fakenos-worker-1
     command:
       - -m
       - fakenos
@@ -131,6 +158,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/containerlab-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,netbox-worker-1.1,containerlab-worker-1
     command:
       - -m
       - containerlab
@@ -149,6 +177,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/workflow-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,nornir-worker-1,nornir-worker-2,workflow-worker-1
     command:
       - -m
       - workflow
@@ -167,6 +196,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/agent-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,nornir-worker-1
     command:
       - -m
       - clientagent
@@ -185,6 +215,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/fastmcp-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,netbox-worker-1.1,nornir-worker-1,workflow-worker-1,fastmcp-worker-1,containerlab-worker-1
     command:
       - -m
       - fastmcp
@@ -203,6 +234,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/fastapi-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,nornir-worker-1,fastapi-worker-1
     command:
       - -m
       - fastapi
@@ -221,6 +253,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/filesharing-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1
     command:
       - -m
       - filesharing
@@ -239,6 +272,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/dummy-service-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,dummy-worker-1
     command:
       - -m
       - dummy
@@ -257,6 +291,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/nfcli-junit.xml
+      NORFAB_TEST_WORKERS: filesharing-worker-1,nornir-worker-1,dummy-worker-1
     command:
       - -m
       - nfcli

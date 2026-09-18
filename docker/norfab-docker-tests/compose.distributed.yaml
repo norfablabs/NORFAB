@@ -6,6 +6,7 @@ x-test-runner-build: &test-runner-build
 
 x-test-runner-env: &test-runner-env
   PYTHONPATH: /workspace:/workspace/tests/nf_tests_inventory
+  NORFAB_INVENTORY_DIR: /norfab-env
 
 x-distributed-env-file: &distributed-env-file
   - ./distributed-basic/.env

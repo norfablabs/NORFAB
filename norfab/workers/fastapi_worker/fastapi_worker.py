@@ -115,10 +115,11 @@ def make_openapi_schema(
     Returns:
         dict: The generated OpenAPI schema as a dictionary.
     """
-    # make app to re-generate openapi schema
+    # Invalidate the cached schema. Routes added with add_api_route are already
+    # present in app.routes, so calling FastAPI.setup() again is unnecessary and
+    # would append duplicate documentation routes.
     if regenerate is True:
         app.openapi_schema = None
-        app.setup()
 
     openapi_schema = get_openapi(title=API_TITLE, version="1", routes=app.routes)
 
@@ -154,6 +155,7 @@ def service_tasks_api_discovery(
     while not worker.exit_event.is_set() and cycles > 0:
         tasks = []
         services = []
+        routes_changed = False
         try:
             # get a list of workers and construct a list of services
             services = worker.client.mmi("mmi.service.broker", "show_workers")
@@ -235,13 +237,23 @@ def service_tasks_api_discovery(
                         tags=[f"NORFAB {task['service'].upper()}"],
                         **task["fastapi"],
                     )
-                    worker.app.openapi_schema = make_openapi_schema(
-                        app=worker.app, regenerate=True, json_refs=json_refs
-                    )
+                    routes_changed = True
                     # save discovered task to results
                     result[task["service"]].append(task["fastapi"]["name"])
+
         except Exception as e:
             log.exception(f"Failed to discover services tasks, error: {e}")
+
+        # Building OpenAPI traverses every registered route. Rebuild once after
+        # the complete discovery batch, including routes added before a later
+        # task raised an exception, instead of once per task.
+        if routes_changed:
+            try:
+                worker.app.openapi_schema = make_openapi_schema(
+                    app=worker.app, regenerate=True, json_refs=json_refs
+                )
+            except Exception as e:
+                log.exception(f"Failed to rebuild OpenAPI schema, error: {e}")
 
         cycles -= 1
         time.sleep(10)
@@ -359,7 +371,7 @@ class FastAPIWorker(NFPWorker):
 
         # wait for server to start
         while not self.uvicorn_server.started:
-            time.sleep(0.001)
+            time.sleep(0.01)
 
         log.info(
             f"{self.name} - Uvicorn server started, serving FastAPI app at "

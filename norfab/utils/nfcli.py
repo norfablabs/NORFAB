@@ -55,6 +55,23 @@ hosts:
 """
 
 
+def _resolve_inventory(inventory: str | None) -> tuple[str, str | None]:
+    """Resolve the NFCLI inventory and base directory.
+
+    An explicit ``--inventory`` always wins. Otherwise,
+    ``NORFAB_INVENTORY_DIR`` may point to the directory containing
+    ``inventory.yaml``. The historical current-directory default is retained
+    when neither is supplied.
+    """
+    if inventory:
+        return inventory, None
+    inventory_dir = os.environ.get("NORFAB_INVENTORY_DIR")
+    if inventory_dir:
+        base_dir = os.path.abspath(os.path.expanduser(inventory_dir))
+        return os.path.join(base_dir, "inventory.yaml"), base_dir
+    return "inventory.yaml", None
+
+
 def nfcli() -> str | None:
     # form argparser menu:
     description_text = """
@@ -76,9 +93,12 @@ def nfcli() -> str | None:
         "--inventory",
         action="store",
         dest="INVENTORY",
-        default="inventory.yaml",
+        default=None,
         type=str,
-        help="OS Path to YAML file with NORFAB inventory data",
+        help=(
+            "OS path to a NORFAB inventory YAML file; defaults to inventory.yaml "
+            "inside NORFAB_INVENTORY_DIR, or the current directory"
+        ),
     )
     run_options.add_argument(
         "-b",
@@ -161,7 +181,7 @@ def nfcli() -> str | None:
     args = argparser.parse_args()
     WORKERS = args.WORKERS
     WORKERS_LIST = args.WORKERS_LIST
-    INVENTORY = args.INVENTORY
+    INVENTORY, BASE_DIR = _resolve_inventory(args.INVENTORY)
     BROKER = args.BROKER
     LOGLEVEL = args.LOGLEVEL
     SHELL = args.SHELL
@@ -231,6 +251,7 @@ def nfcli() -> str | None:
             return
         with NorFab(
             inventory=INVENTORY,
+            base_dir=BASE_DIR,
             log_level=LOGLEVEL,
             configure_logging=True,
             logging_name="tui",
@@ -242,30 +263,31 @@ def nfcli() -> str | None:
             app.run()
     # start broker and workers
     elif BROKER and (WORKERS or WORKERS_LIST):
-        nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
+        nf = NorFab(inventory=INVENTORY, base_dir=BASE_DIR, log_level=LOGLEVEL)
         nf.start(run_broker=True, run_workers=WORKERS_LIST if WORKERS_LIST else True)
         nf.run()
     # start broker only
     elif BROKER:
-        nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
+        nf = NorFab(inventory=INVENTORY, base_dir=BASE_DIR, log_level=LOGLEVEL)
         nf.start(run_broker=True, run_workers=False)
         nf.run()
     # start workers only
     elif WORKERS or WORKERS_LIST:
-        nf = NorFab(inventory=INVENTORY, log_level=LOGLEVEL)
+        nf = NorFab(inventory=INVENTORY, base_dir=BASE_DIR, log_level=LOGLEVEL)
         nf.start(run_broker=False, run_workers=WORKERS_LIST if WORKERS_LIST else True)
         nf.run()
     # start WEB UI Application
     elif WEB_UI:
         from norfab.clients.nfweb.runtime import serve
 
-        asyncio.run(serve(inventory=INVENTORY, log_level=LOGLEVEL))
+        asyncio.run(serve(inventory=INVENTORY, base_dir=BASE_DIR, log_level=LOGLEVEL))
     # start interactive client shell only
     elif CLIENT:
         from norfab.clients.nfcli_shell.nfcli_shell_client import start_picle_shell
 
         start_picle_shell(
             inventory=INVENTORY,
+            base_dir=BASE_DIR,
             run_workers=False,
             run_broker=False,
             log_level=LOGLEVEL,
@@ -276,6 +298,7 @@ def nfcli() -> str | None:
 
         start_picle_shell(
             inventory=INVENTORY,
+            base_dir=BASE_DIR,
             run_workers=WORKERS_LIST if WORKERS_LIST else True,
             run_broker=True,
             log_level=LOGLEVEL,

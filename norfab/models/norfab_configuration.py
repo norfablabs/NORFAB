@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from picle.models import ConfigModel
 from pydantic import (
@@ -14,6 +14,11 @@ from pydantic import (
 from norfab.clients.nfweb.config import NFWebConfig
 from norfab.models.norfab_configuration_logging import (
     LoggingConfig,
+)
+from norfab.models.norfab_configuration_topology import (
+    TopologyConfig,
+    TopologyWorkerEntry,  # noqa: F401
+    WorkerTopologyConfig,  # noqa: F401
 )
 from norfab.workers.netbox_worker.netbox_models import NetboxConfigModel
 
@@ -261,36 +266,6 @@ class PluginConfig(BaseModel):
     nfcli: PluginNfcliConfig = Field(
         None,
         description="NorFab CLI integration configuration for this plugin",
-    )
-
-
-# ------------------------------------------------------
-# Topology configuration models
-# ------------------------------------------------------
-
-
-class WorkerTopologyConfig(BaseModel):
-    """Per-worker topology settings."""
-
-    depends_on: List[StrictStr] = Field(
-        None,
-        description="List of worker names that must be running before this worker starts",
-    )
-
-
-TopologyWorkerEntry = Union[StrictStr, Dict[StrictStr, WorkerTopologyConfig]]
-
-
-class TopologyConfig(BaseModel):
-    """NorFab deployment topology configuration."""
-
-    broker: StrictBool = Field(
-        True,
-        description="Start broker as part of this topology",
-    )
-    workers: List[TopologyWorkerEntry] = Field(
-        None,
-        description="Ordered list of workers to start in this topology",
     )
 
 

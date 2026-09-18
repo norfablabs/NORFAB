@@ -1,3 +1,25 @@
+# 0.23.6
+
+## BUGS
+
+1. Fixed `NorFab.start` worker-list normalization to preserve topology dictionary entries and their `depends_on` metadata instead of calling string methods on them.
+2. Replaced idle worker and client SQLite job polling at ten queries per second with event-driven wake-ups, and reduced idle worker and FakeNOS command-queue wake-ups from ten per second to one, without delaying queued work.
+3. Limited every marker-based Docker test runner to the workers required by its suite instead of starting the complete shared test topology.
+4. Fixed Nornir workers starting both a base watchdog and a Nornir watchdog. Watchdogs now use one interruptible interval wait instead of waking ten times per second to accumulate elapsed time.
+5. Fixed `NorFab.start` ignoring explicit `run_broker=False` and `run_workers=False` overrides when constructor defaults enabled those components, preventing unintended broker and worker startup.
+6. Fixed `NorFab` instances sharing mutable worker-process and plugin registries, preventing one instance from observing or destroying another instance's runtime state.
+7. Prevented repeated `NorFab.start()` calls and attempts to restart a destroyed instance, avoiding ambiguous incremental startup and partially initialized runtime state. A failed startup attempt now requires constructing a new `NorFab` instance before retrying.
+8. Added fail-fast Pydantic validation for circular worker dependencies in topology inventory before broker or worker startup.
+
+## ENHANCEMENTS
+
+1. Batched FastAPI task discovery so all new routes are registered before OpenAPI is regenerated once per discovery cycle. Schema regeneration no longer repeats FastAPI application setup or adds duplicate documentation routes.
+2. Staggered worker process creation by a configurable `topology.workers_start_interval` (default `0.5` seconds) to reduce the CPU burst caused by importing every service stack simultaneously. Set it to `0` to retain fully parallel startup. FastAPI's Uvicorn readiness check also uses a less aggressive polling interval.
+3. Added an idle NorFab Docker Compose service with one worker for every configured test service and a `docker-profile-idle` Invoke task that monitors CPU, memory, and block I/O over a configurable period, reports stability against configurable thresholds, saves CSV samples, and always removes the profiling container.
+4. Added `NORFAB_INVENTORY_DIR` support to NFCLI. When `--inventory` is omitted, the variable identifies the directory containing `inventory.yaml` and supplies the NorFab base directory, allowing commands such as `nfcli -c` to work consistently inside test containers.
+
+---
+
 # 0.23.5
 
 ## BUGS

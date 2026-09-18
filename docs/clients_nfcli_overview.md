@@ -45,6 +45,18 @@ defaults:
 See the [NFAPI environment file reference](api_reference_core_norfab_nfapi.md#environment-file-loading)
 for the supported file syntax and API controls.
 
+## Inventory directory environment variable
+
+When `--inventory` is omitted, `NORFAB_INVENTORY_DIR` can point to the directory
+containing `inventory.yaml`. NFCLI uses that directory as the NorFab base
+directory as well. An explicit `--inventory` takes precedence, and the current
+directory remains the fallback when the variable is unset.
+
+```bash
+export NORFAB_INVENTORY_DIR=/etc/norfab
+nfcli -c
+```
+
 It is important to remember that in PICLE Shell, when you enter a command, the 
 command is executed. If you enter an incorrect command in a production environment, 
 it can negatively impact it.

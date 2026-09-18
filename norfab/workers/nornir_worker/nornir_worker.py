@@ -410,7 +410,7 @@ class NornirWorker(
 
     nr = None
     nornir_inventory = {}
-    autostart_watchdog = False
+    autostart_base_watchdog = False
     monitoring_model = NornirWorkerMonitoringStats
 
     def __init__(
@@ -439,8 +439,9 @@ class NornirWorker(
         self.refresh_nornir(job=Job())
 
         # initiate watchdog
-        self.watchdog = WatchDog(self)
-        self.watchdog.start()
+        if self.autostart_watchdog:
+            self.watchdog = WatchDog(self)
+            self.watchdog.start()
 
         # run startup hooks
         for f in self.inventory.hooks.get("nornir-startup", []):

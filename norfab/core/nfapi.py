@@ -3,6 +3,7 @@ import logging
 import os
 import signal
 import sys
+import threading
 import time
 from importlib.metadata import EntryPoint, entry_points
 from multiprocessing import Event, Process
@@ -135,12 +136,6 @@ class NorFab:
            ret = nf.client.run_job("nornir", "get_version")
     """
 
-    client = None
-    broker = None
-    inventory = None
-    workers_processes = {}
-    worker_plugins = {}
-
     def __init__(
         self,
         inventory: str = "./inventory.yaml",
@@ -157,6 +152,12 @@ class NorFab:
         self.inventory_path = inventory
         self.inventory_data = inventory_data
         self.base_dir = base_dir
+        self.client = None
+        self.broker = None
+        self.workers_processes = {}
+        self.worker_plugins = {}
+        self._start_called = False
+        self._start_lock = threading.Lock()
         self.exiting = False  # flag to signal that Norfab is exiting
         self.load_env_file(inventory, inventory_data, base_dir, load_env_override)
         if configure_logging:
@@ -173,6 +174,10 @@ class NorFab:
         self.broker_endpoint = self.inventory.broker["endpoint"]
         self.workers_init_timeout = self.inventory.topology.get(
             "workers_init_timeout", 300
+        )
+        self.workers_start_interval = max(
+            0.0,
+            float(self.inventory.topology.get("workers_start_interval", 0.5)),
         )
         self.broker_exit_event = Event()
         self.workers_exit_event = Event()
@@ -483,8 +488,10 @@ class NorFab:
 
         Args:
             run_broker (bool): If True, starts the broker if it is defined in the inventory topology.
+                If None, uses the value configured when constructing NorFab.
             run_workers (Union[bool, list]): Determines which workers to start. If True, starts all workers defined in the inventory topology.
-                                         If False or None, no workers are started. If a list, starts the specified workers.
+                If False, no workers are started. If None, uses the value configured
+                when constructing NorFab. If a list, starts the specified workers.
 
         Returns:
             None
@@ -498,9 +505,23 @@ class NorFab:
             - The method waits for all workers to initialize within a specified timeout period.
             - If the initialization timeout expires, an error is logged and the system is destroyed.
             - After starting the workers, any startup hooks defined in the inventory are executed.
+            - Each NorFab instance supports one startup attempt.
         """
-        run_broker = run_broker or self.run_broker
-        run_workers = run_workers or self.run_workers
+        with self._start_lock:
+            if self._start_called:
+                raise RuntimeError(
+                    "NorFab.start() can only be called once per instance"
+                )
+            if self.exiting:
+                raise RuntimeError(
+                    "NorFab cannot be started after it has been destroyed"
+                )
+            self._start_called = True
+
+        if run_broker is None:
+            run_broker = self.run_broker
+        if run_workers is None:
+            run_workers = self.run_workers
         workers_to_start = set()
 
         # start the broker
@@ -513,7 +534,11 @@ class NorFab:
         if run_workers is False or run_workers is None:
             run_workers = []
         elif isinstance(run_workers, list) and run_workers:
-            run_workers = [w.strip() for w in run_workers if w.strip()]
+            run_workers = [
+                worker.strip() if isinstance(worker, str) else worker
+                for worker in run_workers
+                if not isinstance(worker, str) or worker.strip()
+            ]
         # start workers defined in inventory
         elif run_workers is True:
             run_workers = self.inventory.topology.get("workers", [])
@@ -548,7 +573,14 @@ class NorFab:
                     continue
                 # start worker
                 try:
+                    was_started = worker_name in self.workers_processes
                     self.start_worker(worker_name, worker_data)
+                    if (
+                        not was_started
+                        and worker_name in self.workers_processes
+                        and self.workers_start_interval
+                    ):
+                        time.sleep(self.workers_start_interval)
                 # if failed to start remove from workers to start
                 except KeyError:
                     workers_to_start.discard(worker_name)

@@ -1,14 +1,67 @@
 import os
+from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from norfab.core.inventory import NorFabInventory
 from norfab.core.worker import NFPWorker
+from norfab.models.norfab_configuration_topology import TopologyConfig
 
 pytestmark = pytest.mark.core
 
 os.environ["TERMINAL_LOGGING_LEVEL"] = "INFO"
 os.environ["NORNIR_USERNAME"] = "foo"
+
+
+def test_topology_model_accepts_valid_worker_dependencies() -> None:
+    topology = TopologyConfig.model_validate(
+        {
+            "workers": [
+                "netbox-worker",
+                {"nornir-worker": {"depends_on": ["netbox-worker"]}},
+            ]
+        }
+    )
+
+    assert len(topology.workers) == 2
+
+
+@pytest.mark.parametrize(
+    "workers",
+    [
+        [{"worker-a": {"depends_on": ["worker-a"]}}],
+        [
+            {"worker-a": {"depends_on": ["worker-b"]}},
+            {"worker-b": {"depends_on": ["worker-a"]}},
+        ],
+        [
+            {"worker-a": {"depends_on": ["worker-b"]}},
+            {"worker-b": {"depends_on": ["worker-c"]}},
+            {"worker-c": {"depends_on": ["worker-a"]}},
+        ],
+    ],
+)
+def test_topology_model_rejects_circular_worker_dependencies(workers: list) -> None:
+    with pytest.raises(ValidationError, match="Circular worker dependency detected"):
+        TopologyConfig.model_validate({"workers": workers})
+
+
+def test_runtime_inventory_rejects_circular_worker_dependencies(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValidationError, match="worker-a -> worker-b -> worker-a"):
+        NorFabInventory(
+            data={
+                "topology": {
+                    "workers": [
+                        {"worker-a": {"depends_on": ["worker-b"]}},
+                        {"worker-b": {"depends_on": ["worker-a"]}},
+                    ]
+                }
+            },
+            base_dir=str(tmp_path),
+        )
 
 
 class TestInventoryLoad:

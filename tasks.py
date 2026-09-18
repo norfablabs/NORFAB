@@ -8,6 +8,9 @@ file so tasks behave the same way from the repository root or a subdirectory.
 # types are clearer here than annotations repeated across every task callback.
 # ruff: noqa: ANN001, ANN201, ANN202
 
+import csv
+import json
+import math
 import os
 import shlex
 import shutil
@@ -27,6 +30,7 @@ DOCKER_DIR = ROOT / "docker" / "norfab-docker-tests"
 COMPOSE_FILE = DOCKER_DIR / "compose.yaml"
 DISTRIBUTED_FILE = DOCKER_DIR / "compose.distributed.yaml"
 DISTRIBUTED_DIR = DOCKER_DIR / "distributed-basic"
+IDLE_PROFILE_SERVICE = "idle-norfab"
 
 # The distributed broker owns the test keypair. Only its public certificate is
 # copied into client runtime directories; the private certificate never leaves
@@ -133,6 +137,70 @@ def _environment(python_version=""):
     if python_version:
         env["PYTHON_VERSION"] = python_version
     return env
+
+
+def _docker_size_bytes(value):
+    """Convert a Docker stats size such as ``12.5MiB`` to bytes."""
+    value = value.strip()
+    number = "".join(
+        character for character in value if character.isdigit() or character in ".-"
+    )
+    unit = value[len(number) :].strip()
+    factors = {
+        "B": 1,
+        "kB": 1_000,
+        "MB": 1_000_000,
+        "GB": 1_000_000_000,
+        "TB": 1_000_000_000_000,
+        "KiB": 1_024,
+        "MiB": 1_048_576,
+        "GiB": 1_073_741_824,
+        "TiB": 1_099_511_627_776,
+    }
+    if not number or unit not in factors:
+        raise ValueError(f"Unsupported Docker size: {value!r}")
+    return float(number) * factors[unit]
+
+
+def _docker_stats(container_id):
+    """Read one Docker container stats sample as normalized numeric values."""
+    command = [
+        "docker",
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{json .}}",
+        container_id,
+    ]
+    try:
+        result = subprocess.run(
+            command,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as exc:
+        raise Exit(f"Unable to run docker stats: {exc}", code=1) from None
+    if result.returncode:
+        raise Exit(
+            result.stderr.strip() or "docker stats failed", code=result.returncode
+        )
+    data = json.loads(result.stdout.strip())
+    memory_used = data["MemUsage"].split("/", maxsplit=1)[0]
+    block_read, block_write = data["BlockIO"].split("/", maxsplit=1)
+    return {
+        "cpu_percent": float(data["CPUPerc"].strip().rstrip("%")),
+        "memory_bytes": _docker_size_bytes(memory_used),
+        "block_read_bytes": _docker_size_bytes(block_read),
+        "block_write_bytes": _docker_size_bytes(block_write),
+    }
+
+
+def _percentile(values, percentile):
+    """Return a nearest-rank percentile for a non-empty numeric sequence."""
+    ordered = sorted(values)
+    return ordered[max(0, math.ceil(percentile * len(ordered)) - 1)]
 
 
 def _prepare_runtime(service, shard=None):
@@ -350,13 +418,13 @@ def _run_suite_parallel(
             f"{test_file.stem}-junit.xml",
         )
 
-    workers = min(parallel_runs, len(test_files))
+    max_workers = min(parallel_runs, len(test_files))
     print(
         f"Running {len(test_files)} {suite} test containers, "
-        f"at most {workers} at a time",
+        f"at most {max_workers} at a time",
         flush=True,
     )
-    with ThreadPoolExecutor(max_workers=workers) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         results = list(executor.map(run_file, test_files))
 
     print(f"Docker suite {suite} parallel results:")
@@ -508,6 +576,139 @@ def docker_tests_distributed(_context, force_certificates=False):
         _run(compose + ["down", "--remove-orphans"])
 
 
+@task(
+    name="docker-profile-idle",
+    help={
+        "duration": "Total profiling period in seconds (default: 600).",
+        "interval": "Seconds between Docker stats samples.",
+        "warmup": "Initial seconds excluded from stability checks.",
+        "max_cpu_average": "Maximum stable average CPU percentage.",
+        "max_cpu_p95": "Maximum stable p95 CPU percentage.",
+        "max_memory_growth_mb": "Maximum stable memory growth in MiB.",
+        "max_write_growth_mb": "Maximum stable block-write growth in MiB.",
+        "build": "Build the idle profiling image before starting.",
+        "fail_unstable": "Return a failure status when thresholds are exceeded.",
+    },
+)
+def docker_profile_idle(
+    _context,
+    duration=600,
+    interval=5,
+    warmup=30,
+    max_cpu_average=10.0,
+    max_cpu_p95=20.0,
+    max_memory_growth_mb=32.0,
+    max_write_growth_mb=10.0,
+    build=False,
+    fail_unstable=False,
+):
+    """Profile an idle NorFab container and report resource stability."""
+    duration = float(duration)
+    interval = float(interval)
+    warmup = float(warmup)
+    if duration <= 0 or interval <= 0:
+        raise ValueError("--duration and --interval must be greater than zero")
+    if warmup < 0 or warmup >= duration:
+        raise ValueError("--warmup must be non-negative and shorter than --duration")
+
+    runtime = _prepare_runtime(IDLE_PROFILE_SERVICE)
+    artifact = runtime / "artifacts" / "idle-profile.csv"
+    compose = _compose()
+    up_args = compose + ["up", "-d"]
+    if build:
+        up_args.append("--build")
+    up_args.append(IDLE_PROFILE_SERVICE)
+
+    samples = []
+    try:
+        _run(up_args)
+        ps_result = subprocess.run(
+            compose + ["ps", "-q", IDLE_PROFILE_SERVICE],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        container_id = ps_result.stdout.strip()
+        if ps_result.returncode or not container_id:
+            _run(compose + ["logs", IDLE_PROFILE_SERVICE], check=False)
+            raise Exit("Idle NorFab container did not remain running", code=1)
+
+        print(
+            f"Profiling {IDLE_PROFILE_SERVICE} for {duration:g}s every "
+            f"{interval:g}s ({warmup:g}s warm-up)",
+            flush=True,
+        )
+        started = time.monotonic()
+        while True:
+            elapsed = time.monotonic() - started
+            if elapsed >= duration:
+                break
+            sample = _docker_stats(container_id)
+            sample["elapsed_seconds"] = round(elapsed, 3)
+            sample["included"] = elapsed >= warmup
+            samples.append(sample)
+            remaining = duration - (time.monotonic() - started)
+            if remaining > 0:
+                time.sleep(min(interval, remaining))
+    finally:
+        _run(compose + ["rm", "-f", "-s", IDLE_PROFILE_SERVICE], check=False)
+
+    measured = [sample for sample in samples if sample["included"]]
+    if not measured:
+        raise Exit("Profiling completed without any post-warm-up samples", code=1)
+
+    with artifact.open("w", newline="", encoding="utf-8") as profile_file:
+        writer = csv.DictWriter(profile_file, fieldnames=samples[0].keys())
+        writer.writeheader()
+        writer.writerows(samples)
+
+    cpu_values = [sample["cpu_percent"] for sample in measured]
+    memory_growth = max(0, measured[-1]["memory_bytes"] - measured[0]["memory_bytes"])
+    read_growth = max(
+        0, measured[-1]["block_read_bytes"] - measured[0]["block_read_bytes"]
+    )
+    write_growth = max(
+        0, measured[-1]["block_write_bytes"] - measured[0]["block_write_bytes"]
+    )
+    cpu_average = sum(cpu_values) / len(cpu_values)
+    cpu_p95 = _percentile(cpu_values, 0.95)
+    stable = all(
+        (
+            cpu_average <= float(max_cpu_average),
+            cpu_p95 <= float(max_cpu_p95),
+            memory_growth <= float(max_memory_growth_mb) * 1_048_576,
+            write_growth <= float(max_write_growth_mb) * 1_048_576,
+        )
+    )
+    mib = 1_048_576
+    print(f"NorFab idle profile: {'STABLE' if stable else 'UNSTABLE'}")
+    print(
+        f"  CPU: average {cpu_average:.2f}%, p95 {cpu_p95:.2f}%, "
+        f"peak {max(cpu_values):.2f}%"
+    )
+    print(
+        f"  Memory: start {measured[0]['memory_bytes'] / mib:.1f} MiB, "
+        f"peak {max(item['memory_bytes'] for item in measured) / mib:.1f} MiB, "
+        f"growth {memory_growth / mib:.1f} MiB"
+    )
+    print(
+        f"  Block I/O growth: read {read_growth / mib:.2f} MiB, "
+        f"write {write_growth / mib:.2f} MiB"
+    )
+    print(f"  Samples: {len(measured)}; CSV: {artifact}")
+    if not stable:
+        print(
+            "  Limits: "
+            f"CPU average {float(max_cpu_average):.2f}%, "
+            f"CPU p95 {float(max_cpu_p95):.2f}%, "
+            f"memory growth {float(max_memory_growth_mb):.1f} MiB, "
+            f"write growth {float(max_write_growth_mb):.1f} MiB"
+        )
+        if fail_unstable:
+            raise Exit("NorFab idle resource profile exceeded stability limits", code=1)
+
+
 @task(name="docker-tests-down")
 def docker_tests_down(_context):
     """Stop both Docker test projects without deleting runtime artifacts."""
@@ -538,6 +739,7 @@ for invoke_task in (
     docker_tests_build,
     docker_tests_all,
     docker_tests_distributed,
+    docker_profile_idle,
     docker_tests_down,
     docker_tests_config,
 ):

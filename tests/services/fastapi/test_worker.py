@@ -1,7 +1,57 @@
 import pprint
+import threading
+from types import SimpleNamespace
+
 import pytest
+from fastapi import FastAPI
+
+from norfab.workers.fastapi_worker import fastapi_worker
 
 pytestmark = pytest.mark.fastapi
+
+
+def test_discovery_rebuilds_openapi_once(monkeypatch):
+    tasks = [
+        {
+            "name": name,
+            "description": f"{name} description",
+            "inputSchema": {
+                "type": "object",
+                "properties": {"job": {}, "value": {"type": "string"}},
+            },
+            "fastapi": {"methods": ["POST"]},
+        }
+        for name in ("first", "second")
+    ]
+
+    client = SimpleNamespace(
+        mmi=lambda *args, **kwargs: {"results": [{"service": "dummy"}]},
+        run_job=lambda **kwargs: {"dummy-worker-1": {"result": tasks}},
+    )
+    worker = SimpleNamespace(
+        api_prefix="/api",
+        app=FastAPI(),
+        client=client,
+        exit_event=threading.Event(),
+    )
+    schema_builds = 0
+    original_make_openapi_schema = fastapi_worker.make_openapi_schema
+
+    def count_schema_builds(*args, **kwargs):
+        nonlocal schema_builds
+        schema_builds += 1
+        return original_make_openapi_schema(*args, **kwargs)
+
+    monkeypatch.setattr(fastapi_worker, "make_openapi_schema", count_schema_builds)
+    monkeypatch.setattr(fastapi_worker.time, "sleep", lambda _seconds: None)
+
+    result = fastapi_worker.service_tasks_api_discovery(worker, cycles=1)
+
+    assert schema_builds == 1
+    assert result == {"dummy": ["first", "second"]}
+    assert "/api/dummy/first/" in worker.app.openapi_schema["paths"]
+    assert "/api/dummy/second/" in worker.app.openapi_schema["paths"]
+    assert sum(route.path == "/openapi.json" for route in worker.app.routes) == 1
 
 
 class TestFastAPIWorker:

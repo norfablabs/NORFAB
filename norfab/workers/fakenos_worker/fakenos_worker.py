@@ -10,6 +10,7 @@ import psutil
 import yaml
 from fakenos import FakeNOS
 
+from norfab.core import NFP
 from norfab.core.worker import Job, NFPWorker, Task
 from norfab.models import Result
 
@@ -81,7 +82,7 @@ def fakenos_network_process(
     net.start()
     while not stop_event.is_set():
         try:
-            method, args, kwargs = cmd_queue.get(timeout=0.1)
+            method, args, kwargs = cmd_queue.get(timeout=NFP.WORK_QUEUE_TIMEOUT)
             try:
                 if method == "_get_hosts_as_list":
                     result = [
