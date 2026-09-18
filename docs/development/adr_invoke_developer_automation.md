@@ -15,6 +15,31 @@ conventional test tree and runs each file in a separate container and
 `__norfab__` runtime, with at most `N` containers active at once. This remains
 opt-in; the default single-container behavior is unchanged.
 
+All-suites concurrency amendment: `docker-tests-all` starts all regular pytest
+suite containers concurrently and aggregates their statuses after completion.
+The Containerlab runner, idle performance profiler, and distributed topology
+remain opt-in through their dedicated tasks and are not started by the
+aggregate command.
+After a Docker test invocation finishes, the task parses only JUnit XML
+artifacts created or changed by that invocation and writes a timestamped
+Markdown report under `docker/norfab-docker-tests/reports/`. This applies to
+individual suites, selectors, dedicated NetBox file tasks, per-file parallel
+runs, and the consolidated all-suites run. Missing and malformed reports are
+recorded instead of being confused with stale results.
+
+Suite-collection amendment: each Docker suite passes its conventional test
+directory to pytest before applying its marker. This prevents unrelated test
+modules from being imported during collection and avoids contaminating the
+process-global worker task registry inherited by Linux worker processes. A
+user-supplied selector continues to override the default directory.
+
+NetBox test-file amendment: the large NetBox suite is divided into explicit
+`docker-tests-netbox-<file>` Invoke tasks. The tasks dynamically reuse the
+single NetBox Compose service image with `docker compose run`; no duplicate
+Compose services are defined. Each invocation has a descriptive container
+name and its own runtime and JUnit artifact directory. The aggregate NetBox
+and all-suites tasks fan out through the same file runners.
+
 ## Date
 
 2026-08-22.

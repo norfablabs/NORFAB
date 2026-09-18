@@ -73,7 +73,9 @@ topology:
   - dummy-worker-1
   - workflow-worker-1
   - fastmcp-worker-1
-  - fakenos-worker-1
+  - fakenos-worker-1:
+      depends_on:
+      - filesharing-worker-1
 workers:
   agent-worker-1:
   - agents/common.yaml

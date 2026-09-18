@@ -162,13 +162,29 @@ poetry run inv docker-tests-distributed
 
 Docker runtime files and JUnit reports are stored under the selected service's
 ignored `docker/norfab-docker-tests/<service>/__norfab__/` directory.
+Docker suite tasks scope pytest collection to the suite's conventional test
+directory before applying its marker; an explicit `--selector` overrides that
+default collection root.
+The NetBox suite is further split into test-file Invoke runners named
+`docker-tests-netbox-<file>`, such as `docker-tests-netbox-crud`. Each uses
+`docker compose run` with the shared
+NetBox test image, an explicit `norfab-tests-netbox-<group>-<run-id>` container
+name, and a file-specific runtime/JUnit directory. `docker-tests-netbox` and
+`docker-tests-all` launch all of these dedicated group containers.
 With `--parallel-runs=N`, test roots are derived from `tests/services/<suite>`,
 `tests/clients/<suite>`, or `tests/<suite>` and per-file runtimes are stored
 under `<service>/parallel/<test-file>/__norfab__/`. At most `N` per-file
 containers run concurrently.
 Individual `docker-tests-<suite>` tasks report the container exit status but
-do not fail Invoke; `docker-tests-all` still returns non-zero after summarizing
-all failed suites.
+do not fail Invoke; `docker-tests-all` runs the regular suite containers in
+parallel and returns non-zero after summarizing all failed suites. It excludes
+the Containerlab suite, idle performance profiler, and distributed topology,
+which remain available through their dedicated tasks.
+Every Docker suite invocation writes a timestamped Markdown summary under
+`docker/norfab-docker-tests/reports/`, including runs narrowed by selectors,
+markers, keywords, extra pytest arguments, or per-file parallelism. Reports are
+based only on JUnit XML artifacts created or updated by that invocation;
+`docker-tests-all` produces one consolidated report for the complete run.
 The distributed task validates the client's cached broker public certificate;
 if an older runtime key is present, rerun it with `--force-certificates` to
 replace that public certificate. It never copies the broker private key.

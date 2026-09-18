@@ -6,6 +6,9 @@
 !*-tests/__norfab__/artifacts/
 *-tests/__norfab__/artifacts/*
 !*-tests/__norfab__/artifacts/.gitkeep
+*-tests/groups/
+
+reports/*.md
 
 distributed-basic/*/__norfab__/*
 !distributed-basic/*/__norfab__/.gitkeep

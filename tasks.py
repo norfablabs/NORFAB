@@ -18,7 +18,10 @@ import subprocess
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from pathlib import Path
+from uuid import uuid4
+from xml.etree import ElementTree
 
 from invoke import Collection, task
 from invoke.exceptions import Exit
@@ -66,7 +69,7 @@ CLIENT_BROKER_PUBLIC_KEYS = (
 
 # Public Invoke suite name -> (Docker Compose service, default pytest marker).
 # This single mapping drives task registration, aliases, image builds, and the
-# sequential all-suites runner.
+# all-suites runner.
 SUITES = {
     "core": ("core-tests", "core"),
     "nornir": ("nornir-service-tests", "nornir"),
@@ -80,6 +83,20 @@ SUITES = {
     "filesharing": ("filesharing-service-tests", "filesharing"),
     "dummy": ("dummy-service-tests", "dummy"),
     "nfcli": ("nfcli-tests", "nfcli"),
+}
+
+# The aggregate starts the regular pytest runners concurrently. Containerlab
+# has host-level networking/runtime requirements and remains an explicit task;
+# the idle profiler and distributed topology are separate Compose workflows
+# and are intentionally not represented in SUITES.
+ALL_SUITES = tuple(suite for suite in SUITES if suite != "containerlab")
+DOCKER_REPORTS_DIR = DOCKER_DIR / "reports"
+
+# NetBox is large enough to warrant one dedicated container per test module.
+# Group names intentionally match filenames so task names stay predictable.
+NETBOX_TEST_GROUPS = {
+    path.stem.removeprefix("test_"): path.relative_to(ROOT).as_posix()
+    for path in sorted((ROOT / "tests" / "services" / "netbox").glob("test_*.py"))
 }
 
 
@@ -354,11 +371,18 @@ def _run_suite(
     python_version="",
     runtime=None,
     junit_name="",
+    container_name="",
 ):
     """Run one mapped pytest suite in Compose and return its exit status."""
     service, default_marker = SUITES[suite]
     runtime = runtime or _prepare_runtime(service)
+    # Restrict collection before applying the marker. Collecting the entire
+    # tests tree imports unrelated worker modules whose task decorators share
+    # a process-global registry that Linux worker processes can inherit.
+    selector = selector or _suite_test_root(suite).relative_to(ROOT).as_posix()
     args = _compose() + ["run", "--rm"]
+    if container_name:
+        args += ["--name", container_name]
     if build:
         args.append("--build")
     if junit_name:
@@ -372,8 +396,7 @@ def _run_suite(
     # Arguments after the service replace its Compose `command`, so always add
     # a marker explicitly to avoid accidentally running the entire repository.
     args += [service, "-m", marker or default_marker]
-    if selector:
-        args.append(selector)
+    args.append(selector)
     if keyword:
         args += ["-k", keyword]
     if pytest_args:
@@ -434,6 +457,246 @@ def _run_suite_parallel(
     return max((return_code for _test_file, return_code in results), default=0)
 
 
+def _run_netbox_group(group, build=False, python_version=""):
+    """Run one named NetBox task group in a dedicated Compose container."""
+    if group not in NETBOX_TEST_GROUPS:
+        raise ValueError(
+            f"Unknown NetBox test group {group!r}; choose from "
+            f"{', '.join(NETBOX_TEST_GROUPS)}"
+        )
+    service = SUITES["netbox"][0]
+    if build:
+        _run(_compose() + ["build", service], env=_environment(python_version))
+    runtime = DOCKER_DIR / service / "groups" / group / "__norfab__"
+    (runtime / "artifacts").mkdir(parents=True, exist_ok=True)
+    container_name = f"norfab-tests-netbox-{group}-{uuid4().hex[:8]}"
+    return _run_suite(
+        "netbox",
+        selector=NETBOX_TEST_GROUPS[group],
+        marker="netbox",
+        python_version=python_version,
+        runtime=runtime,
+        junit_name=f"{group}-junit.xml",
+        container_name=container_name,
+    )
+
+
+def _run_netbox_groups(build=False, python_version=""):
+    """Run each NetBox test file in its own concurrent Compose container."""
+    service = SUITES["netbox"][0]
+    if build:
+        _run(_compose() + ["build", service], env=_environment(python_version))
+
+    def run_group(group):
+        return group, _run_netbox_group(group, python_version=python_version)
+
+    print(
+        f"Running {len(NETBOX_TEST_GROUPS)} NetBox test-file containers concurrently",
+        flush=True,
+    )
+    with ThreadPoolExecutor(max_workers=len(NETBOX_TEST_GROUPS)) as executor:
+        results = list(executor.map(run_group, NETBOX_TEST_GROUPS))
+
+    print("NetBox test-file results:")
+    for group, return_code in results:
+        status = "passed" if return_code == 0 else f"failed (status {return_code})"
+        print(f"  {group}: {status}")
+    return max((return_code for _group, return_code in results), default=0)
+
+
+def _netbox_group_task(group):
+    """Create an Invoke task for one NetBox test-module Docker runner."""
+
+    @task(
+        help={
+            "build": "Build the NetBox runner image before testing.",
+            "python_version": "Docker runner Python version.",
+        }
+    )
+    def run(_context, build=False, python_version=""):
+        started_at = datetime.now().astimezone()
+        previous_junit = _junit_snapshot()
+        return_code = _run_netbox_group(group, build, python_version)
+        _write_docker_test_report(
+            [("netbox", return_code)],
+            previous_junit,
+            started_at,
+            python_version,
+            report_name=f"docker-tests-netbox-{group}",
+            invocation={"Selector": NETBOX_TEST_GROUPS[group]},
+        )
+        if return_code:
+            print(
+                f"Docker NetBox group {group} exited with status "
+                f"{return_code} (ignored)"
+            )
+
+    run.__doc__ = f"Run test_{group}.py in a dedicated NetBox container."
+    return run
+
+
+def _junit_snapshot():
+    """Return modification signatures for existing Docker JUnit artifacts."""
+    return {
+        path.resolve(): (path.stat().st_mtime_ns, path.stat().st_size)
+        for path in DOCKER_DIR.glob("*-tests/**/artifacts/*-junit.xml")
+    }
+
+
+def _markdown_cell(value):
+    """Escape text for use in a Markdown table cell."""
+    return str(value).replace("|", "\\|").replace("\r", " ").replace("\n", " ")
+
+
+def _write_docker_test_report(
+    results,
+    previous_junit,
+    started_at,
+    python_version,
+    report_name="docker-tests-all",
+    invocation=None,
+):
+    """Write a consolidated Markdown report from JUnit files changed this run."""
+    report_suites = tuple(suite for suite, _return_code in results)
+    report_data = {}
+    for suite, return_code in results:
+        service = SUITES[suite][0]
+        junit_files = []
+        for path in (DOCKER_DIR / service).glob("**/artifacts/*-junit.xml"):
+            resolved = path.resolve()
+            signature = (path.stat().st_mtime_ns, path.stat().st_size)
+            if previous_junit.get(resolved) != signature:
+                junit_files.append(path)
+
+        counts = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
+        duration = 0.0
+        failures = []
+        parse_errors = []
+        for junit_file in sorted(junit_files):
+            try:
+                root = ElementTree.parse(junit_file).getroot()
+            except (ElementTree.ParseError, OSError) as exc:
+                parse_errors.append(f"{junit_file.relative_to(DOCKER_DIR)}: {exc}")
+                continue
+            for testcase in root.iter("testcase"):
+                duration += float(testcase.get("time", 0) or 0)
+                failure = testcase.find("failure")
+                error = testcase.find("error")
+                skipped = testcase.find("skipped")
+                if failure is not None:
+                    counts["failed"] += 1
+                    problem = failure
+                elif error is not None:
+                    counts["errors"] += 1
+                    problem = error
+                elif skipped is not None:
+                    counts["skipped"] += 1
+                    continue
+                else:
+                    counts["passed"] += 1
+                    continue
+                test_name = "::".join(
+                    part
+                    for part in (testcase.get("classname"), testcase.get("name"))
+                    if part
+                )
+                details = (problem.text or problem.get("message") or "").strip()
+                failures.append((test_name or "unknown test", details))
+
+        report_data[suite] = {
+            "return_code": return_code,
+            "junit_files": junit_files,
+            "counts": counts,
+            "duration": duration,
+            "failures": failures,
+            "parse_errors": parse_errors,
+        }
+
+    completed_at = datetime.now().astimezone()
+    total_duration = sum(item["duration"] for item in report_data.values())
+    totals = {
+        key: sum(item["counts"][key] for item in report_data.values())
+        for key in ("passed", "failed", "errors", "skipped")
+    }
+    lines = [
+        "# Docker Test Report",
+        "",
+        f"- Started: {started_at.isoformat(timespec='seconds')}",
+        f"- Completed: {completed_at.isoformat(timespec='seconds')}",
+        f"- Python runner: {python_version or 'Compose default'}",
+        f"- JUnit test duration: {total_duration:.2f}s",
+    ]
+    if invocation:
+        lines.extend(
+            f"- {label}: `{_markdown_cell(value)}`"
+            for label, value in invocation.items()
+            if value not in (None, "", False, 0)
+        )
+    lines += [
+        "",
+        "| Suite | Passed | Failed | Errors | Skipped | Duration | Status |",
+        "|---|---:|---:|---:|---:|---:|---|",
+    ]
+    for suite in report_suites:
+        item = report_data[suite]
+        counts = item["counts"]
+        if not item["junit_files"]:
+            status = f"NO REPORT (container status {item['return_code']})"
+        elif item["parse_errors"]:
+            status = f"INVALID REPORT (container status {item['return_code']})"
+        elif item["return_code"] or counts["failed"] or counts["errors"]:
+            status = f"FAIL (container status {item['return_code']})"
+        else:
+            status = "PASS"
+        lines.append(
+            f"| {_markdown_cell(suite)} | {counts['passed']} | {counts['failed']} | "
+            f"{counts['errors']} | {counts['skipped']} | {item['duration']:.2f}s | "
+            f"{_markdown_cell(status)} |"
+        )
+    lines += [
+        "",
+        f"**Total:** {totals['passed']} passed, {totals['failed']} failed, "
+        f"{totals['errors']} errors, {totals['skipped']} skipped.",
+    ]
+
+    problems_found = False
+    for suite in report_suites:
+        item = report_data[suite]
+        if not item["failures"] and not item["parse_errors"] and item["junit_files"]:
+            continue
+        if not problems_found:
+            lines += ["", "## Failures and report problems"]
+            problems_found = True
+        lines += ["", f"### {suite}"]
+        if not item["junit_files"]:
+            lines += ["", "No JUnit XML file was produced for this run."]
+        for parse_error in item["parse_errors"]:
+            lines += ["", f"Could not parse `{parse_error}`."]
+        for test_name, details in item["failures"]:
+            lines += ["", f"#### `{test_name}`"]
+            if details:
+                lines += ["", "```text", details.replace("```", "` ` `"), "```"]
+
+    lines += ["", "## JUnit artifacts"]
+    for suite in report_suites:
+        files = report_data[suite]["junit_files"]
+        lines += ["", f"### {suite}"]
+        if files:
+            lines.extend(
+                f"- `{path.relative_to(ROOT).as_posix()}`" for path in sorted(files)
+            )
+        else:
+            lines.append("- No report generated")
+
+    DOCKER_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    report_path = DOCKER_REPORTS_DIR / (
+        f"{report_name}-{started_at.strftime('%Y%m%d-%H%M%S-%f')}.md"
+    )
+    report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"Docker test report: {report_path}", flush=True)
+    return report_path
+
+
 def _suite_task(suite):
     """Create an Invoke task and singular alias for one entry in ``SUITES``."""
 
@@ -463,7 +726,13 @@ def _suite_task(suite):
     ):
         # Individual tasks are intended for interactive use, so report test
         # failures without turning them into an Invoke traceback.
-        if parallel_runs:
+        started_at = datetime.now().astimezone()
+        previous_junit = _junit_snapshot()
+        if suite == "netbox" and not any(
+            (selector, marker, keyword, pytest_args, parallel_runs)
+        ):
+            return_code = _run_netbox_groups(build, python_version)
+        elif parallel_runs:
             return_code = _run_suite_parallel(
                 suite,
                 selector,
@@ -478,6 +747,21 @@ def _suite_task(suite):
             return_code = _run_suite(
                 suite, selector, marker, keyword, pytest_args, build, python_version
             )
+        _write_docker_test_report(
+            [(suite, return_code)],
+            previous_junit,
+            started_at,
+            python_version,
+            report_name=f"docker-tests-{suite}",
+            invocation={
+                "Selector": selector
+                or _suite_test_root(suite).relative_to(ROOT).as_posix(),
+                "Marker": marker or SUITES[suite][1],
+                "Keyword": keyword,
+                "Pytest arguments": pytest_args,
+                "Parallel runs": parallel_runs,
+            },
+        )
         if return_code:
             print(f"Docker suite {suite} exited with status {return_code} (ignored)")
 
@@ -516,7 +800,6 @@ def docker_tests_build(_context, suite="", python_version=""):
 @task(
     name="docker-tests-all",
     help={
-        "fail_fast": "Stop after the first failed suite.",
         "build": "Build runner images before testing.",
         "python_version": "Docker runner Python version.",
         "parallel_runs": "Maximum concurrent per-file test containers.",
@@ -524,29 +807,46 @@ def docker_tests_build(_context, suite="", python_version=""):
 )
 def docker_tests_all(
     _context,
-    fail_fast=False,
     build=False,
     python_version="",
     parallel_runs=0,
 ):
-    """Run every Docker suite sequentially and summarize failures."""
-    failures = []
-    # Unlike individual suite tasks, the aggregate retains each status and
-    # ultimately fails so it remains suitable for a full validation run.
-    for suite in SUITES:
-        if parallel_runs:
+    """Run Docker suites concurrently, excluding special-purpose runners."""
+    started_at = datetime.now().astimezone()
+    previous_junit = _junit_snapshot()
+    if build:
+        services = [SUITES[suite][0] for suite in ALL_SUITES]
+        _run(_compose() + ["build", *services], env=_environment(python_version))
+
+    def run_suite(suite):
+        if suite == "netbox" and not parallel_runs:
+            return_code = _run_netbox_groups(python_version=python_version)
+        elif parallel_runs:
             return_code = _run_suite_parallel(
                 suite,
-                build=build,
                 python_version=python_version,
                 parallel_runs=parallel_runs,
             )
         else:
-            return_code = _run_suite(suite, build=build, python_version=python_version)
-        if return_code:
-            failures.append(suite)
-            if fail_fast:
-                break
+            return_code = _run_suite(suite, python_version=python_version)
+        return suite, return_code
+
+    # Unlike individual suite tasks, the aggregate retains each status and
+    # ultimately fails so it remains suitable for a full validation run.
+    print(
+        f"Running {len(ALL_SUITES)} Docker test suites concurrently: "
+        f"{', '.join(ALL_SUITES)}",
+        flush=True,
+    )
+    with ThreadPoolExecutor(max_workers=len(ALL_SUITES)) as executor:
+        results = list(executor.map(run_suite, ALL_SUITES))
+
+    failures = [suite for suite, return_code in results if return_code]
+    print("Docker all-suites results:")
+    for suite, return_code in results:
+        status = "passed" if return_code == 0 else f"failed (status {return_code})"
+        print(f"  {suite}: {status}")
+    _write_docker_test_report(results, previous_junit, started_at, python_version)
     if failures:
         raise RuntimeError(f"Docker test suites failed: {', '.join(failures)}")
 
@@ -751,6 +1051,15 @@ for suite_name in SUITES:
     namespace.add_task(
         _suite_task(suite_name),
         name=f"docker-tests-{suite_name}",
+    )
+
+# Register task-level NetBox runners such as
+# ``docker-tests-netbox-sync-bgp-peerings``. They reuse the Compose service
+# image but run in explicitly named, dedicated containers and runtime folders.
+for group_name in NETBOX_TEST_GROUPS:
+    namespace.add_task(
+        _netbox_group_task(group_name),
+        name=f"docker-tests-netbox-{group_name}",
     )
 
 ns = namespace

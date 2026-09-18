@@ -17,26 +17,22 @@ from norfab.core.nfapi import NorFab
 
 def _get_test_workers(nf: NorFab) -> list | bool:
     """Return the Docker-requested worker subset, preserving topology metadata."""
-    requested = {
+    requested = [
         name.strip()
         for name in os.environ.get("NORFAB_TEST_WORKERS", "").split(",")
         if name.strip()
-    }
+    ]
     if not requested:
         return True
 
-    workers = []
-    selected = set()
+    topology_workers = {}
     for worker in nf.inventory.topology.get("workers", []):
         worker_name = next(iter(worker)) if isinstance(worker, dict) else worker
-        if worker_name in requested:
-            workers.append(worker)
-            selected.add(worker_name)
+        topology_workers[worker_name] = worker
 
     # Built-in workers such as filesharing are added by NorFab during start-up
     # and therefore are not necessarily present in the original topology.
-    workers.extend(sorted(requested - selected))
-    return workers
+    return [topology_workers.get(worker_name, worker_name) for worker_name in requested]
 
 
 @pytest.fixture(scope="module")

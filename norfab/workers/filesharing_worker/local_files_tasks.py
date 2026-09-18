@@ -34,10 +34,10 @@ class LocalFilesTasks:
         """
         if not url.startswith("nf://"):
             raise ValueError(f"'{url}' - invalid URL format")
-        url_path = url.replace("nf://", "")
+        url_path = url.removeprefix("nf://").replace("\\", "/")
         url_path = url_path.lstrip("/\\")
-        base_abs = os.path.abspath(self.base_dir)
-        candidate = os.path.abspath(os.path.join(base_abs, *url_path.split("/")))
+        base_abs = os.path.realpath(self.base_dir)
+        candidate = os.path.realpath(os.path.join(base_abs, *url_path.split("/")))
         if os.path.commonpath([base_abs, candidate]) != base_abs:
             raise ValueError(f"'{url}' - invalid URL path")
         return candidate
@@ -180,7 +180,7 @@ class LocalFilesTasks:
                 if root.count("__") >= 2:
                     continue
                 root = root.replace(self.base_dir, "")
-                root = root.lstrip("\\")
+                root = root.lstrip("/\\")
                 root = root.replace("\\", "/")
                 for filename in files:
                     if filename.startswith("."):

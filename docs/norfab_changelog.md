@@ -10,6 +10,8 @@
 6. Fixed `NorFab` instances sharing mutable worker-process and plugin registries, preventing one instance from observing or destroying another instance's runtime state.
 7. Prevented repeated `NorFab.start()` calls and attempts to restart a destroyed instance, avoiding ambiguous incremental startup and partially initialized runtime state. A failed startup attempt now requires constructing a new `NorFab` instance before retrying.
 8. Added fail-fast Pydantic validation for circular worker dependencies in topology inventory before broker or worker startup.
+9. Fixed FileSharing worker and client `nf://` path validation to reject traversal using Windows-style backslashes on Linux and resolve symbolic links before enforcing publication and download directory boundaries.
+10. Fixed the FileSharing `walk` task returning URLs with an extra slash, such as `nf:///filesharing/file.txt`, when running on POSIX systems.
 
 ## ENHANCEMENTS
 

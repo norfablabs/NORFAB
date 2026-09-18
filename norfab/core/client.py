@@ -1726,10 +1726,10 @@ class NFPClient(object):
         # prevent path traversal / absolute paths
         url_path = url.replace("nf://", "").replace("\\", "/")
         url_path = url_path.lstrip("/\\")
-        destination = os.path.abspath(
+        destination = os.path.realpath(
             os.path.join(self.base_dir, "fetchedfiles", *url_path.split("/"))
         )
-        fetched_root = os.path.abspath(os.path.join(self.base_dir, "fetchedfiles"))
+        fetched_root = os.path.realpath(os.path.join(self.base_dir, "fetchedfiles"))
         if os.path.commonpath([fetched_root, destination]) != fetched_root:
             result["status"] = "500"
             result["error"] = "Invalid url path"

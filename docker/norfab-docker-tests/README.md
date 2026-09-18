@@ -21,9 +21,37 @@ Run `poetry run inv --help docker-tests-nornir` for test selector, marker,
 keyword, image build, Python-version, and file-parallel options. Direct Compose
 commands below remain useful for troubleshooting.
 
+By default, each Invoke suite task passes its conventional test directory to
+pytest before applying the suite marker. This avoids importing unrelated test
+modules and worker task decorators. An explicit `--selector` replaces that
+default directory.
+
+NetBox also has one Invoke runner per `test_*.py` file. For example:
+
+```bash
+poetry run inv docker-tests-netbox-devices
+poetry run inv docker-tests-netbox-bgp
+poetry run inv docker-tests-netbox-crud
+```
+
+These are dynamic `docker compose run` invocations, not duplicate services in
+`compose.yaml`. Each gets a descriptive
+`norfab-tests-netbox-<file>-<run-id>` container name plus isolated logs and
+JUnit output under `netbox-service-tests/groups/<file>/`. Running
+`docker-tests-netbox` or `docker-tests-all` starts every NetBox file runner.
+
 Individual suite tasks print but ignore a non-zero pytest container status so
 the command can remain part of an interactive workflow. `docker-tests-all`
-retains those statuses and fails after listing every failed suite.
+runs the regular pytest suite containers concurrently, retains their statuses,
+and fails after listing every failed suite. It does not start
+`containerlab-service-tests`, `idle-norfab`, or the distributed topology; run
+their dedicated Invoke tasks explicitly when needed.
+Every Docker test invocation creates a timestamped Markdown summary in
+`docker/norfab-docker-tests/reports/`, including runs narrowed by selectors,
+markers, keywords, extra pytest arguments, dedicated NetBox file tasks, or
+per-file parallelism. The summary includes counts, durations, failures,
+missing/invalid JUnit warnings, and paths to artifacts created or updated
+during that run. The all-suites command produces one consolidated report.
 
 Each service mounts:
 

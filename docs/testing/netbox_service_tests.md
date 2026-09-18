@@ -70,6 +70,20 @@ poetry run pytest services/netbox/test_interfaces.py
 poetry run pytest services/netbox -m netbox_get_interfaces
 ```
 
+Run one test file in a dedicated Docker container through Invoke:
+
+```bash
+poetry run inv docker-tests-netbox-interfaces
+poetry run inv docker-tests-netbox-bgp
+poetry run inv docker-tests-netbox-crud
+```
+
+The task-level runners reuse `netbox-service-tests` from Compose and create
+descriptively named containers such as
+`norfab-tests-netbox-bgp-<run-id>`. Runtime data and JUnit XML
+are isolated under `docker/norfab-docker-tests/netbox-service-tests/groups/`.
+The aggregate `docker-tests-netbox` task starts all NetBox file runners.
+
 Run one class:
 
 ```bash
