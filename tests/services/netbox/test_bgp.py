@@ -293,12 +293,12 @@ class TestGetBgpPeerings:
 
 
 BGP_CREATE_SESSIONS_TEST_DEVICES = [
-    "ceos-spine-1",
-    "ceos-spine-2",
-    "ceos-leaf-1",
-    "ceos-leaf-2",
-    "ceos-leaf-3",
-    "vmx-1",
+    "fn-ceos-sp-1",
+    "fn-ceos-sp-2",
+    "fn-ceos-lf-1",
+    "fn-ceos-lf-2",
+    "fn-ceos-lf-3",
+    "fn-junos-3",
 ]
 
 
@@ -863,12 +863,12 @@ class TestSyncBgpPeerings:
             ), f"{worker}: expected errors for nonexistent device"
 
     def test_sync_bgp_peerings_with_nornir_filter(self, nfclient):
-        """Devices sourced from Nornir filter FC='spine'; verify spine sessions created."""
+        """Devices sourced from the FakeNOS spine name filter."""
         ret = nfclient.run_job(
             "netbox",
             "sync_bgp_peerings",
             workers="any",
-            kwargs={"FC": "spine", "rir": "lab"},
+            kwargs={"FB": ["fn-ceos-sp-*"], "rir": "lab"},
         )
         pprint.pprint(ret)
         nb = get_pynetbox(nfclient)
@@ -876,8 +876,8 @@ class TestSyncBgpPeerings:
             assert res["failed"] == False, f"{worker} failed: {res['errors']}"
             for device_name, device_res in res["result"].items():
                 assert (
-                    "spine" in device_name
-                ), f"{worker}: unexpected device '{device_name}' for FC='spine' filter"
+                    device_name in {"fn-ceos-sp-1", "fn-ceos-sp-2"}
+                ), f"{worker}: unexpected device '{device_name}' for spine filter"
                 assert (
                     len(device_res["created"]) > 0
                 ), f"{worker}: expected created sessions for '{device_name}'"
@@ -1206,7 +1206,7 @@ class TestSyncBgpPeerings:
     def test_sync_bgp_peerings_filter_by_description(self, nfclient):
         """Sync only sessions matching a description glob pattern; verify all created
         sessions in NetBox have a description matching that pattern."""
-        target_device = "ceos-spine-1"
+        target_device = "fn-ceos-sp-1"
         desc_pattern = "ceos-leaf-1 Loopback*"
         nb = get_pynetbox(nfclient)
 
@@ -1243,7 +1243,7 @@ class TestSyncBgpPeerings:
 
     def test_sync_bgp_peerings_ignore_peer_ranges(self, nfclient):
         """Peers whose remote IP matches ignore_peer_ranges are not created."""
-        target_device = "ceos-leaf-1"
+        target_device = "fn-ceos-lf-1"
         ignored_peer_ip = "172.16.1.101"
         ignored_session = f"{target_device}_default_{ignored_peer_ip}"
         kwargs = {
@@ -1293,7 +1293,7 @@ class TestSyncBgpPeerings:
         """Pre-create sessions; remove an import policy from one session in NetBox;
         re-run sync; verify the session is listed as updated and the policy is restored.
         """
-        target_device = "vmx-1"
+        target_device = "fn-junos-3"
         nb = get_pynetbox(nfclient)
 
         # First sync: create sessions in NetBox
@@ -1307,7 +1307,7 @@ class TestSyncBgpPeerings:
         # Find a session that has at least one import policy
         sessions = list(
             nb.plugins.bgp.session.filter(
-                device=target_device, name="vmx-1_default_10.10.0.14"
+                device=target_device, name="fn-junos-3_default_10.10.0.14"
             )
         )
         target_session = next((s for s in sessions if s.import_policies), None)
@@ -1346,7 +1346,7 @@ class TestSyncBgpPeerings:
         on the BGP session.  Confirms that even with the default value the VRF is
         always sourced from/written to a custom field, not the built-in vrf attribute.
         """
-        target_device = "vmx-1"
+        target_device = "fn-junos-3"
         ret = nfclient.run_job(
             "netbox",
             "sync_bgp_peerings",
@@ -1369,7 +1369,7 @@ class TestSyncBgpPeerings:
             "sync_bgp_peerings",
             workers="any",
             kwargs={
-                "devices": ["vmx-1"],
+                "devices": ["fn-junos-3"],
                 "rir": "lab",
                 "vrf_custom_field": "vrf_nonexistent",
             },
@@ -1380,15 +1380,15 @@ class TestSyncBgpPeerings:
             assert not res["errors"], f"{worker}: unexpected errors: {res['errors']}"
 
     def test_sync_bgp_peerings_resolve_local_ip_via_peer(self, nfclient):
-        """Sync ceos-leaf-1 which has a BGP peer at 172.16.1.101/30 but no local address
+        """Sync fn-ceos-lf-1 which has a BGP peer at 172.16.1.101/30 but no local address
         in parsed data; verify that resolve_local_ip_via_peer derives the local IP
-        from the subnet and the session ceos-leaf-1_default_172.16.1.101 is created.
+        from the subnet and the session fn-ceos-lf-1_default_172.16.1.101 is created.
 
         For this test to work 172.16.1.102/30 IP need to be assigned to Loopback1001
-        interface of ceos-leaf-1 device.
+        interface of fn-ceos-lf-1 device.
         """
-        target_device = "ceos-leaf-1"
-        expected_session = "ceos-leaf-1_default_172.16.1.101"
+        target_device = "fn-ceos-lf-1"
+        expected_session = "fn-ceos-lf-1_default_172.16.1.101"
         nb = get_pynetbox(nfclient)
 
         ret = nfclient.run_job(

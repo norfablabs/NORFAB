@@ -20,17 +20,12 @@ pytestmark = pytest.mark.core
 
 
 class TestDedicatedNfApiClient:
-    def test_standalone_client(self, nfclient):
+    def test_standalone_client(self, nfclient: NFPClient, tmp_path: Path) -> None:
         inventory_data = {"broker": dict(nfclient.inventory.broker)}
         client_name = f"test_dedicated_client_{uuid4().hex}"
-        client_base_dir = Path(__file__).resolve().parent / "temp"
-        # if client_base_dir.exists():
-        #     shutil.rmtree(client_base_dir)
-        client_base_dir.mkdir()
-
         nf = NorFab(
             inventory_data=inventory_data,
-            base_dir=str(client_base_dir),
+            base_dir=str(tmp_path),
             run_broker=False,
             run_workers=False,
         )
@@ -65,7 +60,7 @@ class TestDedicatedNfApiClient:
 
 
 class TestRemoteBrokerClient:
-    def test_list_workers_mmi_remote_broker(self):
+    def test_list_workers_mmi_remote_broker(self, tmp_path: Path) -> None:
         inventory_data = {
             "broker": {
                 "endpoint": "tcp://192.168.1.220:5555",
@@ -74,14 +69,9 @@ class TestRemoteBrokerClient:
             }
         }
         client_name = f"test_remote_broker_client_{uuid4().hex}"
-        client_base_dir = Path(__file__).resolve().parent / "temp"
-        # if client_base_dir.exists():
-        #     shutil.rmtree(client_base_dir)
-        client_base_dir.mkdir()
-
         nf = NorFab(
             inventory_data=inventory_data,
-            base_dir=str(client_base_dir),
+            base_dir=str(tmp_path),
             run_broker=False,
             run_workers=False,
         )

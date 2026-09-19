@@ -434,8 +434,8 @@ ip_addresses = [
     {"address": "10.0.2.10/30"},  # eth107 fceos5
     {"address": "10.0.2.8/30"},  # fceos4-fceos5-eth107-vrf
     {"address": "10.0.2.9/30"},  # fceos5-fceos4-eth107-vrf
-    {"address": "172.16.1.101/30"},  # BGP peering reolve localip via peer ip test
-    {"address": "172.16.1.102/30"},  # BGP peering reolve localip via peer ip test
+    {"address": "172.16.1.101/30"},  # BGP peering local IP resolution test
+    {"address": "172.16.1.102/30"},  # BGP peering local IP resolution test
 ]
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
@@ -936,9 +936,9 @@ interfaces = [
     {"name": "eth107", "device": {"name": "fceos5"}, "type": "10gbase-x-sfpp"},
     {
         "name": "Loopback1001",
-        "device": {"name": "ceos-leaf-1"},
+        "device": {"name": "fn-ceos-lf-1"},
         "type": "virtual",
-        "description": "BGP reolve local ip via peer ip test",
+        "description": "BGP resolve local IP via peer IP test",
     },
 ]
 
@@ -1334,7 +1334,7 @@ ip_adress_to_devices = [
     {
         "address": "172.16.1.102/30",
         "interface": "Loopback1001",
-        "device": "ceos-leaf-1",
+        "device": "fn-ceos-lf-1",
     },
 ]
 # associate IP addresses to subinterfaces
@@ -2478,13 +2478,6 @@ devices = [
         },
     },
     {
-        "name": "vmx-1",
-        "device_type": {"slug": slugify("vMX")},
-        "device_role": {"name": "VirtualRouter"},
-        "tenant": {"name": "NORFAB"},
-        "site": {"name": "NORFAB-LAB"},
-    },
-    {
         "name": "fn-junos-1",
         "device_type": {"slug": slugify("vMX")},
         "device_role": {"name": "VirtualRouter"},
@@ -2513,6 +2506,23 @@ devices = [
             "nornir": {
                 "hostname": "127.0.0.1",
                 "port": 6206,
+                "username": "nornir",
+                "password": "nornir",
+            },
+        },
+    },
+    {
+        "name": "fn-junos-3",
+        "device_type": {"slug": slugify("vMX")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "juniper_junos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6207,
                 "username": "nornir",
                 "password": "nornir",
             },
@@ -3293,7 +3303,7 @@ def create_devices():
     )
 
 
-def create_sync_vrrp_data():
+def create_vrrp():
     """Create only the NetBox records required by VRRP synchronization tests."""
     log.info("creating VRRP synchronization test data")
     for prefix in prefixes:
@@ -4275,6 +4285,7 @@ def clean_up_netbox():
     delete_racks()
     delete_sites()
     delete_regions()
+    delete_vrrp()
     delete_tenants()
     delete_inventory_items_roles()
     delete_config_templates()
@@ -4320,6 +4331,7 @@ def populate_netbox():
     create_bgp_asn()
     create_bgp_peer_groups()
     create_bgp_peerings()
+    create_vrrp()
 
 
 def delete_interfaces():
@@ -4329,7 +4341,7 @@ def delete_interfaces():
         interface.delete()
 
 
-def delete_sync_vrrp_data():
+def delete_vrrp():
     """Delete only the NetBox records used by VRRP synchronization tests."""
     log.info("deleting VRRP synchronization test data")
     sync_interfaces = [
@@ -4498,7 +4510,7 @@ def main():
 
     if todo in ("1", "3"):
         if args.vrrp:
-            delete_sync_vrrp_data()
+            delete_vrrp()
         if args.bgp_peerings:
             delete_bgp_peerings()
         if args.custom_fields:
@@ -4646,7 +4658,7 @@ def main():
         if args.bgp_peerings:
             create_bgp_peerings()
         if args.vrrp:
-            create_sync_vrrp_data()
+            create_vrrp()
 
 
 if __name__ == "__main__":

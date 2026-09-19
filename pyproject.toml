@@ -107,7 +107,7 @@ uvicorn = { version = "0.51.0", optional = true }
 python-multipart = { version = "0.0.32", optional = true }
 
 # FakeNOS Service Dependencies
-fakenos = { version = "1.0.1", optional = true, python = ">=3.10,<3.13" }
+fakenos = { version = "1.2.1", optional = true, python = ">=3.10,<3.13" }
 
 # docs dependencies
 mkdocs = { version = "1.6.1", optional = true }

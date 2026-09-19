@@ -17,39 +17,44 @@ pytestmark = [
 class TestSyncVrfs:
     DEVICE_1 = "fn-ceos-lf-1"
     DEVICE_2 = "fn-ceos-lf-2"
-    VRF_NAMES = {"CONTROL_PLANE", "TENANT_A", "TENANT_B"}
+    # Keep this suite's NetBox records separate from parallel IPAM sync tests.
+    VRF_NAMES = {
+        "TEST_VRF_SYNC_CONTROL_PLANE",
+        "TEST_VRF_SYNC_TENANT_A",
+        "TEST_VRF_SYNC_TENANT_B",
+    }
     CONTROL_PLANE_INTERFACES = {"Ethernet1.101", "Ethernet2.101", "Loopback101"}
     ROUTE_TARGET_NAMES = {
-        "65000:101",
-        "65000:201",
-        "65000:202",
-        "65000:301",
-        "65000:302",
-        "65000:303",
-        "65000:999",
+        "65100:101",
+        "65100:201",
+        "65100:202",
+        "65100:301",
+        "65100:302",
+        "65100:303",
+        "65100:999",
     }
     DEVICE_1_ROUTE_TARGETS = {
-        "65000:101",
-        "65000:201",
-        "65000:202",
-        "65000:301",
-        "65000:302",
+        "65100:101",
+        "65100:201",
+        "65100:202",
+        "65100:301",
+        "65100:302",
     }
     ROUTING_POLICY_NAMES = {
-        "CONTROL_PLANE_IMPORT",
-        "CONTROL_PLANE_EXPORT",
-        "TENANT_A_IMPORT",
-        "TENANT_A_EXPORT",
-        "TENANT_B_IMPORT",
-        "TENANT_B_EXPORT",
-        "TENANT_A_EXTRA",
-        "TENANT_A_IPV6_IMPORT_TEST",
-        "TENANT_A_IPV6_EXPORT_TEST",
+        "TEST_VRF_SYNC_CONTROL_PLANE_IMPORT",
+        "TEST_VRF_SYNC_CONTROL_PLANE_EXPORT",
+        "TEST_VRF_SYNC_TENANT_A_IMPORT",
+        "TEST_VRF_SYNC_TENANT_A_EXPORT",
+        "TEST_VRF_SYNC_TENANT_B_IMPORT",
+        "TEST_VRF_SYNC_TENANT_B_EXPORT",
+        "TEST_VRF_SYNC_TENANT_A_EXTRA",
+        "TEST_VRF_SYNC_TENANT_A_IPV6_IMPORT_TEST",
+        "TEST_VRF_SYNC_TENANT_A_IPV6_EXPORT_TEST",
     }
     DEVICE_1_ROUTING_POLICIES = ROUTING_POLICY_NAMES - {
-        "TENANT_A_EXTRA",
-        "TENANT_A_IPV6_IMPORT_TEST",
-        "TENANT_A_IPV6_EXPORT_TEST",
+        "TEST_VRF_SYNC_TENANT_A_EXTRA",
+        "TEST_VRF_SYNC_TENANT_A_IPV6_IMPORT_TEST",
+        "TEST_VRF_SYNC_TENANT_A_IPV6_EXPORT_TEST",
     }
 
     @pytest.fixture(autouse=True)
@@ -167,7 +172,7 @@ class TestSyncVrfs:
     @staticmethod
     def _ipv6_record() -> dict:
         return {
-            "name": "TENANT_A",
+            "name": "TEST_VRF_SYNC_TENANT_A",
             "description": "Tenant A services",
             "interfaces": [],
             "address_families": {
@@ -180,8 +185,8 @@ class TestSyncVrfs:
                 "ipv6": {
                     "rt_import": [],
                     "rt_export": [],
-                    "route_policy_import": "TENANT_A_IPV6_IMPORT_TEST",
-                    "route_policy_export": "TENANT_A_IPV6_EXPORT_TEST",
+                    "route_policy_import": "TEST_VRF_SYNC_TENANT_A_IPV6_IMPORT_TEST",
+                    "route_policy_export": "TEST_VRF_SYNC_TENANT_A_IPV6_EXPORT_TEST",
                 },
             },
         }
@@ -192,13 +197,15 @@ class TestSyncVrfs:
             worker, self._stub_job(), devices=[self.DEVICE_1], dry_run=True
         )
         assert set(preview.result["routing_policies"]["create"]) == {
-            "TENANT_A_IPV6_IMPORT_TEST",
-            "TENANT_A_IPV6_EXPORT_TEST",
+            "TEST_VRF_SYNC_TENANT_A_IPV6_IMPORT_TEST",
+            "TEST_VRF_SYNC_TENANT_A_IPV6_EXPORT_TEST",
         }
         changes = preview.result["vrfs"]["create"]
-        assert changes == ["TENANT_A"]
+        assert changes == ["TEST_VRF_SYNC_TENANT_A"]
         assert (
-            self.nb.plugins.bgp.routing_policy.get(name="TENANT_A_IPV6_IMPORT_TEST")
+            self.nb.plugins.bgp.routing_policy.get(
+                name="TEST_VRF_SYNC_TENANT_A_IPV6_IMPORT_TEST"
+            )
             is None
         )
 
@@ -206,15 +213,15 @@ class TestSyncVrfs:
             worker, self._stub_job(), devices=[self.DEVICE_1]
         )
         assert set(applied.result["routing_policies"]["created"]) == {
-            "TENANT_A_IPV6_IMPORT_TEST",
-            "TENANT_A_IPV6_EXPORT_TEST",
+            "TEST_VRF_SYNC_TENANT_A_IPV6_IMPORT_TEST",
+            "TEST_VRF_SYNC_TENANT_A_IPV6_EXPORT_TEST",
         }
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         assert self._custom_field_policy_names(tenant_a, "rpl_import_ipv6") == {
-            "TENANT_A_IPV6_IMPORT_TEST"
+            "TEST_VRF_SYNC_TENANT_A_IPV6_IMPORT_TEST"
         }
         assert self._custom_field_policy_names(tenant_a, "rpl_export_ipv6") == {
-            "TENANT_A_IPV6_EXPORT_TEST"
+            "TEST_VRF_SYNC_TENANT_A_IPV6_EXPORT_TEST"
         }
 
     def test_missing_bgp_plugin_ignores_policies(self, nfclient: Any) -> None:
@@ -223,7 +230,7 @@ class TestSyncVrfs:
             worker, self._stub_job(), devices=[self.DEVICE_1], dry_run=True
         )
         assert preview.errors == []
-        assert preview.result["vrfs"]["create"] == ["TENANT_A"]
+        assert preview.result["vrfs"]["create"] == ["TEST_VRF_SYNC_TENANT_A"]
         assert preview.result["routing_policies"] == {
             "create": [],
             "update": {},
@@ -232,30 +239,35 @@ class TestSyncVrfs:
         }
 
     def test_preserve_description_modes(self, nfclient: Any) -> None:
-        self.nb.ipam.vrfs.create(name="TENANT_B", description="NetBox empty-live")
+        self.nb.ipam.vrfs.create(
+            name="TEST_VRF_SYNC_TENANT_B", description="NetBox empty-live"
+        )
 
         self._successful_results(self._sync(nfclient, [self.DEVICE_1]))
-        assert self.nb.ipam.vrfs.get(name="TENANT_B").description == (
+        assert self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_B").description == (
             "NetBox empty-live"
         )
 
         self._successful_results(
             self._sync(nfclient, [self.DEVICE_1], preserve_description=False)
         )
-        assert self.nb.ipam.vrfs.get(name="TENANT_B").description == ""
+        assert self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_B").description == ""
 
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         tenant_a.description = "NetBox curated"
         tenant_a.save()
         self._successful_results(
             self._sync(nfclient, [self.DEVICE_1], preserve_description=True)
         )
-        assert self.nb.ipam.vrfs.get(name="TENANT_A").description == "NetBox curated"
+        assert (
+            self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A").description
+            == "NetBox curated"
+        )
 
         self._successful_results(
             self._sync(nfclient, [self.DEVICE_1], preserve_description=False)
         )
-        assert self.nb.ipam.vrfs.get(name="TENANT_A").description == (
+        assert self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A").description == (
             "Tenant A services"
         )
 
@@ -283,9 +295,12 @@ class TestSyncVrfs:
                 set(result["result"]["interfaces"][self.DEVICE_1]["update"])
                 == self.CONTROL_PLANE_INTERFACES
             )
-        assert self.nb.ipam.vrfs.get(name="TENANT_A") is None
-        assert self.nb.ipam.route_targets.get(name="65000:201") is None
-        assert self.nb.plugins.bgp.routing_policy.get(name="TENANT_A_IMPORT") is None
+        assert self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A") is None
+        assert self.nb.ipam.route_targets.get(name="65100:201") is None
+        assert (
+            self.nb.plugins.bgp.routing_policy.get(name="TEST_VRF_SYNC_TENANT_A_IMPORT")
+            is None
+        )
 
         first_sync = self._sync(nfclient, [self.DEVICE_1], batch_size=1)
         for result in self._successful_results(first_sync):
@@ -317,23 +332,23 @@ class TestSyncVrfs:
                 == self.CONTROL_PLANE_INTERFACES
             )
 
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         assert tenant_a.description == "Tenant A services"
         assert sorted(target.name for target in tenant_a.import_targets) == [
-            "65000:201",
-            "65000:301",
+            "65100:201",
+            "65100:301",
         ]
         assert sorted(target.name for target in tenant_a.export_targets) == [
-            "65000:201",
-            "65000:302",
+            "65100:201",
+            "65100:302",
         ]
         device = self.nb.dcim.devices.get(name=self.DEVICE_1)
         assert self._custom_field_device_ids(tenant_a, "devices") == {device.id}
         assert self._custom_field_policy_names(tenant_a, "rpl_import_ipv4") == {
-            "TENANT_A_IMPORT"
+            "TEST_VRF_SYNC_TENANT_A_IMPORT"
         }
         assert self._custom_field_policy_names(tenant_a, "rpl_export_ipv4") == {
-            "TENANT_A_EXPORT"
+            "TEST_VRF_SYNC_TENANT_A_EXPORT"
         }
         assert self._custom_field_policy_names(tenant_a, "rpl_import_ipv6") == set()
         assert self._custom_field_policy_names(tenant_a, "rpl_export_ipv6") == set()
@@ -372,11 +387,11 @@ class TestSyncVrfs:
         self._successful_results(response)
 
     def test_extends_route_targets_and_updates_description(self, nfclient: Any) -> None:
-        existing_target = self.nb.ipam.route_targets.create(name="65000:999")
-        self.nb.ipam.route_targets.create(name="65000:201")
+        existing_target = self.nb.ipam.route_targets.create(name="65100:999")
+        self.nb.ipam.route_targets.create(name="65100:201")
         existing_device = self.nb.dcim.devices.get(name=self.DEVICE_2)
         self.nb.ipam.vrfs.create(
-            name="TENANT_A",
+            name="TEST_VRF_SYNC_TENANT_A",
             description="stale description",
             import_targets=[existing_target.id],
             export_targets=[existing_target.id],
@@ -386,34 +401,34 @@ class TestSyncVrfs:
         response = self._sync(nfclient, [self.DEVICE_1])
 
         for result in self._successful_results(response):
-            assert "TENANT_A" in result["result"]["vrfs"]["updated"]
+            assert "TEST_VRF_SYNC_TENANT_A" in result["result"]["vrfs"]["updated"]
             assert set(
                 result["result"]["route_targets"]["created"]
-            ) == self.DEVICE_1_ROUTE_TARGETS - {"65000:201"}
-            changes = result["diff"]["vrfs"]["update"]["TENANT_A"]
+            ) == self.DEVICE_1_ROUTE_TARGETS - {"65100:201"}
+            changes = result["diff"]["vrfs"]["update"]["TEST_VRF_SYNC_TENANT_A"]
             assert sorted(changes["import_targets"]["new_value"]) == [
-                "65000:201",
-                "65000:301",
-                "65000:999",
+                "65100:201",
+                "65100:301",
+                "65100:999",
             ]
             assert sorted(changes["export_targets"]["new_value"]) == [
-                "65000:201",
-                "65000:302",
-                "65000:999",
+                "65100:201",
+                "65100:302",
+                "65100:999",
             ]
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         assert tenant_a.description == "Tenant A services"
         assert sorted(target.name for target in tenant_a.import_targets) == [
-            "65000:201",
-            "65000:301",
-            "65000:999",
+            "65100:201",
+            "65100:301",
+            "65100:999",
         ]
         assert sorted(target.name for target in tenant_a.export_targets) == [
-            "65000:201",
-            "65000:302",
-            "65000:999",
+            "65100:201",
+            "65100:302",
+            "65100:999",
         ]
-        assert len(list(self.nb.ipam.route_targets.filter(name="65000:201"))) == 1
+        assert len(list(self.nb.ipam.route_targets.filter(name="65100:201"))) == 1
         selected_device = self.nb.dcim.devices.get(name=self.DEVICE_1)
         assert self._custom_field_device_ids(tenant_a, "devices") == {
             existing_device.id,
@@ -421,22 +436,24 @@ class TestSyncVrfs:
         }
 
     def test_routing_policies_are_additive(self, nfclient: Any) -> None:
-        existing = self.nb.plugins.bgp.routing_policy.create(name="TENANT_A_EXTRA")
+        existing = self.nb.plugins.bgp.routing_policy.create(
+            name="TEST_VRF_SYNC_TENANT_A_EXTRA"
+        )
         self.nb.ipam.vrfs.create(
-            name="TENANT_A",
+            name="TEST_VRF_SYNC_TENANT_A",
             custom_fields={"rpl_import_ipv4": [existing.id]},
         )
 
         for result in self._successful_results(self._sync(nfclient, [self.DEVICE_1])):
-            changes = result["diff"]["vrfs"]["update"]["TENANT_A"]
+            changes = result["diff"]["vrfs"]["update"]["TEST_VRF_SYNC_TENANT_A"]
             assert set(changes["rpl_import_ipv4"]["new_value"]) == {
-                "TENANT_A_EXTRA",
-                "TENANT_A_IMPORT",
+                "TEST_VRF_SYNC_TENANT_A_EXTRA",
+                "TEST_VRF_SYNC_TENANT_A_IMPORT",
             }
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         assert self._custom_field_policy_names(tenant_a, "rpl_import_ipv4") == {
-            "TENANT_A_EXTRA",
-            "TENANT_A_IMPORT",
+            "TEST_VRF_SYNC_TENANT_A_EXTRA",
+            "TEST_VRF_SYNC_TENANT_A_IMPORT",
         }
 
     def test_multiple_devices_are_aggregated_with_description_precedence(
@@ -446,7 +463,7 @@ class TestSyncVrfs:
 
         for result in self._successful_results(response):
             assert result["result"]["vrfs"]["created"] == sorted(self.VRF_NAMES)
-        control_plane = self.nb.ipam.vrfs.get(name="CONTROL_PLANE")
+        control_plane = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_CONTROL_PLANE")
         expected_device_ids = {
             self.nb.dcim.devices.get(name=self.DEVICE_1).id,
             self.nb.dcim.devices.get(name=self.DEVICE_2).id,
@@ -455,18 +472,18 @@ class TestSyncVrfs:
             expected_device_ids
         )
         assert control_plane.description == "Control plane VRF for ceos-leaf-1"
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         assert self._custom_field_policy_names(tenant_a, "rpl_import_ipv6") == set()
         assert sorted(target.name for target in tenant_a.import_targets) == [
-            "65000:201",
-            "65000:301",
-            "65000:303",
+            "65100:201",
+            "65100:301",
+            "65100:303",
         ]
         assert sorted(target.name for target in tenant_a.export_targets) == [
-            "65000:201",
-            "65000:302",
+            "65100:201",
+            "65100:302",
         ]
-        tenant_b = self.nb.ipam.vrfs.get(name="TENANT_B")
+        tenant_b = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_B")
         assert tenant_b.description == "Tenant B services"
 
     def test_custom_device_field_name(self, nfclient: Any) -> None:
@@ -478,7 +495,7 @@ class TestSyncVrfs:
 
         for result in self._successful_results(response):
             assert result["result"]["vrfs"]["created"] == sorted(self.VRF_NAMES)
-        tenant_b = self.nb.ipam.vrfs.get(name="TENANT_B")
+        tenant_b = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_B")
         device = self.nb.dcim.devices.get(name=self.DEVICE_1)
         assert self._custom_field_device_ids(tenant_b, "vrf_devices") == {device.id}
 
@@ -489,20 +506,20 @@ class TestSyncVrfs:
             rpl_import_ipv4="alternate_rpl_import_ipv4",
         )
         self._successful_results(response)
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         assert self._custom_field_policy_names(
             tenant_a, "alternate_rpl_import_ipv4"
-        ) == {"TENANT_A_IMPORT"}
+        ) == {"TEST_VRF_SYNC_TENANT_A_IMPORT"}
         assert self._custom_field_policy_names(tenant_a, "rpl_import_ipv4") == set()
 
     def test_existing_vrf_with_empty_device_custom_field(self, nfclient: Any) -> None:
-        self.nb.ipam.vrfs.create(name="TENANT_A")
+        self.nb.ipam.vrfs.create(name="TEST_VRF_SYNC_TENANT_A")
 
         response = self._sync(nfclient, [self.DEVICE_1])
 
         for result in self._successful_results(response):
-            assert "TENANT_A" in result["result"]["vrfs"]["updated"]
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+            assert "TEST_VRF_SYNC_TENANT_A" in result["result"]["vrfs"]["updated"]
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         device = self.nb.dcim.devices.get(name=self.DEVICE_1)
         assert self._custom_field_device_ids(tenant_a, "devices") == {device.id}
 
@@ -515,16 +532,16 @@ class TestSyncVrfs:
 
         for result in self._successful_results(response):
             assert result["result"]["vrfs"]["created"] == sorted(self.VRF_NAMES)
-        tenant_a = self.nb.ipam.vrfs.get(name="TENANT_A")
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
         assert "does_not_exist" not in tenant_a.custom_fields
 
     def test_unmatched_netbox_vrf_is_not_deleted(self, nfclient: Any) -> None:
-        self.nb.ipam.vrfs.create(name="KEEP_ME")
+        self.nb.ipam.vrfs.create(name="TEST_VRF_SYNC_KEEP_ME")
         try:
             response = self._sync(nfclient, [self.DEVICE_1])
             for result in self._successful_results(response):
                 assert result["result"]["vrfs"]["deleted"] == []
                 assert result["diff"]["vrfs"]["delete"] == []
-            assert self.nb.ipam.vrfs.get(name="KEEP_ME") is not None
+            assert self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_KEEP_ME") is not None
         finally:
-            self.nb.ipam.vrfs.get(name="KEEP_ME").delete()
+            self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_KEEP_ME").delete()

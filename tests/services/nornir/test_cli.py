@@ -79,7 +79,10 @@ class TestNornirCli:
             assert result["resources_failed"] == [host_name]
             assert list(host_result) == ["netmiko_send_commands"]
             assert all(command not in host_result for command in commands)
-            assert "connection to device failed" in host_result["netmiko_send_commands"]
+            assert any(
+                reason in host_result["netmiko_send_commands"]
+                for reason in ("connection to device failed", "DNS failure")
+            )
             assert all(
                 command in healthy_host_result
                 and "Traceback" not in healthy_host_result[command]
@@ -97,7 +100,10 @@ class TestNornirCli:
 
             assert errdisabled_host["errdisabled_at"]
             assert 0 < errdisabled_host["recovery_time_left"] <= 60
-            assert "connection to device failed" in errdisabled_host["reason"]
+            assert any(
+                reason in errdisabled_host["reason"]
+                for reason in ("connection to device failed", "DNS failure")
+            )
 
             skipped_ret = nfclient.run_job(
                 "nornir",

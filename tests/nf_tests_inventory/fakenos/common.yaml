@@ -15,3 +15,4 @@ nos_plugins:
   NFCEOS_CEOS_LEAF_3: nf://fakenos/custom_nos/norfab_arista_ceos_ceos_leaf_3.yaml
   NFJUNOS-1: nf://fakenos/custom_nos/norfab_juniper_junos_fn_junos_1.yaml
   NFJUNOS-2: nf://fakenos/custom_nos/norfab_juniper_junos_fn_junos_2.yaml
+  NFJUNOS-3: nf://fakenos/custom_nos/fn_junos_3.yaml # ex vmx-1

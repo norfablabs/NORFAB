@@ -311,14 +311,26 @@ class TestSyncDevicePrefixes:
         first = nb.dcim.devices.get(name="fn-ceos-sp-1")
         second = nb.dcim.devices.get(name="fn-ceos-sp-2")
         first_original_site = first.site.id if first.site else None
-        second_original_site = second.site.id if second.site else None
+        second_original_placement = {
+            "site": second.site.id if second.site else None,
+            "rack": second.rack.id if second.rack else None,
+            "position": second.position,
+            "face": second.face.value if second.face else None,
+        }
         first_site = nb.dcim.sites.get(name="NORFAB-LAB")
         second_site = nb.dcim.sites.get(name="SALTNORNIR-LAB")
         assert first_site is not None and second_site is not None
 
         try:
             first.update({"site": first_site.id})
-            second.update({"site": second_site.id})
+            second.update(
+                {
+                    "site": second_site.id,
+                    "rack": None,
+                    "position": None,
+                    "face": None,
+                }
+            )
             ret = self._sync(
                 nfclient,
                 ["fn-ceos-sp-2", "fn-ceos-sp-1"],
@@ -334,7 +346,7 @@ class TestSyncDevicePrefixes:
             assert prefix.scope.name == first_site.name
         finally:
             first.update({"site": first_original_site})
-            second.update({"site": second_original_site})
+            second.update(second_original_placement)
 
     def test_sync_device_prefixes_with_branch(self, nfclient):
         branch = "sync_device_prefixes_branch_1"
@@ -361,27 +373,27 @@ class TestSyncDevicePrefixes:
 
 @pytest.mark.netbox_sync_device_ip
 class TestSyncDeviceIP:
-    SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    SPINE_DEVICES = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
     FAKENOS_SPINE1 = "fn-ceos-sp-1"
     FAKENOS_DEVICES = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
     JUNOS_DEVICES = ["fn-junos-1", "fn-junos-2"]
     ALL_DEVICES = [
-        "ceos-spine-1",
-        "ceos-spine-2",
-        "ceos-leaf-1",
-        "ceos-leaf-2",
-        "ceos-leaf-3",
+        "fn-ceos-sp-1",
+        "fn-ceos-sp-2",
+        "fn-ceos-lf-1",
+        "fn-ceos-lf-2",
+        "fn-ceos-lf-3",
     ]
     RESULT_KEYS = {"created", "updated", "in_sync"}
     DIFF_KEYS = {"create", "update", "delete", "in_sync"}
 
     # Known TEST_SYNC IPs from interfaces_parse_data.json (10.3.x.x / 2001:beef:: only)
-    SPINE1_IP = "10.3.15.33/30"  # ceos-spine-1 Ethernet9 (TEST_SYNC_ROUTED_WITH_MAC)
+    SPINE1_IP = "10.3.15.33/30"  # fn-ceos-sp-1 Ethernet9 (TEST_SYNC_ROUTED_WITH_MAC)
     SPINE1_INTF = "Ethernet9"
     SPINE1_LOOPBACK_IP = (
-        "10.3.4.1/32"  # ceos-spine-1 Loopback10 (TEST_SYNC_LOOPBACK_IPV4)
+        "10.3.4.1/32"  # fn-ceos-sp-1 Loopback10 (TEST_SYNC_LOOPBACK_IPV4)
     )
-    SPINE2_IP = "10.3.16.41/30"  # ceos-spine-2 Ethernet9 (TEST_SYNC_ROUTED_WITH_MAC)
+    SPINE2_IP = "10.3.16.41/30"  # fn-ceos-sp-2 Ethernet9 (TEST_SYNC_ROUTED_WITH_MAC)
     ANYCAST_IP = (
         "10.3.250.250/32"  # Loopback250 on all devices (TEST_SYNC_ANYCAST_IPV4)
     )
@@ -506,22 +518,22 @@ class TestSyncDeviceIP:
         # Validate both spine IPs exist in NetBox assigned to the correct interface
         pynb = get_pynetbox(nfclient)
         nb_spine1 = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
-        assert nb_spine1, f"{self.SPINE1_IP} not found in NetBox for ceos-spine-1"
+        assert nb_spine1, f"{self.SPINE1_IP} not found in NetBox for fn-ceos-sp-1"
         assert (
             nb_spine1[0].assigned_object is not None
-        ), f"{self.SPINE1_IP} not assigned to any interface on ceos-spine-1"
+        ), f"{self.SPINE1_IP} not assigned to any interface on fn-ceos-sp-1"
         assert (
             nb_spine1[0].assigned_object.name == self.SPINE1_INTF
         ), f"{self.SPINE1_IP} assigned to {nb_spine1[0].assigned_object.name!r}, expected {self.SPINE1_INTF!r}"
         nb_spine2 = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE2_IP, device="ceos-spine-2")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE2_IP, device="fn-ceos-sp-2")
         )
-        assert nb_spine2, f"{self.SPINE2_IP} not found in NetBox for ceos-spine-2"
+        assert nb_spine2, f"{self.SPINE2_IP} not found in NetBox for fn-ceos-sp-2"
         assert (
             nb_spine2[0].assigned_object is not None
-        ), f"{self.SPINE2_IP} not assigned to any interface on ceos-spine-2"
+        ), f"{self.SPINE2_IP} not assigned to any interface on fn-ceos-sp-2"
 
     def test_sync_device_ip_dry_run(self, nfclient):
         """Clean IPs from both spines then dry_run. Result keys must be RESULT_KEYS
@@ -549,7 +561,7 @@ class TestSyncDeviceIP:
         # Verify dry-run made no writes - IPs must still be absent from NetBox
         pynb = get_pynetbox(nfclient)
         ips_in_nb = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert (
             not ips_in_nb
@@ -564,7 +576,7 @@ class TestSyncDeviceIP:
         setup = self._sync(nfclient, self.SPINE_DEVICES)
         for worker, res in setup.items():
             assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
-            assert res["result"]["ceos-spine-1"][
+            assert res["result"]["fn-ceos-sp-1"][
                 "created"
             ], f"{worker} no IPs created during setup sync"
 
@@ -590,7 +602,7 @@ class TestSyncDeviceIP:
         # Validate IPs are still correctly assigned in NetBox after second sync
         pynb = get_pynetbox(nfclient)
         nb_ips = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert nb_ips, f"{self.SPINE1_IP} missing from NetBox after second sync"
         assert (
@@ -607,51 +619,51 @@ class TestSyncDeviceIP:
     def test_sync_device_ip_create(self, nfclient):
         """Clean IPs from spine-1 then sync. Verify Ethernet9 IP is created
         and the NetBox record matches the expected IP value and interface assignment."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_IP} not in created list"
 
         # Validate the IP record in NetBox
-        nb_ips = self._get_nb_ip(nfclient, "ceos-spine-1", self.SPINE1_INTF)
+        nb_ips = self._get_nb_ip(nfclient, "fn-ceos-sp-1", self.SPINE1_INTF)
         assert (
             nb_ips
-        ), f"{self.SPINE1_IP} not found in NetBox for ceos-spine-1:{self.SPINE1_INTF}"
+        ), f"{self.SPINE1_IP} not found in NetBox for fn-ceos-sp-1:{self.SPINE1_INTF}"
         ip_values = [str(i) for i in nb_ips]
         assert (
             self.SPINE1_IP in ip_values
         ), f"Expected IP {self.SPINE1_IP} not found in NetBox; got {ip_values}"
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_loopback_role(self, nfclient):
         """Sync spine-1 and verify Loopback10 IP gets the 'loopback' role in NetBox."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
             assert (
-                self.SPINE1_LOOPBACK_IP in res["result"]["ceos-spine-1"]["created"]
+                self.SPINE1_LOOPBACK_IP in res["result"]["fn-ceos-sp-1"]["created"]
             ), f"{worker} {self.SPINE1_LOOPBACK_IP} not in created list"
 
         pynb = get_pynetbox(nfclient)
         nb_ip = pynb.ipam.ip_addresses.get(
-            address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+            address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
         )
         assert nb_ip is not None, f"{self.SPINE1_LOOPBACK_IP} not found in NetBox"
         assert (
             str(nb_ip.role).lower() == "loopback"
         ), f"Expected loopback role for {self.SPINE1_LOOPBACK_IP}, got {nb_ip.role!r}"
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_secondary_role(self, nfclient):
         """Parsed IP roles are created and reconciled in NetBox."""
@@ -994,7 +1006,7 @@ class TestSyncDeviceIP:
         self, nfclient
     ):
         """An existing interface assignment takes priority over VRF filtering."""
-        device = "ceos-spine-1"
+        device = "fn-ceos-sp-1"
         interface = "Loopback250"
         self._cleanup(nfclient, [device])
 
@@ -1038,53 +1050,53 @@ class TestSyncDeviceIP:
         """Pre-create spine-1's Ethernet9 IP in NetBox without assigning it to any
         interface, then sync. The IP must be updated (assigned to Ethernet9) rather
         than created."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
         # Pre-create IP unassigned
         pynb = get_pynetbox(nfclient)
         pynb.ipam.ip_addresses.create(address=self.SPINE1_IP)
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_IP in device_data["updated"]
             ), f"{worker} {self.SPINE1_IP} not in updated list - expected update of unassigned IP"
             assert (
                 self.SPINE1_IP not in device_data["created"]
             ), f"{worker} {self.SPINE1_IP} incorrectly listed as created"
-            assert self.SPINE1_IP in res["diff"]["ceos-spine-1"]["update"]
+            assert self.SPINE1_IP in res["diff"]["fn-ceos-sp-1"]["update"]
 
         # Validate the IP is now assigned to the correct interface
-        nb_ips = self._get_nb_ip(nfclient, "ceos-spine-1", self.SPINE1_INTF)
+        nb_ips = self._get_nb_ip(nfclient, "fn-ceos-sp-1", self.SPINE1_INTF)
         assert (
             nb_ips
-        ), f"{self.SPINE1_IP} not found on ceos-spine-1:{self.SPINE1_INTF} after update"
+        ), f"{self.SPINE1_IP} not found on fn-ceos-sp-1:{self.SPINE1_INTF} after update"
         assert any(
             str(i) == self.SPINE1_IP for i in nb_ips
-        ), f"{self.SPINE1_IP} value not found on ceos-spine-1:{self.SPINE1_INTF}"
+        ), f"{self.SPINE1_IP} value not found on fn-ceos-sp-1:{self.SPINE1_INTF}"
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_update_unassigned_dry_run(self, nfclient):
         """Pre-create spine-1's Ethernet9 IP unassigned in NB. Dry-run sync must
         list it under 'updated', and the IP must remain unassigned after the dry-run."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
         pynb = get_pynetbox(nfclient)
         pynb.ipam.ip_addresses.create(address=self.SPINE1_IP)
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], dry_run=True)
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], dry_run=True)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_IP in device_data["updated"]
             ), f"{worker} {self.SPINE1_IP} not in updated list for dry-run"
-            assert self.SPINE1_IP in res["diff"]["ceos-spine-1"]["update"]
+            assert self.SPINE1_IP in res["diff"]["fn-ceos-sp-1"]["update"]
 
         # Dry-run must not have made any changes - IP must remain unassigned
         pynb = get_pynetbox(nfclient)
@@ -1094,7 +1106,7 @@ class TestSyncDeviceIP:
             nb_entry.assigned_object is None
         ), f"Dry-run unexpectedly assigned {self.SPINE1_IP} to {nb_entry.assigned_object!r}"
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     # ------------------------------------------------------------------ #
     # Duplicate IP scenarios                                               #
@@ -1108,20 +1120,20 @@ class TestSyncDeviceIP:
 
         # Pre-assign spine-1's IP to spine-2's Ethernet9 (TEST_SYNC interface, cleaned up at end)
         pynb = get_pynetbox(nfclient)
-        nb_intf = pynb.dcim.interfaces.get(device="ceos-spine-2", name="Ethernet9")
+        nb_intf = pynb.dcim.interfaces.get(device="fn-ceos-sp-2", name="Ethernet9")
         pynb.ipam.ip_addresses.create(
             address=self.SPINE1_IP,
             assigned_object_type="dcim.interface",
             assigned_object_id=nb_intf.id,
         )
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert (
                 len(res["errors"]) > 0
             ), f"{worker} expected errors for duplicate IP assigned to different device, got none"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_IP not in device_data["created"]
             ), f"{worker} {self.SPINE1_IP} incorrectly created despite conflict"
@@ -1139,9 +1151,9 @@ class TestSyncDeviceIP:
         assert (
             all_entries[0].assigned_object is not None
         ), f"{self.SPINE1_IP} unexpectedly lost its assignment"
-        assert all_entries[0].assigned_object.device.name == "ceos-spine-2", (
+        assert all_entries[0].assigned_object.device.name == "fn-ceos-sp-2", (
             f"{self.SPINE1_IP} ended up on wrong device "
-            f"{all_entries[0].assigned_object.device.name!r}, expected ceos-spine-2"
+            f"{all_entries[0].assigned_object.device.name!r}, expected fn-ceos-sp-2"
         )
 
         self._cleanup(nfclient, self.SPINE_DEVICES)
@@ -1424,7 +1436,7 @@ class TestSyncDeviceIP:
         # Validate IPs were NOT written to the main NetBox context (branch-only writes)
         pynb = get_pynetbox(nfclient)
         nb_ips = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert not nb_ips, (
             f"Branch sync wrote {self.SPINE1_IP} to main NetBox context (should be branch-only): "
@@ -1493,13 +1505,13 @@ class TestSyncDeviceIP:
     def test_sync_device_ip_filter_by_name_loopback(self, nfclient):
         """filter_by_name='Loopback*' must include only loopback interfaces.
         SPINE1_LOOPBACK_IP must be created; SPINE1_IP (Ethernet9) must NOT appear."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], filter_by_name="Loopback*")
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], filter_by_name="Loopback*")
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_LOOPBACK_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_LOOPBACK_IP} not in created with filter_by_name='Loopback*'"
@@ -1514,7 +1526,7 @@ class TestSyncDeviceIP:
         pynb = get_pynetbox(nfclient)
         nb_loopback = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+                address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
             )
         )
         assert (
@@ -1524,24 +1536,24 @@ class TestSyncDeviceIP:
             nb_loopback[0].assigned_object is not None
         ), f"{self.SPINE1_LOOPBACK_IP} not assigned to any interface"
         nb_eth = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert (
             not nb_eth
         ), f"{self.SPINE1_IP} found in NetBox despite filter_by_name='Loopback*': {[str(i) for i in nb_eth]}"
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_filter_by_name_ethernet(self, nfclient):
         """filter_by_name='Ethernet*' must include only ethernet interfaces.
         SPINE1_IP must be created; SPINE1_LOOPBACK_IP must NOT appear."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], filter_by_name="Ethernet*")
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], filter_by_name="Ethernet*")
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_IP} not in created with filter_by_name='Ethernet*'"
@@ -1555,7 +1567,7 @@ class TestSyncDeviceIP:
         # Validate SPINE1_IP written to NetBox assigned to Ethernet9; loopback IP absent
         pynb = get_pynetbox(nfclient)
         nb_eth = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert (
             nb_eth
@@ -1568,7 +1580,7 @@ class TestSyncDeviceIP:
         ), f"{self.SPINE1_IP} assigned to {nb_eth[0].assigned_object.name!r}, expected {self.SPINE1_INTF!r}"
         nb_loopback = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+                address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
             )
         )
         assert not nb_loopback, (
@@ -1576,24 +1588,24 @@ class TestSyncDeviceIP:
             f"{[str(i) for i in nb_loopback]}"
         )
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_filter_by_name_no_match(self, nfclient):
         """filter_by_name that matches nothing must result in empty created/updated/in_sync lists."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], filter_by_name="NonExistent*")
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], filter_by_name="NonExistent*")
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert not device_data[
                 "created"
             ], f"{worker} unexpected created IPs with non-matching filter_by_name: {device_data['created']}"
             assert not device_data[
                 "updated"
             ], f"{worker} unexpected updated IPs with non-matching filter_by_name: {device_data['updated']}"
-            assert res["diff"]["ceos-spine-1"] == {
+            assert res["diff"]["fn-ceos-sp-1"] == {
                 "create": [],
                 "update": {},
                 "delete": [],
@@ -1604,7 +1616,7 @@ class TestSyncDeviceIP:
         pynb = get_pynetbox(nfclient)
         for addr in [self.SPINE1_IP, self.SPINE1_LOOPBACK_IP]:
             nb_ips = list(
-                pynb.ipam.ip_addresses.filter(address=addr, device="ceos-spine-1")
+                pynb.ipam.ip_addresses.filter(address=addr, device="fn-ceos-sp-1")
             )
             assert (
                 not nb_ips
@@ -1614,13 +1626,13 @@ class TestSyncDeviceIP:
         """filter_by_description='*LOOPBACK*' must restrict to interfaces whose
         description matches. SPINE1_LOOPBACK_IP must be created; SPINE1_IP must NOT appear.
         """
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], filter_by_description="*LOOPBACK*")
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], filter_by_description="*LOOPBACK*")
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_LOOPBACK_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_LOOPBACK_IP} not in created with filter_by_description='*LOOPBACK*'"
@@ -1635,7 +1647,7 @@ class TestSyncDeviceIP:
         pynb = get_pynetbox(nfclient)
         nb_loopback = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+                address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
             )
         )
         assert (
@@ -1645,26 +1657,26 @@ class TestSyncDeviceIP:
             nb_loopback[0].assigned_object is not None
         ), f"{self.SPINE1_LOOPBACK_IP} not assigned to any interface"
         nb_eth = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert not nb_eth, (
             f"{self.SPINE1_IP} found in NetBox despite filter_by_description='*LOOPBACK*': "
             f"{[str(i) for i in nb_eth]}"
         )
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_filter_by_prefix(self, nfclient):
         """filter_by_prefix='10.3.15.0/24' must include only IPs within that prefix.
         SPINE1_IP (10.3.15.33) must be created; SPINE1_LOOPBACK_IP (10.3.4.1) must NOT appear.
         """
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], filter_by_prefix="10.3.15.0/24")
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], filter_by_prefix="10.3.15.0/24")
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_IP} not in created with filter_by_prefix='10.3.15.0/24'"
@@ -1678,7 +1690,7 @@ class TestSyncDeviceIP:
         # Validate SPINE1_IP written to NetBox; SPINE1_LOOPBACK_IP absent
         pynb = get_pynetbox(nfclient)
         nb_eth = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert (
             nb_eth
@@ -1691,7 +1703,7 @@ class TestSyncDeviceIP:
         ), f"{self.SPINE1_IP} assigned to {nb_eth[0].assigned_object.name!r}, expected {self.SPINE1_INTF!r}"
         nb_loopback = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+                address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
             )
         )
         assert not nb_loopback, (
@@ -1699,19 +1711,19 @@ class TestSyncDeviceIP:
             f"{[str(i) for i in nb_loopback]}"
         )
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_filter_by_prefix_loopback_range(self, nfclient):
         """filter_by_prefix='10.3.4.0/24' must include only IPs within that prefix.
         SPINE1_LOOPBACK_IP (10.3.4.1) must be created; SPINE1_IP (10.3.15.33) must NOT appear.
         """
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], filter_by_prefix="10.3.4.0/24")
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], filter_by_prefix="10.3.4.0/24")
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_LOOPBACK_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_LOOPBACK_IP} not in created with filter_by_prefix='10.3.4.0/24'"
@@ -1726,7 +1738,7 @@ class TestSyncDeviceIP:
         pynb = get_pynetbox(nfclient)
         nb_loopback = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+                address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
             )
         )
         assert (
@@ -1736,26 +1748,26 @@ class TestSyncDeviceIP:
             nb_loopback[0].assigned_object is not None
         ), f"{self.SPINE1_LOOPBACK_IP} not assigned to any interface"
         nb_eth = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert not nb_eth, (
             f"{self.SPINE1_IP} found in NetBox despite filter_by_prefix='10.3.4.0/24': "
             f"{[str(i) for i in nb_eth]}"
         )
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_filter_by_ip(self, nfclient):
         """filter_by_ip='10.3.4.*' glob must include only matching IP host addresses.
         SPINE1_LOOPBACK_IP (10.3.4.1) must be created; SPINE1_IP (10.3.15.33) must NOT appear.
         """
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], filter_by_ip="10.3.4.*")
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], filter_by_ip="10.3.4.*")
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_LOOPBACK_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_LOOPBACK_IP} not in created with filter_by_ip='10.3.4.*'"
@@ -1770,7 +1782,7 @@ class TestSyncDeviceIP:
         pynb = get_pynetbox(nfclient)
         nb_loopback = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+                address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
             )
         )
         assert (
@@ -1780,30 +1792,30 @@ class TestSyncDeviceIP:
             nb_loopback[0].assigned_object is not None
         ), f"{self.SPINE1_LOOPBACK_IP} not assigned to any interface"
         nb_eth = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert not nb_eth, (
             f"{self.SPINE1_IP} found in NetBox despite filter_by_ip='10.3.4.*': "
             f"{[str(i) for i in nb_eth]}"
         )
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_device_ip_filter_by_name_and_prefix_combined(self, nfclient):
         """Combining filter_by_name='Loopback*' with filter_by_prefix='10.3.4.0/24' must
         intersect both filters - only SPINE1_LOOPBACK_IP must be created."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
         ret = self._sync(
             nfclient,
-            ["ceos-spine-1"],
+            ["fn-ceos-sp-1"],
             filter_by_name="Loopback*",
             filter_by_prefix="10.3.4.0/24",
         )
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_LOOPBACK_IP in device_data["created"]
             ), f"{worker} {self.SPINE1_LOOPBACK_IP} not in created with combined filters"
@@ -1822,7 +1834,7 @@ class TestSyncDeviceIP:
         pynb = get_pynetbox(nfclient)
         nb_loopback = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.SPINE1_LOOPBACK_IP, device="ceos-spine-1"
+                address=self.SPINE1_LOOPBACK_IP, device="fn-ceos-sp-1"
             )
         )
         assert (
@@ -1832,14 +1844,14 @@ class TestSyncDeviceIP:
             nb_loopback[0].assigned_object is not None
         ), f"{self.SPINE1_LOOPBACK_IP} not assigned to any interface"
         nb_eth = list(
-            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="ceos-spine-1")
+            pynb.ipam.ip_addresses.filter(address=self.SPINE1_IP, device="fn-ceos-sp-1")
         )
         assert (
             not nb_eth
         ), f"{self.SPINE1_IP} found in NetBox despite combined filters: {[str(i) for i in nb_eth]}"
         nb_anycast = list(
             pynb.ipam.ip_addresses.filter(
-                address=self.ANYCAST_IP, device="ceos-spine-1"
+                address=self.ANYCAST_IP, device="fn-ceos-sp-1"
             )
         )
         assert not nb_anycast, (
@@ -1847,7 +1859,7 @@ class TestSyncDeviceIP:
             f"{[str(i) for i in nb_anycast]}"
         )
 
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
 
 @pytest.mark.netbox_create_ip
@@ -2223,7 +2235,7 @@ class TestCreateIP:
                 workers="any",
                 kwargs={
                     "prefix": "10.0.0.0/24",
-                    "device": "ceos-spine-1",
+                    "device": "fn-ceos-sp-1",
                     "interface": "Ethernet1",
                     "description": "foo1",
                     "is_primary": True,
@@ -2251,7 +2263,7 @@ class TestCreateIP:
                 workers="any",
                 kwargs={
                     "prefix": "10.0.0.0/24",
-                    "device": "ceos-spine-1",
+                    "device": "fn-ceos-sp-1",
                     "interface": "Ethernet1",
                     "dry_run": True,
                 },

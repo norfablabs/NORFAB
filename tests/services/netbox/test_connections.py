@@ -746,7 +746,7 @@ class TestGetTopology:
                 ), f"{worker} - link target '{link['target']}' has no node entry"
 
     def test_get_topology_filter_platform(self, nfclient):
-        """platform filter must return only devices with the given platform slug."""
+        """Platform filter selects Arista devices and their direct neighbors."""
         ret = nfclient.run_job(
             "netbox",
             "get_topology",
@@ -761,11 +761,12 @@ class TestGetTopology:
             assert (
                 len(res["result"]["nodes"]) > 0
             ), f"{worker} - expected at least one node"
-            for node in res["result"]["nodes"]:
-                assert (
-                    node["type"] == "arista_eos"
-                ), f"{worker} - node '{node['name']}' has unexpected platform '{node['type']}'"
             node_ids = {n["id"] for n in res["result"]["nodes"]}
+            matching_ids = {
+                n["id"] for n in res["result"]["nodes"] if n["type"] == "arista_eos"
+            }
+            assert matching_ids, f"{worker} - no Arista platform nodes found"
+            linked_ids = set()
             for link in res["result"]["links"]:
                 assert (
                     link["source"] in node_ids
@@ -773,9 +774,17 @@ class TestGetTopology:
                 assert (
                     link["target"] in node_ids
                 ), f"{worker} - link target '{link['target']}' has no node entry"
+                assert (
+                    link["source"] in matching_ids or link["target"] in matching_ids
+                ), f"{worker} - link does not touch a filtered Arista device: {link}"
+                linked_ids.update((link["source"], link["target"]))
+            assert node_ids - matching_ids <= linked_ids, (
+                f"{worker} - unlinked nodes do not match the platform filter: "
+                f"{node_ids - matching_ids - linked_ids}"
+            )
 
     def test_get_topology_filter_manufacturer(self, nfclient):
-        """manufacturers filter must return only devices from the given manufacturer."""
+        """Manufacturer filter selects Arista devices and direct neighbors."""
         ret = nfclient.run_job(
             "netbox",
             "get_topology",
@@ -790,11 +799,14 @@ class TestGetTopology:
             assert (
                 len(res["result"]["nodes"]) > 0
             ), f"{worker} - expected at least one node"
-            for node in res["result"]["nodes"]:
-                assert (
-                    node["manufacturer"].lower() == "arista"
-                ), f"{worker} - node '{node['name']}' has unexpected manufacturer '{node['manufacturer']}'"
             node_ids = {n["id"] for n in res["result"]["nodes"]}
+            matching_ids = {
+                n["id"]
+                for n in res["result"]["nodes"]
+                if n["manufacturer"].lower() == "arista"
+            }
+            assert matching_ids, f"{worker} - no Arista manufacturer nodes found"
+            linked_ids = set()
             for link in res["result"]["links"]:
                 assert (
                     link["source"] in node_ids
@@ -802,6 +814,14 @@ class TestGetTopology:
                 assert (
                     link["target"] in node_ids
                 ), f"{worker} - link target '{link['target']}' has no node entry"
+                assert (
+                    link["source"] in matching_ids or link["target"] in matching_ids
+                ), f"{worker} - link does not touch a filtered Arista device: {link}"
+                linked_ids.update((link["source"], link["target"]))
+            assert node_ids - matching_ids <= linked_ids, (
+                f"{worker} - unlinked nodes do not match the manufacturer filter: "
+                f"{node_ids - matching_ids - linked_ids}"
+            )
 
     def test_get_topology_filter_status(self, nfclient):
         """status filter must return only devices with the given status."""

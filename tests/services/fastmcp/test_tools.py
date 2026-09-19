@@ -1,5 +1,6 @@
 import pprint
 import time
+
 import pytest
 
 pytestmark = [
@@ -44,7 +45,9 @@ class TestGetTools:
     def test_get_tools_brief_tool_name_filter(self, nfclient):
         time.sleep(5)
         ret = nfclient.run_job(
-            "fastmcp", "get_tools", kwargs={"brief": True, "name": "*cli"}
+            "fastmcp",
+            "get_tools",
+            kwargs={"brief": True, "service": "nornir", "name": "*cli"},
         )
         pprint.pprint(ret)
 
@@ -53,7 +56,9 @@ class TestGetTools:
 
     def test_get_tools_tool_name_filter(self, nfclient):
         time.sleep(5)
-        ret = nfclient.run_job("fastmcp", "get_tools", kwargs={"name": "*cli"})
+        ret = nfclient.run_job(
+            "fastmcp", "get_tools", kwargs={"service": "nornir", "name": "*cli"}
+        )
         pprint.pprint(ret)
 
         for worker_name, data in ret.items():

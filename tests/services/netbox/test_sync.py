@@ -331,21 +331,21 @@ class TestSyncResourcesFailed:
 @pytest.mark.netbox_sync_mac_addresses
 class TestSyncMacAddresses:
     # MAC addresses present in interfaces_parse_data.json per device:
-    #   ceos-spine-1  : 02:00:00:11:00:09 on Ethernet9  (description TEST_SYNC_ROUTED_WITH_MAC)
-    #   ceos-spine-2  : 02:00:00:12:00:09 on Ethernet9  (description TEST_SYNC_ROUTED_WITH_MAC)
-    #   ceos-leaf-1   : 12:34:12:34:12:34 on Ethernet1  (description P2P to ceos-spine-1 Ethernet2)
+    #   fn-ceos-sp-1  : 02:00:00:11:00:09 on Ethernet9  (description TEST_SYNC_ROUTED_WITH_MAC)
+    #   fn-ceos-sp-2  : 02:00:00:12:00:09 on Ethernet9  (description TEST_SYNC_ROUTED_WITH_MAC)
+    #   fn-ceos-lf-1   : 12:34:12:34:12:34 on Ethernet1  (description P2P to fn-ceos-sp-1 Ethernet2)
     #                   02:00:00:01:00:06 on Ethernet6  (description TEST_SYNC_ROUTED_WITH_MAC)
-    #   ceos-leaf-2   : 02:00:00:02:00:06 on Ethernet6  (description TEST_SYNC_ROUTED_WITH_MAC)
-    #   ceos-leaf-3   : 02:00:00:03:00:06 on Ethernet6  (description TEST_SYNC_ROUTED_WITH_MAC)
+    #   fn-ceos-lf-2   : 02:00:00:02:00:06 on Ethernet6  (description TEST_SYNC_ROUTED_WITH_MAC)
+    #   fn-ceos-lf-3   : 02:00:00:03:00:06 on Ethernet6  (description TEST_SYNC_ROUTED_WITH_MAC)
 
     ALL_DEVICES = [
-        "ceos-spine-1",
-        "ceos-spine-2",
-        "ceos-leaf-1",
-        "ceos-leaf-2",
-        "ceos-leaf-3",
+        "fn-ceos-sp-1",
+        "fn-ceos-sp-2",
+        "fn-ceos-lf-1",
+        "fn-ceos-lf-2",
+        "fn-ceos-lf-3",
     ]
-    SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    SPINE_DEVICES = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
     RESULT_KEYS = {"created", "updated", "in_sync"}
 
     # MAC addresses per device from parse data
@@ -517,7 +517,7 @@ class TestSyncMacAddresses:
         setup = self._sync(nfclient, self.SPINE_DEVICES)
         for worker, res in setup.items():
             assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
-            assert res["result"]["ceos-spine-1"][
+            assert res["result"]["fn-ceos-sp-1"][
                 "created"
             ], f"{worker} no MACs created during setup sync"
 
@@ -545,22 +545,22 @@ class TestSyncMacAddresses:
         """Clean MACs from spine-1 then sync. Verify the MAC on Ethernet9 is created
         and the NetBox record matches the expected MAC value and interface assignment.
         """
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_MAC in device_data["created"]
             ), f"{worker} {self.SPINE1_MAC} not in created list"
 
         # Validate the MAC record in NetBox
-        nb_macs = self._get_nb_macs(nfclient, "ceos-spine-1", self.SPINE1_INTF)
+        nb_macs = self._get_nb_macs(nfclient, "fn-ceos-sp-1", self.SPINE1_INTF)
         assert (
             nb_macs
-        ), f"{self.SPINE1_MAC} not found in NetBox for ceos-spine-1:{self.SPINE1_INTF}"
+        ), f"{self.SPINE1_MAC} not found in NetBox for fn-ceos-sp-1:{self.SPINE1_INTF}"
         mac_values = [m.mac_address.lower() for m in nb_macs]
         assert (
             self.SPINE1_MAC in mac_values
@@ -574,16 +574,16 @@ class TestSyncMacAddresses:
         ), f"{self.SPINE1_MAC} assigned to wrong interface: got {nb_mac.assigned_object.name!r}"
 
     def test_sync_mac_addresses_create_leaf1_two_macs(self, nfclient):
-        """ceos-leaf-1 has two interfaces with MACs in live data (Ethernet1 and Ethernet6).
+        """fn-ceos-lf-1 has two interfaces with MACs in live data (Ethernet1 and Ethernet6).
         Clean all leaf-1 MACs then sync. Both MACs must be created and correctly assigned.
         """
-        self._cleanup(nfclient, ["ceos-leaf-1"])
+        self._cleanup(nfclient, ["fn-ceos-lf-1"])
 
-        ret = self._sync(nfclient, ["ceos-leaf-1"])
+        ret = self._sync(nfclient, ["fn-ceos-lf-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-leaf-1"]
+            device_data = res["result"]["fn-ceos-lf-1"]
             assert (
                 self.LEAF1_MAC_ETH1 in device_data["created"]
             ), f"{worker} {self.LEAF1_MAC_ETH1} not in created list"
@@ -592,22 +592,22 @@ class TestSyncMacAddresses:
             ), f"{worker} {self.LEAF1_MAC_ETH6} not in created list"
 
         # Validate Ethernet1 MAC record
-        nb_macs_eth1 = self._get_nb_macs(nfclient, "ceos-leaf-1", self.LEAF1_INTF_ETH1)
+        nb_macs_eth1 = self._get_nb_macs(nfclient, "fn-ceos-lf-1", self.LEAF1_INTF_ETH1)
         assert (
             nb_macs_eth1
-        ), f"{self.LEAF1_MAC_ETH1} not found in NetBox for ceos-leaf-1:{self.LEAF1_INTF_ETH1}"
+        ), f"{self.LEAF1_MAC_ETH1} not found in NetBox for fn-ceos-lf-1:{self.LEAF1_INTF_ETH1}"
         assert any(
             m.mac_address.lower() == self.LEAF1_MAC_ETH1 for m in nb_macs_eth1
-        ), f"Expected MAC {self.LEAF1_MAC_ETH1} not found on ceos-leaf-1:{self.LEAF1_INTF_ETH1}"
+        ), f"Expected MAC {self.LEAF1_MAC_ETH1} not found on fn-ceos-lf-1:{self.LEAF1_INTF_ETH1}"
 
         # Validate Ethernet6 MAC record
-        nb_macs_eth6 = self._get_nb_macs(nfclient, "ceos-leaf-1", self.LEAF1_INTF_ETH6)
+        nb_macs_eth6 = self._get_nb_macs(nfclient, "fn-ceos-lf-1", self.LEAF1_INTF_ETH6)
         assert (
             nb_macs_eth6
-        ), f"{self.LEAF1_MAC_ETH6} not found in NetBox for ceos-leaf-1:{self.LEAF1_INTF_ETH6}"
+        ), f"{self.LEAF1_MAC_ETH6} not found in NetBox for fn-ceos-lf-1:{self.LEAF1_INTF_ETH6}"
         assert any(
             m.mac_address.lower() == self.LEAF1_MAC_ETH6 for m in nb_macs_eth6
-        ), f"Expected MAC {self.LEAF1_MAC_ETH6} not found on ceos-leaf-1:{self.LEAF1_INTF_ETH6}"
+        ), f"Expected MAC {self.LEAF1_MAC_ETH6} not found on fn-ceos-lf-1:{self.LEAF1_INTF_ETH6}"
 
     # ------------------------------------------------------------------ #
     # Update scenarios                                                     #
@@ -617,16 +617,16 @@ class TestSyncMacAddresses:
         """Pre-create the spine-1 MAC in NetBox without assigning it to any interface,
         then sync. The MAC must be updated (assigned to Ethernet9) rather than created.
         """
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
         # Pre-create MAC unassigned (no assigned_object_id)
         self._create_nb_mac(nfclient, self.SPINE1_MAC, intf_id=None)
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_MAC in device_data["updated"]
             ), f"{worker} {self.SPINE1_MAC} not in updated list - expected update of unassigned MAC"
@@ -635,16 +635,16 @@ class TestSyncMacAddresses:
             ), f"{worker} {self.SPINE1_MAC} incorrectly listed as created"
 
         # Validate the MAC is now assigned to the correct interface
-        nb_macs = self._get_nb_macs(nfclient, "ceos-spine-1", self.SPINE1_INTF)
+        nb_macs = self._get_nb_macs(nfclient, "fn-ceos-sp-1", self.SPINE1_INTF)
         assert (
             nb_macs
-        ), f"{self.SPINE1_MAC} not found on ceos-spine-1:{self.SPINE1_INTF} after update"
+        ), f"{self.SPINE1_MAC} not found on fn-ceos-sp-1:{self.SPINE1_INTF} after update"
         nb_mac = next(
             (m for m in nb_macs if m.mac_address.lower() == self.SPINE1_MAC), None
         )
         assert (
             nb_mac is not None
-        ), f"{self.SPINE1_MAC} value not found on ceos-spine-1:{self.SPINE1_INTF}"
+        ), f"{self.SPINE1_MAC} value not found on fn-ceos-sp-1:{self.SPINE1_INTF}"
         assert (
             nb_mac.assigned_object is not None
         ), f"{self.SPINE1_MAC} still has no assigned_object after update"
@@ -655,14 +655,14 @@ class TestSyncMacAddresses:
     def test_sync_mac_addresses_update_unassigned_dry_run(self, nfclient):
         """Pre-create spine-1 MAC unassigned in NB. Dry-run sync must list it under
         'updated', and the MAC must remain unassigned after the dry-run."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
         self._create_nb_mac(nfclient, self.SPINE1_MAC, intf_id=None)
 
-        ret = self._sync(nfclient, ["ceos-spine-1"], dry_run=True)
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"], dry_run=True)
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             assert (
                 self.SPINE1_MAC in device_data["updated"]
             ), f"{worker} {self.SPINE1_MAC} not in updated list for dry-run"
@@ -683,20 +683,20 @@ class TestSyncMacAddresses:
         """Pre-assign the spine-1 MAC to a different interface (Ethernet1) in NetBox,
         then run sync. The sync must report an error because the MAC is already
         assigned to a different interface, and must NOT create or update the MAC."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
         # Assign the MAC to a *different* interface (Ethernet1, not Ethernet9)
-        intf_id = self._get_intf_id(nfclient, "ceos-spine-1", "Ethernet1")
+        intf_id = self._get_intf_id(nfclient, "fn-ceos-sp-1", "Ethernet1")
         self._create_nb_mac(nfclient, self.SPINE1_MAC, intf_id=intf_id)
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             # Errors must be reported for the conflicting MAC
             assert (
                 len(res["errors"]) > 0
             ), f"{worker} expected errors for MAC assigned to different interface, got none"
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             # The MAC must NOT appear in created or updated
             assert (
                 self.SPINE1_MAC not in device_data["created"]
@@ -706,33 +706,33 @@ class TestSyncMacAddresses:
             ), f"{worker} {self.SPINE1_MAC} incorrectly updated despite interface conflict"
 
         # Validate the MAC is still assigned to Ethernet1 (not moved to Ethernet9)
-        nb_macs_eth1 = self._get_nb_macs(nfclient, "ceos-spine-1", "Ethernet1")
+        nb_macs_eth1 = self._get_nb_macs(nfclient, "fn-ceos-sp-1", "Ethernet1")
         assert any(
             m.mac_address.lower() == self.SPINE1_MAC for m in nb_macs_eth1
-        ), f"{self.SPINE1_MAC} no longer on ceos-spine-1:Ethernet1 after conflict sync"
-        nb_macs_eth9 = self._get_nb_macs(nfclient, "ceos-spine-1", self.SPINE1_INTF)
+        ), f"{self.SPINE1_MAC} no longer on fn-ceos-sp-1:Ethernet1 after conflict sync"
+        nb_macs_eth9 = self._get_nb_macs(nfclient, "fn-ceos-sp-1", self.SPINE1_INTF)
         assert not any(
             m.mac_address.lower() == self.SPINE1_MAC for m in nb_macs_eth9
-        ), f"{self.SPINE1_MAC} was incorrectly duplicated onto ceos-spine-1:{self.SPINE1_INTF}"
+        ), f"{self.SPINE1_MAC} was incorrectly duplicated onto fn-ceos-sp-1:{self.SPINE1_INTF}"
 
         # Cleanup
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_mac_addresses_duplicate_mac_same_interface(self, nfclient):
         """Pre-assign the spine-2 MAC to the correct interface (Ethernet9) in NetBox
         to simulate a MAC that already exists as a duplicate entry from a prior run.
         The sync must report it as in_sync without creating duplicates."""
-        self._cleanup(nfclient, ["ceos-spine-2"])
+        self._cleanup(nfclient, ["fn-ceos-sp-2"])
 
         # Pre-assign MAC to the correct interface - simulates an existing correct entry
-        intf_id = self._get_intf_id(nfclient, "ceos-spine-2", self.SPINE2_INTF)
+        intf_id = self._get_intf_id(nfclient, "fn-ceos-sp-2", self.SPINE2_INTF)
         self._create_nb_mac(nfclient, self.SPINE2_MAC, intf_id=intf_id)
 
-        ret = self._sync(nfclient, ["ceos-spine-2"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-2"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed - {res}"
-            device_data = res["result"]["ceos-spine-2"]
+            device_data = res["result"]["fn-ceos-sp-2"]
             assert (
                 self.SPINE2_MAC in device_data["in_sync"]
             ), f"{worker} {self.SPINE2_MAC} not in in_sync list - expected in_sync for pre-assigned MAC"
@@ -744,10 +744,10 @@ class TestSyncMacAddresses:
             ), f"{worker} {self.SPINE2_MAC} incorrectly listed as updated"
 
         # Validate only one MAC entry exists for this interface (no duplicates added)
-        nb_macs = self._get_nb_macs(nfclient, "ceos-spine-2", self.SPINE2_INTF)
+        nb_macs = self._get_nb_macs(nfclient, "fn-ceos-sp-2", self.SPINE2_INTF)
         matching = [m for m in nb_macs if m.mac_address.lower() == self.SPINE2_MAC]
         assert len(matching) == 1, (
-            f"Expected exactly 1 entry for {self.SPINE2_MAC} on ceos-spine-2:{self.SPINE2_INTF}, "
+            f"Expected exactly 1 entry for {self.SPINE2_MAC} on fn-ceos-sp-2:{self.SPINE2_INTF}, "
             f"got {len(matching)}"
         )
 
@@ -856,16 +856,16 @@ class TestSyncMacAddresses:
 
         With the fix, the assigned (conflicting) entry always wins.  The sync must
         report an error and NOT silently move or update the MAC."""
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
         # Create entry A: MAC assigned to Ethernet1 (conflicts with live data pointing to Ethernet9)
-        wrong_intf_id = self._get_intf_id(nfclient, "ceos-spine-1", "Ethernet1")
+        wrong_intf_id = self._get_intf_id(nfclient, "fn-ceos-sp-1", "Ethernet1")
         self._create_nb_mac(nfclient, self.SPINE1_MAC, intf_id=wrong_intf_id)
 
         # Create entry B: same MAC but unassigned (no interface)
         self._create_nb_mac(nfclient, self.SPINE1_MAC, intf_id=None)
 
-        ret = self._sync(nfclient, ["ceos-spine-1"])
+        ret = self._sync(nfclient, ["fn-ceos-sp-1"])
         pprint.pprint(ret)
         for worker, res in ret.items():
             # Must report an error - the assigned conflicting entry must win over the unassigned one
@@ -873,7 +873,7 @@ class TestSyncMacAddresses:
                 f"{worker} expected conflict error but got none - "
                 f"the unassigned entry may have silently overwritten the conflicting one"
             )
-            device_data = res["result"]["ceos-spine-1"]
+            device_data = res["result"]["fn-ceos-sp-1"]
             # The MAC must NOT be silently updated/created
             assert (
                 self.SPINE1_MAC not in device_data["created"]
@@ -884,7 +884,7 @@ class TestSyncMacAddresses:
             )
 
         # Cleanup both NB entries
-        self._cleanup(nfclient, ["ceos-spine-1"])
+        self._cleanup(nfclient, ["fn-ceos-sp-1"])
 
     def test_sync_mac_addresses_non_existing_device(self, nfclient):
         """Sync against a device name that does not exist in NetBox.
@@ -921,7 +921,7 @@ class TestSyncMacAddresses:
 class TestCheckDeviceSync:
     """Test suite for check_device_sync task."""
 
-    DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    DEVICES = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
     # Expected per-device sub-categories when all checks are enabled
     ALL_CATEGORIES = {
         "inventory",
@@ -988,17 +988,17 @@ class TestCheckDeviceSync:
     def test_check_device_sync_no_writes_to_netbox(self, nfclient):
         """check_device_sync must never write to NetBox."""
         pynb = get_pynetbox(nfclient)
-        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
+        nb_device = pynb.dcim.devices.get(name="fn-ceos-sp-1")
         serial_before = nb_device.serial
 
         nfclient.run_job(
             "netbox",
             "check_device_sync",
             workers="any",
-            kwargs={"devices": ["ceos-spine-1"]},
+            kwargs={"devices": ["fn-ceos-sp-1"]},
         )
 
-        nb_device = pynb.dcim.devices.get(name="ceos-spine-1")
+        nb_device = pynb.dcim.devices.get(name="fn-ceos-sp-1")
         assert (
             nb_device.serial == serial_before
         ), "check_device_sync modified NetBox serial - writes must not occur"
@@ -1118,12 +1118,12 @@ class TestCheckDeviceSync:
                 assert device_data["in_sync"] == device_data["inventory"]
 
     def test_check_device_sync_with_nornir_filter(self, nfclient):
-        """Devices resolved via Nornir FC filter."""
+        """Devices resolved via the FakeNOS spine name filter."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
             workers="any",
-            kwargs={"FC": "spine"},
+            kwargs={"FB": ["fn-ceos-sp-*"]},
         )
         pprint.pprint(ret, width=200)
 
@@ -1157,7 +1157,7 @@ class TestSyncAll:
     and uses out-of-band pynetbox queries to verify NetBox state directly.
     """
 
-    SPINE_DEVICES = ["ceos-spine-1", "ceos-spine-2"]
+    SPINE_DEVICES = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
     ALL_CATEGORIES = {
         "inventory",
         "vlans",
@@ -1168,12 +1168,12 @@ class TestSyncAll:
         "bgp_peerings",
     }
     NETBOX_SERIALS = {
-        "ceos-spine-1": "FNS12345678",
-        "ceos-spine-2": "FNS123456789",
+        "fn-ceos-sp-1": "FN-FNS12345678",
+        "fn-ceos-sp-2": "FN-FNS123456789",
     }
     LIVE_SERIALS = {
-        "ceos-spine-1": "C4889628D19280228439023C4F0C3EE4",
-        "ceos-spine-2": "F8B8101D77067B49C0437B3711AA1719",
+        "fn-ceos-sp-1": "AF0396AF41960AB215A1BDB718EA1CDA",
+        "fn-ceos-sp-2": "88E1CBB406FA6F8C132AD50609BE3053",
     }
 
     # Known TEST_SYNC items from interfaces_parse_data.json for spine devices
@@ -1200,7 +1200,7 @@ class TestSyncAll:
         """Remove TEST_SYNC interfaces, all MACs, TEST_SYNC IPs and BGP sessions
         for spine devices using pynetbox directly."""
         nb = get_pynetbox(None)
-        devices = ["ceos-spine-1", "ceos-spine-2"]
+        devices = ["fn-ceos-sp-1", "fn-ceos-sp-2"]
         # BGP sessions
         for device in devices:
             for session in list(nb.plugins.bgp.session.filter(device=device)):
@@ -1303,21 +1303,21 @@ class TestSyncAll:
         for device, serial in self.NETBOX_SERIALS.items():
             assert nb.dcim.devices.get(name=device).serial == serial
         # Interface must not exist
-        intf = nb.dcim.interfaces.get(device="ceos-spine-1", name=self.SPINE1_TEST_INTF)
+        intf = nb.dcim.interfaces.get(device="fn-ceos-sp-1", name=self.SPINE1_TEST_INTF)
         assert (
             intf is None
         ), f"dry_run wrote interface {self.SPINE1_TEST_INTF!r} to NetBox"
         # MAC must not exist
         macs = list(
             nb.dcim.mac_addresses.filter(
-                device="ceos-spine-1", mac_address=self.SPINE1_TEST_MAC
+                device="fn-ceos-sp-1", mac_address=self.SPINE1_TEST_MAC
             )
         )
         assert not macs, f"dry_run wrote MAC {self.SPINE1_TEST_MAC!r} to NetBox"
         # IP must not exist
         ips = list(
             nb.ipam.ip_addresses.filter(
-                address=self.SPINE1_TEST_IP, device="ceos-spine-1"
+                address=self.SPINE1_TEST_IP, device="fn-ceos-sp-1"
             )
         )
         assert not ips, f"dry_run wrote IP {self.SPINE1_TEST_IP!r} to NetBox"
@@ -1357,7 +1357,7 @@ class TestSyncAll:
                 ), f"{worker}:{device} no interfaces created after cleanup"
 
         # Out-of-band: verify Loopback10 exists in NetBox with correct description
-        nb_intf = self._get_nb_intf("ceos-spine-1", self.SPINE1_TEST_INTF)
+        nb_intf = self._get_nb_intf("fn-ceos-sp-1", self.SPINE1_TEST_INTF)
         assert (
             nb_intf is not None
         ), f"{self.SPINE1_TEST_INTF} not found in NetBox after sync_all"
@@ -1376,16 +1376,16 @@ class TestSyncAll:
 
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            mac_data = res["result"]["ceos-spine-1"].get("mac_addresses", {})
+            mac_data = res["result"]["fn-ceos-sp-1"].get("mac_addresses", {})
             assert mac_data.get(
                 "created"
-            ), f"{worker}:ceos-spine-1 no MACs created after cleanup"
+            ), f"{worker}:fn-ceos-sp-1 no MACs created after cleanup"
 
         # Out-of-band: verify spine-1 MAC exists on Ethernet9
-        macs = self._get_nb_macs("ceos-spine-1", "Ethernet9")
+        macs = self._get_nb_macs("fn-ceos-sp-1", "Ethernet9")
         mac_addresses = [str(m.mac_address).lower() for m in macs]
         assert self.SPINE1_TEST_MAC in mac_addresses, (
-            f"MAC {self.SPINE1_TEST_MAC!r} not found on ceos-spine-1:Ethernet9 "
+            f"MAC {self.SPINE1_TEST_MAC!r} not found on fn-ceos-sp-1:Ethernet9 "
             f"after sync_all; found: {mac_addresses}"
         )
 
@@ -1397,16 +1397,16 @@ class TestSyncAll:
 
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            ip_data = res["result"]["ceos-spine-1"].get("ip_addresses", {})
+            ip_data = res["result"]["fn-ceos-sp-1"].get("ip_addresses", {})
             assert ip_data.get(
                 "created"
-            ), f"{worker}:ceos-spine-1 no IPs created after cleanup"
+            ), f"{worker}:fn-ceos-sp-1 no IPs created after cleanup"
 
         # Out-of-band: verify spine-1 Ethernet9 IP exists in NetBox
-        ips = self._get_nb_ips("ceos-spine-1", "Ethernet9")
+        ips = self._get_nb_ips("fn-ceos-sp-1", "Ethernet9")
         ip_addresses = [str(ip.address) for ip in ips]
         assert self.SPINE1_TEST_IP in ip_addresses, (
-            f"IP {self.SPINE1_TEST_IP!r} not found on ceos-spine-1:Ethernet9 "
+            f"IP {self.SPINE1_TEST_IP!r} not found on fn-ceos-sp-1:Ethernet9 "
             f"after sync_all; found: {ip_addresses}"
         )
 
@@ -1464,13 +1464,13 @@ class TestSyncAll:
     # ------------------------------------------------------------------ #
 
     def test_sync_all_with_nornir_filter(self, nfclient):
-        """Devices resolved via Nornir FC filter must include both spine devices."""
+        """Devices resolved by name filter must include both FakeNOS spines."""
         ret = nfclient.run_job(
             "netbox",
             "sync_all",
             workers="any",
             kwargs={
-                "FC": "spine",
+                "FB": ["fn-ceos-sp-*"],
                 "dry_run": True,
                 "sync_kwargs": {"sync_vrfs": False},
             },
@@ -1500,7 +1500,7 @@ class TestSyncAll:
         """Per-task arguments can be supplied inline or through File Sharing."""
         ret = self._sync(
             nfclient,
-            ["ceos-spine-1"],
+            ["fn-ceos-sp-1"],
             dry_run=True,
             sync_kwargs=sync_kwargs,
         )
@@ -1508,7 +1508,7 @@ class TestSyncAll:
 
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            interfaces = res["result"]["ceos-spine-1"]["interfaces"]
+            interfaces = res["result"]["fn-ceos-sp-1"]["interfaces"]
             interface_changes = (
                 list(interfaces.get("create", []))
                 + list(interfaces.get("update", {}))

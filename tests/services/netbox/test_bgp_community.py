@@ -125,7 +125,9 @@ class TestSyncBgpCommunity:
         customer_export = self._community_by_description("65000:100", "CUSTOMER_EXPORT")
         origin_site = self._community_by_description("65000:300", "ORIGIN_SITE")
         site_origin = self._community_by_description("65000:300", "SITE_ORIGIN")
-        assert route_target.custom_fields["community_name"] == ("TENANT_BLUE, VPN_BLUE")
+        assert route_target.custom_fields["community_name"] == (
+            "TEST_VRF_SYNC_TENANT_BLUE, VPN_BLUE"
+        )
         assert blue_export.custom_fields["community_name"] == "BLUE_EXPORT"
         assert customer_export.custom_fields["community_name"] == "CUSTOMER_EXPORT"
         assert origin_site.custom_fields["community_name"] == "ORIGIN_SITE"
@@ -187,7 +189,7 @@ class TestSyncBgpCommunity:
 
         route_target = self.nb.ipam.route_targets.get(name="65000:200")
         assert route_target.custom_fields["community_aliases"] == (
-            "TENANT_BLUE, VPN_BLUE, stale"
+            "TEST_VRF_SYNC_TENANT_BLUE, VPN_BLUE, stale"
         )
         blue_export = self._community_by_description("65000:100", "BLUE_EXPORT")
         customer_export = self._community_by_description("65000:100", "CUSTOMER_EXPORT")

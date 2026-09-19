@@ -76,3 +76,11 @@ hosts:
     port: 6206
     groups:
       - junos_params
+  fn-junos-3:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    username: nornir
+    password: nornir
+    port: 6207
+    groups:
+      - junos_params

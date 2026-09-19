@@ -120,7 +120,7 @@ services:
     environment:
       <<: *test-runner-env
       PYTEST_JUNIT_XML: /workspace/tests/nf_tests_inventory/__norfab__/artifacts/netbox-service-junit.xml
-      NORFAB_TEST_WORKERS: filesharing-worker-1,netbox-worker-1.1,netbox-worker-1.2,nornir-worker-4,fakenos-worker-1
+      NORFAB_TEST_WORKERS: filesharing-worker-1,netbox-worker-1.1,netbox-worker-1.2,nornir-worker-1,nornir-worker-2,nornir-worker-4,fakenos-worker-1
     command:
       - -m
       - netbox
