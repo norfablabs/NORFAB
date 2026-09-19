@@ -191,15 +191,12 @@ class NetboxVrfsTasks:
         result_devices = set()
         failed_devices = set()
         for worker_name, worker_data in parse_data.items():
-            if worker_data["failed"]:
-                msg = f"worker '{worker_name}' failed to collect live VRF data"
-                job.event(msg, severity="ERROR")
-                log.error(f"Sync VRFs: {msg}")
-                ret.errors.append(msg)
-                continue
             resources_failed = worker_data.get("resources_failed") or []
             if resources_failed:
                 failed_devices.update(resources_failed)
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{worker_name} failed to fetch VRF data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -207,6 +204,12 @@ class NetboxVrfsTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"Sync VRFs: {msg}")
                 ret.errors.append(msg)
+            if worker_data["failed"]:
+                msg = f"worker '{worker_name}' failed to collect live VRF data"
+                job.event(msg, severity="ERROR")
+                log.error(f"Sync VRFs: {msg}")
+                ret.errors.append(msg)
+                continue
             for device_name, records in worker_data["result"].items():
                 if device_name not in nb_devices:
                     continue

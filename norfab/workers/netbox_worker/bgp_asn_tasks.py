@@ -141,15 +141,12 @@ class NetboxBgpAsnTasks:
         failed_devices = set()
         parsed_count = 0
         for worker_name, worker_data in parse_data.items():
-            if worker_data["failed"]:
-                msg = f"worker '{worker_name}' failed to collect live BGP ASN data"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync BGP ASNs: {msg}")
-                ret.errors.append(msg)
-                continue
             resources_failed = worker_data.get("resources_failed") or []
             if resources_failed:
                 failed_devices.update(resources_failed)
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{worker_name} failed to fetch BGP ASN data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -157,6 +154,12 @@ class NetboxBgpAsnTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - Sync BGP ASNs: {msg}")
                 ret.errors.append(msg)
+            if worker_data["failed"]:
+                msg = f"worker '{worker_name}' failed to collect live BGP ASN data"
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - Sync BGP ASNs: {msg}")
+                ret.errors.append(msg)
+                continue
             for device_name, records in worker_data["result"].items():
                 if device_name not in nb_devices:
                     continue

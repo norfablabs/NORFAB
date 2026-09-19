@@ -2150,14 +2150,12 @@ class NetboxBgpPeeringsTasks:
         job.event("normalising live BGP session data")
         failed_devices = set()
         for wname, wdata in parse_data.items():
-            if wdata.get("failed"):
-                msg = f"{wname} - failed to parse BGP session data from devices"
-                log.warning(msg)
-                job.event(msg, severity="WARNING")
-                continue
             resources_failed = wdata.get("resources_failed") or []
             if resources_failed:
                 failed_devices.update(resources_failed)
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{wname} failed to fetch BGP session data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -2165,6 +2163,11 @@ class NetboxBgpPeeringsTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
+            if wdata.get("failed"):
+                msg = f"{wname} - failed to parse BGP session data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+                continue
             for device_name, host_sessions in (wdata.get("result") or {}).items():
                 normalised_live.setdefault(device_name, {})
                 for s in host_sessions:

@@ -266,25 +266,23 @@ class TestSyncResourcesFailed:
     SUCCESS_DEVICE = "fn-ceos-lf-1"
 
     @pytest.mark.parametrize(
-        ("task", "error_text", "failed_device"),
+        ("task", "failed_device"),
         [
-            (
-                "sync_device_inventory",
-                "failed to fetch inventory data",
-                DEVICE,
-            ),
-            ("sync_vlans", "failed to fetch VLAN data", VLAN_DEVICE),
-            ("sync_vrrp", "failed to fetch VRRP data", VLAN_DEVICE),
-            ("sync_device_prefixes", "failed to fetch interface data", DEVICE),
-            ("sync_vrfs", "failed to fetch VRF data", DEVICE),
-            ("sync_device_interfaces", "failed to fetch interface data", DEVICE),
-            ("sync_mac_addresses", "failed to fetch interface data", DEVICE),
-            ("sync_device_ip", "failed to fetch interface data", DEVICE),
-            ("sync_bgp_peerings", "failed to fetch BGP session data", DEVICE),
+            ("sync_device_inventory", DEVICE),
+            ("sync_vlans", VLAN_DEVICE),
+            ("sync_vrrp", VLAN_DEVICE),
+            ("sync_device_prefixes", DEVICE),
+            ("sync_vrfs", DEVICE),
+            ("sync_device_interfaces", DEVICE),
+            ("sync_mac_addresses", DEVICE),
+            ("sync_device_ip", DEVICE),
+            ("sync_bgp_peerings", DEVICE),
+            ("sync_bgp_asn", DEVICE),
+            ("sync_bgp_community", DEVICE),
         ],
     )
     def test_failed_nornir_resources_are_reported(
-        self, nfclient: Any, task: str, error_text: str, failed_device: str
+        self, nfclient: Any, task: str, failed_device: str
     ) -> None:
         nb = get_pynetbox(nfclient)
         device = nb.dcim.devices.get(name=failed_device)
@@ -302,6 +300,11 @@ class TestSyncResourcesFailed:
             status="active",
         )
         try:
+            clear_result = nfclient.run_job(
+                "nornir", "errdisabled_hosts_clear", workers=["nornir-worker-4"]
+            )["nornir-worker-4"]
+            assert clear_result["failed"] is False
+
             response = nfclient.run_job(
                 "netbox",
                 task,
@@ -314,10 +317,8 @@ class TestSyncResourcesFailed:
 
             assert response
             for result in response.values():
-                assert any(
-                    error_text in error and failed_device in error
-                    for error in result["errors"]
-                )
+                assert failed_device in result["resources_failed"]
+                assert result["errors"]
                 if task == "sync_vrrp":
                     assert not any(
                         "missing a live VRRP result" in error and failed_device in error

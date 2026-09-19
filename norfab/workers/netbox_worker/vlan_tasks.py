@@ -425,20 +425,24 @@ class NetboxVlansTasks:
         )
         live_by_device = {}
         for worker, response in parsed.items():
+            resources_failed = response.get("resources_failed") or []
+            if resources_failed:
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
+                message = (
+                    f"{worker} failed to fetch VLAN data from devices "
+                    f"{', '.join(sorted(resources_failed))}"
+                )
+                job.event(message, severity="ERROR")
+                log.error(message)
+                ret.errors.append(message)
             if response.get("failed"):
                 message = f"worker '{worker}' failed to collect live VLAN data"
                 job.event(message, severity="ERROR")
                 log.error(message)
                 ret.errors.append(message)
                 continue
-            if response.get("resources_failed"):
-                message = (
-                    f"{worker} failed to fetch VLAN data from devices "
-                    f"{', '.join(sorted(response['resources_failed']))}"
-                )
-                job.event(message, severity="ERROR")
-                log.error(message)
-                ret.errors.append(message)
             for device, records in response["result"].items():
                 live_by_device.setdefault(device, []).extend(records)
         if not live_by_device:

@@ -781,7 +781,8 @@ inputs must match the NetBox model.
 [Task details](workers/netbox/services_netbox_service_tasks_create_device_interfaces.md)
 
 Live-state synchronization tasks report per-device Nornir collection failures
-in their NetBox task errors while retaining usable results from other devices.
+in their NetBox task errors and `resources_failed` while retaining usable results
+from other devices. `sync_all` propagates failed resources from its child tasks.
 
 ### Live interface reconciliation
 

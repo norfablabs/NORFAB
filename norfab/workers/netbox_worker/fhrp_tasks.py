@@ -168,16 +168,12 @@ class NetboxFhrpTasks:
         live_state = {}
         failed_devices = set()
         for worker_name, worker_data in parse_data.items():
-            if worker_data.get("failed"):
-                msg = f"worker '{worker_name}' failed to collect live VRRP data"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - Sync VRRP: {msg}")
-                ret.errors.append(msg)
-                continue
-
             resources_failed = worker_data.get("resources_failed") or []
             if resources_failed:
                 failed_devices.update(resources_failed)
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{worker_name} failed to fetch VRRP data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -185,6 +181,12 @@ class NetboxFhrpTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - Sync VRRP: {msg}")
                 ret.errors.append(msg)
+            if worker_data.get("failed"):
+                msg = f"worker '{worker_name}' failed to collect live VRRP data"
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - Sync VRRP: {msg}")
+                ret.errors.append(msg)
+                continue
 
             worker_result = worker_data.get("result")
             if not isinstance(worker_result, dict):
@@ -226,7 +228,9 @@ class NetboxFhrpTasks:
                             record.get("virtual_address") or ""
                         ).strip()
                         if not virtual_address_value:
-                            raise ValueError(f"{interface_name} virtual address is missing")
+                            raise ValueError(
+                                f"{interface_name} virtual address is missing"
+                            )
                         virtual_address = str(
                             ipaddress.ip_interface(virtual_address_value).ip
                         )

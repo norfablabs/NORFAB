@@ -593,16 +593,12 @@ class NetboxDevicesTasks:
         live_records_by_device = {device_name: [] for device_name in devices}
         failed_devices = set()
         for worker_name, worker_data in parse_data.items():
-            if worker_data["failed"]:
-                if not worker_data["result"]:
-                    msg = f"{worker_name} - failed to parse inventory data from devices"
-                    parse_worker_errors.append(msg)
-                    log.warning(f"{msg}: {worker_data['errors']}")
-                    job.event(msg, severity="WARNING")
-                    continue
             resources_failed = worker_data.get("resources_failed") or []
             if resources_failed:
                 failed_devices.update(resources_failed)
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{worker_name} failed to fetch inventory data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -610,6 +606,13 @@ class NetboxDevicesTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
+            if worker_data["failed"]:
+                if not worker_data["result"]:
+                    msg = f"{worker_name} - failed to parse inventory data from devices"
+                    parse_worker_errors.append(msg)
+                    log.warning(f"{msg}: {worker_data['errors']}")
+                    job.event(msg, severity="WARNING")
+                    continue
             for device_name, host_inventory in worker_data["result"].items():
                 if device_name not in live_records_by_device:
                     continue
@@ -1560,6 +1563,9 @@ class NetboxDevicesTasks:
             if inventory_result.errors:
                 job.event("inventory sync completed with errors", severity="WARNING")
                 ret.errors.extend(inventory_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(inventory_result.resources_failed)
+            )
             for device, data in inventory_result.result.items():
                 ret.result.setdefault(device, {})["inventory"] = data
             if inventory_result.failed:
@@ -1595,6 +1601,9 @@ class NetboxDevicesTasks:
             if prefix_result.errors:
                 job.event("prefix sync completed with errors", severity="WARNING")
                 ret.errors.extend(prefix_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(prefix_result.resources_failed)
+            )
             for device in devices:
                 ret.result[device]["prefixes"] = prefix_result.result
             if prefix_result.failed:
@@ -1627,6 +1636,9 @@ class NetboxDevicesTasks:
             if intf_result.errors:
                 job.event("interface sync completed with errors", severity="WARNING")
                 ret.errors.extend(intf_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(intf_result.resources_failed)
+            )
             for device, data in intf_result.result.items():
                 ret.result.setdefault(device, {})["interfaces"] = data
             if intf_result.failed:
@@ -1659,6 +1671,9 @@ class NetboxDevicesTasks:
             if vrf_result.errors:
                 job.event("VRF sync completed with errors", severity="WARNING")
                 ret.errors.extend(vrf_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(vrf_result.resources_failed)
+            )
             for device in devices:
                 device_interfaces = {}
                 if device in vrf_result.result["interfaces"]:
@@ -1697,6 +1712,9 @@ class NetboxDevicesTasks:
             if vlan_result.errors:
                 job.event("VLAN sync completed with errors", severity="WARNING")
                 ret.errors.extend(vlan_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(vlan_result.resources_failed)
+            )
             if vlan_result.failed:
                 ret.failed = True
                 job.event("sync all stopped because VLAN sync failed", severity="ERROR")
@@ -1733,6 +1751,9 @@ class NetboxDevicesTasks:
             if mac_result.errors:
                 job.event("MAC address sync completed with errors", severity="WARNING")
                 ret.errors.extend(mac_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(mac_result.resources_failed)
+            )
             for device, data in mac_result.result.items():
                 ret.result.setdefault(device, {})["mac_addresses"] = data
             if mac_result.failed:
@@ -1765,6 +1786,9 @@ class NetboxDevicesTasks:
             if ip_result.errors:
                 job.event("IP address sync completed with errors", severity="WARNING")
                 ret.errors.extend(ip_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(ip_result.resources_failed)
+            )
             for device, data in ip_result.result.items():
                 ret.result.setdefault(device, {})["ip_addresses"] = data
             if ip_result.failed:
@@ -1797,6 +1821,9 @@ class NetboxDevicesTasks:
             if bgp_result.errors:
                 job.event("BGP peerings sync completed with errors", severity="WARNING")
                 ret.errors.extend(bgp_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(bgp_result.resources_failed)
+            )
             for device, data in bgp_result.result.items():
                 ret.result.setdefault(device, {})["bgp_peerings"] = data
             if bgp_result.failed:

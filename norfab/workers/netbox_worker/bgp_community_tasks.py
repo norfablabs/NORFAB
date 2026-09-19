@@ -191,15 +191,12 @@ class NetboxBgpCommunityTasks:
         failed_devices = set()
         parsed_count = 0
         for worker_name, worker_data in parse_data.items():
-            if worker_data.get("failed"):
-                msg = f"worker '{worker_name}' failed to collect BGP communities"
-                job.event(msg, severity="ERROR")
-                log.error(f"{self.name} - {msg}")
-                ret.errors.append(msg)
-                continue
             resources_failed = worker_data.get("resources_failed") or []
             if resources_failed:
                 failed_devices.update(resources_failed)
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{worker_name} failed to fetch BGP community data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -207,7 +204,12 @@ class NetboxBgpCommunityTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
-
+            if worker_data.get("failed"):
+                msg = f"worker '{worker_name}' failed to collect BGP communities"
+                job.event(msg, severity="ERROR")
+                log.error(f"{self.name} - {msg}")
+                ret.errors.append(msg)
+                continue
             worker_result = worker_data.get("result")
             if not isinstance(worker_result, dict):
                 msg = f"worker '{worker_name}' returned malformed community data"

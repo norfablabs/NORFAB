@@ -85,13 +85,11 @@ def collect_live_interface_ip_data(
 
     normalised_live_all = {}
     for worker_name, worker_data in parse_data.items():
-        if worker_data.get("failed"):
-            msg = f"{worker_name} - failed to parse interface data from devices"
-            log.warning(msg)
-            job.event(msg, severity="WARNING")
-            continue
         resources_failed = worker_data.get("resources_failed") or []
         if resources_failed:
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(resources_failed)
+            )
             msg = (
                 f"{worker_name} failed to fetch interface data from devices "
                 f"{', '.join(sorted(resources_failed))}"
@@ -99,6 +97,11 @@ def collect_live_interface_ip_data(
             job.event(msg, severity="ERROR")
             log.error(f"Failed to collect live interface data: {msg}")
             ret.errors.append(msg)
+        if worker_data.get("failed"):
+            msg = f"{worker_name} - failed to parse interface data from devices"
+            log.warning(msg)
+            job.event(msg, severity="WARNING")
+            continue
         for device_name, host_interfaces in worker_data["result"].items():
             filtered = {}
             for interface in host_interfaces:

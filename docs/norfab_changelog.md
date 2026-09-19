@@ -1,3 +1,11 @@
+# 0.23.7
+
+## ENHANCEMENTS
+
+1. NetBox sync tasks now include failed Nornir devices in `resources_failed`, including through `sync_all`, while preserving results from devices that succeeded.
+
+---
+
 # 0.23.6
 
 ## BUGS

@@ -1069,13 +1069,11 @@ class NetboxInterfacesTasks:
         )
         interface_status = {}
         for wname, wdata in parse_status_data.items():
-            if wdata.get("failed"):
-                msg = f"{wname} - failed to parse interface status data from devices"
-                log.warning(msg)
-                job.event(msg, severity="WARNING")
-                continue
             resources_failed = wdata.get("resources_failed") or []
             if resources_failed:
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{wname} failed to fetch interface status data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -1083,6 +1081,11 @@ class NetboxInterfacesTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
+            if wdata.get("failed"):
+                msg = f"{wname} - failed to parse interface status data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+                continue
             for device_name, host_interfaces in wdata["result"].items():
                 device_status = interface_status.setdefault(device_name, {})
                 for data in host_interfaces or []:
@@ -1093,13 +1096,11 @@ class NetboxInterfacesTasks:
         job.event("normalising live interface data")
         normalised_live_all = {}
         for wname, wdata in parse_data.items():
-            if wdata.get("failed"):
-                msg = f"{wname} - failed to parse interface data from devices"
-                log.warning(msg)
-                job.event(msg, severity="WARNING")
-                continue
             resources_failed = wdata.get("resources_failed") or []
             if resources_failed:
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{wname} failed to fetch interface data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -1107,6 +1108,11 @@ class NetboxInterfacesTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
+            if wdata.get("failed"):
+                msg = f"{wname} - failed to parse interface data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+                continue
             for device_name, host_interfaces in wdata["result"].items():
                 normalised_live_all.setdefault(device_name, {})
                 for data in host_interfaces or []:
@@ -1660,13 +1666,11 @@ class NetboxInterfacesTasks:
         job.event("collecting live MAC address candidates")
         all_mac_live: dict = {}  # {mac: {"device": ..., "interface": ...}}
         for wname, wdata in parse_data.items():
-            if wdata.get("failed"):
-                msg = f"{wname} - failed to parse interface data from devices"
-                log.warning(msg)
-                job.event(msg, severity="WARNING")
-                continue
             resources_failed = wdata.get("resources_failed") or []
             if resources_failed:
+                ret.resources_failed = sorted(
+                    set(ret.resources_failed) | set(resources_failed)
+                )
                 msg = (
                     f"{wname} failed to fetch interface data from devices "
                     f"{', '.join(sorted(resources_failed))}"
@@ -1674,6 +1678,11 @@ class NetboxInterfacesTasks:
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
+            if wdata.get("failed"):
+                msg = f"{wname} - failed to parse interface data from devices"
+                log.warning(msg)
+                job.event(msg, severity="WARNING")
+                continue
             for device_name, host_interfaces in wdata["result"].items():
                 for data in host_interfaces:
                     intf_name = data["name"]
