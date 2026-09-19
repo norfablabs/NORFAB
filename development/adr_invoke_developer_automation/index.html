@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7481,6 +7481,28 @@ accepts <code>--parallel-runs=N</code>. It discovers <code>test_*.py</code> file
 conventional test tree and runs each file in a separate container and
 <code>__norfab__</code> runtime, with at most <code>N</code> containers active at once. This remains
 opt-in; the default single-container behavior is unchanged.</p>
+<p>All-suites concurrency amendment: <code>docker-tests-all</code> starts all regular pytest
+suite containers concurrently and aggregates their statuses after completion.
+The Containerlab runner, idle performance profiler, and distributed topology
+remain opt-in through their dedicated tasks and are not started by the
+aggregate command.
+After a Docker test invocation finishes, the task parses only JUnit XML
+artifacts created or changed by that invocation and writes a timestamped
+Markdown report under <code>docker/norfab-docker-tests/reports/</code>. This applies to
+individual suites, selectors, dedicated NetBox file tasks, per-file parallel
+runs, and the consolidated all-suites run. Missing and malformed reports are
+recorded instead of being confused with stale results.</p>
+<p>Suite-collection amendment: each Docker suite passes its conventional test
+directory to pytest before applying its marker. This prevents unrelated test
+modules from being imported during collection and avoids contaminating the
+process-global worker task registry inherited by Linux worker processes. A
+user-supplied selector continues to override the default directory.</p>
+<p>NetBox test-file amendment: the large NetBox suite is divided into explicit
+<code>docker-tests-netbox-&lt;file&gt;</code> Invoke tasks. The tasks dynamically reuse the
+single NetBox Compose service image with <code>docker compose run</code>; no duplicate
+Compose services are defined. Each invocation has a descriptive container
+name and its own runtime and JUnit artifact directory. The aggregate NetBox
+and all-suites tasks fan out through the same file runners.</p>
 <h2 id="date">Date<a class="headerlink" href="#date" title="Permanent link">¤</a></h2>
 <p>2026-08-22.</p>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">¤</a></h2>
@@ -8117,7 +8139,7 @@ until the maintainer approves the proposal.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

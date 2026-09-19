@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7197,6 +7197,16 @@ poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> 
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>netbox_get_interfaces
 </code></pre></div>
+<p>Run one test file in a dedicated Docker container through Invoke:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox-interfaces
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox-bgp
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox-crud
+</code></pre></div>
+<p>The task-level runners reuse <code>netbox-service-tests</code> from Compose and create
+descriptively named containers such as
+<code>norfab-tests-netbox-bgp-&lt;run-id&gt;</code>. Runtime data and JUnit XML
+are isolated under <code>docker/norfab-docker-tests/netbox-service-tests/groups/</code>.
+The aggregate <code>docker-tests-netbox</code> task starts all NetBox file runners.</p>
 <p>Run one class:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py::TestGetInterfaces
@@ -7446,7 +7456,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

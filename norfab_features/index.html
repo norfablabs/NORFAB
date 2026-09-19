@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -9894,7 +9894,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 16 September 2026</em></p>
+<p><em>Last updated: 19 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10262,11 +10262,11 @@ excluded from source control and protected appropriately.
 <a href="../api_reference_core_norfab_nfapi/#environment-file-loading">NFAPI environment details</a></p>
 <h3 id="topology-dependencies-and-lifecycle-hooks">Topology dependencies and lifecycle hooks<a class="headerlink" href="#topology-dependencies-and-lifecycle-hooks" title="Permanent link">¤</a></h3>
 <p>Starts an ordered selection of broker/workers, lets workers declare
-<code>depends_on</code> relationships, and runs configured startup, exit, Nornir-startup,
-and Nornir-exit Python hooks. <strong>Use cases:</strong> waiting for a source-of-truth
-service, preloading data, registering integrations, and cleanup. <strong>Limitations:</strong>
-hooks are trusted code; dependency ordering does not replace external service
-health orchestration.
+<code>depends_on</code> relationships, staggers worker process creation to control peak
+startup CPU, and runs configured startup, exit, Nornir-startup, and Nornir-exit
+Python hooks. <strong>Use cases:</strong> waiting for a source-of-truth service, preloading
+data, registering integrations, and cleanup. <strong>Limitations:</strong> hooks are trusted
+code; dependency ordering does not replace external service health orchestration.
 <a href="../customization/norfab_hooks/">Hook details</a></p>
 <h3 id="worker-capacity-and-resource-controls">Worker capacity and resource controls<a class="headerlink" href="#worker-capacity-and-resource-controls" title="Permanent link">¤</a></h3>
 <p>Configures per-worker concurrent-job limits, compressed job storage, watchdog
@@ -10315,7 +10315,10 @@ packaging, dependency, schema, security, and lifecycle ownership.
 <a href="../customization/service_plugin_overview/">Plugin details</a></p>
 <h2 id="nfcli-interactive-shell">NFCLI interactive shell<a class="headerlink" href="#nfcli-interactive-shell" title="Permanent link">¤</a></h2>
 <p>The <a href="../clients_nfcli_overview/">NFCLI client</a> provides a model-driven operations
-shell over the same task contracts used by the Python, REST, and MCP interfaces.</p>
+shell over the same task contracts used by the Python, REST, and MCP interfaces.
+When <code>--inventory</code> is omitted, <code>NORFAB_INVENTORY_DIR</code> can locate
+<code>inventory.yaml</code> and establish its base directory, which is useful for
+containerized clients.</p>
 <h3 id="hierarchical-operating-modes">Hierarchical operating modes<a class="headerlink" href="#hierarchical-operating-modes" title="Permanent link">¤</a></h3>
 <p>Organizes platform and service commands into familiar nested modes such as
 <code>nornir cli</code>, <code>netbox</code>, <code>containerlab</code>, and <code>show</code>. <strong>Use cases:</strong> guided
@@ -10795,11 +10798,13 @@ route-target and routing-policy objects, their associations, and device
 associations are not removed automatically.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_vrfs/">Task details</a></p>
 <h3 id="live-ip-and-mac-reconciliation">Live IP and MAC reconciliation<a class="headerlink" href="#live-ip-and-mac-reconciliation" title="Permanent link">¤</a></h3>
-<p>Reconciles device IP assignments, derived prefixes, and interface MAC addresses
-with NetBox, including interface-first IP matching, filters, inline or <code>nf://</code>
+<p>Reconciles device IP assignments, parsed IP roles, derived prefixes, and
+interface MAC addresses with NetBox, including interface-first IP matching,
+shared inline or <code>nf://</code> interface-name mapping, filters, inline or <code>nf://</code>
 anycast ranges, VRF/site association, controlled deletion behavior, and stable
-create, update, delete, and in-sync diff reports. <strong>Use cases:</strong> IPAM accuracy
-and address/MAC drift correction.
+create, update, delete, and in-sync diff reports.
+Parsed VRRP addresses remain unassigned for the VRRP sync task to associate with
+FHRP groups. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
 <strong>Limitations:</strong> requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_ip/">IP sync</a> ·
@@ -11083,7 +11088,8 @@ HTTP/JSON gateway.</p>
 <h3 id="generated-service-apis">Generated service APIs<a class="headerlink" href="#generated-service-apis" title="Permanent link">¤</a></h3>
 <p>Discovers eligible service tasks and generates REST endpoints from their
 schemas, descriptions, paths, and declared GET/POST/PATCH/DELETE methods. Tasks
-can be rediscovered at runtime. <strong>Interfaces:</strong> REST is the delivered interface;
+can be rediscovered at runtime; each discovery batch rebuilds OpenAPI once after
+all new routes are registered. <strong>Interfaces:</strong> REST is the delivered interface;
 NFCLI and Python API administer the service. <strong>Use cases:</strong> portals, OSS/BSS,
 ITSM, webhooks, CI pipelines, and non-Python consumers. <strong>Limitations:</strong> only
 tasks declaring REST exposure are published.</p>
@@ -11288,7 +11294,7 @@ protection must be designed as part of deployment.
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

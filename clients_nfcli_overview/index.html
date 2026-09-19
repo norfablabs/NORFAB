@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -4500,6 +4500,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#inventory-directory-environment-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inventory directory environment variable
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6861,6 +6872,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#inventory-directory-environment-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inventory directory environment variable
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -6921,6 +6943,14 @@ by CI.</p>
 </code></pre></div>
 <p>See the <a href="../api_reference_core_norfab_nfapi/#environment-file-loading">NFAPI environment file reference</a>
 for the supported file syntax and API controls.</p>
+<h2 id="inventory-directory-environment-variable">Inventory directory environment variable<a class="headerlink" href="#inventory-directory-environment-variable" title="Permanent link">¤</a></h2>
+<p>When <code>--inventory</code> is omitted, <code>NORFAB_INVENTORY_DIR</code> can point to the directory
+containing <code>inventory.yaml</code>. NFCLI uses that directory as the NorFab base
+directory as well. An explicit <code>--inventory</code> takes precedence, and the current
+directory remains the fallback when the variable is unset.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">NORFAB_INVENTORY_DIR</span><span class="o">=</span>/etc/norfab
+nfcli<span class="w"> </span>-c
+</code></pre></div>
 <p>It is important to remember that in PICLE Shell, when you enter a command, the 
 command is executed. If you enter an incorrect command in a production environment, 
 it can negatively impact it.</p>
@@ -7048,7 +7078,7 @@ it can negatively impact it.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

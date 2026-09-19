@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2809,6 +2809,17 @@
     <span class="md-ellipsis">
       
         Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Mapping
       
     </span>
   </a>
@@ -7015,6 +7026,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#interface-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Mapping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#existing-ip-selection" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7170,12 +7192,21 @@
 <p>NetBox candidates are searched by host address without using the prefix length.
 When several records have the same address, interface assignment takes priority
 over VRF and unassigned-record fallback matching.</p>
-<p>Roles are assigned automatically:</p>
+<p>Roles are synchronized from the normalized TTP interface data. The
+<code>ip_address_role</code> value is written to NetBox when present, including roles such
+as <code>secondary</code>, <code>anycast</code>, and <code>vrrp</code>. The task also applies these fallbacks:</p>
 <ul>
 <li>Interfaces whose name starts with <code>loopback</code> or <code>lo</code> → role <code>loopback</code></li>
 <li>Addresses that fall within any configured <code>anycast_ranges</code> prefix → role <code>anycast</code></li>
 <li>All other addresses → no role (standard unicast)</li>
 </ul>
+<p>Configured <code>anycast_ranges</code> take precedence over the parsed role. A parsed role
+takes precedence over loopback-name inference.</p>
+<p>Addresses with the parsed <code>vrrp</code> role are created or reused without an
+interface assignment. The <a href="../services_netbox_service_tasks_sync_vrrp/"><code>sync_vrrp</code></a>
+task assigns those addresses to the appropriate NetBox FHRP group. If the
+address is already assigned to an FHRP group, IP synchronization leaves it
+unchanged.</p>
 <p><img alt="Netbox Sync Device Interfaces" src="../../../images/Netbox_Service_Sync_Interfaces.jpg" /></p>
 <ol>
 <li>Client submits an on-demand request to the NorFab Netbox worker to sync device IP addresses</li>
@@ -7222,6 +7253,19 @@ including when every address is already synchronized:</p>
 <li><code>filter_by_ip</code> — glob pattern matched against the host portion of the IP address (without prefix length), e.g. <code>"10.0.1.*"</code>. Only matching addresses are included.</li>
 </ul>
 <p>Multiple filters combine as intersection — all specified conditions must be satisfied for an IP to be included.</p>
+<h2 id="interface-mapping">Interface Mapping<a class="headerlink" href="#interface-mapping" title="Permanent link">¤</a></h2>
+<p>Use <code>interface_map</code> to translate live interface names to their NetBox names.
+Rules are evaluated in order and the first matching device name, device type,
+and literal interface-name substring wins. Mapping occurs before
+<code>filter_by_name</code>, role inference, and NetBox interface lookup. Use the same map
+for <code>sync_device_interfaces</code> and <code>sync_device_ip</code> so IP addresses are assigned
+to the interfaces created by interface sync.</p>
+<p>Rules can be supplied inline or through an <code>nf://</code> YAML file:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">device_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fn-ceos-sp-*&quot;</span>
+<span class="w">  </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Arista</span><span class="nv"> </span><span class="s">*&quot;</span>
+<span class="w">  </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Loopback&quot;</span>
+<span class="w">  </span><span class="nt">replace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NetBoxLoopback&quot;</span>
+</code></pre></div>
 <h2 id="existing-ip-selection">Existing IP Selection<a class="headerlink" href="#existing-ip-selection" title="Permanent link">¤</a></h2>
 <p>For each live address, the task uses this order:</p>
 <ol>
@@ -7315,6 +7359,9 @@ successful batches.</p>
 </code></pre></div>
 <p>Sync only loopback interface addresses:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 filter-by-name &quot;Loopback*&quot;
+</code></pre></div>
+<p>Map live interface names before filtering and assignment:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices fn-ceos-sp-1 interface-map nf://netbox/interface_map.yaml filter-by-name &quot;NetBoxLoopback*&quot;
 </code></pre></div>
 <p>Sync only addresses within a specific prefix:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync ip-addresses devices ceos-spine-1 filter-by-prefix &quot;10.3.0.0/16&quot;
@@ -7437,6 +7484,18 @@ successful batches.</p>
     <span class="p">},</span>
 <span class="p">)</span>
 
+<span class="c1"># map live interface names to their NetBox names</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fn-ceos-sp-1&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;interface_map&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://netbox/interface_map.yaml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;filter_by_name&quot;</span><span class="p">:</span> <span class="s2">&quot;NetBoxLoopback*&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
 <span class="c1"># sync into a NetBox branch</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
     <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
@@ -7478,35 +7537,36 @@ successful batches.</p>
 </div>
 <h2 id="norfab-netbox-sync-device-ip-command-shell-reference">NORFAB Netbox Sync Device IP Command Shell Reference<a class="headerlink" href="#norfab-netbox-sync-device-ip-command-shell-reference" title="Permanent link">¤</a></h2>
 <p>NorFab shell supports these command options for the <code>sync_device_ip</code> task:</p>
-<div class="highlight"><pre><span></span><code>nf# man tree netbox.sync.ip-addresses
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox.sync.ip-addresses
 root
-└── netbox:    Netbox service
-    └── sync:    Sync Netbox data
-        └── ip-addresses:    Sync device IP addresses with NetBox
-            ├── timeout:    Job timeout in seconds
-            ├── workers:    Filter worker to target, default &#39;any&#39;
-            ├── verbose-result:    Control output details, default &#39;False&#39;
-            ├── progress:    Display progress events, default &#39;True&#39;
-            ├── instance:    Netbox instance name to target
-            ├── dry-run:    Return reconciliation plan without pushing changes to NetBox
-            ├── devices:    List of NetBox device names to sync
-            ├── anycast-ranges:    IP prefix(es) used to classify addresses as anycast role
-            ├── ignore-vrf:    Ignore discovered interface VRFs during IP sync
-            ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. &#39;Loopback*&#39;
-            ├── filter-by-description:    Glob pattern to restrict sync by interface description
-            ├── filter-by-prefix:    CIDR prefix to restrict sync to addresses within it, e.g. &#39;10.0.0.0/8&#39;
-            ├── filter-by-ip:    Glob pattern to restrict sync by IP host address, e.g. &#39;10.0.1.*&#39;
-            ├── branch:    Branching plugin branch name to push changes into
-            ├── FO:    Filter Nornir hosts using Filter Object
-            ├── FB:    Filter Nornir hosts by name using Glob Patterns
-            ├── FH:    Filter Nornir hosts by hostname
-            ├── FC:    Filter Nornir hosts by name containment
-            ├── FR:    Filter Nornir hosts by name using Regular Expressions
-            ├── FG:    Filter Nornir hosts by group
-            ├── FP:    Filter Nornir hosts by hostname using IP Prefix
-            ├── FL:    Filter Nornir hosts by names list
-            ├── FM:    Filter Nornir hosts by platform
-            └── FN:    Negate the Nornir host filter match
+└──<span class="w"> </span>netbox:<span class="w">    </span>Netbox<span class="w"> </span>service
+<span class="w">    </span>└──<span class="w"> </span>sync:<span class="w">    </span>Sync<span class="w"> </span>Netbox<span class="w"> </span>data
+<span class="w">        </span>└──<span class="w"> </span>ip-addresses:<span class="w">    </span>Sync<span class="w"> </span>device<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>with<span class="w"> </span>NetBox
+<span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds
+<span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>verbose-result:<span class="w">    </span>Control<span class="w"> </span>output<span class="w"> </span>details,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>progress:<span class="w">    </span>Display<span class="w"> </span>progress<span class="w"> </span>events,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>Netbox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
+<span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Return<span class="w"> </span>reconciliation<span class="w"> </span>plan<span class="w"> </span>without<span class="w"> </span>pushing<span class="w"> </span>changes<span class="w"> </span>to<span class="w"> </span>NetBox
+<span class="w">            </span>├──<span class="w"> </span>devices:<span class="w">    </span>List<span class="w"> </span>of<span class="w"> </span>NetBox<span class="w"> </span>device<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>sync
+<span class="w">            </span>├──<span class="w"> </span>anycast-ranges:<span class="w">    </span>IP<span class="w"> </span>prefix<span class="o">(</span>es<span class="o">)</span><span class="w"> </span>used<span class="w"> </span>to<span class="w"> </span>classify<span class="w"> </span>addresses<span class="w"> </span>as<span class="w"> </span>anycast<span class="w"> </span>role
+<span class="w">            </span>├──<span class="w"> </span>ignore-vrf:<span class="w">    </span>Ignore<span class="w"> </span>discovered<span class="w"> </span>interface<span class="w"> </span>VRFs<span class="w"> </span>during<span class="w"> </span>IP<span class="w"> </span>sync
+<span class="w">            </span>├──<span class="w"> </span>interface-map:<span class="w">    </span>Ordered<span class="w"> </span>rules<span class="w"> </span>mapping<span class="w"> </span>live<span class="w"> </span>interface<span class="w"> </span>names<span class="w"> </span>to<span class="w"> </span>preferred<span class="w"> </span>NetBox<span class="w"> </span>names
+<span class="w">            </span>├──<span class="w"> </span>filter-by-name:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>interface<span class="w"> </span>name,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">&#39;Loopback*&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>filter-by-description:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>interface<span class="w"> </span>description
+<span class="w">            </span>├──<span class="w"> </span>filter-by-prefix:<span class="w">    </span>CIDR<span class="w"> </span>prefix<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>to<span class="w"> </span>addresses<span class="w"> </span>within<span class="w"> </span>it,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">&#39;10.0.0.0/8&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>filter-by-ip:<span class="w">    </span>Glob<span class="w"> </span>pattern<span class="w"> </span>to<span class="w"> </span>restrict<span class="w"> </span>sync<span class="w"> </span>by<span class="w"> </span>IP<span class="w"> </span>host<span class="w"> </span>address,<span class="w"> </span>e.g.<span class="w"> </span><span class="s1">&#39;10.0.1.*&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>Branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>push<span class="w"> </span>changes<span class="w"> </span>into
+<span class="w">            </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
+<span class="w">            </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
+<span class="w">            </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
+<span class="w">            </span>├──<span class="w"> </span>FC:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>containment
+<span class="w">            </span>├──<span class="w"> </span>FR:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Regular<span class="w"> </span>Expressions
+<span class="w">            </span>├──<span class="w"> </span>FG:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>group
+<span class="w">            </span>├──<span class="w"> </span>FP:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname<span class="w"> </span>using<span class="w"> </span>IP<span class="w"> </span>Prefix
+<span class="w">            </span>├──<span class="w"> </span>FL:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>names<span class="w"> </span>list
+<span class="w">            </span>├──<span class="w"> </span>FM:<span class="w">    </span>Filter<span class="w"> </span>Nornir<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>platform
+<span class="w">            </span>└──<span class="w"> </span>FN:<span class="w">    </span>Negate<span class="w"> </span>the<span class="w"> </span>Nornir<span class="w"> </span>host<span class="w"> </span>filter<span class="w"> </span>match
 nf#
 </code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
@@ -7544,6 +7604,9 @@ the same structure showing what was done.</p>
 <ol>
 <li>When overlapping IP discovered in Netbox and it is part of anycast range,
     existing IP role update to <code>anycast</code></li>
+<li>Parsed TTP IP roles are synchronized to NetBox. VRRP addresses are
+    created or reused without an interface assignment so that <code>sync_vrrp</code>
+    can associate them with an FHRP group.</li>
 </ol>
 
 
@@ -7725,6 +7788,24 @@ and their VRF is left unchanged. Defaults to True.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>interface_map</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>, <span title="list">list</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ordered interface rename rules, or an <code>nf://</code> YAML
+file containing them. Mapping is applied before interface filtering
+and NetBox interface lookup. The first matching rule wins.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>filter_by_name</code>
             </td>
             <td>
@@ -7841,17 +7922,7 @@ does not delete IP addresses.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 671</span>
-<span class="normal"> 672</span>
-<span class="normal"> 673</span>
-<span class="normal"> 674</span>
-<span class="normal"> 675</span>
-<span class="normal"> 676</span>
-<span class="normal"> 677</span>
-<span class="normal"> 678</span>
-<span class="normal"> 679</span>
-<span class="normal"> 680</span>
-<span class="normal"> 681</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 681</span>
 <span class="normal"> 682</span>
 <span class="normal"> 683</span>
 <span class="normal"> 684</span>
@@ -8411,7 +8482,105 @@ does not delete IP addresses.</p>
 <span class="normal">1238</span>
 <span class="normal">1239</span>
 <span class="normal">1240</span>
-<span class="normal">1241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1241</span>
+<span class="normal">1242</span>
+<span class="normal">1243</span>
+<span class="normal">1244</span>
+<span class="normal">1245</span>
+<span class="normal">1246</span>
+<span class="normal">1247</span>
+<span class="normal">1248</span>
+<span class="normal">1249</span>
+<span class="normal">1250</span>
+<span class="normal">1251</span>
+<span class="normal">1252</span>
+<span class="normal">1253</span>
+<span class="normal">1254</span>
+<span class="normal">1255</span>
+<span class="normal">1256</span>
+<span class="normal">1257</span>
+<span class="normal">1258</span>
+<span class="normal">1259</span>
+<span class="normal">1260</span>
+<span class="normal">1261</span>
+<span class="normal">1262</span>
+<span class="normal">1263</span>
+<span class="normal">1264</span>
+<span class="normal">1265</span>
+<span class="normal">1266</span>
+<span class="normal">1267</span>
+<span class="normal">1268</span>
+<span class="normal">1269</span>
+<span class="normal">1270</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span>
+<span class="normal">1281</span>
+<span class="normal">1282</span>
+<span class="normal">1283</span>
+<span class="normal">1284</span>
+<span class="normal">1285</span>
+<span class="normal">1286</span>
+<span class="normal">1287</span>
+<span class="normal">1288</span>
+<span class="normal">1289</span>
+<span class="normal">1290</span>
+<span class="normal">1291</span>
+<span class="normal">1292</span>
+<span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span>
+<span class="normal">1296</span>
+<span class="normal">1297</span>
+<span class="normal">1298</span>
+<span class="normal">1299</span>
+<span class="normal">1300</span>
+<span class="normal">1301</span>
+<span class="normal">1302</span>
+<span class="normal">1303</span>
+<span class="normal">1304</span>
+<span class="normal">1305</span>
+<span class="normal">1306</span>
+<span class="normal">1307</span>
+<span class="normal">1308</span>
+<span class="normal">1309</span>
+<span class="normal">1310</span>
+<span class="normal">1311</span>
+<span class="normal">1312</span>
+<span class="normal">1313</span>
+<span class="normal">1314</span>
+<span class="normal">1315</span>
+<span class="normal">1316</span>
+<span class="normal">1317</span>
+<span class="normal">1318</span>
+<span class="normal">1319</span>
+<span class="normal">1320</span>
+<span class="normal">1321</span>
+<span class="normal">1322</span>
+<span class="normal">1323</span>
+<span class="normal">1324</span>
+<span class="normal">1325</span>
+<span class="normal">1326</span>
+<span class="normal">1327</span>
+<span class="normal">1328</span>
+<span class="normal">1329</span>
+<span class="normal">1330</span>
+<span class="normal">1331</span>
+<span class="normal">1332</span>
+<span class="normal">1333</span>
+<span class="normal">1334</span>
+<span class="normal">1335</span>
+<span class="normal">1336</span>
+<span class="normal">1337</span>
+<span class="normal">1338</span>
+<span class="normal">1339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -8437,6 +8606,7 @@ does not delete IP addresses.</p>
     <span class="n">anycast_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_ranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_vrf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">interface_map</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">filter_by_prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -8475,6 +8645,9 @@ does not delete IP addresses.</p>
 
 <span class="sd">    1. When overlapping IP discovered in Netbox and it is part of anycast range,</span>
 <span class="sd">        existing IP role update to `anycast`</span>
+<span class="sd">    2. Parsed TTP IP roles are synchronized to NetBox. VRRP addresses are</span>
+<span class="sd">        created or reused without an interface assignment so that `sync_vrrp`</span>
+<span class="sd">        can associate them with an FHRP group.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object containing relevant metadata.</span>
@@ -8492,6 +8665,9 @@ does not delete IP addresses.</p>
 <span class="sd">        ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored</span>
 <span class="sd">            for IP writes. Existing VRF-scoped IPs are still matched by address</span>
 <span class="sd">            and their VRF is left unchanged. Defaults to True.</span>
+<span class="sd">        interface_map: Ordered interface rename rules, or an ``nf://`` YAML</span>
+<span class="sd">            file containing them. Mapping is applied before interface filtering</span>
+<span class="sd">            and NetBox interface lookup. The first matching rule wins.</span>
 <span class="sd">        filter_by_name (str, optional): Glob pattern to restrict which interfaces</span>
 <span class="sd">            are included by name, e.g. ``&#39;Loopback*&#39;`` or ``&#39;Eth*&#39;``.</span>
 <span class="sd">        filter_by_description (str, optional): Glob pattern to restrict which</span>
@@ -8511,6 +8687,14 @@ does not delete IP addresses.</p>
 <span class="sd">            does not delete IP addresses.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">interface_map</span><span class="p">):</span>
+        <span class="n">interface_map</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="n">InterfaceMapRule</span><span class="p">])</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">interface_map</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="p">)</span>
+    <span class="n">interface_map</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">rule</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="s2">&quot;model_dump&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">interface_map</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="p">]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:sync_device_ip&quot;</span><span class="p">,</span>
@@ -8573,8 +8757,13 @@ does not delete IP addresses.</p>
         <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;device_type&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,name,device_type&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="p">:</span>
@@ -8598,6 +8787,10 @@ does not delete IP addresses.</p>
         <span class="n">ret</span><span class="o">=</span><span class="n">ret</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="n">interface_map</span><span class="o">=</span><span class="n">interface_map</span><span class="p">,</span>
+        <span class="n">device_types</span><span class="o">=</span><span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;device_type&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">},</span>
         <span class="n">filter_by_name</span><span class="o">=</span><span class="n">filter_by_name</span><span class="p">,</span>
         <span class="n">filter_by_description</span><span class="o">=</span><span class="n">filter_by_description</span><span class="p">,</span>
     <span class="p">)</span>
@@ -8648,9 +8841,11 @@ does not delete IP addresses.</p>
         <span class="k">for</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">intf_data</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">intf_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_raw</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="p">(</span><span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">(</span>
+            <span class="k">for</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="p">(</span><span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv4_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">(</span>
                 <span class="n">intf_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ipv6_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
             <span class="p">):</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;ip&quot;</span><span class="p">]</span>
+                <span class="n">parsed_ip_role</span> <span class="o">=</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ip_address_role&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
                 <span class="n">host_address</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span><span class="o">.</span><span class="n">ip</span>
                 <span class="k">if</span> <span class="n">filter_prefix_net</span> <span class="ow">and</span> <span class="n">host_address</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filter_prefix_net</span><span class="p">:</span>
                     <span class="k">continue</span>
@@ -8665,17 +8860,29 @@ does not delete IP addresses.</p>
                     <span class="k">if</span> <span class="n">ignore_vrf</span>
                     <span class="k">else</span> <span class="n">resolve_vrf</span><span class="p">(</span><span class="n">intf_data</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">],</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">all_ip_live</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
-                        <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
-                        <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span>
-                        <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
-                        <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">resolve_ip_role</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">anycast_nets</span><span class="p">),</span>
-                        <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-                    <span class="p">}</span>
-                <span class="p">)</span>
+                <span class="n">resolved_ip_role</span> <span class="o">=</span> <span class="n">resolve_ip_role</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">,</span> <span class="n">anycast_nets</span><span class="p">)</span>
+                <span class="c1"># Preserve explicit roles parsed from the device, while anycast</span>
+                <span class="c1"># detection remains authoritative for configured anycast ranges.</span>
+                <span class="k">if</span> <span class="n">parsed_ip_role</span> <span class="ow">and</span> <span class="n">resolved_ip_role</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
+                    <span class="n">resolved_ip_role</span> <span class="o">=</span> <span class="n">parsed_ip_role</span>
+                <span class="n">ip_live</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
+                    <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>
+                    <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span>
+                    <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">resolved_ip_role</span><span class="p">,</span>
+                    <span class="c1"># VRRP IPs are created unassigned; sync_vrrp associates them</span>
+                    <span class="c1"># with the corresponding NetBox FHRP group.</span>
+                    <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="kc">None</span> <span class="k">if</span> <span class="n">resolved_ip_role</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span> <span class="k">else</span> <span class="s2">&quot;dcim.interface&quot;</span>
+                    <span class="p">),</span>
+                    <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="kc">None</span>
+                        <span class="k">if</span> <span class="n">resolved_ip_role</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span>
+                        <span class="k">else</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+                    <span class="p">),</span>
+                <span class="p">}</span>
+                <span class="n">all_ip_live</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_live</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">all_ip_live</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -8693,21 +8900,30 @@ does not delete IP addresses.</p>
             <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
             <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">vrf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">role</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
-            <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="p">(</span>
-                <span class="s2">&quot;dcim.interface&quot;</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="p">),</span>
+            <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span><span class="p">,</span>
             <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="p">(</span>
                 <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
             <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="p">(</span>
-                <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span>
+                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
+                <span class="k">else</span> <span class="kc">None</span>
             <span class="p">),</span>
-            <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object</span>
+                <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">endpoint</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_ip_live</span><span class="p">],</span>
-            <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;id,address,vrf,role,assigned_object&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="p">(</span>
+                <span class="s2">&quot;id,address,vrf,role,assigned_object,&quot;</span>
+                <span class="s2">&quot;assigned_object_type,assigned_object_id&quot;</span>
+            <span class="p">),</span>
         <span class="p">)</span>
     <span class="p">]</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nb_ips</span><span class="p">)</span><span class="si">}</span><span class="s2"> matching IP address object(s) from NetBox&quot;</span><span class="p">)</span>
@@ -8777,14 +8993,45 @@ does not delete IP addresses.</p>
                     <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">candidate_nb_ip</span>
                     <span class="k">break</span>
             <span class="k">if</span> <span class="n">nb_ip</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                    <span class="ow">and</span> <span class="p">(</span><span class="n">ignore_vrf</span> <span class="ow">or</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">])</span>
+                <span class="p">):</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="k">continue</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
                 <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
                 <span class="n">bulk_update_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span>
+
+                <span class="c1"># Reflect the planned assignment in the local NetBox snapshot so</span>
+                <span class="c1"># that another live interface cannot reuse the same unassigned</span>
+                <span class="c1"># record before the bulk update is applied.</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_name</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_name</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_vrf</span><span class="p">:</span>
+                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
                 <span class="k">continue</span>
 
             <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
                 <span class="c1"># existing NB IP already assigned to an interface</span>
                 <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+                    <span class="c1"># sync_vrrp owns the FHRP assignment, so IP sync must not</span>
+                    <span class="c1"># move an existing VRRP address back onto an interface.</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span>
+                        <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span>
+                        <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
+                    <span class="p">):</span>
+                        <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="k">break</span>
                     <span class="c1"># if existing Netbox IP role is anycast - override live IP role to anycast too</span>
                     <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Found existing Netbox IP with &#39;anycast&#39; role </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, assigning anycast role to live IP&quot;</span>
@@ -8842,6 +9089,16 @@ does not delete IP addresses.</p>
             <span class="p">},</span>
         <span class="p">)</span>
 
+    <span class="c1"># Multiple VRRP peers report the same virtual IP. Create it once and leave</span>
+    <span class="c1"># peer-to-group association to sync_vrrp.</span>
+    <span class="n">vrrp_address_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">vrrp_address_seen</span><span class="p">:</span>
+                <span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vrrp_address_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
     <span class="c1"># check that update and create payloads have no non-anycast duplicate IPs</span>
     <span class="c1"># Netbox has a bug allowing to create duplicate IPs in single create request</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking IP address payloads for duplicate non-anycast addresses&quot;</span><span class="p">)</span>
@@ -9111,7 +9368,7 @@ does not delete IP addresses.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
