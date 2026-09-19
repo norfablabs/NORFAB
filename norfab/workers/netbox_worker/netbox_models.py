@@ -1670,6 +1670,11 @@ class SyncDeviceIpInput(
         description="Ignore discovered interface VRFs during IP sync",
         alias="ignore-vrf",
     )
+    interface_map: Union[None, StrictStr, List[InterfaceMapRule]] = Field(
+        None,
+        description="Ordered interface name mapping rules or nf:// YAML file reference",
+        alias="interface-map",
+    )
     filter_by_name: Union[None, StrictStr] = Field(
         None,
         description="Glob pattern to restrict which interfaces are included by name, e.g. 'Loopback*' or 'Eth*'",

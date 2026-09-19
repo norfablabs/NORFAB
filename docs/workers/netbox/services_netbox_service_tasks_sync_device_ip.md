@@ -100,6 +100,24 @@ IP addresses and interfaces can be scoped before reconciliation. All filters are
 
 Multiple filters combine as intersection — all specified conditions must be satisfied for an IP to be included.
 
+## Interface Mapping
+
+Use `interface_map` to translate live interface names to their NetBox names.
+Rules are evaluated in order and the first matching device name, device type,
+and literal interface-name substring wins. Mapping occurs before
+`filter_by_name`, role inference, and NetBox interface lookup. Use the same map
+for `sync_device_interfaces` and `sync_device_ip` so IP addresses are assigned
+to the interfaces created by interface sync.
+
+Rules can be supplied inline or through an `nf://` YAML file:
+
+```yaml
+- device_name: "fn-ceos-sp-*"
+  device_type: "Arista *"
+  match: "Loopback"
+  replace: "NetBoxLoopback"
+```
+
 ## Existing IP Selection
 
 For each live address, the task uses this order:
@@ -185,6 +203,12 @@ successful batches.
 
     ```
     nf#netbox sync ip-addresses devices ceos-spine-1 filter-by-name "Loopback*"
+    ```
+
+    Map live interface names before filtering and assignment:
+
+    ```
+    nf#netbox sync ip-addresses devices fn-ceos-sp-1 interface-map nf://netbox/interface_map.yaml filter-by-name "NetBoxLoopback*"
     ```
 
     Sync only addresses within a specific prefix:
@@ -324,6 +348,18 @@ successful batches.
         },
     )
 
+    # map live interface names to their NetBox names
+    result = client.run_job(
+        "netbox",
+        "sync_device_ip",
+        workers="any",
+        kwargs={
+            "devices": ["fn-ceos-sp-1"],
+            "interface_map": "nf://netbox/interface_map.yaml",
+            "filter_by_name": "NetBoxLoopback*",
+        },
+    )
+
     # sync into a NetBox branch
     result = client.run_job(
         "netbox",
@@ -365,7 +401,7 @@ successful batches.
 
 NorFab shell supports these command options for the `sync_device_ip` task:
 
-```
+```bash
 nf# man tree netbox.sync.ip-addresses
 root
 └── netbox:    Netbox service
@@ -380,6 +416,7 @@ root
             ├── devices:    List of NetBox device names to sync
             ├── anycast-ranges:    IP prefix(es) used to classify addresses as anycast role
             ├── ignore-vrf:    Ignore discovered interface VRFs during IP sync
+            ├── interface-map:    Ordered rules mapping live interface names to preferred NetBox names
             ├── filter-by-name:    Glob pattern to restrict sync by interface name, e.g. 'Loopback*'
             ├── filter-by-description:    Glob pattern to restrict sync by interface description
             ├── filter-by-prefix:    CIDR prefix to restrict sync to addresses within it, e.g. '10.0.0.0/8'

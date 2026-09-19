@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 18 September 2026*
+*Last updated: 19 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -885,8 +885,9 @@ associations are not removed automatically.
 
 Reconciles device IP assignments, parsed IP roles, derived prefixes, and
 interface MAC addresses with NetBox, including interface-first IP matching,
-filters, inline or `nf://` anycast ranges, VRF/site association, controlled
-deletion behavior, and stable create, update, delete, and in-sync diff reports.
+shared inline or `nf://` interface-name mapping, filters, inline or `nf://`
+anycast ranges, VRF/site association, controlled deletion behavior, and stable
+create, update, delete, and in-sync diff reports.
 Parsed VRRP addresses remain unassigned for the VRRP sync task to associate with
 FHRP groups. **Use cases:** IPAM accuracy and address/MAC drift correction.
 **Limitations:** requires supported live parsers and accurate interface identity;

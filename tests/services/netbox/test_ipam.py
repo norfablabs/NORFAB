@@ -3,6 +3,8 @@ import random
 
 import pytest
 
+from norfab.workers.netbox_worker.netbox_models import SyncDeviceIpInput
+
 try:
     from tests.services.netbox.common import (
         delete_branch,
@@ -456,6 +458,26 @@ class TestSyncDeviceIP:
     # ------------------------------------------------------------------ #
     # Basic smoke tests                                                    #
     # ------------------------------------------------------------------ #
+
+    def test_sync_device_ip_model_accepts_interface_mapping(self):
+        inline = SyncDeviceIpInput.model_validate(
+            {
+                "interface-map": [
+                    {
+                        "device-name": "fn-ceos-sp-*",
+                        "device-type": "Arista *",
+                        "match": "Loopback",
+                        "replace": "NetBoxLoopback",
+                    }
+                ]
+            }
+        )
+        assert inline.interface_map[0].replace == "NetBoxLoopback"
+
+        from_url = SyncDeviceIpInput.model_validate(
+            {"interface-map": "nf://netbox/interface_map.yaml"}
+        )
+        assert from_url.interface_map == "nf://netbox/interface_map.yaml"
 
     def test_sync_device_ip(self, nfclient):
         """Clean IPs from both spines then sync. Both spine IPs must be created;
@@ -1414,6 +1436,59 @@ class TestSyncDeviceIP:
     # ------------------------------------------------------------------ #
     # Filter scenarios                                                     #
     # ------------------------------------------------------------------ #
+
+    def test_sync_device_ip_interface_map(self, nfclient):
+        """Map the live name before filtering and NetBox interface lookup."""
+        device = self.FAKENOS_SPINE1
+        mapped_name = "NetBoxLoopback10"
+        self._cleanup(nfclient, [device])
+        pynb = get_pynetbox(nfclient)
+        mapped_interface = pynb.dcim.interfaces.get(
+            device=device,
+            name=mapped_name,
+        )
+        if mapped_interface:
+            mapped_interface.delete()
+
+        interface_map = "nf://netbox/interface_map.yaml"
+        try:
+            interface_ret = nfclient.run_job(
+                "netbox",
+                "sync_device_interfaces",
+                workers="any",
+                kwargs={
+                    "devices": [device],
+                    "interface_map": interface_map,
+                    "filter_by_name": "NetBoxLoopback10",
+                },
+            )
+            for worker, res in interface_ret.items():
+                assert res["failed"] is False, f"{worker} failed - {res}"
+
+            ret = self._sync(
+                nfclient,
+                [device],
+                interface_map=interface_map,
+                filter_by_name="NetBoxLoopback10",
+            )
+            for worker, res in ret.items():
+                assert res["failed"] is False, f"{worker} failed - {res}"
+                assert self.SPINE1_LOOPBACK_IP in res["result"][device]["created"]
+
+            nb_ip = pynb.ipam.ip_addresses.get(
+                address=self.SPINE1_LOOPBACK_IP,
+                device=device,
+            )
+            assert nb_ip is not None
+            assert nb_ip.assigned_object.name == mapped_name
+        finally:
+            self._cleanup(nfclient, [device])
+            mapped_interface = pynb.dcim.interfaces.get(
+                device=device,
+                name=mapped_name,
+            )
+            if mapped_interface:
+                mapped_interface.delete()
 
     def test_sync_device_ip_filter_by_name_loopback(self, nfclient):
         """filter_by_name='Loopback*' must include only loopback interfaces.

@@ -5,6 +5,7 @@ import logging
 from typing import Any, Union
 
 import yaml
+from pydantic import TypeAdapter
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
@@ -15,6 +16,7 @@ from .netbox_models import (
     CreateIpBulkResult,
     CreateIpInput,
     CreateIpResult,
+    InterfaceMapRule,
     NetboxFastApiArgs,
     SyncDeviceIpInput,
     SyncDeviceIpResult,
@@ -22,6 +24,7 @@ from .netbox_models import (
     SyncDevicePrefixesResult,
 )
 from .netbox_worker_utilities import (
+    map_interface_name,
     resolve_vrf,
     review_sync_task_result,
 )
@@ -65,6 +68,8 @@ def collect_live_interface_ip_data(
     ret: Result,
     devices: list,
     timeout: int,
+    interface_map: Union[None, list] = None,
+    device_types: Union[None, dict] = None,
     filter_by_name: Union[None, str] = None,
     filter_by_description: Union[None, str] = None,
 ) -> dict:
@@ -97,7 +102,12 @@ def collect_live_interface_ip_data(
         for device_name, host_interfaces in worker_data["result"].items():
             filtered = {}
             for interface in host_interfaces:
-                interface_name = interface["name"]
+                interface_name = map_interface_name(
+                    interface["name"],
+                    interface_map or [],
+                    device_name,
+                    (device_types or {}).get(device_name, ""),
+                )
                 interface_description = interface.get("description") or ""
                 if filter_by_name and not fnmatch.fnmatch(
                     interface_name, filter_by_name
@@ -694,6 +704,7 @@ class NetboxIpTasks:
         anycast_ranges: Union[None, list] = None,
         ignore_ranges: Union[None, str, list] = None,
         ignore_vrf: bool = True,
+        interface_map: Union[None, str, list] = None,
         filter_by_name: Union[None, str] = None,
         filter_by_description: Union[None, str] = None,
         filter_by_prefix: Union[None, str] = None,
@@ -752,6 +763,9 @@ class NetboxIpTasks:
             ignore_vrf (bool, optional): If True, discovered interface VRFs are ignored
                 for IP writes. Existing VRF-scoped IPs are still matched by address
                 and their VRF is left unchanged. Defaults to True.
+            interface_map: Ordered interface rename rules, or an ``nf://`` YAML
+                file containing them. Mapping is applied before interface filtering
+                and NetBox interface lookup. The first matching rule wins.
             filter_by_name (str, optional): Glob pattern to restrict which interfaces
                 are included by name, e.g. ``'Loopback*'`` or ``'Eth*'``.
             filter_by_description (str, optional): Glob pattern to restrict which
@@ -771,6 +785,14 @@ class NetboxIpTasks:
                 does not delete IP addresses.
         """
         devices = devices or []
+        if self.is_url(interface_map):
+            interface_map = TypeAdapter(list[InterfaceMapRule]).validate_python(
+                yaml.safe_load(self.fetch_file(interface_map, raise_on_fail=True)) or []
+            )
+        interface_map = [
+            rule.model_dump() if hasattr(rule, "model_dump") else dict(rule)
+            for rule in interface_map or []
+        ]
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_ip",
@@ -833,8 +855,13 @@ class NetboxIpTasks:
             d.name: {
                 "id": d.id,
                 "name": d.name,
+                "device_type": d.device_type.model,
             }
-            for d in self.bulk_filter(nb.dcim.devices, name=devices, fields="id,name")
+            for d in self.bulk_filter(
+                nb.dcim.devices,
+                name=devices,
+                fields="id,name,device_type",
+            )
         }
         for d in list(devices):
             if d not in nb_devices_data:
@@ -858,6 +885,10 @@ class NetboxIpTasks:
             ret=ret,
             devices=devices,
             timeout=timeout,
+            interface_map=interface_map,
+            device_types={
+                name: data["device_type"] for name, data in nb_devices_data.items()
+            },
             filter_by_name=filter_by_name,
             filter_by_description=filter_by_description,
         )

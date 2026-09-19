@@ -19,6 +19,7 @@
 2. Staggered worker process creation by a configurable `topology.workers_start_interval` (default `0.5` seconds) to reduce the CPU burst caused by importing every service stack simultaneously. Set it to `0` to retain fully parallel startup. FastAPI's Uvicorn readiness check also uses a less aggressive polling interval.
 3. Added an idle NorFab Docker Compose service with one worker for every configured test service and a `docker-profile-idle` Invoke task that monitors CPU, memory, and block I/O over a configurable period, reports stability against configurable thresholds, saves CSV samples, and always removes the profiling container.
 4. Added `NORFAB_INVENTORY_DIR` support to NFCLI. When `--inventory` is omitted, the variable identifies the directory containing `inventory.yaml` and supplies the NorFab base directory, allowing commands such as `nfcli -c` to work consistently inside test containers.
+5. Added shared ordered `interface_map` rules to NetBox IP synchronization so live interface names can be mapped before filtering, role inference, and IP assignment lookup.
 
 ---
 

@@ -11,18 +11,18 @@ commands:
   set cli complete-on-space off:
     output: Disabling complete-on-space
     prompt: 'nornir@{base_prompt}>'
-  'show configuration | display set | match vrrp':
+  'show configuration | display inheritance | display set | match vrrp':
     output: |
       set interfaces ge-0/0/46 unit 0 family inet address 198.51.100.3/24 vrrp-group 10 virtual-address 198.51.100.1
     prompt: 'nornir@{base_prompt}>'
     help: targeted VRRP peer sync test data
-  'show configuration interfaces | display set':
+  'show configuration interfaces | display inheritance | display set':
     output: |
       set interfaces ge-0/0/46 unit 0 description TEST_SYNC_VRRP_IPV4
       set interfaces ge-0/0/46 unit 0 family inet address 198.51.100.3/24 vrrp-group 10 virtual-address 198.51.100.1
     prompt: 'nornir@{base_prompt}>'
     help: targeted interface VRRP peer sync test data
-  'show configuration routing-instances | display set | match interface':
+  'show configuration routing-instances | display inheritance | display set | match interface':
     output: ''
     prompt: 'nornir@{base_prompt}>'
     help: no routing-instance interface assignments in targeted sync test data

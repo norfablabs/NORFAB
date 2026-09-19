@@ -987,7 +987,7 @@ interfaces.extend(
             "name": interface_name,
             "device": {"name": device_name},
             "type": interface_type,
-            "description": "TEST_SYNC_VRRP",
+            "description": "TEST_VRRP_SYNC",
         }
         for device_name, interface_type, interface_names in [
             (
@@ -3305,7 +3305,7 @@ def create_sync_vrrp_data():
     sync_interfaces = [
         interface
         for interface in interfaces
-        if interface.get("description") == "TEST_SYNC_VRRP"
+        if interface.get("description") == "TEST_VRRP_SYNC"
     ]
     sync_device_names = {interface["device"]["name"] for interface in sync_interfaces}
     nb_devices = {}
@@ -4335,7 +4335,7 @@ def delete_sync_vrrp_data():
     sync_interfaces = [
         interface
         for interface in interfaces
-        if interface.get("description") == "TEST_SYNC_VRRP"
+        if interface.get("description") == "TEST_VRRP_SYNC"
     ]
     netbox_interfaces = []
     group_ids = set()
