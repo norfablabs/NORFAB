@@ -60,7 +60,16 @@ class TestBroker:
         assert result["service_count"] > 0
         assert result["process"]["cpu_percent"] >= 0
         assert result["process"]["memory_rss_mbyte"] > 0
+        assert (
+            result["process"]["open_file_descriptors"] is None
+            or result["process"]["open_file_descriptors"] >= 0
+        )
         assert result["process"]["uptime_seconds"] >= 0
+        assert result["process"]["threads"] > 0
+        assert (
+            result["process"]["tcp_sockets"] is None
+            or result["process"]["tcp_sockets"] >= 0
+        )
         assert result["messaging"]["received"] > 0
 
     def test_get_status_reports_broker_environment(self, nfclient) -> None:

@@ -52,7 +52,7 @@ x-test-runner-common: &test-runner-common
   entrypoint: *test-runner-entrypoint
 
 services:
-  idle-norfab:
+  idle-norfab: &idle-norfab
     build: *test-runner-build
     image: norfab:idle-profile-py${PYTHON_VERSION:-3.12}
     working_dir: /workspace/tests
@@ -72,6 +72,21 @@ services:
       - *inventory-volume
       - type: bind
         source: ./idle-norfab/__norfab__
+        target: /workspace/tests/nf_tests_inventory/__norfab__
+
+  fd-profile-norfab:
+    <<: *idle-norfab
+    command:
+      - -b
+      - -wl
+      - filesharing-worker-1,nornir-worker-4,fakenos-worker-1
+      - -l
+      - WARNING
+    volumes:
+      - *workspace-volume
+      - *inventory-volume
+      - type: bind
+        source: ./fd-profile-norfab/__norfab__
         target: /workspace/tests/nf_tests_inventory/__norfab__
 
   core-tests:

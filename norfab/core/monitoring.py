@@ -21,6 +21,9 @@ class ProcessMonitoringStats(BaseModel):
     cpu_percent: float
     memory_rss_mbyte: float
     uptime_seconds: int
+    open_file_descriptors: int | None = None
+    tcp_sockets: int | None = None
+    threads: int
 
 
 class MessagingMonitoringStats(BaseModel):
@@ -187,10 +190,18 @@ class ProcessMonitor:
 
     def process_stats(self) -> ProcessMonitoringStats:
         memory = self.process.memory_info()
+        num_fds = getattr(self.process, "num_fds", None)
+        try:
+            tcp_sockets = len(self.process.net_connections(kind="tcp"))
+        except (psutil.AccessDenied, NotImplementedError):
+            tcp_sockets = None
         return ProcessMonitoringStats(
             cpu_percent=self.process.cpu_percent(interval=None),
             memory_rss_mbyte=memory.rss / 1024 / 1024,
             uptime_seconds=int(time.time() - self.started_at),
+            open_file_descriptors=num_fds() if num_fds is not None else None,
+            tcp_sockets=tcp_sockets,
+            threads=self.process.num_threads(),
         )
 
     def messaging_stats(self) -> MessagingMonitoringStats:

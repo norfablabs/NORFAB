@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 19 September 2026*
+*Last updated: 20 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -119,7 +119,8 @@ production resilience depends on the topology and infrastructure deployed.
 Provides separate status and statistics views for brokers, clients, and workers.
 Status reports component identity, endpoints, runtime directories, and CurveZMQ
 configuration for environment troubleshooting. Versioned statistics report
-process resources, message activity, queues, jobs, connections, and service-specific
+process CPU, memory, threads, TCP sockets, open file descriptors on supported
+platforms, message activity, queues, jobs, connections, and service-specific
 metrics for performance analysis and dashboards. NFCLI exposes these through
 `show norfab <component> status` and `show norfab <component> statistics`.
 **Limitations:** status output contains local filesystem paths and should only be
@@ -559,7 +560,8 @@ and requires compatible SCP or inline-transfer support.
 ### Runtime inventory management
 
 Creates, reads, updates, deletes, or loads Nornir hosts without restarting a
-worker; reads nested host data, manages group membership/defaults, and lists
+worker. Create, delete, and load actions close existing host connections. It
+reads nested host data, manages group membership/defaults, and lists
 hosts/platforms. Runtime hosts can also be created or replaced directly from
 explicit NetBox device names. **Use cases:** ephemeral targets, dynamic
 discovery, per-job metadata, lab inventory injection, source-of-truth handoff,

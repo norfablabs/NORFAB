@@ -2,6 +2,7 @@ import logging
 from typing import Any, Union
 
 from nornir_salt.plugins.functions import InventoryFun
+from nornir_salt.plugins.tasks import connections as nr_connections
 
 from norfab.core.inventory import merge_recursively
 from norfab.core.worker import Job, Task
@@ -166,16 +167,18 @@ class InventoryTasks:
             ret.dry_run = True
             return ret
 
-        if replace is True:
-            InventoryFun(
-                self.nr, call="delete_host", name=list(self.nr.inventory.hosts)
-            )
-
         # Runtime inventory load calls create_host once for each returned NetBox host.
-        inventory_actions = [
-            {"call": "create_host", "name": host_name, **host_data}
-            for host_name, host_data in netbox_hosts.items()
-        ]
+        inventory_actions = (
+            [{"call": "delete_host", "name": list(self.nr.inventory.hosts)}]
+            if replace is True
+            else []
+        )
+        inventory_actions.extend(
+            [
+                {"call": "create_host", "name": host_name, **host_data}
+                for host_name, host_data in netbox_hosts.items()
+            ]
+        )
         inventory_result = self.runtime_inventory(
             job=job,
             action="load",
@@ -491,6 +494,9 @@ class InventoryTasks:
         """
         Task to work with Nornir runtime (in-memory) inventory.
 
+        Create, delete, and load actions close all connections for all hosts on this
+        worker before changing the inventory.
+
         Supported actions:
 
         - `create_host` or `create` - creates new host or replaces existing host object
@@ -513,4 +519,10 @@ class InventoryTasks:
         # clean up kwargs
         _ = kwargs.pop("progress", None)
         job.event(f"performing '{action}' action")
-        return Result(result=InventoryFun(self.nr, call=action, **kwargs))
+        with self.connections_lock:
+            if action in {"delete_host", "delete", "create_host", "create", "load"}:
+                self.nr.run(
+                    task=nr_connections, call="close", conn_name="all", on_failed=True
+                )
+                self.watchdog.connections_data.clear()
+            return Result(result=InventoryFun(self.nr, call=action, **kwargs))

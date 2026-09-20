@@ -110,7 +110,16 @@ class TestWorkersListTasks:
             assert stats["role"] == "worker", worker
             assert stats["process"]["cpu_percent"] >= 0, worker
             assert stats["process"]["memory_rss_mbyte"] > 0, worker
+            assert (
+                stats["process"]["open_file_descriptors"] is None
+                or stats["process"]["open_file_descriptors"] >= 0
+            ), worker
             assert stats["process"]["uptime_seconds"] >= 0, worker
+            assert stats["process"]["threads"] > 0, worker
+            assert (
+                stats["process"]["tcp_sockets"] is None
+                or stats["process"]["tcp_sockets"] >= 0
+            ), worker
             assert stats["messaging"]["received"] > 0, worker
             assert "details" not in stats, worker
             if stats["service"] == "nornir":

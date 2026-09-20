@@ -142,6 +142,15 @@ class TestClientApi:
         assert isinstance(client_stats, dict)
         assert client_stats["role"] == "client"
         assert client_stats["process"]["memory_rss_mbyte"] > 0
+        assert client_stats["process"]["threads"] > 0
+        assert (
+            client_stats["process"]["tcp_sockets"] is None
+            or client_stats["process"]["tcp_sockets"] >= 0
+        )
+        assert (
+            client_stats["process"]["open_file_descriptors"] is None
+            or client_stats["process"]["open_file_descriptors"] >= 0
+        )
         assert client_stats["messaging"]["sent"] > 0
         assert client_stats["messaging"]["received"] > 0
         assert client_stats["reconnects"] > 0

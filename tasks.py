@@ -34,6 +34,7 @@ COMPOSE_FILE = DOCKER_DIR / "compose.yaml"
 DISTRIBUTED_FILE = DOCKER_DIR / "compose.distributed.yaml"
 DISTRIBUTED_DIR = DOCKER_DIR / "distributed-basic"
 IDLE_PROFILE_SERVICE = "idle-norfab"
+FD_PROFILE_SERVICE = "fd-profile-norfab"
 
 # The distributed broker owns the test keypair. Only its public certificate is
 # copied into client runtime directories; the private certificate never leaves
@@ -1009,6 +1010,44 @@ def docker_profile_idle(
             raise Exit("NorFab idle resource profile exceeded stability limits", code=1)
 
 
+@task(
+    name="docker-profile-fds",
+    help={
+        "duration": "Seconds to repeat FakeNOS VRRP parsing (default: 120).",
+        "interval": "Seconds to pause between jobs (default: 0).",
+        "build": "Build the profiling image before starting.",
+    },
+)
+def docker_profile_fds(_context, duration=120, interval=0, build=False):
+    """Profile broker, Nornir worker, and client descriptors under FakeNOS load."""
+    if float(duration) <= 0 or float(interval) < 0:
+        raise ValueError("--duration must be positive and --interval non-negative")
+    _prepare_runtime(FD_PROFILE_SERVICE)
+    compose = _compose()
+    up_args = compose + ["up", "-d"]
+    if build:
+        up_args.append("--build")
+    up_args.append(FD_PROFILE_SERVICE)
+    try:
+        _run(up_args)
+        _run(
+            compose
+            + [
+                "exec",
+                "-T",
+                FD_PROFILE_SERVICE,
+                "python",
+                "/workspace/docker/norfab-docker-tests/profile_fds.py",
+                "--duration",
+                str(duration),
+                "--interval",
+                str(interval),
+            ]
+        )
+    finally:
+        _run(compose + ["rm", "-f", "-s", FD_PROFILE_SERVICE], check=False)
+
+
 @task(name="docker-tests-down")
 def docker_tests_down(_context):
     """Stop both Docker test projects without deleting runtime artifacts."""
@@ -1040,6 +1079,7 @@ for invoke_task in (
     docker_tests_all,
     docker_tests_distributed,
     docker_profile_idle,
+    docker_profile_fds,
     docker_tests_down,
     docker_tests_config,
 ):

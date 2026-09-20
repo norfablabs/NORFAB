@@ -3,6 +3,10 @@ services:
     container_name: "norfab"
     hostname: 'norfab'
     image: docker.io/dmulyalin/norfab:aio-latest
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     volumes:
       - type: bind
         source: ./norfab/

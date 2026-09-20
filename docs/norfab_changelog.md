@@ -1,8 +1,13 @@
 # 0.23.7
 
+## BUGS
+
+1. Fixed open connections left behind when Nornir runtime hosts were deleted or replaced, including hosts loaded from NetBox. Create, delete, and load actions now use the Nornir Salt `connections` task to close connections for all hosts before changing the inventory.
+
 ## ENHANCEMENTS
 
 1. NetBox sync tasks now include failed Nornir devices in `resources_failed`, including through `sync_all`, while preserving results from devices that succeeded.
+2. Added `open_file_descriptors`, `tcp_sockets`, and `threads` process stats to worker, broker, and client monitoring.
 
 ---
 

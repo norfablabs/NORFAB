@@ -234,6 +234,17 @@ The default limits are 10% average CPU, 20% p95 CPU, 32 MiB memory growth, and
 written to `idle-norfab/__norfab__/artifacts/idle-profile.csv`, and the profiling
 container is removed after every run, including interrupted or failed runs.
 
+To repeat `parse_ttp(get="vrrp")` against two local FakeNOS devices and record
+broker, Nornir worker, and client file descriptor counts, run:
+
+```bash
+poetry run inv docker-profile-fds --duration=120
+```
+
+This uses a separate `fd-profile-norfab` service so the idle measurements retain
+their original worker set. Per-job counts and failures are written to
+`fd-profile-norfab/__norfab__/artifacts/fd-profile.csv`.
+
 All test-runner containers export `NORFAB_INVENTORY_DIR` pointing at the mounted
 inventory directory. This allows an interactive client to be opened in a
 running container without repeating the inventory path:

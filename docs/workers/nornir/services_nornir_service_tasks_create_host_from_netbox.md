@@ -115,8 +115,8 @@ calculated by comparing requested device names with returned host names.
   `created` and `updated` using returned Nornir host names.
 - If some requested devices are missing, the task emits a warning and still
   creates or updates hosts for the devices NetBox returned.
-- `replace=True` deletes all current runtime hosts with `InventoryFun` before
-  loading the hosts returned by NetBox.
+- `replace=True` closes connections and deletes all current runtime hosts
+  before loading the hosts returned by NetBox.
 - `dry_run=True` sets the top-level result `dry_run` flag and does not mutate
   runtime inventory.
 - Runtime inventory writes are delegated to `runtime_inventory` with a `load`

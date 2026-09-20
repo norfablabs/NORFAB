@@ -9,6 +9,11 @@ tags:
 
 The Nornir service `runtime_inventory` task works with Nornir inventory content at runtime. It uses nornir-salt `InventoryFun` functions to create, read, update, delete, and load hosts without restarting the worker.
 
+**Connection side effect:** `create_host`/`create`, `delete_host`/`delete`, and
+`load` close connections for **all hosts** on the targeted Nornir worker before
+changing the inventory. This includes connections to hosts unrelated to the
+requested change and hosts marked failed. Subsequent tasks reconnect as needed.
+
 ## Inputs
 
 | Parameter | Required | Description |

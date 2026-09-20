@@ -15,6 +15,8 @@ The supplied inventory starts these components in the same container:
 The FastAPI service is published on host port `8000`. The inventory and worker
 configuration under `norfab/` are bind-mounted into the container at
 `/etc/norfab`.
+The Compose service sets the container's soft and hard `nofile` limits to 65535;
+check the effective limit with `docker exec norfab sh -c 'ulimit -n'`.
 
 ## Start the deployment
 
