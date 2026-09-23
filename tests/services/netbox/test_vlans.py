@@ -293,6 +293,28 @@ class TestSyncVlanMemberships:
         assert changes["name"]["new_value"] == "Live user access"
         assert not result.errors
 
+    @pytest.mark.parametrize(
+        ("leaf_1_description", "leaf_2_description"),
+        [
+            (None, "Live description"),
+            ("Live description", None),
+        ],
+    )
+    def test_non_empty_description_wins_regardless_of_device_order(
+        self, leaf_1_description: str | None, leaf_2_description: str | None
+    ) -> None:
+        result, _, _, _ = self._run(
+            {
+                "leaf-1": [self._live(description=leaf_1_description)],
+                "leaf-2": [self._live(description=leaf_2_description)],
+            },
+            vlans=[self._vlan(50, description="NetBox description")],
+        )
+
+        changes = result.result["vlans"]["site:lab"]["update"]["50"]
+        assert changes["description"]["new_value"] == "Live description"
+        assert not result.errors
+
     def test_membership_updates_are_additive(self) -> None:
         vlan, unmanaged = self._vlan(50), self._vlan(900)
         result, nb, _, _ = self._run(

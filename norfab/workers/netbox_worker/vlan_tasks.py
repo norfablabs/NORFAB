@@ -657,13 +657,14 @@ class NetboxVlansTasks:
                         )
 
                 name = record["name"].strip()
+                description = (record["description"] or "").strip()
                 vlan = device_vlans.setdefault(
                     vid,
                     {
                         "device_name": device,
                         "vid": vid,
                         "name": name,
-                        "description": (record["description"] or "").strip(),
+                        "description": description,
                         "tagged_interfaces": [],
                         "untagged_interfaces": [],
                     },
@@ -673,6 +674,9 @@ class NetboxVlansTasks:
                     and name.casefold() != f"vlan{vid}".casefold()
                 ):
                     vlan["name"] = name
+                # Prefer useful text when duplicate records from one device differ.
+                if description and not vlan["description"]:
+                    vlan["description"] = description
                 for field in VLAN_MEMBERSHIP_FIELDS:
                     for name in record[field]:
                         if name not in vlan[field]:
@@ -804,7 +808,24 @@ class NetboxVlansTasks:
                         job.event(message, severity="ERROR")
                         log.error(message)
                         ret.errors.append(message)
-            if description_sources[key][1] != observation["description"]:
+            source_description = description_sources[key][1]
+            # Let the first non-empty device description replace an empty source.
+            if observation["description"] and not source_description:
+                description_sources[key] = (device, observation["description"])
+                netbox_description = (
+                    vlan_current.get(scope, {}).get(vid, {}).get("description", "")
+                )
+                vlan_live[scope][vid]["description"] = apply_description_policy(
+                    observation["description"],
+                    netbox_description,
+                    preserve_description,
+                )
+            # Empty descriptions are ignored; only differing useful text conflicts.
+            elif (
+                source_description
+                and observation["description"]
+                and source_description != observation["description"]
+            ):
                 source_device = description_sources[key][0]
                 message = (
                     f"{scope} VLAN {vid} source conflict (description): using live "

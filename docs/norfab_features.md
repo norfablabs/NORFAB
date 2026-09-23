@@ -853,7 +853,8 @@ an optional scalar VLAN-group fallback. Mapping rules can be supplied inline or
 loaded from YAML through `nf://` URLs, using `match_device_names`,
 `match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
 and group selection. The first matching mapping rule applies to the whole VLAN.
-Existing descriptions support always, live-empty-only, or never preservation.
+Existing descriptions support always, live-empty-only, or never preservation;
+empty device descriptions yield to non-empty observations of the same VLAN.
 VLAN name conflicts are validated within each group or site before bulk writes;
 conflicting creations and updates are reported and skipped without stopping
 unrelated VLAN changes.
