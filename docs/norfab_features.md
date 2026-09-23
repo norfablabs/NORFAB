@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 20 September 2026*
+*Last updated: 23 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -700,6 +700,34 @@ and AI tool use. **Limitations:** generic operations require knowledge of the
 NetBox data model and do not provide every safeguard of a dedicated task.
 [Task details](workers/netbox/services_netbox_service_tasks_crud.md)
 
+### Additive NetBox designs
+
+Applies static YAML or optionally renders Jinja2 target-state designs, then
+creates or updates every supplied field without deleting omitted objects.
+Global collections can be combined with nested device interfaces, IP and MAC
+assignments, interface VLANs, device BGP sessions, prefix IPs, and VRF route
+targets. A design containing only
+device names uses managed `undefined` region, site, manufacturer, device role,
+and device type objects for NetBox's mandatory references. The design Jinja2
+environment exposes interface-range expansion and callable or filter-form
+NetBox IP, prefix, VLAN-group, VLAN, and ASN allocations backed by independent worker
+tasks. The `design_deploy` task validates template context through inline JSON Schema or an external
+Pydantic model. Designs declare reusable Jinja functions from Python files
+served through `nf://` or `git://` URLs and support relative Jinja2 includes.
+Ordered Jinja calls can create allocation dependencies before later template calls use them.
+Designs also support physical hierarchy and cabling, BGP
+sessions, L2VPNs and interface terminations, VRRP groups and assignments, and
+custom fields on created objects. **Use cases:** rapid
+NetBox population, repeatable lab construction, allocation from managed pools,
+progressively enriching a minimal device list, and modelling routed leaf-spine fabrics. **Limitations:** designs are
+additive and do not remove objects omitted from later runs; allocation functions
+perform their dedicated NetBox tasks while the template renders. NFCLI exposes
+deployment through `netbox design deploy`.
+[Design deploy task](workers/netbox/services_netbox_service_tasks_design_deploy.md) ·
+[Create ASN task](workers/netbox/services_netbox_service_tasks_create_asn.md) ·
+[Create VLAN group task](workers/netbox/services_netbox_service_tasks_create_vlan_group.md) ·
+[Create VLAN task](workers/netbox/services_netbox_service_tasks_create_vlan.md)
+
 ### Branch-aware changes
 
 Supported get, sync, CRUD, raw REST, and paginated GraphQL tasks can target a named NetBox branch, and the service can delete a
@@ -815,6 +843,8 @@ reviewed with dry-run first.
 
 ### Live VLAN reconciliation
 
+Creates or updates an explicit VLAN, or allocates the next available VID from a
+named VLAN group. The same task backs the `netbox.create_vlan` design filter.
 Reconciles live VLAN names, descriptions, and tagged/untagged interface
 memberships with NetBox objects using ordered device, interface-name,
 VLAN-name, and VLAN-ID mapping rules plus
@@ -933,6 +963,8 @@ objects are never deleted.
 
 ### Live BGP ASN reconciliation
 
+Creates or updates an explicit ASN, or allocates the next available ASN from a
+named ASN range. The same task backs the `netbox.create_asn` design filter.
 Reconciles globally unique ASNs from supported live devices with NetBox IPAM,
 preserves existing descriptions by default, and optionally associates each ASN
 with the devices for which it is a local ASN. Missing ASNs are created only

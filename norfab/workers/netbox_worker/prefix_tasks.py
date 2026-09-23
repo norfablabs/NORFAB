@@ -120,7 +120,15 @@ class NetboxPrefixTasks:
             elif is_network is False:
                 parent_filters = {"description": parent}
         elif isinstance(parent, dict):
-            parent_filters = parent
+            parent_filters = dict(parent)
+            parent_site = parent_filters.pop("site", None)
+            if parent_site:
+                nb_site = nb.dcim.sites.get(name=parent_site)
+                if not nb_site:
+                    raise NetboxAllocationError(
+                        f"Failed to get parent prefix site '{parent_site}' from NetBox"
+                    )
+                parent_filters.update(scope_type="dcim.site", scope_id=nb_site.id)
         nb_parent_prefix = nb.ipam.prefixes.get(**parent_filters)
         if not nb_parent_prefix:
             job.event(f"parent prefix not found in NetBox: {parent}", severity="ERROR")
@@ -140,6 +148,8 @@ class NetboxPrefixTasks:
             prefix_filters["vrf__name"] = vrf
         if site:
             prefix_filters["site__name"] = site
+        if role:
+            prefix_filters["role__name"] = role
         if description:
             prefix_filters["description"] = description
         try:
@@ -250,7 +260,7 @@ class NetboxPrefixTasks:
         if comments and comments != nb_prefix.comments:
             changed["comments"] = {"-": str(nb_prefix.comments), "+": comments}
             nb_prefix.comments = comments
-        if role and role != nb_prefix.role:
+        if role and role != str(nb_prefix.role):
             changed["role"] = {"-": str(nb_prefix.role), "+": role}
             nb_prefix.role = {"name": role}
         existing_tags = [str(t) for t in nb_prefix.tags]

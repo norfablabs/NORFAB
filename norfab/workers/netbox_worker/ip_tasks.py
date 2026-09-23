@@ -267,6 +267,16 @@ class NetboxIpTasks:
                 prefix = {"description": prefix, "vrf__name": vrf}
             elif is_network is False:
                 prefix = {"description": prefix}
+        elif isinstance(prefix, dict):
+            prefix = dict(prefix)
+            prefix_site = prefix.pop("site", None)
+            if prefix_site:
+                nb_site = nb.dcim.sites.get(name=prefix_site)
+                if not nb_site:
+                    raise NetboxAllocationError(
+                        f"Failed to get parent prefix site '{prefix_site}' from NetBox"
+                    )
+                prefix.update(scope_type="dcim.site", scope_id=nb_site.id)
         nb_prefixes = self.bulk_filter(nb.ipam.prefixes, **prefix)
         if not nb_prefixes:
             raise NetboxAllocationError(

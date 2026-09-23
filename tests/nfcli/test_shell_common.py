@@ -4,6 +4,11 @@ import pytest
 from pydantic import ValidationError
 
 from norfab.clients.nfcli_shell.common import ClientRunJobArgs
+from norfab.clients.nfcli_shell.netbox.netbox_picle_shell import NetboxServiceCommands
+from norfab.clients.nfcli_shell.netbox.netbox_picle_shell_design import (
+    DesignCommands,
+    DesignDeployShell,
+)
 from norfab.clients.nfcli_shell.nfcli_shell_client import (
     LogLevel,
     ShowNorfabLoggingModel,
@@ -71,6 +76,40 @@ class FakeLoggingNFClient:
 
 
 class TestShellCommon:
+    def test_netbox_design_shell_submission(self, monkeypatch):
+        calls = []
+
+        def fake_run_future_job(*args, **kwargs):
+            calls.append((args, kwargs))
+            return {"netbox-worker-1": {"failed": False, "result": {}}}
+
+        monkeypatch.setattr(
+            "norfab.clients.nfcli_shell.netbox.netbox_picle_shell_design.run_future_job",
+            fake_run_future_job,
+        )
+        monkeypatch.setattr(
+            "norfab.clients.nfcli_shell.netbox.netbox_picle_shell_design.log_error_or_result",
+            lambda result, **kwargs: result,
+        )
+
+        DesignDeployShell.run(
+            design="nf://netbox/designs/branch.yaml",
+            context="nf://netbox/designs/branch-data.yaml",
+            workers="netbox-worker-1",
+            dry_run=True,
+        )
+
+        args, kwargs = calls[0]
+        assert args[:2] == ("netbox", "design_deploy")
+        assert kwargs["workers"] == "netbox-worker-1"
+        assert kwargs["kwargs"] == {
+            "design": "nf://netbox/designs/branch.yaml",
+            "context": "nf://netbox/designs/branch-data.yaml",
+            "dry_run": True,
+        }
+        assert NetboxServiceCommands.model_fields["design"].annotation is DesignCommands
+        assert DesignCommands.model_fields["deploy"].annotation is DesignDeployShell
+
     def test_show_norfab_logging_uses_single_service_and_supported_filters(
         self, monkeypatch
     ):

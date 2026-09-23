@@ -1,0 +1,7 @@
+site: BRANCH-001
+prefix: 10.60.0.0/16
+asn_range: BRANCH-ASNS
+rir: BRANCH-001-RIR
+rd_prefix: 65000
+asn_start: 4200101000
+asn_end: 4200101099

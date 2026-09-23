@@ -1092,6 +1092,7 @@ class NetboxBgpPeeringsTasks:
         export_policies: Union[None, list] = None,
         prefix_list_in: Union[None, str] = None,
         prefix_list_out: Union[None, str] = None,
+        custom_fields: Union[None, dict] = None,
         # interface-driven resolution
         local_interface: Union[None, str] = None,
         asn_source: Union[None, str, dict] = None,
@@ -1210,6 +1211,7 @@ class NetboxBgpPeeringsTasks:
                 "export_policies": export_policies,
                 "prefix_list_in": prefix_list_in,
                 "prefix_list_out": prefix_list_out,
+                "custom_fields": custom_fields,
                 "local_interface": local_interface,
             }
         ]
@@ -1524,6 +1526,8 @@ class NetboxBgpPeeringsTasks:
                 "status": bgp_session.get("status", "active"),
                 "site": site_id,
             }
+            if bgp_session.get("custom_fields") is not None:
+                payload["custom_fields"] = bgp_session["custom_fields"]
 
             # Optional fields (step 6h)
             payload.update(

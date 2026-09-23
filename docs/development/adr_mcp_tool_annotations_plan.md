@@ -156,7 +156,7 @@ from MCP and are documented here as not applicable.
 | `netbox_worker/circuits_tasks.py` | `get_circuits` | Get Circuits | true | false | true | true | Reads NetBox circuit data. |
 | `netbox_worker/connections_tasks.py` | `get_connections` | Get Connections | true | false | true | true | Reads NetBox connection data. |
 | `netbox_worker/containerlab_inventory_tasks.py` | `get_containerlab_inventory` | Get Containerlab Inventory | true | false | true | true | Reads NetBox data to generate inventory. |
-| `netbox_worker/design_tasks.py` | `create_design` | Create Design | false | false | false | true | Creates NetBox design data. |
+| `netbox_worker/design_tasks.py` | `design_deploy` | Deploy Design | false | false | true | true | Applies an additive NetBox target-state design. |
 | `netbox_worker/devices_tasks.py` | `get_devices` | Get Devices | true | false | true | true | Reads NetBox device data. |
 | `netbox_worker/devices_tasks.py` | `check_device_sync` | Check Device Sync | true | false | true | true | Runs sync checks in dry-run mode. |
 | `netbox_worker/devices_tasks.py` | `sync_all` | Sync All Device Data | false | true | true | true | Updates multiple NetBox object classes. |

@@ -1,0 +1,174 @@
+{% include "includes/data_center_leaf_spine_design_schema.yaml" %}
+---
+# Two-spine, three-leaf routed fabric. Allocation pools and site already exist.
+{% set site_slug = context.site | lower | replace(" ", "-") %}
+{% set fabric_parent = {"prefix": context.fabric_prefix, "site": context.site} %}
+{% set loopback_parent = {"prefix": context.loopback_prefix, "site": context.site} %}
+
+locations:
+  - name: FABRIC-ROOM
+    site: {{ context.site }}
+    status: active
+
+rack_roles:
+  - name: NETWORK
+    color: 3f51b5
+
+racks:
+  - name: SPINE-RACK
+    site: {{ context.site }}
+    location: FABRIC-ROOM
+    role: NETWORK
+    status: active
+    width: 19
+    u_height: 42
+  - name: LEAF-RACK
+    site: {{ context.site }}
+    location: FABRIC-ROOM
+    role: NETWORK
+    status: active
+    width: 19
+    u_height: 42
+
+manufacturers:
+  - name: Example Networks
+
+device_types:
+  - model: Fabric Spine
+    manufacturer: Example Networks
+    u_height: 1
+  - model: Fabric Leaf
+    manufacturer: Example Networks
+    u_height: 1
+
+device_roles:
+  - name: SPINE
+    color: 673ab7
+  - name: LEAF
+    color: 009688
+
+roles:
+  - name: FABRIC-LINK
+  - name: FABRIC-LOOPBACK
+
+prefixes:
+{% for spine in range(1, 3) %}
+{% for leaf in range(1, 4) %}
+  - prefix: "{{ netbox.create_prefix(parent=fabric_parent, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LINK", prefixlen=31, site=context.site, status="active") }}"
+    description: {{ context.site }} spine-{{ spine }} leaf-{{ leaf }} LINK
+    site: {{ context.site }}
+    role: FABRIC-LINK
+    status: active
+{% endfor %}
+{% endfor %}
+
+devices:
+{% for spine in range(1, 3) %}
+{% set device_name = site_slug ~ "-spine-" ~ spine %}
+{% set local_asn = netbox.create_asn(asn_range=context.asn_range, site=context.site, description=context.site ~ " spine-" ~ spine ~ " ASN") %}
+  - name: {{ device_name }}
+    site: {{ context.site }}
+    location: FABRIC-ROOM
+    rack: SPINE-RACK
+    position: {{ 43 - spine }}
+    face: front
+    role: SPINE
+    device_type: Fabric Spine
+    status: active
+    bgp:
+      local_as: {{ local_asn }}
+      sessions:
+{% for leaf in range(1, 4) %}
+{% set link_prefix = netbox.create_prefix(parent=fabric_parent, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LINK", prefixlen=31, site=context.site, status="active") %}
+{% set local_ip = netbox.create_ip(prefix=link_prefix, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " SPINE IP", status="active", create_peer_ip=false) %}
+{% set remote_ip = netbox.create_ip(prefix=link_prefix, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LEAF IP", status="active", create_peer_ip=false) %}
+        - name: {{ context.site }}-SPINE-{{ spine }}-LEAF-{{ leaf }}
+          local_address: "{{ local_ip.split('/')[0] }}"
+          remote_address: "{{ remote_ip.split('/')[0] }}"
+          remote_as: {{ netbox.create_asn(asn_range=context.asn_range, site=context.site, description=context.site ~ " leaf-" ~ leaf ~ " ASN") }}
+          status: active
+          description: Underlay eBGP to {{ site_slug }}-leaf-{{ leaf }}
+{% endfor %}
+    interfaces:
+      - name: Loopback0
+        type: virtual
+        description: Router ID and overlay endpoint
+        ip_addresses:
+          - address: "{{ netbox.create_ip(prefix=loopback_parent, description=context.site ~ " " ~ device_name ~ " LOOPBACK", status="active", role="loopback", create_peer_ip=false) }}"
+            description: {{ context.site }} {{ device_name }} LOOPBACK
+            role: loopback
+            status: active
+{% for leaf in range(1, 4) %}
+{% set link_prefix = netbox.create_prefix(parent=fabric_parent, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LINK", prefixlen=31, site=context.site, status="active") %}
+      - name: Ethernet{{ leaf }}
+        type: 100gbase-x-qsfp28
+        enabled: true
+        description: To {{ site_slug }}-leaf-{{ leaf }} Ethernet{{ spine }}
+        ip_addresses:
+          - address: "{{ netbox.create_ip(prefix=link_prefix, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " SPINE IP", status="active", create_peer_ip=false) }}"
+            description: {{ context.site }} spine-{{ spine }} leaf-{{ leaf }} SPINE IP
+            status: active
+{% endfor %}
+{% endfor %}
+{% for leaf in range(1, 4) %}
+{% set device_name = site_slug ~ "-leaf-" ~ leaf %}
+{% set local_asn = netbox.create_asn(asn_range=context.asn_range, site=context.site, description=context.site ~ " leaf-" ~ leaf ~ " ASN") %}
+  - name: {{ device_name }}
+    site: {{ context.site }}
+    location: FABRIC-ROOM
+    rack: LEAF-RACK
+    position: {{ 43 - leaf }}
+    face: front
+    role: LEAF
+    device_type: Fabric Leaf
+    status: active
+    bgp:
+      local_as: {{ local_asn }}
+      sessions:
+{% for spine in range(1, 3) %}
+{% set link_prefix = netbox.create_prefix(parent=fabric_parent, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LINK", prefixlen=31, site=context.site, status="active") %}
+{% set local_ip = netbox.create_ip(prefix=link_prefix, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LEAF IP", status="active", create_peer_ip=false) %}
+{% set remote_ip = netbox.create_ip(prefix=link_prefix, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " SPINE IP", status="active", create_peer_ip=false) %}
+        - name: {{ context.site }}-LEAF-{{ leaf }}-SPINE-{{ spine }}
+          local_address: "{{ local_ip.split('/')[0] }}"
+          remote_address: "{{ remote_ip.split('/')[0] }}"
+          remote_as: {{ netbox.create_asn(asn_range=context.asn_range, site=context.site, description=context.site ~ " spine-" ~ spine ~ " ASN") }}
+          status: active
+          description: Underlay eBGP to {{ site_slug }}-spine-{{ spine }}
+{% endfor %}
+    interfaces:
+      - name: Loopback0
+        type: virtual
+        description: Router ID and VTEP endpoint
+        ip_addresses:
+          - address: "{{ netbox.create_ip(prefix=loopback_parent, description=context.site ~ " " ~ device_name ~ " LOOPBACK", status="active", role="loopback", create_peer_ip=false) }}"
+            description: {{ context.site }} {{ device_name }} LOOPBACK
+            role: loopback
+            status: active
+{% for spine in range(1, 3) %}
+{% set link_prefix = netbox.create_prefix(parent=fabric_parent, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LINK", prefixlen=31, site=context.site, status="active") %}
+      - name: Ethernet{{ spine }}
+        type: 100gbase-x-qsfp28
+        enabled: true
+        description: To {{ site_slug }}-spine-{{ spine }} Ethernet{{ leaf }}
+        ip_addresses:
+          - address: "{{ netbox.create_ip(prefix=link_prefix, description=context.site ~ " spine-" ~ spine ~ " leaf-" ~ leaf ~ " LEAF IP", status="active", create_peer_ip=false) }}"
+            description: {{ context.site }} spine-{{ spine }} leaf-{{ leaf }} LEAF IP
+            status: active
+{% endfor %}
+{% endfor %}
+
+connections:
+{% for spine in range(1, 3) %}
+{% for leaf in range(1, 4) %}
+  - label: {{ context.site }}-SPINE-{{ spine }}-LEAF-{{ leaf }}
+    type: smf-os2
+    status: connected
+    a_terminations:
+      - device: {{ site_slug }}-spine-{{ spine }}
+        interface: Ethernet{{ leaf }}
+    b_terminations:
+      - device: {{ site_slug }}-leaf-{{ leaf }}
+        interface: Ethernet{{ spine }}
+{% endfor %}
+{% endfor %}

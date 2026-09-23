@@ -1,0 +1,6 @@
+design_input_schema: nf://netbox/designs/models/device_design_input.py
+---
+devices:
+{% for device_name in context.devices %}
+  - name: {{ device_name }}
+{% endfor %}

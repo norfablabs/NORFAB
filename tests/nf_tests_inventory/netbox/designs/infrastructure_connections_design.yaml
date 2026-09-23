@@ -1,0 +1,73 @@
+---
+# Physical hierarchy, placement, and connection design.
+
+regions:
+  - name: DESIGN REGION PHYSICAL
+    custom_fields:
+      design_owner: design-engine
+
+sites:
+  - name: DESIGN SITE PHYSICAL
+    region: DESIGN REGION PHYSICAL
+    status: active
+    custom_fields:
+      design_owner: design-engine
+
+locations:
+  - name: DESIGN ROOM 1
+    site: DESIGN SITE PHYSICAL
+    status: active
+    custom_fields:
+      design_owner: design-engine
+
+rack_roles:
+  - name: DESIGN NETWORK RACK
+    color: 3f51b5
+
+racks:
+  - name: DESIGN RACK 1
+    site: DESIGN SITE PHYSICAL
+    location: DESIGN ROOM 1
+    role: DESIGN NETWORK RACK
+    status: active
+    width: 19
+    u_height: 42
+    custom_fields:
+      design_owner: design-engine
+
+devices:
+{% for device_name, position in [("design-physical-1", 40), ("design-physical-2", 38)] %}
+  - name: {{ device_name }}
+    site: DESIGN SITE PHYSICAL
+    location: DESIGN ROOM 1
+    rack: DESIGN RACK 1
+    position: {{ position }}
+    face: front
+    status: active
+    custom_fields:
+      design_owner: design-engine
+{% endfor %}
+
+interfaces:
+{% for device_name in "design-physical-[1-2]" | expand_range %}
+  - device: {{ device_name }}
+    name: Ethernet1
+    type: 1000base-t
+    enabled: true
+    custom_fields:
+      design_owner: design-engine
+{% endfor %}
+
+connections:
+  - label: DESIGN PHYSICAL LINK 1
+    type: cat6a
+    status: connected
+    description: Managed physical connection
+    a_terminations:
+      - device: design-physical-1
+        interface: Ethernet1
+    b_terminations:
+      - device: design-physical-2
+        interface: Ethernet1
+    custom_fields:
+      design_owner: design-engine

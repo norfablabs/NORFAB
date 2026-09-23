@@ -29,6 +29,7 @@ from .netbox_picle_shell_create_ip import CreateIp
 from .netbox_picle_shell_create_ip_bulk import CreateIpBulk
 from .netbox_picle_shell_create_prefix import CreatePrefixShell
 from .netbox_picle_shell_crud import CrudCommands
+from .netbox_picle_shell_design import DesignCommands
 from .netbox_picle_shell_get_bgp_peerings import GetBGPPeerings
 from .netbox_picle_shell_get_circuits import GetCircuits
 from .netbox_picle_shell_get_connections import GetConnections
@@ -366,6 +367,7 @@ class UpdateCommands(BaseModel):
 
 class NetboxServiceCommands(BaseModel):
     graphql: GrapQLCommands = Field(None, description="Query Netbox GrapQL API")
+    design: DesignCommands = Field(None, description="Deploy NetBox designs")
     get: GetCommands = Field(None, description="Query data from Netbox")
     sync: SyncCommands = Field(None, description="Sync Netbox data")
     check_sync: CheckSyncCommands = Field(

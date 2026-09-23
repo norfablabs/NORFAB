@@ -5,7 +5,13 @@ from norfab.core.worker import Job, Task
 from norfab.models import Result
 from norfab.utils.text import expand_alphanumeric_range
 
-from .netbox_models import NetboxFastApiArgs, SyncBgpAsnInput, SyncBgpAsnResult
+from .netbox_models import (
+    CreateBgpAsnInput,
+    CreateBgpAsnResult,
+    NetboxFastApiArgs,
+    SyncBgpAsnInput,
+    SyncBgpAsnResult,
+)
 from .netbox_worker_utilities import (
     apply_description_policy,
     review_sync_task_result,
@@ -15,6 +21,121 @@ log = logging.getLogger(__name__)
 
 
 class NetboxBgpAsnTasks:
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CreateBgpAsnInput,
+        output=CreateBgpAsnResult,
+        mcp={
+            "annotations": {
+                "title": "Create BGP ASN",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def create_asn(
+        self,
+        job: Job,
+        asn_range: Union[None, str] = None,
+        asn: Union[None, int] = None,
+        rir: Union[None, str] = None,
+        description: Union[None, str] = None,
+        tenant: Union[None, str] = None,
+        tags: Union[None, list] = None,
+        custom_fields: Union[None, dict] = None,
+        site: Union[None, str] = None,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        branch: Union[None, str] = None,
+    ) -> Result:
+        """Create, update, or allocate one ASN."""
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:create_asn",
+            result={},
+            resources=[instance],
+            dry_run=dry_run,
+        )
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
+        range_filters = {"name": asn_range}
+        if site:
+            nb_site = nb.dcim.sites.get(name=site)
+            if not nb_site:
+                raise ValueError(f"Site '{site}' not found in NetBox")
+            range_filters.update(scope_type="dcim.site", scope_id=nb_site.id)
+        nb_range = nb.ipam.asn_ranges.get(**range_filters) if asn_range else None
+        if asn_range and not nb_range:
+            raise ValueError(f"ASN range '{asn_range}' not found in NetBox")
+
+        matches = []
+        if asn is not None:
+            existing = nb.ipam.asns.get(asn=asn)
+            matches = [existing] if existing else []
+        elif description:
+            matches = self.bulk_filter(
+                nb.ipam.asns,
+                description=description,
+                asn__gte=nb_range.start,
+                asn__lte=nb_range.end,
+            )
+        if len(matches) > 1:
+            raise ValueError(
+                f"ASN description '{description}' matched more than one ASN in range '{asn_range}'"
+            )
+
+        nb_asn = matches[0] if matches else None
+        if not nb_asn and asn is None:
+            available = list(nb_range.available_asns.list())
+            if not available:
+                raise ValueError(f"ASN range '{asn_range}' has no available ASNs")
+            asn = int(
+                available[0]["asn"]
+                if isinstance(available[0], dict)
+                else getattr(available[0], "asn", available[0])
+            )
+        if dry_run:
+            ret.result = {
+                "asn": int(nb_asn.asn) if nb_asn else asn,
+                "description": description,
+                "status": "update" if nb_asn else "create",
+            }
+            return ret
+
+        if not nb_asn and nb_range:
+            nb_asn = nb.ipam.asns.create({"asn": asn, "rir": nb_range.rir.id})
+        elif not nb_asn:
+            rir_object = nb.ipam.rirs.get(name=rir)
+            if not rir_object:
+                raise ValueError(f"RIR '{rir}' not found in NetBox")
+            nb_asn = nb.ipam.asns.create({"asn": asn, "rir": rir_object.id})
+
+        changed = False
+        if description is not None and nb_asn.description != description:
+            nb_asn.description = description
+            changed = True
+        if tenant is not None and str(nb_asn.tenant) != tenant:
+            nb_asn.tenant = {"name": tenant}
+            changed = True
+        if tags is not None:
+            nb_asn.tags = [{"name": tag} for tag in tags]
+            changed = True
+        if custom_fields is not None and nb_asn.custom_fields != custom_fields:
+            nb_asn.custom_fields = custom_fields
+            changed = True
+        if changed:
+            nb_asn.save()
+
+        ret.status = "updated" if matches else "created"
+        ret.result = {
+            "asn": int(nb_asn.asn),
+            "description": nb_asn.description,
+            "status": ret.status,
+        }
+        job.event(f"{ret.status} ASN {nb_asn.asn}")
+        return ret
+
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncBgpAsnInput,

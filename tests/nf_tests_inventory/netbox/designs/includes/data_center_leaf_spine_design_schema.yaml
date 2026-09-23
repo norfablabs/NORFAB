@@ -1,0 +1,22 @@
+design_input_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    site:
+      type: string
+      minLength: 1
+      description: Existing NetBox site name used for fabric scope and device names.
+    fabric_prefix:
+      type: string
+      description: Existing site-scoped prefix used to allocate point-to-point links.
+    loopback_prefix:
+      type: string
+      description: Existing site-scoped prefix used to allocate device loopbacks.
+    asn_range:
+      type: string
+      description: Existing ASN range name selected within the site scope.
+  required:
+    - site
+    - fabric_prefix
+    - loopback_prefix
+    - asn_range

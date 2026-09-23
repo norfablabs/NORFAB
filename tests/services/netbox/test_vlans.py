@@ -20,6 +20,41 @@ pytestmark = [
 ]
 
 
+@pytest.mark.netbox_create_vlan
+class TestCreateVlan:
+    def test_dry_run_allocates_from_named_group(self) -> None:
+        group = SimpleNamespace(
+            id=10,
+            available_vlans=SimpleNamespace(list=Mock(return_value=[100])),
+        )
+        nb = SimpleNamespace(
+            ipam=SimpleNamespace(
+                vlan_groups=SimpleNamespace(get=Mock(return_value=group)),
+                vlans=SimpleNamespace(),
+            )
+        )
+        worker = object.__new__(NetboxWorker)
+        worker.name, worker.default_instance = "test", "test"
+        worker._get_pynetbox = Mock(return_value=nb)
+        worker.bulk_filter = Mock(return_value=[])
+        job = SimpleNamespace(event=Mock())
+
+        result = worker.create_vlan(
+            job,
+            vlan_group="campus",
+            name="users",
+            dry_run=True,
+        )
+
+        assert result.result == {
+            "vid": 100,
+            "name": "users",
+            "vlan_group": "campus",
+            "status": "create",
+        }
+        group.available_vlans.list.assert_called_once_with()
+
+
 class TestSyncVlanMemberships:
     """Exercise collection, the real diff, and writes without network services."""
 

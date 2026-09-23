@@ -1,0 +1,51 @@
+---
+# Self-contained devices and interfaces design.
+
+manufacturers:
+  - name: DESIGN LABS
+
+platforms:
+  - name: DESIGN OS
+    manufacturer: DESIGN LABS
+
+device_roles:
+  - name: ROUTER
+
+device_types:
+  - model: DESIGN ROUTER
+    manufacturer: DESIGN LABS
+    default_platform: DESIGN OS
+
+regions:
+  - name: DESIGN REGION
+
+sites:
+  - name: DESIGN SITE
+    region: DESIGN REGION
+    status: active
+
+devices:
+{% for device_name in "design-edge-[1-2]" | expand_range %}
+  - name: {{ device_name }}
+    device_type: DESIGN ROUTER
+    role: ROUTER
+    site: DESIGN SITE
+    platform: DESIGN OS
+    status: active
+{% endfor %}
+
+interfaces:
+{% for device_name in "design-edge-[1-2]" | expand_range %}
+{% for interface_name in "Ethernet[1-4]" | expand_range %}
+  - device: {{ device_name }}
+    name: {{ interface_name }}
+    type: 1000base-t
+    enabled: true
+{% endfor %}
+{% for interface_name in "Loopback[0-1]" | expand_range %}
+  - device: {{ device_name }}
+    name: {{ interface_name }}
+    type: virtual
+    enabled: true
+{% endfor %}
+{% endfor %}

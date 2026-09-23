@@ -8,9 +8,13 @@ from pydantic import TypeAdapter
 
 from norfab.core.worker import Job, Task
 from norfab.models import Result
-from norfab.utils.text import expand_alphanumeric_range
+from norfab.utils.text import expand_alphanumeric_range, slugify
 
 from .netbox_models import (
+    CreateVlanGroupInput,
+    CreateVlanGroupResult,
+    CreateVlanInput,
+    CreateVlanResult,
     InterfaceMapRule,
     NetboxFastApiArgs,
     SyncVlansInput,
@@ -246,6 +250,153 @@ VLAN_MEMBERSHIP_FIELDS = ("tagged_interfaces", "untagged_interfaces")
 
 
 class NetboxVlansTasks:
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CreateVlanGroupInput,
+        output=CreateVlanGroupResult,
+    )
+    def create_vlan_group(
+        self,
+        job: Job,
+        name: str,
+        site: str,
+        vid_ranges: list,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        branch: Union[None, str] = None,
+    ) -> Result:
+        """Create or update one site-scoped VLAN group."""
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:create_vlan_group",
+            result={"name": name, "site": site, "vid_ranges": vid_ranges},
+            resources=[instance],
+            dry_run=dry_run,
+        )
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
+        nb_site = nb.dcim.sites.get(name=site)
+        if not nb_site:
+            raise ValueError(f"Site '{site}' not found in NetBox")
+        group = nb.ipam.vlan_groups.get(name=name)
+        payload = {
+            "name": name,
+            "slug": slugify(name),
+            "scope_type": "dcim.site",
+            "scope_id": nb_site.id,
+            "vid_ranges": vid_ranges,
+        }
+        if dry_run:
+            ret.status = "updated" if group else "created"
+        elif group:
+            group.update(payload)
+            ret.status = "updated"
+        else:
+            nb.ipam.vlan_groups.create(payload)
+            ret.status = "created"
+        job.event(f"{ret.status} VLAN group '{name}'")
+        return ret
+
+    @Task(
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        input=CreateVlanInput,
+        output=CreateVlanResult,
+        mcp={
+            "annotations": {
+                "title": "Create VLAN",
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def create_vlan(
+        self,
+        job: Job,
+        vlan_group: str,
+        name: str,
+        vid: Union[None, int] = None,
+        status: str = "active",
+        description: Union[None, str] = None,
+        tenant: Union[None, str] = None,
+        role: Union[None, str] = None,
+        tags: Union[None, list] = None,
+        custom_fields: Union[None, dict] = None,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        branch: Union[None, str] = None,
+    ) -> Result:
+        """Create, update, or allocate one VLAN in a VLAN group."""
+        instance = instance or self.default_instance
+        ret = Result(
+            task=f"{self.name}:create_vlan",
+            result={},
+            resources=[instance],
+            dry_run=dry_run,
+        )
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
+        group = nb.ipam.vlan_groups.get(name=vlan_group)
+        if not group:
+            raise ValueError(f"VLAN group '{vlan_group}' not found in NetBox")
+
+        filters = (
+            {"group_id": group.id, "vid": vid}
+            if vid
+            else {
+                "group_id": group.id,
+                "name": name,
+            }
+        )
+        matches = self.bulk_filter(nb.ipam.vlans, **filters)
+        if len(matches) > 1:
+            raise ValueError(f"VLAN identity {filters} matched more than one VLAN")
+        nb_vlan = matches[0] if matches else None
+
+        if not nb_vlan and vid is None:
+            available = group.available_vlans.list()
+            if not available:
+                raise ValueError(f"VLAN group '{vlan_group}' has no available VLAN IDs")
+            vid = int(getattr(available[0], "vid", available[0]))
+        if dry_run:
+            ret.result = {
+                "vid": int(nb_vlan.vid) if nb_vlan else vid,
+                "name": name,
+                "vlan_group": vlan_group,
+                "status": "update" if nb_vlan else "create",
+            }
+            return ret
+
+        payload = {"name": name, "status": status}
+        if description is not None:
+            payload["description"] = description
+        if tenant is not None:
+            payload["tenant"] = {"name": tenant}
+        if role is not None:
+            payload["role"] = {"name": role}
+        if tags is not None:
+            payload["tags"] = [{"name": tag} for tag in tags]
+        if custom_fields is not None:
+            payload["custom_fields"] = custom_fields
+
+        if nb_vlan:
+            nb_vlan.update(payload)
+            ret.status = "updated"
+        elif filters.get("vid") is None:
+            nb_vlan = group.available_vlans.create(payload)
+            ret.status = "created"
+        else:
+            nb_vlan = nb.ipam.vlans.create({"vid": vid, "group": group.id, **payload})
+            ret.status = "created"
+
+        ret.result = {
+            "vid": int(nb_vlan.vid),
+            "name": nb_vlan.name,
+            "vlan_group": vlan_group,
+            "status": ret.status,
+        }
+        job.event(f"{ret.status} VLAN {nb_vlan.vid} '{nb_vlan.name}'")
+        return ret
+
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
         input=SyncVlansInput,

@@ -1,0 +1,78 @@
+---
+# BGP, L2VPN, and VRRP target state.
+
+rirs:
+  - name: DESIGN SERVICE RIR
+    is_private: true
+
+asns:
+  - asn: 4200099001
+    rir: DESIGN SERVICE RIR
+    description: Design local ASN
+  - asn: 4200099002
+    rir: DESIGN SERVICE RIR
+    description: Design remote ASN
+
+devices:
+  - name: design-services-1
+    status: active
+    custom_fields:
+      design_owner: design-engine
+
+interfaces:
+  - device: design-services-1
+    name: Ethernet1
+    type: 1000base-t
+    enabled: true
+    custom_fields:
+      design_owner: design-engine
+
+ip_addresses:
+  - address: 192.0.2.101/32
+    status: active
+  - address: 192.0.2.102/32
+    status: active
+
+l2vpns:
+  - name: DESIGN L2VPN 100
+    type: vxlan
+    identifier: 100
+    status: active
+    description: Managed L2VPN
+    custom_fields:
+      design_owner: design-engine
+
+l2vpn_terminations:
+  - l2vpn: DESIGN L2VPN 100
+    interface:
+      device: design-services-1
+      name: Ethernet1
+    custom_fields:
+      design_owner: design-engine
+
+vrrp_groups:
+  - name: DESIGN VRRP 10
+    protocol: vrrp2
+    group_id: 10
+    description: Managed VRRP group
+    custom_fields:
+      design_owner: design-engine
+
+vrrp_group_assignments:
+  - group: DESIGN VRRP 10
+    interface:
+      device: design-services-1
+      name: Ethernet1
+    priority: 110
+
+bgp_sessions:
+  - name: DESIGN BGP SESSION 1
+    device: design-services-1
+    local_address: 192.0.2.101
+    remote_address: 192.0.2.102
+    local_as: 4200099001
+    remote_as: 4200099002
+    status: active
+    description: Managed BGP session
+    custom_fields:
+      design_owner: design-engine

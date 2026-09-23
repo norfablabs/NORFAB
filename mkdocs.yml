@@ -155,7 +155,11 @@ nav:
       - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
       - Create IP Bulk: workers/netbox/services_netbox_service_tasks_create_ip_bulk.md
       - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md
+      - Create ASN: workers/netbox/services_netbox_service_tasks_create_asn.md
+      - Create VLAN Group: workers/netbox/services_netbox_service_tasks_create_vlan_group.md
+      - Create VLAN: workers/netbox/services_netbox_service_tasks_create_vlan.md
       - Create Device Interfaces: workers/netbox/services_netbox_service_tasks_create_device_interfaces.md
+      - Design Deploy: workers/netbox/services_netbox_service_tasks_design_deploy.md
       - Sync Device Inventory: workers/netbox/services_netbox_service_tasks_sync_device_inventory.md
       - Sync Device Interfaces: workers/netbox/services_netbox_service_tasks_sync_device_interfaces.md
       - Sync VLANs: workers/netbox/services_netbox_service_tasks_sync_vlans.md
@@ -261,6 +265,7 @@ nav:
   - NFWeb Developer Guide: development/nfweb_developer_guide.md
   - Docker Development: development/norfab_docker_development.md
   - Documentation Style Guide: development/documentation_style_guide.md
+  - NetBox Design Specification: development/netbox_design_specification.md
   - Task Pydantic Models Guide: development/adr_tasks_pydantic_models_guide.md
   - File Streaming (fetch_file): development/file_streaming_fetch_file.md
   - Architecture Design Records:

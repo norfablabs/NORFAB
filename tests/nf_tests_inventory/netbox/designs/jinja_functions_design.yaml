@@ -1,0 +1,9 @@
+jinja_functions:
+  allocate_vrf_route_target: nf://netbox/designs/filters/allocate_vrf_route_target.py
+---
+# Design using a custom Jinja2 function declared by the design.
+
+vrfs:
+  - name: DESIGN CUSTOM FILTER VRF
+    rd: "{{ allocate_vrf_route_target(100, rd_suffix=3) }}"
+    description: Created with the allocate_vrf_route_target custom function

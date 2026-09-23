@@ -311,6 +311,9 @@ class BgpSessionCommonFields(BaseModel):
     prefix_list_out: Union[None, StrictStr] = Field(
         None, description="Outbound prefix list"
     )
+    custom_fields: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="BGP session custom fields"
+    )
 
 
 class BgpSessionBulkCreateFields(BgpSessionCommonFields):
@@ -363,6 +366,9 @@ class CreateBgpPeeringInput(
     )
     prefix_list_out: Union[None, StrictStr] = Field(
         None, description="Outbound prefix list"
+    )
+    custom_fields: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="BGP session custom fields"
     )
     local_interface: Union[None, StrictStr] = Field(
         None,
@@ -707,15 +713,14 @@ class GetContainerlabInventoryResult(Result):
 # --------------------------------------------------------------------------
 
 
-class CreateDesignInput(BaseModel, use_enum_values=True, populate_by_name=True):
-    design_data: Union[StrictStr, dict[StrictStr, Any]] = Field(
+class DesignDeployInput(BaseModel, use_enum_values=True, populate_by_name=True):
+    design: Union[StrictStr, dict[StrictStr, Any]] = Field(
         ...,
-        description="NetBox design data as YAML string, URL, or dictionary",
-        alias="design-data",
+        description="NetBox design as YAML text, file URL, or parsed dictionary",
     )
     context: Union[StrictStr, dict[StrictStr, Any]] = Field(
-        {},
-        description="Template context as YAML string, URL, or dictionary",
+        default_factory=dict,
+        description="Template context validated by design_input_schema",
     )
     instance: Union[None, StrictStr] = Field(
         None,
@@ -733,7 +738,7 @@ class CreateDesignInput(BaseModel, use_enum_values=True, populate_by_name=True):
     )
 
 
-class CreateDesignResult(Result):
+class DesignDeployResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
         description="NetBox design creation result data",
@@ -2290,6 +2295,47 @@ class GetNornirInventoryResult(Result):
 # --------------------------------------------------------------------------
 
 
+class CreateVlanGroupInput(
+    NetboxCommonArgs, use_enum_values=True, populate_by_name=True
+):
+    name: StrictStr = Field(..., min_length=1, description="VLAN group name")
+    site: StrictStr = Field(..., min_length=1, description="Site scope name")
+    vid_ranges: List[List[StrictInt]] = Field(
+        ..., description="Inclusive VLAN ID ranges"
+    )
+
+
+class CreateVlanGroupResult(Result):
+    result: Dict[StrictStr, Any] = Field({}, description="VLAN group data")
+
+
+class CreateVlanInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    vlan_group: StrictStr = Field(
+        ...,
+        min_length=1,
+        description="VLAN group name to allocate or create the VLAN in",
+        alias="vlan-group",
+    )
+    name: StrictStr = Field(..., min_length=1, description="VLAN name")
+    vid: Union[None, StrictInt] = Field(
+        None, ge=1, le=4094, description="Explicit VLAN ID; allocate when omitted"
+    )
+    status: StrictStr = Field("active", description="VLAN status")
+    description: Union[None, StrictStr] = Field(None, description="VLAN description")
+    tenant: Union[None, StrictStr] = Field(None, description="Tenant name")
+    role: Union[None, StrictStr] = Field(None, description="IPAM role name")
+    tags: Union[None, List[StrictStr]] = Field(None, description="VLAN tags")
+    custom_fields: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="VLAN custom fields"
+    )
+
+
+class CreateVlanResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {}, description="Created, updated, existing, or proposed VLAN"
+    )
+
+
 class SyncVlansInput(
     NetboxNornirHostsFilters,
     NetboxBulkBatchArgs,
@@ -2521,6 +2567,46 @@ class SyncVrfsResult(Result):
 # --------------------------------------------------------------------------
 # BGP ASN TASK MODELS
 # --------------------------------------------------------------------------
+
+
+class CreateBgpAsnInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    asn_range: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        description="ASN range name to allocate the next available ASN from",
+        alias="asn-range",
+    )
+    site: Union[None, StrictStr] = Field(
+        None,
+        min_length=1,
+        description="Site scope used to select the ASN range",
+    )
+    asn: Union[None, StrictInt] = Field(
+        None, ge=1, le=4294967295, description="Explicit ASN; allocate when omitted"
+    )
+    rir: Union[None, StrictStr] = Field(
+        None, description="RIR name required when creating an explicit ASN"
+    )
+    description: Union[None, StrictStr] = Field(None, description="ASN description")
+    tenant: Union[None, StrictStr] = Field(None, description="Tenant name")
+    tags: Union[None, List[StrictStr]] = Field(None, description="ASN tags")
+    custom_fields: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="ASN custom fields"
+    )
+
+    @model_validator(mode="after")
+    def validate_asn_source(self) -> "CreateBgpAsnInput":
+        if self.asn is None and self.asn_range is None:
+            raise ValueError("Either asn or asn-range must be provided")
+        if self.asn is not None and self.asn_range is None and self.rir is None:
+            raise ValueError("rir is required when creating an explicit ASN")
+        return self
+
+
+class CreateBgpAsnResult(Result):
+    result: Dict[StrictStr, Any] = Field(
+        {}, description="Created, updated, existing, or proposed ASN"
+    )
 
 
 class SyncBgpAsnInput(

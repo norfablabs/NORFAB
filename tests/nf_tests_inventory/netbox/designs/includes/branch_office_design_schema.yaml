@@ -1,0 +1,43 @@
+design_input_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    site:
+      type: string
+      minLength: 1
+      description: NetBox site name used to scope and name branch resources.
+    prefix:
+      type: string
+      description: Top-level site prefix subdivided into branch address pools.
+    asn_range:
+      type: string
+      description: Site-scoped ASN range created and used by the design.
+    rir:
+      type: string
+      description: RIR used by the site ASN allocation range.
+    rd_prefix:
+      type: integer
+      minimum: 1
+      maximum: 4294967295
+      description: Administrator or ASN component used for VRF RDs and route targets.
+    asn_start:
+      type: integer
+      minimum: 1
+      maximum: 4294967295
+      description: First ASN in the site allocation range.
+    asn_end:
+      type: integer
+      minimum: 1
+      maximum: 4294967295
+      description: Last ASN in the site allocation range.
+  required:
+    - site
+    - prefix
+    - asn_range
+    - rir
+    - rd_prefix
+    - asn_start
+    - asn_end
+jinja_functions:
+  allocate_vrf_route_target: nf://netbox/designs/filters/allocate_vrf_route_target.py
+  allocate_mac: nf://netbox/designs/filters/allocate_mac.py

@@ -1,0 +1,63 @@
+---
+sites:
+  - name: DESIGN STATIC SITE
+    status: active
+
+roles:
+  - name: DESIGN STATIC ACCESS
+
+vlan_groups:
+  - name: DESIGN STATIC VLAN POOL
+    vid_ranges:
+      - [1200, 1299]
+
+vlans:
+  - name: DESIGN STATIC VLAN
+    group: DESIGN STATIC VLAN POOL
+    vid: 1200
+    status: active
+  - name: DESIGN STATIC TAGGED VLAN
+    group: DESIGN STATIC VLAN POOL
+    vid: 1201
+    status: active
+
+route_targets:
+  - name: "65000:1200"
+
+vrfs:
+  - name: DESIGN STATIC VRF
+    rd: "65000:1200"
+    import_targets:
+      - name: "65000:1200"
+    export_targets:
+      - name: "65000:1200"
+
+prefixes:
+  - prefix: 10.253.0.0/24
+    site: DESIGN STATIC SITE
+    role: DESIGN STATIC ACCESS
+    status: active
+    ip_addresses:
+      - address: 10.253.0.254/24
+        description: DESIGN STATIC UNASSIGNED IP
+
+devices:
+  - name: design-static-1
+    site: DESIGN STATIC SITE
+    interfaces:
+      - name: Ethernet1
+        type: 1000base-t
+        mode: access
+        untagged_vlan:
+          group: DESIGN STATIC VLAN POOL
+          vid: 1200
+        ip_addresses:
+          - address: 10.253.0.1/24
+            description: DESIGN STATIC INTERFACE IP
+            status: active
+      - name: Ethernet2
+        type: 1000base-t
+        mode: tagged
+        tagged_vlans:
+          - group: DESIGN STATIC VLAN POOL
+            vid: 1201

@@ -1,3 +1,11 @@
+# 0.24.0
+
+## FEATURES
+
+1. Added NetBox design deployment using validated YAML and Jinja2 templates, with reusable includes, custom functions, allocations, nested objects, and the `netbox design deploy` NFCLI command.
+
+---
+
 # 0.23.7
 
 ## BUGS

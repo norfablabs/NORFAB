@@ -1,0 +1,225 @@
+{% include "includes/branch_office_design_schema.yaml" %}
+---
+# Production-style branch design. Allocations are inline where their values are used.
+{% set site_slug = context.site | lower | replace(" ", "-") %}
+{% set site_prefix = {"prefix": context.prefix, "site": context.site} %}
+{% set region = netbox.create_object("regions", name="LAB-REGION") %}
+{% set site = netbox.create_object("sites", name=context.site, region=region, status="active") %}
+{% for role in ["BRANCH-LINKS", "BRANCH-LOOPBACKS", "BRANCH-MGMT", "BRANCH-VOICE", "BRANCH-CORP", "BRANCH-INTERNET"] %}
+{% set role = netbox.create_object("roles", name=role) %}
+{% endfor %}
+{% set rir = netbox.create_object("rirs", name=context.rir, is_private=true) %}
+{% set asn_range = netbox.create_object("asn_ranges", name=context.asn_range, rir=rir, start=context.asn_start, end=context.asn_end, site=site) %}
+{% set parent_prefix = netbox.create_object("prefixes", prefix=context.prefix, description=site ~ " allocation pool", site=site, status="active") %}
+{% set vlan_group = netbox.create_vlan_group(name=site ~ " VLANS", site=site, vid_ranges=[[10, 99]]) %}
+
+locations:
+  - name: MAIN-EQUIPMENT-ROOM
+    site: {{ site }}
+    status: active
+
+rack_roles:
+  - name: NETWORK
+    color: 3f51b5
+
+racks:
+{% for rack in ["NETWORK-RACK-A", "NETWORK-RACK-B"] %}
+  - name: {{ rack }}
+    site: {{ site }}
+    location: MAIN-EQUIPMENT-ROOM
+    role: NETWORK
+    status: active
+    width: 19
+    u_height: 42
+{% endfor %}
+
+manufacturers:
+  - name: Example Networks
+
+device_types:
+  - model: Branch Router
+    manufacturer: Example Networks
+    u_height: 1
+  - model: Access Switch
+    manufacturer: Example Networks
+    u_height: 1
+
+device_roles:
+  - name: ROUTER
+    color: f44336
+  - name: ACCESS-SWITCH
+    color: 4caf50
+
+vlans:
+{% for name, description in [("MGMT", "Branch management"), ("VOICE", "Branch voice"), ("CORP", "Branch corporate access"), ("INTERNET", "Branch internet edge")] %}
+  - name: {{ name }}
+    group: {{ vlan_group }}
+    vid: {{ netbox.create_vlan(vlan_group=vlan_group, name=name, status="active", description=description) }}
+    status: active
+{% endfor %}
+
+route_targets:
+{% for name, description in [("MGMT", "Branch management"), ("VOICE", "Branch voice"), ("CORP", "Branch corporate access"), ("INTERNET", "Branch internet edge")] %}
+  - name: "{{ allocate_vrf_route_target(context.rd_prefix, rd_suffix=netbox.create_vlan(vlan_group=vlan_group, name=name, status="active", description=description)) }}"
+{% endfor %}
+
+vrfs:
+{% for name, description in [("MGMT", "Branch management"), ("VOICE", "Branch voice"), ("CORP", "Branch corporate access"), ("INTERNET", "Branch internet edge")] %}
+  - name: {{ name }}
+    rd: "{{ allocate_vrf_route_target(context.rd_prefix, rd_suffix=netbox.create_vlan(vlan_group=vlan_group, name=name, status="active", description=description)) }}"
+    import_targets:
+      - name: "{{ allocate_vrf_route_target(context.rd_prefix, rd_suffix=netbox.create_vlan(vlan_group=vlan_group, name=name, status="active", description=description)) }}"
+    export_targets:
+      - name: "{{ allocate_vrf_route_target(context.rd_prefix, rd_suffix=netbox.create_vlan(vlan_group=vlan_group, name=name, status="active", description=description)) }}"
+{% endfor %}
+
+prefixes:
+{% for name, role in [("LINKS", "BRANCH-LINKS"), ("LOOPBACKS", "BRANCH-LOOPBACKS"), ("MGMT", "BRANCH-MGMT"), ("VOICE", "BRANCH-VOICE"), ("CORP", "BRANCH-CORP"), ("INTERNET", "BRANCH-INTERNET")] %}
+  - prefix: "{{ netbox.create_prefix(parent=site_prefix, description=site ~ " " ~ name ~ " PREFIX", prefixlen=24, site=site, role=role, status="active") }}"
+    description: {{ site }} {{ name }} PREFIX
+{% if name not in ["LINKS", "LOOPBACKS"] %}
+    vrf: {{ name }}
+{% endif %}
+    site: {{ site }}
+    role: {{ role }}
+    status: active
+{% endfor %}
+
+devices:
+{% for number, rack, position in [(1, "NETWORK-RACK-A", 40), (2, "NETWORK-RACK-B", 40)] %}
+{% set peer = 2 if number == 1 else 1 %}
+{% set mgmt_prefix = netbox.create_prefix(parent=site_prefix, description=site ~ " MGMT PREFIX", prefixlen=24, site=site, role="BRANCH-MGMT", status="active") %}
+{% set loopback_prefix = netbox.create_prefix(parent=site_prefix, description=site ~ " LOOPBACKS PREFIX", prefixlen=24, site=site, role="BRANCH-LOOPBACKS", status="active") %}
+  - name: {{ site_slug }}-rtr-{{ number }}
+    site: {{ site }}
+    location: MAIN-EQUIPMENT-ROOM
+    rack: {{ rack }}
+    position: {{ position }}
+    face: front
+    role: ROUTER
+    device_type: Branch Router
+    status: active
+    bgp:
+      local_as: {{ netbox.create_asn(asn_range=asn_range, site=site, description=site ~ " router " ~ number ~ " ASN") }}
+      sessions:
+        - name: {{ site }}-RTR-{{ number }}-IBGP
+          local_address: "{{ netbox.create_ip(prefix=mgmt_prefix, description=site ~ " " ~ site_slug ~ "-rtr-" ~ number ~ " MGMT", status="active", create_peer_ip=false).split('/')[0] }}"
+          remote_address: "{{ netbox.create_ip(prefix=mgmt_prefix, description=site ~ " " ~ site_slug ~ "-rtr-" ~ peer ~ " MGMT", status="active", create_peer_ip=false).split('/')[0] }}"
+          remote_as: {{ netbox.create_asn(asn_range=asn_range, site=site, description=site ~ " router " ~ peer ~ " ASN") }}
+          status: active
+          description: Redundant branch router session
+    interfaces:
+      - name: Ethernet1
+        type: 1000base-t
+        description: Uplink to access switch
+        mac_addresses:
+          - mac_address: "{{ '02:60:00:00:00' | allocate_mac(suffix=number) }}"
+      - name: Loopback0
+        type: virtual
+        ip_addresses:
+          - address: "{{ netbox.create_ip(prefix=loopback_prefix, description=site ~ " " ~ site_slug ~ "-rtr-" ~ number ~ " LOOPBACK", status="active", create_peer_ip=false) }}"
+            description: {{ site }} {{ site_slug }}-rtr-{{ number }} LOOPBACK
+            status: active
+{% for service, description in [("MGMT", "Branch management"), ("VOICE", "Branch voice"), ("CORP", "Branch corporate access"), ("INTERNET", "Branch internet edge")] %}
+{% set service_prefix = netbox.create_prefix(parent=site_prefix, description=site ~ " " ~ service ~ " PREFIX", prefixlen=24, site=site, role="BRANCH-" ~ service, status="active") %}
+      - name: Ethernet2.{{ netbox.create_vlan(vlan_group=vlan_group, name=service, status="active", description=description) }}
+        type: virtual
+        vrf: {{ service }}
+        ip_addresses:
+          - address: "{{ netbox.create_ip(prefix=service_prefix, description=site ~ " " ~ site_slug ~ "-rtr-" ~ number ~ " " ~ service, status="active", create_peer_ip=false) }}"
+            description: {{ site }} {{ site_slug }}-rtr-{{ number }} {{ service }}
+            vrf: {{ service }}
+            status: active
+{% endfor %}
+{% endfor %}
+{% for number, rack, position in [(1, "NETWORK-RACK-A", 38), (2, "NETWORK-RACK-B", 38)] %}
+{% set mgmt_prefix = netbox.create_prefix(parent=site_prefix, description=site ~ " MGMT PREFIX", prefixlen=24, site=site, role="BRANCH-MGMT", status="active") %}
+  - name: {{ site_slug }}-sw-{{ number }}
+    site: {{ site }}
+    location: MAIN-EQUIPMENT-ROOM
+    rack: {{ rack }}
+    position: {{ position }}
+    face: front
+    role: ACCESS-SWITCH
+    device_type: Access Switch
+    status: active
+    interfaces:
+      - name: Ethernet1
+        type: 1000base-t
+        mode: access
+        mac_addresses:
+          - mac_address: "{{ '02:60:00:00:01' | allocate_mac(suffix=number) }}"
+        untagged_vlan:
+          group: {{ vlan_group }}
+          vid: {{ netbox.create_vlan(vlan_group=vlan_group, name="CORP", status="active", description="Branch corporate access") }}
+      - name: Ethernet2
+        type: 1000base-t
+        mode: tagged
+        tagged_vlans:
+          - group: {{ vlan_group }}
+            vid: {{ netbox.create_vlan(vlan_group=vlan_group, name="VOICE", status="active", description="Branch voice") }}
+          - group: {{ vlan_group }}
+            vid: {{ netbox.create_vlan(vlan_group=vlan_group, name="CORP", status="active", description="Branch corporate access") }}
+      - name: Ethernet48
+        type: 10gbase-x-sfpp
+        description: Switch peer link
+      - name: Ethernet49
+        type: 10gbase-x-sfpp
+        description: Router uplink
+      - name: Vlan{{ netbox.create_vlan(vlan_group=vlan_group, name="MGMT", status="active", description="Branch management") }}
+        type: virtual
+        vrf: MGMT
+        ip_addresses:
+          - address: "{{ netbox.create_ip(prefix=mgmt_prefix, description=site ~ " " ~ site_slug ~ "-sw-" ~ number ~ " MGMT", status="active", create_peer_ip=false) }}"
+            description: {{ site }} {{ site_slug }}-sw-{{ number }} MGMT
+            vrf: MGMT
+            status: active
+{% endfor %}
+
+connections:
+  - label: {{ site }}-RTR-1-UPLINK
+    type: mmf-om4
+    status: connected
+    a_terminations:
+      - device: {{ site_slug }}-rtr-1
+        interface: Ethernet1
+    b_terminations:
+      - device: {{ site_slug }}-sw-1
+        interface: Ethernet49
+  - label: {{ site }}-RTR-2-UPLINK
+    type: mmf-om4
+    status: connected
+    a_terminations:
+      - device: {{ site_slug }}-rtr-2
+        interface: Ethernet1
+    b_terminations:
+      - device: {{ site_slug }}-sw-2
+        interface: Ethernet49
+  - label: {{ site }}-SWITCH-PEER
+    type: mmf-om4
+    status: connected
+    a_terminations:
+      - device: {{ site_slug }}-sw-1
+        interface: Ethernet48
+    b_terminations:
+      - device: {{ site_slug }}-sw-2
+        interface: Ethernet48
+
+vrrp_groups:
+{% for name, description in [("MGMT", "Branch management"), ("VOICE", "Branch voice"), ("CORP", "Branch corporate access"), ("INTERNET", "Branch internet edge")] %}
+  - name: {{ site }}-{{ name }}-VRRP
+    protocol: vrrp2
+    group_id: {{ netbox.create_vlan(vlan_group=vlan_group, name=name, status="active", description=description) }}
+    description: {{ name }} default gateway
+{% endfor %}
+
+vrrp_group_assignments:
+{% for name, description in [("MGMT", "Branch management"), ("VOICE", "Branch voice"), ("CORP", "Branch corporate access"), ("INTERNET", "Branch internet edge")] %}
+{% for router, priority in [(1, 110), (2, 100)] %}
+  - group: {{ site }}-{{ name }}-VRRP
+    interface:
+      device: {{ site_slug }}-rtr-{{ router }}
+      name: Ethernet2.{{ netbox.create_vlan(vlan_group=vlan_group, name=name, status="active", description=description) }}
+    priority: {{ priority }}
+{% endfor %}
+{% endfor %}

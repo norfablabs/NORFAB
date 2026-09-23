@@ -1,0 +1,12 @@
+design_input_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    devices:
+      type: array
+      items:
+        type: string
+      minItems: 1
+  required:
+    - devices
+jinja_functions: {}

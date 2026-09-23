@@ -1,0 +1,89 @@
+jinja_functions:
+  allocate_route_target: nf://netbox/designs/filters/allocate_route_target.py
+  allocate_mac: nf://netbox/designs/filters/allocate_mac.py
+---
+# Allocation design.
+#
+# Required NetBox allocation pools:
+#
+# - Parent prefix: 10.254.0.0/16
+# - VLAN group: DESIGN VLAN POOL
+# - ASN range: DESIGN ASN POOL
+
+{% set allocated_prefix = netbox.create_prefix(
+  parent="10.254.0.0/16",
+  description="DESIGN ALLOCATED PREFIX",
+  prefixlen=28,
+  status="active"
+) %}
+{% set allocated_vlan = netbox.create_vlan(
+  vlan_group="DESIGN VLAN POOL",
+  name="DESIGN VLAN",
+  status="active",
+  description="Allocated by design"
+) %}
+{% set local_asn = netbox.create_asn(
+  asn_range="DESIGN ASN POOL",
+  description="DESIGN LOCAL ASN"
+) %}
+{% set remote_asn = netbox.create_asn(
+  asn_range="DESIGN ASN POOL",
+  description="DESIGN REMOTE ASN"
+) %}
+{% set local_ip = netbox.create_ip(
+  prefix=allocated_prefix,
+  description="DESIGN ALLOCATED IP",
+  status="active",
+  create_peer_ip=false
+) %}
+{% set remote_ip = netbox.create_ip(
+  prefix=allocated_prefix,
+  description="DESIGN REMOTE IP",
+  status="active",
+  create_peer_ip=false
+) %}
+{% set route_target = 64512 | allocate_route_target(suffix=100) %}
+
+prefixes:
+  - prefix: "{{ allocated_prefix }}"
+    description: DESIGN ALLOCATED PREFIX
+    status: active
+    ip_addresses:
+      - address: "{{ remote_ip }}"
+        description: DESIGN REMOTE IP
+        status: active
+
+route_targets:
+  - name: "{{ route_target }}"
+
+vrfs:
+  - name: DESIGN ALLOCATED VRF
+    rd: "{{ route_target }}"
+    import_targets:
+      - name: "{{ route_target }}"
+    export_targets:
+      - name: "{{ route_target }}"
+
+devices:
+  - name: design-allocation-1
+    bgp:
+      local_as: {{ local_asn }}
+      sessions:
+        - name: DESIGN ALLOCATED BGP SESSION
+          local_address: "{{ local_ip.split('/')[0] }}"
+          remote_address: "{{ remote_ip.split('/')[0] }}"
+          remote_as: {{ remote_asn }}
+          status: active
+    interfaces:
+      - name: Ethernet1
+        type: 1000base-t
+        mode: access
+        mac_addresses:
+          - mac_address: "{{ '02:00:00:00:00' | allocate_mac(suffix=1) }}"
+        untagged_vlan:
+          group: DESIGN VLAN POOL
+          vid: {{ allocated_vlan }}
+        ip_addresses:
+          - address: "{{ local_ip }}"
+            description: DESIGN ALLOCATED IP
+            status: active

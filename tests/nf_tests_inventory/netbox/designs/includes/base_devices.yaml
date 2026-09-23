@@ -1,0 +1,8 @@
+{% include "base_design_schema.yaml" %}
+---
+# The design engine supplies mandatory catch-all objects and references.
+
+devices:
+{% for device_name in context.devices %}
+  - name: {{ device_name }}
+{% endfor %}

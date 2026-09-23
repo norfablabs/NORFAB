@@ -1,11 +1,49 @@
 from collections.abc import Iterator
+from types import SimpleNamespace
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
+from norfab.workers.netbox_worker.netbox_worker import NetboxWorker
 from tests.services.netbox.common import get_pynetbox
 
 pytestmark = [pytest.mark.netbox, pytest.mark.netbox_sync_bgp_asn]
+
+
+@pytest.mark.netbox_create_asn
+class TestCreateBgpAsn:
+    def test_dry_run_allocates_from_named_range(self) -> None:
+        asn_range = SimpleNamespace(
+            start=64512,
+            end=65534,
+            available_asns=SimpleNamespace(list=Mock(return_value=[64512])),
+        )
+        nb = SimpleNamespace(
+            ipam=SimpleNamespace(
+                asn_ranges=SimpleNamespace(get=Mock(return_value=asn_range)),
+                asns=SimpleNamespace(),
+            )
+        )
+        worker = object.__new__(NetboxWorker)
+        worker.name, worker.default_instance = "test", "test"
+        worker._get_pynetbox = Mock(return_value=nb)
+        worker.bulk_filter = Mock(return_value=[])
+        job = SimpleNamespace(event=Mock())
+
+        result = worker.create_asn(
+            job,
+            asn_range="private",
+            description="test allocation",
+            dry_run=True,
+        )
+
+        assert result.result == {
+            "asn": 64512,
+            "description": "test allocation",
+            "status": "create",
+        }
+        asn_range.available_asns.list.assert_called_once_with()
 
 
 class TestSyncBgpAsn:
