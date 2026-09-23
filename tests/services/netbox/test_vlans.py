@@ -153,6 +153,7 @@ class TestSyncVlanMemberships:
             for v in vlans
             if ("vid" not in filters or v.vid in filters["vid"])
             and ("id" not in filters or v.id in filters["id"])
+            and ("name" not in filters or v.name in filters["name"])
         ]
 
         create_calls = 0
@@ -623,6 +624,58 @@ class TestSyncVlanMemberships:
             [{"id": 1050, "name": "new-50"}, {"id": 1102, "name": "new-102"}]
         )
 
+    def test_conflicting_group_vlan_rename_is_reported_and_skipped(self) -> None:
+        group = TestVlanResolution._group(30)
+        result, nb, _, _ = self._run(
+            {"leaf-1": [self._live(name="shared")]},
+            vlans=[
+                self._vlan(50, group=group, name="old-name"),
+                self._vlan(60, group=group, name="shared"),
+            ],
+            groups=[group],
+            vlan_map=[{"set_vlan_group": "group-30", "match_vlan_ids": ["50"]}],
+            dry_run=False,
+        )
+
+        assert not result.failed
+        assert any(
+            "VLAN 50 name 'shared' overlaps with VLAN 60 in scope "
+            "'group:group-30'; skipping VLAN update" in error
+            for error in result.errors
+        )
+        nb.ipam.vlans.update.assert_not_called()
+
+    def test_conflicting_site_vlan_creation_is_reported_and_skipped(self) -> None:
+        result, nb, _, _ = self._run(
+            {"leaf-1": [self._live(name="shared", tagged=("Ethernet6",))]},
+            vlans=[self._vlan(60, name="shared")],
+            interfaces=[self._interface()],
+            dry_run=False,
+        )
+
+        assert not result.failed
+        assert any(
+            "VLAN 50 name 'shared' overlaps with VLAN 60 in scope 'site:lab'; "
+            "skipping VLAN create" in error
+            for error in result.errors
+        )
+        nb.ipam.vlans.create.assert_not_called()
+        nb.dcim.interfaces.update.assert_not_called()
+
+    def test_same_vlan_name_in_different_groups_is_allowed(self) -> None:
+        group_30 = TestVlanResolution._group(30)
+        group_40 = TestVlanResolution._group(40)
+        result, nb, _, _ = self._run(
+            {"leaf-1": [self._live(name="shared")]},
+            vlans=[self._vlan(60, group=group_40, name="shared")],
+            groups=[group_30, group_40],
+            vlan_map=[{"set_vlan_group": "group-30", "match_vlan_ids": ["50"]}],
+            dry_run=False,
+        )
+
+        assert not result.failed and not result.errors
+        nb.ipam.vlans.create.assert_called_once()
+
     def test_different_tagged_and_untagged_vids_share_one_interface_payload(
         self,
     ) -> None:
@@ -799,9 +852,7 @@ class TestVlanResolution:
         device_scope = self._device_scope(region_ids={10, 11, 12})
 
         assert (
-            validate_vlan_group_scope(
-                self._group(30, "region", 12), device_scope, 100
-            )
+            validate_vlan_group_scope(self._group(30, "region", 12), device_scope, 100)
             is None
         )
 
@@ -824,13 +875,9 @@ class TestVlanResolution:
             region=self._record(id=10, name="region-10"),
             group=None,
         )
-        device = self._record(
-            name="leaf-1", site=site, rack=None, location=None
-        )
+        device = self._record(name="leaf-1", site=site, rack=None, location=None)
         nb = self._record(
-            dcim=self._record(
-                sites=object(), racks=object(), regions=object()
-            )
+            dcim=self._record(sites=object(), racks=object(), regions=object())
         )
 
         def bulk_filter(endpoint: Any, **filters: Any) -> list:

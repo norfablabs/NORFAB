@@ -854,6 +854,9 @@ loaded from YAML through `nf://` URLs, using `match_device_names`,
 `match_interface_names`, `match_vlan_ids`, and `set_vlan_group` for matching
 and group selection. The first matching mapping rule applies to the whole VLAN.
 Existing descriptions support always, live-empty-only, or never preservation.
+VLAN name conflicts are validated within each group or site before bulk writes;
+conflicting creations and updates are reported and skipped without stopping
+unrelated VLAN changes.
 VLANs are identified by VID and group, with every same-VID
 candidate validated against the device site, group VID ranges, and the group's
 direct site, site group, location, rack, or rack group scope, or up to five

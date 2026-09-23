@@ -836,6 +836,50 @@ class NetboxVlansTasks:
             if live_name.upper() == f"VLAN{vid}".upper():
                 vlan_live[scope][vid]["name"] = vlan_current[scope][vid]["name"]
 
+        # NetBox requires VLAN names to be unique within their group or site.
+        # Validate proposed creations and renames before sending a bulk write so
+        # one conflict does not reject every VLAN in the batch.
+        proposed_names = {
+            values["name"] for vlans in vlan_live.values() for values in vlans.values()
+        }
+        name_matches = []
+        if proposed_names:
+            name_matches = self.bulk_filter(
+                nb.ipam.vlans,
+                name=sorted(proposed_names),
+                fields="id,vid,name,site,group",
+            )
+        for existing in name_matches:
+            if existing.group:
+                scope = f"group:{existing.group.name}"
+            elif existing.site:
+                scope = f"site:{existing.site.name}"
+            else:
+                scope = "global"
+            for vid, values in list(vlan_live.get(scope, {}).items()):
+                if values["name"] != str(existing.name):
+                    continue
+                current = vlan_current.get(scope, {}).get(vid)
+                if current and vlan_objects[(scope, vid)].id == existing.id:
+                    continue
+                action = "update" if current else "create"
+                if current:
+                    vlan_live[scope][vid] = dict(current)
+                else:
+                    del vlan_live[scope][vid]
+                    vlan_reference = f"{scope}/{vid}"
+                    for target in interface_targets.values():
+                        target["tagged_vlans"].discard(vlan_reference)
+                        if target["untagged_vlan"] == vlan_reference:
+                            target["untagged_vlan"] = None
+                message = (
+                    f"VLAN {vid} name '{values['name']}' overlaps with VLAN "
+                    f"{existing.vid} in scope '{scope}'; skipping VLAN {action}"
+                )
+                job.event(message, severity="ERROR")
+                log.error(message)
+                ret.errors.append(message)
+
         message = (
             f"resolved {sum(len(vlans) for vlans in vlan_live.values())} VLAN(s) "
             f"across {len(vlan_live)} NetBox scope(s)"
