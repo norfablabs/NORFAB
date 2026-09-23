@@ -7,6 +7,7 @@
 ## BUGS
 
 1. Fixed NetBox interface synchronization assigning parsed parent relationships to interfaces whose physical type is preserved from NetBox.
+2. Fixed NetBox BGP community synchronization converting an unset route-target or community name custom field into the literal `"None"` string before appending live community names.
 
 ---
 

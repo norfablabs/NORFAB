@@ -204,6 +204,25 @@ class TestSyncBgpCommunity:
         assert self.nb.ipam.route_targets.get(name="65000:999") is not None
         assert self.nb.plugins.bgp.community.get(value="65000:999") is not None
 
+    def test_unset_community_name_does_not_become_none_string(
+        self, nfclient: Any
+    ) -> None:
+        self.nb.ipam.route_targets.create(name="65000:200")
+
+        response = self._sync(
+            nfclient,
+            community_name_field="community_name",
+            device_custom_field="community_devices",
+        )
+
+        for result in self._successful_results(response):
+            assert result["result"]["route_targets"]["updated"] == ["65000:200"]
+
+        route_target = self.nb.ipam.route_targets.get(name="65000:200")
+        assert route_target.custom_fields["community_name"] == (
+            "TEST_VRF_SYNC_TENANT_BLUE, VPN_BLUE"
+        )
+
         response = self._sync(
             nfclient,
             community_name_field="community_aliases",

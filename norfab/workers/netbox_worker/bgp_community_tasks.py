@@ -313,7 +313,7 @@ class NetboxBgpCommunityTasks:
             normalised_nb["route_targets"][sname] = {}
             if community_name_field:
                 custom_fields = nb_community.custom_fields or {}
-                current_value = str(custom_fields.get(community_name_field, ""))
+                current_value = str(custom_fields.get(community_name_field) or "")
                 normalised_nb["route_targets"][sname] = {
                     community_name_field: current_value
                 }
@@ -404,7 +404,9 @@ class NetboxBgpCommunityTasks:
                 if community_name_field and name:
                     for candidate in candidates:
                         custom_fields = candidate.custom_fields or {}
-                        current_value = str(custom_fields.get(community_name_field, ""))
+                        current_value = str(
+                            custom_fields.get(community_name_field) or ""
+                        )
                         current_names = {
                             current_name.strip()
                             for current_name in current_value.split(",")
@@ -430,7 +432,7 @@ class NetboxBgpCommunityTasks:
                             {
                                 current_name.strip()
                                 for current_name in str(
-                                    custom_fields.get(community_name_field, "")
+                                    custom_fields.get(community_name_field) or ""
                                 ).split(",")
                                 if current_name.strip()
                             }
@@ -448,7 +450,9 @@ class NetboxBgpCommunityTasks:
                 normalised_nb["communities"][sname] = {}
                 if community_name_field:
                     custom_fields = nb_community.custom_fields or {}
-                    current_value = str(custom_fields.get(community_name_field, ""))
+                    current_value = str(
+                        custom_fields.get(community_name_field) or ""
+                    )
                     normalised_nb["communities"][sname] = {
                         community_name_field: current_value
                     }
