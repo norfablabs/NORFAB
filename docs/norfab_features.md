@@ -856,7 +856,8 @@ and group selection. The first matching mapping rule applies to the whole VLAN.
 Existing descriptions support always, live-empty-only, or never preservation.
 VLANs are identified by VID and group, with every same-VID
 candidate validated against the device site, group VID ranges, and the group's
-direct site, region, site group, location, rack, or rack group scope. Compatible groups take
+direct site, site group, location, rack, or rack group scope, or up to five
+levels of the site's region hierarchy. Compatible groups take
 precedence over direct-site VLANs, with global VLANs used as a final fallback;
 the first device supplies values when later devices report a conflict, except an
 automatic `VLAN<VID>` name yields to the first descriptive live name or, when

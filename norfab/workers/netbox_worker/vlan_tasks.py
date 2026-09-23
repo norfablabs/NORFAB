@@ -63,7 +63,7 @@ def match_vlan_map(
 def load_device_vlan_scopes(
     devices: Iterable, nb: Any, bulk_filter: Any
 ) -> dict[str, dict]:
-    """Load direct NetBox scope assignments used to resolve VLANs per device."""
+    """Load NetBox scope assignments used to resolve VLANs per device."""
     devices = list(devices)
     site_ids = sorted({device.site.id for device in devices})
     site_records = bulk_filter(
@@ -72,6 +72,24 @@ def load_device_vlan_scopes(
         fields="id,name,region,group",
     )
     sites = {site.id: site for site in site_records}
+
+    # A VLAN group scoped to a parent region also applies to sites in its child
+    # regions. Load at most five levels, including each site's direct region.
+    regions = {}
+    pending_region_ids = {site.region.id for site in site_records if site.region}
+    for _ in range(5):
+        pending_region_ids -= regions.keys()
+        if not pending_region_ids:
+            break
+        region_records = bulk_filter(
+            nb.dcim.regions,
+            id=sorted(pending_region_ids),
+            fields="id,name,parent",
+        )
+        regions.update({region.id: region for region in region_records})
+        pending_region_ids = {
+            region.parent.id for region in region_records if region.parent
+        }
 
     rack_ids = sorted({device.rack.id for device in devices if device.rack})
     racks = {}
@@ -89,11 +107,19 @@ def load_device_vlan_scopes(
         rack = racks.get(device.rack.id) if device.rack else None
         location = device.location or (rack.location if rack else None)
         rack_group = rack.group if rack else None
+        region_ids = set()
+        region = regions.get(site.region.id) if site.region else None
+        while region and len(region_ids) < 5 and region.id not in region_ids:
+            region_ids.add(region.id)
+            region = regions.get(region.parent.id) if region.parent else None
+        if site.region:
+            region_ids.add(site.region.id)
 
         device_scopes[str(device.name)] = {
             "device_name": str(device.name),
             "site": site,
             "region": site.region,
+            "region_ids": region_ids,
             "sitegroup": site.group,
             "location": location,
             "rack": rack,
@@ -128,8 +154,7 @@ def validate_vlan_group_scope(
             f"'{scope_type}' for device '{device_name}'"
         )
 
-    # Each supported group scope compares with one direct device value. There
-    # is deliberately no traversal through parent regions, groups, or locations.
+    # Regions include bounded parent traversal; other scopes require a direct match.
     display_types = {"sitegroup": "site group", "rackgroup": "rack group"}
     if scope_type not in device_scope:
         return (
@@ -138,7 +163,11 @@ def validate_vlan_group_scope(
         )
 
     device_value = device_scope[scope_type]
-    if device_value and device_value.id == vlan_group.scope_id:
+    if scope_type == "region":
+        matches_scope = vlan_group.scope_id in device_scope.get("region_ids", set())
+    else:
+        matches_scope = device_value and device_value.id == vlan_group.scope_id
+    if matches_scope:
         return None
 
     display_type = display_types.get(scope_type, scope_type)

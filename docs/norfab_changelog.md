@@ -4,6 +4,10 @@
 
 1. Added NetBox design deployment using validated YAML and Jinja2 templates, with reusable includes, custom functions, allocations, nested objects, and the `netbox design deploy` NFCLI command.
 
+## ENHANCEMENTS
+
+1. NetBox VLAN synchronization now validates region-scoped VLAN groups against up to five levels of the device site's region hierarchy.
+
 ## BUGS
 
 1. Fixed NetBox interface synchronization assigning parsed parent relationships to interfaces whose physical type is preserved from NetBox.

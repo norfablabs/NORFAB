@@ -9,6 +9,7 @@ import pytest
 from norfab.workers.netbox_worker.netbox_models import SyncVlansInput
 from norfab.workers.netbox_worker.netbox_worker import NetboxWorker
 from norfab.workers.netbox_worker.vlan_tasks import (
+    load_device_vlan_scopes,
     resolve_live_vlans,
     validate_vlan_group_scope,
 )
@@ -668,6 +669,7 @@ class TestVlanResolution:
             "device_name": "leaf-1",
             "site": cls._record(id=1, name="site-a"),
             "region": cls._record(id=10, name="region-a"),
+            "region_ids": {10},
             "sitegroup": cls._record(id=20, name="sites-a"),
             "location": cls._record(id=30, name="location-a"),
             "rack": cls._record(id=40, name="rack-a"),
@@ -792,6 +794,55 @@ class TestVlanResolution:
             )
             is not None
         )
+
+    def test_group_scope_accepts_parent_region(self) -> None:
+        device_scope = self._device_scope(region_ids={10, 11, 12})
+
+        assert (
+            validate_vlan_group_scope(
+                self._group(30, "region", 12), device_scope, 100
+            )
+            is None
+        )
+
+    def test_region_scope_loading_is_limited_to_five_levels(self) -> None:
+        region_records = {
+            region_id: self._record(
+                id=region_id,
+                name=f"region-{region_id}",
+                parent=(
+                    self._record(id=region_id + 1, name=f"region-{region_id + 1}")
+                    if region_id < 15
+                    else None
+                ),
+            )
+            for region_id in range(10, 16)
+        }
+        site = self._record(
+            id=1,
+            name="site-a",
+            region=self._record(id=10, name="region-10"),
+            group=None,
+        )
+        device = self._record(
+            name="leaf-1", site=site, rack=None, location=None
+        )
+        nb = self._record(
+            dcim=self._record(
+                sites=object(), racks=object(), regions=object()
+            )
+        )
+
+        def bulk_filter(endpoint: Any, **filters: Any) -> list:
+            if endpoint is nb.dcim.sites:
+                return [site]
+            if endpoint is nb.dcim.regions:
+                return [region_records[region_id] for region_id in filters["id"]]
+            return []
+
+        scopes = load_device_vlan_scopes([device], nb, bulk_filter)
+
+        assert scopes["leaf-1"]["region_ids"] == {10, 11, 12, 13, 14}
 
     @pytest.mark.parametrize(
         "scope_type",
