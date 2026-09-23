@@ -835,7 +835,8 @@ tagged/untagged memberships are handled by VLAN sync.
 VRF objects and interface VRF assignments are handled by VRF sync.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
-the `other` fallback. **Use cases:**
+the `other` fallback. Parsed parent relationships are not assigned to existing
+physical interfaces. **Use cases:**
 source-of-truth maintenance and drift remediation. **Limitations:** parser
 coverage determines live-state quality; deletion is opt-in and should be
 reviewed with dry-run first.

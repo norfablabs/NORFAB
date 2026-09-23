@@ -1135,6 +1135,44 @@ class TestSyncDeviceInterfaces:
 
         assert self._get_nb_intf(nfclient, device, interface).type.value == "1000base-t"
 
+    def test_sync_device_interfaces_does_not_parent_physical_interface(self, nfclient):
+        """A physical NetBox type prevents a parsed parent assignment."""
+        device = "fn-ceos-sp-1"
+        interface = "Ethernet9.610"
+        delete_interfaces(nfclient, device, interface)
+
+        try:
+            setup = self._sync(nfclient, [device], filter_by_name=interface)
+            for worker, res in setup.items():
+                assert not res["failed"], f"Setup sync failed for {worker}: {res}"
+
+            nb_interface = self._get_nb_intf(nfclient, device, interface)
+            self._patch_intf(
+                nfclient,
+                nb_interface.id,
+                {"type": "1000base-t", "parent": None},
+            )
+
+            ret = self._sync(
+                nfclient,
+                [device],
+                dry_run=True,
+                filter_by_name=interface,
+            )
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert not res["failed"], f"{worker} failed - {res}"
+                field_diff = res["result"][device]["update"].get(interface, {})
+                assert "type" not in field_diff
+                assert "parent" not in field_diff
+                assert interface in res["result"][device]["in_sync"]
+
+            nb_interface = self._get_nb_intf(nfclient, device, interface)
+            assert nb_interface.type.value == "1000base-t"
+            assert nb_interface.parent is None
+        finally:
+            delete_interfaces(nfclient, device, interface)
+
     def test_sync_device_interfaces_can_disable_safe_type_updates(self, nfclient):
         """``update_type=False`` suppresses an otherwise safe type transition."""
         device = "fn-ceos-sp-2"

@@ -1224,6 +1224,9 @@ class NetboxInterfacesTasks:
                             f"{dev_name}:{intf_name}: {old_type} -> {new_type}",
                             severity="WARNING",
                         )
+                    # Do not assign a parsed parent when NetBox keeps a non-virtual type.
+                    if old_type != "virtual" and "type" not in intf_updates:
+                        intf_updates.pop("parent", None)
                 # remove interface from updates if nothing remains to update
                 if not intf_updates:
                     dev_diff["update"].pop(intf_name)

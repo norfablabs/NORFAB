@@ -55,6 +55,7 @@ logical type correction:
 - `other` can change to `virtual`, `bridge`, or `lag`.
 - `virtual`, `bridge`, and `lag` can change between one another.
 - A specific physical type is never replaced with another type.
+- A specific physical type does not receive a parent inferred from live parsing.
 - No existing type is replaced with `other`.
 
 Loopback interfaces use NetBox type `virtual`; `loopback` is not submitted as
