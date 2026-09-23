@@ -291,6 +291,7 @@ class TestSyncVlanMemberships:
 
         changes = result.result["vlans"]["site:lab"]["update"]["50"]
         assert changes["name"]["new_value"] == "Live user access"
+        assert not result.errors
 
     def test_membership_updates_are_additive(self) -> None:
         vlan, unmanaged = self._vlan(50), self._vlan(900)
@@ -497,7 +498,7 @@ class TestSyncVlanMemberships:
             ],
         )
         assert not result.failed
-        assert len(result.errors) == 1 and "source conflict" in result.errors[0]
+        assert not result.errors
         desired = result.result["vlans"]["site:lab"]["create_details"]["50"]
         assert desired["name"] == "other"
         assert result.result["interfaces"]["leaf-2"]["update"]["Ethernet6"][
