@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2471,6 +2471,90 @@
   
   
     <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_create_asn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create ASN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_create_vlan_group/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create VLAN Group
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_create_vlan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create VLAN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../services_netbox_service_tasks_create_device_interfaces/" class="md-nav__link">
         
   
@@ -2479,6 +2563,34 @@
     
   
     Create Device Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services_netbox_service_tasks_design_deploy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Deploy
   
 
     
@@ -6057,6 +6169,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NetBox Design Specification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6121,10 +6261,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -6142,8 +6282,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6764,10 +6904,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
             
   
   
@@ -6785,8 +6925,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7039,9 +7179,12 @@
 <li><strong>inventory</strong> — calls <code>sync_device_inventory(dry_run=True)</code></li>
 <li><strong>interfaces</strong> — calls <code>sync_device_interfaces(dry_run=True)</code></li>
 <li><strong>vrfs</strong> — calls <code>sync_vrfs(dry_run=True)</code> for VRFs, missing route targets and routing policies, and interface assignments</li>
-<li><strong>mac_addresses</strong> — calls <code>sync_mac_addresses(dry_run=True)</code></li>
+<li><strong>vlans</strong> — calls <code>sync_vlans(dry_run=True)</code> for VLANs and interface assignments</li>
+<li><strong>prefixes</strong> — calls <code>sync_device_prefixes(dry_run=True)</code></li>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip(dry_run=True)</code></li>
 <li><strong>bgp_peerings</strong> — calls <code>sync_bgp_peerings(dry_run=True)</code></li>
+<li><strong>bgp_communities</strong> — calls <code>sync_bgp_community(dry_run=True)</code> for route targets and BGP plugin communities</li>
+<li><strong>vrrp</strong> — calls <code>sync_vrrp(dry_run=True)</code></li>
 </ul>
 <p>Each sub-check can be enabled or disabled independently.</p>
 <h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
@@ -7090,9 +7233,14 @@
 <td>Check VRF, route-target and routing-policy creation, and interface assignment sync state, default <code>True</code></td>
 </tr>
 <tr>
-<td><code>check_mac_addresses</code></td>
+<td><code>check_vlans</code></td>
 <td style="text-align: right;">No</td>
-<td>Check MAC address sync state, default <code>True</code></td>
+<td>Check VLAN and interface assignment sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>check_prefixes</code></td>
+<td style="text-align: right;">No</td>
+<td>Check prefix sync state, default <code>True</code></td>
 </tr>
 <tr>
 <td><code>check_ip_addresses</code></td>
@@ -7103,6 +7251,21 @@
 <td><code>check_bgp_peerings</code></td>
 <td style="text-align: right;">No</td>
 <td>Check BGP peering sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>check_bgp_communities</code></td>
+<td style="text-align: right;">No</td>
+<td>Check route-target and BGP community sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>check_vrrp</code></td>
+<td style="text-align: right;">No</td>
+<td>Check VRRP sync state, default <code>True</code></td>
+</tr>
+<tr>
+<td><code>ignore_deletions</code></td>
+<td style="text-align: right;">No</td>
+<td>Treat deletion-only differences as in sync, default <code>False</code></td>
 </tr>
 <tr>
 <td>Nornir filters</td>
@@ -7120,26 +7283,33 @@
             <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;vlans&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;prefixes&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;bgp_communities&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;vrrp&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">},</span>
     <span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;vlans&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;prefixes&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;bgp_communities&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;vrrp&quot;</span><span class="p">:</span> <span class="p">{},</span>
     <span class="p">},</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>A category is considered in sync when the corresponding dry-run reports no pending creates, updates, or deletes.</p>
+<p>A category is considered in sync when the corresponding dry-run reports no pending creates, updates, or deletes. With <code>ignore_deletions=True</code>, pending deletions remain in <code>Result.diff</code> but do not make the category out of sync.</p>
 <h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
 <ul>
 <li>No data is written to NetBox.</li>
 <li><code>Result.diff</code> contains the raw dry-run detail from each enabled sub-task.</li>
+<li>Prefix, global VLAN, BGP community, and route-target drift affects every selected device; interface VLAN and VRRP drift is assessed per device.</li>
 <li>Device names can be supplied directly or resolved from Nornir filters.</li>
 </ul>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -7150,7 +7320,7 @@
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>ceos-leaf-2
 </code></pre></div>
 <p>Check only interface and IP address sync:</p>
-<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>check-inventory<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vrfs<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-mac-addresses<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-peerings<span class="w"> </span><span class="nb">false</span>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>check-inventory<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vrfs<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vlans<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-prefixes<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-peerings<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-bgp-communities<span class="w"> </span><span class="nb">false</span><span class="w"> </span>check-vrrp<span class="w"> </span><span class="nb">false</span>
 </code></pre></div>
 <p>Resolve devices using a Nornir group filter:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>FG<span class="w"> </span>leafs
@@ -7191,8 +7361,11 @@
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">],</span>
             <span class="s2">&quot;check_inventory&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;check_vrfs&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;check_mac_addresses&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;check_vlans&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;check_prefixes&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;check_bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;check_bgp_communities&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;check_vrrp&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -7227,9 +7400,13 @@ root
 <span class="w">            </span>├──<span class="w"> </span>check-inventory:<span class="w">    </span>Check<span class="w"> </span>device<span class="w"> </span>inventory<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-interfaces:<span class="w">    </span>Check<span class="w"> </span>interfaces<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-vrfs:<span class="w">    </span>Check<span class="w"> </span>VRF<span class="w"> </span>and<span class="w"> </span>interface<span class="w"> </span>assignment<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
-<span class="w">            </span>├──<span class="w"> </span>check-mac-addresses:<span class="w">    </span>Check<span class="w"> </span>MAC<span class="w"> </span>addresses<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>check-vlans:<span class="w">    </span>Check<span class="w"> </span>VLAN<span class="w"> </span>and<span class="w"> </span>interface<span class="w"> </span>assignment<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>check-prefixes:<span class="w">    </span>Check<span class="w"> </span>prefix<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-ip-addresses:<span class="w">    </span>Check<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-bgp-peerings:<span class="w">    </span>Check<span class="w"> </span>BGP<span class="w"> </span>peerings<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>check-bgp-communities:<span class="w">    </span>Check<span class="w"> </span>BGP<span class="w"> </span>communities<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>check-vrrp:<span class="w">    </span>Check<span class="w"> </span>VRRP<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>ignore-deletions:<span class="w">    </span>Treat<span class="w"> </span>deletion-only<span class="w"> </span>differences<span class="w"> </span>as<span class="w"> </span><span class="k">in</span><span class="w"> </span>sync,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
 <span class="w">            </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
 <span class="w">            </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
@@ -7253,11 +7430,13 @@ nf#
     <div class="doc doc-contents first">
 
         <p>Check if NetBox device data is in sync with live device data.</p>
-<p>Calls the inventory, interface, VRF, MAC address, IP address, and BGP
-peering synchronizers in dry-run mode and produces a per-device report.</p>
+<p>Calls the inventory, interface, VRF, VLAN, prefix, IP address, BGP
+peering, BGP community, and VRRP synchronizers in dry-run mode and produces
+a per-device report.</p>
 <p><code>Result.diff</code> contains the full dry-run detail from each sub-task, keyed by
-sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code>, <code>mac_addresses</code>,
-<code>ip_addresses</code>, <code>bgp_peerings</code>).</p>
+sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code>, <code>vlans</code>,
+<code>prefixes</code>, <code>ip_addresses</code>, <code>bgp_peerings</code>, <code>bgp_communities</code>,
+<code>vrrp</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -7401,14 +7580,30 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>check_mac_addresses</code>
+                <code>check_vlans</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Check MAC address sync state. Defaults to True.</p>
+                <p>Check VLAN and interface assignment sync state.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>check_prefixes</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Check prefix sync state. Defaults to True.</p>
               </div>
             </td>
             <td>
@@ -7445,6 +7640,55 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
             </td>
             <td>
                   <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>check_bgp_communities</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Check BGP community sync state. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>check_vrrp</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Check VRRP sync state. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ignore_deletions</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Treat deletion-only differences as in sync.
+Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7489,9 +7733,12 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
         "inventory":     True | False,
         "interfaces":    True | False,
         "vrfs":          True | False,
-        "mac_addresses": True | False,
+        "vlans":         True | False,
+        "prefixes":      True | False,
         "ip_addresses":  True | False,
         "bgp_peerings":  True | False,
+        "bgp_communities": True | False,
+        "vrrp":          True | False,
     }
 }</p>
               </div>
@@ -7503,8 +7750,7 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1181</span>
-<span class="normal">1182</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1182</span>
 <span class="normal">1183</span>
 <span class="normal">1184</span>
 <span class="normal">1185</span>
@@ -7754,7 +8000,85 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
 <span class="normal">1429</span>
 <span class="normal">1430</span>
 <span class="normal">1431</span>
-<span class="normal">1432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1432</span>
+<span class="normal">1433</span>
+<span class="normal">1434</span>
+<span class="normal">1435</span>
+<span class="normal">1436</span>
+<span class="normal">1437</span>
+<span class="normal">1438</span>
+<span class="normal">1439</span>
+<span class="normal">1440</span>
+<span class="normal">1441</span>
+<span class="normal">1442</span>
+<span class="normal">1443</span>
+<span class="normal">1444</span>
+<span class="normal">1445</span>
+<span class="normal">1446</span>
+<span class="normal">1447</span>
+<span class="normal">1448</span>
+<span class="normal">1449</span>
+<span class="normal">1450</span>
+<span class="normal">1451</span>
+<span class="normal">1452</span>
+<span class="normal">1453</span>
+<span class="normal">1454</span>
+<span class="normal">1455</span>
+<span class="normal">1456</span>
+<span class="normal">1457</span>
+<span class="normal">1458</span>
+<span class="normal">1459</span>
+<span class="normal">1460</span>
+<span class="normal">1461</span>
+<span class="normal">1462</span>
+<span class="normal">1463</span>
+<span class="normal">1464</span>
+<span class="normal">1465</span>
+<span class="normal">1466</span>
+<span class="normal">1467</span>
+<span class="normal">1468</span>
+<span class="normal">1469</span>
+<span class="normal">1470</span>
+<span class="normal">1471</span>
+<span class="normal">1472</span>
+<span class="normal">1473</span>
+<span class="normal">1474</span>
+<span class="normal">1475</span>
+<span class="normal">1476</span>
+<span class="normal">1477</span>
+<span class="normal">1478</span>
+<span class="normal">1479</span>
+<span class="normal">1480</span>
+<span class="normal">1481</span>
+<span class="normal">1482</span>
+<span class="normal">1483</span>
+<span class="normal">1484</span>
+<span class="normal">1485</span>
+<span class="normal">1486</span>
+<span class="normal">1487</span>
+<span class="normal">1488</span>
+<span class="normal">1489</span>
+<span class="normal">1490</span>
+<span class="normal">1491</span>
+<span class="normal">1492</span>
+<span class="normal">1493</span>
+<span class="normal">1494</span>
+<span class="normal">1495</span>
+<span class="normal">1496</span>
+<span class="normal">1497</span>
+<span class="normal">1498</span>
+<span class="normal">1499</span>
+<span class="normal">1500</span>
+<span class="normal">1501</span>
+<span class="normal">1502</span>
+<span class="normal">1503</span>
+<span class="normal">1504</span>
+<span class="normal">1505</span>
+<span class="normal">1506</span>
+<span class="normal">1507</span>
+<span class="normal">1508</span>
+<span class="normal">1509</span>
+<span class="normal">1510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CheckDeviceSyncInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CheckDeviceSyncResult</span><span class="p">,</span>
@@ -7778,20 +8102,26 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
     <span class="n">check_inventory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_interfaces</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_vrfs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">check_mac_addresses</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">check_vlans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">check_prefixes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_ip_addresses</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_bgp_peerings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">check_bgp_communities</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">check_vrrp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">ignore_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if NetBox device data is in sync with live device data.</span>
 
-<span class="sd">    Calls the inventory, interface, VRF, MAC address, IP address, and BGP</span>
-<span class="sd">    peering synchronizers in dry-run mode and produces a per-device report.</span>
+<span class="sd">    Calls the inventory, interface, VRF, VLAN, prefix, IP address, BGP</span>
+<span class="sd">    peering, BGP community, and VRRP synchronizers in dry-run mode and produces</span>
+<span class="sd">    a per-device report.</span>
 
 <span class="sd">    ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by</span>
-<span class="sd">    sub-task name (``inventory``, ``interfaces``, ``vrfs``, ``mac_addresses``,</span>
-<span class="sd">    ``ip_addresses``, ``bgp_peerings``).</span>
+<span class="sd">    sub-task name (``inventory``, ``interfaces``, ``vrfs``, ``vlans``,</span>
+<span class="sd">    ``prefixes``, ``ip_addresses``, ``bgp_peerings``, ``bgp_communities``,</span>
+<span class="sd">    ``vrrp``).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object.</span>
@@ -7802,9 +8132,14 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
 <span class="sd">        check_inventory (bool): Check device inventory sync state. Defaults to True.</span>
 <span class="sd">        check_interfaces (bool): Check interface sync state. Defaults to True.</span>
 <span class="sd">        check_vrfs (bool): Check VRF and interface assignment sync state.</span>
-<span class="sd">        check_mac_addresses (bool): Check MAC address sync state. Defaults to True.</span>
+<span class="sd">        check_vlans (bool): Check VLAN and interface assignment sync state.</span>
+<span class="sd">        check_prefixes (bool): Check prefix sync state. Defaults to True.</span>
 <span class="sd">        check_ip_addresses (bool): Check IP address sync state. Defaults to True.</span>
 <span class="sd">        check_bgp_peerings (bool): Check BGP peering sync state. Defaults to True.</span>
+<span class="sd">        check_bgp_communities (bool): Check BGP community sync state. Defaults to True.</span>
+<span class="sd">        check_vrrp (bool): Check VRRP sync state. Defaults to True.</span>
+<span class="sd">        ignore_deletions (bool): Treat deletion-only differences as in sync.</span>
+<span class="sd">            Defaults to False.</span>
 <span class="sd">        **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).</span>
 
 <span class="sd">    Returns:</span>
@@ -7816,9 +8151,12 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
 <span class="sd">                    &quot;inventory&quot;:     True | False,</span>
 <span class="sd">                    &quot;interfaces&quot;:    True | False,</span>
 <span class="sd">                    &quot;vrfs&quot;:          True | False,</span>
-<span class="sd">                    &quot;mac_addresses&quot;: True | False,</span>
+<span class="sd">                    &quot;vlans&quot;:         True | False,</span>
+<span class="sd">                    &quot;prefixes&quot;:      True | False,</span>
 <span class="sd">                    &quot;ip_addresses&quot;:  True | False,</span>
 <span class="sd">                    &quot;bgp_peerings&quot;:  True | False,</span>
+<span class="sd">                    &quot;bgp_communities&quot;: True | False,</span>
+<span class="sd">                    &quot;vrrp&quot;:          True | False,</span>
 <span class="sd">                }</span>
 <span class="sd">            }</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -7854,7 +8192,6 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Check device sync for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checking sync state for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-
     <span class="c1"># initialize per-device result structure</span>
     <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -7872,14 +8209,11 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">in_sync</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;update&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;delete&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
             <span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_sync</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">diff</span>
 
     <span class="c1"># --- check interfaces ---</span>
     <span class="k">if</span> <span class="n">check_interfaces</span><span class="p">:</span>
@@ -7894,14 +8228,11 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">intf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">in_sync</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;update&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;delete&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
             <span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_sync</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">diff</span>
 
     <span class="c1"># --- check VRFs and their interface assignments ---</span>
     <span class="k">if</span> <span class="n">check_vrfs</span><span class="p">:</span>
@@ -7916,23 +8247,24 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">global_actions</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vrfs&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">global_in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
-            <span class="n">global_actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="n">interface_actions</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interfaces&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">global_vrf_diff</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">section</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vrfs&quot;</span><span class="p">,</span> <span class="s2">&quot;route_targets&quot;</span><span class="p">,</span> <span class="s2">&quot;routing_policies&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">actions</span> <span class="o">=</span> <span class="n">interface_actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})</span>
-            <span class="n">assignments_in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
-                <span class="n">actions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">)</span>
+            <span class="n">device_diff</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="o">**</span><span class="n">global_vrf_diff</span><span class="p">,</span>
+                <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interfaces&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="p">}</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">device_diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
             <span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">global_in_sync</span> <span class="ow">and</span> <span class="n">assignments_in_sync</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">diff</span>
 
-    <span class="c1"># --- check MAC addresses ---</span>
-    <span class="k">if</span> <span class="n">check_mac_addresses</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking MAC addresses sync state&quot;</span><span class="p">)</span>
-        <span class="n">mac_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_mac_addresses</span><span class="p">(</span>
+    <span class="c1"># --- check VLANs and their interface assignments ---</span>
+    <span class="k">if</span> <span class="n">check_vlans</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking VLAN sync state&quot;</span><span class="p">)</span>
+        <span class="n">vlan_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_vlans</span><span class="p">(</span>
             <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
             <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -7940,12 +8272,37 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mac_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated&quot;</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;mac_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_sync</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;mac_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">device_diff</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;vlans&quot;</span><span class="p">:</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vlans&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interfaces&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{}),</span>
+            <span class="p">}</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vlans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">device_diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
+            <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;vlans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span>
+
+    <span class="c1"># --- check prefixes ---</span>
+    <span class="k">if</span> <span class="n">check_prefixes</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking prefix sync state&quot;</span><span class="p">)</span>
+        <span class="n">prefix_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_device_prefixes</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">prefixes_in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+            <span class="n">prefix_result</span><span class="o">.</span><span class="n">diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;prefixes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefixes_in_sync</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;prefixes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">diff</span>
 
     <span class="c1"># --- check IP addresses ---</span>
     <span class="k">if</span> <span class="n">check_ip_addresses</span><span class="p">:</span>
@@ -7960,10 +8317,52 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ip_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated&quot;</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_sync</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span>
+                <span class="s2">&quot;ip_addresses&quot;</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
+            <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">diff</span>
+
+    <span class="c1"># --- check VRRP ---</span>
+    <span class="k">if</span> <span class="n">check_vrrp</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking VRRP sync state&quot;</span><span class="p">)</span>
+        <span class="n">vrrp_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_vrrp</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
+            <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">diff</span>
+
+    <span class="c1"># --- check BGP communities ---</span>
+    <span class="k">if</span> <span class="n">check_bgp_communities</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking BGP community sync state&quot;</span><span class="p">)</span>
+        <span class="n">community_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_community</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">communities_in_sync</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+            <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;bgp_communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">communities_in_sync</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;bgp_communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span>
 
     <span class="c1"># --- check BGP peerings ---</span>
     <span class="k">if</span> <span class="n">check_bgp_peerings</span><span class="p">:</span>
@@ -7978,21 +8377,23 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bgp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">in_sync</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;update&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;delete&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span>
+                <span class="s2">&quot;bgp_peerings&quot;</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">sync_diff_has_changes</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">ignore_deletions</span><span class="o">=</span><span class="n">ignore_deletions</span>
             <span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_sync</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">diff</span>
 
     <span class="n">checked_categories</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;inventory&quot;</span><span class="p">:</span> <span class="n">check_inventory</span><span class="p">,</span>
         <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">check_interfaces</span><span class="p">,</span>
         <span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="n">check_vrfs</span><span class="p">,</span>
-        <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="n">check_mac_addresses</span><span class="p">,</span>
+        <span class="s2">&quot;vlans&quot;</span><span class="p">:</span> <span class="n">check_vlans</span><span class="p">,</span>
+        <span class="s2">&quot;prefixes&quot;</span><span class="p">:</span> <span class="n">check_prefixes</span><span class="p">,</span>
         <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="n">check_ip_addresses</span><span class="p">,</span>
+        <span class="s2">&quot;vrrp&quot;</span><span class="p">:</span> <span class="n">check_vrrp</span><span class="p">,</span>
+        <span class="s2">&quot;bgp_communities&quot;</span><span class="p">:</span> <span class="n">check_bgp_communities</span><span class="p">,</span>
         <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="n">check_bgp_peerings</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">device_data</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -8135,7 +8536,7 @@ sub-task name (<code>inventory</code>, <code>interfaces</code>, <code>vrfs</code
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
