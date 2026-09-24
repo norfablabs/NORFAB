@@ -44,7 +44,9 @@ DEFAULT_IGNORE_RANGES = [
 ]
 
 
-def resolve_ip_role(ip: str, intf_name: str, anycast_nets: list) -> Union[None, str]:
+def resolve_ip_role(
+    ip: str, intf_name: Union[None, str], anycast_nets: list
+) -> Union[None, str]:
     # check if IP is part of anycast ranges
     if anycast_nets:
         ip_addr = ipaddress.ip_interface(str(ip)).ip
@@ -52,7 +54,7 @@ def resolve_ip_role(ip: str, intf_name: str, anycast_nets: list) -> Union[None, 
             return "anycast"
 
     # check if interface is a loopback
-    if any(intf_name.lower().startswith(k) for k in ["loopback", "lo"]):
+    if intf_name and intf_name.lower().startswith(("loopback", "lo")):
         return "loopback"
 
     return None

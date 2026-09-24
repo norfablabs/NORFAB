@@ -19,6 +19,7 @@
 ## BUGS
 
 1. Fixed NetBox interface synchronization attempting to change a cabled interface to type `virtual`. The rejected transition is now reported as an error while unrelated interface updates continue.
+2. Fixed NetBox IP address synchronization failing when a matching IP is assigned to a non-interface object, such as an FHRP group. IP role resolution now handles the missing interface name while preserving anycast detection.
 
 ---
 

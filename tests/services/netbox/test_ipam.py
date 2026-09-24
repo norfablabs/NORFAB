@@ -1,8 +1,10 @@
+import ipaddress
 import pprint
 import random
 
 import pytest
 
+from norfab.workers.netbox_worker.ip_tasks import resolve_ip_role
 from norfab.workers.netbox_worker.netbox_models import SyncDeviceIpInput
 
 try:
@@ -34,6 +36,16 @@ except ModuleNotFoundError as exc:
     )
 
 pytestmark = pytest.mark.netbox
+
+
+def test_resolve_ip_role_without_interface_name() -> None:
+    assert resolve_ip_role("192.0.2.1/24", None, []) is None
+
+
+def test_resolve_ip_role_anycast_without_interface_name() -> None:
+    anycast_nets = [ipaddress.ip_network("192.0.2.0/24")]
+
+    assert resolve_ip_role("192.0.2.1/24", None, anycast_nets) == "anycast"
 
 
 @pytest.mark.netbox_sync_device_prefixes
