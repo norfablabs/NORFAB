@@ -8,6 +8,22 @@ from norfab.models import Result
 
 log = logging.getLogger(__name__)
 
+SYNC_DIFF_ACTIONS = ("create", "update", "delete")
+
+
+def sync_diff_has_changes(diff: dict, ignore_deletions: bool = False) -> bool:
+    """Return whether a sync diff contains a relevant actionable change."""
+    if any(action in diff for action in SYNC_DIFF_ACTIONS):
+        actions = ("create", "update") if ignore_deletions else SYNC_DIFF_ACTIONS
+        return any(bool(diff.get(action)) for action in actions)
+
+    # Combined sync tasks group action dictionaries by device or resource type.
+    return any(
+        sync_diff_has_changes(value, ignore_deletions=ignore_deletions)
+        for value in diff.values()
+        if isinstance(value, dict)
+    )
+
 
 def map_interface_name(
     name: Union[None, str],

@@ -1023,11 +1023,17 @@ class CheckDeviceSyncInput(
         json_schema_extra={"presence": True},
         alias="check-vrfs",
     )
-    check_mac_addresses: StrictBool = Field(
+    check_vlans: StrictBool = Field(
         True,
-        description="Check MAC address sync state",
+        description="Check VLAN and interface VLAN assignment sync state",
         json_schema_extra={"presence": True},
-        alias="check-mac-addresses",
+        alias="check-vlans",
+    )
+    check_prefixes: StrictBool = Field(
+        True,
+        description="Check prefix sync state",
+        json_schema_extra={"presence": True},
+        alias="check-prefixes",
     )
     check_ip_addresses: StrictBool = Field(
         True,

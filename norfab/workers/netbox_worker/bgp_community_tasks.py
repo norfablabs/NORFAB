@@ -11,7 +11,7 @@ from .netbox_models import (
     SyncBgpCommunityInput,
     SyncBgpCommunityResult,
 )
-from .netbox_worker_utilities import review_sync_task_result
+from .netbox_worker_utilities import review_sync_task_result, sync_diff_has_changes
 
 log = logging.getLogger(__name__)
 
@@ -509,9 +509,17 @@ class NetboxBgpCommunityTasks:
         job.event(msg)
         log.info(f"{self.name} - {msg}")
 
+        ret.diff = full_diff
+        ret.result = {
+            scope: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
+            for scope, actions in full_diff.items()
+        }
         if dry_run:
             ret.result = full_diff
             ret.dry_run = True
+            return ret
+        if not sync_diff_has_changes(full_diff):
+            job.event("no BGP community sync changes required")
             return ret
         if with_approval and not review_sync_task_result(
             job, "BGP community sync", full_diff
@@ -524,11 +532,6 @@ class NetboxBgpCommunityTasks:
 
         # Apply route targets and plugin communities separately to keep the
         # NetBox API writes explicit.
-        ret.diff = full_diff
-        ret.result = {
-            scope: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for scope, actions in full_diff.items()
-        }
         create_snames = full_diff["route_targets"]["create"]
         create_items = []
         for sname in create_snames:

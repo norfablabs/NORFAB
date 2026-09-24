@@ -13,7 +13,8 @@
 9. NetBox BGP peering synchronization live results now use the shared typed action-summary structure per device.
 10. NetBox BGP ASN synchronization live results now use the shared typed action-summary structure for global actions.
 11. NetBox BGP community synchronization live results now use the shared typed action-summary structure for route targets and plugin communities.
-12. NetBox `check_device_sync` now includes BGP community, route-target, and VRRP drift in its read-only per-device sync assessment.
+12. NetBox leaf synchronization tasks now exit before approval and write preparation when their finalized diff contains no actionable create, update, or delete operations.
+13. NetBox `check_device_sync` now evaluates canonical task diffs and includes VLAN, prefix, BGP community, route-target, and VRRP drift in its read-only per-device assessment. MAC address checking was removed from this task.
 
 ## BUGS
 

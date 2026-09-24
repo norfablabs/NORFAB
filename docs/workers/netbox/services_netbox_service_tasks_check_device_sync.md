@@ -16,7 +16,8 @@ Checks whether NetBox data is in sync with live device state without writing to 
 - **inventory** — calls `sync_device_inventory(dry_run=True)`
 - **interfaces** — calls `sync_device_interfaces(dry_run=True)`
 - **vrfs** — calls `sync_vrfs(dry_run=True)` for VRFs, missing route targets and routing policies, and interface assignments
-- **mac_addresses** — calls `sync_mac_addresses(dry_run=True)`
+- **vlans** — calls `sync_vlans(dry_run=True)` for VLANs and interface assignments
+- **prefixes** — calls `sync_device_prefixes(dry_run=True)`
 - **ip_addresses** — calls `sync_device_ip(dry_run=True)`
 - **bgp_peerings** — calls `sync_bgp_peerings(dry_run=True)`
 - **bgp_communities** — calls `sync_bgp_community(dry_run=True)` for route targets and BGP plugin communities
@@ -35,7 +36,8 @@ Each sub-check can be enabled or disabled independently.
 | `check_inventory` | No | Check device inventory sync state, default `True` |
 | `check_interfaces` | No | Check interface sync state, default `True` |
 | `check_vrfs` | No | Check VRF, route-target and routing-policy creation, and interface assignment sync state, default `True` |
-| `check_mac_addresses` | No | Check MAC address sync state, default `True` |
+| `check_vlans` | No | Check VLAN and interface assignment sync state, default `True` |
+| `check_prefixes` | No | Check prefix sync state, default `True` |
 | `check_ip_addresses` | No | Check IP address sync state, default `True` |
 | `check_bgp_peerings` | No | Check BGP peering sync state, default `True` |
 | `check_bgp_communities` | No | Check route-target and BGP community sync state, default `True` |
@@ -55,7 +57,8 @@ At least one explicit device or Nornir host filter must resolve to a device.
             "inventory": True,
             "interfaces": True,
             "vrfs": True,
-            "mac_addresses": False,
+            "vlans": False,
+            "prefixes": True,
             "ip_addresses": True,
             "bgp_peerings": True,
             "bgp_communities": True,
@@ -66,7 +69,8 @@ At least one explicit device or Nornir host filter must resolve to a device.
         "inventory": {},
         "interfaces": {},
         "vrfs": {},
-        "mac_addresses": {},
+        "vlans": {},
+        "prefixes": {},
         "ip_addresses": {},
         "bgp_peerings": {},
         "bgp_communities": {},
@@ -81,7 +85,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
 
 - No data is written to NetBox.
 - `Result.diff` contains the raw dry-run detail from each enabled sub-task.
-- BGP community and route-target drift is global and therefore affects every selected device; VRRP drift is assessed per device.
+- Prefix, global VLAN, BGP community, and route-target drift affects every selected device; interface VLAN and VRRP drift is assessed per device.
 - Device names can be supplied directly or resolved from Nornir filters.
 
 ## Examples
@@ -97,7 +101,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
     Check only interface and IP address sync:
 
     ```bash
-    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-vrfs false check-mac-addresses false check-bgp-peerings false check-bgp-communities false check-vrrp false
+    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-vrfs false check-vlans false check-prefixes false check-bgp-peerings false check-bgp-communities false check-vrrp false
     ```
 
     Resolve devices using a Nornir group filter:
@@ -150,7 +154,8 @@ A category is considered in sync when the corresponding dry-run reports no pendi
                 "devices": ["ceos-leaf-1"],
                 "check_inventory": False,
                 "check_vrfs": False,
-                "check_mac_addresses": False,
+                "check_vlans": False,
+                "check_prefixes": False,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,
                 "check_vrrp": False,
@@ -189,7 +194,8 @@ root
             ├── check-inventory:    Check device inventory sync state, default 'True'
             ├── check-interfaces:    Check interfaces sync state, default 'True'
             ├── check-vrfs:    Check VRF and interface assignment sync state, default 'True'
-            ├── check-mac-addresses:    Check MAC addresses sync state, default 'True'
+            ├── check-vlans:    Check VLAN and interface assignment sync state, default 'True'
+            ├── check-prefixes:    Check prefix sync state, default 'True'
             ├── check-ip-addresses:    Check IP addresses sync state, default 'True'
             ├── check-bgp-peerings:    Check BGP peerings sync state, default 'True'
             ├── check-bgp-communities:    Check BGP communities sync state, default 'True'

@@ -29,6 +29,7 @@ from .netbox_worker_utilities import (
     apply_description_policy,
     map_interface_name,
     review_sync_task_result,
+    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -1257,12 +1258,20 @@ class NetboxInterfacesTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
+        ret.result = {
+            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
+            for device_name, actions in full_diff.items()
+        }
+        ret.diff = full_diff
         if dry_run:
             job.event(
                 "dry-run requested, returning interface sync diff without changes"
             )
             ret.result = full_diff
             ret.dry_run = True
+            return ret
+        if not sync_diff_has_changes(full_diff):
+            job.event("no interface sync changes required")
             return ret
         if with_approval and not review_sync_task_result(
             job, "interface sync", full_diff
@@ -1272,14 +1281,6 @@ class NetboxInterfacesTasks:
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
-        ret.diff = full_diff
-
-        # Per-device result tracking
-        ret.result = {
-            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for device_name, actions in full_diff.items()
-        }
-
         # create LAG interfaces
         job.event("preparing LAG interface create payloads")
         bulk_create_lag_interfaces = []
@@ -1846,6 +1847,15 @@ class NetboxInterfacesTasks:
             f"{len(bulk_update_mac)} update"
         )
 
+        if dry_run is True:
+            job.event(
+                "dry-run requested, returning MAC address sync plan without changes"
+            )
+            ret.dry_run = True
+            return ret
+        if not bulk_create_mac and not bulk_update_mac:
+            job.event("no MAC address sync changes required")
+            return ret
         if with_approval:
             mac_preview_result = {
                 device_name: {
@@ -1868,13 +1878,6 @@ class NetboxInterfacesTasks:
                 ret.dry_run = True
                 ret.messages.append("review declined; changes were not applied")
                 return ret
-        elif dry_run is True:
-            job.event(
-                "dry-run requested, returning MAC address sync plan without changes"
-            )
-            ret.dry_run = True
-            return ret
-
         if bulk_create_mac:
             job.event(f"creating {len(bulk_create_mac)} MAC address(es)")
             total_batches = (len(bulk_create_mac) + batch_size - 1) // batch_size

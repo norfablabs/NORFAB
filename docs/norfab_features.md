@@ -814,7 +814,8 @@ Live-state synchronization tasks report per-device Nornir collection failures
 in their NetBox task errors and `resources_failed` while retaining usable results
 from other devices. Their live results use a consistent created, updated, deleted,
 and in-sync action-summary contract, while dry-run results retain detailed diff
-plans. `sync_all` propagates failed resources from its child tasks.
+plans. Live runs with no actionable finalized diff exit before approval and write
+preparation. `sync_all` propagates failed resources from its child tasks.
 
 ### Live interface reconciliation
 
@@ -994,7 +995,7 @@ validated in dry-run mode.
 ### Drift assessment and coordinated synchronization
 
 Runs selected synchronizers in read-only dry-run mode for drift reporting,
-including inventory, interface, VRF, MAC, IP, VRRP, BGP peering, and BGP
+including inventory, interface, VRF, VLAN, prefix, IP, VRRP, BGP peering, and BGP
 community state, or executes the supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
 MAC, IP, and BGP sequence. `sync_all` accepts per-task keyword arguments inline
 or from an `nf://` YAML file and can skip individual stages. Drift assessment can

@@ -19,6 +19,7 @@ from .netbox_worker_utilities import (
     apply_description_policy,
     map_interface_name,
     review_sync_task_result,
+    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -499,15 +500,6 @@ class NetboxVrfsTasks:
             "routing_policies": policy_diff,
             "interfaces": interface_diff,
         }
-        has_changes = any(
-            full_diff[section][action]
-            for section in ("vrfs", "route_targets", "routing_policies")
-            for action in ("create", "update", "delete")
-        ) or any(
-            actions[action]
-            for actions in interface_diff.values()
-            for action in ("create", "update", "delete")
-        )
         msg = (
             "vrf sync diff complete: "
             f"{len(create_names)} create, {len(update)} update, "
@@ -516,12 +508,12 @@ class NetboxVrfsTasks:
         job.event(msg)
         log.info(f"Sync VRFs: {msg}")
 
+        ret.diff = full_diff
         if dry_run:
             ret.result = full_diff
             ret.dry_run = True
             return ret
-        if not has_changes:
-            ret.diff = full_diff
+        if not sync_diff_has_changes(full_diff):
             msg = "no VRF sync changes required"
             job.event(msg)
             log.info(f"Sync VRFs: {msg}")
@@ -538,7 +530,6 @@ class NetboxVrfsTasks:
 
         # Apply global VRF changes first so every desired VRF ID is cached before
         # building the dependent interface assignment updates.
-        ret.diff = full_diff
         if missing_route_targets:
             target_payloads = [{"name": name} for name in missing_route_targets]
             total_batches = (len(target_payloads) + batch_size - 1) // batch_size

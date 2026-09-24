@@ -17,6 +17,7 @@ from .netbox_models import (
 from .netbox_worker_utilities import (
     apply_description_policy,
     review_sync_task_result,
+    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -388,9 +389,14 @@ class NetboxBgpAsnTasks:
             f"{len(in_sync)} in sync"
         )
 
+        ret.diff = full_diff
+        ret.result = {"global": SyncActionSummary(in_sync=in_sync).model_dump()}
         if dry_run:
             ret.result = full_diff
             ret.dry_run = True
+            return ret
+        if not sync_diff_has_changes(full_diff):
+            job.event("no BGP ASN sync changes required")
             return ret
         if with_approval and not review_sync_task_result(
             job, "BGP ASN sync", full_diff
@@ -408,10 +414,6 @@ class NetboxBgpAsnTasks:
             log.warning(f"{self.name} - {msg}")
             ret.errors.append(msg)
 
-        ret.diff = full_diff
-        ret.result = {
-            "global": SyncActionSummary(in_sync=in_sync).model_dump()
-        }
         create_items = []
         if rir_obj:
             for asn in create_numbers:

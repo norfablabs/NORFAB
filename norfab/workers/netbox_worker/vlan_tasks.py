@@ -27,6 +27,7 @@ from .netbox_worker_utilities import (
     apply_description_policy,
     map_interface_name,
     review_sync_task_result,
+    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -1043,25 +1044,27 @@ class NetboxVlansTasks:
             job.event(message)
             log.info(message)
             return ret
-        if with_approval and not review_sync_task_result(job, "vlan sync", preview):
-            ret.status = "skipped"
-            ret.dry_run = True
-            ret.messages.append("review declined; changes were not applied")
-            return ret
 
-        vlan_result = {}
-        for scope, actions in vlan_diff.items():
-            vlan_result[scope] = SyncActionSummary(
-                in_sync=actions["in_sync"]
-            ).model_dump()
-        interface_result = {}
-        for device, actions in interface_diff.items():
-            interface_result[device] = SyncActionSummary(
-                in_sync=actions["in_sync"]
-            ).model_dump()
+        vlan_result = {
+            scope: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
+            for scope, actions in vlan_diff.items()
+        }
+        interface_result = {
+            device: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
+            for device, actions in interface_diff.items()
+        }
         ret.result = SyncVlansResultPayload(
             vlans=vlan_result, interfaces=interface_result
         ).model_dump()
+        if not sync_diff_has_changes(preview):
+            job.event("no VLAN sync changes required")
+            return ret
+        if with_approval and not review_sync_task_result(job, "vlan sync", preview):
+            ret.status = "skipped"
+            ret.result = preview
+            ret.dry_run = True
+            ret.messages.append("review declined; changes were not applied")
+            return ret
 
         # Complete all creations before any VLAN updates or interface writes.
         create_items = []

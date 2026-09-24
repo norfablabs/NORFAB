@@ -14,6 +14,9 @@ from norfab.workers.netbox_worker.netbox_worker import (
     RETRYABLE_HTTP_METHODS,
     NetboxWorker,
 )
+from norfab.workers.netbox_worker.netbox_worker_utilities import (
+    sync_diff_has_changes,
+)
 
 try:
     from tests.services.netbox.common import (
@@ -36,6 +39,38 @@ except ModuleNotFoundError as exc:
     )
 
 pytestmark = pytest.mark.netbox
+
+
+@pytest.mark.parametrize(
+    ("diff", "expected"),
+    [
+        ({}, False),
+        ({"create": [], "update": {}, "delete": [], "in_sync": ["item"]}, False),
+        ({"device": {"create": [], "update": {}, "delete": []}}, False),
+        (
+            {
+                "vlans": {"global": {"create": [], "update": {}, "delete": []}},
+                "interfaces": {
+                    "router-1": {"create": [], "update": {}, "delete": []}
+                },
+            },
+            False,
+        ),
+        ({"device": {"create": ["item"], "update": {}, "delete": []}}, True),
+        ({"global": {"create": [], "update": {"item": {}}, "delete": []}}, True),
+    ],
+)
+def test_sync_diff_has_changes(diff: dict, expected: bool) -> None:
+    assert sync_diff_has_changes(diff) is expected
+
+
+def test_sync_diff_has_changes_can_ignore_deletions() -> None:
+    diff = {
+        "device": {"create": [], "update": {}, "delete": ["Loopback99"]}
+    }
+
+    assert sync_diff_has_changes(diff) is True
+    assert sync_diff_has_changes(diff, ignore_deletions=True) is False
 
 
 @pytest.mark.parametrize(
@@ -245,7 +280,7 @@ class TestSyncAllOrchestration:
             "routing_policies": {"create": ["RPL1"]},
             "interfaces": {},
         }
-        worker.sync_vrfs = lambda **kwargs: Result(task="sync_vrfs", result=vrf_plan)
+        worker.sync_vrfs = lambda **kwargs: Result(task="sync_vrfs", diff=vrf_plan)
 
         result = NetboxDevicesTasks.check_device_sync(
             worker,
@@ -253,7 +288,8 @@ class TestSyncAllOrchestration:
             devices=["device-1"],
             check_inventory=False,
             check_interfaces=False,
-            check_mac_addresses=False,
+            check_vlans=False,
+            check_prefixes=False,
             check_ip_addresses=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
@@ -271,7 +307,7 @@ class TestSyncAllOrchestration:
             "routing_policies": {"create": [], "update": {}, "delete": []},
             "interfaces": {},
         }
-        worker.sync_vrfs = lambda **kwargs: Result(task="sync_vrfs", result=vrf_plan)
+        worker.sync_vrfs = lambda **kwargs: Result(task="sync_vrfs", diff=vrf_plan)
 
         result = NetboxDevicesTasks.check_device_sync(
             worker,
@@ -279,7 +315,8 @@ class TestSyncAllOrchestration:
             devices=["device-1"],
             check_inventory=False,
             check_interfaces=False,
-            check_mac_addresses=False,
+            check_vlans=False,
+            check_prefixes=False,
             check_ip_addresses=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
@@ -306,7 +343,7 @@ class TestSyncAllOrchestration:
             }
         }
         worker.sync_device_interfaces = lambda **kwargs: Result(
-            task="sync_device_interfaces", result=interface_plan
+            task="sync_device_interfaces", diff=interface_plan
         )
 
         result = NetboxDevicesTasks.check_device_sync(
@@ -315,7 +352,8 @@ class TestSyncAllOrchestration:
             devices=["device-1"],
             check_inventory=False,
             check_vrfs=False,
-            check_mac_addresses=False,
+            check_vlans=False,
+            check_prefixes=False,
             check_ip_addresses=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
@@ -346,7 +384,7 @@ class TestSyncAllOrchestration:
             },
         }
         worker.sync_bgp_community = lambda **kwargs: Result(
-            task="sync_bgp_community", result=community_plan
+            task="sync_bgp_community", diff=community_plan
         )
 
         result = NetboxDevicesTasks.check_device_sync(
@@ -356,7 +394,8 @@ class TestSyncAllOrchestration:
             check_inventory=False,
             check_interfaces=False,
             check_vrfs=False,
-            check_mac_addresses=False,
+            check_vlans=False,
+            check_prefixes=False,
             check_ip_addresses=False,
             check_bgp_peerings=False,
             check_vrrp=False,
@@ -384,7 +423,7 @@ class TestSyncAllOrchestration:
                 "in_sync": ["Ethernet1:vrrp2:10"],
             },
         }
-        worker.sync_vrrp = lambda **kwargs: Result(task="sync_vrrp", result=vrrp_plan)
+        worker.sync_vrrp = lambda **kwargs: Result(task="sync_vrrp", diff=vrrp_plan)
 
         result = NetboxDevicesTasks.check_device_sync(
             worker,
@@ -393,7 +432,8 @@ class TestSyncAllOrchestration:
             check_inventory=False,
             check_interfaces=False,
             check_vrfs=False,
-            check_mac_addresses=False,
+            check_vlans=False,
+            check_prefixes=False,
             check_ip_addresses=False,
             check_bgp_peerings=False,
             check_bgp_communities=False,
@@ -1123,7 +1163,8 @@ class TestCheckDeviceSync:
         "inventory",
         "interfaces",
         "vrfs",
-        "mac_addresses",
+        "vlans",
+        "prefixes",
         "ip_addresses",
         "bgp_peerings",
         "bgp_communities",
@@ -1131,7 +1172,7 @@ class TestCheckDeviceSync:
     }
 
     def test_check_device_sync_result_structure(self, nfclient):
-        """Result has a dict per device with all eight sync categories."""
+        """Result has a dict per device with every enabled sync category."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
@@ -1212,7 +1253,8 @@ class TestCheckDeviceSync:
                 "check_inventory": False,
                 "check_interfaces": True,
                 "check_vrfs": False,
-                "check_mac_addresses": False,
+                "check_vlans": False,
+                "check_prefixes": False,
                 "check_ip_addresses": False,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,
@@ -1232,9 +1274,8 @@ class TestCheckDeviceSync:
                 assert (
                     "inventory" not in device_data
                 ), f"{worker}:{device} inventory should not be present"
-                assert (
-                    "mac_addresses" not in device_data
-                ), f"{worker}:{device} mac_addresses should not be present"
+                assert "vlans" not in device_data
+                assert "prefixes" not in device_data
                 assert (
                     "ip_addresses" not in device_data
                 ), f"{worker}:{device} ip_addresses should not be present"
@@ -1245,12 +1286,11 @@ class TestCheckDeviceSync:
             assert (
                 "inventory" not in res["diff"]
             ), f"{worker} diff should not have inventory"
-            assert (
-                "mac_addresses" not in res["diff"]
-            ), f"{worker} diff should not have mac_addresses"
+            assert "vlans" not in res["diff"]
+            assert "prefixes" not in res["diff"]
 
-    def test_check_device_sync_selective_mac_and_ip_only(self, nfclient):
-        """Only mac_addresses and ip_addresses categories returned."""
+    def test_check_device_sync_selective_ip_only(self, nfclient):
+        """Only the IP address category is returned."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
@@ -1260,7 +1300,8 @@ class TestCheckDeviceSync:
                 "check_inventory": False,
                 "check_interfaces": False,
                 "check_vrfs": False,
-                "check_mac_addresses": True,
+                "check_vlans": False,
+                "check_prefixes": False,
                 "check_ip_addresses": True,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,
@@ -1280,9 +1321,6 @@ class TestCheckDeviceSync:
                     "interfaces" not in device_data
                 ), f"{worker}:{device} interfaces should not be present"
                 assert (
-                    "mac_addresses" in device_data
-                ), f"{worker}:{device} missing mac_addresses"
-                assert (
                     "ip_addresses" in device_data
                 ), f"{worker}:{device} missing ip_addresses"
                 assert (
@@ -1300,7 +1338,8 @@ class TestCheckDeviceSync:
                 "check_inventory": True,
                 "check_interfaces": False,
                 "check_vrfs": False,
-                "check_mac_addresses": False,
+                "check_vlans": False,
+                "check_prefixes": False,
                 "check_ip_addresses": False,
                 "check_bgp_peerings": False,
                 "check_bgp_communities": False,

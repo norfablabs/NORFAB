@@ -25,7 +25,7 @@ from .netbox_models import (
     SyncDeviceInventoryInput,
     SyncDeviceInventoryResult,
 )
-from .netbox_worker_utilities import review_sync_task_result
+from .netbox_worker_utilities import review_sync_task_result, sync_diff_has_changes
 
 log = logging.getLogger(__name__)
 
@@ -866,6 +866,22 @@ class NetboxDevicesTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
+        ret.result = {
+            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
+            for device_name, actions in full_diff.items()
+        }
+        device_results = ret.result
+        ret.diff = full_diff
+        if dry_run is True:
+            job.event(
+                "dry-run requested, returning inventory sync diff without changes"
+            )
+            ret.result = full_diff
+            ret.dry_run = True
+            return ret
+        if not sync_diff_has_changes(full_diff):
+            job.event("no device inventory sync changes required")
+            return ret
         if with_approval and not review_sync_task_result(
             job, "device inventory sync", full_diff
         ):
@@ -874,15 +890,6 @@ class NetboxDevicesTasks:
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
-        elif dry_run is True:
-            job.event(
-                "dry-run requested, returning inventory sync diff without changes"
-            )
-            ret.result = full_diff
-            ret.dry_run = True
-            return ret
-        else:
-            ret.diff = full_diff
 
         if not create_module_bays:
             job.event("validating module bays before module writes")
@@ -960,12 +967,6 @@ class NetboxDevicesTasks:
                 ret.errors.append(msg)
                 log.error(msg)
                 job.event(msg, severity="ERROR")
-
-        device_results = {
-            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for device_name, actions in full_diff.items()
-        }
-        ret.result = device_results
 
         # Device serial updates from the synthetic chassis slot.
         job.event("applying chassis serial updates")
@@ -1202,7 +1203,8 @@ class NetboxDevicesTasks:
         check_inventory: bool = True,
         check_interfaces: bool = True,
         check_vrfs: bool = True,
-        check_mac_addresses: bool = True,
+        check_vlans: bool = True,
+        check_prefixes: bool = True,
         check_ip_addresses: bool = True,
         check_bgp_peerings: bool = True,
         check_bgp_communities: bool = True,
@@ -1213,13 +1215,14 @@ class NetboxDevicesTasks:
         """
         Check if NetBox device data is in sync with live device data.
 
-        Calls the inventory, interface, VRF, MAC address, IP address, BGP
-        peering, BGP community, and VRRP synchronizers in dry-run mode and
-        produces a per-device report.
+        Calls the inventory, interface, VRF, VLAN, prefix, IP address, BGP
+        peering, BGP community, and VRRP synchronizers in dry-run mode and produces
+        a per-device report.
 
         ``Result.diff`` contains the full dry-run detail from each sub-task, keyed by
-        sub-task name (``inventory``, ``interfaces``, ``vrfs``, ``mac_addresses``,
-        ``ip_addresses``, ``bgp_peerings``, ``bgp_communities``, ``vrrp``).
+        sub-task name (``inventory``, ``interfaces``, ``vrfs``, ``vlans``,
+        ``prefixes``, ``ip_addresses``, ``bgp_peerings``, ``bgp_communities``,
+        ``vrrp``).
 
         Args:
             job: NorFab Job object.
@@ -1230,7 +1233,8 @@ class NetboxDevicesTasks:
             check_inventory (bool): Check device inventory sync state. Defaults to True.
             check_interfaces (bool): Check interface sync state. Defaults to True.
             check_vrfs (bool): Check VRF and interface assignment sync state.
-            check_mac_addresses (bool): Check MAC address sync state. Defaults to True.
+            check_vlans (bool): Check VLAN and interface assignment sync state.
+            check_prefixes (bool): Check prefix sync state. Defaults to True.
             check_ip_addresses (bool): Check IP address sync state. Defaults to True.
             check_bgp_peerings (bool): Check BGP peering sync state. Defaults to True.
             check_bgp_communities (bool): Check BGP community sync state. Defaults to True.
@@ -1248,7 +1252,8 @@ class NetboxDevicesTasks:
                         "inventory":     True | False,
                         "interfaces":    True | False,
                         "vrfs":          True | False,
-                        "mac_addresses": True | False,
+                        "vlans":         True | False,
+                        "prefixes":      True | False,
                         "ip_addresses":  True | False,
                         "bgp_peerings":  True | False,
                         "bgp_communities": True | False,
@@ -1288,10 +1293,6 @@ class NetboxDevicesTasks:
             f"{self.name} - Check device sync for {len(devices)} device(s) in '{instance}'"
         )
         job.event(f"checking sync state for {len(devices)} device(s)")
-        change_actions = (
-            ("create", "update") if ignore_deletions else ("create", "update", "delete")
-        )
-
         # initialize per-device result structure
         for device in devices:
             ret.result[device] = {}
@@ -1309,10 +1310,11 @@ class NetboxDevicesTasks:
             )
             if inventory_result.errors:
                 ret.errors.extend(inventory_result.errors)
-            for device, data in inventory_result.result.items():
-                in_sync = not any(data.get(action) for action in change_actions)
-                ret.result.setdefault(device, {})["inventory"] = in_sync
-            ret.diff["inventory"] = inventory_result.result
+            for device, data in inventory_result.diff.items():
+                ret.result.setdefault(device, {})["inventory"] = not sync_diff_has_changes(
+                    data, ignore_deletions=ignore_deletions
+                )
+            ret.diff["inventory"] = inventory_result.diff
 
         # --- check interfaces ---
         if check_interfaces:
@@ -1327,10 +1329,11 @@ class NetboxDevicesTasks:
             )
             if intf_result.errors:
                 ret.errors.extend(intf_result.errors)
-            for device, data in intf_result.result.items():
-                in_sync = not any(data.get(action) for action in change_actions)
-                ret.result.setdefault(device, {})["interfaces"] = in_sync
-            ret.diff["interfaces"] = intf_result.result
+            for device, data in intf_result.diff.items():
+                ret.result.setdefault(device, {})["interfaces"] = not sync_diff_has_changes(
+                    data, ignore_deletions=ignore_deletions
+                )
+            ret.diff["interfaces"] = intf_result.diff
 
         # --- check VRFs and their interface assignments ---
         if check_vrfs:
@@ -1345,24 +1348,24 @@ class NetboxDevicesTasks:
             )
             if vrf_result.errors:
                 ret.errors.extend(vrf_result.errors)
+            global_vrf_diff = {
+                section: vrf_result.diff.get(section, {})
+                for section in ("vrfs", "route_targets", "routing_policies")
+            }
             for device in devices:
-                sections = (
-                    vrf_result.result.get("vrfs", {}),
-                    vrf_result.result.get("route_targets", {}),
-                    vrf_result.result.get("routing_policies", {}),
-                    vrf_result.result.get("interfaces", {}).get(device, {}),
+                device_diff = {
+                    **global_vrf_diff,
+                    "interfaces": vrf_result.diff.get("interfaces", {}).get(device, {}),
+                }
+                ret.result[device]["vrfs"] = not sync_diff_has_changes(
+                    device_diff, ignore_deletions=ignore_deletions
                 )
-                ret.result[device]["vrfs"] = not any(
-                    section.get(action)
-                    for section in sections
-                    for action in change_actions
-                )
-            ret.diff["vrfs"] = vrf_result.result
+            ret.diff["vrfs"] = vrf_result.diff
 
-        # --- check MAC addresses ---
-        if check_mac_addresses:
-            job.event("checking MAC addresses sync state")
-            mac_result = self.sync_mac_addresses(
+        # --- check VLANs and their interface assignments ---
+        if check_vlans:
+            job.event("checking VLAN sync state")
+            vlan_result = self.sync_vlans(
                 job=job,
                 instance=instance,
                 dry_run=True,
@@ -1370,12 +1373,37 @@ class NetboxDevicesTasks:
                 devices=list(devices),
                 branch=branch,
             )
-            if mac_result.errors:
-                ret.errors.extend(mac_result.errors)
-            for device, data in mac_result.result.items():
-                in_sync = not data.get("created") and not data.get("updated")
-                ret.result.setdefault(device, {})["mac_addresses"] = in_sync
-            ret.diff["mac_addresses"] = mac_result.result
+            if vlan_result.errors:
+                ret.errors.extend(vlan_result.errors)
+            for device in devices:
+                device_diff = {
+                    "vlans": vlan_result.diff.get("vlans", {}),
+                    "interfaces": vlan_result.diff.get("interfaces", {}).get(device, {}),
+                }
+                ret.result[device]["vlans"] = not sync_diff_has_changes(
+                    device_diff, ignore_deletions=ignore_deletions
+                )
+            ret.diff["vlans"] = vlan_result.diff
+
+        # --- check prefixes ---
+        if check_prefixes:
+            job.event("checking prefix sync state")
+            prefix_result = self.sync_device_prefixes(
+                job=job,
+                instance=instance,
+                dry_run=True,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+            )
+            if prefix_result.errors:
+                ret.errors.extend(prefix_result.errors)
+            prefixes_in_sync = not sync_diff_has_changes(
+                prefix_result.diff, ignore_deletions=ignore_deletions
+            )
+            for device in devices:
+                ret.result[device]["prefixes"] = prefixes_in_sync
+            ret.diff["prefixes"] = prefix_result.diff
 
         # --- check IP addresses ---
         if check_ip_addresses:
@@ -1390,10 +1418,13 @@ class NetboxDevicesTasks:
             )
             if ip_result.errors:
                 ret.errors.extend(ip_result.errors)
-            for device, data in ip_result.result.items():
-                in_sync = not data.get("created") and not data.get("updated")
-                ret.result.setdefault(device, {})["ip_addresses"] = in_sync
-            ret.diff["ip_addresses"] = ip_result.result
+            for device, data in ip_result.diff.items():
+                ret.result.setdefault(device, {})[
+                    "ip_addresses"
+                ] = not sync_diff_has_changes(
+                    data, ignore_deletions=ignore_deletions
+                )
+            ret.diff["ip_addresses"] = ip_result.diff
 
         # --- check VRRP ---
         if check_vrrp:
@@ -1408,10 +1439,11 @@ class NetboxDevicesTasks:
             )
             if vrrp_result.errors:
                 ret.errors.extend(vrrp_result.errors)
-            for device, data in vrrp_result.result.items():
-                in_sync = not any(data.get(action) for action in change_actions)
-                ret.result.setdefault(device, {})["vrrp"] = in_sync
-            ret.diff["vrrp"] = vrrp_result.result
+            for device, data in vrrp_result.diff.items():
+                ret.result.setdefault(device, {})["vrrp"] = not sync_diff_has_changes(
+                    data, ignore_deletions=ignore_deletions
+                )
+            ret.diff["vrrp"] = vrrp_result.diff
 
         # --- check BGP communities ---
         if check_bgp_communities:
@@ -1426,14 +1458,12 @@ class NetboxDevicesTasks:
             )
             if community_result.errors:
                 ret.errors.extend(community_result.errors)
-            in_sync = not any(
-                data.get(action)
-                for data in community_result.result.values()
-                for action in change_actions
+            communities_in_sync = not sync_diff_has_changes(
+                community_result.diff, ignore_deletions=ignore_deletions
             )
             for device in devices:
-                ret.result[device]["bgp_communities"] = in_sync
-            ret.diff["bgp_communities"] = community_result.result
+                ret.result[device]["bgp_communities"] = communities_in_sync
+            ret.diff["bgp_communities"] = community_result.diff
 
         # --- check BGP peerings ---
         if check_bgp_peerings:
@@ -1448,16 +1478,20 @@ class NetboxDevicesTasks:
             )
             if bgp_result.errors:
                 ret.errors.extend(bgp_result.errors)
-            for device, data in bgp_result.result.items():
-                in_sync = not any(data.get(action) for action in change_actions)
-                ret.result.setdefault(device, {})["bgp_peerings"] = in_sync
-            ret.diff["bgp_peerings"] = bgp_result.result
+            for device, data in bgp_result.diff.items():
+                ret.result.setdefault(device, {})[
+                    "bgp_peerings"
+                ] = not sync_diff_has_changes(
+                    data, ignore_deletions=ignore_deletions
+                )
+            ret.diff["bgp_peerings"] = bgp_result.diff
 
         checked_categories = {
             "inventory": check_inventory,
             "interfaces": check_interfaces,
             "vrfs": check_vrfs,
-            "mac_addresses": check_mac_addresses,
+            "vlans": check_vlans,
+            "prefixes": check_prefixes,
             "ip_addresses": check_ip_addresses,
             "vrrp": check_vrrp,
             "bgp_communities": check_bgp_communities,

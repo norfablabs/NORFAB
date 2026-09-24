@@ -14,7 +14,7 @@ from .netbox_models import (
     SyncVrrpInput,
     SyncVrrpResult,
 )
-from .netbox_worker_utilities import review_sync_task_result
+from .netbox_worker_utilities import review_sync_task_result, sync_diff_has_changes
 
 log = logging.getLogger(__name__)
 
@@ -451,11 +451,20 @@ class NetboxFhrpTasks:
             f"{update_count} update, {in_sync_count} in sync"
         )
 
+        ret.result = {
+            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
+            for device_name, actions in sync_diff.items()
+        }
+        ret.diff = sync_diff
         if dry_run:
             job.event("dry-run requested, returning VRRP diff without changes")
             log.info(f"{self.name} - Sync VRRP: dry-run complete")
             ret.result = sync_diff
             ret.dry_run = True
+            return ret
+
+        if not sync_diff_has_changes(sync_diff):
+            job.event("no VRRP sync changes required")
             return ret
 
         if with_approval:
@@ -467,12 +476,6 @@ class NetboxFhrpTasks:
             ret.messages.append("review declined; changes were not applied")
             log.info(f"{self.name} - Sync VRRP: approval declined")
             return ret
-
-        ret.diff = sync_diff
-        ret.result = {
-            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for device_name, actions in sync_diff.items()
-        }
 
         desired_addresses = sorted(
             {

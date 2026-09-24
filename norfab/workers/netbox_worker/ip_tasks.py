@@ -29,6 +29,7 @@ from .netbox_worker_utilities import (
     map_interface_name,
     resolve_vrf,
     review_sync_task_result,
+    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -1258,6 +1259,21 @@ class NetboxIpTasks:
             }
         ret.diff = full_diff
 
+        if dry_run is True:
+            job.event(
+                "dry-run requested, returning IP address sync plan without changes"
+            )
+            for key in bulk_create_ip:
+                device_name = key[0]
+                device_results[device_name]["created"].append(key[2])
+            for key in bulk_update_ip:
+                device_name = key[0]
+                device_results[device_name]["updated"].append(key[2])
+            ret.dry_run = True
+            return ret
+        if not sync_diff_has_changes(full_diff):
+            job.event("no IP address sync changes required")
+            return ret
         if with_approval:
             ip_preview_result = copy.deepcopy(device_results)
             for key in bulk_create_ip:
@@ -1272,19 +1288,6 @@ class NetboxIpTasks:
                 ret.dry_run = True
                 ret.messages.append("review declined; changes were not applied")
                 return ret
-        elif dry_run is True:
-            job.event(
-                "dry-run requested, returning IP address sync plan without changes"
-            )
-            for key in bulk_create_ip:
-                device_name = key[0]
-                device_results[device_name]["created"].append(key[2])
-            for key in bulk_update_ip:
-                device_name = key[0]
-                device_results[device_name]["updated"].append(key[2])
-            ret.dry_run = True
-            return ret
-
         # update first, since existing IPs might change role to anycast
         if bulk_update_ip:
             job.event(f"updating {len(bulk_update_ip)} IP address(es)")
@@ -1589,6 +1592,13 @@ class NetboxIpTasks:
         )
         for action in preview:
             preview[action] = sorted(set(preview[action]))
+        if dry_run:
+            ret.result = preview
+            ret.dry_run = True
+            return ret
+        if not sync_diff_has_changes(ret.diff):
+            job.event("no prefix sync changes required")
+            return ret
         if with_approval:
             if not review_sync_task_result(job, "prefix sync", preview):
                 ret.status = "skipped"
@@ -1596,11 +1606,6 @@ class NetboxIpTasks:
                 ret.dry_run = True
                 ret.messages.append("review declined; changes were not applied")
                 return ret
-        elif dry_run:
-            ret.result = preview
-            ret.dry_run = True
-            return ret
-
         vrf_ids = {}
         for key in list(create_prefixes):
             vrf_name = desired_prefixes[key]["vrf"]

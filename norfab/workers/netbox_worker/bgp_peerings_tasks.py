@@ -27,6 +27,7 @@ from .netbox_worker_utilities import (
     resolve_ip,
     resolve_vrf,
     review_sync_task_result,
+    sync_diff_has_changes,
 )
 
 log = logging.getLogger(__name__)
@@ -2293,6 +2294,23 @@ class NetboxBgpPeeringsTasks:
             f"{delete_count} delete, {in_sync_count} in sync"
         )
 
+        ret.diff = full_diff
+        ret.result = {
+            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
+            for device_name, actions in full_diff.items()
+        }
+        device_results = ret.result
+        # Return dry-run results per device.
+        if dry_run is True:
+            job.event(
+                "dry-run requested, returning BGP session sync diff without changes"
+            )
+            ret.result = full_diff
+            ret.dry_run = True
+            return ret
+        if not sync_diff_has_changes(full_diff):
+            job.event("no BGP peerings sync changes required")
+            return ret
         if with_approval and not review_sync_task_result(
             job, "BGP peerings sync", full_diff
         ):
@@ -2301,23 +2319,6 @@ class NetboxBgpPeeringsTasks:
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
-        # Return dry-run results per device
-        elif dry_run is True:
-            job.event(
-                "dry-run requested, returning BGP session sync diff without changes"
-            )
-            ret.result = full_diff
-            ret.dry_run = True
-            return ret
-        else:
-            ret.diff = full_diff
-
-        # Per-device result tracking
-        device_results = {
-            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
-            for device_name, actions in full_diff.items()
-        }
-        ret.result = device_results
 
         # Build bulk_create list from full_diff — split pipe-separated policies to lists
         job.event("preparing BGP session create payloads")
