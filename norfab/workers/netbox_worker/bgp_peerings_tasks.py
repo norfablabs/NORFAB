@@ -15,6 +15,8 @@ from .netbox_models import (
     GetBgpPeeringsInput,
     GetBgpPeeringsResult,
     NetboxFastApiArgs,
+    SyncActionSummary,
+    SyncActionSummaryMap,
     SyncBgpPeeringsInput,
     SyncBgpPeeringsResult,
     UpdateBgpPeeringInput,
@@ -2001,7 +2003,7 @@ class NetboxBgpPeeringsTasks:
         devices = devices or []
         ret = Result(
             task=f"{self.name}:sync_bgp_peerings",
-            result={},
+            result=SyncActionSummaryMap().model_dump(),
             resources=[instance],
         )
 
@@ -2312,12 +2314,7 @@ class NetboxBgpPeeringsTasks:
 
         # Per-device result tracking
         device_results = {
-            device_name: {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": actions["in_sync"],
-            }
+            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
             for device_name, actions in full_diff.items()
         }
         ret.result = device_results

@@ -18,6 +18,8 @@ from .netbox_models import (
     CreateIpResult,
     InterfaceMapRule,
     NetboxFastApiArgs,
+    SyncActionSummary,
+    SyncActionSummaryMap,
     SyncDeviceIpInput,
     SyncDeviceIpResult,
     SyncDevicePrefixesInput,
@@ -809,7 +811,7 @@ class NetboxIpTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_ip",
-            result={},
+            result=SyncActionSummaryMap().model_dump(),
             resources=[instance],
             diff={},
             dry_run=dry_run,
@@ -924,11 +926,7 @@ class NetboxIpTasks:
 
         # per-device result tracking
         device_results = {
-            device_name: {
-                "created": [],
-                "updated": [],
-                "in_sync": [],
-            }
+            device_name: SyncActionSummary().model_dump()
             for device_name in devices
         }
         ret.result = device_results
@@ -1193,11 +1191,7 @@ class NetboxIpTasks:
         for key in list(bulk_create_ip) + list(bulk_update_ip):
             device_results.setdefault(
                 key[0],
-                {
-                    "created": [],
-                    "updated": [],
-                    "in_sync": [],
-                },
+                SyncActionSummary().model_dump(),
             )
 
         # Multiple VRRP peers report the same virtual IP. Create it once and leave
@@ -1417,7 +1411,7 @@ class NetboxIpTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_prefixes",
-            result={"created": [], "updated": [], "in_sync": []},
+            result=SyncActionSummary().model_dump(),
             resources=[instance],
             diff={
                 "global": {

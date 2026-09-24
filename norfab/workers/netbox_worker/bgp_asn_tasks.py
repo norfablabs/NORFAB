@@ -9,6 +9,8 @@ from .netbox_models import (
     CreateBgpAsnInput,
     CreateBgpAsnResult,
     NetboxFastApiArgs,
+    SyncActionSummary,
+    SyncActionSummaryMap,
     SyncBgpAsnInput,
     SyncBgpAsnResult,
 )
@@ -194,7 +196,7 @@ class NetboxBgpAsnTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_bgp_asn",
-            result={},
+            result=SyncActionSummaryMap().model_dump(),
             resources=[instance],
             dry_run=dry_run,
             diff={},
@@ -408,12 +410,7 @@ class NetboxBgpAsnTasks:
 
         ret.diff = full_diff
         ret.result = {
-            "global": {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": in_sync,
-            }
+            "global": SyncActionSummary(in_sync=in_sync).model_dump()
         }
         create_items = []
         if rir_obj:

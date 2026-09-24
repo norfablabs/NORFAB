@@ -106,6 +106,7 @@ class TestSyncDevicePrefixes:
             assert result["result"] == {
                 "created": [self.PREFIX_ONLY_PREFIX],
                 "updated": [],
+                "deleted": [],
                 "in_sync": [],
             }
             assert set(result["diff"]["global"]) == self.DIFF_KEYS
@@ -157,6 +158,7 @@ class TestSyncDevicePrefixes:
             assert result["result"] == {
                 "created": [],
                 "updated": [],
+                "deleted": [],
                 "in_sync": [],
             }
             assert result["diff"]["global"] == {
@@ -190,6 +192,7 @@ class TestSyncDevicePrefixes:
             assert result["result"] == {
                 "created": [],
                 "updated": [],
+                "deleted": [],
                 "in_sync": [],
             }
 
@@ -212,6 +215,7 @@ class TestSyncDevicePrefixes:
             assert not result["failed"], f"{worker} failed - {result}"
             assert result["result"]["created"] == []
             assert result["result"]["updated"] == []
+            assert result["result"]["deleted"] == []
             assert result["result"]["in_sync"] == [self.PREFIX_ONLY_PREFIX]
             assert result["diff"]["global"] == {
                 "create": [],

@@ -71,6 +71,24 @@ class NetboxConfigModel(BaseModel):
 # --------------------------------------------------------------------------
 
 
+SyncActionIdentifier = Union[StrictStr, StrictInt]
+
+
+class SyncActionSummary(BaseModel):
+    """Actions applied by a synchronization task."""
+
+    created: List[SyncActionIdentifier] = Field(default_factory=list)
+    updated: List[SyncActionIdentifier] = Field(default_factory=list)
+    deleted: List[SyncActionIdentifier] = Field(default_factory=list)
+    in_sync: List[SyncActionIdentifier] = Field(default_factory=list)
+
+
+class SyncActionSummaryMap(RootModel[Dict[StrictStr, SyncActionSummary]]):
+    """Action summaries keyed by device, scope, or resource type."""
+
+    root: Dict[StrictStr, SyncActionSummary] = Field(default_factory=dict)
+
+
 class NetboxCommonArgs(BaseModel, use_enum_values=True, populate_by_name=True):
     """Model to enlist arguments common across Netbox service tasks"""
 
@@ -521,8 +539,8 @@ class UpdateBgpPeeringResult(Result):
 
 
 class SyncBgpPeeringsResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="BGP peering sync result keyed by device name",
     )
 
@@ -1023,6 +1041,24 @@ class CheckDeviceSyncInput(
         json_schema_extra={"presence": True},
         alias="check-bgp-peerings",
     )
+    check_bgp_communities: StrictBool = Field(
+        True,
+        description="Check BGP community sync state",
+        json_schema_extra={"presence": True},
+        alias="check-bgp-communities",
+    )
+    check_vrrp: StrictBool = Field(
+        True,
+        description="Check VRRP sync state",
+        json_schema_extra={"presence": True},
+        alias="check-vrrp",
+    )
+    ignore_deletions: StrictBool = Field(
+        False,
+        description="Treat deletion-only differences as in sync",
+        json_schema_extra={"presence": True},
+        alias="ignore-deletions",
+    )
 
 
 class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
@@ -1064,8 +1100,8 @@ class GetDevicesResult(Result):
 
 
 class SyncDeviceInventoryResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="Device inventory sync result keyed by device name",
     )
 
@@ -1622,15 +1658,15 @@ class UpdateInterfacesDescriptionResult(Result):
 
 
 class SyncDeviceInterfacesResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="Interface sync result keyed by device name",
     )
 
 
 class SyncMacAddressesResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="MAC address sync result keyed by device name",
     )
 
@@ -1910,15 +1946,15 @@ class CreateIpBulkResult(Result):
 
 
 class SyncDeviceIpResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="IP address sync result keyed by device name",
     )
 
 
 class SyncDevicePrefixesResult(Result):
-    result: dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummary, dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummary,
         description="Global prefix synchronization action lists",
     )
 
@@ -2421,9 +2457,16 @@ class SyncVlansInput(
         return self
 
 
+class SyncVlansResultPayload(BaseModel):
+    """Applied VLAN and related interface synchronization actions."""
+
+    vlans: Dict[StrictStr, SyncActionSummary] = Field(default_factory=dict)
+    interfaces: Dict[StrictStr, SyncActionSummary] = Field(default_factory=dict)
+
+
 class SyncVlansResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncVlansResultPayload, Dict[StrictStr, Any]] = Field(
+        default_factory=SyncVlansResultPayload,
         description="VLAN actions by NetBox scope and interface actions by device",
     )
 
@@ -2473,8 +2516,8 @@ class SyncVrrpInput(
 
 
 class SyncVrrpResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, Dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="VRRP sync actions keyed by NetBox device name",
     )
 
@@ -2557,10 +2600,22 @@ class SyncVrfsInput(
     )
 
 
+class SyncVrfsResultPayload(BaseModel):
+    """Applied VRF synchronization actions."""
+
+    vrfs: SyncActionSummary = Field(default_factory=SyncActionSummary)
+    route_targets: SyncActionSummary = Field(default_factory=SyncActionSummary)
+    routing_policies: SyncActionSummary = Field(default_factory=SyncActionSummary)
+    interfaces: Dict[StrictStr, SyncActionSummary] = Field(default_factory=dict)
+
+
 class SyncVrfsResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
-        description="VRF, route-target, routing-policy, and interface assignment synchronization actions",
+    result: Union[SyncVrfsResultPayload, Dict[StrictStr, Any]] = Field(
+        default_factory=SyncVrfsResultPayload,
+        description=(
+            "Applied VRF, route-target, routing-policy, and interface assignment "
+            "actions, or an untyped dry-run diff"
+        ),
     )
 
 
@@ -2661,8 +2716,8 @@ class SyncBgpAsnInput(
 
 
 class SyncBgpAsnResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, Dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="BGP ASN synchronization actions keyed by global scope",
     )
 
@@ -2714,8 +2769,8 @@ class SyncBgpCommunityInput(
 
 
 class SyncBgpCommunityResult(Result):
-    result: Dict[StrictStr, Any] = Field(
-        {},
+    result: Union[SyncActionSummaryMap, Dict[StrictStr, Any]] = Field(
+        default_factory=SyncActionSummaryMap,
         description="BGP community synchronization actions keyed by NetBox model",
     )
 

@@ -10,8 +10,10 @@ from norfab.models import Result
 from .netbox_models import (
     InterfaceMapRule,
     NetboxFastApiArgs,
+    SyncActionSummary,
     SyncVrfsInput,
     SyncVrfsResult,
+    SyncVrfsResultPayload,
 )
 from .netbox_worker_utilities import (
     apply_description_policy,
@@ -102,12 +104,7 @@ class NetboxVrfsTasks:
         ]
         ret = Result(
             task=f"{self.name}:sync_vrfs",
-            result={
-                "vrfs": {},
-                "route_targets": {},
-                "routing_policies": {},
-                "interfaces": {},
-            },
+            result=SyncVrfsResultPayload().model_dump(),
             resources=[instance],
             dry_run=dry_run,
             diff={
@@ -154,6 +151,9 @@ class NetboxVrfsTasks:
         if not devices:
             ret.failed = True
             return ret
+        ret.result["interfaces"] = {
+            device_name: SyncActionSummary().model_dump() for device_name in devices
+        }
 
         if not nb.extras.custom_fields.get(name=device_custom_field):
             device_custom_field = None
@@ -490,12 +490,24 @@ class NetboxVrfsTasks:
         # Interface identity is scoped by device. A different current VRF becomes
         # a normal update, while an equal assignment is reported as in sync.
         interface_diff = self.make_diff(interface_live, interface_current)
+        ret.result["vrfs"]["in_sync"] = in_sync
+        for device_name, actions in interface_diff.items():
+            ret.result["interfaces"][device_name]["in_sync"] = actions["in_sync"]
         full_diff = {
             "vrfs": vrf_diff,
             "route_targets": route_target_diff,
             "routing_policies": policy_diff,
             "interfaces": interface_diff,
         }
+        has_changes = any(
+            full_diff[section][action]
+            for section in ("vrfs", "route_targets", "routing_policies")
+            for action in ("create", "update", "delete")
+        ) or any(
+            actions[action]
+            for actions in interface_diff.values()
+            for action in ("create", "update", "delete")
+        )
         msg = (
             "vrf sync diff complete: "
             f"{len(create_names)} create, {len(update)} update, "
@@ -507,6 +519,12 @@ class NetboxVrfsTasks:
         if dry_run:
             ret.result = full_diff
             ret.dry_run = True
+            return ret
+        if not has_changes:
+            ret.diff = full_diff
+            msg = "no VRF sync changes required"
+            job.event(msg)
+            log.info(f"Sync VRFs: {msg}")
             return ret
         if with_approval and not review_sync_task_result(job, "VRF sync", full_diff):
             ret.status = "skipped"
@@ -521,35 +539,6 @@ class NetboxVrfsTasks:
         # Apply global VRF changes first so every desired VRF ID is cached before
         # building the dependent interface assignment updates.
         ret.diff = full_diff
-        ret.result = {
-            "vrfs": {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": in_sync,
-            },
-            "route_targets": {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": [],
-            },
-            "routing_policies": {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": [],
-            },
-            "interfaces": {
-                device_name: {
-                    "created": [],
-                    "updated": [],
-                    "deleted": [],
-                    "in_sync": actions["in_sync"],
-                }
-                for device_name, actions in interface_diff.items()
-            },
-        }
         if missing_route_targets:
             target_payloads = [{"name": name} for name in missing_route_targets]
             total_batches = (len(target_payloads) + batch_size - 1) // batch_size

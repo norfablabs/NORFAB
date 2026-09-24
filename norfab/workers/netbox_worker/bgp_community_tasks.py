@@ -6,6 +6,8 @@ from norfab.models import Result
 
 from .netbox_models import (
     NetboxFastApiArgs,
+    SyncActionSummary,
+    SyncActionSummaryMap,
     SyncBgpCommunityInput,
     SyncBgpCommunityResult,
 )
@@ -96,7 +98,7 @@ class NetboxBgpCommunityTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_bgp_community",
-            result={},
+            result=SyncActionSummaryMap().model_dump(),
             resources=[instance],
             dry_run=dry_run,
             diff={},
@@ -524,12 +526,7 @@ class NetboxBgpCommunityTasks:
         # NetBox API writes explicit.
         ret.diff = full_diff
         ret.result = {
-            scope: {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": actions["in_sync"],
-            }
+            scope: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
             for scope, actions in full_diff.items()
         }
         create_snames = full_diff["route_targets"]["create"]

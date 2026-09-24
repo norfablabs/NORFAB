@@ -1,3 +1,26 @@
+# 0.24.1
+
+## ENHANCEMENTS
+
+1. NetBox VRF synchronization now exits early when the complete diff contains no actionable changes, avoiding unnecessary approval and write preparation for already synchronized resources. Live results use a defined action-summary structure and include every resolved NetBox device in the interface section.
+2. NetBox device inventory synchronization live results now use the shared typed action-summary structure per device.
+3. NetBox interface synchronization live results now use the shared typed action-summary structure per device.
+4. NetBox MAC address synchronization live results now use the shared typed action-summary structure per device, including an explicit empty `deleted` list.
+5. NetBox IP address synchronization live results now use the shared typed action-summary structure per device, including an explicit empty `deleted` list.
+6. NetBox prefix synchronization live results now use the shared typed action-summary structure, including an explicit empty `deleted` list.
+7. NetBox VLAN synchronization live results now use typed action-summary mappings for VLAN scopes and device interfaces.
+8. NetBox VRRP synchronization live results now use the shared typed action-summary structure per device.
+9. NetBox BGP peering synchronization live results now use the shared typed action-summary structure per device.
+10. NetBox BGP ASN synchronization live results now use the shared typed action-summary structure for global actions.
+11. NetBox BGP community synchronization live results now use the shared typed action-summary structure for route targets and plugin communities.
+12. NetBox `check_device_sync` now includes BGP community, route-target, and VRRP drift in its read-only per-device sync assessment.
+
+## BUGS
+
+1. Fixed NetBox interface synchronization attempting to change a cabled interface to type `virtual`. The rejected transition is now reported as an error while unrelated interface updates continue.
+
+---
+
 # 0.24.0
 
 ## FEATURES

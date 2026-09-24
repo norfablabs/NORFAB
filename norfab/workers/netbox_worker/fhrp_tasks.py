@@ -7,7 +7,13 @@ from jinja2 import Environment, StrictUndefined, TemplateError
 from norfab.core.worker import Job, Task
 from norfab.models import Result
 
-from .netbox_models import NetboxFastApiArgs, SyncVrrpInput, SyncVrrpResult
+from .netbox_models import (
+    NetboxFastApiArgs,
+    SyncActionSummary,
+    SyncActionSummaryMap,
+    SyncVrrpInput,
+    SyncVrrpResult,
+)
 from .netbox_worker_utilities import review_sync_task_result
 
 log = logging.getLogger(__name__)
@@ -74,7 +80,7 @@ class NetboxFhrpTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_vrrp",
-            result={},
+            result=SyncActionSummaryMap().model_dump(),
             resources=[instance],
             dry_run=dry_run,
             diff={},
@@ -464,12 +470,7 @@ class NetboxFhrpTasks:
 
         ret.diff = sync_diff
         ret.result = {
-            device_name: {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": actions["in_sync"],
-            }
+            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
             for device_name, actions in sync_diff.items()
         }
 

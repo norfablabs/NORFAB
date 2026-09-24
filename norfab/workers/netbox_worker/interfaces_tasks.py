@@ -16,6 +16,8 @@ from .netbox_models import (
     GetInterfacesResult,
     InterfaceMapRule,
     NetboxFastApiArgs,
+    SyncActionSummary,
+    SyncActionSummaryMap,
     SyncDeviceInterfacesInput,
     SyncDeviceInterfacesResult,
     SyncMacAddressesInput,
@@ -929,7 +931,7 @@ class NetboxInterfacesTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_device_interfaces",
-            result={},
+            result=SyncActionSummaryMap().model_dump(),
             resources=[instance],
             dry_run=dry_run,
             diff={},
@@ -1216,6 +1218,19 @@ class NetboxInterfacesTasks:
                     if update_type is False:
                         intf_updates.pop("type")
 
+                    # NetBox does not allow cabled interfaces to become virtual.
+                    elif new_type == "virtual" and nb_interfaces_result.result[
+                        dev_name
+                    ][intf_name].get("cable"):
+                        intf_updates.pop("type")
+                        msg = (
+                            f"{dev_name}:{intf_name} - cannot transition interface "
+                            f"type from {old_type} to virtual while a cable is connected"
+                        )
+                        ret.errors.append(msg)
+                        log.error(msg)
+                        job.event(msg, severity="ERROR")
+
                     # Protect physical types and never transition to ``other``.
                     elif safe_type_transition is False:
                         intf_updates.pop("type")
@@ -1261,12 +1276,7 @@ class NetboxInterfacesTasks:
 
         # Per-device result tracking
         ret.result = {
-            device_name: {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": actions["in_sync"],
-            }
+            device_name: SyncActionSummary(in_sync=actions["in_sync"]).model_dump()
             for device_name, actions in full_diff.items()
         }
 
@@ -1602,7 +1612,7 @@ class NetboxInterfacesTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_mac_addresses",
-            result={},
+            result=SyncActionSummaryMap().model_dump(),
             resources=[instance],
             dry_run=dry_run,
         )
@@ -1769,11 +1779,7 @@ class NetboxInterfacesTasks:
 
         # per-device result tracking
         device_results = {
-            device_name: {
-                "created": [],
-                "updated": [],
-                "in_sync": [],
-            }
+            device_name: SyncActionSummary().model_dump()
             for device_name in devices
         }
         ret.result = device_results

@@ -19,6 +19,8 @@ Checks whether NetBox data is in sync with live device state without writing to 
 - **mac_addresses** — calls `sync_mac_addresses(dry_run=True)`
 - **ip_addresses** — calls `sync_device_ip(dry_run=True)`
 - **bgp_peerings** — calls `sync_bgp_peerings(dry_run=True)`
+- **bgp_communities** — calls `sync_bgp_community(dry_run=True)` for route targets and BGP plugin communities
+- **vrrp** — calls `sync_vrrp(dry_run=True)`
 
 Each sub-check can be enabled or disabled independently.
 
@@ -36,6 +38,9 @@ Each sub-check can be enabled or disabled independently.
 | `check_mac_addresses` | No | Check MAC address sync state, default `True` |
 | `check_ip_addresses` | No | Check IP address sync state, default `True` |
 | `check_bgp_peerings` | No | Check BGP peering sync state, default `True` |
+| `check_bgp_communities` | No | Check route-target and BGP community sync state, default `True` |
+| `check_vrrp` | No | Check VRRP sync state, default `True` |
+| `ignore_deletions` | No | Treat deletion-only differences as in sync, default `False` |
 | Nornir filters | No | Host filters such as `FL`, `FB`, `FG`, `FC`, or `FN` |
 
 At least one explicit device or Nornir host filter must resolve to a device.
@@ -53,6 +58,8 @@ At least one explicit device or Nornir host filter must resolve to a device.
             "mac_addresses": False,
             "ip_addresses": True,
             "bgp_peerings": True,
+            "bgp_communities": True,
+            "vrrp": True,
         },
     },
     "diff": {
@@ -62,16 +69,19 @@ At least one explicit device or Nornir host filter must resolve to a device.
         "mac_addresses": {},
         "ip_addresses": {},
         "bgp_peerings": {},
+        "bgp_communities": {},
+        "vrrp": {},
     },
 }
 ```
 
-A category is considered in sync when the corresponding dry-run reports no pending creates, updates, or deletes.
+A category is considered in sync when the corresponding dry-run reports no pending creates, updates, or deletes. With `ignore_deletions=True`, pending deletions remain in `Result.diff` but do not make the category out of sync.
 
 ## Notes / Gotchas
 
 - No data is written to NetBox.
 - `Result.diff` contains the raw dry-run detail from each enabled sub-task.
+- BGP community and route-target drift is global and therefore affects every selected device; VRRP drift is assessed per device.
 - Device names can be supplied directly or resolved from Nornir filters.
 
 ## Examples
@@ -87,7 +97,7 @@ A category is considered in sync when the corresponding dry-run reports no pendi
     Check only interface and IP address sync:
 
     ```bash
-    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-vrfs false check-mac-addresses false check-bgp-peerings false
+    nf#netbox check-sync devices devices ceos-leaf-1 check-inventory false check-vrfs false check-mac-addresses false check-bgp-peerings false check-bgp-communities false check-vrrp false
     ```
 
     Resolve devices using a Nornir group filter:
@@ -142,6 +152,8 @@ A category is considered in sync when the corresponding dry-run reports no pendi
                 "check_vrfs": False,
                 "check_mac_addresses": False,
                 "check_bgp_peerings": False,
+                "check_bgp_communities": False,
+                "check_vrrp": False,
             },
         )
 
@@ -180,6 +192,9 @@ root
             ├── check-mac-addresses:    Check MAC addresses sync state, default 'True'
             ├── check-ip-addresses:    Check IP addresses sync state, default 'True'
             ├── check-bgp-peerings:    Check BGP peerings sync state, default 'True'
+            ├── check-bgp-communities:    Check BGP communities sync state, default 'True'
+            ├── check-vrrp:    Check VRRP sync state, default 'True'
+            ├── ignore-deletions:    Treat deletion-only differences as in sync, default 'False'
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
             ├── FH:    Filter hosts by hostname

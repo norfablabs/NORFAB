@@ -224,6 +224,27 @@ class TestSyncVrfs:
             "TEST_VRF_SYNC_TENANT_A_IPV6_EXPORT_TEST"
         }
 
+    def test_in_sync_live_run_exits_before_approval(self, nfclient: Any) -> None:
+        worker = self._stub_worker([self._ipv6_record()], plugin_installed=True)
+        job = self._stub_job()
+        NetboxVrfsTasks.sync_vrfs(worker, job, devices=[self.DEVICE_1])
+
+        result = NetboxVrfsTasks.sync_vrfs(
+            worker,
+            job,
+            devices=[self.DEVICE_1],
+            with_approval=True,
+        )
+
+        assert result.result["vrfs"]["updated"] == []
+        assert result.result["vrfs"]["in_sync"] == ["TEST_VRF_SYNC_TENANT_A"]
+        assert result.result["interfaces"][self.DEVICE_1] == {
+            "created": [],
+            "updated": [],
+            "deleted": [],
+            "in_sync": [],
+        }
+
     def test_missing_bgp_plugin_ignores_policies(self, nfclient: Any) -> None:
         worker = self._stub_worker([self._ipv6_record()], plugin_installed=False)
         preview = NetboxVrfsTasks.sync_vrfs(

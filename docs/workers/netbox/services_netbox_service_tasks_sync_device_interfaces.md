@@ -57,6 +57,8 @@ logical type correction:
 - A specific physical type is never replaced with another type.
 - A specific physical type does not receive a parent inferred from live parsing.
 - No existing type is replaced with `other`.
+- An interface with a connected cable is not changed to `virtual`; the rejected
+  transition is reported as an error.
 
 Loopback interfaces use NetBox type `virtual`; `loopback` is not submitted as
 an interface type. Set `update_type=False` to disable all type changes for

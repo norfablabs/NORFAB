@@ -1111,6 +1111,64 @@ class TestSyncDeviceInterfaces:
 
         assert self._get_nb_intf(nfclient, device, interface).type.value == "virtual"
 
+    def test_sync_device_interfaces_rejects_cabled_interface_becoming_virtual(
+        self, nfclient
+    ):
+        """A connected cable prevents an interface transition to ``virtual``."""
+        device = "fn-ceos-sp-2"
+        interface = "Loopback10"
+        peer_name = "TEST_SYNC_CABLE_PEER"
+        nb = get_pynetbox(nfclient)
+        cable = None
+        peer = None
+
+        self._cleanup(nfclient, [device])
+        setup = self._sync(nfclient, [device])
+        for worker, res in setup.items():
+            assert not res["failed"], f"Setup sync failed for {worker}: {res['errors']}"
+
+        nb_interface = self._get_nb_intf(nfclient, device, interface)
+        self._patch_intf(nfclient, nb_interface.id, {"type": "other"})
+        try:
+            peer = nb.dcim.interfaces.create(
+                device=nb_interface.device.id,
+                name=peer_name,
+                type="other",
+            )
+            cable = nb.dcim.cables.create(
+                a_terminations=[
+                    {"object_type": "dcim.interface", "object_id": nb_interface.id}
+                ],
+                b_terminations=[
+                    {"object_type": "dcim.interface", "object_id": peer.id}
+                ],
+                status="connected",
+            )
+
+            ret = self._sync(nfclient, [device], filter_by_name=interface)
+            pprint.pprint(ret)
+            for worker, res in ret.items():
+                assert not res["failed"], f"{worker} failed - {res}"
+                assert any(
+                    f"{device}:{interface} - cannot transition interface type "
+                    "from other to virtual while a cable is connected" in error
+                    for error in res["errors"]
+                )
+                assert interface in res["result"][device]["in_sync"]
+                assert interface not in res["result"][device]["updated"]
+
+            assert self._get_nb_intf(nfclient, device, interface).type.value == "other"
+        finally:
+            if cable:
+                cable.delete()
+            if peer:
+                peer.delete()
+            restore = self._sync(nfclient, [device], filter_by_name=interface)
+            for worker, res in restore.items():
+                assert not res[
+                    "failed"
+                ], f"Restore sync failed for {worker}: {res['errors']}"
+
     def test_sync_device_interfaces_does_not_replace_physical_type_with_other(
         self, nfclient
     ):

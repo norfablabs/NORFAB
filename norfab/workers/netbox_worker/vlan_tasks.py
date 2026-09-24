@@ -17,8 +17,10 @@ from .netbox_models import (
     CreateVlanResult,
     InterfaceMapRule,
     NetboxFastApiArgs,
+    SyncActionSummary,
     SyncVlansInput,
     SyncVlansResult,
+    SyncVlansResultPayload,
     VlanMapRule,
 )
 from .netbox_worker_utilities import (
@@ -492,7 +494,7 @@ class NetboxVlansTasks:
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:sync_vlans",
-            result={"vlans": {}, "interfaces": {}},
+            result=SyncVlansResultPayload().model_dump(),
             resources=[instance],
             dry_run=dry_run,
             diff={"vlans": {}, "interfaces": {}},
@@ -1049,21 +1051,17 @@ class NetboxVlansTasks:
 
         vlan_result = {}
         for scope, actions in vlan_diff.items():
-            vlan_result[scope] = {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": actions["in_sync"],
-            }
+            vlan_result[scope] = SyncActionSummary(
+                in_sync=actions["in_sync"]
+            ).model_dump()
         interface_result = {}
         for device, actions in interface_diff.items():
-            interface_result[device] = {
-                "created": [],
-                "updated": [],
-                "deleted": [],
-                "in_sync": actions["in_sync"],
-            }
-        ret.result = {"vlans": vlan_result, "interfaces": interface_result}
+            interface_result[device] = SyncActionSummary(
+                in_sync=actions["in_sync"]
+            ).model_dump()
+        ret.result = SyncVlansResultPayload(
+            vlans=vlan_result, interfaces=interface_result
+        ).model_dump()
 
         # Complete all creations before any VLAN updates or interface writes.
         create_items = []
