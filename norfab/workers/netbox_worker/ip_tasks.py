@@ -761,9 +761,8 @@ class NetboxIpTasks:
 
         1. When overlapping IP discovered in Netbox and it is part of anycast range,
             existing IP role update to `anycast`
-        2. Parsed TTP IP roles are synchronized to NetBox. VRRP addresses are
-            created or reused without an interface assignment so that `sync_vrrp`
-            can associate them with an FHRP group.
+        2. Parsed TTP IP roles are synchronized to NetBox, except for FHRP
+            addresses using the `vrrp`, `glbp`, `hsrp`, or `carp` roles.
 
         Args:
             job: NorFab Job object containing relevant metadata.
@@ -958,6 +957,8 @@ class NetboxIpTasks:
                 ):
                     ip = ip_data["ip"]
                     parsed_ip_role = ip_data.get("ip_address_role") or None
+                    if parsed_ip_role in ("vrrp", "glbp", "hsrp", "carp"):
+                        continue
                     host_address = ipaddress.ip_interface(str(ip)).ip
                     if filter_prefix_net and host_address not in filter_prefix_net:
                         continue
@@ -983,16 +984,8 @@ class NetboxIpTasks:
                         "address": ip,
                         "vrf": vrf,
                         "role": resolved_ip_role,
-                        # VRRP IPs are created unassigned; sync_vrrp associates them
-                        # with the corresponding NetBox FHRP group.
-                        "assigned_object_type": (
-                            None if resolved_ip_role == "vrrp" else "dcim.interface"
-                        ),
-                        "assigned_object_id": (
-                            None
-                            if resolved_ip_role == "vrrp"
-                            else nb_raw[intf_name]["id"]
-                        ),
+                        "assigned_object_type": "dcim.interface",
+                        "assigned_object_id": nb_raw[intf_name]["id"],
                     }
                     all_ip_live.append(ip_live)
 
@@ -1057,7 +1050,12 @@ class NetboxIpTasks:
             ]
             # Prefer the matching IP already assigned to the target interface.
             for nb_ip in matching_nb_ips:
-                if nb_ip["assigned_object_id"] == ip_live["assigned_object_id"]:
+                if (
+                    nb_ip["assigned_object_type"]
+                    == ip_live["assigned_object_type"]
+                    and nb_ip["assigned_object_id"]
+                    == ip_live["assigned_object_id"]
+                ):
                     matching_nb_ips = [nb_ip]
                     break
             else:
@@ -1066,6 +1064,17 @@ class NetboxIpTasks:
                     matching_nb_ips = [
                         i for i in matching_nb_ips if i["vrf"] == ip_live["vrf"]
                     ]
+            # Exclude records owned by non-interface objects while retaining valid
+            # interface-assigned and unassigned candidates for reconciliation.
+            eligible_nb_ips = [
+                i
+                for i in matching_nb_ips
+                if i["assigned_object_id"] is None
+                or i["assigned_object_type"] == "dcim.interface"
+            ]
+            if matching_nb_ips and not eligible_nb_ips:
+                continue
+            matching_nb_ips = eligible_nb_ips
             # no existing IP found, create it
             if not matching_nb_ips:
                 bulk_create_ip[key] = _ip_payload(ip_live, ignore_vrf)
@@ -1074,7 +1083,12 @@ class NetboxIpTasks:
             for nb_ip in matching_nb_ips:
                 if nb_ip["assigned_object_id"]:
                     # ip already assigned to same interface
-                    if nb_ip["assigned_object_id"] == ip_live["assigned_object_id"]:
+                    if (
+                        nb_ip["assigned_object_type"]
+                        == ip_live["assigned_object_type"]
+                        and nb_ip["assigned_object_id"]
+                        == ip_live["assigned_object_id"]
+                    ):
                         # if Netbox IP has anycast role, override live IP to use anycast role too
                         if nb_ip["role"] == "anycast":
                             msg = f"Found existing Netbox IP with 'anycast' role {nb_ip['address']}, assigning anycast role to live IP"
@@ -1133,17 +1147,6 @@ class NetboxIpTasks:
                 for nb_ip in matching_nb_ips:
                     # existing NB IP already assigned to an interface
                     if nb_ip["assigned_object_id"]:
-                        # sync_vrrp owns the FHRP assignment, so IP sync must not
-                        # move an existing VRRP address back onto an interface.
-                        if (
-                            ip_live["role"] == "vrrp"
-                            and nb_ip["role"] == "vrrp"
-                            and nb_ip["assigned_object_type"] == "ipam.fhrpgroup"
-                        ):
-                            device_results[device_name]["in_sync"].append(
-                                ip_live["address"]
-                            )
-                            break
                         # if existing Netbox IP role is anycast - override live IP role to anycast too
                         if nb_ip["role"] == "anycast":
                             msg = f"Found existing Netbox IP with 'anycast' role {nb_ip['address']}, assigning anycast role to live IP"
@@ -1197,16 +1200,6 @@ class NetboxIpTasks:
                 SyncActionSummary().model_dump(),
             )
 
-        # Multiple VRRP peers report the same virtual IP. Create it once and leave
-        # peer-to-group association to sync_vrrp.
-        vrrp_address_seen = set()
-        for key, ip_data in list(bulk_create_ip.items()):
-            addr = str(ipaddress.ip_interface(key[2]).ip)
-            if ip_data.get("role") == "vrrp":
-                if addr in vrrp_address_seen:
-                    bulk_create_ip.pop(key)
-                else:
-                    vrrp_address_seen.add(addr)
         # check that update and create payloads have no non-anycast duplicate IPs
         # Netbox has a bug allowing to create duplicate IPs in single create request
         job.event("checking IP address payloads for duplicate non-anycast addresses")

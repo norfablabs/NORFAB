@@ -26,7 +26,7 @@ over VRF and unassigned-record fallback matching.
 
 Roles are synchronized from the normalized TTP interface data. The
 `ip_address_role` value is written to NetBox when present, including roles such
-as `secondary`, `anycast`, and `vrrp`. The task also applies these fallbacks:
+as `secondary` and `anycast`. The task also applies these fallbacks:
 
 - Interfaces whose name starts with `loopback` or `lo` → role `loopback`
 - Addresses that fall within any configured `anycast_ranges` prefix → role `anycast`
@@ -35,11 +35,14 @@ as `secondary`, `anycast`, and `vrrp`. The task also applies these fallbacks:
 Configured `anycast_ranges` take precedence over the parsed role. A parsed role
 takes precedence over loopback-name inference.
 
-Addresses with the parsed `vrrp` role are created or reused without an
-interface assignment. The [`sync_vrrp`](services_netbox_service_tasks_sync_vrrp.md)
-task assigns those addresses to the appropriate NetBox FHRP group. If the
-address is already assigned to an FHRP group, IP synchronization leaves it
-unchanged.
+Addresses with a parsed `vrrp`, `glbp`, `hsrp`, or `carp` role are excluded
+from this task. The
+[`sync_vrrp`](services_netbox_service_tasks_sync_vrrp.md) task exclusively
+creates or reuses VRRP addresses and assigns them to the appropriate NetBox
+FHRP group. Matching IP records assigned to any non-interface NetBox object are
+also excluded so this task cannot reassign or duplicate records owned by
+another synchronization domain. Truly unassigned records remain eligible for
+reuse.
 
 ![Netbox Sync Device Interfaces](../../images/Netbox_Service_Sync_Interfaces.jpg)
 
@@ -133,6 +136,7 @@ For each live address, the task uses this order:
 | Same IP is unassigned in NetBox | Reuse the first unassigned record across all VRFs, assign it to the interface, and leave its VRF unchanged. | Reuse the first unassigned record in the VRF of the IP discovered from the live device and assign it to the interface. |
 | Only an unassigned IP in another VRF exists | Reuse it and preserve its current VRF. | Ignore it and create a record in the VRF of the IP discovered from the live device. |
 | Same non-anycast IP is assigned to another interface | Report a duplicate conflict. | Report a conflict when it is in the same VRF as the IP discovered from the live device. A record in another VRF does not match, so a new record is created in the discovered IP's VRF. |
+| Same IP is assigned to a non-interface object | Exclude the live address from IP synchronization. | Exclude the live address when the existing record is in the discovered IP's VRF. |
 | Same anycast IP is assigned to another interface | Create another anycast record for the target interface without a VRF. | Create another anycast record for the target interface in the VRF of the IP discovered from the live device. |
 | No matching IP exists | Create and assign an IP without a VRF. | Create and assign an IP in the VRF of the IP discovered from the live device. |
 

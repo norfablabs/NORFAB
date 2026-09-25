@@ -1022,6 +1022,54 @@ class TestSyncBgpPeerings:
                 "_BGP_" in renamed_name
             ), f"renamed session '{renamed_name}' does not match template '{template}'"
 
+    def test_sync_bgp_peerings_duplicate_names_use_tuple_identity(self, nfclient):
+        """Same-name NetBox sessions must remain distinct five-tuple identities."""
+        nb = get_pynetbox(nfclient)
+        target_device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        duplicate_name = "duplicate-session-name"
+
+        nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [target_device],
+                "rir": "lab",
+                "name_template": duplicate_name,
+            },
+        )
+        sessions = list(nb.plugins.bgp.session.filter(device=target_device))
+        assert len(sessions) > 1, f"Expected multiple sessions for '{target_device}'"
+        assert all(session.name == duplicate_name for session in sessions)
+
+        get_result = nfclient.run_job(
+            "netbox",
+            "get_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [target_device], "cache": False},
+        )
+        for worker, res in get_result.items():
+            assert any(
+                "duplicate BGP session name" in error for error in res["errors"]
+            ), f"{worker}: duplicate session names were not reported"
+
+        sync_result = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [target_device],
+                "rir": "lab",
+                "name_template": duplicate_name,
+                "dry_run": True,
+            },
+        )
+        for worker, res in sync_result.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            assert (
+                res["result"][target_device]["create"] == []
+            ), f"{worker}: existing same-name sessions were classified as creates"
+
     def test_sync_bgp_peerings_asn_type_idempotency(self, nfclient):
         """Regression: Bug #2 - ASN type mismatch (int in NB vs str from device) must not
         cause false 'updated' entries on second sync when nothing has changed."""
@@ -1108,7 +1156,7 @@ class TestSyncBgpPeerings:
             ip_obj.delete()
 
     def test_sync_bgp_peerings_filter_by_remote_as(self, nfclient):
-        """Only sessions matching filter_by_remote_as are synced; others are ignored."""
+        """Apply the remote-AS filter only to live sessions."""
         target_device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
         # First sync without filter to populate NetBox
         nfclient.run_job(
@@ -1144,7 +1192,6 @@ class TestSyncBgpPeerings:
                     device_result.get("create", [])
                     + device_result.get("in_sync", [])
                     + list(device_result.get("update", {}).keys())
-                    + device_result.get("delete", [])
                 )
                 for sname in all_tracked:
                     nb_session = nb.plugins.bgp.session.get(name=sname)
@@ -1155,7 +1202,7 @@ class TestSyncBgpPeerings:
                         )
 
     def test_sync_bgp_peerings_filter_by_peer_group(self, nfclient):
-        """Only sessions matching filter_by_peer_group are synced; others are ignored."""
+        """Apply the peer-group filter only to live sessions."""
         target_device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
         # First sync to populate NetBox
         nfclient.run_job(
@@ -1193,7 +1240,6 @@ class TestSyncBgpPeerings:
                     device_result.get("create", [])
                     + device_result.get("in_sync", [])
                     + list(device_result.get("update", {}).keys())
-                    + device_result.get("delete", [])
                 )
                 for sname in all_tracked:
                     nb_session = nb.plugins.bgp.session.get(name=sname)
@@ -1204,8 +1250,7 @@ class TestSyncBgpPeerings:
                         )
 
     def test_sync_bgp_peerings_filter_by_description(self, nfclient):
-        """Sync only sessions matching a description glob pattern; verify all created
-        sessions in NetBox have a description matching that pattern."""
+        """Filter live sessions without filtering tuple-matched NetBox sessions."""
         target_device = "fn-ceos-sp-1"
         desc_pattern = "ceos-leaf-1 Loopback*"
         nb = get_pynetbox(nfclient)
@@ -1240,6 +1285,33 @@ class TestSyncBgpPeerings:
                 f"Session '{session.name}' description '{session.description}' "
                 f"does not match pattern '{desc_pattern}'"
             )
+
+        # Make one existing target attribute fail the live-only filter. The stable
+        # five-tuple must still match this session and produce an update, not a create.
+        stale_session = created_sessions[0]
+        stale_session.description = "stale NetBox description"
+        stale_session.save()
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": [target_device],
+                "rir": "lab",
+                "filter_by_description": desc_pattern,
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert res["failed"] == False, f"{worker} failed: {res['errors']}"
+            device_result = res["result"][target_device]
+            assert (
+                stale_session.name in device_result["update"]
+            ), f"{worker}: tuple-matched session '{stale_session.name}' was not updated"
+            assert (
+                stale_session.name not in device_result["create"]
+            ), f"{worker}: tuple-matched session '{stale_session.name}' was classified as create"
 
     def test_sync_bgp_peerings_ignore_peer_ranges(self, nfclient):
         """Peers whose remote IP matches ignore_peer_ranges are not created."""

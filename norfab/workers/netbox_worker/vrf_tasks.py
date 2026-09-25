@@ -362,22 +362,26 @@ class NetboxVrfsTasks:
                 netbox_vrfs[vrf.name] = current
                 object_cache[("vrf", vrf.name)] = vrf
 
-        # Diff route-target and routing-policy lists before applying the
-        # additive policy. Only fields reported by make_diff are later written;
-        # changed lists retain NetBox values plus targets newly observed live.
+        # Route-target and routing-policy updates are additive. Retain existing
+        # NetBox associations and add values newly observed in live data.
+        for vrf_name, current in netbox_vrfs.items():
+            for field in (
+                "import_targets",
+                "export_targets",
+                rpl_import_ipv4,
+                rpl_import_ipv6,
+                rpl_export_ipv4,
+                rpl_export_ipv6,
+            ):
+                if field in current:
+                    live_vrfs[vrf_name][field] = sorted(
+                        set(current[field]) | set(live_vrfs[vrf_name][field])
+                    )
+
         vrf_diff = self.make_diff(
             {"vrfs": live_vrfs},
             {"vrfs": netbox_vrfs},
         )["vrfs"]
-        for vrf_name, changes in vrf_diff["update"].items():
-            for field in ("import_targets", "export_targets", *policy_fields.values()):
-                if field in changes:
-                    live_vrfs[vrf_name][field] = netbox_vrfs[vrf_name][field] + [
-                        target
-                        for target in live_vrfs[vrf_name][field]
-                        if target not in netbox_vrfs[vrf_name][field]
-                    ]
-                    changes[field]["new_value"] = live_vrfs[vrf_name][field]
         vrf_diff["delete"] = []
 
         create_names = vrf_diff["create"]

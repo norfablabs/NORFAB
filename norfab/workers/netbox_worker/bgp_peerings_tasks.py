@@ -962,10 +962,19 @@ class NetboxBgpPeeringsTasks:
 
             # Mode: cache disabled - fetch without caching
             if cache is False:
-                bgp_sessions = self.bulk_filter(
+                for session in self.bulk_filter(
                     nb.plugins.bgp.session, device_id=device_id
-                )
-                ret.result[device_name] = {s.name: dict(s) for s in bgp_sessions}
+                ):
+                    if session.name in ret.result[device_name]:
+                        msg = (
+                            f"duplicate BGP session name '{session.name}' found on device "
+                            f"'{device_name}'; skipping duplicate"
+                        )
+                        job.event(msg, resource=device_name, severity="ERROR")
+                        log.error(f"{self.name} - {msg}")
+                        ret.errors.append(msg)
+                        continue
+                    ret.result[device_name][session.name] = dict(session)
                 job.event(
                     f"retrieved {len(ret.result[device_name])} BGP session(s) for '{device_name}'",
                     resource=instance,
@@ -976,10 +985,19 @@ class NetboxBgpPeeringsTasks:
             if cache == "refresh" or cached_data is None:
                 if cache == "refresh" and cached_data is not None:
                     self.cache.delete(cache_key, retry=True)
-                bgp_sessions = self.bulk_filter(
+                for session in self.bulk_filter(
                     nb.plugins.bgp.session, device_id=device_id
-                )
-                ret.result[device_name] = {s.name: dict(s) for s in bgp_sessions}
+                ):
+                    if session.name in ret.result[device_name]:
+                        msg = (
+                            f"duplicate BGP session name '{session.name}' found on device "
+                            f"'{device_name}'; skipping duplicate"
+                        )
+                        job.event(msg, resource=device_name, severity="ERROR")
+                        log.error(f"{self.name} - {msg}")
+                        ret.errors.append(msg)
+                        continue
+                    ret.result[device_name][session.name] = dict(session)
                 self.cache.set(
                     cache_key, ret.result[device_name], expire=self.cache_ttl
                 )
@@ -1002,6 +1020,17 @@ class NetboxBgpPeeringsTasks:
                 device_id=device_id,
                 fields="id,last_updated,name",
             )
+            seen_session_names = set()
+            for session in brief_sessions:
+                if session.name in seen_session_names:
+                    msg = (
+                        f"duplicate BGP session name '{session.name}' found on device "
+                        f"'{device_name}'; skipping duplicate"
+                    )
+                    job.event(msg, resource=device_name, severity="ERROR")
+                    log.error(f"{self.name} - {msg}")
+                    ret.errors.append(msg)
+                seen_session_names.add(session.name)
             netbox_sessions = {
                 s.id: {"name": s.name, "last_updated": s.last_updated}
                 for s in brief_sessions
@@ -1045,6 +1074,9 @@ class NetboxBgpPeeringsTasks:
                 for session in self.bulk_filter(
                     nb.plugins.bgp.session, id=session_ids_to_fetch
                 ):
+                    existing_session = ret.result[device_name].get(session.name)
+                    if existing_session and existing_session["id"] != session.id:
+                        continue
                     ret.result[device_name][session.name] = dict(session)
 
             # Update cache if any changes occurred
@@ -2065,20 +2097,33 @@ class NetboxBgpPeeringsTasks:
             f"syncing BGP peerings for {len(devices)} device(s) in '{instance}', dry_run={dry_run}"
         )
 
-        # Fetch existing NetBox BGP sessions
+        # Fetch existing NetBox BGP sessions directly. get_bgp_peerings returns
+        # name-keyed data and cannot represent multiple sessions with the same name.
         job.event(f"fetching BGP session data from NetBox for {len(devices)} device(s)")
-        nb_sessions_result = self.get_bgp_peerings(
-            job=job,
-            instance=instance,
-            devices=devices,
-            cache="refresh",
-            branch=branch,
+        devices_result = self.get_devices(
+            job=job, devices=devices, instance=instance, cache=False, branch=branch
         )
-        if nb_sessions_result.errors:
-            job.event("failed to fetch BGP session data from NetBox", severity="ERROR")
-            ret.errors.extend(nb_sessions_result.errors)
+        if devices_result.errors:
+            job.event("failed to fetch device data from NetBox", severity="ERROR")
+            ret.errors.extend(devices_result.errors)
             ret.failed = True
             return ret
+
+        nb_sessions = {device_name: [] for device_name in devices}
+        device_names_by_id = {
+            device_data["id"]: device_name
+            for device_name, device_data in devices_result.result.items()
+            if device_name in devices
+        }
+        if device_names_by_id:
+            fetched_sessions = self.bulk_filter(
+                nb.plugins.bgp.session,
+                device_id=list(device_names_by_id),
+            )
+            for session in fetched_sessions:
+                device_name = device_names_by_id.get(session.device.id)
+                if device_name:
+                    nb_sessions[device_name].append(session)
 
         # Fetch live BGP data from devices via Nornir parse_ttp
         job.event(
@@ -2097,32 +2142,21 @@ class NetboxBgpPeeringsTasks:
         for device_name in devices:
             # Normalise NetBox sessions for this device
             normalised_nb[device_name] = {}
-            for sname, nb_session in nb_sessions_result.result.get(
-                device_name, {}
-            ).items():
+            for nb_session in nb_sessions.get(device_name, []):
+                sname = nb_session.name
                 try:
                     normalised = normalise_nb_bgp_session(
-                        nb_session, vrf_custom_field=vrf_custom_field
+                        dict(nb_session), vrf_custom_field=vrf_custom_field
                     )
                 except Exception as e:
                     log.warning(
                         f"{self.name} - failed to normalise NetBox session '{sname}' for '{device_name}': {e}"
                     )
                     continue
-                if not bgp_session_matches_filters(
-                    normalised,
-                    filter_by_remote_as=filter_by_remote_as,
-                    filter_by_peer_group=filter_by_peer_group,
-                    filter_by_description=filter_by_description,
-                    ignore_peer_nets=ignore_peer_nets,
-                ):
-                    continue
                 identity = bgp_session_identity(device_name, normalised)
                 normalised_nb[device_name][identity] = normalised
         nb_session_count = sum(len(sessions) for sessions in normalised_nb.values())
-        job.event(
-            f"normalised {nb_session_count} NetBox BGP session(s) after applying filters"
-        )
+        job.event(f"normalised {nb_session_count} NetBox BGP session(s)")
 
         # pre-seed lookup cache from fetched NetBox sessions and all parsed live
         # sessions before rendering live session names.

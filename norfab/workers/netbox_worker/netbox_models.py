@@ -1065,6 +1065,14 @@ class CheckDeviceSyncInput(
         json_schema_extra={"presence": True},
         alias="ignore-deletions",
     )
+    sync_kwargs: Union[None, StrictStr, Dict] = Field(
+        None,
+        description=(
+            "Per-task sync arguments keyed by sync task name, or an nf:// YAML "
+            "file containing them"
+        ),
+        alias="sync-kwargs",
+    )
 
 
 class SyncAllInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):

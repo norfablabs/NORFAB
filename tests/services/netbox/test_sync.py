@@ -205,6 +205,7 @@ class TestSyncAllOrchestration:
         ),
         ("sync_mac_addresses", {"device-1": {}}),
         ("sync_device_ip", {"device-1": {}}),
+        ("sync_vrrp", {"device-1": {}}),
         ("sync_bgp_peerings", {"device-1": {}}),
     ]
     RESULT_CATEGORIES = {
@@ -215,6 +216,7 @@ class TestSyncAllOrchestration:
         "sync_device_interfaces": "interfaces",
         "sync_mac_addresses": "mac_addresses",
         "sync_device_ip": "ip_addresses",
+        "sync_vrrp": "vrrp",
         "sync_bgp_peerings": "bgp_peerings",
     }
 
@@ -236,9 +238,6 @@ class TestSyncAllOrchestration:
         worker.sync_bgp_community = lambda **kwargs: Result(
             task="sync_bgp_community",
             result={"route_targets": {}, "communities": {}},
-        )
-        worker.sync_vrrp = lambda **kwargs: Result(
-            task="sync_vrrp", result={"device-1": {}}
         )
         return worker
 
@@ -442,6 +441,75 @@ class TestSyncAllOrchestration:
         assert result.result["device-1"] == {"vrrp": False, "in_sync": False}
         assert result.result["device-2"] == {"vrrp": True, "in_sync": True}
         assert result.diff["vrrp"] == vrrp_plan
+
+    def test_check_sync_passes_per_task_sync_kwargs(self) -> None:
+        worker = self._worker([])
+        received = {}
+
+        def sync_interfaces(**kwargs: Any) -> Result:
+            received["interfaces"] = kwargs
+            return Result(task="sync_device_interfaces", diff={"device-1": {}})
+
+        def sync_vrrp(**kwargs: Any) -> Result:
+            received["vrrp"] = kwargs
+            return Result(task="sync_vrrp", diff={"device-1": {}})
+
+        worker.sync_device_interfaces = sync_interfaces
+        worker.sync_vrrp = sync_vrrp
+
+        NetboxDevicesTasks.check_device_sync(
+            worker,
+            self._job(),
+            devices=["device-1"],
+            check_inventory=False,
+            check_vrfs=False,
+            check_vlans=False,
+            check_prefixes=False,
+            check_ip_addresses=False,
+            check_bgp_peerings=False,
+            check_bgp_communities=False,
+            sync_kwargs={
+                "sync_device_interfaces": {"filter_by_name": "Loopback*"},
+                "sync_vrrp": {"name_template": "{{ device }}-{{ group_id }}"},
+            },
+        )
+
+        assert received["interfaces"]["filter_by_name"] == "Loopback*"
+        assert received["vrrp"]["name_template"] == "{{ device }}-{{ group_id }}"
+        assert received["interfaces"]["dry_run"] is True
+        assert "name_template" not in received["interfaces"]
+
+    def test_check_sync_loads_sync_kwargs_from_file(self) -> None:
+        worker = self._worker([])
+        received = {}
+        worker.fetch_file = lambda url, raise_on_fail: """
+sync_device_interfaces:
+  filter_by_name: Loopback*
+"""
+
+        def sync_interfaces(**kwargs: Any) -> Result:
+            received.update(kwargs)
+            return Result(task="sync_device_interfaces", diff={"device-1": {}})
+
+        worker.sync_device_interfaces = sync_interfaces
+
+        NetboxDevicesTasks.check_device_sync(
+            worker,
+            self._job(),
+            devices=["device-1"],
+            check_inventory=False,
+            check_vrfs=False,
+            check_vlans=False,
+            check_prefixes=False,
+            check_ip_addresses=False,
+            check_bgp_peerings=False,
+            check_bgp_communities=False,
+            check_vrrp=False,
+            sync_kwargs="nf://netbox/check_sync_kwargs.yaml",
+        )
+
+        assert received["filter_by_name"] == "Loopback*"
+        assert received["dry_run"] is True
 
     @pytest.mark.parametrize("failed_task, failed_result", TASKS)
     def test_sync_all_stops_after_failed_stage(
@@ -1394,7 +1462,7 @@ class TestCheckDeviceSync:
 
 @pytest.mark.netbox_sync_all
 class TestSyncAll:
-    """Verify sync_all calls all eight sync tasks in sequence.
+    """Verify sync_all calls all nine sync tasks in sequence.
 
     Each test performs a full cleanup before and after via setup_method/teardown_method
     and uses out-of-band pynetbox queries to verify NetBox state directly.
@@ -1408,6 +1476,7 @@ class TestSyncAll:
         "interfaces",
         "mac_addresses",
         "ip_addresses",
+        "vrrp",
         "bgp_peerings",
     }
     NETBOX_SERIALS = {
@@ -1715,7 +1784,7 @@ class TestSyncAll:
             kwargs={
                 "FB": ["fn-ceos-sp-*"],
                 "dry_run": True,
-                "sync_kwargs": {"sync_vrfs": False},
+                "sync_kwargs": {"sync_vrfs": False, "sync_vrrp": False},
             },
         )
         pprint.pprint(ret, width=200)

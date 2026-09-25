@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 24 September 2026*
+*Last updated: 26 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -931,8 +931,10 @@ interface MAC addresses with NetBox, including interface-first IP matching,
 shared inline or `nf://` interface-name mapping, filters, inline or `nf://`
 anycast ranges, VRF/site association, controlled deletion behavior, and stable
 create, update, delete, and in-sync diff reports.
-Parsed VRRP addresses remain unassigned for the VRRP sync task to associate with
-FHRP groups. **Use cases:** IPAM accuracy and address/MAC drift correction.
+Parsed VRRP, GLBP, HSRP, and CARP addresses are excluded from IP
+synchronization. The VRRP sync task creates VRRP addresses and associates them
+with FHRP groups. IP records assigned to other non-interface objects are also
+excluded. **Use cases:** IPAM accuracy and address/MAC drift correction.
 **Limitations:** requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 [IP sync](workers/netbox/services_netbox_service_tasks_sync_device_ip.md) ·
@@ -951,8 +953,9 @@ prerequisites; templates and transformer files execute as trusted code.
 ### BGP peering lifecycle
 
 Creates or updates individual and bulk BGP sessions, and reconciles live BGP
-neighbors with NetBox using dry-run, filters, optional stale-session deletion,
-and tri-state existing-description preservation. **Use cases:** routing
+neighbors with NetBox using five-tuple session identity, live-data filters,
+dry-run, optional stale-session deletion, and tri-state existing-description
+preservation. **Use cases:** routing
 source-of-truth onboarding and drift control.
 **Limitations:** requires the NetBox BGP plugin, supported live parsing, and
 consistent IP/ASN/VRF modelling.
@@ -997,10 +1000,10 @@ validated in dry-run mode.
 Runs selected synchronizers in read-only dry-run mode for drift reporting,
 including inventory, interface, VRF, VLAN, prefix, IP, VRRP, BGP peering, and BGP
 community state, or executes the supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
-MAC, IP, and BGP sequence. `sync_all` accepts per-task keyword arguments inline
-or from an `nf://` YAML file and can skip individual stages. Drift assessment can
-treat deletion-only differences as in sync while retaining them in the detailed
-diff. **Use cases:** audit
+MAC, IP, VRRP, and BGP sequence. Both operations accept per-task keyword arguments
+inline or from an `nf://` YAML file; `sync_all` can also skip individual stages.
+Drift assessment can treat deletion-only differences as in sync while retaining
+them in the detailed diff. **Use cases:** audit
 evidence, change planning, and scheduled source-of-truth maintenance.
 **Limitations:** assessment is limited to implemented sync domains; `sync_all`
 can make broad changes and requires careful deletion/filter policy.

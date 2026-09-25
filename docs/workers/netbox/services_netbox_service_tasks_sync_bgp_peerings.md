@@ -11,9 +11,9 @@ Synchronises BGP sessions between live network devices and the NetBox BGP plugin
 
 ## How It Works
 
-**Data collection** — NetBox worker fetches existing BGP sessions from NetBox BGP plugin. In parallel, Nornir service parses BGP neighbor data from devices using `parse_ttp` with `get="bgp_neighbors"`.
+**Data collection** — NetBox worker fetches every existing BGP session directly from the NetBox BGP plugin so sessions with duplicate names remain distinct. In parallel, Nornir service parses BGP neighbor data from devices using `parse_ttp` with `get="bgp_neighbors"`.
 
-**Normalisation and diff** — Both datasets are normalised to flat comparable dicts keyed by session name convention `{device_name}_{session_name}`. `DeepDiff` classifies each session as `create`, `update`, `delete`, or `in_sync`.
+**Normalisation and diff** — Both datasets are normalised to flat comparable dictionaries keyed by the five-part identity `(device, local address, local ASN, remote address, remote ASN)`. Session names remain updateable attributes. `DeepDiff` classifies each session as `create`, `update`, `delete`, or `in_sync`.
 
 **NetBox writes** — Sessions are created, updated, or (when `process_deletions=True`) deleted in NetBox. IP addresses and ASNs are resolved from IPAM or created on-demand. On create, all related objects (peer groups, routing policies, prefix lists) are resolved or created by name.
 
@@ -117,18 +117,18 @@ live description.
 
 ## Filtering
 
-Three optional filters narrow which sessions are considered during sync. Filters apply to **both** the NetBox dataset and the live device dataset before the diff is computed. Sessions that do not match are silently excluded from creates, updates, and deletes.
+Three optional filters narrow which live sessions are considered during sync. Existing NetBox sessions remain in the five-tuple-keyed target dataset so a matching live session is updated instead of incorrectly treated as a new session when filtered attributes differ.
 
 | Parameter | Match logic | Applied to |
 |---|---|---|
-| `filter_by_remote_as` | Exact match — session's remote AS must equal one of the provided integer values | NetBox & live |
-| `filter_by_peer_group` | Exact match — session's peer group name must equal one of the provided values | NetBox & live |
-| `filter_by_description` | Glob match — session's description must match the provided glob pattern (e.g. `*uplink*`) | NetBox & live |
+| `filter_by_remote_as` | Exact match — live session's remote AS must equal one of the provided integer values | Live only |
+| `filter_by_peer_group` | Exact match — live session's peer group name must equal one of the provided values | Live only |
+| `filter_by_description` | Glob match — live session's description must match the provided glob pattern (e.g. `*uplink*`) | Live only |
 
 Multiple filters may be combined; all must pass (AND logic). `filter_by_description` uses Python `fnmatch` glob syntax — `*` matches any sequence of characters, `?` matches a single character.
 
 !!! note
-    When `process_deletions=True`, only sessions that pass the filters are candidates for deletion. Sessions excluded by a filter are never deleted.
+    Because filters apply only to live data, existing NetBox sessions without a matching filtered live five-tuple appear as deletion candidates. They are deleted only when `process_deletions=True`.
 
 ## Deletion Behavior
 

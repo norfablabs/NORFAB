@@ -1210,6 +1210,7 @@ class NetboxDevicesTasks:
         check_bgp_communities: bool = True,
         check_vrrp: bool = True,
         ignore_deletions: bool = False,
+        sync_kwargs: Union[None, dict, str] = None,
         **kwargs: Any,
     ) -> Result:
         """
@@ -1241,6 +1242,12 @@ class NetboxDevicesTasks:
             check_vrrp (bool): Check VRRP sync state. Defaults to True.
             ignore_deletions (bool): Treat deletion-only differences as in sync.
                 Defaults to False.
+            sync_kwargs: Per-task arguments keyed by sync task name, or an
+                ``nf://`` YAML file containing that dictionary. Supported keys
+                are ``sync_device_inventory``, ``sync_device_interfaces``,
+                ``sync_vrfs``, ``sync_vlans``, ``sync_device_prefixes``,
+                ``sync_device_ip``, ``sync_vrrp``, ``sync_bgp_community``, and
+                ``sync_bgp_peerings``.
             **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
@@ -1263,6 +1270,11 @@ class NetboxDevicesTasks:
         """
         devices = devices or []
         instance = instance or self.default_instance
+        if isinstance(sync_kwargs, str):
+            sync_kwargs = yaml.safe_load(
+                self.fetch_file(sync_kwargs, raise_on_fail=True)
+            )
+        sync_kwargs = sync_kwargs or {}
         ret = Result(
             task=f"{self.name}:check_device_sync",
             result={},
@@ -1307,6 +1319,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_device_inventory") or {}),
             )
             if inventory_result.errors:
                 ret.errors.extend(inventory_result.errors)
@@ -1326,6 +1339,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_device_interfaces") or {}),
             )
             if intf_result.errors:
                 ret.errors.extend(intf_result.errors)
@@ -1345,6 +1359,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_vrfs") or {}),
             )
             if vrf_result.errors:
                 ret.errors.extend(vrf_result.errors)
@@ -1372,6 +1387,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_vlans") or {}),
             )
             if vlan_result.errors:
                 ret.errors.extend(vlan_result.errors)
@@ -1395,6 +1411,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_device_prefixes") or {}),
             )
             if prefix_result.errors:
                 ret.errors.extend(prefix_result.errors)
@@ -1415,6 +1432,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_device_ip") or {}),
             )
             if ip_result.errors:
                 ret.errors.extend(ip_result.errors)
@@ -1436,6 +1454,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_vrrp") or {}),
             )
             if vrrp_result.errors:
                 ret.errors.extend(vrrp_result.errors)
@@ -1455,6 +1474,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_bgp_community") or {}),
             )
             if community_result.errors:
                 ret.errors.extend(community_result.errors)
@@ -1475,6 +1495,7 @@ class NetboxDevicesTasks:
                 timeout=timeout,
                 devices=list(devices),
                 branch=branch,
+                **(sync_kwargs.get("sync_bgp_peerings") or {}),
             )
             if bgp_result.errors:
                 ret.errors.extend(bgp_result.errors)
@@ -1538,7 +1559,7 @@ class NetboxDevicesTasks:
         """
         Synchronize all device data from live devices into NetBox in sequence:
         inventory → prefixes → interfaces → VRFs → VLANs → MAC addresses →
-        IP addresses → BGP peerings.
+        IP addresses → VRRP → BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
         Pass ``with_approval=True`` to have each sync stage run a dry-run preview,
@@ -1563,6 +1584,7 @@ class NetboxDevicesTasks:
                     "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
                     "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
                     "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
+                    "vrrp":          {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
                     "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},
                 }
             }
@@ -1876,6 +1898,39 @@ class NetboxDevicesTasks:
                 ret.status = "skipped"
                 ret.dry_run = True
                 job.event("sync all stopped because IP address review was declined")
+                return ret
+
+        # --- sync VRRP after regular IP addresses ---
+        if sync_kwargs.get("sync_vrrp") is False:
+            job.event("skipping VRRP sync")
+        else:
+            job.event("syncing VRRP")
+            vrrp_result = self.sync_vrrp(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_vrrp") or {}),
+            )
+            if vrrp_result.errors:
+                job.event("VRRP sync completed with errors", severity="WARNING")
+                ret.errors.extend(vrrp_result.errors)
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(vrrp_result.resources_failed)
+            )
+            for device, data in vrrp_result.result.items():
+                ret.result.setdefault(device, {})["vrrp"] = data
+            if vrrp_result.failed:
+                ret.failed = True
+                job.event("sync all stopped because VRRP sync failed", severity="ERROR")
+                return ret
+            if vrrp_result.status == "skipped" and vrrp_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because VRRP review was declined")
                 return ret
 
         # --- sync BGP peerings ---

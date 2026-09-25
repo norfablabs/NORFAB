@@ -17,15 +17,16 @@ fixed sequence:
 5. **vlans** — calls `sync_vlans`
 6. **mac_addresses** — calls `sync_mac_addresses`
 7. **ip_addresses** — calls `sync_device_ip`
-8. **bgp_peerings** — calls `sync_bgp_peerings`
+8. **vrrp** — calls `sync_vrrp`
+9. **bgp_peerings** — calls `sync_bgp_peerings`
 
 ## How It Works
 
-The `sync_all` task orchestrates eight subordinate sync tasks in sequence. Each task collects live device data,
+The `sync_all` task orchestrates nine subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When `dry_run=True`, all tasks preview changes
 without writing. When `with_approval=True`, each stage waits for user confirmation before applying changes.
 If VLAN synchronization fails, `sync_all` returns immediately and does not run
-MAC address, IP address, or BGP peering synchronization.
+MAC address, IP address, VRRP, or BGP peering synchronization.
 
 ## Execution Modes
 
@@ -79,6 +80,9 @@ sync_device_ip:
   ignore_ranges:
     - 192.0.2.0/24
 
+sync_vrrp:
+  name_template: "{{ device }}-{{ interface }}-vrrp-{{ group_id }}"
+
 sync_bgp_peerings:
   process_deletions: true
   status: active
@@ -87,7 +91,7 @@ sync_bgp_peerings:
 
 The supported keys are `sync_device_inventory`, `sync_vlans`,
 `sync_device_prefixes`, `sync_vrfs`, `sync_device_interfaces`,
-`sync_mac_addresses`, `sync_device_ip`, and `sync_bgp_peerings`. Refer to each
+`sync_mac_addresses`, `sync_device_ip`, `sync_vrrp`, and `sync_bgp_peerings`. Refer to each
 task's documentation for its accepted arguments. Missing keys run with the
 subordinate task's defaults. Set a key to `false` to skip that task and continue
 with the next stage:
@@ -103,7 +107,7 @@ at the `sync_all` level rather than repeating them inside a task dictionary.
 
 ## Output
 
-The result structure aggregates the outcomes of all eight subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and `interfaces` sections. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. Each `interfaces` section contains only the current device.
+The result structure aggregates the outcomes of all nine subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and `interfaces` sections. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. Each `interfaces` section contains only the current device.
 
 ```python
 {
@@ -183,6 +187,12 @@ The result structure aggregates the outcomes of all eight subordinate sync tasks
                 "updated": [ ... ],
                 "in_sync": [ ... ],
             },
+            "vrrp": {
+                "created": [ ... ],
+                "updated": [ ... ],
+                "deleted": [ ... ],
+                "in_sync": [ ... ],
+            },
             "bgp_peerings": {
                 "create":  { ... },
                 "update":  { ... },
@@ -202,7 +212,7 @@ When `dry_run=True` the same structure is returned but no changes are written to
 
 === "CLI"
 
-    Preview all eight sync categories:
+    Preview all nine sync categories:
 
     ```
     nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
@@ -250,6 +260,7 @@ When `dry_run=True` the same structure is returned but no changes are written to
                     "vlan_map": "nf://netbox/vlan_map.yaml",
                 },
                 "sync_device_ip": {"ignore_vrf": False},
+                "sync_vrrp": {"name_template": "{{ device }}-{{ interface }}-vrrp-{{ group_id }}"},
                 "sync_bgp_peerings": False,
             },
         },
@@ -268,7 +279,7 @@ nf# man tree netbox.sync.all
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, MAC addresses, IP addresses and BGP peerings
+        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, MAC addresses, IP addresses, VRRP and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'

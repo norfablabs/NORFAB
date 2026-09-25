@@ -726,10 +726,9 @@ class TestSyncDeviceIP:
         finally:
             self._delete_ip_addresses(nfclient, address)
 
-    def test_sync_device_ip_junos_vrrp_role(self, nfclient):
-        """Create one VRRP IP and hand it off to FHRP synchronization."""
+    def test_sync_device_ip_skips_junos_vrrp_role(self, nfclient):
+        """Exclude a parser-labelled VRRP IP from IP synchronization."""
         pynb = get_pynetbox(nfclient)
-        fhrp_group = None
         self._delete_ip_addresses(nfclient, self.JUNOS_VRRP_IP)
 
         try:
@@ -764,115 +763,32 @@ class TestSyncDeviceIP:
                 ("fn-junos-2", self.JUNOS_VRRP_IP),
             ]
 
-            first_sync = self._sync(
+            ip_sync = self._sync(
                 nfclient,
                 self.JUNOS_DEVICES,
                 filter_by_ip=self.JUNOS_VRRP_IP.split("/")[0],
             )
-            for worker, result in first_sync.items():
+            for worker, result in ip_sync.items():
                 assert result["failed"] == False, f"{worker} failed - {result}"
                 assert result["errors"] == []
-                created = sum(
-                    self.JUNOS_VRRP_IP in device_result["created"]
-                    for device_result in result["result"].values()
-                )
-                assert created == 1, result
-
-            matching_ips = list(
+                for device in self.JUNOS_DEVICES:
+                    assert result["result"][device] == {
+                        "created": [],
+                        "updated": [],
+                        "deleted": [],
+                        "in_sync": [],
+                    }
+                    assert result["diff"][device] == {
+                        "create": [],
+                        "update": {},
+                        "delete": [],
+                        "in_sync": [],
+                    }
+            assert not list(
                 pynb.ipam.ip_addresses.filter(address=self.JUNOS_VRRP_IP)
             )
-            assert len(matching_ips) == 1
-            nb_ip = matching_ips[0]
-            assert str(nb_ip.role).lower() == "vrrp"
-            assert nb_ip.assigned_object is None
-
-            second_sync = self._sync(
-                nfclient,
-                self.JUNOS_DEVICES,
-                filter_by_ip=self.JUNOS_VRRP_IP.split("/")[0],
-            )
-            for worker, result in second_sync.items():
-                assert result["failed"] == False, f"{worker} failed - {result}"
-                assert result["errors"] == []
-                for device in self.JUNOS_DEVICES:
-                    assert self.JUNOS_VRRP_IP in result["result"][device]["in_sync"]
-                    assert result["result"][device]["created"] == []
-                    assert result["result"][device]["updated"] == []
-
-            nb_ip.update({"role": "secondary"})
-            role_sync = self._sync(
-                nfclient,
-                self.JUNOS_DEVICES,
-                filter_by_ip=self.JUNOS_VRRP_IP.split("/")[0],
-            )
-            for worker, result in role_sync.items():
-                assert result["failed"] == False, f"{worker} failed - {result}"
-                assert result["errors"] == []
-                updated = sum(
-                    self.JUNOS_VRRP_IP in device_result["updated"]
-                    for device_result in result["result"].values()
-                )
-                assert updated == 1, result
-            nb_ip = pynb.ipam.ip_addresses.get(id=nb_ip.id)
-            assert str(nb_ip.role).lower() == "vrrp"
-            assert nb_ip.assigned_object is None
-
-            vrrp_sync = nfclient.run_job(
-                "netbox",
-                "sync_vrrp",
-                workers="any",
-                kwargs={"devices": self.JUNOS_DEVICES},
-            )
-            for worker, result in vrrp_sync.items():
-                assert result["failed"] == False, f"{worker} failed - {result}"
-                assert result["errors"] == []
-
-            nb_ip = pynb.ipam.ip_addresses.get(id=nb_ip.id)
-            assert nb_ip.assigned_object_type == "ipam.fhrpgroup"
-            fhrp_group = pynb.ipam.fhrp_groups.get(id=nb_ip.assigned_object.id)
-            assert fhrp_group.protocol == "vrrp2"
-            assert fhrp_group.group_id == 10
-            assignments = list(
-                pynb.ipam.fhrp_group_assignments.filter(group_id=fhrp_group.id)
-            )
-            assert len(assignments) == len(self.JUNOS_DEVICES)
-            expected_interface_ids = {
-                pynb.dcim.interfaces.get(
-                    device=device,
-                    name=self.JUNOS_VRRP_INTERFACE,
-                ).id
-                for device in self.JUNOS_DEVICES
-            }
-            assert {assignment.interface_id for assignment in assignments} == (
-                expected_interface_ids
-            )
-
-            assigned_sync = self._sync(
-                nfclient,
-                self.JUNOS_DEVICES,
-                filter_by_ip=self.JUNOS_VRRP_IP.split("/")[0],
-            )
-            for worker, result in assigned_sync.items():
-                assert result["failed"] == False, f"{worker} failed - {result}"
-                assert result["errors"] == []
-                for device in self.JUNOS_DEVICES:
-                    assert self.JUNOS_VRRP_IP in result["result"][device]["in_sync"]
-                    assert result["result"][device]["created"] == []
-                    assert result["result"][device]["updated"] == []
-
-            nb_ip = pynb.ipam.ip_addresses.get(id=nb_ip.id)
-            assert nb_ip.assigned_object_type == "ipam.fhrpgroup"
-            assert nb_ip.assigned_object.id == fhrp_group.id
         finally:
             self._delete_ip_addresses(nfclient, self.JUNOS_VRRP_IP)
-            if fhrp_group:
-                for assignment in pynb.ipam.fhrp_group_assignments.filter(
-                    group_id=fhrp_group.id
-                ):
-                    assignment.delete()
-                existing_group = pynb.ipam.fhrp_groups.get(id=fhrp_group.id)
-                if existing_group:
-                    existing_group.delete()
 
     # ------------------------------------------------------------------ #
     # Anycast scenarios                                                    #

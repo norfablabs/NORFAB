@@ -1,3 +1,23 @@
+# 0.24.2
+
+## ENHANCEMENTS
+
+1. NetBox `check_device_sync` now accepts per-task `sync_kwargs` inline or from an `nf://` YAML file, allowing each dry-run synchronizer's filtering, mapping, and comparison options to be configured independently.
+
+## BUGS
+
+1. Fixed NetBox IP address synchronization reporting duplicate-IP conflicts for virtual addresses already assigned to FHRP groups.
+2. Fixed NetBox BGP peering synchronization filtering existing NetBox sessions before five-tuple identity comparison or collapsing same-name sessions, which could classify an existing session as a create instead of an update. Synchronization now reads every NetBox session directly, keys both datasets by the device, local address, local ASN, remote address, and remote ASN tuple, and applies session filters only to live data.
+3. Fixed NetBox VRF synchronization reporting route-target and routing-policy updates with identical old and new values when NetBox already contained every live value plus additional associations. Additive associations are now merged before comparison, so NetBox-only values are retained and the VRF is reported as in sync.
+
+## CHANGES
+
+1. NetBox `sync_device_ip` now excludes live addresses labelled `vrrp`, `glbp`, `hsrp`, or `carp`, as well as matching NetBox IPs assigned to non-interface objects. FHRP synchronization tasks own those addresses; `sync_vrrp` creates or reuses VRRP IPs and assigns them to FHRP groups.
+2. NetBox `sync_all` now runs `sync_vrrp` after IP address synchronization and before BGP peering synchronization.
+3. NetBox `get_bgp_peerings` now reports an error when multiple BGP sessions on a device share the same name. Its name-keyed response keeps the first session and skips later duplicates.
+
+---
+
 # 0.24.1
 
 ## ENHANCEMENTS

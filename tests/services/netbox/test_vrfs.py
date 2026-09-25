@@ -477,6 +477,27 @@ class TestSyncVrfs:
             "TEST_VRF_SYNC_TENANT_A_IMPORT",
         }
 
+    def test_netbox_only_additive_values_are_in_sync(self, nfclient: Any) -> None:
+        self._successful_results(self._sync(nfclient, [self.DEVICE_1]))
+        extra_target = self.nb.ipam.route_targets.create(name="65100:999")
+        extra_policy = self.nb.plugins.bgp.routing_policy.create(
+            name="TEST_VRF_SYNC_TENANT_A_EXTRA"
+        )
+        tenant_a = self.nb.ipam.vrfs.get(name="TEST_VRF_SYNC_TENANT_A")
+        tenant_a.import_targets = [
+            *[target.id for target in tenant_a.import_targets],
+            extra_target.id,
+        ]
+        tenant_a.custom_fields["rpl_import_ipv4"] = [
+            *[policy["id"] for policy in tenant_a.custom_fields["rpl_import_ipv4"]],
+            extra_policy.id,
+        ]
+        tenant_a.save()
+
+        for result in self._successful_results(self._sync(nfclient, [self.DEVICE_1])):
+            assert result["result"]["vrfs"]["updated"] == []
+            assert result["result"]["vrfs"]["in_sync"] == sorted(self.VRF_NAMES)
+
     def test_multiple_devices_are_aggregated_with_description_precedence(
         self, nfclient: Any
     ) -> None:

@@ -43,9 +43,32 @@ Each sub-check can be enabled or disabled independently.
 | `check_bgp_communities` | No | Check route-target and BGP community sync state, default `True` |
 | `check_vrrp` | No | Check VRRP sync state, default `True` |
 | `ignore_deletions` | No | Treat deletion-only differences as in sync, default `False` |
+| `sync_kwargs` | No | Per-task sync arguments as an inline dictionary or an `nf://` YAML file |
 | Nornir filters | No | Host filters such as `FL`, `FB`, `FG`, `FC`, or `FN` |
 
 At least one explicit device or Nornir host filter must resolve to a device.
+
+## Sync Task Arguments
+
+Use `sync_kwargs` to configure how individual dry-run synchronizers calculate
+drift. Supported keys are `sync_device_inventory`, `sync_device_interfaces`,
+`sync_vrfs`, `sync_vlans`, `sync_device_prefixes`, `sync_device_ip`,
+`sync_vrrp`, `sync_bgp_community`, and `sync_bgp_peerings`. Values are keyword
+argument dictionaries accepted by the corresponding task. Keep `instance`,
+`timeout`, `devices`, `branch`, and `dry_run` at the `check_device_sync` level;
+all subordinate tasks are always called with `dry_run=True`.
+
+The mapping can be supplied inline or loaded from an `nf://` YAML file:
+
+```yaml
+sync_device_interfaces:
+  filter_by_name: Loopback*
+sync_vlans:
+  filter_by_vlan_ids:
+    - 100-299
+sync_bgp_peerings:
+  status: active
+```
 
 ## Output
 
@@ -116,6 +139,12 @@ A category is considered in sync when the corresponding dry-run reports no pendi
     nf#netbox check-sync devices devices ceos-leaf-1 branch my-branch
     ```
 
+    Load per-task arguments from the File Sharing service:
+
+    ```bash
+    nf#netbox check-sync devices devices ceos-leaf-1 sync-kwargs nf://netbox/check_sync_kwargs.yaml
+    ```
+
 === "Python"
 
     Context manager:
@@ -132,6 +161,10 @@ A category is considered in sync when the corresponding dry-run reports no pendi
             workers="any",
             kwargs={
                 "devices": ["ceos-leaf-1", "ceos-leaf-2"],
+                "sync_kwargs": {
+                    "sync_device_interfaces": {"filter_by_name": "Loopback*"},
+                    "sync_vlans": {"filter_by_vlan_ids": ["100-299"]},
+                },
             },
         )
     ```
@@ -201,6 +234,7 @@ root
             ├── check-bgp-communities:    Check BGP communities sync state, default 'True'
             ├── check-vrrp:    Check VRRP sync state, default 'True'
             ├── ignore-deletions:    Treat deletion-only differences as in sync, default 'False'
+            ├── sync-kwargs:    Per-task sync arguments or nf:// YAML file
             ├── FO:    Filter hosts using Filter Object
             ├── FB:    Filter hosts by name using Glob Patterns
             ├── FH:    Filter hosts by hostname

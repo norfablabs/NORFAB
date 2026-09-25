@@ -331,7 +331,7 @@ class SyncCommands(BaseModel):
         None,
         description=(
             "Sync all device data: inventory, prefixes, interfaces, VRFs, VLANs, "
-            "MAC addresses, IP addresses and BGP peerings"
+            "MAC addresses, IP addresses, VRRP and BGP peerings"
         ),
     )
 
