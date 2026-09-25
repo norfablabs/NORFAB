@@ -862,6 +862,28 @@ class TestSyncBgpPeerings:
                 len(res["errors"]) > 0
             ), f"{worker}: expected errors for nonexistent device"
 
+    def test_sync_bgp_peerings_keeps_valid_device_with_nonexistent_device(
+        self, nfclient
+    ):
+        """Missing devices report errors without discarding valid-device results."""
+        ret = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={
+                "devices": ["fn-ceos-sp-1", "nonexistent-device-xyz"],
+                "rir": "lab",
+                "dry_run": True,
+            },
+        )
+        pprint.pprint(ret)
+        for worker, res in ret.items():
+            assert any(
+                "nonexistent-device-xyz" in error for error in res["errors"]
+            ), f"{worker}: expected missing-device error"
+            assert "fn-ceos-sp-1" in res["result"]
+            assert "nonexistent-device-xyz" not in res["result"]
+
     def test_sync_bgp_peerings_with_nornir_filter(self, nfclient):
         """Devices sourced from the FakeNOS spine name filter."""
         ret = nfclient.run_job(

@@ -390,7 +390,8 @@ class TestSyncVrrp:
             )
             == []
         )
-        assert list(nb.ipam.fhrp_groups.filter(protocol="vrrp2", group_id=10)) == []
+        expected_group_name = f"{self.DEVICE}_{self.INTERFACES[10]}_VRRP10"
+        assert nb.ipam.fhrp_groups.get(name=expected_group_name) is None
 
     def test_sync_vrrp_creates_netbox_records_and_is_idempotent(
         self, nfclient: Any
@@ -464,7 +465,7 @@ class TestSyncVrrp:
 
 
 class TestSyncVrrpEmptyResult:
-    DEVICE = "fn-ceos-sp-1"
+    DEVICE = "fn-ceos-lf-3"
     NORNIR_WORKER = "nornir-worker-4"
 
     def test_sync_vrrp_stops_when_getter_returns_no_assignments(

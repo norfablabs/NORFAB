@@ -3150,6 +3150,19 @@ commands:
     - '{base_prompt}>'
     - '{base_prompt}#'
     help: collected from live cEOS
+  show running-config section vrrp:
+    output: |
+      interface Ethernet1
+         vrrp 250 ipv4 10.3.250.1
+         vrrp 250 ipv4 version 3
+         vrrp 250 priority-level 110
+      !
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show run section vrrp:
+    alias: show running-config section vrrp
   show run section vrf:
     output: |
       vrf instance CONTROL_PLANE

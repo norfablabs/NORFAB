@@ -2109,6 +2109,19 @@ class NetboxBgpPeeringsTasks:
             ret.failed = True
             return ret
 
+        # Report devices missing from NetBox while continuing with valid devices.
+        valid_devices = set(devices_result.result)
+        missing_devices = sorted(set(devices) - valid_devices)
+        for device_name in missing_devices:
+            msg = f"device '{device_name}' not found in NetBox"
+            job.event(msg, severity="ERROR")
+            log.error(msg)
+            ret.errors.append(msg)
+
+        devices = [device_name for device_name in devices if device_name in valid_devices]
+        if not devices:
+            return ret
+
         nb_sessions = {device_name: [] for device_name in devices}
         device_names_by_id = {
             device_data["id"]: device_name

@@ -9,6 +9,7 @@
 1. Fixed NetBox IP address synchronization reporting duplicate-IP conflicts for virtual addresses already assigned to FHRP groups.
 2. Fixed NetBox BGP peering synchronization filtering existing NetBox sessions before five-tuple identity comparison or collapsing same-name sessions, which could classify an existing session as a create instead of an update. Synchronization now reads every NetBox session directly, keys both datasets by the device, local address, local ASN, remote address, and remote ASN tuple, and applies session filters only to live data.
 3. Fixed NetBox VRF synchronization reporting route-target and routing-policy updates with identical old and new values when NetBox already contained every live value plus additional associations. Additive associations are now merged before comparison, so NetBox-only values are retained and the VRF is reported as in sync.
+4. Fixed NetBox BGP peering synchronization silently accepting requested devices that do not exist in NetBox. Missing devices are now reported while valid devices in the same request continue to synchronize.
 
 ## CHANGES
 
