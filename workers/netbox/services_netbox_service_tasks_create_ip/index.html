@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2447,10 +2475,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#inputs" class="md-nav__link">
+  <a href="#vrrp-virtual-ip-allocation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inputs
+        VRRP virtual IP allocation
       
     </span>
   </a>
@@ -6158,34 +6186,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6250,10 +6250,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6271,8 +6271,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6893,10 +6893,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -6914,8 +6914,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7050,10 +7050,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#inputs" class="md-nav__link">
+  <a href="#vrrp-virtual-ip-allocation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inputs
+        VRRP virtual IP allocation
       
     </span>
   </a>
@@ -7152,103 +7152,21 @@
 </blockquote>
 <p>Allocates the next available IP address from a parent prefix, or reuses an existing matching IP address. The task can assign the IP to a device interface, update metadata, set the address as primary, and optionally create an address for the connected peer interface.</p>
 <p>The task can also be called from Nornir templates through the <a href="../../nornir/services_nornir_service_jinja2_filters/#netboxcreate_ip">netbox.create_ip Jinja2 filter</a>.</p>
-<h2 id="inputs">Inputs<a class="headerlink" href="#inputs" title="Permanent link">¤</a></h2>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th style="text-align: right;">Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>prefix</code></td>
-<td style="text-align: right;">Yes</td>
-<td>Parent prefix as a network string, prefix description, or pynetbox filter dictionary</td>
-</tr>
-<tr>
-<td><code>device</code></td>
-<td style="text-align: right;">No</td>
-<td>Device name to associate with the IP address</td>
-</tr>
-<tr>
-<td><code>interface</code></td>
-<td style="text-align: right;">No</td>
-<td>Interface name to associate with the IP address</td>
-</tr>
-<tr>
-<td><code>description</code></td>
-<td style="text-align: right;">No</td>
-<td>IP address description</td>
-</tr>
-<tr>
-<td><code>vrf</code></td>
-<td style="text-align: right;">No</td>
-<td>VRF name for the IP address</td>
-</tr>
-<tr>
-<td><code>tags</code></td>
-<td style="text-align: right;">No</td>
-<td>Tags to associate with the IP address</td>
-</tr>
-<tr>
-<td><code>dns_name</code></td>
-<td style="text-align: right;">No</td>
-<td>DNS name for the IP address</td>
-</tr>
-<tr>
-<td><code>tenant</code></td>
-<td style="text-align: right;">No</td>
-<td>Tenant name to associate with the IP address</td>
-</tr>
-<tr>
-<td><code>comments</code></td>
-<td style="text-align: right;">No</td>
-<td>IP address comments</td>
-</tr>
-<tr>
-<td><code>role</code></td>
-<td style="text-align: right;">No</td>
-<td>IP address role, such as <code>loopback</code> or <code>anycast</code></td>
-</tr>
-<tr>
-<td><code>status</code></td>
-<td style="text-align: right;">No</td>
-<td>IP address status</td>
-</tr>
-<tr>
-<td><code>is_primary</code></td>
-<td style="text-align: right;">No</td>
-<td>Set the IP address as the device primary IP</td>
-</tr>
-<tr>
-<td><code>mask_len</code></td>
-<td style="text-align: right;">No</td>
-<td>Allocate a child subnet of this length before creating the IP</td>
-</tr>
-<tr>
-<td><code>create_peer_ip</code></td>
-<td style="text-align: right;">No</td>
-<td>Create an IP address for the connected peer interface, default <code>True</code></td>
-</tr>
-<tr>
-<td><code>instance</code></td>
-<td style="text-align: right;">No</td>
-<td>NetBox instance name to target</td>
-</tr>
-<tr>
-<td><code>branch</code></td>
-<td style="text-align: right;">No</td>
-<td>NetBox Branching plugin branch name to write to</td>
-</tr>
-<tr>
-<td><code>dry_run</code></td>
-<td style="text-align: right;">No</td>
-<td>Preview the candidate IP without writing</td>
-</tr>
-</tbody>
-</table>
+<h2 id="vrrp-virtual-ip-allocation">VRRP virtual IP allocation<a class="headerlink" href="#vrrp-virtual-ip-allocation" title="Permanent link">¤</a></h2>
+<p>Supply <code>vrrp_group</code> with an existing, uniquely named VRRPv2 or VRRPv3 group.
+The task assigns the address to that group and defaults its role to <code>vrrp</code>.
+Repeated calls reuse the group's address within the selected prefix, optionally
+matching <code>description</code>. Missing, ambiguous, or non-VRRP groups fail before allocation.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">create_ip</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">prefix</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LAB</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MGMT</span>
+<span class="w">  </span><span class="nt">vrrp_group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LAB-mgmt</span>
+</code></pre></div>
+<p>Group allocation cannot accompany <code>device</code>, <code>interface</code>, or <code>is_primary: true</code>.
+It disables peer allocation. Dry runs resolve the group without writing; the
+existing dry-run limitation for <code>mask_len</code> still applies. Results include
+<code>vrrp_group</code> when supplied. Omitting it preserves existing task behavior.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Returns the allocated or updated IP address data. When <code>create_peer_ip=True</code>, peer allocation details may be included in the result.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -7264,7 +7182,7 @@
 <li><code>prefix</code> can be a network string, a prefix description, or a dictionary of pynetbox prefix filters.</li>
 <li>When <code>mask_len</code> differs from the parent prefix length, the task creates or reuses a child prefix through <code>create_prefix</code>.</li>
 <li>In dry-run mode, <code>mask_len</code> is ignored and the candidate IP is allocated directly from the parent prefix.</li>
-<li><code>mask_len=32</code> or <code>mask_len=128</code> is invalid with <code>create_peer_ip=True</code>.</li>
+<li>IPv4 /32 and IPv6 /128 allocations automatically disable peer creation and peer-subnet reuse, including when the supplied parent is itself a host prefix.</li>
 <li>Branch writes require the <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a>.</li>
 </ul>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -7399,14 +7317,33 @@ previewing changes.</p>
 <li>IPv4 prefix string e.g. 10.0.0.0/24</li>
 <li>IPv6 prefix string e.g. 2001::/64</li>
 <li>Prefix description string to filter by</li>
-<li>Dictionary with prefix filters to feed <code>pynetbox</code> get method
+<li>Dictionary with prefix filters to feed <code>pynetbox</code> filter method
     e.g. <code>{"prefix": "10.0.0.0/24", "site": "foo", "role": "bar"}</code>,
-    site and role referred to by slugs not by their names.</li>
+    <code>site</code> accepts a site name and <code>role</code> accepts a role name
+    resolved to <code>role_id</code>. An unknown role name raises
+    <code>NetboxAllocationError</code>.</li>
 </ul>
               </div>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>custom_fields</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Custom-field names and values to PATCH
+on the allocated IP. Definitions must already exist in Netbox.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -7451,6 +7388,27 @@ previewing changes.</p>
             <td>
               <div class="doc-md-description">
                 <p>The interface associated with the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vrrp_group</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Existing VRRP group name to assign the IP to.
+Must uniquely identify a VRRPv2 or VRRPv3 group. Reuses an IP assigned
+to that group within the selected prefix, optionally matching description.
+Cannot accompany device, interface, or is_primary=True. Disables peer
+allocation and defaults role to vrrp. Missing or ambiguous groups raise
+NetboxAllocationError before allocation. Returned when supplied.</p>
               </div>
             </td>
             <td>
@@ -7615,7 +7573,9 @@ existing IP addresses. Ignored when <code>dry_run=True</code>.</p>
             <td>
               <div class="doc-md-description">
                 <p>If True creates IP address for link peer -
-remote device interface connected to requested device and interface</p>
+remote device interface connected to requested device and interface.
+Disabled for IPv4 /32 and IPv6 /128 allocations, which have no
+room for a peer. Host allocations also skip peer-subnet reuse.</p>
               </div>
             </td>
             <td>
@@ -8097,7 +8057,78 @@ remote device interface connected to requested device and interface</p>
 <span class="normal">558</span>
 <span class="normal">559</span>
 <span class="normal">560</span>
-<span class="normal">561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpResult</span><span class="p">,</span>
@@ -8131,6 +8162,8 @@ remote device interface connected to requested device and interface</p>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mask_len</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">create_peer_ip</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">custom_fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">vrrp_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allocate the next available IP address from a given subnet.</span>
@@ -8151,13 +8184,23 @@ remote device interface connected to requested device and interface</p>
 <span class="sd">            - IPv4 prefix string e.g. 10.0.0.0/24</span>
 <span class="sd">            - IPv6 prefix string e.g. 2001::/64</span>
 <span class="sd">            - Prefix description string to filter by</span>
-<span class="sd">            - Dictionary with prefix filters to feed `pynetbox` get method</span>
+<span class="sd">            - Dictionary with prefix filters to feed `pynetbox` filter method</span>
 <span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site&quot;: &quot;foo&quot;, &quot;role&quot;: &quot;bar&quot;}`,</span>
-<span class="sd">                site and role referred to by slugs not by their names.</span>
+<span class="sd">                `site` accepts a site name and `role` accepts a role name</span>
+<span class="sd">                resolved to `role_id`. An unknown role name raises</span>
+<span class="sd">                `NetboxAllocationError`.</span>
 
+<span class="sd">        custom_fields (dict, optional): Custom-field names and values to PATCH</span>
+<span class="sd">            on the allocated IP. Definitions must already exist in Netbox.</span>
 <span class="sd">        description (str, optional): A description for the allocated IP address.</span>
 <span class="sd">        device (str, optional): The device associated with the IP address.</span>
 <span class="sd">        interface (str, optional): The interface associated with the IP address.</span>
+<span class="sd">        vrrp_group (str, optional): Existing VRRP group name to assign the IP to.</span>
+<span class="sd">            Must uniquely identify a VRRPv2 or VRRPv3 group. Reuses an IP assigned</span>
+<span class="sd">            to that group within the selected prefix, optionally matching description.</span>
+<span class="sd">            Cannot accompany device, interface, or is_primary=True. Disables peer</span>
+<span class="sd">            allocation and defaults role to vrrp. Missing or ambiguous groups raise</span>
+<span class="sd">            NetboxAllocationError before allocation. Returned when supplied.</span>
 <span class="sd">        vrf (str, optional): The VRF (Virtual Routing and Forwarding) instance.</span>
 <span class="sd">        tags (list, optional): A list of tags to associate with the IP address.</span>
 <span class="sd">        dns_name (str, optional): The DNS name for the IP address.</span>
@@ -8172,7 +8215,9 @@ remote device interface connected to requested device and interface</p>
 <span class="sd">            subnet of `mask_len` within parent `prefix`, new subnet not created for</span>
 <span class="sd">            existing IP addresses. Ignored when ``dry_run=True``.</span>
 <span class="sd">        create_peer_ip (bool, optional): If True creates IP address for link peer -</span>
-<span class="sd">            remote device interface connected to requested device and interface</span>
+<span class="sd">            remote device interface connected to requested device and interface.</span>
+<span class="sd">            Disabled for IPv4 /32 and IPv6 /128 allocations, which have no</span>
+<span class="sd">            room for a peer. Host allocations also skip peer-subnet reuse.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary containing the result of the IP allocation.</span>
@@ -8213,6 +8258,22 @@ remote device interface connected to requested device and interface</p>
         <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; from prefix &#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&#39;, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
+    <span class="n">nb_vrrp_group</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">nb_vrrp_group</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">fhrp_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">vrrp_group</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_vrrp_group</span> <span class="ow">or</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="s2">&quot;vrrp2&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;vrrp3&quot;</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;expected an existing VRRPv2 or VRRPv3 group&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unable to resolve VRRP group &#39;</span><span class="si">{</span><span class="n">vrrp_group</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="n">create_peer_ip</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="n">role</span> <span class="ow">or</span> <span class="s2">&quot;vrrp&quot;</span>
+
     <span class="c1"># source parent prefix from Netbox</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="c1"># try converting prefix to network, if fails prefix is not an IP network</span>
@@ -8239,6 +8300,16 @@ remote device interface connected to requested device and interface</p>
                     <span class="sa">f</span><span class="s2">&quot;Failed to get parent prefix site &#39;</span><span class="si">{</span><span class="n">prefix_site</span><span class="si">}</span><span class="s2">&#39; from NetBox&quot;</span>
                 <span class="p">)</span>
             <span class="n">prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope_type</span><span class="o">=</span><span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span> <span class="n">scope_id</span><span class="o">=</span><span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="c1"># NetBox&#39;s prefix filter accepts role slugs or role_id, not role names.</span>
+        <span class="c1"># Resolve the task&#39;s role-name input to an ID before filtering prefixes.</span>
+        <span class="n">prefix_role</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefix_role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nb_role</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">roles</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefix_role</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_role</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Failed to get parent prefix role &#39;</span><span class="si">{</span><span class="n">prefix_role</span><span class="si">}</span><span class="s2">&#39; from NetBox&quot;</span>
+                <span class="p">)</span>
+            <span class="n">prefix</span><span class="p">[</span><span class="s2">&quot;role_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_role</span><span class="o">.</span><span class="n">id</span>
     <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">prefixes</span><span class="p">,</span> <span class="o">**</span><span class="n">prefix</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefixes</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
@@ -8247,7 +8318,16 @@ remote device interface connected to requested device and interface</p>
 
     <span class="c1"># try to source existing IP from netbox</span>
     <span class="k">for</span> <span class="n">nb_prefix</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span> <span class="ow">and</span> <span class="n">description</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nb_vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">),</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+                <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">filters</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span> <span class="ow">and</span> <span class="n">description</span><span class="p">:</span>
             <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
                 <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
@@ -8294,8 +8374,15 @@ remote device interface connected to requested device and interface</p>
 
     <span class="c1"># create new IP address</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_ip</span><span class="p">:</span>
+        <span class="c1"># A host prefix has only one address, regardless of peer settings.</span>
+        <span class="n">allocation_prefix</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">))</span>
+        <span class="n">host_allocation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mask_len</span> <span class="k">if</span> <span class="n">mask_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">allocation_prefix</span><span class="o">.</span><span class="n">prefixlen</span>
+        <span class="p">)</span> <span class="o">==</span> <span class="n">allocation_prefix</span><span class="o">.</span><span class="n">max_prefixlen</span>
+        <span class="k">if</span> <span class="n">host_allocation</span><span class="p">:</span>
+            <span class="n">create_peer_ip</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># check if interface has link peer that has IP within parent prefix</span>
-        <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">host_allocation</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connections</span><span class="p">(</span>
                 <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
                 <span class="n">devices</span><span class="o">=</span><span class="p">[</span><span class="n">device</span><span class="p">],</span>
@@ -8415,6 +8502,8 @@ remote device interface connected to requested device and interface</p>
                 <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
                 <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
             <span class="p">}</span>
+            <span class="k">if</span> <span class="n">vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;vrrp_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_group</span>
             <span class="c1"># add branch to results</span>
             <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
@@ -8432,6 +8521,17 @@ remote device interface connected to requested device and interface</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
 
     <span class="c1"># update IP address parameters</span>
+    <span class="k">if</span> <span class="n">nb_vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">!=</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
+        <span class="ow">or</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">!=</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">):</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">nb_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">custom_fields</span><span class="p">})</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
@@ -8499,6 +8599,8 @@ remote device interface connected to requested device and interface</p>
         <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
         <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">interface</span><span class="p">,</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="n">vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;vrrp_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_group</span>
     <span class="c1"># add branch to results</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
@@ -8645,7 +8747,7 @@ remote device interface connected to requested device and interface</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

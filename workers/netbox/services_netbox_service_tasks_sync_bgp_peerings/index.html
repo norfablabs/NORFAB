@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -6246,34 +6274,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6338,10 +6338,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6359,8 +6359,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6981,10 +6981,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -7002,8 +7002,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7328,8 +7328,8 @@
 </blockquote>
 <p>Synchronises BGP sessions between live network devices and the NetBox BGP plugin. Supports idempotent create, update, and optional deletion of stale sessions.</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
-<p><strong>Data collection</strong> — NetBox worker fetches existing BGP sessions from NetBox BGP plugin. In parallel, Nornir service parses BGP neighbor data from devices using <code>parse_ttp</code> with <code>get="bgp_neighbors"</code>.</p>
-<p><strong>Normalisation and diff</strong> — Both datasets are normalised to flat comparable dicts keyed by session name convention <code>{device_name}_{session_name}</code>. <code>DeepDiff</code> classifies each session as <code>create</code>, <code>update</code>, <code>delete</code>, or <code>in_sync</code>.</p>
+<p><strong>Data collection</strong> — NetBox worker fetches every existing BGP session directly from the NetBox BGP plugin so sessions with duplicate names remain distinct. In parallel, Nornir service parses BGP neighbor data from devices using <code>parse_ttp</code> with <code>get="bgp_neighbors"</code>.</p>
+<p><strong>Normalisation and diff</strong> — Both datasets are normalised to flat comparable dictionaries keyed by the five-part identity <code>(device, local address, local ASN, remote address, remote ASN)</code>. Session names remain updateable attributes. <code>DeepDiff</code> classifies each session as <code>create</code>, <code>update</code>, <code>delete</code>, or <code>in_sync</code>.</p>
 <p><strong>NetBox writes</strong> — Sessions are created, updated, or (when <code>process_deletions=True</code>) deleted in NetBox. IP addresses and ASNs are resolved from IPAM or created on-demand. On create, all related objects (peer groups, routing policies, prefix lists) are resolved or created by name.</p>
 <p><strong>Dry run</strong> — When <code>dry_run=True</code> no writes occur; the raw diff report is returned.</p>
 <ol>
@@ -7458,7 +7458,7 @@ always keep the NetBox description. Set it to <code>False</code> to always use t
 description, including an empty string. Newly created sessions always use the
 live description.</p>
 <h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">¤</a></h2>
-<p>Three optional filters narrow which sessions are considered during sync. Filters apply to <strong>both</strong> the NetBox dataset and the live device dataset before the diff is computed. Sessions that do not match are silently excluded from creates, updates, and deletes.</p>
+<p>Three optional filters narrow which live sessions are considered during sync. Existing NetBox sessions remain in the five-tuple-keyed target dataset so a matching live session is updated instead of incorrectly treated as a new session when filtered attributes differ.</p>
 <table>
 <thead>
 <tr>
@@ -7470,25 +7470,25 @@ live description.</p>
 <tbody>
 <tr>
 <td><code>filter_by_remote_as</code></td>
-<td>Exact match — session's remote AS must equal one of the provided integer values</td>
-<td>NetBox &amp; live</td>
+<td>Exact match — live session's remote AS must equal one of the provided integer values</td>
+<td>Live only</td>
 </tr>
 <tr>
 <td><code>filter_by_peer_group</code></td>
-<td>Exact match — session's peer group name must equal one of the provided values</td>
-<td>NetBox &amp; live</td>
+<td>Exact match — live session's peer group name must equal one of the provided values</td>
+<td>Live only</td>
 </tr>
 <tr>
 <td><code>filter_by_description</code></td>
-<td>Glob match — session's description must match the provided glob pattern (e.g. <code>*uplink*</code>)</td>
-<td>NetBox &amp; live</td>
+<td>Glob match — live session's description must match the provided glob pattern (e.g. <code>*uplink*</code>)</td>
+<td>Live only</td>
 </tr>
 </tbody>
 </table>
 <p>Multiple filters may be combined; all must pass (AND logic). <code>filter_by_description</code> uses Python <code>fnmatch</code> glob syntax — <code>*</code> matches any sequence of characters, <code>?</code> matches a single character.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When <code>process_deletions=True</code>, only sessions that pass the filters are candidates for deletion. Sessions excluded by a filter are never deleted.</p>
+<p>Because filters apply only to live data, existing NetBox sessions without a matching filtered live five-tuple appear as deletion candidates. They are deleted only when <code>process_deletions=True</code>.</p>
 </div>
 <h2 id="deletion-behavior">Deletion Behavior<a class="headerlink" href="#deletion-behavior" title="Permanent link">¤</a></h2>
 <p>Default <code>process_deletions=False</code> — sessions present in NetBox but absent on the device are left untouched.</p>
@@ -8123,39 +8123,7 @@ live text.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1889</span>
-<span class="normal">1890</span>
-<span class="normal">1891</span>
-<span class="normal">1892</span>
-<span class="normal">1893</span>
-<span class="normal">1894</span>
-<span class="normal">1895</span>
-<span class="normal">1896</span>
-<span class="normal">1897</span>
-<span class="normal">1898</span>
-<span class="normal">1899</span>
-<span class="normal">1900</span>
-<span class="normal">1901</span>
-<span class="normal">1902</span>
-<span class="normal">1903</span>
-<span class="normal">1904</span>
-<span class="normal">1905</span>
-<span class="normal">1906</span>
-<span class="normal">1907</span>
-<span class="normal">1908</span>
-<span class="normal">1909</span>
-<span class="normal">1910</span>
-<span class="normal">1911</span>
-<span class="normal">1912</span>
-<span class="normal">1913</span>
-<span class="normal">1914</span>
-<span class="normal">1915</span>
-<span class="normal">1916</span>
-<span class="normal">1917</span>
-<span class="normal">1918</span>
-<span class="normal">1919</span>
-<span class="normal">1920</span>
-<span class="normal">1921</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1921</span>
 <span class="normal">1922</span>
 <span class="normal">1923</span>
 <span class="normal">1924</span>
@@ -8697,7 +8665,54 @@ live text.</p>
 <span class="normal">2460</span>
 <span class="normal">2461</span>
 <span class="normal">2462</span>
-<span class="normal">2463</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2463</span>
+<span class="normal">2464</span>
+<span class="normal">2465</span>
+<span class="normal">2466</span>
+<span class="normal">2467</span>
+<span class="normal">2468</span>
+<span class="normal">2469</span>
+<span class="normal">2470</span>
+<span class="normal">2471</span>
+<span class="normal">2472</span>
+<span class="normal">2473</span>
+<span class="normal">2474</span>
+<span class="normal">2475</span>
+<span class="normal">2476</span>
+<span class="normal">2477</span>
+<span class="normal">2478</span>
+<span class="normal">2479</span>
+<span class="normal">2480</span>
+<span class="normal">2481</span>
+<span class="normal">2482</span>
+<span class="normal">2483</span>
+<span class="normal">2484</span>
+<span class="normal">2485</span>
+<span class="normal">2486</span>
+<span class="normal">2487</span>
+<span class="normal">2488</span>
+<span class="normal">2489</span>
+<span class="normal">2490</span>
+<span class="normal">2491</span>
+<span class="normal">2492</span>
+<span class="normal">2493</span>
+<span class="normal">2494</span>
+<span class="normal">2495</span>
+<span class="normal">2496</span>
+<span class="normal">2497</span>
+<span class="normal">2498</span>
+<span class="normal">2499</span>
+<span class="normal">2500</span>
+<span class="normal">2501</span>
+<span class="normal">2502</span>
+<span class="normal">2503</span>
+<span class="normal">2504</span>
+<span class="normal">2505</span>
+<span class="normal">2506</span>
+<span class="normal">2507</span>
+<span class="normal">2508</span>
+<span class="normal">2509</span>
+<span class="normal">2510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpPeeringsResult</span><span class="p">,</span>
@@ -8876,20 +8891,46 @@ live text.</p>
         <span class="sa">f</span><span class="s2">&quot;syncing BGP peerings for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s) in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;, dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
-    <span class="c1"># Fetch existing NetBox BGP sessions</span>
+    <span class="c1"># Fetch existing NetBox BGP sessions directly. get_bgp_peerings returns</span>
+    <span class="c1"># name-keyed data and cannot represent multiple sessions with the same name.</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching BGP session data from NetBox for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span><span class="p">)</span>
-    <span class="n">nb_sessions_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bgp_peerings</span><span class="p">(</span>
-        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-        <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
-        <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span>
-        <span class="n">cache</span><span class="o">=</span><span class="s2">&quot;refresh&quot;</span><span class="p">,</span>
-        <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+    <span class="n">devices_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
+        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="n">nb_sessions_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed to fetch BGP session data from NetBox&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nb_sessions_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;failed to fetch device data from NetBox&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">devices_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c1"># Report devices missing from NetBox while continuing with valid devices.</span>
+    <span class="n">valid_devices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+    <span class="n">missing_devices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span> <span class="o">-</span> <span class="n">valid_devices</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">missing_devices</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span><span class="n">device_name</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span> <span class="k">if</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">valid_devices</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">devices</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="n">nb_sessions</span> <span class="o">=</span> <span class="p">{</span><span class="n">device_name</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">}</span>
+    <span class="n">device_names_by_id</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">device_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">device_name</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">device_data</span> <span class="ow">in</span> <span class="n">devices_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">device_names_by_id</span><span class="p">:</span>
+        <span class="n">fetched_sessions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
+            <span class="n">device_id</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">device_names_by_id</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">fetched_sessions</span><span class="p">:</span>
+            <span class="n">device_name</span> <span class="o">=</span> <span class="n">device_names_by_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">device_name</span><span class="p">:</span>
+                <span class="n">nb_sessions</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
 
     <span class="c1"># Fetch live BGP data from devices via Nornir parse_ttp</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
@@ -8908,32 +8949,21 @@ live text.</p>
     <span class="k">for</span> <span class="n">device_name</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
         <span class="c1"># Normalise NetBox sessions for this device</span>
         <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">nb_session</span> <span class="ow">in</span> <span class="n">nb_sessions_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="n">device_name</span><span class="p">,</span> <span class="p">{}</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">nb_session</span> <span class="ow">in</span> <span class="n">nb_sessions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="n">sname</span> <span class="o">=</span> <span class="n">nb_session</span><span class="o">.</span><span class="n">name</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">normalised</span> <span class="o">=</span> <span class="n">normalise_nb_bgp_session</span><span class="p">(</span>
-                    <span class="n">nb_session</span><span class="p">,</span> <span class="n">vrf_custom_field</span><span class="o">=</span><span class="n">vrf_custom_field</span>
+                    <span class="nb">dict</span><span class="p">(</span><span class="n">nb_session</span><span class="p">),</span> <span class="n">vrf_custom_field</span><span class="o">=</span><span class="n">vrf_custom_field</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - failed to normalise NetBox session &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">bgp_session_matches_filters</span><span class="p">(</span>
-                <span class="n">normalised</span><span class="p">,</span>
-                <span class="n">filter_by_remote_as</span><span class="o">=</span><span class="n">filter_by_remote_as</span><span class="p">,</span>
-                <span class="n">filter_by_peer_group</span><span class="o">=</span><span class="n">filter_by_peer_group</span><span class="p">,</span>
-                <span class="n">filter_by_description</span><span class="o">=</span><span class="n">filter_by_description</span><span class="p">,</span>
-                <span class="n">ignore_peer_nets</span><span class="o">=</span><span class="n">ignore_peer_nets</span><span class="p">,</span>
-            <span class="p">):</span>
-                <span class="k">continue</span>
             <span class="n">identity</span> <span class="o">=</span> <span class="n">bgp_session_identity</span><span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">normalised</span><span class="p">)</span>
             <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalised</span>
     <span class="n">nb_session_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="k">for</span> <span class="n">sessions</span> <span class="ow">in</span> <span class="n">normalised_nb</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;normalised </span><span class="si">{</span><span class="n">nb_session_count</span><span class="si">}</span><span class="s2"> NetBox BGP session(s) after applying filters&quot;</span>
-    <span class="p">)</span>
+    <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;normalised </span><span class="si">{</span><span class="n">nb_session_count</span><span class="si">}</span><span class="s2"> NetBox BGP session(s)&quot;</span><span class="p">)</span>
 
     <span class="c1"># pre-seed lookup cache from fetched NetBox sessions and all parsed live</span>
     <span class="c1"># sessions before rendering live session names.</span>
@@ -9401,7 +9431,7 @@ live text.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

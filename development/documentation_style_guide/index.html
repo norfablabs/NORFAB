@@ -18,14 +18,14 @@
         <link rel="prev" href="../norfab_docker_development/">
       
       
-        <link rel="next" href="../netbox_design_specification/">
+        <link rel="next" href="../adr_tasks_pydantic_models_guide/">
       
       
         
       
       
       <link rel="icon" href="../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -6242,34 +6270,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6334,10 +6334,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6355,8 +6355,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6977,10 +6977,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -6998,8 +6998,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7321,7 +7321,6 @@
 <p>For most service task pages, prefer this order:</p>
 <ol>
 <li><strong>Purpose</strong> (1–2 paragraphs)</li>
-<li><strong>Inputs</strong> (kwargs, required vs optional, defaults)</li>
 <li><strong>Output</strong> (what the result looks like)</li>
 <li><strong>Examples</strong> (in tabbed format)</li>
 <li>CLI example in the <code>=== "CLI"</code> tab</li>
@@ -7335,7 +7334,7 @@
 <p>When updating a service task page:</p>
 <ol>
 <li>Read the task implementation, input/output Pydantic models, and NFCLI/PICLE command model before editing.</li>
-<li>Derive Inputs from the Pydantic model and task signature.</li>
+<li>Do not add an Inputs section. Document task arguments in the Google-style task docstring and expose them through the Python API Reference.</li>
 <li>Add an Output section to every task page. If the exact output shape is unclear, write <code>TBD</code> and leave it for maintainer review.</li>
 <li>Derive CLI examples from NFCLI aliases and command structure.</li>
 <li>Derive Python examples from <code>client.run_job(...)</code> using the task API name and Python kwargs.</li>
@@ -7347,7 +7346,7 @@
 <h2 id="writing-style">Writing style<a class="headerlink" href="#writing-style" title="Permanent link">¤</a></h2>
 <ul>
 <li>Prefer short sentences and active voice.</li>
-<li>Use <strong>NetBox</strong> for the product name in prose and headings. Keep lowercase <code>netbox</code> only for service names, task names, command paths, Python imports, and API references.</li>
+<li>Use <strong>Netbox</strong> for the product name in prose and headings. Keep lowercase <code>netbox</code> for service names, task names, command paths, Python imports, and API references.</li>
 <li>Use consistent terminology:</li>
 <li>Pick one: <strong>Service</strong> vs <strong>Worker</strong> wording in headings and keep it consistent per section.</li>
 <li>Use the same names for the same concept everywhere (e.g. <code>kwargs</code>, <code>workers</code>, <code>service</code>, <code>task</code>).</li>
@@ -7490,13 +7489,13 @@
         
         
           
-          <a href="../netbox_design_specification/" class="md-footer__link md-footer__link--next" aria-label="Next: NetBox Design Specification">
+          <a href="../adr_tasks_pydantic_models_guide/" class="md-footer__link md-footer__link--next" aria-label="Next: Task Pydantic Models Guide">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                NetBox Design Specification
+                Task Pydantic Models Guide
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -7565,7 +7564,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

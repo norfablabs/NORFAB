@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -6169,34 +6197,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6261,10 +6261,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6282,8 +6282,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6904,10 +6904,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -6925,8 +6925,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7191,10 +7191,16 @@
 <td>Existing ASN range name used for allocation</td>
 </tr>
 <tr>
-<td><code>site</code></td>
+<td><code>sites</code></td>
 <td style="text-align: right;">No</td>
 <td><code>None</code></td>
-<td>Site scope used to select an ASN range with that name</td>
+<td>Site names to assign the ASN to</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td style="text-align: right;">No</td>
+<td><code>None</code></td>
+<td>IPAM role name</td>
 </tr>
 <tr>
 <td><code>asn</code></td>
@@ -7265,8 +7271,8 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>A dedicated NFCLI command is not currently registered for <code>create_asn</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Use the Python API, REST API, MCP task interface, or design filter.</span>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>create<span class="w"> </span>asn<span class="w"> </span>asn-range<span class="w"> </span>PRIVATE-ASNS<span class="w"> </span>description<span class="w"> </span><span class="s2">&quot;edge routing&quot;</span><span class="w"> </span>sites<span class="w"> </span>BRANCH-001,BRANCH-002
+nf#<span class="w"> </span>netbox<span class="w"> </span>create<span class="w"> </span>asn<span class="w"> </span>asn<span class="w"> </span><span class="m">65001</span><span class="w"> </span>rir<span class="w"> </span>Private<span class="w"> </span>sites<span class="w"> </span>BRANCH-001
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7281,7 +7287,7 @@
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;asn_range&quot;</span><span class="p">:</span> <span class="s2">&quot;PRIVATE-ASNS&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;BRANCH-001&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sites&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;BRANCH-001&quot;</span><span class="p">,</span> <span class="s2">&quot;BRANCH-002&quot;</span><span class="p">],</span>
             <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;edge routing&quot;</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
@@ -7297,15 +7303,17 @@
 </div>
 </div>
 <p>In a NetBox design:</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">set edge_asn = &quot;PRIVATE-ASNS&quot; | netbox.create_asn(&quot;edge routing&quot;) %</span><span class="p p-Indicator">}</span>
-
-<span class="nt">asns</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">asn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">edge_asn</span><span class="w"> </span><span class="p p-Indicator">}}</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">edge routing</span>
+<div class="highlight"><pre><span></span><code><span class="nt">asns</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">create_asn</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">asn_range</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PRIVATE-ASNS</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">edge routing</span>
+<span class="w">      </span><span class="nt">sites</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">BRANCH-001</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH-ROUTING</span>
 </code></pre></div>
 <h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
 <ul>
-<li>The named ASN range and its RIR must already exist. Supply <code>site</code> when range names are reused across site scopes.</li>
+<li>The named ASN range and its RIR must already exist. ASN ranges have no site scope; <code>sites</code> associates the ASN with sites.</li>
+<li>In NFCLI, separate multiple site names with commas.</li>
 <li>Repeated range allocations reuse an ASN with the same description inside that range.</li>
 <li>Without a description, repeated range calls allocate the next available ASN.</li>
 <li>Branch writes require the NetBox Branching plugin.</li>
@@ -7318,7 +7326,21 @@
 <li><strong>Multiple description matches:</strong> make descriptions unique inside the ASN range.</li>
 </ul>
 <h2 id="task-command-shell-reference">Task Command Shell Reference<a class="headerlink" href="#task-command-shell-reference" title="Permanent link">¤</a></h2>
-<p><code>create_asn</code> does not currently have a dedicated NFCLI command model.</p>
+<div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>man<span class="w"> </span>tree<span class="w"> </span>netbox<span class="w"> </span>create<span class="w"> </span>asn
+netbox<span class="w"> </span>create<span class="w"> </span>asn
+├──<span class="w"> </span>asn-range
+├──<span class="w"> </span>asn
+├──<span class="w"> </span>rir
+├──<span class="w"> </span>description
+├──<span class="w"> </span>tenant
+├──<span class="w"> </span>sites
+├──<span class="w"> </span>role
+├──<span class="w"> </span>tags
+├──<span class="w"> </span>custom-fields
+├──<span class="w"> </span>instance
+├──<span class="w"> </span>branch
+└──<span class="w"> </span>dry-run
+</code></pre></div>
 <h2 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">¤</a></h2>
 
 
@@ -7329,7 +7351,305 @@
 
     <div class="doc doc-contents first">
 
-        <p>Create, update, or allocate one ASN.</p>
+        <p>Create, update, or allocate one ASN in NetBox.</p>
+<p>An explicit ASN is matched globally by number. Without one, the task
+reuses an ASN with the same description inside the named range, or
+allocates the first available number. Omitting the description means
+repeated range calls can allocate different ASNs. A non-empty sites
+list replaces the ASN's site assignments; an empty or omitted list
+leaves them alone.
+Dry-run reports the selected number without writing relationships.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>job</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Job(worker: object = None, juuid: str = None, client_address: str = None, timeout: int = None, args: list = None, kwargs: dict = None, task: str = None, client_input_queue: object = None) (norfab.core.worker.Job)" href="../../../api_reference_core_norfab_worker/#norfab.core.worker.Job">Job</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Current NorFab job for events and branch provisioning.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>asn_range</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Existing range name for next-available allocation.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>asn</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Explicit ASN number; omit to allocate from <code>asn_range</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>rir</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Existing RIR name required whenever an explicit ASN is
+supplied without a range, including updates.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>description</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description used to reuse allocations within a range.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tenant</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional tenant name.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tags</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="list">list</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional tag names to assign.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>custom_fields</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="dict">dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional NetBox custom-field values.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sites</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="list">list</span>[<span title="str">str</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional site names to assign to the ASN.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>role</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional IPAM role name.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>instance</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NetBox instance name, or the worker default when omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dry_run</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Select an ASN without creating or updating it.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>branch</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional NetBox Branching plugin branch name.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Result</code></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Selected ASN, description, and action. Dry-run actions</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>are <code>create</code> or <code>update</code>; applied actions are <code>created</code> or</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>updated</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The range, RIR, or a site is missing; more than one
+ASN matches the description; or the range has no free ASNs.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
             <details class="mkdocstrings-source">
@@ -7447,7 +7767,49 @@
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpAsnResult</span><span class="p">,</span>
@@ -7471,12 +7833,47 @@
     <span class="n">tenant</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">custom_fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">site</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sites</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">role</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create, update, or allocate one ASN.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create, update, or allocate one ASN in NetBox.</span>
+
+<span class="sd">    An explicit ASN is matched globally by number. Without one, the task</span>
+<span class="sd">    reuses an ASN with the same description inside the named range, or</span>
+<span class="sd">    allocates the first available number. Omitting the description means</span>
+<span class="sd">    repeated range calls can allocate different ASNs. A non-empty sites</span>
+<span class="sd">    list replaces the ASN&#39;s site assignments; an empty or omitted list</span>
+<span class="sd">    leaves them alone.</span>
+<span class="sd">    Dry-run reports the selected number without writing relationships.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        job: Current NorFab job for events and branch provisioning.</span>
+<span class="sd">        asn_range: Existing range name for next-available allocation.</span>
+<span class="sd">        asn: Explicit ASN number; omit to allocate from ``asn_range``.</span>
+<span class="sd">        rir: Existing RIR name required whenever an explicit ASN is</span>
+<span class="sd">            supplied without a range, including updates.</span>
+<span class="sd">        description: Description used to reuse allocations within a range.</span>
+<span class="sd">        tenant: Optional tenant name.</span>
+<span class="sd">        tags: Optional tag names to assign.</span>
+<span class="sd">        custom_fields: Optional NetBox custom-field values.</span>
+<span class="sd">        sites: Optional site names to assign to the ASN.</span>
+<span class="sd">        role: Optional IPAM role name.</span>
+<span class="sd">        instance: NetBox instance name, or the worker default when omitted.</span>
+<span class="sd">        dry_run: Select an ASN without creating or updating it.</span>
+<span class="sd">        branch: Optional NetBox Branching plugin branch name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result: Selected ASN, description, and action. Dry-run actions</span>
+<span class="sd">        are ``create`` or ``update``; applied actions are ``created`` or</span>
+<span class="sd">        ``updated``.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: The range, RIR, or a site is missing; more than one</span>
+<span class="sd">            ASN matches the description; or the range has no free ASNs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:create_asn&quot;</span><span class="p">,</span>
@@ -7485,13 +7882,7 @@
         <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
-    <span class="n">range_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">asn_range</span><span class="p">}</span>
-    <span class="k">if</span> <span class="n">site</span><span class="p">:</span>
-        <span class="n">nb_site</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_site</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Site &#39;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span><span class="p">)</span>
-        <span class="n">range_filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope_type</span><span class="o">=</span><span class="s2">&quot;dcim.site&quot;</span><span class="p">,</span> <span class="n">scope_id</span><span class="o">=</span><span class="n">nb_site</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-    <span class="n">nb_range</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asn_ranges</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">range_filters</span><span class="p">)</span> <span class="k">if</span> <span class="n">asn_range</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">nb_range</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asn_ranges</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">asn_range</span><span class="p">)</span> <span class="k">if</span> <span class="n">asn_range</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">asn_range</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nb_range</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ASN range &#39;</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">&#39; not found in NetBox&quot;</span><span class="p">)</span>
 
@@ -7543,6 +7934,19 @@
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">tenant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">tenant</span><span class="p">)</span> <span class="o">!=</span> <span class="n">tenant</span><span class="p">:</span>
         <span class="n">nb_asn</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_asn</span><span class="o">.</span><span class="n">role</span><span class="p">)</span> <span class="o">!=</span> <span class="n">role</span><span class="p">:</span>
+        <span class="n">nb_asn</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">site_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">sites</span> <span class="ow">or</span> <span class="p">[]))</span>
+    <span class="k">if</span> <span class="n">site_names</span><span class="p">:</span>
+        <span class="n">nb_sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">site_names</span><span class="p">)</span>
+        <span class="n">site_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">nb_sites</span><span class="p">}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">site_names</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;ASN sites not found: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">site_names</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">site_ids</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">nb_asn</span><span class="o">.</span><span class="n">sites</span> <span class="o">=</span> <span class="p">[</span><span class="n">site_ids</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">site_names</span><span class="p">]</span>
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">nb_asn</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tag</span><span class="p">}</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
@@ -7690,7 +8094,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

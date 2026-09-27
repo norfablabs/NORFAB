@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2147,6 +2147,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -7607,34 +7635,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -7699,10 +7699,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -7720,8 +7720,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8342,10 +8342,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -8363,8 +8363,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -10056,7 +10056,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 24 September 2026</em></p>
+<p><em>Last updated: 27 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10807,27 +10807,52 @@ and AI tool use. <strong>Limitations:</strong> generic operations require knowle
 NetBox data model and do not provide every safeguard of a dedicated task.
 <a href="../workers/netbox/services_netbox_service_tasks_crud/">Task details</a></p>
 <h3 id="additive-netbox-designs">Additive NetBox designs<a class="headerlink" href="#additive-netbox-designs" title="Permanent link">¤</a></h3>
-<p>Applies static YAML or optionally renders Jinja2 target-state designs, then
-creates or updates every supplied field without deleting omitted objects.
-Global collections can be combined with nested device interfaces, IP and MAC
-assignments, interface VLANs, device BGP sessions, prefix IPs, and VRF route
-targets. A design containing only
-device names uses managed <code>undefined</code> region, site, manufacturer, device role,
-and device type objects for NetBox's mandatory references. The design Jinja2
-environment exposes interface-range expansion and callable or filter-form
-NetBox IP, prefix, VLAN-group, VLAN, and ASN allocations backed by independent worker
-tasks. The <code>design_deploy</code> task validates template context through inline JSON Schema or an external
-Pydantic model. Designs declare reusable Jinja functions from Python files
-served through <code>nf://</code> or <code>git://</code> URLs and support relative Jinja2 includes.
-Ordered Jinja calls can create allocation dependencies before later template calls use them.
-Designs also support physical hierarchy and cabling, BGP
-sessions, L2VPNs and interface terminations, VRRP groups and assignments, and
-custom fields on created objects. <strong>Use cases:</strong> rapid
-NetBox population, repeatable lab construction, allocation from managed pools,
-progressively enriching a minimal device list, and modelling routed leaf-spine fabrics. <strong>Limitations:</strong> designs are
-additive and do not remove objects omitted from later runs; allocation functions
-perform their dedicated NetBox tasks while the template renders. NFCLI exposes
-deployment through <code>netbox design deploy</code>.
+<p>Deploys static or Jinja2-rendered YAML designs. Handlers for tenants, regions,
+manufacturers, platforms, device types, device roles, sites, rack roles, racks,
+IPAM roles, RIRs, ASN ranges, ASNs, VLAN groups, VLANs, VRFs, prefixes,
+devices, interfaces, console and power ports/outlets, IP addresses, FHRP groups and assignments, and device primary IPs
+bulk create missing records and patch existing records without calculating a diff.
+An explicit preprocessing step flattens nested device definitions into top-level
+records before validation; flattened collections without handlers are rejected.
+Dictionary input, template context validation through inline JSON Schema or an
+external Pydantic model, custom Jinja2 filters/functions, and dry-run are supported.
+Records wrapped in <code>create_ip</code>, <code>create_prefix</code>, <code>create_asn</code>, or <code>create_vlan</code>
+call the corresponding worker task with its arguments instead of using bulk writes.
+<code>create_asn</code> is reserved for next-available range allocation; known ASN numbers
+use direct bulk writes.
+Likewise, <code>create_vlan</code> allocates the next available VLAN ID; known IDs use bulk writes.
+VLAN records require a group and interface VLAN references accept group names directly; direct VLAN-to-site association is unsupported. A per-deployment reference cache avoids repeat lookups for VLANs, sites, route targets, VRFs, interfaces, console and power ports, VRRP groups, and IP addresses.
+VLAN groups can be scoped by name to a rack, location, site, site group, region, cluster, or cluster group; a site can disambiguate rack and location names.
+ASN records resolve site lists and IPAM roles. Explicit prefixes resolve named location, site, site-group or region scopes and group/VID VLAN references.
+Independent interfaces are created before interfaces with parent, LAG or bridge references. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last.
+Device types accept <code>default_platform</code> as a platform name.
+Route targets support bulk creation/update before VRFs; inline import/export
+route-target definitions are flattened and associated with their VRFs.
+Route-target and BGP-community definition lists require dictionaries, not bare strings.
+Routing-policy definitions, including BGP import/export lists, also require dictionaries.
+Interface, console, and power cables support top-level and nested definitions, bulk creation/update,
+and endpoint conflict checks without disconnecting existing cables.
+Unique-name relationships use direct strings, validated before deployment;
+device-type references use manufacturer and model dictionaries.
+Required slugs default from object names (device-type models) on creation;
+explicit and existing slugs are preserved.
+BGP communities and routing policies support bulk create/update;
+Design object records pass custom fields through creation and PATCH updates, including next-available IP and prefix allocations. Custom-field definitions must exist for the target object type.
+design communities match by value and optional description, and interface VRFs accept direct name references.
+Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
+Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
+IP allocation prefix filters resolve <code>role</code> by role name, not slug, and reject unknown names.
+BGP sessions use existing creation/update tasks after ASNs, IPs and policies.
+Inline import/export policy definitions are extracted before deployment.
+Custom creation functions loaded from file URLs run during their collection's
+deployment phase, receiving record arguments, <code>netbox</code>, and <code>dry_run</code>; custom
+code is responsible for honoring dry-run and returning serializable results.
+Deployment emits stage and collection summaries to logs and job events;
+preparation or handler failures stop processing and populate result errors.
+Omitted objects are not deleted. <strong>Use cases:</strong> repeatable NetBox prerequisite
+setup for network designs. <strong>Limitations:</strong> other design collections are rejected
+until their handlers are implemented.
+NFCLI exposes deployment through <code>netbox design deploy</code>.
 <a href="../workers/netbox/services_netbox_service_tasks_design_deploy/">Design deploy task</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_create_asn/">Create ASN task</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_create_vlan_group/">Create VLAN group task</a> ·
@@ -10887,7 +10912,8 @@ allocation. <strong>Use cases:</strong> provisioning links, loopbacks, managemen
 new devices, and template-driven zero-touch workflows.
 <strong>Limitations:</strong> parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
-<a href="../workers/netbox/services_netbox_service_tasks_create_ip/">Create IP</a> ·
+<code>create_ip</code> can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.</p>
+<p><a href="../workers/netbox/services_netbox_service_tasks_create_ip/">Create IP</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_create_ip_bulk/">Bulk IP</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_create_prefix/">Create prefix</a></p>
 <h3 id="interface-provisioning">Interface provisioning<a class="headerlink" href="#interface-provisioning" title="Permanent link">¤</a></h3>
@@ -11007,8 +11033,10 @@ interface MAC addresses with NetBox, including interface-first IP matching,
 shared inline or <code>nf://</code> interface-name mapping, filters, inline or <code>nf://</code>
 anycast ranges, VRF/site association, controlled deletion behavior, and stable
 create, update, delete, and in-sync diff reports.
-Parsed VRRP addresses remain unassigned for the VRRP sync task to associate with
-FHRP groups. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
+Parsed VRRP, GLBP, HSRP, and CARP addresses are excluded from IP
+synchronization. The VRRP sync task creates VRRP addresses and associates them
+with FHRP groups. IP records assigned to other non-interface objects are also
+excluded. <strong>Use cases:</strong> IPAM accuracy and address/MAC drift correction.
 <strong>Limitations:</strong> requires supported live parsers and accurate interface identity;
 write runs should follow scoped dry-run review.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_ip/">IP sync</a> ·
@@ -11023,8 +11051,9 @@ prerequisites; templates and transformer files execute as trusted code.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_inventory/">Task details</a></p>
 <h3 id="bgp-peering-lifecycle">BGP peering lifecycle<a class="headerlink" href="#bgp-peering-lifecycle" title="Permanent link">¤</a></h3>
 <p>Creates or updates individual and bulk BGP sessions, and reconciles live BGP
-neighbors with NetBox using dry-run, filters, optional stale-session deletion,
-and tri-state existing-description preservation. <strong>Use cases:</strong> routing
+neighbors with NetBox using five-tuple session identity, live-data filters,
+dry-run, optional stale-session deletion, and tri-state existing-description
+preservation. <strong>Use cases:</strong> routing
 source-of-truth onboarding and drift control.
 <strong>Limitations:</strong> requires the NetBox BGP plugin, supported live parsing, and
 consistent IP/ASN/VRF modelling.
@@ -11042,7 +11071,8 @@ objects are never deleted.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_bgp_community/">Task details</a></p>
 <h3 id="live-bgp-asn-reconciliation">Live BGP ASN reconciliation<a class="headerlink" href="#live-bgp-asn-reconciliation" title="Permanent link">¤</a></h3>
 <p>Creates or updates an explicit ASN, or allocates the next available ASN from a
-named ASN range. The same task backs the <code>netbox.create_asn</code> design filter.
+named ASN range. The task and <code>netbox create asn</code> NFCLI command accept a <code>sites</code>
+list to associate the ASN with multiple sites; the same task backs design allocations.
 Reconciles globally unique ASNs from supported live devices with NetBox IPAM,
 preserves existing descriptions by default, and optionally associates each ASN
 with the devices for which it is a local ASN. Missing ASNs are created only
@@ -11061,10 +11091,10 @@ validated in dry-run mode.
 <p>Runs selected synchronizers in read-only dry-run mode for drift reporting,
 including inventory, interface, VRF, VLAN, prefix, IP, VRRP, BGP peering, and BGP
 community state, or executes the supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
-MAC, IP, and BGP sequence. <code>sync_all</code> accepts per-task keyword arguments inline
-or from an <code>nf://</code> YAML file and can skip individual stages. Drift assessment can
-treat deletion-only differences as in sync while retaining them in the detailed
-diff. <strong>Use cases:</strong> audit
+MAC, IP, VRRP, and BGP sequence. Both operations accept per-task keyword arguments
+inline or from an <code>nf://</code> YAML file; <code>sync_all</code> can also skip individual stages.
+Drift assessment can treat deletion-only differences as in sync while retaining
+them in the detailed diff. <strong>Use cases:</strong> audit
 evidence, change planning, and scheduled source-of-truth maintenance.
 <strong>Limitations:</strong> assessment is limited to implemented sync domains; <code>sync_all</code>
 can make broad changes and requires careful deletion/filter policy.
@@ -11502,7 +11532,7 @@ protection must be designed as part of deployment.
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2994,6 +3022,17 @@
     <span class="md-ellipsis">
       
         Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sync-task-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Task Arguments
       
     </span>
   </a>
@@ -6169,34 +6208,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6261,10 +6272,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6282,8 +6293,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6904,10 +6915,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -6925,8 +6936,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7076,6 +7087,17 @@
     <span class="md-ellipsis">
       
         Inputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sync-task-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Task Arguments
       
     </span>
   </a>
@@ -7268,6 +7290,11 @@
 <td>Treat deletion-only differences as in sync, default <code>False</code></td>
 </tr>
 <tr>
+<td><code>sync_kwargs</code></td>
+<td style="text-align: right;">No</td>
+<td>Per-task sync arguments as an inline dictionary or an <code>nf://</code> YAML file</td>
+</tr>
+<tr>
 <td>Nornir filters</td>
 <td style="text-align: right;">No</td>
 <td>Host filters such as <code>FL</code>, <code>FB</code>, <code>FG</code>, <code>FC</code>, or <code>FN</code></td>
@@ -7275,6 +7302,23 @@
 </tbody>
 </table>
 <p>At least one explicit device or Nornir host filter must resolve to a device.</p>
+<h2 id="sync-task-arguments">Sync Task Arguments<a class="headerlink" href="#sync-task-arguments" title="Permanent link">¤</a></h2>
+<p>Use <code>sync_kwargs</code> to configure how individual dry-run synchronizers calculate
+drift. Supported keys are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
+<code>sync_vrfs</code>, <code>sync_vlans</code>, <code>sync_device_prefixes</code>, <code>sync_device_ip</code>,
+<code>sync_vrrp</code>, <code>sync_bgp_community</code>, and <code>sync_bgp_peerings</code>. Values are keyword
+argument dictionaries accepted by the corresponding task. Keep <code>instance</code>,
+<code>timeout</code>, <code>devices</code>, <code>branch</code>, and <code>dry_run</code> at the <code>check_device_sync</code> level;
+all subordinate tasks are always called with <code>dry_run=True</code>.</p>
+<p>The mapping can be supplied inline or loaded from an <code>nf://</code> YAML file:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">sync_device_interfaces</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">filter_by_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Loopback*</span>
+<span class="nt">sync_vlans</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">filter_by_vlan_ids</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100-299</span>
+<span class="nt">sync_bgp_peerings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
+</code></pre></div>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -7328,6 +7372,9 @@
 <p>Check against a NetBox branch:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>branch<span class="w"> </span>my-branch
 </code></pre></div>
+<p>Load per-task arguments from the File Sharing service:</p>
+<div class="highlight"><pre><span></span><code>nf#netbox<span class="w"> </span>check-sync<span class="w"> </span>devices<span class="w"> </span>devices<span class="w"> </span>ceos-leaf-1<span class="w"> </span>sync-kwargs<span class="w"> </span>nf://netbox/check_sync_kwargs.yaml
+</code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Context manager:</p>
@@ -7342,6 +7389,10 @@
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;ceos-leaf-2&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;sync_kwargs&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;filter_by_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Loopback*&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;sync_vlans&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;filter_by_vlan_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;100-299&quot;</span><span class="p">]},</span>
+            <span class="p">},</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
@@ -7407,6 +7458,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>check-bgp-communities:<span class="w">    </span>Check<span class="w"> </span>BGP<span class="w"> </span>communities<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>check-vrrp:<span class="w">    </span>Check<span class="w"> </span>VRRP<span class="w"> </span>sync<span class="w"> </span>state,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;True&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>ignore-deletions:<span class="w">    </span>Treat<span class="w"> </span>deletion-only<span class="w"> </span>differences<span class="w"> </span>as<span class="w"> </span><span class="k">in</span><span class="w"> </span>sync,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>sync-kwargs:<span class="w">    </span>Per-task<span class="w"> </span>sync<span class="w"> </span>arguments<span class="w"> </span>or<span class="w"> </span>nf://<span class="w"> </span>YAML<span class="w"> </span>file
 <span class="w">            </span>├──<span class="w"> </span>FO:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>using<span class="w"> </span>Filter<span class="w"> </span>Object
 <span class="w">            </span>├──<span class="w"> </span>FB:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>name<span class="w"> </span>using<span class="w"> </span>Glob<span class="w"> </span>Patterns
 <span class="w">            </span>├──<span class="w"> </span>FH:<span class="w">    </span>Filter<span class="w"> </span>hosts<span class="w"> </span>by<span class="w"> </span>hostname
@@ -7689,6 +7741,27 @@ Defaults to False.</p>
             </td>
             <td>
                   <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sync_kwargs</code>
+            </td>
+            <td>
+                  <code><span title="typing.Union">Union</span>[None, <span title="dict">dict</span>, <span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Per-task arguments keyed by sync task name, or an
+<code>nf://</code> YAML file containing that dictionary. Supported keys
+are <code>sync_device_inventory</code>, <code>sync_device_interfaces</code>,
+<code>sync_vrfs</code>, <code>sync_vlans</code>, <code>sync_device_prefixes</code>,
+<code>sync_device_ip</code>, <code>sync_vrrp</code>, <code>sync_bgp_community</code>, and
+<code>sync_bgp_peerings</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -8078,7 +8151,28 @@ Defaults to False.</p>
 <span class="normal">1507</span>
 <span class="normal">1508</span>
 <span class="normal">1509</span>
-<span class="normal">1510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1510</span>
+<span class="normal">1511</span>
+<span class="normal">1512</span>
+<span class="normal">1513</span>
+<span class="normal">1514</span>
+<span class="normal">1515</span>
+<span class="normal">1516</span>
+<span class="normal">1517</span>
+<span class="normal">1518</span>
+<span class="normal">1519</span>
+<span class="normal">1520</span>
+<span class="normal">1521</span>
+<span class="normal">1522</span>
+<span class="normal">1523</span>
+<span class="normal">1524</span>
+<span class="normal">1525</span>
+<span class="normal">1526</span>
+<span class="normal">1527</span>
+<span class="normal">1528</span>
+<span class="normal">1529</span>
+<span class="normal">1530</span>
+<span class="normal">1531</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CheckDeviceSyncInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CheckDeviceSyncResult</span><span class="p">,</span>
@@ -8109,6 +8203,7 @@ Defaults to False.</p>
     <span class="n">check_bgp_communities</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">check_vrrp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">ignore_deletions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">sync_kwargs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8140,6 +8235,12 @@ Defaults to False.</p>
 <span class="sd">        check_vrrp (bool): Check VRRP sync state. Defaults to True.</span>
 <span class="sd">        ignore_deletions (bool): Treat deletion-only differences as in sync.</span>
 <span class="sd">            Defaults to False.</span>
+<span class="sd">        sync_kwargs: Per-task arguments keyed by sync task name, or an</span>
+<span class="sd">            ``nf://`` YAML file containing that dictionary. Supported keys</span>
+<span class="sd">            are ``sync_device_inventory``, ``sync_device_interfaces``,</span>
+<span class="sd">            ``sync_vrfs``, ``sync_vlans``, ``sync_device_prefixes``,</span>
+<span class="sd">            ``sync_device_ip``, ``sync_vrrp``, ``sync_bgp_community``, and</span>
+<span class="sd">            ``sync_bgp_peerings``.</span>
 <span class="sd">        **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).</span>
 
 <span class="sd">    Returns:</span>
@@ -8162,6 +8263,11 @@ Defaults to False.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">sync_kwargs</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="n">sync_kwargs</span> <span class="o">=</span> <span class="n">sync_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
         <span class="n">task</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:check_device_sync&quot;</span><span class="p">,</span>
         <span class="n">result</span><span class="o">=</span><span class="p">{},</span>
@@ -8206,6 +8312,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_device_inventory&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8225,6 +8332,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_device_interfaces&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">intf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8244,6 +8352,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_vrfs&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8271,6 +8380,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_vlans&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8294,6 +8404,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_device_prefixes&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8314,6 +8425,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_device_ip&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ip_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8335,6 +8447,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_vrrp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8354,6 +8467,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_bgp_community&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8374,6 +8488,7 @@ Defaults to False.</p>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
             <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bgp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
@@ -8536,7 +8651,7 @@ Defaults to False.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

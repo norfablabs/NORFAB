@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -6318,34 +6346,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6410,10 +6410,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6431,8 +6431,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7053,10 +7053,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -7074,8 +7074,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -8933,7 +8933,11 @@ file containing them.</p>
 <span class="normal">702</span>
 <span class="normal">703</span>
 <span class="normal">704</span>
-<span class="normal">705</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncVrfsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncVrfsResult</span><span class="p">,</span>
@@ -9269,22 +9273,26 @@ file containing them.</p>
             <span class="n">netbox_vrfs</span><span class="p">[</span><span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span>
             <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;vrf&quot;</span><span class="p">,</span> <span class="n">vrf</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">vrf</span>
 
-    <span class="c1"># Diff route-target and routing-policy lists before applying the</span>
-    <span class="c1"># additive policy. Only fields reported by make_diff are later written;</span>
-    <span class="c1"># changed lists retain NetBox values plus targets newly observed live.</span>
+    <span class="c1"># Route-target and routing-policy updates are additive. Retain existing</span>
+    <span class="c1"># NetBox associations and add values newly observed in live data.</span>
+    <span class="k">for</span> <span class="n">vrf_name</span><span class="p">,</span> <span class="n">current</span> <span class="ow">in</span> <span class="n">netbox_vrfs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;import_targets&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;export_targets&quot;</span><span class="p">,</span>
+            <span class="n">rpl_import_ipv4</span><span class="p">,</span>
+            <span class="n">rpl_import_ipv6</span><span class="p">,</span>
+            <span class="n">rpl_export_ipv4</span><span class="p">,</span>
+            <span class="n">rpl_export_ipv6</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">current</span><span class="p">:</span>
+                <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                    <span class="nb">set</span><span class="p">(</span><span class="n">current</span><span class="p">[</span><span class="n">field</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">])</span>
+                <span class="p">)</span>
+
     <span class="n">vrf_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_diff</span><span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="n">live_vrfs</span><span class="p">},</span>
         <span class="p">{</span><span class="s2">&quot;vrfs&quot;</span><span class="p">:</span> <span class="n">netbox_vrfs</span><span class="p">},</span>
     <span class="p">)[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">vrf_name</span><span class="p">,</span> <span class="n">changes</span> <span class="ow">in</span> <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;import_targets&quot;</span><span class="p">,</span> <span class="s2">&quot;export_targets&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">policy_fields</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
-            <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
-                <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">netbox_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
-                    <span class="n">target</span>
-                    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">netbox_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span>
-                <span class="p">]</span>
-                <span class="n">changes</span><span class="p">[</span><span class="n">field</span><span class="p">][</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">live_vrfs</span><span class="p">[</span><span class="n">vrf_name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span>
     <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">create_names</span> <span class="o">=</span> <span class="n">vrf_diff</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span>
@@ -9736,7 +9744,7 @@ file containing them.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

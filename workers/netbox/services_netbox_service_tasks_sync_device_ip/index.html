@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -6241,34 +6269,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6333,10 +6333,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6354,8 +6354,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6976,10 +6976,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -6997,8 +6997,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7334,7 +7334,7 @@ When several records have the same address, interface assignment takes priority
 over VRF and unassigned-record fallback matching.</p>
 <p>Roles are synchronized from the normalized TTP interface data. The
 <code>ip_address_role</code> value is written to NetBox when present, including roles such
-as <code>secondary</code>, <code>anycast</code>, and <code>vrrp</code>. The task also applies these fallbacks:</p>
+as <code>secondary</code> and <code>anycast</code>. The task also applies these fallbacks:</p>
 <ul>
 <li>Interfaces whose name starts with <code>loopback</code> or <code>lo</code> → role <code>loopback</code></li>
 <li>Addresses that fall within any configured <code>anycast_ranges</code> prefix → role <code>anycast</code></li>
@@ -7342,11 +7342,14 @@ as <code>secondary</code>, <code>anycast</code>, and <code>vrrp</code>. The task
 </ul>
 <p>Configured <code>anycast_ranges</code> take precedence over the parsed role. A parsed role
 takes precedence over loopback-name inference.</p>
-<p>Addresses with the parsed <code>vrrp</code> role are created or reused without an
-interface assignment. The <a href="../services_netbox_service_tasks_sync_vrrp/"><code>sync_vrrp</code></a>
-task assigns those addresses to the appropriate NetBox FHRP group. If the
-address is already assigned to an FHRP group, IP synchronization leaves it
-unchanged.</p>
+<p>Addresses with a parsed <code>vrrp</code>, <code>glbp</code>, <code>hsrp</code>, or <code>carp</code> role are excluded
+from this task. The
+<a href="../services_netbox_service_tasks_sync_vrrp/"><code>sync_vrrp</code></a> task exclusively
+creates or reuses VRRP addresses and assigns them to the appropriate NetBox
+FHRP group. Matching IP records assigned to any non-interface NetBox object are
+also excluded so this task cannot reassign or duplicate records owned by
+another synchronization domain. Truly unassigned records remain eligible for
+reuse.</p>
 <p><img alt="Netbox Sync Device Interfaces" src="../../../images/Netbox_Service_Sync_Interfaces.jpg" /></p>
 <ol>
 <li>Client submits an on-demand request to the NorFab Netbox worker to sync device IP addresses</li>
@@ -7442,6 +7445,11 @@ to the interfaces created by interface sync.</p>
 <td>Same non-anycast IP is assigned to another interface</td>
 <td>Report a duplicate conflict.</td>
 <td>Report a conflict when it is in the same VRF as the IP discovered from the live device. A record in another VRF does not match, so a new record is created in the discovered IP's VRF.</td>
+</tr>
+<tr>
+<td>Same IP is assigned to a non-interface object</td>
+<td>Exclude the live address from IP synchronization.</td>
+<td>Exclude the live address when the existing record is in the discovered IP's VRF.</td>
 </tr>
 <tr>
 <td>Same anycast IP is assigned to another interface</td>
@@ -7744,9 +7752,8 @@ the same structure showing what was done.</p>
 <ol>
 <li>When overlapping IP discovered in Netbox and it is part of anycast range,
     existing IP role update to <code>anycast</code></li>
-<li>Parsed TTP IP roles are synchronized to NetBox. VRRP addresses are
-    created or reused without an interface assignment so that <code>sync_vrrp</code>
-    can associate them with an FHRP group.</li>
+<li>Parsed TTP IP roles are synchronized to NetBox, except for FHRP
+    addresses using the <code>vrrp</code>, <code>glbp</code>, <code>hsrp</code>, or <code>carp</code> roles.</li>
 </ol>
 
 
@@ -8062,78 +8069,7 @@ does not delete IP addresses.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 699</span>
-<span class="normal"> 700</span>
-<span class="normal"> 701</span>
-<span class="normal"> 702</span>
-<span class="normal"> 703</span>
-<span class="normal"> 704</span>
-<span class="normal"> 705</span>
-<span class="normal"> 706</span>
-<span class="normal"> 707</span>
-<span class="normal"> 708</span>
-<span class="normal"> 709</span>
-<span class="normal"> 710</span>
-<span class="normal"> 711</span>
-<span class="normal"> 712</span>
-<span class="normal"> 713</span>
-<span class="normal"> 714</span>
-<span class="normal"> 715</span>
-<span class="normal"> 716</span>
-<span class="normal"> 717</span>
-<span class="normal"> 718</span>
-<span class="normal"> 719</span>
-<span class="normal"> 720</span>
-<span class="normal"> 721</span>
-<span class="normal"> 722</span>
-<span class="normal"> 723</span>
-<span class="normal"> 724</span>
-<span class="normal"> 725</span>
-<span class="normal"> 726</span>
-<span class="normal"> 727</span>
-<span class="normal"> 728</span>
-<span class="normal"> 729</span>
-<span class="normal"> 730</span>
-<span class="normal"> 731</span>
-<span class="normal"> 732</span>
-<span class="normal"> 733</span>
-<span class="normal"> 734</span>
-<span class="normal"> 735</span>
-<span class="normal"> 736</span>
-<span class="normal"> 737</span>
-<span class="normal"> 738</span>
-<span class="normal"> 739</span>
-<span class="normal"> 740</span>
-<span class="normal"> 741</span>
-<span class="normal"> 742</span>
-<span class="normal"> 743</span>
-<span class="normal"> 744</span>
-<span class="normal"> 745</span>
-<span class="normal"> 746</span>
-<span class="normal"> 747</span>
-<span class="normal"> 748</span>
-<span class="normal"> 749</span>
-<span class="normal"> 750</span>
-<span class="normal"> 751</span>
-<span class="normal"> 752</span>
-<span class="normal"> 753</span>
-<span class="normal"> 754</span>
-<span class="normal"> 755</span>
-<span class="normal"> 756</span>
-<span class="normal"> 757</span>
-<span class="normal"> 758</span>
-<span class="normal"> 759</span>
-<span class="normal"> 760</span>
-<span class="normal"> 761</span>
-<span class="normal"> 762</span>
-<span class="normal"> 763</span>
-<span class="normal"> 764</span>
-<span class="normal"> 765</span>
-<span class="normal"> 766</span>
-<span class="normal"> 767</span>
-<span class="normal"> 768</span>
-<span class="normal"> 769</span>
-<span class="normal"> 770</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 770</span>
 <span class="normal"> 771</span>
 <span class="normal"> 772</span>
 <span class="normal"> 773</span>
@@ -8714,7 +8650,71 @@ does not delete IP addresses.</p>
 <span class="normal">1348</span>
 <span class="normal">1349</span>
 <span class="normal">1350</span>
-<span class="normal">1351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1351</span>
+<span class="normal">1352</span>
+<span class="normal">1353</span>
+<span class="normal">1354</span>
+<span class="normal">1355</span>
+<span class="normal">1356</span>
+<span class="normal">1357</span>
+<span class="normal">1358</span>
+<span class="normal">1359</span>
+<span class="normal">1360</span>
+<span class="normal">1361</span>
+<span class="normal">1362</span>
+<span class="normal">1363</span>
+<span class="normal">1364</span>
+<span class="normal">1365</span>
+<span class="normal">1366</span>
+<span class="normal">1367</span>
+<span class="normal">1368</span>
+<span class="normal">1369</span>
+<span class="normal">1370</span>
+<span class="normal">1371</span>
+<span class="normal">1372</span>
+<span class="normal">1373</span>
+<span class="normal">1374</span>
+<span class="normal">1375</span>
+<span class="normal">1376</span>
+<span class="normal">1377</span>
+<span class="normal">1378</span>
+<span class="normal">1379</span>
+<span class="normal">1380</span>
+<span class="normal">1381</span>
+<span class="normal">1382</span>
+<span class="normal">1383</span>
+<span class="normal">1384</span>
+<span class="normal">1385</span>
+<span class="normal">1386</span>
+<span class="normal">1387</span>
+<span class="normal">1388</span>
+<span class="normal">1389</span>
+<span class="normal">1390</span>
+<span class="normal">1391</span>
+<span class="normal">1392</span>
+<span class="normal">1393</span>
+<span class="normal">1394</span>
+<span class="normal">1395</span>
+<span class="normal">1396</span>
+<span class="normal">1397</span>
+<span class="normal">1398</span>
+<span class="normal">1399</span>
+<span class="normal">1400</span>
+<span class="normal">1401</span>
+<span class="normal">1402</span>
+<span class="normal">1403</span>
+<span class="normal">1404</span>
+<span class="normal">1405</span>
+<span class="normal">1406</span>
+<span class="normal">1407</span>
+<span class="normal">1408</span>
+<span class="normal">1409</span>
+<span class="normal">1410</span>
+<span class="normal">1411</span>
+<span class="normal">1412</span>
+<span class="normal">1413</span>
+<span class="normal">1414</span>
+<span class="normal">1415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -8779,9 +8779,8 @@ does not delete IP addresses.</p>
 
 <span class="sd">    1. When overlapping IP discovered in Netbox and it is part of anycast range,</span>
 <span class="sd">        existing IP role update to `anycast`</span>
-<span class="sd">    2. Parsed TTP IP roles are synchronized to NetBox. VRRP addresses are</span>
-<span class="sd">        created or reused without an interface assignment so that `sync_vrrp`</span>
-<span class="sd">        can associate them with an FHRP group.</span>
+<span class="sd">    2. Parsed TTP IP roles are synchronized to NetBox, except for FHRP</span>
+<span class="sd">        addresses using the `vrrp`, `glbp`, `hsrp`, or `carp` roles.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object containing relevant metadata.</span>
@@ -8976,6 +8975,8 @@ does not delete IP addresses.</p>
             <span class="p">):</span>
                 <span class="n">ip</span> <span class="o">=</span> <span class="n">ip_data</span><span class="p">[</span><span class="s2">&quot;ip&quot;</span><span class="p">]</span>
                 <span class="n">parsed_ip_role</span> <span class="o">=</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ip_address_role&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">parsed_ip_role</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vrrp&quot;</span><span class="p">,</span> <span class="s2">&quot;glbp&quot;</span><span class="p">,</span> <span class="s2">&quot;hsrp&quot;</span><span class="p">,</span> <span class="s2">&quot;carp&quot;</span><span class="p">):</span>
+                    <span class="k">continue</span>
                 <span class="n">host_address</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span><span class="o">.</span><span class="n">ip</span>
                 <span class="k">if</span> <span class="n">filter_prefix_net</span> <span class="ow">and</span> <span class="n">host_address</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filter_prefix_net</span><span class="p">:</span>
                     <span class="k">continue</span>
@@ -9001,16 +9002,8 @@ does not delete IP addresses.</p>
                     <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span>
                     <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
                     <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">resolved_ip_role</span><span class="p">,</span>
-                    <span class="c1"># VRRP IPs are created unassigned; sync_vrrp associates them</span>
-                    <span class="c1"># with the corresponding NetBox FHRP group.</span>
-                    <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="kc">None</span> <span class="k">if</span> <span class="n">resolved_ip_role</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span> <span class="k">else</span> <span class="s2">&quot;dcim.interface&quot;</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="kc">None</span>
-                        <span class="k">if</span> <span class="n">resolved_ip_role</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span>
-                        <span class="k">else</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-                    <span class="p">),</span>
+                    <span class="s2">&quot;assigned_object_type&quot;</span><span class="p">:</span> <span class="s2">&quot;dcim.interface&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;assigned_object_id&quot;</span><span class="p">:</span> <span class="n">nb_raw</span><span class="p">[</span><span class="n">intf_name</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
                 <span class="p">}</span>
                 <span class="n">all_ip_live</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip_live</span><span class="p">)</span>
 
@@ -9075,7 +9068,12 @@ does not delete IP addresses.</p>
         <span class="p">]</span>
         <span class="c1"># Prefer the matching IP already assigned to the target interface.</span>
         <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
+                <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+                <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+            <span class="p">):</span>
                 <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span><span class="n">nb_ip</span><span class="p">]</span>
                 <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
@@ -9084,6 +9082,17 @@ does not delete IP addresses.</p>
                 <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;vrf&quot;</span><span class="p">]</span>
                 <span class="p">]</span>
+        <span class="c1"># Exclude records owned by non-interface objects while retaining valid</span>
+        <span class="c1"># interface-assigned and unassigned candidates for reconciliation.</span>
+        <span class="n">eligible_nb_ips</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">i</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span>
+            <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;dcim.interface&quot;</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">matching_nb_ips</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">eligible_nb_ips</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">matching_nb_ips</span> <span class="o">=</span> <span class="n">eligible_nb_ips</span>
         <span class="c1"># no existing IP found, create it</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
             <span class="n">bulk_create_ip</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_ip_payload</span><span class="p">(</span><span class="n">ip_live</span><span class="p">,</span> <span class="n">ignore_vrf</span><span class="p">)</span>
@@ -9092,7 +9101,12 @@ does not delete IP addresses.</p>
         <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
                 <span class="c1"># ip already assigned to same interface</span>
-                <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
+                    <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span>
+                    <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+                    <span class="o">==</span> <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]</span>
+                <span class="p">):</span>
                     <span class="c1"># if Netbox IP has anycast role, override live IP to use anycast role too</span>
                     <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Found existing Netbox IP with &#39;anycast&#39; role </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, assigning anycast role to live IP&quot;</span>
@@ -9151,17 +9165,6 @@ does not delete IP addresses.</p>
             <span class="k">for</span> <span class="n">nb_ip</span> <span class="ow">in</span> <span class="n">matching_nb_ips</span><span class="p">:</span>
                 <span class="c1"># existing NB IP already assigned to an interface</span>
                 <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_id&quot;</span><span class="p">]:</span>
-                    <span class="c1"># sync_vrrp owns the FHRP assignment, so IP sync must not</span>
-                    <span class="c1"># move an existing VRRP address back onto an interface.</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span>
-                        <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span>
-                        <span class="ow">and</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;assigned_object_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ipam.fhrpgroup&quot;</span>
-                    <span class="p">):</span>
-                        <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;in_sync&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="n">ip_live</span><span class="p">[</span><span class="s2">&quot;address&quot;</span><span class="p">]</span>
-                        <span class="p">)</span>
-                        <span class="k">break</span>
                     <span class="c1"># if existing Netbox IP role is anycast - override live IP role to anycast too</span>
                     <span class="k">if</span> <span class="n">nb_ip</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Found existing Netbox IP with &#39;anycast&#39; role </span><span class="si">{</span><span class="n">nb_ip</span><span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, assigning anycast role to live IP&quot;</span>
@@ -9215,16 +9218,6 @@ does not delete IP addresses.</p>
             <span class="n">SyncActionSummary</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>
         <span class="p">)</span>
 
-    <span class="c1"># Multiple VRRP peers report the same virtual IP. Create it once and leave</span>
-    <span class="c1"># peer-to-group association to sync_vrrp.</span>
-    <span class="n">vrrp_address_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">ip_data</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-        <span class="n">addr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ip_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;vrrp&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">vrrp_address_seen</span><span class="p">:</span>
-                <span class="n">bulk_create_ip</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">vrrp_address_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
     <span class="c1"># check that update and create payloads have no non-anycast duplicate IPs</span>
     <span class="c1"># Netbox has a bug allowing to create duplicate IPs in single create request</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;checking IP address payloads for duplicate non-anycast addresses&quot;</span><span class="p">)</span>
@@ -9496,7 +9489,7 @@ does not delete IP addresses.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

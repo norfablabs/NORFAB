@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -579,6 +579,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/norfab_netbox_design_authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Author a Netbox Design with an Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -6169,34 +6197,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/netbox_design_specification/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    NetBox Design Specification
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../development/adr_tasks_pydantic_models_guide/" class="md-nav__link">
         
   
@@ -6261,10 +6261,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
         
           
-          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
             
   
   
@@ -6282,8 +6282,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -6904,10 +6904,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_7" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_7" id="__nav_8_7_label" tabindex="0">
             
   
   
@@ -6925,8 +6925,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -7182,14 +7182,15 @@ fixed sequence:</p>
 <li><strong>vlans</strong> — calls <code>sync_vlans</code></li>
 <li><strong>mac_addresses</strong> — calls <code>sync_mac_addresses</code></li>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip</code></li>
+<li><strong>vrrp</strong> — calls <code>sync_vrrp</code></li>
 <li><strong>bgp_peerings</strong> — calls <code>sync_bgp_peerings</code></li>
 </ol>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
-<p>The <code>sync_all</code> task orchestrates eight subordinate sync tasks in sequence. Each task collects live device data,
+<p>The <code>sync_all</code> task orchestrates nine subordinate sync tasks in sequence. Each task collects live device data,
 compares it against NetBox state, and applies reconciliation operations. When <code>dry_run=True</code>, all tasks preview changes
 without writing. When <code>with_approval=True</code>, each stage waits for user confirmation before applying changes.
 If VLAN synchronization fails, <code>sync_all</code> returns immediately and does not run
-MAC address, IP address, or BGP peering synchronization.</p>
+MAC address, IP address, VRRP, or BGP peering synchronization.</p>
 <h2 id="execution-modes">Execution Modes<a class="headerlink" href="#execution-modes" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) previews all changes without writing to NetBox.</p>
 <p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops <code>sync_all</code> at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.</p>
@@ -7235,6 +7236,9 @@ task as keyword arguments:</p>
 <span class="w">  </span><span class="nt">ignore_ranges</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.0/24</span>
 
+<span class="nt">sync_vrrp</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">device</span><span class="nv"> </span><span class="s">}}-{{</span><span class="nv"> </span><span class="s">interface</span><span class="nv"> </span><span class="s">}}-vrrp-{{</span><span class="nv"> </span><span class="s">group_id</span><span class="nv"> </span><span class="s">}}&quot;</span>
+
 <span class="nt">sync_bgp_peerings</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">process_deletions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
@@ -7242,7 +7246,7 @@ task as keyword arguments:</p>
 </code></pre></div>
 <p>The supported keys are <code>sync_device_inventory</code>, <code>sync_vlans</code>,
 <code>sync_device_prefixes</code>, <code>sync_vrfs</code>, <code>sync_device_interfaces</code>,
-<code>sync_mac_addresses</code>, <code>sync_device_ip</code>, and <code>sync_bgp_peerings</code>. Refer to each
+<code>sync_mac_addresses</code>, <code>sync_device_ip</code>, <code>sync_vrrp</code>, and <code>sync_bgp_peerings</code>. Refer to each
 task's documentation for its accepted arguments. Missing keys run with the
 subordinate task's defaults. Set a key to <code>false</code> to skip that task and continue
 with the next stage:</p>
@@ -7252,7 +7256,7 @@ with the next stage:</p>
 <p>Keep <code>instance</code>, <code>timeout</code>, <code>devices</code>, <code>branch</code>, <code>dry_run</code>, and <code>with_approval</code>
 at the <code>sync_all</code> level rather than repeating them inside a task dictionary.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
-<p>The result structure aggregates the outcomes of all eight subordinate sync tasks. When <code>dry_run=True</code> the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and <code>interfaces</code> sections. The VRF category retains separate <code>vrfs</code>, <code>route_targets</code>, <code>routing_policies</code>, and <code>interfaces</code> sections. Each <code>interfaces</code> section contains only the current device.</p>
+<p>The result structure aggregates the outcomes of all nine subordinate sync tasks. When <code>dry_run=True</code> the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and <code>interfaces</code> sections. The VRF category retains separate <code>vrfs</code>, <code>route_targets</code>, <code>routing_policies</code>, and <code>interfaces</code> sections. Each <code>interfaces</code> section contains only the current device.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="c1"># per-device results — one entry per resolved device</span>
     <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -7330,6 +7334,12 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
                 <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
                 <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
             <span class="p">},</span>
+            <span class="s2">&quot;vrrp&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
+                <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
+                <span class="s2">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
+                <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
+            <span class="p">},</span>
             <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;create&quot;</span><span class="p">:</span>  <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
                 <span class="s2">&quot;update&quot;</span><span class="p">:</span>  <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
@@ -7347,7 +7357,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">CLI</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Preview all eight sync categories:</p>
+<p>Preview all nine sync categories:</p>
 <div class="highlight"><pre><span></span><code>nf#netbox sync all devices ceos-spine-1 ceos-spine-2 dry-run
 </code></pre></div>
 <p>Preview, prompt for review, and apply the changes:</p>
@@ -7385,6 +7395,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
                 <span class="s2">&quot;vlan_map&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://netbox/vlan_map.yaml&quot;</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="s2">&quot;sync_device_ip&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ignore_vrf&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+            <span class="s2">&quot;sync_vrrp&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device }}-{{ interface }}-vrrp-{{ group_id }}&quot;</span><span class="p">},</span>
             <span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">},</span>
@@ -7401,7 +7412,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, MAC addresses, IP addresses and BGP peerings
+        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, MAC addresses, IP addresses, VRRP and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default &#39;any&#39;
             ├── verbose-result:    Control output details, default &#39;False&#39;
@@ -7436,7 +7447,7 @@ nf#
 
         <p>Synchronize all device data from live devices into NetBox in sequence:
 inventory → prefixes → interfaces → VRFs → VLANs → MAC addresses →
-IP addresses → BGP peerings.</p>
+IP addresses → VRRP → BGP peerings.</p>
 <p>Pass <code>dry_run=True</code> to preview changes without writing to NetBox.
 Pass <code>with_approval=True</code> to have each sync stage run a dry-run preview,
 ask the interactive client for review, and only then apply that stage.</p>
@@ -7458,6 +7469,7 @@ ask the interactive client for review, and only then apply that stage.</p>
         "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
         "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
         "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
+        "vrrp":          {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
         "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},
     }
 }
@@ -7651,28 +7663,7 @@ to <code>False</code> to skip that task.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1512</span>
-<span class="normal">1513</span>
-<span class="normal">1514</span>
-<span class="normal">1515</span>
-<span class="normal">1516</span>
-<span class="normal">1517</span>
-<span class="normal">1518</span>
-<span class="normal">1519</span>
-<span class="normal">1520</span>
-<span class="normal">1521</span>
-<span class="normal">1522</span>
-<span class="normal">1523</span>
-<span class="normal">1524</span>
-<span class="normal">1525</span>
-<span class="normal">1526</span>
-<span class="normal">1527</span>
-<span class="normal">1528</span>
-<span class="normal">1529</span>
-<span class="normal">1530</span>
-<span class="normal">1531</span>
-<span class="normal">1532</span>
-<span class="normal">1533</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1533</span>
 <span class="normal">1534</span>
 <span class="normal">1535</span>
 <span class="normal">1536</span>
@@ -8057,7 +8048,62 @@ to <code>False</code> to skip that task.</p>
 <span class="normal">1915</span>
 <span class="normal">1916</span>
 <span class="normal">1917</span>
-<span class="normal">1918</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1918</span>
+<span class="normal">1919</span>
+<span class="normal">1920</span>
+<span class="normal">1921</span>
+<span class="normal">1922</span>
+<span class="normal">1923</span>
+<span class="normal">1924</span>
+<span class="normal">1925</span>
+<span class="normal">1926</span>
+<span class="normal">1927</span>
+<span class="normal">1928</span>
+<span class="normal">1929</span>
+<span class="normal">1930</span>
+<span class="normal">1931</span>
+<span class="normal">1932</span>
+<span class="normal">1933</span>
+<span class="normal">1934</span>
+<span class="normal">1935</span>
+<span class="normal">1936</span>
+<span class="normal">1937</span>
+<span class="normal">1938</span>
+<span class="normal">1939</span>
+<span class="normal">1940</span>
+<span class="normal">1941</span>
+<span class="normal">1942</span>
+<span class="normal">1943</span>
+<span class="normal">1944</span>
+<span class="normal">1945</span>
+<span class="normal">1946</span>
+<span class="normal">1947</span>
+<span class="normal">1948</span>
+<span class="normal">1949</span>
+<span class="normal">1950</span>
+<span class="normal">1951</span>
+<span class="normal">1952</span>
+<span class="normal">1953</span>
+<span class="normal">1954</span>
+<span class="normal">1955</span>
+<span class="normal">1956</span>
+<span class="normal">1957</span>
+<span class="normal">1958</span>
+<span class="normal">1959</span>
+<span class="normal">1960</span>
+<span class="normal">1961</span>
+<span class="normal">1962</span>
+<span class="normal">1963</span>
+<span class="normal">1964</span>
+<span class="normal">1965</span>
+<span class="normal">1966</span>
+<span class="normal">1967</span>
+<span class="normal">1968</span>
+<span class="normal">1969</span>
+<span class="normal">1970</span>
+<span class="normal">1971</span>
+<span class="normal">1972</span>
+<span class="normal">1973</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncAllInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncAllResult</span><span class="p">,</span>
@@ -8086,7 +8132,7 @@ to <code>False</code> to skip that task.</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Synchronize all device data from live devices into NetBox in sequence:</span>
 <span class="sd">    inventory → prefixes → interfaces → VRFs → VLANs → MAC addresses →</span>
-<span class="sd">    IP addresses → BGP peerings.</span>
+<span class="sd">    IP addresses → VRRP → BGP peerings.</span>
 
 <span class="sd">    Pass ``dry_run=True`` to preview changes without writing to NetBox.</span>
 <span class="sd">    Pass ``with_approval=True`` to have each sync stage run a dry-run preview,</span>
@@ -8111,6 +8157,7 @@ to <code>False</code> to skip that task.</p>
 <span class="sd">                &quot;interfaces&quot;:    {&quot;created&quot;: [...], &quot;updated&quot;: {...}, &quot;deleted&quot;: [...], &quot;in_sync&quot;: [...]},</span>
 <span class="sd">                &quot;mac_addresses&quot;: {&quot;created&quot;: [...], &quot;updated&quot;: [...], &quot;in_sync&quot;: [...]},</span>
 <span class="sd">                &quot;ip_addresses&quot;:  {&quot;created&quot;: [...], &quot;updated&quot;: [...], &quot;in_sync&quot;: [...]},</span>
+<span class="sd">                &quot;vrrp&quot;:          {&quot;created&quot;: [...], &quot;updated&quot;: [...], &quot;deleted&quot;: [...], &quot;in_sync&quot;: [...]},</span>
 <span class="sd">                &quot;bgp_peerings&quot;:  {&quot;create&quot;: [...],  &quot;update&quot;: {...},  &quot;delete&quot;: [...],  &quot;in_sync&quot;: [...]},</span>
 <span class="sd">            }</span>
 <span class="sd">        }</span>
@@ -8426,6 +8473,39 @@ to <code>False</code> to skip that task.</p>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because IP address review was declined&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
 
+    <span class="c1"># --- sync VRRP after regular IP addresses ---</span>
+    <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_vrrp&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;skipping VRRP sync&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;syncing VRRP&quot;</span><span class="p">)</span>
+        <span class="n">vrrp_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_vrrp</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_vrrp&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;VRRP sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">vrrp_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VRRP sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VRRP review was declined&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
     <span class="c1"># --- sync BGP peerings ---</span>
     <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_bgp_peerings&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;skipping BGP peering sync&quot;</span><span class="p">)</span>
@@ -8593,7 +8673,7 @@ to <code>False</code> to skip that task.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
