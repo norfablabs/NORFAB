@@ -1099,10 +1099,10 @@ class TestDesignDeploy:
             "192.0.2.21/24",
             "192.0.2.22/24",
             "192.0.2.1/24",
-            "192.0.2.2/24",
         ]
         # Allocated addresses are identified by their explicit purpose, not guessed values.
         allocated_addresses = [
+            "ACME allocated management VIP",
             "acme-branch-rtr-1 Ethernet1",
             "acme-branch-rtr-2 Ethernet1",
             "acme-branch-rtr-1 Loopback0",
@@ -1234,6 +1234,12 @@ class TestDesignDeploy:
                 assert prefix.scope_type == "dcim.site"
                 assert prefix.scope_id == nb.dcim.sites.get(name=context["site"]).id
                 assert prefix.vlan.vid == 100
+                allocated_prefix = nb.ipam.prefixes.get(
+                    description=f"ACME {context['site']} user prefix"
+                )
+                assert allocated_prefix.vlan.id == nb.ipam.vlans.get(
+                    group_id=group.id, vid=100
+                ).id
                 assert (
                     nb.ipam.prefixes.get(prefix="198.19.230.0/24").vrf.name
                     == "ACME BRANCH"
@@ -1323,6 +1329,27 @@ class TestDesignDeploy:
                 )
                 vip = nb.ipam.ip_addresses.get(address="192.0.2.1/24")
                 assert vip.assigned_object.group_id == 10
+                allocated_vip = nb.ipam.ip_addresses.get(
+                    description="ACME allocated management VIP"
+                )
+                management_group = nb.ipam.fhrp_groups.get(
+                    name="ACME MANAGEMENT GATEWAY"
+                )
+                assert allocated_vip.assigned_object_type == "ipam.fhrpgroup"
+                assert allocated_vip.assigned_object_id == management_group.id
+                assert allocated_vip.role.value == "vrrp"
+                assert allocated_vip.address.endswith("/24")
+                assert (
+                    len(
+                        list(
+                            nb.ipam.ip_addresses.filter(
+                                assigned_object_type="ipam.fhrpgroup",
+                                assigned_object_id=management_group.id,
+                            )
+                        )
+                    )
+                    == 1
+                )
                 assert (
                     nb.dcim.devices.get(name="acme-branch-agg-1").primary_ip4.address
                     == "192.0.2.10/32"

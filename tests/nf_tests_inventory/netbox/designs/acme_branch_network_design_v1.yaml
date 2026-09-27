@@ -191,6 +191,8 @@ prefixes:
       prefixlen: 24
       site: "{{ context.site }}"
       role: ACME-BRANCH-LAN
+      vlan: 100
+      vlan_group: "{{ context.site }} VLANS"
       status: active
   - create_prefix:
       tenant: ACME
@@ -202,6 +204,11 @@ prefixes:
       status: active
 
 ip_addresses:
+  - create_ip:
+      prefix: 192.0.2.0/24
+      tenant: ACME
+      description: ACME allocated management VIP
+      vrrp_group: ACME MANAGEMENT GATEWAY
   - address: 198.19.230.1/24
     vrf: ACME BRANCH
     tenant: ACME
@@ -1105,7 +1112,6 @@ vrrp_groups:
   - protocol: vrrp2
     group_id: 20
     name: ACME MANAGEMENT GATEWAY
-    vip: 192.0.2.2/24
     assignments:
       - device: acme-branch-agg-1
         interface: Vlan100
