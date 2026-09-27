@@ -60,7 +60,12 @@ class TestGetInterfaces:
             "netbox",
             "get_interfaces",
             workers="any",
-            kwargs={"devices": [device], "raise_on_empty": False, "cache": False},
+            kwargs={
+                "devices": [device],
+                "interface_list": ["__norfab_test_nonexistent_interface__"],
+                "raise_on_empty": False,
+                "cache": False,
+            },
         )
 
         for worker, res in ret.items():

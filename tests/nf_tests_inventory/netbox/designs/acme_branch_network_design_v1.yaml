@@ -220,6 +220,9 @@ ip_addresses:
 # Both session directions are explicit; create_reverse remains false.
 devices:
   - name: acme-branch-rtr-1
+    # Requires the dcim.device custom field supplied by the test inventory.
+    custom_fields:
+      norfab_crud_test_text: ACME core router
     tenant: ACME
     site: "{{ context.site }}"
     console_ports:

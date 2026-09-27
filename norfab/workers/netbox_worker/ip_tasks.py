@@ -174,6 +174,7 @@ class NetboxIpTasks:
         branch: Union[None, str] = None,
         mask_len: Union[None, int] = None,
         create_peer_ip: Union[None, bool] = True,
+        custom_fields: Union[None, dict] = None,
     ) -> Result:
         """
         Allocate the next available IP address from a given subnet.
@@ -194,10 +195,13 @@ class NetboxIpTasks:
                 - IPv4 prefix string e.g. 10.0.0.0/24
                 - IPv6 prefix string e.g. 2001::/64
                 - Prefix description string to filter by
-                - Dictionary with prefix filters to feed `pynetbox` get method
+                - Dictionary with prefix filters to feed `pynetbox` filter method
                     e.g. `{"prefix": "10.0.0.0/24", "site": "foo", "role": "bar"}`,
-                    site and role referred to by slugs not by their names.
+                    `site` accepts a site name, `role` accepts a role slug,
+                    and `role` accepts a role name.
 
+            custom_fields (dict, optional): Custom-field names and values to PATCH
+                on the allocated IP. Definitions must already exist in Netbox.
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.
             interface (str, optional): The interface associated with the IP address.
@@ -484,6 +488,10 @@ class NetboxIpTasks:
             ret.status = "updated"
 
         # update IP address parameters
+        if custom_fields is not None:
+            if not dry_run:
+                nb_ip.update({"custom_fields": custom_fields})
+            has_changes = True
         if description and description != nb_ip.description:
             nb_ip.description = description
             has_changes = True

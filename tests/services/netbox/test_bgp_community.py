@@ -225,7 +225,7 @@ class TestSyncBgpCommunity:
 
         response = self._sync(
             nfclient,
-            community_name_field="community_aliases",
+            community_name_field="community_name",
             device_custom_field="community_devices",
         )
         for result in self._successful_results(response):

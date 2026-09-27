@@ -268,7 +268,9 @@ For each object type, specified values are created or updated before next-availa
 
 === "ASN"
 
-    The design creates an ASN range under the RIR, then `create_asn` selects an available number from that range. Its description lets the task find the same ASN on a repeat run.
+    Prerequisites: A text custom field named `deployment_owner` enabled for ASN objects (`ipam.asn`) in Netbox.
+
+    The design creates an ASN range under the RIR, then `create_asn` selects an available number from that range and sets its custom fields. Its description lets the task find the same ASN on a repeat run.
 
     ```yaml
     rirs:
@@ -285,6 +287,8 @@ For each object type, specified values are created or updated before next-availa
       - create_asn:
           asn_range: ACME BRANCH ASNS
           description: ACME branch ASN
+          custom_fields:
+            deployment_owner: ACME
     ```
 
 === "VLAN"
@@ -364,11 +368,68 @@ IPv4 /32 and IPv6 /128 allocations work with the default `create_peer_ip` settin
 
 The standalone [create_ip task](services_netbox_service_tasks_create_ip.md) takes a `prefix` string or filter dictionary and allocates an available IP. It can assign that IP to a `device` and `interface`. If nested under an interface's `ip_addresses`, the design supplies those two arguments during flattening.
 
+## Custom fields
+
+Put a `custom_fields` dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use `null` to clear a nullable field.
+
+FHRP group assignments and ConfigContext objects do not support custom fields. Device-local context is ordinary JSON data, not a custom-field definition. The design does not create custom-field definitions.
+
+=== "Device and interface"
+
+    Prerequisites: the referenced device prerequisites and custom-field definitions enabled for devices and interfaces respectively.
+
+    ```yaml
+    devices:
+      - name: branch-router-1
+        site: BRANCH-1
+        role: ROUTER
+        device_type: {manufacturer: ACME, model: ROUTER}
+        custom_fields:
+          deployment_owner: ACME
+        interfaces:
+          Loopback0:
+            type: virtual
+            custom_fields:
+              service_name: routing
+    ```
+
+=== "Next-available allocation"
+
+    Prerequisites: `deployment_owner` enabled for prefixes and IP addresses. Arguments belong inside the allocation wrapper.
+
+    ```yaml
+    prefixes:
+      - prefix: 192.0.2.0/24
+        custom_fields: {deployment_owner: ACME}
+      - create_prefix:
+          parent: 192.0.2.0/24
+          prefixlen: 28
+          description: ACME services
+          custom_fields: {deployment_owner: ACME}
+    ip_addresses:
+      - create_ip:
+          prefix: {description: ACME services}
+          description: ACME service IP
+          custom_fields: {deployment_owner: ACME}
+    ```
+
+=== "Clear a value"
+
+    Prerequisites: the prefix and a nullable `deployment_owner` custom field.
+
+    ```yaml
+    prefixes:
+      - prefix: 192.0.2.0/24
+        custom_fields: {deployment_owner: null}
+    ```
+
 ## Custom functions
 
 Custom functions let a design run Python during deployment for use cases such as custom next-available allocation, Netbox lookups, or object creation that needs additional logic.
 
 The following contract applies to `custom_function` on an object record. [Device-local context functions](#device-local-context) have a different contract.
+
+When `branch` is supplied to `design_deploy`, the provided `netbox` client is already configured for that branch. Queries and writes through this client use the deployment branch. Custom functions do not need to initialize branching themselves.
 
 | Argument | Type | Supplied by | Meaning |
 | --- | --- | --- | --- |
@@ -1556,7 +1617,11 @@ A `custom_function` on a `config_context` record uses the same [arguments and re
 
 ## Device local context
 
-`local_context_data` updates a `local_context_data` field on one device, not a reusable ConfigContext object. Nested records are processed last, after interfaces, IP addresses, connections, BGP peerings, and shared configuration contexts. Local context replaces the previous dictionary rather than merging with it.
+`local_context_data` updates a `local_context_data` field on one device, not a reusable ConfigContext object. Both nested and top-level local context definitions run in the final deployment stage, after all other design objects have been created or updated. Custom functions can query those objects through the provided `netbox` client to calculate device context. Local context replaces the previous dictionary rather than merging with it.
+
+!!! note "Final-stage queries and branching"
+
+    During a normal deployment, objects from all preceding stages are available in Netbox when device-local context functions run. If `branch` was supplied to `design_deploy`, the provided `netbox` client already targets that branch. During a dry run, planned objects are not created and may be unavailable.
 
 !!! important "Device-local context functions receive the device object"
 

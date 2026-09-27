@@ -940,6 +940,15 @@ class DesignDocument(BaseModel):
             if not isinstance(records, list):
                 continue
             for record in records:
+                if "custom_fields" in record:
+                    if field in ("config_context", "vrrp_group_assignments"):
+                        raise ValueError(f"{field} does not support custom_fields")
+                    if not isinstance(record["custom_fields"], dict) or not all(
+                        isinstance(key, str) for key in record["custom_fields"]
+                    ):
+                        raise ValueError(
+                            f"{field}.custom_fields must be a dictionary with string keys"
+                        )
                 if "custom_function" in record:
                     name = record["custom_function"]
                     if not isinstance(name, str) or name not in self.custom_functions:
@@ -2109,6 +2118,9 @@ class SyncDevicePrefixesInput(
 
 
 class CreateIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    custom_fields: Union[None, dict[StrictStr, Any]] = Field(
+        None, description="Custom-field names and values for the IP address"
+    )
     prefix: Union[StrictStr, dict] = Field(
         ...,
         description="Prefix to allocate IP from; IPv4/IPv6 network string, prefix description, or dict with pynetbox filter keys",
@@ -3103,6 +3115,9 @@ class PrefixStatusEnum(str, Enum):
 
 
 class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    custom_fields: Union[None, dict[StrictStr, Any]] = Field(
+        None, description="Custom-field names and values for the prefix"
+    )
     parent: Union[StrictStr, dict] = Field(
         ...,
         description="Parent prefix to allocate new prefix from",

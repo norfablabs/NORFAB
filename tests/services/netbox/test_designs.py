@@ -1,12 +1,9 @@
 """NetBox design deployment integration tests."""
 
-from pathlib import Path
 from typing import Any
 
 import pynetbox
 import pytest
-import yaml
-from jinja2 import Template
 
 try:
     from tests.netbox_data import NB_API_TOKEN, NB_URL
@@ -19,6 +16,131 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_custom_fields(self, nfclient: Any) -> None:
+        """Create, PATCH, preserve and clear custom fields through design deployment."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        if nb.extras.custom_fields.get(
+            name="norfab_design_cf"
+        ) or nb.extras.custom_fields.get(name="norfab_design_keep"):
+            pytest.skip("Custom-field test definitions already exist")
+        if list(nb.ipam.prefixes.filter(within_include="198.19.247.0/24")) or list(
+            nb.ipam.ip_addresses.filter(parent="198.19.247.0/24")
+        ):
+            pytest.skip("Custom-field test pool already exists")
+        definitions = []
+        try:
+            invalid = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": {
+                        "prefixes": [
+                            {"prefix": "198.19.247.0/24", "custom_fields": ["invalid"]}
+                        ]
+                    }
+                },
+            )
+            for result in invalid.values():
+                assert result["failed"], result
+                assert "custom_fields must be a dictionary" in str(result["errors"])
+            assert not nb.ipam.prefixes.get(prefix="198.19.247.0/24")
+            for name in ("norfab_design_cf", "norfab_design_keep"):
+                definitions.append(
+                    nb.extras.custom_fields.create(
+                        {
+                            "name": name,
+                            "type": "text",
+                            "object_types": ["ipam.prefix", "ipam.ipaddress"],
+                        }
+                    )
+                )
+            for fields in (
+                {"norfab_design_cf": "first", "norfab_design_keep": "keep"},
+                {"norfab_design_cf": "second"},
+                {"norfab_design_cf": None},
+            ):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "prefixes": [
+                                {"prefix": "198.19.247.0/24", "custom_fields": fields},
+                                {
+                                    "create_prefix": {
+                                        "parent": "198.19.247.0/24",
+                                        "prefixlen": 28,
+                                        "description": "NORFAB CF CHILD",
+                                        "custom_fields": fields,
+                                    }
+                                },
+                            ],
+                            "ip_addresses": [
+                                {
+                                    "address": "198.19.247.250/24",
+                                    "custom_fields": fields,
+                                },
+                                {
+                                    "create_ip": {
+                                        "prefix": {"description": "NORFAB CF CHILD"},
+                                        "description": "NORFAB CF IP",
+                                        "custom_fields": fields,
+                                    }
+                                },
+                            ],
+                        }
+                    },
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                objects = list(
+                    nb.ipam.prefixes.filter(within_include="198.19.247.0/24")
+                ) + list(nb.ipam.ip_addresses.filter(parent="198.19.247.0/24"))
+                assert len(objects) == 4
+                for obj in objects:
+                    assert (
+                        obj.custom_fields["norfab_design_cf"]
+                        == fields["norfab_design_cf"]
+                    )
+                    assert obj.custom_fields["norfab_design_keep"] == "keep"
+            for value, expected in [("preview", ["norfab_design_cf"]), (None, [])]:
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_prefix",
+                    workers="any",
+                    kwargs={
+                        "parent": "198.19.247.0/24",
+                        "prefixlen": 28,
+                        "description": "NORFAB CF CHILD",
+                        "custom_fields": {
+                            "norfab_design_cf": value,
+                            "norfab_design_keep": "keep",
+                        },
+                        "dry_run": True,
+                    },
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert result["diff"].get("custom_fields", []) == expected
+                assert (
+                    nb.ipam.prefixes.get(description="NORFAB CF CHILD").custom_fields[
+                        "norfab_design_cf"
+                    ]
+                    is None
+                )
+        finally:
+            for obj in nb.ipam.ip_addresses.filter(parent="198.19.247.0/24"):
+                obj.delete()
+            for obj in nb.ipam.prefixes.filter(within="198.19.247.0/24"):
+                obj.delete()
+            parent = nb.ipam.prefixes.get(prefix="198.19.247.0/24")
+            if parent:
+                parent.delete()
+            for definition in reversed(definitions):
+                definition.delete()
+
     def test_community_description_matching(self, nfclient: Any) -> None:
         """Match a community by value alone or by value and description."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -223,6 +345,8 @@ class TestDesignDeploy:
             (nb.dcim.device_types, {"model": type_name}),
             (nb.dcim.device_roles, {"name": role_name}),
             (nb.dcim.manufacturers, {"name": manufacturer_name}),
+            (nb.extras.custom_fields, {"name": "norfab_design_device_context"}),
+            (nb.extras.custom_fields, {"name": "norfab_design_device_keep"}),
         ]
         for endpoint, filters in objects:
             if endpoint.name == "interfaces":
@@ -248,6 +372,10 @@ class TestDesignDeploy:
                         "model": type_name,
                     },
                     "local_context_data": {"acme": {"profile": "static"}},
+                    "custom_fields": {
+                        "norfab_design_device_context": "ACME first",
+                        "norfab_design_device_keep": 42,
+                    },
                 },
                 {
                     "name": device_names[1],
@@ -284,6 +412,20 @@ class TestDesignDeploy:
             ],
         }
         try:
+            nb.extras.custom_fields.create(
+                {
+                    "name": "norfab_design_device_context",
+                    "type": "text",
+                    "object_types": ["dcim.device"],
+                }
+            )
+            nb.extras.custom_fields.create(
+                {
+                    "name": "norfab_design_device_keep",
+                    "type": "integer",
+                    "object_types": ["dcim.device"],
+                }
+            )
             for _ in (1, 2):
                 reply = nfclient.run_job(
                     "netbox", "design_deploy", workers="any", kwargs={"design": design}
@@ -299,6 +441,26 @@ class TestDesignDeploy:
                     == "NORFAB DESIGN CONTEXT VRF"
                 )
                 assert context.data == {"acme": {"managed": True}}
+                assert (
+                    nb.dcim.devices.get(name=device_names[0]).custom_fields[
+                        "norfab_design_device_context"
+                    ]
+                    == design["devices"][0]["custom_fields"][
+                        "norfab_design_device_context"
+                    ]
+                )
+                design["devices"][0]["custom_fields"][
+                    "norfab_design_device_context"
+                ] = "ACME updated"
+                design["devices"][0]["custom_fields"].pop(
+                    "norfab_design_device_keep", None
+                )
+                assert (
+                    nb.dcim.devices.get(name=device_names[0]).custom_fields[
+                        "norfab_design_device_keep"
+                    ]
+                    == 42
+                )
                 assert [site.name for site in context.sites] == [site_name]
                 assert nb.dcim.devices.get(name=device_names[0]).local_context_data == {
                     "acme": {"profile": "static"}
@@ -312,6 +474,51 @@ class TestDesignDeploy:
                         "primary_ip": None,
                     }
                 }
+            device_id = nb.dcim.devices.get(name=device_names[0]).id
+            # Omitted fields remain intact, dry runs do not write, and null clears.
+            for fields, dry_run, expected in [
+                ({}, False, "ACME updated"),
+                ({"custom_fields": {}}, False, "ACME updated"),
+                (
+                    {"custom_fields": {"norfab_design_device_context": "dry run"}},
+                    True,
+                    "ACME updated",
+                ),
+                (
+                    {"custom_fields": {"norfab_design_device_context": None}},
+                    False,
+                    None,
+                ),
+                (
+                    {"custom_fields": {"norfab_design_device_context": None}},
+                    False,
+                    None,
+                ),
+            ]:
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "devices": [
+                                {"name": device_names[0], "site": site_name, **fields}
+                            ]
+                        },
+                        "dry_run": dry_run,
+                    },
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                devices = list(nb.dcim.devices.filter(name=device_names[0]))
+                assert len(devices) == 1
+                assert devices[0].id == device_id
+                assert (
+                    devices[0].custom_fields["norfab_design_device_context"] == expected
+                )
+                assert devices[0].custom_fields["norfab_design_device_keep"] == 42
+                assert devices[0].local_context_data == {"acme": {"profile": "static"}}
         finally:
             for endpoint, filters in objects:
                 if endpoint.name == "interfaces":
@@ -795,21 +1002,152 @@ class TestDesignDeploy:
         """Deploy the complete ACME example from scratch and clean all owned data."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         context = {"site": "NORFAB ACME TEST", "parent_prefix": "198.19.224.0/20"}
-        source = Path(
-            "nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml"
-        ).read_text()
-        design = yaml.safe_load(Template(source).render(context=context))
-        device_names = [device["name"] for device in design["devices"]]
+        # Independent expectations, with dependent interfaces first for cleanup.
+        expected_interfaces = {
+            "acme-branch-rtr-1": [
+                "Ethernet2.100",
+                "Loopback100",
+                "Ethernet1",
+                "Ethernet2",
+                "Ethernet3",
+                "Loopback0",
+                "Ethernet4",
+            ],
+            "acme-branch-rtr-2": [
+                "Loopback100",
+                "Ethernet1",
+                "Ethernet2",
+                "Ethernet3",
+                "Loopback0",
+            ],
+            "acme-branch-agg-1": [
+                "Ethernet6",
+                "Ethernet7",
+                "Loopback100",
+                "Loopback0",
+                "Ethernet1",
+                "Ethernet2",
+                "Ethernet3",
+                "Ethernet4",
+                "Ethernet5",
+                "Port-Channel1",
+                "Vlan100",
+            ],
+            "acme-branch-agg-2": [
+                "Ethernet6",
+                "Ethernet7",
+                "Loopback100",
+                "Loopback0",
+                "Ethernet1",
+                "Ethernet2",
+                "Ethernet3",
+                "Ethernet4",
+                "Ethernet5",
+                "Port-Channel1",
+                "Vlan100",
+            ],
+            "acme-branch-access-1": [
+                "Loopback100",
+                "Ethernet1",
+                "Ethernet2",
+                "Ethernet3",
+            ],
+            "acme-branch-access-2": [
+                "Loopback100",
+                "Ethernet1",
+                "Ethernet2",
+                "Ethernet3",
+            ],
+            "acme-branch-access-3": [
+                "Loopback100",
+                "Ethernet1",
+                "Ethernet2",
+                "Ethernet3",
+            ],
+            "acme-branch-terminal-server": [],
+            "acme-branch-pdu": [],
+        }
+        device_names = list(expected_interfaces)
+        expected_vlans = {
+            100: "ACME USERS",
+            101: "ACME GUEST",
+            110: "ACME VOICE",
+            120: "ACME MANAGEMENT",
+        }
+        expected_prefixes = [
+            "198.19.224.0/20",
+            "198.19.224.0/24",
+            "198.19.225.0/24",
+            "198.19.230.0/24",
+            "192.0.2.0/24",
+            "198.51.100.0/30",
+        ]
+        expected_addresses = [
+            "198.19.230.1/24",
+            "198.51.100.1/30",
+            "198.51.100.2/30",
+            "192.0.2.20/32",
+            "192.0.2.101/32",
+            "192.0.2.102/32",
+            "192.0.2.103/32",
+            "192.0.2.104/32",
+            "192.0.2.105/32",
+            "192.0.2.106/32",
+            "192.0.2.107/32",
+            "192.0.2.10/32",
+            "192.0.2.11/32",
+            "192.0.2.21/24",
+            "192.0.2.22/24",
+            "192.0.2.1/24",
+            "192.0.2.2/24",
+        ]
+        # Allocated addresses are identified by their explicit purpose, not guessed values.
+        allocated_addresses = [
+            "acme-branch-rtr-1 Ethernet1",
+            "acme-branch-rtr-2 Ethernet1",
+            "acme-branch-rtr-1 Loopback0",
+            "acme-branch-rtr-2 Loopback0",
+        ]
+        console_power_connections = [
+            ("acme-branch-rtr-1", "Line 1", "Outlet 1"),
+            ("acme-branch-rtr-2", "Line 2", "Outlet 2"),
+            ("acme-branch-agg-1", "Line 3", "Outlet 3"),
+            ("acme-branch-agg-2", "Line 4", "Outlet 4"),
+            ("acme-branch-access-1", "Line 5", "Outlet 5"),
+            ("acme-branch-access-2", "Line 6", "Outlet 6"),
+            ("acme-branch-access-3", "Line 7", "Outlet 7"),
+        ]
+        expected_peerings = [
+            "acme-branch-rtr-1-upstream",
+            "acme-branch-rtr-1-to-acme-branch-rtr-2",
+            "acme-branch-rtr-1-to-acme-branch-agg-1",
+            "acme-branch-rtr-1-to-acme-branch-agg-2",
+            "acme-branch-rtr-2-to-acme-branch-rtr-1",
+            "acme-branch-rtr-2-to-acme-branch-agg-1",
+            "acme-branch-rtr-2-to-acme-branch-agg-2",
+            "acme-branch-agg-1-to-acme-branch-rtr-1",
+            "acme-branch-agg-1-to-acme-branch-rtr-2",
+            "acme-branch-agg-1-to-acme-branch-agg-2",
+            "acme-branch-agg-1-to-acme-branch-access-1",
+            "acme-branch-agg-1-to-acme-branch-access-2",
+            "acme-branch-agg-1-to-acme-branch-access-3",
+            "acme-branch-agg-2-to-acme-branch-rtr-1",
+            "acme-branch-agg-2-to-acme-branch-rtr-2",
+            "acme-branch-agg-2-to-acme-branch-agg-1",
+            "acme-branch-agg-2-to-acme-branch-access-1",
+            "acme-branch-agg-2-to-acme-branch-access-2",
+            "acme-branch-agg-2-to-acme-branch-access-3",
+            "acme-branch-access-1-to-acme-branch-agg-1",
+            "acme-branch-access-1-to-acme-branch-agg-2",
+            "acme-branch-access-2-to-acme-branch-agg-1",
+            "acme-branch-access-2-to-acme-branch-agg-2",
+            "acme-branch-access-3-to-acme-branch-agg-1",
+            "acme-branch-access-3-to-acme-branch-agg-2",
+        ]
         objects = [
             (
                 nb.plugins.bgp.session,
-                {
-                    "name": [
-                        name
-                        for device in design["devices"]
-                        for name in device.get("bgp_peerings", {})
-                    ]
-                },
+                {"name": expected_peerings},
             ),
             (nb.ipam.ip_addresses, {"parent": "198.19.224.0/20"}),
             (nb.ipam.ip_addresses, {"parent": "192.0.2.0/24"}),
@@ -932,17 +1270,16 @@ class TestDesignDeploy:
                     )
                     == 12
                 )
-                network_devices = device_names[:7]
-                for number, device_name in enumerate(network_devices, start=1):
+                for device_name, line_name, outlet_name in console_power_connections:
                     console = nb.dcim.console_ports.get(
                         device=device_name, name="Console"
                     )
                     server = nb.dcim.console_server_ports.get(
-                        device="acme-branch-terminal-server", name=f"Line {number}"
+                        device="acme-branch-terminal-server", name=line_name
                     )
                     power = nb.dcim.power_ports.get(device=device_name, name="PSU1")
                     outlet = nb.dcim.power_outlets.get(
-                        device="acme-branch-pdu", name=f"Outlet {number}"
+                        device="acme-branch-pdu", name=outlet_name
                     )
                     assert console.cable and console.cable.id == server.cable.id
                     assert power.cable and power.cable.id == outlet.cable.id
@@ -952,11 +1289,25 @@ class TestDesignDeploy:
                 ]
                 assert all(current_ids), current_ids
                 assert len(current_ids[0]) == 25
-                assert len(current_ids[4]) == sum(
-                    len(device.get("interfaces", {})) for device in design["devices"]
-                )
+                for device_name, names in expected_interfaces.items():
+                    assert sorted(
+                        item.name
+                        for item in nb.dcim.interfaces.filter(device=device_name)
+                    ) == sorted(names), device_name
                 assert len(current_ids[5]) == 9
                 assert len(list(nb.ipam.vlans.filter(group_id=group.id))) == 4
+                assert {
+                    vlan.vid: vlan.name
+                    for vlan in nb.ipam.vlans.filter(group_id=group.id)
+                } == expected_vlans
+                for value in expected_prefixes:
+                    assert nb.ipam.prefixes.get(prefix=value), value
+                for value in expected_addresses:
+                    assert nb.ipam.ip_addresses.get(address=value), value
+                for description in allocated_addresses:
+                    assert nb.ipam.ip_addresses.get(
+                        description=description
+                    ), description
                 assert len(list(nb.ipam.fhrp_groups.filter(group_id=[10, 20]))) == 2
                 fhrp_groups = list(nb.ipam.fhrp_groups.filter(group_id=[10, 20]))
                 assert (
@@ -992,7 +1343,7 @@ class TestDesignDeploy:
                         "profile": "aggregation",
                         "site": context["site"],
                         "role": "ACME AGGREGATION SWITCH",
-                        "interface_count": len(design["devices"][2]["interfaces"]),
+                        "interface_count": 11,
                         "primary_ip": "192.0.2.10/32",
                     }
                 }
@@ -1040,14 +1391,12 @@ class TestDesignDeploy:
                         for device_name in device_names:
                             device = nb.dcim.devices.get(name=device_name)
                             if device:
-                                interfaces = list(
-                                    nb.dcim.interfaces.filter(device_id=device.id)
-                                )
-                                interfaces.sort(
-                                    key=lambda item: not (item.parent or item.lag)
-                                )
-                                for interface in interfaces:
-                                    interface.delete()
+                                for name in expected_interfaces[device_name]:
+                                    interface = nb.dcim.interfaces.get(
+                                        device_id=device.id, name=name
+                                    )
+                                    if interface:
+                                        interface.delete()
                                 for port_endpoint in (
                                     nb.dcim.power_ports,
                                     nb.dcim.console_ports,

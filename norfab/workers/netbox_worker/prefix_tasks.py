@@ -52,6 +52,7 @@ class NetboxPrefixTasks:
         instance: Union[None, str] = None,
         dry_run: bool = False,
         branch: str = None,
+        custom_fields: Union[None, dict] = None,
     ) -> Result:
         """
         Creates a new IP prefix in NetBox or updates an existing one.
@@ -65,6 +66,9 @@ class NetboxPrefixTasks:
                 - Dictionary with prefix filters for `pynetbox` prefixes.get method
                     e.g. `{"prefix": "10.0.0.0/24", "site": "foo"}`
 
+            custom_fields (dict, optional): Custom-field names and values to PATCH
+                on the allocated prefix. Definitions must already exist in Netbox.
+                The result diff lists changed field names only, not their values.
             description (str): Description for the new prefix, prefix description used for
                 deduplication to source existing prefixes.
             prefixlen (int, optional): The prefix length of the new prefix to create, by default
@@ -232,6 +236,16 @@ class NetboxPrefixTasks:
             job.event(f"using existing prefix {nb_prefix}")
 
         # update prefix parameters
+        if custom_fields is not None:
+            changed_fields = [
+                name
+                for name, value in custom_fields.items()
+                if nb_prefix.custom_fields.get(name) != value
+            ]
+            if changed_fields:
+                changed["custom_fields"] = changed_fields
+            if not dry_run:
+                nb_prefix.update({"custom_fields": custom_fields})
         if description and description != nb_prefix.description:
             changed["description"] = {"-": str(nb_prefix.description), "+": description}
             nb_prefix.description = description
