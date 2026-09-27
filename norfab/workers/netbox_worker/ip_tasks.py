@@ -197,8 +197,9 @@ class NetboxIpTasks:
                 - Prefix description string to filter by
                 - Dictionary with prefix filters to feed `pynetbox` filter method
                     e.g. `{"prefix": "10.0.0.0/24", "site": "foo", "role": "bar"}`,
-                    `site` accepts a site name, `role` accepts a role slug,
-                    and `role` accepts a role name.
+                    `site` accepts a site name and `role` accepts a role name
+                    resolved to `role_id`. An unknown role name raises
+                    `NetboxAllocationError`.
 
             custom_fields (dict, optional): Custom-field names and values to PATCH
                 on the allocated IP. Definitions must already exist in Netbox.
@@ -288,6 +289,16 @@ class NetboxIpTasks:
                         f"Failed to get parent prefix site '{prefix_site}' from NetBox"
                     )
                 prefix.update(scope_type="dcim.site", scope_id=nb_site.id)
+            # NetBox's prefix filter accepts role slugs or role_id, not role names.
+            # Resolve the task's role-name input to an ID before filtering prefixes.
+            prefix_role = prefix.pop("role", None)
+            if prefix_role is not None:
+                nb_role = nb.ipam.roles.get(name=prefix_role)
+                if not nb_role:
+                    raise NetboxAllocationError(
+                        f"Failed to get parent prefix role '{prefix_role}' from NetBox"
+                    )
+                prefix["role_id"] = nb_role.id
         nb_prefixes = self.bulk_filter(nb.ipam.prefixes, **prefix)
         if not nb_prefixes:
             raise NetboxAllocationError(

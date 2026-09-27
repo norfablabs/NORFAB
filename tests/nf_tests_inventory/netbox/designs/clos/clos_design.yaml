@@ -1,0 +1,422 @@
+design_input_schema:
+  type: object
+  properties:
+    site:
+      type: string
+      minLength: 1
+      maxLength: 50
+      pattern: '^[A-Za-z0-9][A-Za-z0-9_-]*$'
+    prefix:
+      type: string
+  required:
+    - site
+    - prefix
+  additionalProperties: false
+
+# Dedicated loops define ASNs, spines, and leaves.
+# Supply an aligned IPv4 /20. Its format and alignment are not validated.
+# Inline substitutions retain the site name and pool as the only inputs.
+manufacturers:
+  - name: 'Arista'
+
+platforms:
+  - name: 'arista_eos'
+    manufacturer: 'Arista'
+
+device_types:
+  - model: 'Arista cEOS'
+    manufacturer: 'Arista'
+
+device_roles:
+  - name: 'clos-spine'
+    color: '2196f3'
+  - name: 'clos-leaf'
+    color: '4caf50'
+
+sites:
+  - name: '{{ context.site }}'
+    status: 'active'
+
+roles:
+  - name: LOOPBACKS
+  - name: P2P
+  - name: MGMT
+  - name: DATA
+  - name: CONTROL
+  - name: MGMT-LEAF3
+  - name: DATA-LEAF3
+  - name: CONTROL-LEAF3
+
+rirs:
+  - name: 'CLOS-PRIVATE'
+    is_private: true
+
+# NetBox ASN ranges are global; the site name labels this range.
+asn_ranges:
+  - name: '{{ context.site }}-asns'
+    rir: 'CLOS-PRIVATE'
+    start: 65001
+    end: 65005
+
+asns:
+{% for device in ['spine-1', 'spine-2', 'leaf-1', 'leaf-2', 'leaf-3'] %}
+  - asn: {{ 65000 + loop.index }}
+    rir: 'CLOS-PRIVATE'
+    description: '{{ context.site }}-{{ device }}'
+    sites:
+      - '{{ context.site }}'
+{% endfor %}
+
+# Each site has its own VLAN group, permitting IDs 100 through 200.
+vlan_groups:
+  - name: '{{ context.site }}-vlans'
+    site: '{{ context.site }}'
+    vid_ranges:
+      - [100, 200]
+
+vlans:
+  - vid: 100
+    name: 'mgmt'
+    group: '{{ context.site }}-vlans'
+    status: 'active'
+  - vid: 110
+    name: 'data'
+    group: '{{ context.site }}-vlans'
+    status: 'active'
+  - vid: 120
+    name: 'control'
+    group: '{{ context.site }}-vlans'
+    status: 'active'
+
+# Allocate site-scoped P2P and LOOPBACKS pools within the supplied parent.
+# Interface create_ip records allocate /31 links and /32 loopbacks from these pools.
+# Allocate access /24s after the infrastructure pools, in the listed order.
+# SVI and VIP allocations select access pools by site and role.
+# VIP-to-FHRP assignment remains a TODO in the design specification ADR.
+prefixes:
+  - prefix: '{{ context.prefix }}'
+    site: '{{ context.site }}'
+    status: 'container'
+    description: '{{ context.site }} fabric'
+  # Routed interfaces allocate /31 children from this site-scoped pool.
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 27
+      site: "{{ context.site }}"
+      role: P2P
+      description: "{{ context.site }} P2P links"
+  # One site-scoped pool supplies every Loopback0 address.
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 27
+      site: "{{ context.site }}"
+      role: LOOPBACKS
+      description: "{{ context.site }} loopbacks"
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: MGMT
+      description: "{{ context.site }} leaf-1/2 mgmt"
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: DATA
+      description: "{{ context.site }} leaf-1/2 data"
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: CONTROL
+      description: "{{ context.site }} leaf-1/2 control"
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: MGMT-LEAF3
+      description: "{{ context.site }} leaf-3 mgmt"
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: DATA-LEAF3
+      description: "{{ context.site }} leaf-3 data"
+  - create_prefix:
+      parent: "{{ context.prefix }}"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: CONTROL-LEAF3
+      description: "{{ context.site }} leaf-3 control"
+
+# Devices own their interfaces; link interfaces contain IP allocations and BGP peerings.
+# Connections are nested on spines and leaf 1 only, so each cable is defined once.
+# Spine create_ip calls allocate both cable endpoints; leaves reuse those addresses.
+# Both BGP directions are explicit; the containing interface supplies local_interface.
+# Leaf 1/2 share access pools and the Ethernet6 VLAN trunk; leaf 3 has separate pools.
+# VRRP priorities are 200/100. Allocated VIPs still require FHRP association.
+devices:
+{% for spine, local_as in [(1, 65001), (2, 65002)] %}
+  - name: '{{ context.site }}-spine-{{ spine }}'
+    site: '{{ context.site }}'
+    role: 'clos-spine'
+    device_type:
+      manufacturer: 'Arista'
+      model: 'Arista cEOS'
+    platform: 'arista_eos'
+    status: 'active'
+    interfaces:
+      Loopback0:
+        type: 'virtual'
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: LOOPBACKS
+              mask_len: 32
+              description: "{{ context.site }} spine-{{ spine }} Loopback0"
+              is_primary: true
+      Ethernet1:
+        type: '1000base-t'
+        description: 'to {{ context.site }}-leaf-1'
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: P2P
+              mask_len: 31
+              description: "{{ context.site }} spine-{{ spine }} Ethernet1"
+              create_peer_ip: true
+        connection:
+          device: '{{ context.site }}-leaf-1'
+          interface: 'Ethernet{{ spine }}'
+          type: 'cat6'
+          status: 'connected'
+        bgp_peerings:
+          '{{ context.site }}-spine-{{ spine }}-to-leaf-1':
+            local_as: {{ local_as }}
+            remote_as: 65003
+            status: 'active'
+            create_reverse: false
+      Ethernet2:
+        type: '1000base-t'
+        description: 'to {{ context.site }}-leaf-2'
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: P2P
+              mask_len: 31
+              description: "{{ context.site }} spine-{{ spine }} Ethernet2"
+              create_peer_ip: true
+        connection:
+          device: '{{ context.site }}-leaf-2'
+          interface: 'Ethernet{{ spine }}'
+          type: 'cat6'
+          status: 'connected'
+        bgp_peerings:
+          '{{ context.site }}-spine-{{ spine }}-to-leaf-2':
+            local_as: {{ local_as }}
+            remote_as: 65004
+            status: 'active'
+            create_reverse: false
+      Ethernet3:
+        type: '1000base-t'
+        description: 'to {{ context.site }}-leaf-3'
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: P2P
+              mask_len: 31
+              description: "{{ context.site }} spine-{{ spine }} Ethernet3"
+              create_peer_ip: true
+        connection:
+          device: '{{ context.site }}-leaf-3'
+          interface: 'Ethernet{{ spine }}'
+          type: 'cat6'
+          status: 'connected'
+        bgp_peerings:
+          '{{ context.site }}-spine-{{ spine }}-to-leaf-3':
+            local_as: {{ local_as }}
+            remote_as: 65005
+            status: 'active'
+            create_reverse: false
+{% endfor %}
+# Leaf 1/2 share access pools and a trunk; leaf 3 uses separate access pools.
+{% for leaf, local_as in [(1, 65003), (2, 65004), (3, 65005)] %}
+  - name: '{{ context.site }}-leaf-{{ leaf }}'
+    site: '{{ context.site }}'
+    role: 'clos-leaf'
+    device_type:
+      manufacturer: 'Arista'
+      model: 'Arista cEOS'
+    platform: 'arista_eos'
+    status: 'active'
+    interfaces:
+      Loopback0:
+        type: 'virtual'
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: LOOPBACKS
+              mask_len: 32
+              description: "{{ context.site }} leaf-{{ leaf }} Loopback0"
+              is_primary: true
+      Ethernet1:
+        type: '1000base-t'
+        description: 'to {{ context.site }}-spine-1'
+        # The connected spine allocates both /31 endpoint addresses.
+        bgp_peerings:
+          '{{ context.site }}-leaf-{{ leaf }}-to-spine-1':
+            local_as: {{ local_as }}
+            remote_as: 65001
+            status: 'active'
+            create_reverse: false
+      Ethernet2:
+        type: '1000base-t'
+        description: 'to {{ context.site }}-spine-2'
+        # The connected spine allocates both /31 endpoint addresses.
+        bgp_peerings:
+          '{{ context.site }}-leaf-{{ leaf }}-to-spine-2':
+            local_as: {{ local_as }}
+            remote_as: 65002
+            status: 'active'
+            create_reverse: false
+      Ethernet3:
+        type: '1000base-t'
+        description: 'mgmt access'
+        mode: 'access'
+        untagged_vlan:
+          group: '{{ context.site }}-vlans'
+          vid: 100
+      Vlan100:
+        type: 'virtual'
+        mode: 'access'
+        untagged_vlan:
+          group: '{{ context.site }}-vlans'
+          vid: 100
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: "MGMT{{ '-LEAF3' if leaf == 3 else '' }}"
+              description: "{{ context.site }} leaf-{{ leaf }} Vlan100"
+              create_peer_ip: false
+      Ethernet4:
+        type: '1000base-t'
+        description: 'data access'
+        mode: 'access'
+        untagged_vlan:
+          group: '{{ context.site }}-vlans'
+          vid: 110
+      Vlan110:
+        type: 'virtual'
+        mode: 'access'
+        untagged_vlan:
+          group: '{{ context.site }}-vlans'
+          vid: 110
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: "DATA{{ '-LEAF3' if leaf == 3 else '' }}"
+              description: "{{ context.site }} leaf-{{ leaf }} Vlan110"
+              create_peer_ip: false
+      Ethernet5:
+        type: '1000base-t'
+        description: 'control access'
+        mode: 'access'
+        untagged_vlan:
+          group: '{{ context.site }}-vlans'
+          vid: 120
+      Vlan120:
+        type: 'virtual'
+        mode: 'access'
+        untagged_vlan:
+          group: '{{ context.site }}-vlans'
+          vid: 120
+        ip_addresses:
+          - create_ip:
+              prefix:
+                site: "{{ context.site }}"
+                role: "CONTROL{{ '-LEAF3' if leaf == 3 else '' }}"
+              description: "{{ context.site }} leaf-{{ leaf }} Vlan120"
+              create_peer_ip: false
+{% if leaf != 3 %}
+      Ethernet6:
+        type: '1000base-t'
+        description: 'leaf-1/2 VRRP VLAN trunk'
+        mode: 'tagged'
+        tagged_vlans:
+          - group: '{{ context.site }}-vlans'
+            vid: 100
+          - group: '{{ context.site }}-vlans'
+            vid: 110
+          - group: '{{ context.site }}-vlans'
+            vid: 120
+{% if leaf == 1 %}
+        connection:
+          device: '{{ context.site }}-leaf-2'
+          interface: 'Ethernet6'
+          type: 'cat6'
+          status: 'connected'
+{% endif %}
+{% endif %}
+{% endfor %}
+
+# Allocate VIPs before interface IPs; keep them unassigned until FHRP allocation
+# support is implemented. This draft does not yet provide complete VRRP gateways.
+ip_addresses:
+  - create_ip:
+      prefix:
+        site: "{{ context.site }}"
+        role: MGMT
+      description: "{{ context.site }} mgmt VRRP VIP"
+      create_peer_ip: false
+  - create_ip:
+      prefix:
+        site: "{{ context.site }}"
+        role: DATA
+      description: "{{ context.site }} data VRRP VIP"
+      create_peer_ip: false
+  - create_ip:
+      prefix:
+        site: "{{ context.site }}"
+        role: CONTROL
+      description: "{{ context.site }} control VRRP VIP"
+      create_peer_ip: false
+
+# TODO: attach each allocated VIP to its matching group.
+vrrp_groups:
+  - protocol: vrrp2
+    group_id: 100
+    name: "{{ context.site }}-mgmt"
+    assignments:
+      - device: "{{ context.site }}-leaf-1"
+        interface: Vlan100
+        priority: 200
+      - device: "{{ context.site }}-leaf-2"
+        interface: Vlan100
+        priority: 100
+  - protocol: vrrp2
+    group_id: 110
+    name: "{{ context.site }}-data"
+    assignments:
+      - device: "{{ context.site }}-leaf-1"
+        interface: Vlan110
+        priority: 200
+      - device: "{{ context.site }}-leaf-2"
+        interface: Vlan110
+        priority: 100
+  - protocol: vrrp2
+    group_id: 120
+    name: "{{ context.site }}-control"
+    assignments:
+      - device: "{{ context.site }}-leaf-1"
+        interface: Vlan120
+        priority: 200
+      - device: "{{ context.site }}-leaf-2"
+        interface: Vlan120
+        priority: 100

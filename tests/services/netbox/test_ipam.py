@@ -1944,7 +1944,7 @@ class TestCreateIP:
             workers="any",
             kwargs={
                 "prefix": {
-                    "role__name": "PREFIX_ROLE_1",
+                    "role": "PREFIX_ROLE_1",
                     "site": "NORFAB-LAB",
                 },
                 "description": f"test create ip by prefix role and site 1st",
@@ -1957,7 +1957,7 @@ class TestCreateIP:
             workers="any",
             kwargs={
                 "prefix": {
-                    "role": "prefix_role_1",
+                    "role": "PREFIX_ROLE_1",
                     "site": "NORFAB-LAB",
                 },
                 "description": f"test create ip by prefix role and site 2nd",

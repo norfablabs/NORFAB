@@ -18,6 +18,7 @@
 2. NetBox `sync_all` now runs `sync_vrrp` after IP address synchronization and before BGP peering synchronization.
 3. NetBox `get_bgp_peerings` now reports an error when multiple BGP sessions on a device share the same name. Its name-keyed response keeps the first session and skips later duplicates.
 4. Rewrote the Netbox design deployment engine around ordered object handlers and bulk pynetbox creates and updates, with nested device definitions, next-available allocations, custom functions, and configuration contexts. Previous design syntax is not backward compatible. See the [design deployment documentation](workers/netbox/services_netbox_service_tasks_design_deploy.md).
+5. NetBox `create_ip` now interprets `role` in a `prefix` filter dictionary as a role name instead of a slug, resolves it to `role_id`, and reports an error if the role does not exist. Existing filters using role slugs must use the corresponding role names.
 
 ---
 

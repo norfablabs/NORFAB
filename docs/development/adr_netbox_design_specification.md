@@ -157,3 +157,16 @@ Device types are defined as a top-level list and created after their manufacture
 and accept `default_platform: PLATFORM NAME`, converted to a NetBox name reference.
 They follow platforms and precede devices. Top-level connections and nested
 interface `connection` entries use the same handler.
+
+## TODO
+
+- Support VLAN association in `create_prefix`. Explicit prefix records accept
+  `vlan` references by group and VID, but the allocation task has no VLAN
+  argument. Allow a next-available subnet allocated from the supplied parent,
+  with a site and role, to retain its VLAN association without custom Python.
+- Support FHRP-group assignment in `create_ip` and allocation-backed VRRP VIPs
+  in designs. Explicit IP records can reference an FHRP group, but `create_ip`
+  cannot assign an allocated address to one, and nested `vrrp.vip` currently
+  requires an explicit address. Allow VIP allocation from a prefix selected by
+  site and role, with stable reuse on repeated deployment, without calculating
+  addresses in Jinja2 or adding custom Python.
