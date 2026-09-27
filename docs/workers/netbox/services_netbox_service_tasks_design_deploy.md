@@ -9,6 +9,8 @@ tags:
 
 ## Design overview
 
+For an agent-oriented authoring workflow, see [Author a Netbox design with an agent](../../tutorials/norfab_netbox_design_authoring.md).
+
 A design is one YAML document with object collections such as `sites` and `devices`. It can also contain three optional control sections:
 
 | Section | Purpose |
@@ -357,6 +359,8 @@ vlan_groups:
 The standalone [create_prefix task](services_netbox_service_tasks_create_prefix.md) takes a `parent` prefix or parent filter dictionary and a `prefixlen`, then allocates an available child prefix. A stable `description`, optionally with `site`, `role`, or `vrf`, helps it find the same child on repeat deployment. `create_prefix.parent` can select the parent through a dictionary of filters. The task accepts `site` for the allocated child's scope, but has no `location`, `site_group`, `region`, or `vlan` argument for the child.
 
 ### Create IP Next Available Allocation
+
+IPv4 /32 and IPv6 /128 allocations work with the default `create_peer_ip` setting. The task automatically skips peer creation and peer-subnet reuse for these host prefixes. There is no need to set `create_peer_ip: false` explicitly.
 
 The standalone [create_ip task](services_netbox_service_tasks_create_ip.md) takes a `prefix` string or filter dictionary and allocates an available IP. It can assign that IP to a `device` and `interface`. If nested under an interface's `ip_addresses`, the design supplies those two arguments during flattening.
 
@@ -1643,7 +1647,6 @@ The function receives the full device record so it can inspect fields beyond its
               - create_ip:
                   prefix: 192.0.2.0/24
                   mask_len: 32
-                  create_peer_ip: false
                   description: branch-router-2 loopback
         local_context_data:
           custom_function: calculate_isis_context
@@ -1674,7 +1677,6 @@ The function receives the full device record so it can inspect fields beyond its
     - create_ip:
         prefix: 192.0.2.0/24
         mask_len: 32
-        create_peer_ip: false
         description: branch-router-2 loopback
         device: branch-router-2
         interface: Loopback0
@@ -1779,8 +1781,7 @@ Errors identify the collection that stopped deployment. Earlier collections are 
     from norfab.core.nfapi import NorFab
 
     with NorFab(inventory="inventory.yaml") as nf:
-        client = nf.make_client()
-        result = client.run_job(
+        result = nf.client.run_job(
             service="netbox",
             task="design_deploy",
             workers="any",
@@ -1790,6 +1791,33 @@ Errors identify the collection that stopped deployment. Earlier collections are 
             },
         )
     ```
+
+=== "FastAPI"
+
+    Enable the Netbox service endpoints on the NorFab FastAPI worker and configure a bearer token. Send task arguments directly in the JSON body, without a `kwargs` wrapper. Replace the API address and token with your environment's values. This example deploys to branch `branch-review`, which requires Netbox branching.
+
+    ```bash
+    curl -X POST "http://localhost:8000/api/netbox/design_deploy/" \
+      -H "Authorization: Bearer <TOKEN>" \
+      -H "Content-Type: application/json" \
+      -d '{"design":"nf://netbox/designs/branch.yaml","context":{"site":"BRANCH-1"},"branch":"branch-review","workers":"any"}'
+    ```
+
+    See [FastAPI setup and authentication](../fastapi/services_fastapi_service.md) for service configuration. Inspect the response's worker results for deployment errors.
+
+=== "MCP"
+
+    Connect your agent to the NorFab MCP service with the Netbox `design_deploy` tool exposed. Ask it to deploy using a chat message such as:
+
+    ```text
+    Use the NorFab Netbox design_deploy tool to instantiate the design at
+    nf://netbox/designs/branch.yaml with context {"site": "BRANCH-1"}.
+    Deploy to Netbox branch `branch-review`. If branching is unavailable,
+    stop and ask before writing to main data. Report the deployment result
+    and any errors.
+    ```
+
+    The agent should pass the file path as `design`, the dictionary as `context`, and the branch name as `branch`. The file must be accessible to the NorFab worker.
 
 ## Notes
 

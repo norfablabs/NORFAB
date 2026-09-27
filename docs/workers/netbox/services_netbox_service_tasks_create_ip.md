@@ -52,7 +52,7 @@ Returns the allocated or updated IP address data. When `create_peer_ip=True`, pe
 - `prefix` can be a network string, a prefix description, or a dictionary of pynetbox prefix filters.
 - When `mask_len` differs from the parent prefix length, the task creates or reuses a child prefix through `create_prefix`.
 - In dry-run mode, `mask_len` is ignored and the candidate IP is allocated directly from the parent prefix.
-- `mask_len=32` or `mask_len=128` is invalid with `create_peer_ip=True`.
+- IPv4 /32 and IPv6 /128 allocations automatically disable peer creation and peer-subnet reuse, including when the supplied parent is itself a host prefix.
 - Branch writes require the [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching).
 
 ## Examples

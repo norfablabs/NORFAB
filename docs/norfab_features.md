@@ -733,6 +733,7 @@ Required slugs default from object names (device-type models) on creation;
 explicit and existing slugs are preserved.
 BGP communities and routing policies support bulk create/update;
 design communities match by value and optional description, and interface VRFs accept direct name references.
+Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 BGP sessions use existing creation/update tasks after ASNs, IPs and policies.
 Inline import/export policy definitions are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's

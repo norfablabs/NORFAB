@@ -95,6 +95,7 @@ nav:
   - Inventory: reference_norfab_inventory.md
 
 - Tutorials:
+  - Author a Netbox Design with an Agent: tutorials/norfab_netbox_design_authoring.md
   - Docker Deployment: tutorials/norfab_docker_deployment.md
   - Distributed Deployment: tutorials/norfab_distributed_deployment.md
   - VSCode MCP Integration: tutorials/norfab_vscode_mcp_integration.md

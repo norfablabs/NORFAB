@@ -2170,15 +2170,6 @@ class CreateIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=Tru
         alias="create-peer-ip",
     )
 
-    @model_validator(mode="after")
-    def validate_mask_len_with_peer_ip(self) -> "CreateIpInput":
-        if self.mask_len in (32, 128) and self.create_peer_ip is True:
-            raise ValueError(
-                f"mask_len={self.mask_len} with create_peer_ip=True is invalid: "
-                "cannot create a peer IP for a host prefix (/32 or /128)"
-            )
-        return self
-
 
 class CreateIpBulkInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
     prefix: Union[StrictStr, dict] = Field(

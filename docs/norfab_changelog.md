@@ -11,8 +11,9 @@
 3. Fixed NetBox VRF synchronization reporting route-target and routing-policy updates with identical old and new values when NetBox already contained every live value plus additional associations. Additive associations are now merged before comparison, so NetBox-only values are retained and the VRF is reported as in sync.
 4. Fixed NetBox BGP peering synchronization silently accepting requested devices that do not exist in NetBox. Missing devices are now reported while valid devices in the same request continue to synchronize.
 
-## CHANGES
+5. Fixed IPv4 /32 and IPv6 /128 `create_ip` allocations with default peer settings by automatically skipping peer creation and peer-subnet reuse.
 
+## CHANGES
 1. NetBox `sync_device_ip` now excludes live addresses labelled `vrrp`, `glbp`, `hsrp`, or `carp`, as well as matching NetBox IPs assigned to non-interface objects. FHRP synchronization tasks own those addresses; `sync_vrrp` creates or reuses VRRP IPs and assigns them to FHRP groups.
 2. NetBox `sync_all` now runs `sync_vrrp` after IP address synchronization and before BGP peering synchronization.
 3. NetBox `get_bgp_peerings` now reports an error when multiple BGP sessions on a device share the same name. Its name-keyed response keeps the first session and skips later duplicates.

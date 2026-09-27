@@ -1796,6 +1796,51 @@ class TestSyncDeviceIP:
 
 @pytest.mark.netbox_create_ip
 class TestCreateIP:
+    @pytest.mark.parametrize(
+        "prefix,mask_len",
+        [
+            ("198.18.253.0/30", 32),
+            ("2001:db8:ffff:253::/126", 128),
+            ("198.18.253.9/32", None),
+            ("2001:db8:ffff:253::9/128", None),
+        ],
+    )
+    def test_host_allocation_default_peer(self, nfclient, prefix, mask_len):
+        """Allocate host addresses with default peer settings and reuse on repeat."""
+        nb = get_pynetbox(nfclient)
+        if list(nb.ipam.prefixes.filter(within_include=prefix)) or list(
+            nb.ipam.ip_addresses.filter(parent=prefix)
+        ):
+            pytest.skip("Host allocation test pool already contains objects")
+        parent = nb.ipam.prefixes.create(
+            {"prefix": prefix, "description": "NORFAB HOST ALLOCATION TEST"}
+        )
+        try:
+            addresses = []
+            for _ in range(2):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_ip",
+                    workers="any",
+                    kwargs={
+                        "prefix": prefix,
+                        "mask_len": mask_len,
+                        "description": "NORFAB HOST ALLOCATION TEST",
+                    },
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                    addresses.append(result["result"]["address"])
+            assert len(set(addresses)) == 1
+            assert ipaddress.ip_interface(addresses[0]).network.num_addresses == 1
+            assert len(list(nb.ipam.ip_addresses.filter(parent=prefix))) == 1
+        finally:
+            for address in nb.ipam.ip_addresses.filter(parent=prefix):
+                address.delete()
+            for child in nb.ipam.prefixes.filter(within=prefix):
+                child.delete()
+            parent.delete()
+
     nb_version = None
 
     def setup_method(self):

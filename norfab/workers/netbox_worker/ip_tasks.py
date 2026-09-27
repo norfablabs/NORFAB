@@ -215,7 +215,9 @@ class NetboxIpTasks:
                 subnet of `mask_len` within parent `prefix`, new subnet not created for
                 existing IP addresses. Ignored when ``dry_run=True``.
             create_peer_ip (bool, optional): If True creates IP address for link peer -
-                remote device interface connected to requested device and interface
+                remote device interface connected to requested device and interface.
+                Disabled for IPv4 /32 and IPv6 /128 allocations, which have no
+                room for a peer. Host allocations also skip peer-subnet reuse.
 
         Returns:
             dict: A dictionary containing the result of the IP allocation.
@@ -337,8 +339,15 @@ class NetboxIpTasks:
 
         # create new IP address
         if not nb_ip:
+            # A host prefix has only one address, regardless of peer settings.
+            allocation_prefix = ipaddress.ip_network(str(nb_prefix))
+            host_allocation = (
+                mask_len if mask_len is not None else allocation_prefix.prefixlen
+            ) == allocation_prefix.max_prefixlen
+            if host_allocation:
+                create_peer_ip = False
             # check if interface has link peer that has IP within parent prefix
-            if device and interface:
+            if device and interface and not host_allocation:
                 connection = self.get_connections(
                     job=job,
                     devices=[device],
