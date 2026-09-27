@@ -1,1069 +1,1613 @@
-from collections.abc import Iterator
+"""NetBox design deployment integration tests."""
+
+from pathlib import Path
 from typing import Any
 
+import pynetbox
 import pytest
+import yaml
+from jinja2 import Template
 
-from tests.services.netbox.common import get_pynetbox
+try:
+    from tests.netbox_data import NB_API_TOKEN, NB_URL
+except ModuleNotFoundError as exc:
+    if exc.name not in {"tests", "tests.netbox_data"}:
+        raise
+    from netbox_data import NB_API_TOKEN, NB_URL
 
 pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
-    DEVICES = ["design-router-1", "design-router-2"]
-
-    @pytest.fixture(autouse=True)
-    def cleanup_design_objects(self, nfclient: Any) -> Iterator[None]:
-        nb = get_pynetbox(nfclient)
-        existed = {
-            "region": nb.dcim.regions.get(name="undefined"),
-            "site": nb.dcim.sites.get(name="undefined"),
-            "manufacturer": nb.dcim.manufacturers.get(name="undefined"),
-            "role": nb.dcim.device_roles.get(name="undefined"),
-            "device_type": nb.dcim.device_types.get(model="undefined"),
-        }
-        for device_name in self.DEVICES:
-            device = nb.dcim.devices.get(name=device_name)
-            if device:
-                device.delete()
-        yield
-        for device_name in self.DEVICES:
-            device = nb.dcim.devices.get(name=device_name)
-            if device:
-                device.delete()
-        for key, endpoint, filters in (
-            ("device_type", nb.dcim.device_types, {"model": "undefined"}),
-            ("role", nb.dcim.device_roles, {"name": "undefined"}),
-            ("site", nb.dcim.sites, {"name": "undefined"}),
-            ("manufacturer", nb.dcim.manufacturers, {"name": "undefined"}),
-            ("region", nb.dcim.regions, {"name": "undefined"}),
-        ):
-            if existed[key] is None:
-                obj = endpoint.get(**filters)
-                if obj:
-                    obj.delete()
-
-    def run_design(self, nfclient: Any, dry_run: bool) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/includes/base_devices.yaml",
-                "context": {"devices": self.DEVICES},
-                "dry_run": dry_run,
-            },
-        )
-
-    def test_inline_input_schema_rejects_invalid_data(self, nfclient: Any) -> None:
-        response = nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/includes/base_devices.yaml",
-                "context": {"devices": self.DEVICES, "unknown": True},
-            },
-        )
-
-        for result in response.values():
-            assert result["failed"] is True
-
-    def test_pydantic_input_schema_and_include(self, nfclient: Any) -> None:
-        response = nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/pydantic_input_design.yaml",
-                "context": {"devices": self.DEVICES},
-                "dry_run": True,
-            },
-        )
-
-        for worker, result in response.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"]["devices"] == self.DEVICES
-
-    def test_minimal_device_design_dry_run(self, nfclient: Any) -> None:
-        response = self.run_design(nfclient, dry_run=True)
-
-        for worker, result in response.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["dry_run"] is True
-            assert result["result"]["created"]["devices"] == self.DEVICES
-            handled_collections = set(result["result"]["created"]) | set(
-                result["result"]["unchanged"]
+    def test_community_description_matching(self, nfclient: Any) -> None:
+        """Match a community by value alone or by value and description."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        if list(nb.plugins.bgp.community.filter(value="65199:61999")):
+            pytest.skip("Community test value already exists")
+        try:
+            for records, count in (
+                ([{"value": "65199:61999", "description": "NORFAB FIRST"}], 1),
+                ([{"value": "65199:61999"}], 1),
+                ([{"value": "65199:61999", "description": "NORFAB SECOND"}], 2),
+                ([{"value": "65199:61999", "description": "NORFAB SECOND"}], 2),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"bgp_communities": records}},
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                assert (
+                    len(list(nb.plugins.bgp.community.filter(value="65199:61999")))
+                    == count
+                )
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={"design": {"bgp_communities": [{"value": "65199:61999"}]}},
             )
-            assert handled_collections >= {
-                "regions",
-                "sites",
-                "manufacturers",
-                "device_roles",
-                "device_types",
-                "devices",
-            }
-            assert result["diff"]["devices"]["design-router-1"]["fields"] == {
-                "name": "design-router-1",
-                "site": {"name": "undefined"},
-                "role": {"name": "undefined"},
-                "device_type": {"model": "undefined"},
-                "status": "active",
-            }
+            for result in response.values():
+                assert result["failed"], result
+                assert "ambiguous BGP community" in str(result["errors"])
+        finally:
+            for item in nb.plugins.bgp.community.filter(value="65199:61999"):
+                item.delete()
 
-    def test_minimal_device_design_apply_is_idempotent(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient, dry_run=False)
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"]["devices"] == self.DEVICES
-
-        second = self.run_design(nfclient, dry_run=False)
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["unchanged"]["devices"] == self.DEVICES
-
-
-class TestDeviceInterfacesDesign:
-    DEVICES = ["design-edge-1", "design-edge-2"]
-
-    def remove_design_objects(self, nfclient: Any) -> None:
-        nb = get_pynetbox(nfclient)
-        for device_name in self.DEVICES:
-            device = nb.dcim.devices.get(name=device_name)
-            if device:
-                device.delete()
-        for endpoint, filters in (
-            (nb.dcim.device_types, {"model": "DESIGN ROUTER"}),
-            (nb.dcim.device_roles, {"name": "ROUTER"}),
-            (nb.dcim.sites, {"name": "DESIGN SITE"}),
-            (nb.dcim.platforms, {"name": "DESIGN OS"}),
-            (nb.dcim.manufacturers, {"name": "DESIGN LABS"}),
-            (nb.dcim.regions, {"name": "DESIGN REGION"}),
+    def test_vlan_group_scopes(self, nfclient: Any) -> None:
+        """Create and update VLAN groups across all supported Netbox scopes."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "NORFAB DESIGN SCOPE"
+        scope_names = {
+            "region": f"{name} REGION",
+            "site_group": f"{name} SITE GROUP",
+            "site": f"{name} SITE",
+            "location": f"{name} LOCATION",
+            "rack": f"{name} RACK",
+            "cluster_group": f"{name} CLUSTER GROUP",
+            "cluster_type": f"{name} CLUSTER TYPE",
+            "cluster": f"{name} CLUSTER",
+        }
+        endpoints = {
+            "region": nb.dcim.regions,
+            "site_group": nb.dcim.site_groups,
+            "site": nb.dcim.sites,
+            "location": nb.dcim.locations,
+            "rack": nb.dcim.racks,
+            "cluster_group": nb.virtualization.cluster_groups,
+            "cluster_type": nb.virtualization.cluster_types,
+            "cluster": nb.virtualization.clusters,
+        }
+        group_names = {
+            scope: f"{name} {scope.upper()} VLAN GROUP"
+            for scope in scope_names
+            if scope != "cluster_type"
+        }
+        if any(
+            endpoint.get(name=scope_names[scope])
+            for scope, endpoint in endpoints.items()
+        ) or any(
+            nb.ipam.vlan_groups.get(name=group_name)
+            for group_name in group_names.values()
         ):
-            obj = endpoint.get(**filters)
-            if obj:
+            pytest.skip("VLAN group scope test objects already exist in Netbox")
+
+        created = []
+        try:
+            region = nb.dcim.regions.create(
+                {"name": scope_names["region"], "slug": "norfab-design-scope-region"}
+            )
+            created.append(region)
+            site_group = nb.dcim.site_groups.create(
+                {
+                    "name": scope_names["site_group"],
+                    "slug": "norfab-design-scope-site-group",
+                }
+            )
+            created.append(site_group)
+            site = nb.dcim.sites.create(
+                {
+                    "name": scope_names["site"],
+                    "slug": "norfab-design-scope-site",
+                    "region": region.id,
+                    "group": site_group.id,
+                    "status": "active",
+                }
+            )
+            created.append(site)
+            location = nb.dcim.locations.create(
+                {
+                    "name": scope_names["location"],
+                    "slug": "norfab-design-scope-location",
+                    "site": site.id,
+                }
+            )
+            created.append(location)
+            rack = nb.dcim.racks.create(
+                {
+                    "name": scope_names["rack"],
+                    "site": site.id,
+                    "location": location.id,
+                    "status": "active",
+                }
+            )
+            created.append(rack)
+            cluster_group = nb.virtualization.cluster_groups.create(
+                {
+                    "name": scope_names["cluster_group"],
+                    "slug": "norfab-design-scope-cluster-group",
+                }
+            )
+            created.append(cluster_group)
+            cluster_type = nb.virtualization.cluster_types.create(
+                {
+                    "name": scope_names["cluster_type"],
+                    "slug": "norfab-design-scope-cluster-type",
+                }
+            )
+            created.append(cluster_type)
+            cluster = nb.virtualization.clusters.create(
+                {
+                    "name": scope_names["cluster"],
+                    "type": cluster_type.id,
+                    "group": cluster_group.id,
+                }
+            )
+            created.append(cluster)
+
+            scopes = {
+                "region": region,
+                "site_group": site_group,
+                "site": site,
+                "location": location,
+                "rack": rack,
+                "cluster_group": cluster_group,
+                "cluster": cluster,
+            }
+            design = {
+                "vlan_groups": [
+                    {
+                        "name": group_names[scope],
+                        scope: scope_names[scope],
+                        **(
+                            {"site": scope_names["site"]}
+                            if scope in ("location", "rack")
+                            else {}
+                        ),
+                    }
+                    for scope in scopes
+                ]
+            }
+            for action in ("created", "updated"):
+                response = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for result in response.values():
+                    assert result["failed"] is False, result
+                    assert result["result"]["vlan_groups"][action] == list(
+                        group_names.values()
+                    )
+                for scope, obj in scopes.items():
+                    group = nb.ipam.vlan_groups.get(name=group_names[scope])
+                    assert group.scope_id == obj.id
+                    assert group.scope_type == (
+                        f"virtualization.{scope.replace('_', '')}"
+                        if scope.startswith("cluster")
+                        else f"dcim.{scope.replace('_', '')}"
+                    )
+        finally:
+            for group_name in group_names.values():
+                group = nb.ipam.vlan_groups.get(name=group_name)
+                if group:
+                    group.delete()
+            for obj in reversed(created):
                 obj.delete()
 
-    @pytest.fixture(autouse=True)
-    def cleanup_design_objects(self, nfclient: Any) -> Iterator[None]:
-        self.remove_design_objects(nfclient)
-        yield
-        self.remove_design_objects(nfclient)
-
-    def run_design(self, nfclient: Any, dry_run: bool = False) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/device_interfaces_design.yaml",
-                "dry_run": dry_run,
-            },
-        )
-
-    def test_device_interfaces_design_end_to_end(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient)
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"]["devices"] == self.DEVICES
-            assert len(result["result"]["created"]["interfaces"]) == 12
-
-        nb = get_pynetbox(nfclient)
-        first_device = nb.dcim.devices.get(name="design-edge-1")
-        assert first_device.device_type.model == "DESIGN ROUTER"
-        assert first_device.role.name == "ROUTER"
-        assert first_device.site.name == "DESIGN SITE"
-        assert first_device.platform.name == "DESIGN OS"
-
-        interfaces = list(nb.dcim.interfaces.filter(device_id=first_device.id))
-        assert {interface.name for interface in interfaces} == {
-            "Ethernet1",
-            "Ethernet2",
-            "Ethernet3",
-            "Ethernet4",
-            "Loopback0",
-            "Loopback1",
-        }
-
-        first_device.update({"status": "planned"})
-        nb.dcim.interfaces.get(device_id=first_device.id, name="Ethernet1").update(
-            {"enabled": False}
-        )
-
-        repaired = self.run_design(nfclient)
-        for worker, result in repaired.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["updated"]["devices"] == ["design-edge-1"]
-            assert result["result"]["updated"]["interfaces"] == ["Ethernet1"]
-
-        unchanged = self.run_design(nfclient)
-        for worker, result in unchanged.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["updated"] == {}
-            assert result["result"]["unchanged"]["devices"] == self.DEVICES
-            assert len(result["result"]["unchanged"]["interfaces"]) == 12
-
-
-class TestAllocationsDesign:
-    PARENT_PREFIX = "10.254.0.0/16"
-    VLAN_GROUP = "DESIGN VLAN POOL"
-    ASN_RANGE = "DESIGN ASN POOL"
-    RIR = "DESIGN RIR"
-
-    def remove_design_objects(self, nfclient: Any) -> None:
-        nb = get_pynetbox(nfclient)
-        session = nb.plugins.bgp.session.get(name="DESIGN ALLOCATED BGP SESSION")
-        if session:
-            session.delete()
-        mac_address = nb.dcim.mac_addresses.get(mac_address="02:00:00:00:00:01")
-        if mac_address:
-            mac_address.delete()
-        device = nb.dcim.devices.get(name="design-allocation-1")
-        if device:
-            device.delete()
-        for ip_address in list(nb.ipam.ip_addresses.filter(parent=self.PARENT_PREFIX)):
-            ip_address.delete()
-        for prefix in list(nb.ipam.prefixes.filter(within=self.PARENT_PREFIX)):
-            prefix.delete()
-        parent = nb.ipam.prefixes.get(prefix=self.PARENT_PREFIX)
-        if parent:
-            parent.delete()
-
-        vlan_group = nb.ipam.vlan_groups.get(name=self.VLAN_GROUP)
-        if vlan_group:
-            for vlan in list(nb.ipam.vlans.filter(group_id=vlan_group.id)):
-                vlan.delete()
-            vlan_group.delete()
-
-        for asn in list(nb.ipam.asns.filter(asn__gte=64512, asn__lte=64599)):
-            asn.delete()
-        asn_range = nb.ipam.asn_ranges.get(name=self.ASN_RANGE)
-        if asn_range:
-            asn_range.delete()
-        rir = nb.ipam.rirs.get(name=self.RIR)
-        if rir:
-            rir.delete()
-        vrf = nb.ipam.vrfs.get(name="DESIGN ALLOCATED VRF")
-        if vrf:
-            vrf.delete()
-        route_target = nb.ipam.route_targets.get(name="64512:100")
-        if route_target:
-            route_target.delete()
-
-    @pytest.fixture(autouse=True)
-    def allocation_pools(self, nfclient: Any) -> Iterator[None]:
-        self.remove_design_objects(nfclient)
-        nb = get_pynetbox(nfclient)
-        nb.ipam.prefixes.create(prefix=self.PARENT_PREFIX, status="active")
-        nb.ipam.vlan_groups.create(
-            name=self.VLAN_GROUP,
-            slug="design-vlan-pool",
-            vid_ranges=[[1000, 1099]],
-        )
-        rir = nb.ipam.rirs.create(name=self.RIR, slug="design-rir", is_private=True)
-        nb.ipam.asn_ranges.create(
-            name=self.ASN_RANGE,
-            slug="design-asn-pool",
-            rir=rir.id,
-            start=64512,
-            end=64599,
-        )
-        yield
-        self.remove_design_objects(nfclient)
-
-    def run_design(self, nfclient: Any) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/allocations_design.yaml",
-            },
-        )
-
-    def test_allocations_design_end_to_end(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient)
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-
-        nb = get_pynetbox(nfclient)
-        prefix = nb.ipam.prefixes.get(description="DESIGN ALLOCATED PREFIX")
-        assert prefix is not None
-        assert prefix.prefix == "10.254.0.0/28"
-
-        ip_address = nb.ipam.ip_addresses.get(description="DESIGN ALLOCATED IP")
-        assert ip_address is not None
-        assert ip_address.address == "10.254.0.1/28"
-        assert ip_address.assigned_object.device.name == "design-allocation-1"
-        assert ip_address.assigned_object.name == "Ethernet1"
-
-        vlan_group = nb.ipam.vlan_groups.get(name=self.VLAN_GROUP)
-        vlan = nb.ipam.vlans.get(group_id=vlan_group.id, name="DESIGN VLAN")
-        assert vlan is not None
-        assert vlan.vid == 1000
-
-        interface = nb.dcim.interfaces.get(
-            device="design-allocation-1", name="Ethernet1"
-        )
-        assert interface.mode.value == "access"
-        assert interface.untagged_vlan.id == vlan.id
-
-        asn = nb.ipam.asns.get(description="DESIGN LOCAL ASN")
-        assert asn is not None
-        assert asn.asn == 64512
-        assert asn.rir.name == self.RIR
-
-        mac_address = nb.dcim.mac_addresses.get(mac_address="02:00:00:00:00:01")
-        assert mac_address.assigned_object.id == interface.id
-        session = nb.plugins.bgp.session.get(name="DESIGN ALLOCATED BGP SESSION")
-        assert session.device.name == "design-allocation-1"
-        assert session.local_as.asn == 64512
-        assert session.remote_as.asn == 64513
-        vrf = nb.ipam.vrfs.get(name="DESIGN ALLOCATED VRF")
-        assert [target.name for target in vrf.import_targets] == ["64512:100"]
-
-        second = self.run_design(nfclient)
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"] == {}
-            assert result["result"]["updated"] == {}
-            assert {"devices", "interfaces"}.issubset(result["result"]["unchanged"])
-            assert {"prefixes", "ip_addresses"}.issubset(result["result"]["unchanged"])
-            assert not {"vlans", "asns"}.intersection(result["result"]["unchanged"])
-
-
-class TestStaticNestedDesign:
-    @pytest.fixture(autouse=True)
-    def cleanup_design_objects(self, nfclient: Any) -> Iterator[None]:
-        nb = get_pynetbox(nfclient)
-
-        def remove() -> None:
-            device = nb.dcim.devices.get(name="design-static-1")
-            if device:
-                device.delete()
-            for address in ("10.253.0.1/24", "10.253.0.254/24"):
-                ip_address = nb.ipam.ip_addresses.get(address=address)
-                if ip_address:
-                    ip_address.delete()
-            prefix = nb.ipam.prefixes.get(prefix="10.253.0.0/24")
-            if prefix:
-                prefix.delete()
-            vrf = nb.ipam.vrfs.get(name="DESIGN STATIC VRF")
-            if vrf:
-                vrf.delete()
-            route_target = nb.ipam.route_targets.get(name="65000:1200")
-            if route_target:
-                route_target.delete()
-            vlan_group = nb.ipam.vlan_groups.get(name="DESIGN STATIC VLAN POOL")
-            if vlan_group:
-                for vlan in list(nb.ipam.vlans.filter(group_id=vlan_group.id)):
-                    vlan.delete()
-                vlan_group.delete()
-            role = nb.ipam.roles.get(name="DESIGN STATIC ACCESS")
-            if role:
-                role.delete()
-            site = nb.dcim.sites.get(name="DESIGN STATIC SITE")
-            if site:
-                site.delete()
-
-        remove()
-        yield
-        remove()
-
-    @staticmethod
-    def run_design(nfclient: Any) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={"design": "nf://netbox/designs/static_nested_design.yaml"},
-        )
-
-    def test_static_global_and_nested_objects(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient)
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-
-        nb = get_pynetbox(nfclient)
-        prefix = nb.ipam.prefixes.get(prefix="10.253.0.0/24")
-        assert prefix.scope.name == "DESIGN STATIC SITE"
-        assert prefix.role.name == "DESIGN STATIC ACCESS"
-
-        interface = nb.dcim.interfaces.get(device="design-static-1", name="Ethernet1")
-        assert interface.mode.value == "access"
-        assert interface.untagged_vlan.name == "DESIGN STATIC VLAN"
-        tagged_interface = nb.dcim.interfaces.get(
-            device="design-static-1", name="Ethernet2"
-        )
-        assert tagged_interface.mode.value == "tagged"
-        assert [vlan.name for vlan in tagged_interface.tagged_vlans] == [
-            "DESIGN STATIC TAGGED VLAN"
+    def test_config_context(self, nfclient: Any) -> None:
+        """Create a scoped context and compute local data after interfaces exist."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        site_name = "NORFAB DESIGN CONTEXT SITE"
+        manufacturer_name = "NORFAB DESIGN CONTEXT MANUFACTURER"
+        type_name = "NORFAB DESIGN CONTEXT TYPE"
+        role_name = "NORFAB DESIGN CONTEXT ROLE"
+        device_names = ["norfab-context-static", "norfab-context-computed"]
+        context_name = "NORFAB DESIGN CONTEXT BASELINE"
+        objects = [
+            (nb.extras.config_contexts, {"name": context_name}),
+            (nb.dcim.interfaces, {"device": device_names}),
+            (nb.dcim.devices, {"name": device_names}),
+            (nb.ipam.vrfs, {"name": "NORFAB DESIGN CONTEXT VRF"}),
+            (nb.dcim.sites, {"name": site_name}),
+            (nb.dcim.device_types, {"model": type_name}),
+            (nb.dcim.device_roles, {"name": role_name}),
+            (nb.dcim.manufacturers, {"name": manufacturer_name}),
         ]
-
-        assigned_ip = nb.ipam.ip_addresses.get(address="10.253.0.1/24")
-        assert assigned_ip.assigned_object.id == interface.id
-        unassigned_ip = nb.ipam.ip_addresses.get(address="10.253.0.254/24")
-        assert unassigned_ip.assigned_object is None
-
-        vrf = nb.ipam.vrfs.get(name="DESIGN STATIC VRF")
-        assert [target.name for target in vrf.import_targets] == ["65000:1200"]
-        assert [target.name for target in vrf.export_targets] == ["65000:1200"]
-
-        second = self.run_design(nfclient)
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"] == {}
-            assert result["result"]["updated"] == {}
-
-
-class TestBranchOfficeDesign:
-    SITE = "BRANCH-001"
-    DEVICES = [
-        "branch-001-rtr-1",
-        "branch-001-rtr-2",
-        "branch-001-sw-1",
-        "branch-001-sw-2",
-    ]
-    VRFS = ["MGMT", "VOICE", "CORP", "INTERNET"]
-    PREFIX = "10.60.0.0/16"
-    VLAN_GROUP = "BRANCH-001 VLANS"
-    ASN_RANGE = "BRANCH-ASNS"
-    RIR = "BRANCH-001-RIR"
-    RD_PREFIX = 65000
-    ASN_START = 4200101000
-    ASN_END = 4200101099
-
-    @pytest.fixture(autouse=True)
-    def cleanup_design_objects(self, nfclient: Any) -> Iterator[None]:
-        nb = get_pynetbox(nfclient)
-
-        def remove() -> None:
-            for name in ("BRANCH-001-RTR-1-IBGP", "BRANCH-001-RTR-2-IBGP"):
-                session = nb.plugins.bgp.session.get(name=name)
-                if session:
-                    session.delete()
-            for label in (
-                "BRANCH-001-RTR-1-UPLINK",
-                "BRANCH-001-RTR-2-UPLINK",
-                "BRANCH-001-SWITCH-PEER",
-            ):
-                cable = nb.dcim.cables.get(label=label)
-                if cable:
-                    cable.delete()
-            for name in (
-                "BRANCH-001-MGMT-VRRP",
-                "BRANCH-001-VOICE-VRRP",
-                "BRANCH-001-CORP-VRRP",
-                "BRANCH-001-INTERNET-VRRP",
-            ):
-                group = nb.ipam.fhrp_groups.get(name=name)
-                if group:
-                    for assignment in list(
-                        nb.ipam.fhrp_group_assignments.filter(group_id=group.id)
-                    ):
-                        assignment.delete()
-                    group.delete()
-            for address in (
-                "02:60:00:00:00:01",
-                "02:60:00:00:00:02",
-                "02:60:00:00:01:01",
-                "02:60:00:00:01:02",
-            ):
-                mac_address = nb.dcim.mac_addresses.get(mac_address=address)
-                if mac_address:
-                    mac_address.delete()
-            for device_name in self.DEVICES:
-                device = nb.dcim.devices.get(name=device_name)
-                if device:
-                    device.delete()
-            for prefix in list(nb.ipam.prefixes.filter(within=self.PREFIX)):
-                for ip_address in list(
-                    nb.ipam.ip_addresses.filter(parent=prefix.prefix)
-                ):
-                    ip_address.delete()
-                prefix.delete()
-            top_level_prefix = nb.ipam.prefixes.get(prefix=self.PREFIX)
-            if top_level_prefix:
-                top_level_prefix.delete()
-            for name in self.VRFS:
-                vrf = nb.ipam.vrfs.get(name=name)
-                if vrf:
-                    vrf.delete()
-            for name in ("65000:10", "65000:11", "65000:12", "65000:13"):
-                route_target = nb.ipam.route_targets.get(name=name)
-                if route_target:
-                    route_target.delete()
-            vlan_group = nb.ipam.vlan_groups.get(name=self.VLAN_GROUP)
-            if vlan_group:
-                for vlan in list(nb.ipam.vlans.filter(group_id=vlan_group.id)):
-                    vlan.delete()
-                vlan_group.delete()
-            for asn in list(
-                nb.ipam.asns.filter(asn__gte=4200101000, asn__lte=4200101099)
-            ):
-                asn.delete()
-            asn_range = nb.ipam.asn_ranges.get(name=self.ASN_RANGE)
-            if asn_range:
-                asn_range.delete()
-            rir = nb.ipam.rirs.get(name=self.RIR)
-            if rir:
-                rir.delete()
-            for rack_name in ("NETWORK-RACK-A", "NETWORK-RACK-B"):
-                rack = nb.dcim.racks.get(name=rack_name)
-                if rack:
-                    rack.delete()
-            location = nb.dcim.locations.get(name="MAIN-EQUIPMENT-ROOM")
-            if location:
-                location.delete()
-            site = nb.dcim.sites.get(name=self.SITE)
-            if site:
-                site.delete()
-            for model in ("Branch Router", "Access Switch"):
-                device_type = nb.dcim.device_types.get(model=model)
-                if device_type:
-                    device_type.delete()
-            for name in ("ROUTER", "ACCESS-SWITCH"):
-                role = nb.dcim.device_roles.get(name=name)
-                if role:
-                    role.delete()
-            manufacturer = nb.dcim.manufacturers.get(name="Example Networks")
-            if manufacturer:
-                manufacturer.delete()
-            rack_role = nb.dcim.rack_roles.get(name="NETWORK")
-            if rack_role:
-                rack_role.delete()
-            for name in (
-                "BRANCH-LINKS",
-                "BRANCH-LOOPBACKS",
-                "BRANCH-MGMT",
-                "BRANCH-VOICE",
-                "BRANCH-CORP",
-                "BRANCH-INTERNET",
-            ):
-                role = nb.ipam.roles.get(name=name)
-                if role:
-                    role.delete()
-            region = nb.dcim.regions.get(name="LAB-REGION")
-            if region:
-                region.delete()
-
-        remove()
-        yield
-        remove()
-
-    @staticmethod
-    def run_design(nfclient: Any) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/branch_office_design.yaml",
-                "context": {
-                    "site": TestBranchOfficeDesign.SITE,
-                    "prefix": TestBranchOfficeDesign.PREFIX,
-                    "asn_range": TestBranchOfficeDesign.ASN_RANGE,
-                    "rir": TestBranchOfficeDesign.RIR,
-                    "rd_prefix": TestBranchOfficeDesign.RD_PREFIX,
-                    "asn_start": TestBranchOfficeDesign.ASN_START,
-                    "asn_end": TestBranchOfficeDesign.ASN_END,
+        for endpoint, filters in objects:
+            if endpoint.name == "interfaces":
+                continue
+            if list(endpoint.filter(**filters)):
+                pytest.skip("context test objects already exist")
+        design = {
+            "custom_functions": {
+                "calculate_acme_device_context": "nf://netbox/designs/calculate_acme_device_context.py"
+            },
+            "manufacturers": [{"name": manufacturer_name}],
+            "device_types": [{"model": type_name, "manufacturer": manufacturer_name}],
+            "device_roles": [{"name": role_name}],
+            "sites": [{"name": site_name}],
+            "vrfs": [{"name": "NORFAB DESIGN CONTEXT VRF"}],
+            "devices": [
+                {
+                    "name": device_names[0],
+                    "site": site_name,
+                    "role": role_name,
+                    "device_type": {
+                        "manufacturer": manufacturer_name,
+                        "model": type_name,
+                    },
+                    "local_context_data": {"acme": {"profile": "static"}},
                 },
-            },
-        )
-
-    def test_branch_office_context_validation(self, nfclient: Any) -> None:
-        response = nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/branch_office_design.yaml",
-                "context": {"site": self.SITE},
-            },
-        )
-
-        for result in response.values():
-            assert result["failed"] is True
-
-    def test_branch_office_design_end_to_end(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient)
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-
-        nb = get_pynetbox(nfclient)
-        site = nb.dcim.sites.get(name=self.SITE)
-        assert {
-            device.name for device in nb.dcim.devices.filter(site_id=site.id)
-        } >= set(self.DEVICES)
-        vlan_group = nb.ipam.vlan_groups.get(name=self.VLAN_GROUP)
-        assert vlan_group.scope.name == self.SITE
-        asn_range = nb.ipam.asn_ranges.get(name=self.ASN_RANGE)
-        assert asn_range.scope.name == self.SITE
-        assert (
-            nb.dcim.devices.get(name="branch-001-rtr-1").rack.name == "NETWORK-RACK-A"
-        )
-        assert (
-            nb.dcim.devices.get(name="branch-001-rtr-2").rack.name == "NETWORK-RACK-B"
-        )
-        assert len(list(nb.dcim.cables.filter(label__ic=f"{self.SITE}-"))) == 3
-
-        for vrf_name in self.VRFS:
-            vrf = nb.ipam.vrfs.get(name=vrf_name)
-            assert len(vrf.import_targets) == 1
-            assert len(vrf.export_targets) == 1
-            assert (
-                nb.ipam.prefixes.get(
-                    description=f"{self.SITE} {vrf_name} PREFIX"
-                ).vrf.name
-                == vrf_name
-            )
-        for role_name in ("BRANCH-LINKS", "BRANCH-LOOPBACKS"):
-            prefix = nb.ipam.prefixes.get(role__name=role_name, site__name=self.SITE)
-            assert prefix.scope.name == self.SITE
-
-        corp_vlan = nb.ipam.vlans.get(
-            group_id=nb.ipam.vlan_groups.get(name=self.VLAN_GROUP).id, name="CORP"
-        )
-        corp_interface = nb.dcim.interfaces.get(
-            device="branch-001-rtr-1", name=f"Ethernet2.{corp_vlan.vid}"
-        )
-        assert corp_interface.vrf.name == "CORP"
-        corp_ip = nb.ipam.ip_addresses.get(
-            description="BRANCH-001 branch-001-rtr-1 CORP"
-        )
-        assert corp_ip.assigned_object.id == corp_interface.id
-        assert (
-            nb.ipam.prefixes.get(description=f"{self.SITE} CORP PREFIX").vrf.name
-            == "CORP"
-        )
-
-        access_interface = nb.dcim.interfaces.get(
-            device="branch-001-sw-1", name="Ethernet1"
-        )
-        assert access_interface.untagged_vlan.name == "CORP"
-        tagged_interface = nb.dcim.interfaces.get(
-            device="branch-001-sw-1", name="Ethernet2"
-        )
-        assert {vlan.name for vlan in tagged_interface.tagged_vlans} == {
-            "VOICE",
-            "CORP",
+                {
+                    "name": device_names[1],
+                    "site": site_name,
+                    "role": role_name,
+                    "device_type": {
+                        "manufacturer": manufacturer_name,
+                        "model": type_name,
+                    },
+                    "interfaces": {
+                        "Loopback0": {
+                            "type": "virtual",
+                            "vrf": "NORFAB DESIGN CONTEXT VRF",
+                        }
+                    },
+                },
+            ],
+            "local_context_data": [
+                {
+                    "device": device_names[1],
+                    "site": site_name,
+                    "local_context_data": {
+                        "custom_function": "calculate_acme_device_context",
+                        "profile": "test",
+                    },
+                }
+            ],
+            "config_context": [
+                {
+                    "name": context_name,
+                    "sites": [site_name],
+                    "data": {"acme": {"managed": True}},
+                }
+            ],
         }
-        assert (
-            nb.dcim.mac_addresses.get(
-                mac_address="02:60:00:00:00:01"
-            ).assigned_object.name
-            == "Ethernet1"
-        )
-
-        assert nb.plugins.bgp.session.get(name="BRANCH-001-RTR-1-IBGP") is not None
-        assert nb.plugins.bgp.session.get(name="BRANCH-001-RTR-2-IBGP") is not None
-        assert nb.ipam.asns.get(description=f"{self.SITE} router 1 ASN") is not None
-        assert nb.ipam.asns.get(description=f"{self.SITE} router 2 ASN") is not None
-
-        for name in (
-            "BRANCH-001-MGMT-VRRP",
-            "BRANCH-001-VOICE-VRRP",
-            "BRANCH-001-CORP-VRRP",
-            "BRANCH-001-INTERNET-VRRP",
-        ):
-            group = nb.ipam.fhrp_groups.get(name=name)
-            assert (
-                len(list(nb.ipam.fhrp_group_assignments.filter(group_id=group.id))) == 2
-            )
-
-        second = self.run_design(nfclient)
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"] == {}
-            assert result["result"]["updated"] == {}
-
-
-class TestDataCenterLeafSpineDesign:
-    SITE = "DC-001"
-    FABRIC_PREFIX = "10.70.0.0/16"
-    LOOPBACK_PREFIX = "10.71.0.0/24"
-    ASN_RANGE = "DC-FABRIC-ASNS"
-    RIR = "DC-FABRIC-RIR"
-    DEVICES = [
-        "dc-001-spine-1",
-        "dc-001-spine-2",
-        "dc-001-leaf-1",
-        "dc-001-leaf-2",
-        "dc-001-leaf-3",
-    ]
-
-    def remove_design_objects(self, nfclient: Any) -> None:
-        nb = get_pynetbox(nfclient)
-        for spine in range(1, 3):
-            for leaf in range(1, 4):
-                for name in (
-                    f"{self.SITE}-SPINE-{spine}-LEAF-{leaf}",
-                    f"{self.SITE}-LEAF-{leaf}-SPINE-{spine}",
-                ):
-                    session = nb.plugins.bgp.session.get(name=name)
-                    if session:
-                        session.delete()
-                cable = nb.dcim.cables.get(
-                    label=f"{self.SITE}-SPINE-{spine}-LEAF-{leaf}"
+        try:
+            for _ in (1, 2):
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
                 )
-                if cable:
-                    cable.delete()
-        for parent in (self.FABRIC_PREFIX, self.LOOPBACK_PREFIX):
-            for address in list(nb.ipam.ip_addresses.filter(parent=parent)):
-                address.delete()
-        for device_name in self.DEVICES:
-            device = nb.dcim.devices.get(name=device_name)
-            if device:
-                device.delete()
-        for prefix in list(nb.ipam.prefixes.filter(within=self.FABRIC_PREFIX)):
-            prefix.delete()
-        for prefix_value in (self.FABRIC_PREFIX, self.LOOPBACK_PREFIX):
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                context = nb.extras.config_contexts.get(name=context_name)
+                assert (
+                    nb.dcim.interfaces.get(
+                        device=device_names[1], name="Loopback0"
+                    ).vrf.name
+                    == "NORFAB DESIGN CONTEXT VRF"
+                )
+                assert context.data == {"acme": {"managed": True}}
+                assert [site.name for site in context.sites] == [site_name]
+                assert nb.dcim.devices.get(name=device_names[0]).local_context_data == {
+                    "acme": {"profile": "static"}
+                }
+                assert nb.dcim.devices.get(name=device_names[1]).local_context_data == {
+                    "acme": {
+                        "profile": "test",
+                        "site": site_name,
+                        "role": role_name,
+                        "interface_count": 1,
+                        "primary_ip": None,
+                    }
+                }
+        finally:
+            for endpoint, filters in objects:
+                if endpoint.name == "interfaces":
+                    for device_name in device_names:
+                        for interface in nb.dcim.interfaces.filter(device=device_name):
+                            interface.delete()
+                    continue
+                for record in endpoint.filter(**filters):
+                    record.delete()
+
+    def test_existing_vlan_references(self, nfclient: Any) -> None:
+        """Use one deployment lookup for an existing VLAN referenced twice."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        device = nb.dcim.devices.get(name="ceos1")
+        if not device:
+            pytest.skip("ceos1 fixture required")
+        group_name = "NORFAB DESIGN CACHE VLANS"
+        interface_name = "NORFAB-CACHE-INTERFACE"
+        prefix_value = "198.19.244.0/24"
+        if (
+            nb.ipam.vlan_groups.get(name=group_name)
+            or nb.dcim.interfaces.get(device_id=device.id, name=interface_name)
+            or nb.ipam.prefixes.get(prefix=prefix_value)
+        ):
+            pytest.skip("VLAN reference test objects already exist")
+        try:
+            group = nb.ipam.vlan_groups.create(
+                {"name": group_name, "slug": "norfab-design-cache-vlans"}
+            )
+            vlan = nb.ipam.vlans.create(
+                {"group": group.id, "vid": 2999, "name": "NORFAB CACHE VLAN"}
+            )
+            design = {
+                "prefixes": [
+                    {"prefix": prefix_value, "vlan": {"group": group_name, "vid": 2999}}
+                ],
+                "interfaces": [
+                    {
+                        "device": device.name,
+                        "name": interface_name,
+                        "type": "virtual",
+                        "mode": "access",
+                        "untagged_vlan": {"group": group_name, "vid": 2999},
+                    }
+                ],
+            }
+            for _ in (1, 2):
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                assert nb.ipam.prefixes.get(prefix=prefix_value).vlan.id == vlan.id
+                assert (
+                    nb.dcim.interfaces.get(
+                        device_id=device.id, name=interface_name
+                    ).untagged_vlan.id
+                    == vlan.id
+                )
+        finally:
+            interface = nb.dcim.interfaces.get(device_id=device.id, name=interface_name)
+            if interface:
+                interface.delete()
             prefix = nb.ipam.prefixes.get(prefix=prefix_value)
             if prefix:
                 prefix.delete()
-        for asn in list(nb.ipam.asns.filter(asn__gte=4200200000, asn__lte=4200200099)):
-            asn.delete()
-        asn_range = nb.ipam.asn_ranges.get(name=self.ASN_RANGE)
-        if asn_range:
-            asn_range.delete()
-        rir = nb.ipam.rirs.get(name=self.RIR)
-        if rir:
-            rir.delete()
-        for rack_name in ("SPINE-RACK", "LEAF-RACK"):
-            rack = nb.dcim.racks.get(name=rack_name)
-            if rack:
-                rack.delete()
-        location = nb.dcim.locations.get(name="FABRIC-ROOM")
-        if location:
-            location.delete()
-        for model in ("Fabric Spine", "Fabric Leaf"):
-            device_type = nb.dcim.device_types.get(model=model)
+            group = nb.ipam.vlan_groups.get(name=group_name)
+            if group:
+                for vlan in nb.ipam.vlans.filter(group_id=group.id):
+                    vlan.delete()
+                group.delete()
+
+    def test_prefix_scope_precedence(self, nfclient: Any) -> None:
+        """Resolve prefix scopes from location through region in priority order."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        prefixes = [
+            "198.19.245.10/32",
+            "198.19.245.11/32",
+            "198.19.245.12/32",
+            "198.19.245.13/32",
+        ]
+        if list(nb.ipam.prefixes.filter(prefix=prefixes)):
+            pytest.skip("prefix scope test addresses already exist")
+        if any(
+            (
+                nb.dcim.regions.get(name="NORFAB DESIGN SCOPE REGION"),
+                nb.dcim.site_groups.get(name="NORFAB DESIGN SCOPE GROUP"),
+                nb.dcim.sites.get(name="NORFAB DESIGN SCOPE SITE"),
+                nb.dcim.locations.get(name="NORFAB DESIGN SCOPE LOCATION"),
+            )
+        ):
+            pytest.skip("prefix scope test prerequisites already exist")
+        try:
+            region = nb.dcim.regions.create(
+                {
+                    "name": "NORFAB DESIGN SCOPE REGION",
+                    "slug": "norfab-design-scope-region",
+                }
+            )
+            site_group = nb.dcim.site_groups.create(
+                {
+                    "name": "NORFAB DESIGN SCOPE GROUP",
+                    "slug": "norfab-design-scope-group",
+                }
+            )
+            site = nb.dcim.sites.create(
+                {
+                    "name": "NORFAB DESIGN SCOPE SITE",
+                    "slug": "norfab-design-scope-site",
+                    "region": region.id,
+                    "group": site_group.id,
+                }
+            )
+            location = nb.dcim.locations.create(
+                {
+                    "name": "NORFAB DESIGN SCOPE LOCATION",
+                    "slug": "norfab-design-scope-location",
+                    "site": site.id,
+                }
+            )
+            design = {
+                "prefixes": [
+                    {
+                        "prefix": prefixes[0],
+                        "location": location.name,
+                        "site": site.name,
+                        "site_group": site_group.name,
+                        "region": region.name,
+                    },
+                    {
+                        "prefix": prefixes[1],
+                        "site": site.name,
+                        "site_group": site_group.name,
+                        "region": region.name,
+                    },
+                    {
+                        "prefix": prefixes[2],
+                        "site_group": site_group.name,
+                        "region": region.name,
+                    },
+                    {"prefix": prefixes[3], "region": region.name},
+                ]
+            }
+            for _ in (1, 2):
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                for prefix, scope_type, scope_id in zip(
+                    prefixes,
+                    ("dcim.location", "dcim.site", "dcim.sitegroup", "dcim.region"),
+                    (location.id, site.id, site_group.id, region.id),
+                ):
+                    record = nb.ipam.prefixes.get(prefix=prefix)
+                    assert (record.scope_type, record.scope_id) == (
+                        scope_type,
+                        scope_id,
+                    )
+        finally:
+            for prefix in prefixes:
+                record = nb.ipam.prefixes.get(prefix=prefix)
+                if record:
+                    record.delete()
+            for endpoint, name in (
+                (nb.dcim.locations, "NORFAB DESIGN SCOPE LOCATION"),
+                (nb.dcim.sites, "NORFAB DESIGN SCOPE SITE"),
+                (nb.dcim.site_groups, "NORFAB DESIGN SCOPE GROUP"),
+                (nb.dcim.regions, "NORFAB DESIGN SCOPE REGION"),
+            ):
+                record = endpoint.get(name=name)
+                if record:
+                    record.delete()
+
+    def test_allocated_asn_sites_and_role(self, nfclient: Any) -> None:
+        """Allocate an ASN, attach its site and role, then reuse it."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        objects = [
+            (nb.ipam.asns, {"asn": [4200999600, 4200999601]}),
+            (nb.ipam.asn_ranges, {"name": "NORFAB DESIGN ASN RANGE"}),
+            (nb.ipam.roles, {"name": "NORFAB DESIGN ASN ROLE"}),
+            (nb.ipam.rirs, {"name": "NORFAB DESIGN ASN RIR"}),
+            (nb.dcim.sites, {"name": "NORFAB DESIGN ASN SITE"}),
+        ]
+        for endpoint, filters in objects:
+            if list(endpoint.filter(**filters)):
+                pytest.skip(f"ASN test object already exists: {filters}")
+        design = {
+            "sites": [{"name": "NORFAB DESIGN ASN SITE"}],
+            "roles": [{"name": "NORFAB DESIGN ASN ROLE"}],
+            "rirs": [{"name": "NORFAB DESIGN ASN RIR"}],
+            "asn_ranges": [
+                {
+                    "name": "NORFAB DESIGN ASN RANGE",
+                    "rir": "NORFAB DESIGN ASN RIR",
+                    "start": 4200999600,
+                    "end": 4200999601,
+                }
+            ],
+            "asns": [
+                {
+                    "create_asn": {
+                        "asn_range": "NORFAB DESIGN ASN RANGE",
+                        "description": "NORFAB DESIGN ALLOCATED ASN",
+                        "sites": ["NORFAB DESIGN ASN SITE"],
+                        "role": "NORFAB DESIGN ASN ROLE",
+                    }
+                }
+            ],
+        }
+        try:
+            for _ in (1, 2):
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                asn = nb.ipam.asns.get(asn=4200999600)
+                assert asn.role.name == "NORFAB DESIGN ASN ROLE"
+                assert [site.name for site in asn.sites] == ["NORFAB DESIGN ASN SITE"]
+        finally:
+            for endpoint, filters in objects:
+                for record in endpoint.filter(**filters):
+                    record.delete()
+
+    def test_devices_with_same_name_at_different_sites(self, nfclient: Any) -> None:
+        """Match devices by site and tenant on repeated deployment."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        objects = [
+            (nb.dcim.devices, {"name": "norfab-design-identity-device"}),
+            (
+                nb.dcim.sites,
+                {"name": ["NORFAB DESIGN ID SITE A", "NORFAB DESIGN ID SITE B"]},
+            ),
+            (nb.dcim.device_types, {"model": "NORFAB DESIGN ID TYPE"}),
+            (nb.dcim.device_roles, {"name": "NORFAB DESIGN ID ROLE"}),
+            (nb.dcim.manufacturers, {"name": "NORFAB DESIGN ID MANUFACTURER"}),
+            (nb.tenancy.tenants, {"name": "NORFAB DESIGN ID TENANT"}),
+        ]
+        for endpoint, filters in objects:
+            if list(endpoint.filter(**filters)):
+                pytest.skip(f"identity test object already exists: {filters}")
+        design = {
+            "tenants": [{"name": "NORFAB DESIGN ID TENANT"}],
+            "manufacturers": [{"name": "NORFAB DESIGN ID MANUFACTURER"}],
+            "device_types": [
+                {
+                    "model": "NORFAB DESIGN ID TYPE",
+                    "manufacturer": "NORFAB DESIGN ID MANUFACTURER",
+                }
+            ],
+            "device_roles": [{"name": "NORFAB DESIGN ID ROLE"}],
+            "sites": [
+                {"name": "NORFAB DESIGN ID SITE A"},
+                {"name": "NORFAB DESIGN ID SITE B"},
+            ],
+            "devices": [
+                {
+                    "name": "norfab-design-identity-device",
+                    "site": "NORFAB DESIGN ID SITE A",
+                    "tenant": "NORFAB DESIGN ID TENANT",
+                    "role": "NORFAB DESIGN ID ROLE",
+                    "device_type": {
+                        "manufacturer": "NORFAB DESIGN ID MANUFACTURER",
+                        "model": "NORFAB DESIGN ID TYPE",
+                    },
+                },
+                {
+                    "name": "norfab-design-identity-device",
+                    "site": "NORFAB DESIGN ID SITE B",
+                    "tenant": "NORFAB DESIGN ID TENANT",
+                    "role": "NORFAB DESIGN ID ROLE",
+                    "device_type": {
+                        "manufacturer": "NORFAB DESIGN ID MANUFACTURER",
+                        "model": "NORFAB DESIGN ID TYPE",
+                    },
+                },
+            ],
+        }
+        try:
+            for run in (1, 2):
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                    if run == 2:
+                        assert not result["result"]["devices"]["created"]
+                devices = list(
+                    nb.dcim.devices.filter(name="norfab-design-identity-device")
+                )
+                assert len(devices) == 2
+                assert {device.site.name for device in devices} == {
+                    "NORFAB DESIGN ID SITE A",
+                    "NORFAB DESIGN ID SITE B",
+                }
+        finally:
+            for endpoint, filters in objects:
+                for record in endpoint.filter(**filters):
+                    record.delete()
+
+    def test_connections(self, nfclient: Any) -> None:
+        """Create and update a cable between test interfaces without duplicating it."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        device = nb.dcim.devices.get(name="ceos1")
+        if not device:
+            pytest.skip("ceos1 fixture required")
+        names = ["NORFAB-CABLE-A", "NORFAB-CABLE-B"]
+        if list(nb.dcim.interfaces.filter(device="ceos1", name=names)):
+            pytest.skip("cable fixtures already exist")
+        design = {
+            "interfaces": [
+                {
+                    "name": "NORFAB-CABLE-A",
+                    "device": "ceos1",
+                    "type": "1000base-t",
+                    "connection": {
+                        "device": "ceos1",
+                        "interface": "NORFAB-CABLE-B",
+                        "label": "NORFAB DESIGN CABLE",
+                        "type": "cat6",
+                    },
+                },
+                {"name": "NORFAB-CABLE-B", "device": "ceos1", "type": "1000base-t"},
+            ],
+        }
+        cable_id = None
+        try:
+            for run in (1, 2):
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                interface = nb.dcim.interfaces.get(device="ceos1", name=names[0])
+                assert interface.cable
+                if cable_id:
+                    assert interface.cable.id == cable_id
+                cable_id = interface.cable.id
+                assert (
+                    nb.dcim.interfaces.get(device="ceos1", name=names[1]).cable.id
+                    == cable_id
+                )
+        finally:
+            for interface in nb.dcim.interfaces.filter(device="ceos1", name=names):
+                if interface.cable:
+                    cable = nb.dcim.cables.get(interface.cable.id)
+                    if cable:
+                        cable.delete()
+                interface.delete()
+
+    def test_console_and_power_connections(self, nfclient: Any) -> None:
+        """Deploy nested and top-level ports, then cable both port families."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        site_name = "NORFAB DESIGN PORT SITE"
+        device_names = ["norfab-design-port-a", "norfab-design-port-b"]
+        if (
+            nb.dcim.sites.get(name=site_name)
+            or list(nb.dcim.devices.filter(name=device_names))
+            or nb.dcim.device_roles.get(name="NORFAB DESIGN PORT ROLE")
+            or nb.dcim.device_types.get(model="NORFAB DESIGN PORT TYPE")
+            or nb.dcim.manufacturers.get(name="NORFAB DESIGN PORT MANUFACTURER")
+        ):
+            pytest.skip("design port test objects already exist")
+        design = {
+            "manufacturers": [{"name": "NORFAB DESIGN PORT MANUFACTURER"}],
+            "device_types": [
+                {
+                    "model": "NORFAB DESIGN PORT TYPE",
+                    "manufacturer": "NORFAB DESIGN PORT MANUFACTURER",
+                }
+            ],
+            "device_roles": [{"name": "NORFAB DESIGN PORT ROLE"}],
+            "sites": [{"name": site_name}],
+            "devices": [
+                {
+                    "name": device_names[0],
+                    "site": site_name,
+                    "role": "NORFAB DESIGN PORT ROLE",
+                    "device_type": {
+                        "manufacturer": "NORFAB DESIGN PORT MANUFACTURER",
+                        "model": "NORFAB DESIGN PORT TYPE",
+                    },
+                    "console_ports": {"Console": {"type": "rj-45"}},
+                    "power_ports": {
+                        "PSU1": {
+                            "type": "iec-60320-c14",
+                            "connection": {
+                                "device": device_names[1],
+                                "power_outlet": "Outlet 1",
+                                "label": "NORFAB DESIGN POWER CABLE",
+                            },
+                        }
+                    },
+                },
+                {
+                    "name": device_names[1],
+                    "site": site_name,
+                    "role": "NORFAB DESIGN PORT ROLE",
+                    "device_type": {
+                        "manufacturer": "NORFAB DESIGN PORT MANUFACTURER",
+                        "model": "NORFAB DESIGN PORT TYPE",
+                    },
+                },
+            ],
+            "console_server_ports": [
+                {"device": device_names[1], "name": "Line 1", "type": "rj-45"}
+            ],
+            "power_outlets": [
+                {
+                    "device": device_names[1],
+                    "name": "Outlet 1",
+                    "type": "iec-60320-c13",
+                }
+            ],
+            "connections": [
+                {
+                    "label": "NORFAB DESIGN CONSOLE CABLE",
+                    "a_terminations": [
+                        {"device": device_names[0], "console_port": "Console"}
+                    ],
+                    "b_terminations": [
+                        {"device": device_names[1], "console_server_port": "Line 1"}
+                    ],
+                }
+            ],
+        }
+        try:
+            for run in (1, 2):
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                    if run == 2:
+                        assert not result["result"]["connections"]["created"]
+                console = nb.dcim.console_ports.get(
+                    device=device_names[0], name="Console"
+                )
+                server = nb.dcim.console_server_ports.get(
+                    device=device_names[1], name="Line 1"
+                )
+                power = nb.dcim.power_ports.get(device=device_names[0], name="PSU1")
+                outlet = nb.dcim.power_outlets.get(
+                    device=device_names[1], name="Outlet 1"
+                )
+                assert console.cable and console.cable.id == server.cable.id
+                assert power.cable and power.cable.id == outlet.cable.id
+        finally:
+            for device_name in device_names:
+                for endpoint in (
+                    nb.dcim.console_ports,
+                    nb.dcim.console_server_ports,
+                    nb.dcim.power_ports,
+                    nb.dcim.power_outlets,
+                ):
+                    for port in endpoint.filter(device=device_name):
+                        if port.cable:
+                            cable = nb.dcim.cables.get(port.cable.id)
+                            if cable:
+                                cable.delete()
+                        port.delete()
+                device = nb.dcim.devices.get(name=device_name)
+                if device:
+                    device.delete()
+            device_type = nb.dcim.device_types.get(model="NORFAB DESIGN PORT TYPE")
             if device_type:
                 device_type.delete()
-        for name in ("SPINE", "LEAF"):
-            role = nb.dcim.device_roles.get(name=name)
-            if role:
-                role.delete()
-        for name in ("FABRIC-LINK", "FABRIC-LOOPBACK"):
-            role = nb.ipam.roles.get(name=name)
-            if role:
-                role.delete()
-        manufacturer = nb.dcim.manufacturers.get(name="Example Networks")
-        if manufacturer:
-            manufacturer.delete()
-        rack_role = nb.dcim.rack_roles.get(name="NETWORK")
-        if rack_role:
-            rack_role.delete()
-        site = nb.dcim.sites.get(name=self.SITE)
-        if site:
-            site.delete()
-        region = nb.dcim.regions.get(name="DC-REGION")
-        if region:
-            region.delete()
-
-    @pytest.fixture(autouse=True)
-    def allocation_pools(self, nfclient: Any) -> Iterator[None]:
-        self.remove_design_objects(nfclient)
-        nb = get_pynetbox(nfclient)
-        region = nb.dcim.regions.create(name="DC-REGION", slug="dc-region")
-        site = nb.dcim.sites.create(
-            name=self.SITE,
-            slug="dc-001",
-            region=region.id,
-            status="active",
-        )
-        for prefix, description in (
-            (self.FABRIC_PREFIX, "Data center fabric link pool"),
-            (self.LOOPBACK_PREFIX, "Data center loopback pool"),
-        ):
-            nb.ipam.prefixes.create(
-                prefix=prefix,
-                status="active",
-                description=description,
-                scope_type="dcim.site",
-                scope_id=site.id,
-            )
-        rir = nb.ipam.rirs.create(name=self.RIR, slug="dc-fabric-rir", is_private=True)
-        nb.ipam.asn_ranges.create(
-            name=self.ASN_RANGE,
-            slug="dc-fabric-asns",
-            rir=rir.id,
-            start=4200200000,
-            end=4200200099,
-            scope_type="dcim.site",
-            scope_id=site.id,
-        )
-        yield
-        self.remove_design_objects(nfclient)
-
-    def run_design(self, nfclient: Any) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/data_center_leaf_spine_design.yaml",
-                "context": {
-                    "site": self.SITE,
-                    "fabric_prefix": self.FABRIC_PREFIX,
-                    "loopback_prefix": self.LOOPBACK_PREFIX,
-                    "asn_range": self.ASN_RANGE,
-                },
-            },
-        )
-
-    def test_data_center_leaf_spine_design_end_to_end(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient)
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-
-        nb = get_pynetbox(nfclient)
-        site = nb.dcim.sites.get(name=self.SITE)
-        assert {
-            device.name for device in nb.dcim.devices.filter(site_id=site.id)
-        } >= set(self.DEVICES)
-        assert nb.dcim.devices.get(name="dc-001-spine-1").rack.name == "SPINE-RACK"
-        assert nb.dcim.devices.get(name="dc-001-leaf-1").rack.name == "LEAF-RACK"
-        assert len(list(nb.dcim.cables.filter(label__ic=f"{self.SITE}-"))) == 6
-
-        link_prefixes = list(
-            nb.ipam.prefixes.filter(role__name="FABRIC-LINK", site__name=self.SITE)
-        )
-        assert len(link_prefixes) == 6
-        assert all(prefix.prefix.endswith("/31") for prefix in link_prefixes)
-        assert (
-            len(list(nb.ipam.asns.filter(asn__gte=4200200000, asn__lte=4200200099)))
-            == 5
-        )
-        sessions = [
-            nb.plugins.bgp.session.get(name=name)
-            for spine in range(1, 3)
-            for leaf in range(1, 4)
-            for name in (
-                f"{self.SITE}-SPINE-{spine}-LEAF-{leaf}",
-                f"{self.SITE}-LEAF-{leaf}-SPINE-{spine}",
-            )
-        ]
-        assert all(sessions)
-
-        for device_name in self.DEVICES:
-            loopback = nb.dcim.interfaces.get(device=device_name, name="Loopback0")
-            addresses = list(
-                nb.ipam.ip_addresses.filter(
-                    device=device_name,
-                    interface="Loopback0",
-                    parent=self.LOOPBACK_PREFIX,
-                )
-            )
-            assert loopback is not None
-            assert len(addresses) == 1
-
-        spine_ip = nb.ipam.ip_addresses.get(
-            description=f"{self.SITE} spine-1 leaf-1 SPINE IP"
-        )
-        leaf_ip = nb.ipam.ip_addresses.get(
-            description=f"{self.SITE} spine-1 leaf-1 LEAF IP"
-        )
-        assert spine_ip.assigned_object.device.name == "dc-001-spine-1"
-        assert spine_ip.assigned_object.name == "Ethernet1"
-        assert leaf_ip.assigned_object.device.name == "dc-001-leaf-1"
-        assert leaf_ip.assigned_object.name == "Ethernet1"
-
-        second = self.run_design(nfclient)
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"] == {}
-            assert result["result"]["updated"] == {}
-
-
-class TestJinjaFunctionsDesign:
-    VRF = "DESIGN CUSTOM FILTER VRF"
-
-    @pytest.fixture(autouse=True)
-    def cleanup_design_objects(self, nfclient: Any) -> Iterator[None]:
-        nb = get_pynetbox(nfclient)
-        vrf = nb.ipam.vrfs.get(name=self.VRF)
-        if vrf:
-            vrf.delete()
-        yield
-        vrf = nb.ipam.vrfs.get(name=self.VRF)
-        if vrf:
-            vrf.delete()
-
-    def run_design(self, nfclient: Any) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={
-                "design": "nf://netbox/designs/jinja_functions_design.yaml",
-            },
-        )
-
-    def test_jinja_functions_design_end_to_end(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient)
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"]["vrfs"] == [self.VRF]
-
-        vrf = get_pynetbox(nfclient).ipam.vrfs.get(name=self.VRF)
-        assert vrf is not None
-        assert vrf.rd == "100:3"
-        assert (
-            vrf.description
-            == "Created with the allocate_vrf_route_target custom function"
-        )
-
-        second = self.run_design(nfclient)
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"] == {}
-            assert result["result"]["updated"] == {}
-            assert result["result"]["unchanged"]["vrfs"] == [self.VRF]
-
-
-class TestInfrastructureAndServicesDesigns:
-    CUSTOM_FIELD = "design_owner"
-
-    def remove_design_objects(self, nfclient: Any) -> None:
-        nb = get_pynetbox(nfclient)
-        session = nb.plugins.bgp.session.get(name="DESIGN BGP SESSION 1")
-        if session:
-            session.delete()
-        for assignment in list(
-            nb.ipam.fhrp_group_assignments.filter(device="design-services-1")
-        ):
-            assignment.delete()
-        group = nb.ipam.fhrp_groups.get(name="DESIGN VRRP 10")
-        if group:
-            group.delete()
-        l2vpn = nb.vpn.l2vpns.get(name="DESIGN L2VPN 100")
-        if l2vpn:
-            for termination in list(
-                nb.vpn.l2vpn_terminations.filter(l2vpn_id=l2vpn.id)
+            for endpoint, name in (
+                (nb.dcim.sites, site_name),
+                (nb.dcim.device_roles, "NORFAB DESIGN PORT ROLE"),
+                (nb.dcim.manufacturers, "NORFAB DESIGN PORT MANUFACTURER"),
             ):
-                termination.delete()
-            l2vpn.delete()
-        cable = nb.dcim.cables.get(label="DESIGN PHYSICAL LINK 1")
-        if cable:
-            cable.delete()
-        for address in ("192.0.2.101/32", "192.0.2.102/32"):
-            ip_address = nb.ipam.ip_addresses.get(address=address)
-            if ip_address:
-                ip_address.delete()
-        for device_name in (
-            "design-services-1",
-            "design-physical-1",
-            "design-physical-2",
-        ):
-            device = nb.dcim.devices.get(name=device_name)
-            if device:
-                device.delete()
-        rack = nb.dcim.racks.get(name="DESIGN RACK 1")
-        if rack:
-            rack.delete()
-        location = nb.dcim.locations.get(name="DESIGN ROOM 1")
-        if location:
-            location.delete()
-        site = nb.dcim.sites.get(name="DESIGN SITE PHYSICAL")
-        if site:
-            site.delete()
-        region = nb.dcim.regions.get(name="DESIGN REGION PHYSICAL")
-        if region:
-            region.delete()
-        rack_role = nb.dcim.rack_roles.get(name="DESIGN NETWORK RACK")
-        if rack_role:
-            rack_role.delete()
-        for asn in (4200099001, 4200099002):
-            asn_object = nb.ipam.asns.get(asn=asn)
-            if asn_object:
-                asn_object.delete()
-        rir = nb.ipam.rirs.get(name="DESIGN SERVICE RIR")
-        if rir:
-            rir.delete()
+                record = endpoint.get(name=name)
+                if record:
+                    record.delete()
 
-    @pytest.fixture(autouse=True)
-    def design_objects(self, nfclient: Any) -> Iterator[None]:
-        self.remove_design_objects(nfclient)
-        nb = get_pynetbox(nfclient)
-        custom_field = nb.extras.custom_fields.get(name=self.CUSTOM_FIELD)
-        if custom_field:
-            custom_field.delete()
-        nb.extras.custom_fields.create(
-            name=self.CUSTOM_FIELD,
-            label="Design owner",
-            type="text",
-            object_types=[
-                "dcim.region",
-                "dcim.site",
-                "dcim.location",
-                "dcim.rack",
-                "dcim.device",
-                "dcim.interface",
-                "dcim.cable",
-                "vpn.l2vpn",
-                "vpn.l2vpntermination",
-                "ipam.fhrpgroup",
-                "netbox_bgp.bgpsession",
+    @pytest.mark.parametrize("deployments", [1, 3], ids=["clean", "repeat"])
+    def test_acme_design(self, nfclient: Any, deployments: int) -> None:
+        """Deploy the complete ACME example from scratch and clean all owned data."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        context = {"site": "NORFAB ACME TEST", "parent_prefix": "198.19.224.0/20"}
+        source = Path(
+            "nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml"
+        ).read_text()
+        design = yaml.safe_load(Template(source).render(context=context))
+        device_names = [device["name"] for device in design["devices"]]
+        objects = [
+            (
+                nb.plugins.bgp.session,
+                {
+                    "name": [
+                        name
+                        for device in design["devices"]
+                        for name in device.get("bgp_peerings", {})
+                    ]
+                },
+            ),
+            (nb.ipam.ip_addresses, {"parent": "198.19.224.0/20"}),
+            (nb.ipam.ip_addresses, {"parent": "192.0.2.0/24"}),
+            (nb.ipam.ip_addresses, {"parent": "198.51.100.0/30"}),
+            (nb.dcim.interfaces, {"device": device_names}),
+            (nb.dcim.devices, {"name": device_names}),
+            (nb.ipam.prefixes, {"within_include": "198.19.224.0/20"}),
+            (nb.ipam.prefixes, {"prefix": ["192.0.2.0/24", "198.51.100.0/30"]}),
+            (nb.ipam.vlan_groups, {"name": "NORFAB ACME TEST VLANS"}),
+            (nb.ipam.vrfs, {"name": "ACME BRANCH", "rd": "4200650001:100"}),
+            (nb.ipam.route_targets, {"name": ["4200650001:100", "4200650001:200"]}),
+            (nb.plugins.bgp.routing_policy, {"name": ["ACME IMPORT", "ACME EXPORT"]}),
+            (nb.plugins.bgp.community, {"value": "4200650001:100"}),
+            (nb.ipam.asns, {"asn": [4200650000, 4200650001, 4200650002, 4200650003]}),
+            (nb.ipam.rirs, {"name": "ACME PRIVATE"}),
+            (nb.ipam.roles, {"name": ["ACME-BRANCH-LAN", "ACME-BRANCH-LOOPBACK"]}),
+            (
+                nb.dcim.device_types,
+                {
+                    "model": [
+                        "ACME BRANCH ROUTER",
+                        "ACME AGG SWITCH",
+                        "ACME ACCESS SWITCH",
+                        "ACME TERMINAL SERVER",
+                        "ACME PDU",
+                    ]
+                },
+            ),
+            (
+                nb.dcim.device_roles,
+                {
+                    "name": [
+                        "ACME ROUTER",
+                        "ACME AGGREGATION SWITCH",
+                        "ACME ACCESS SWITCH",
+                        "ACME TERMINAL SERVER",
+                        "ACME PDU",
+                    ]
+                },
+            ),
+            (nb.dcim.platforms, {"name": "ACME OS"}),
+            (nb.dcim.manufacturers, {"name": "ACME NETWORKS"}),
+            (nb.extras.config_contexts, {"name": "ACME BRANCH BASELINE"}),
+            (nb.dcim.sites, {"name": "NORFAB ACME TEST"}),
+            (nb.dcim.regions, {"name": "ACME REGION"}),
+            (nb.tenancy.tenants, {"name": "ACME"}),
+        ]
+        for endpoint, filters in objects:
+            if endpoint.name == "interfaces":
+                continue  # Device names are checked below.
+            if list(endpoint.filter(**filters)):
+                pytest.skip(
+                    f"ACME objects already exist; refusing to change them: {filters}"
+                )
+        if list(nb.ipam.fhrp_groups.filter(group_id=[10, 20])):
+            pytest.skip("VRRP group IDs 10 or 20 already exist")
+        try:
+            previous_ids = None
+            for run in range(deployments):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": "nf://netbox/designs/acme_branch_network_design_v1.yaml",
+                        "context": context,
+                    },
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                    assert all(
+                        "unchanged" not in changes
+                        for changes in result["result"].values()
+                    )
+                    if run:
+                        for collection, changes in result["result"].items():
+                            assert not changes["created"], (collection, changes)
+                group = nb.ipam.vlan_groups.get(name="NORFAB ACME TEST VLANS")
+                assert group.scope_type == "dcim.site"
+                assert group.scope_id == nb.dcim.sites.get(name=context["site"]).id
+                prefix = nb.ipam.prefixes.get(prefix="192.0.2.0/24")
+                assert prefix.scope_type == "dcim.site"
+                assert prefix.scope_id == nb.dcim.sites.get(name=context["site"]).id
+                assert prefix.vlan.vid == 100
+                assert (
+                    nb.ipam.prefixes.get(prefix="198.19.230.0/24").vrf.name
+                    == "ACME BRANCH"
+                )
+                assert (
+                    nb.ipam.ip_addresses.get(address="198.19.230.1/24").vrf.name
+                    == "ACME BRANCH"
+                )
+                assert (
+                    nb.dcim.interfaces.get(
+                        device="acme-branch-rtr-1", name="Ethernet2.100"
+                    ).parent.name
+                    == "Ethernet2"
+                )
+                assert (
+                    nb.dcim.interfaces.get(
+                        device="acme-branch-agg-1", name="Ethernet6"
+                    ).lag.name
+                    == "Port-Channel1"
+                )
+                asn = nb.ipam.asns.get(asn=4200650002)
+                assert asn.role.name == "ACME-BRANCH-LAN"
+                assert [site.name for site in asn.sites] == [context["site"]]
+                assert (
+                    len(
+                        {
+                            interface.cable.id
+                            for device_name in device_names
+                            for interface in nb.dcim.interfaces.filter(
+                                device=device_name
+                            )
+                            if interface.cable
+                        }
+                    )
+                    == 12
+                )
+                network_devices = device_names[:7]
+                for number, device_name in enumerate(network_devices, start=1):
+                    console = nb.dcim.console_ports.get(
+                        device=device_name, name="Console"
+                    )
+                    server = nb.dcim.console_server_ports.get(
+                        device="acme-branch-terminal-server", name=f"Line {number}"
+                    )
+                    power = nb.dcim.power_ports.get(device=device_name, name="PSU1")
+                    outlet = nb.dcim.power_outlets.get(
+                        device="acme-branch-pdu", name=f"Outlet {number}"
+                    )
+                    assert console.cable and console.cable.id == server.cable.id
+                    assert power.cable and power.cable.id == outlet.cable.id
+                current_ids = [
+                    sorted(record.id for record in endpoint.filter(**filters))
+                    for endpoint, filters in objects
+                ]
+                assert all(current_ids), current_ids
+                assert len(current_ids[0]) == 25
+                assert len(current_ids[4]) == sum(
+                    len(device.get("interfaces", {})) for device in design["devices"]
+                )
+                assert len(current_ids[5]) == 9
+                assert len(list(nb.ipam.vlans.filter(group_id=group.id))) == 4
+                assert len(list(nb.ipam.fhrp_groups.filter(group_id=[10, 20]))) == 2
+                fhrp_groups = list(nb.ipam.fhrp_groups.filter(group_id=[10, 20]))
+                assert (
+                    sum(
+                        len(
+                            list(
+                                nb.ipam.fhrp_group_assignments.filter(group_id=item.id)
+                            )
+                        )
+                        for item in fhrp_groups
+                    )
+                    == 4
+                )
+                vip = nb.ipam.ip_addresses.get(address="192.0.2.1/24")
+                assert vip.assigned_object.group_id == 10
+                assert (
+                    nb.dcim.devices.get(name="acme-branch-agg-1").primary_ip4.address
+                    == "192.0.2.10/32"
+                )
+                context_record = nb.extras.config_contexts.get(
+                    name="ACME BRANCH BASELINE"
+                )
+                assert context_record.data == {"acme": {"managed": True}}
+                assert [site.name for site in context_record.sites] == [context["site"]]
+                assert nb.dcim.devices.get(
+                    name="acme-branch-rtr-1"
+                ).local_context_data == {
+                    "acme": {"profile": "core-router", "managed": True}
+                }
+                aggregation = nb.dcim.devices.get(name="acme-branch-agg-1")
+                assert aggregation.local_context_data == {
+                    "acme": {
+                        "profile": "aggregation",
+                        "site": context["site"],
+                        "role": "ACME AGGREGATION SWITCH",
+                        "interface_count": len(design["devices"][2]["interfaces"]),
+                        "primary_ip": "192.0.2.10/32",
+                    }
+                }
+                if previous_ids is not None:
+                    assert current_ids == previous_ids
+                previous_ids = current_ids
+        finally:
+            cleanup_errors = []
+            cable_ids = set()
+            for device_name in device_names:
+                device = nb.dcim.devices.get(name=device_name)
+                if device:
+                    for endpoint in (
+                        nb.dcim.interfaces,
+                        nb.dcim.power_ports,
+                        nb.dcim.console_ports,
+                        nb.dcim.power_outlets,
+                        nb.dcim.console_server_ports,
+                    ):
+                        for port in endpoint.filter(device_id=device.id):
+                            if port.cable:
+                                cable_ids.add(port.cable.id)
+            for cable_id in cable_ids:
+                try:
+                    cable = nb.dcim.cables.get(cable_id)
+                    if cable:
+                        cable.delete()
+                except Exception as exc:
+                    cleanup_errors.append(f"cable {cable_id}: {exc}")
+            for device_name in ("acme-branch-agg-1", "acme-branch-agg-2"):
+                device = nb.dcim.devices.get(name=device_name)
+                if device and device.primary_ip4:
+                    device.primary_ip4 = None
+                    device.save()
+            for group in nb.ipam.fhrp_groups.filter(group_id=[10, 20]):
+                for assignment in nb.ipam.fhrp_group_assignments.filter(
+                    group_id=group.id
+                ):
+                    assignment.delete()
+            for endpoint, filters in objects:
+                try:
+                    if endpoint.name == "interfaces":
+                        for group in nb.ipam.fhrp_groups.filter(group_id=[10, 20]):
+                            group.delete()
+                        for device_name in device_names:
+                            device = nb.dcim.devices.get(name=device_name)
+                            if device:
+                                interfaces = list(
+                                    nb.dcim.interfaces.filter(device_id=device.id)
+                                )
+                                interfaces.sort(
+                                    key=lambda item: not (item.parent or item.lag)
+                                )
+                                for interface in interfaces:
+                                    interface.delete()
+                                for port_endpoint in (
+                                    nb.dcim.power_ports,
+                                    nb.dcim.console_ports,
+                                    nb.dcim.power_outlets,
+                                    nb.dcim.console_server_ports,
+                                ):
+                                    for port in port_endpoint.filter(
+                                        device_id=device.id
+                                    ):
+                                        port.delete()
+                        continue
+                    if endpoint.name == "vlan-groups":
+                        group = nb.ipam.vlan_groups.get(name="NORFAB ACME TEST VLANS")
+                        if group:
+                            for vlan in nb.ipam.vlans.filter(group_id=group.id):
+                                vlan.delete()
+                    for record in endpoint.filter(**filters):
+                        record.delete()
+                except Exception as exc:
+                    cleanup_errors.append(f"{filters}: {exc}")
+            assert not cleanup_errors, cleanup_errors
+            for endpoint, filters in objects:
+                if endpoint.name == "interfaces":
+                    continue
+                assert not list(endpoint.filter(**filters)), filters
+
+    def test_bgp_peering_policies(self, nfclient: Any) -> None:
+        """Deploy an ASN, IPs, nested routing policy and BGP session, then update."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        if not nb.dcim.devices.get(name="ceos1"):
+            pytest.skip("ceos1 fixture is required")
+        objects = [
+            (nb.plugins.bgp.session, {"name": "NORFAB DESIGN BGP"}),
+            (nb.plugins.bgp.routing_policy, {"name": "NORFAB DESIGN BGP IMPORT"}),
+            (nb.ipam.ip_addresses, {"address": ["198.19.246.1/30", "198.19.246.2/30"]}),
+            (nb.ipam.asns, {"asn": 4200999246}),
+            (nb.ipam.rirs, {"name": "NORFAB DESIGN BGP RIR"}),
+        ]
+        for endpoint, filters in objects:
+            if list(endpoint.filter(**filters)):
+                pytest.skip(f"BGP design fixture already exists: {filters}")
+        design = {
+            "rirs": [{"name": "NORFAB DESIGN BGP RIR", "is_private": True}],
+            "asns": [{"asn": 4200999246, "rir": "NORFAB DESIGN BGP RIR"}],
+            "ip_addresses": [
+                {"address": "198.19.246.1/30"},
+                {"address": "198.19.246.2/30"},
             ],
+            "bgp_peerings": [
+                {
+                    "name": "NORFAB DESIGN BGP",
+                    "device": "ceos1",
+                    "local_address": "198.19.246.1",
+                    "remote_address": "198.19.246.2",
+                    "local_as": 4200999246,
+                    "remote_as": 4200999246,
+                    "create_reverse": False,
+                    "import_policies": [
+                        {
+                            "name": "NORFAB DESIGN BGP IMPORT",
+                            "description": "inline policy",
+                        }
+                    ],
+                }
+            ],
+        }
+        try:
+            for description in ("initial", "updated"):
+                design["bgp_peerings"][0]["description"] = description
+                reply = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                session = nb.plugins.bgp.session.get(name="NORFAB DESIGN BGP")
+                assert session.description == description
+                assert [policy.name for policy in session.import_policies] == [
+                    "NORFAB DESIGN BGP IMPORT"
+                ]
+        finally:
+            for endpoint, filters in objects:
+                for record in endpoint.filter(**filters):
+                    record.delete()
+
+    def test_custom_function(self, nfclient: Any) -> None:
+        """Load a custom creator from nf:// and execute after explicit records."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        names = ["NORFAB CUSTOM BASE", "NORFAB CUSTOM TENANT"]
+        if list(nb.tenancy.tenants.filter(name=names)):
+            pytest.skip("custom design fixtures already exist")
+        design = """custom_functions:
+  custom_create_tenant: nf://netbox/designs/custom_create_tenant.py
+tenants:
+  - custom_function: custom_create_tenant
+    name: NORFAB CUSTOM TENANT
+    slug: norfab-custom-tenant
+    prerequisite: NORFAB CUSTOM BASE
+  - name: NORFAB CUSTOM BASE
+"""
+        try:
+            nb.tenancy.tenants.create({"name": names[0], "slug": "norfab-custom-base"})
+            for dry_run in (True, False, False):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": design, "dry_run": dry_run},
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                    assert result["result"]["tenants"]["custom"][0]["result"] == {
+                        "name": names[1],
+                        "dry_run": dry_run,
+                    }
+                assert bool(nb.tenancy.tenants.get(name=names[1])) is not dry_run
+        finally:
+            for tenant in nb.tenancy.tenants.filter(name=names):
+                tenant.delete()
+
+    def test_task_wrappers(self, nfclient: Any) -> None:
+        """Deploy task-name wrappers and repeat without allocating duplicates."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        objects = [
+            (nb.ipam.ip_addresses, {"parent": "198.19.247.0/24"}),
+            (nb.ipam.prefixes, {"within_include": "198.19.247.0/24"}),
+            (nb.ipam.asns, {"asn": 4200999251}),
+            (nb.ipam.asns, {"asn": 4200999252}),
+            (nb.ipam.asn_ranges, {"name": "NORFAB DESIGN WRAPPER RANGE"}),
+            (nb.ipam.vlans, {"name": "NORFAB DESIGN WRAPPER VLAN"}),
+            (nb.ipam.vlans, {"name": "NORFAB DESIGN EXPLICIT VLAN"}),
+            (nb.ipam.vlan_groups, {"name": "NORFAB DESIGN WRAPPER GROUP"}),
+            (nb.ipam.rirs, {"name": "NORFAB DESIGN WRAPPER RIR"}),
+        ]
+        for endpoint, filters in objects:
+            if list(endpoint.filter(**filters)):
+                pytest.skip(f"design fixture already exists: {filters}")
+        design = {
+            "rirs": [
+                {
+                    "name": "NORFAB DESIGN WRAPPER RIR",
+                    "slug": "norfab-design-wrapper-rir",
+                    "is_private": True,
+                }
+            ],
+            "vlan_groups": [
+                {
+                    "name": "NORFAB DESIGN WRAPPER GROUP",
+                    "slug": "norfab-design-wrapper-group",
+                    "vid_ranges": [[251, 259]],
+                }
+            ],
+            "asn_ranges": [
+                {
+                    "name": "NORFAB DESIGN WRAPPER RANGE",
+                    "slug": "norfab-design-wrapper-range",
+                    "start": 4200999251,
+                    "end": 4200999252,
+                    "rir": "NORFAB DESIGN WRAPPER RIR",
+                }
+            ],
+            "asns": [
+                {
+                    "create_asn": {
+                        "asn_range": "NORFAB DESIGN WRAPPER RANGE",
+                        "description": "NORFAB DESIGN ALLOCATED ASN",
+                    }
+                },
+                {"asn": 4200999252, "rir": "NORFAB DESIGN WRAPPER RIR"},
+            ],
+            "vlans": [
+                {
+                    "vid": 259,
+                    "name": "NORFAB DESIGN EXPLICIT VLAN",
+                    "group": "NORFAB DESIGN WRAPPER GROUP",
+                },
+                {
+                    "create_vlan": {
+                        "vlan_group": "NORFAB DESIGN WRAPPER GROUP",
+                        "name": "NORFAB DESIGN WRAPPER VLAN",
+                    }
+                },
+            ],
+            "prefixes": [
+                {"prefix": "198.19.247.0/24"},
+                {
+                    "create_prefix": {
+                        "parent": "198.19.247.0/24",
+                        "prefixlen": 28,
+                        "description": "NORFAB DESIGN WRAPPER PREFIX",
+                    }
+                },
+            ],
+            "ip_addresses": [
+                {
+                    "create_ip": {
+                        "prefix": "198.19.247.0/28",
+                        "description": "NORFAB DESIGN WRAPPER IP",
+                        "create_peer_ip": False,
+                    }
+                }
+            ],
+        }
+        try:
+            for dry_run in (False, False, True):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": design, "dry_run": dry_run},
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                assert nb.ipam.asns.get(asn=4200999251)
+                assert nb.ipam.asns.get(asn=4200999252)
+                assert nb.ipam.vlans.get(name="NORFAB DESIGN WRAPPER VLAN").vid == 251
+                assert nb.ipam.prefixes.get(prefix="198.19.247.0/28")
+                assert (
+                    len(list(nb.ipam.ip_addresses.filter(parent="198.19.247.0/28")))
+                    == 1
+                )
+        finally:
+            for endpoint, filters in objects:
+                for record in endpoint.filter(**filters):
+                    record.delete()
+
+    def test_simple_collections(self, nfclient: Any) -> None:
+        """Create and update dependent DCIM and IPAM objects in order."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        design = {
+            "regions": [
+                {
+                    "name": "NORFAB DESIGN REGION",
+                    "description": "old",
+                }
+            ],
+            "manufacturers": [{"name": "NORFAB DESIGN MFR"}],
+            "platforms": [
+                {
+                    "name": "NORFAB DESIGN OS",
+                    "manufacturer": "NORFAB DESIGN MFR",
+                }
+            ],
+            "device_types": [
+                {
+                    "model": "NORFAB DESIGN DEVICE",
+                    "manufacturer": "NORFAB DESIGN MFR",
+                    "default_platform": "NORFAB DESIGN OS",
+                }
+            ],
+            "device_roles": [
+                {
+                    "name": "NORFAB DESIGN ROLE",
+                    "color": "ff0000",
+                }
+            ],
+            "sites": [
+                {
+                    "name": "NORFAB DESIGN SITE",
+                    "region": "NORFAB DESIGN REGION",
+                    "status": "active",
+                }
+            ],
+            "roles": [{"name": "NORFAB DESIGN IPAM ROLE"}],
+            "rirs": [
+                {
+                    "name": "NORFAB DESIGN RIR",
+                    "is_private": True,
+                }
+            ],
+        }
+        design["rack_roles"] = [{"name": "NORFAB DESIGN RACK ROLE"}]
+        design["racks"] = [
+            {
+                "name": "NORFAB DESIGN RACK",
+                "site": "NORFAB DESIGN SITE",
+                "role": "NORFAB DESIGN RACK ROLE",
+                "status": "active",
+            }
+        ]
+        design["asn_ranges"] = [
+            {
+                "name": "NORFAB DESIGN ASN RANGE",
+                "rir": "NORFAB DESIGN RIR",
+                "start": 64512,
+                "end": 64520,
+            }
+        ]
+        design["vlan_groups"] = [
+            {
+                "name": "NORFAB DESIGN VLAN GROUP",
+                "vid_ranges": [[100, 199]],
+            }
+        ]
+        design["vrfs"] = [
+            {
+                "name": "NORFAB DESIGN VRF",
+                "rd": "64512:123",
+                "import_route_targets": [
+                    {"name": "64512:99123", "description": "design target"}
+                ],
+                "export_route_targets": [
+                    {"name": "64512:99123", "description": "design target"}
+                ],
+            }
+        ]
+        design["bgp_communities"] = [
+            {"value": "64512:987", "description": "design community"}
+        ]
+        design["routing_policies"] = [{"name": "NORFAB DESIGN EXPORT"}]
+        objects = [
+            (nb.plugins.bgp.community, {"value": "64512:987"}),
+            (nb.plugins.bgp.routing_policy, {"name": "NORFAB DESIGN EXPORT"}),
+            (nb.dcim.racks, {"name": "NORFAB DESIGN RACK"}),
+            (nb.dcim.rack_roles, {"name": "NORFAB DESIGN RACK ROLE"}),
+            (nb.ipam.asn_ranges, {"name": "NORFAB DESIGN ASN RANGE"}),
+            (nb.ipam.vlan_groups, {"name": "NORFAB DESIGN VLAN GROUP"}),
+            (nb.ipam.vrfs, {"name": "NORFAB DESIGN VRF"}),
+            (nb.ipam.route_targets, {"name": "64512:99123"}),
+            (nb.dcim.sites, {"name": "NORFAB DESIGN SITE"}),
+            (nb.dcim.device_types, {"model": "NORFAB DESIGN DEVICE"}),
+            (nb.dcim.device_roles, {"name": "NORFAB DESIGN ROLE"}),
+            (nb.dcim.platforms, {"name": "NORFAB DESIGN OS"}),
+            (nb.dcim.manufacturers, {"name": "NORFAB DESIGN MFR"}),
+            (nb.dcim.regions, {"name": "NORFAB DESIGN REGION"}),
+            (nb.ipam.roles, {"name": "NORFAB DESIGN IPAM ROLE"}),
+            (nb.ipam.rirs, {"name": "NORFAB DESIGN RIR"}),
+        ]
+        if any(endpoint.get(**filters) for endpoint, filters in objects):
+            pytest.skip("Design test objects already exist in NetBox")
+        try:
+            for action in ("created", "updated"):
+                if action == "updated":
+                    design["regions"][0]["description"] = "updated"
+                response = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for worker, result in response.items():
+                    assert result["failed"] is False, f"{worker} failed: {result}"
+                    for collection, records in design.items():
+                        identity = (
+                            "model"
+                            if collection == "device_types"
+                            else "value" if collection == "bgp_communities" else "name"
+                        )
+                        assert result["result"][collection][action] == [
+                            records[0][identity]
+                        ]
+            vrf = nb.ipam.vrfs.get(name="NORFAB DESIGN VRF")
+            assert [target.name for target in vrf.import_targets] == ["64512:99123"]
+            assert [target.name for target in vrf.export_targets] == ["64512:99123"]
+            assert (
+                nb.ipam.route_targets.get(name="64512:99123").description
+                == "design target"
+            )
+            assert (
+                nb.dcim.regions.get(name="NORFAB DESIGN REGION").description
+                == "updated"
+            )
+        finally:
+            for endpoint, filters in objects:
+                item = endpoint.get(**filters)
+                if item:
+                    item.delete()
+
+    def test_single_document_metadata_and_tenants(self, nfclient: Any) -> None:
+        """Metadata and rendered tenant records share one YAML document."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "norfab-design-single-document"
+        if nb.tenancy.tenants.get(name=name):
+            pytest.skip("Design test tenant already exists in NetBox")
+        design = """design_input_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    tenant_name:
+      type: string
+  required:
+    - tenant_name
+jinja_functions: {}
+tenants:
+  - name: "{{ context.tenant_name }}"
+    slug: "{{ context.tenant_name }}"
+"""
+        try:
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={"design": design, "context": {"tenant_name": name}},
+            )
+            for worker, result in response.items():
+                assert result["failed"] is False, f"{worker} failed: {result}"
+                assert result["result"]["tenants"]["created"] == [name]
+            assert nb.tenancy.tenants.get(name=name)
+        finally:
+            tenant = nb.tenancy.tenants.get(name=name)
+            if tenant:
+                tenant.delete()
+
+    @pytest.mark.parametrize(
+        "design",
+        [
+            {"unknown": []},
+            {"tenants": {"name": "tenant-1"}},
+            {"tenants": ["tenant-1"]},
+            {"vrfs": [{"name": "invalid", "import_route_targets": ["64512:100"]}]},
+            {"route_targets": ["64512:100"]},
+            {"bgp_communities": ["64512:100"]},
+            {"routing_policies": ["ACME EXPORT"]},
+            {"bgp_peerings": [{"name": "invalid", "import_policies": ["ACME IMPORT"]}]},
+            {"bgp_peerings": [{"name": "invalid", "export_policies": ["ACME EXPORT"]}]},
+            {"platforms": [{"name": "invalid", "manufacturer": {"name": "ACME"}}]},
+            {"vlans": [{"name": "invalid", "vid": 321}]},
+            {
+                "vlans": [
+                    {"name": "invalid", "vid": 321, "group": "test", "site": "test"}
+                ]
+            },
+            {
+                "vlans": [
+                    {
+                        "create_vlan": {
+                            "vlan_group": "test",
+                            "name": "invalid",
+                            "site": "test",
+                        }
+                    }
+                ]
+            },
+        ],
+    )
+    def test_invalid_design(self, nfclient: Any, design: dict) -> None:
+        """The worker rejects unsupported collections and invalid list shapes."""
+        response = nfclient.run_job(
+            "netbox", "design_deploy", workers="any", kwargs={"design": design}
         )
-        yield
-        self.remove_design_objects(nfclient)
-        custom_field = nb.extras.custom_fields.get(name=self.CUSTOM_FIELD)
-        if custom_field:
-            custom_field.delete()
+        for result in response.values():
+            assert result["failed"] is True
 
-    @staticmethod
-    def run_design(nfclient: Any, filename: str) -> dict:
-        return nfclient.run_job(
-            "netbox",
-            "design_deploy",
-            workers="any",
-            kwargs={"design": f"nf://netbox/designs/{filename}"},
-        )
+    def test_tenant_write_error(self, nfclient: Any) -> None:
+        """A NetBox write error is returned with the failing collection."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "norfab-design-invalid-tenant"
+        if nb.tenancy.tenants.get(name=name):
+            pytest.skip("Design test tenant already exists in NetBox")
+        try:
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": {
+                        "tenants": [
+                            {
+                                "name": name,
+                                "slug": name,
+                                "group": "NORFAB MISSING TENANT GROUP",
+                            }
+                        ]
+                    }
+                },
+            )
+            for result in response.values():
+                assert result["failed"] is True
+                assert result["errors"]
+                assert "failed to deploy tenants" in result["errors"][0]
+        finally:
+            tenant = nb.tenancy.tenants.get(name=name)
+            if tenant:
+                tenant.delete()
 
-    def test_physical_hierarchy_and_connection(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient, "infrastructure_connections_design.yaml")
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
+    def test_five_tenants(self, nfclient: Any) -> None:
+        """A design dictionary creates five tenants and patches them on rerun."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        design = {
+            "tenants": [
+                {"name": "norfab-design-create-1", "slug": "norfab-design-create-1"},
+                {"name": "norfab-design-create-2", "slug": "norfab-design-create-2"},
+                {"name": "norfab-design-create-3", "slug": "norfab-design-create-3"},
+                {"name": "norfab-design-create-4", "slug": "norfab-design-create-4"},
+                {"name": "norfab-design-create-5", "slug": "norfab-design-create-5"},
+            ]
+        }
+        names = [tenant["name"] for tenant in design["tenants"]]
+        if any(nb.tenancy.tenants.get(name=name) for name in names):
+            pytest.skip("Design test tenants already exist in NetBox")
+        try:
+            for expected_action in ("created", "updated"):
+                response = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for worker, result in response.items():
+                    assert result["failed"] is False, f"{worker} failed: {result}"
+                    assert result["result"]["tenants"][expected_action] == names
+            assert all(nb.tenancy.tenants.get(name=name) for name in names)
+        finally:
+            for name in names:
+                tenant = nb.tenancy.tenants.get(name=name)
+                if tenant:
+                    tenant.delete()
 
-        nb = get_pynetbox(nfclient)
-        rack = nb.dcim.racks.get(name="DESIGN RACK 1")
-        assert rack.site.name == "DESIGN SITE PHYSICAL"
-        assert rack.location.name == "DESIGN ROOM 1"
-        assert rack.custom_fields[self.CUSTOM_FIELD] == "design-engine"
-        cable = nb.dcim.cables.get(label="DESIGN PHYSICAL LINK 1")
-        assert cable is not None
-        assert cable.custom_fields[self.CUSTOM_FIELD] == "design-engine"
-        assert nb.dcim.devices.get(name="design-physical-1").rack.name == rack.name
-
-        second = self.run_design(nfclient, "infrastructure_connections_design.yaml")
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"] == {}
-            assert result["result"]["updated"] == {}
-
-    def test_bgp_l2vpn_and_vrrp(self, nfclient: Any) -> None:
-        first = self.run_design(nfclient, "network_services_design.yaml")
-        for worker, result in first.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-
-        nb = get_pynetbox(nfclient)
-        session = nb.plugins.bgp.session.get(name="DESIGN BGP SESSION 1")
-        assert session is not None
-        assert session.custom_fields[self.CUSTOM_FIELD] == "design-engine"
-        l2vpn = nb.vpn.l2vpns.get(name="DESIGN L2VPN 100")
-        assert l2vpn is not None
-        assert l2vpn.custom_fields[self.CUSTOM_FIELD] == "design-engine"
-        assert len(list(nb.vpn.l2vpn_terminations.filter(l2vpn_id=l2vpn.id))) == 1
-        group = nb.ipam.fhrp_groups.get(name="DESIGN VRRP 10")
-        assert group.protocol == "vrrp2"
-        assert group.custom_fields[self.CUSTOM_FIELD] == "design-engine"
-        assignments = list(nb.ipam.fhrp_group_assignments.filter(group_id=group.id))
-        assert len(assignments) == 1
-        assert assignments[0].priority == 110
-
-        second = self.run_design(nfclient, "network_services_design.yaml")
-        for worker, result in second.items():
-            assert result["failed"] is False, f"{worker} failed: {result}"
-            assert result["result"]["created"] == {}
-            assert result["result"]["updated"] == {}
+    def test_mixed_tenant_create_and_update(self, nfclient: Any) -> None:
+        """One deployment separates existing tenants from missing tenants."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        design = {
+            "tenants": [
+                {
+                    "name": "norfab-design-mixed-1",
+                    "slug": "norfab-design-mixed-1",
+                    "description": "new",
+                },
+                {
+                    "name": "norfab-design-mixed-2",
+                    "slug": "norfab-design-mixed-2",
+                    "description": "new",
+                },
+                {
+                    "name": "norfab-design-mixed-3",
+                    "slug": "norfab-design-mixed-3",
+                    "description": "new",
+                },
+                {
+                    "name": "norfab-design-mixed-4",
+                    "slug": "norfab-design-mixed-4",
+                    "description": "new",
+                },
+                {
+                    "name": "norfab-design-mixed-5",
+                    "slug": "norfab-design-mixed-5",
+                    "description": "new",
+                },
+            ]
+        }
+        names = [tenant["name"] for tenant in design["tenants"]]
+        if any(nb.tenancy.tenants.get(name=name) for name in names):
+            pytest.skip("Design test tenants already exist in NetBox")
+        try:
+            nb.tenancy.tenants.create(
+                {"name": names[0], "slug": names[0], "description": "old"}
+            )
+            response = nfclient.run_job(
+                "netbox", "design_deploy", workers="any", kwargs={"design": design}
+            )
+            for worker, result in response.items():
+                assert result["failed"] is False, f"{worker} failed: {result}"
+                assert result["result"]["tenants"] == {
+                    "created": names[1:],
+                    "updated": [names[0]],
+                }
+            assert all(
+                nb.tenancy.tenants.get(name=name).description == "new" for name in names
+            )
+        finally:
+            for name in names:
+                tenant = nb.tenancy.tenants.get(name=name)
+                if tenant:
+                    tenant.delete()

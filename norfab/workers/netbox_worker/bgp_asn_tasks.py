@@ -48,12 +48,47 @@ class NetboxBgpAsnTasks:
         tenant: Union[None, str] = None,
         tags: Union[None, list] = None,
         custom_fields: Union[None, dict] = None,
-        site: Union[None, str] = None,
+        sites: Union[None, list[str]] = None,
+        role: Union[None, str] = None,
         instance: Union[None, str] = None,
         dry_run: bool = False,
         branch: Union[None, str] = None,
     ) -> Result:
-        """Create, update, or allocate one ASN."""
+        """Create, update, or allocate one ASN in NetBox.
+
+        An explicit ASN is matched globally by number. Without one, the task
+        reuses an ASN with the same description inside the named range, or
+        allocates the first available number. Omitting the description means
+        repeated range calls can allocate different ASNs. A non-empty sites
+        list replaces the ASN's site assignments; an empty or omitted list
+        leaves them alone.
+        Dry-run reports the selected number without writing relationships.
+
+        Args:
+            job: Current NorFab job for events and branch provisioning.
+            asn_range: Existing range name for next-available allocation.
+            asn: Explicit ASN number; omit to allocate from ``asn_range``.
+            rir: Existing RIR name required whenever an explicit ASN is
+                supplied without a range, including updates.
+            description: Description used to reuse allocations within a range.
+            tenant: Optional tenant name.
+            tags: Optional tag names to assign.
+            custom_fields: Optional NetBox custom-field values.
+            sites: Optional site names to assign to the ASN.
+            role: Optional IPAM role name.
+            instance: NetBox instance name, or the worker default when omitted.
+            dry_run: Select an ASN without creating or updating it.
+            branch: Optional NetBox Branching plugin branch name.
+
+        Returns:
+            Result: Selected ASN, description, and action. Dry-run actions
+            are ``create`` or ``update``; applied actions are ``created`` or
+            ``updated``.
+
+        Raises:
+            ValueError: The range, RIR, or a site is missing; more than one
+                ASN matches the description; or the range has no free ASNs.
+        """
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:create_asn",
@@ -62,13 +97,7 @@ class NetboxBgpAsnTasks:
             dry_run=dry_run,
         )
         nb = self._get_pynetbox(instance, branch=branch, job=job)
-        range_filters = {"name": asn_range}
-        if site:
-            nb_site = nb.dcim.sites.get(name=site)
-            if not nb_site:
-                raise ValueError(f"Site '{site}' not found in NetBox")
-            range_filters.update(scope_type="dcim.site", scope_id=nb_site.id)
-        nb_range = nb.ipam.asn_ranges.get(**range_filters) if asn_range else None
+        nb_range = nb.ipam.asn_ranges.get(name=asn_range) if asn_range else None
         if asn_range and not nb_range:
             raise ValueError(f"ASN range '{asn_range}' not found in NetBox")
 
@@ -120,6 +149,19 @@ class NetboxBgpAsnTasks:
             changed = True
         if tenant is not None and str(nb_asn.tenant) != tenant:
             nb_asn.tenant = {"name": tenant}
+            changed = True
+        if role is not None and str(nb_asn.role) != role:
+            nb_asn.role = {"name": role}
+            changed = True
+        site_names = list(dict.fromkeys(sites or []))
+        if site_names:
+            nb_sites = self.bulk_filter(nb.dcim.sites, name=site_names)
+            site_ids = {item.name: item.id for item in nb_sites}
+            if len(site_ids) != len(site_names):
+                raise ValueError(
+                    f"ASN sites not found: {set(site_names) - set(site_ids)}"
+                )
+            nb_asn.sites = [site_ids[name] for name in site_names]
             changed = True
         if tags is not None:
             nb_asn.tags = [{"name": tag} for tag in tags]

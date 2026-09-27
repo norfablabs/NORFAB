@@ -14,7 +14,8 @@ The `create_asn` task creates or updates one NetBox ASN. It can use an explicit 
 | Parameter | Required | Default | Description |
 | --- | ---: | --- | --- |
 | `asn_range` | Conditional | `None` | Existing ASN range name used for allocation |
-| `site` | No | `None` | Site scope used to select an ASN range with that name |
+| `sites` | No | `None` | Site names to assign the ASN to |
+| `role` | No | `None` | IPAM role name |
 | `asn` | Conditional | `None` | Explicit ASN from 1 through 4294967295 |
 | `rir` | Conditional | `None` | Existing RIR name required for an explicit ASN without `asn_range` |
 | `description` | No | `None` | ASN description and allocation deduplication value within a range |
@@ -43,10 +44,9 @@ Provide `asn` or `asn_range`. When `asn` is supplied without a range, `rir` is r
 
 === "CLI"
 
-    A dedicated NFCLI command is not currently registered for `create_asn`.
-
     ```bash
-    # Use the Python API, REST API, MCP task interface, or design filter.
+    nf# netbox create asn asn-range PRIVATE-ASNS description "edge routing" sites BRANCH-001,BRANCH-002
+    nf# netbox create asn asn 65001 rir Private sites BRANCH-001
     ```
 
 === "Python"
@@ -63,7 +63,7 @@ Provide `asn` or `asn_range`. When `asn` is supplied without a range, `rir` is r
             workers="any",
             kwargs={
                 "asn_range": "PRIVATE-ASNS",
-                "site": "BRANCH-001",
+                "sites": ["BRANCH-001", "BRANCH-002"],
                 "description": "edge routing",
             },
         )
@@ -79,16 +79,18 @@ Provide `asn` or `asn_range`. When `asn` is supplied without a range, `rir` is r
 In a NetBox design:
 
 ```yaml
-{% set edge_asn = "PRIVATE-ASNS" | netbox.create_asn("edge routing") %}
-
 asns:
-  - asn: {{ edge_asn }}
-    description: edge routing
+  - create_asn:
+      asn_range: PRIVATE-ASNS
+      description: edge routing
+      sites: [BRANCH-001]
+      role: BRANCH-ROUTING
 ```
 
 ## Notes / Gotchas
 
-- The named ASN range and its RIR must already exist. Supply `site` when range names are reused across site scopes.
+- The named ASN range and its RIR must already exist. ASN ranges have no site scope; `sites` associates the ASN with sites.
+- In NFCLI, separate multiple site names with commas.
 - Repeated range allocations reuse an ASN with the same description inside that range.
 - Without a description, repeated range calls allocate the next available ASN.
 - Branch writes require the NetBox Branching plugin.
@@ -102,7 +104,22 @@ asns:
 
 ## Task Command Shell Reference
 
-`create_asn` does not currently have a dedicated NFCLI command model.
+```bash
+nf# man tree netbox create asn
+netbox create asn
+├── asn-range
+├── asn
+├── rir
+├── description
+├── tenant
+├── sites
+├── role
+├── tags
+├── custom-fields
+├── instance
+├── branch
+└── dry-run
+```
 
 ## Python API Reference
 

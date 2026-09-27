@@ -297,7 +297,27 @@ class NetboxVlansTasks:
         dry_run: bool = False,
         branch: Union[None, str] = None,
     ) -> Result:
-        """Create or update one site-scoped VLAN group."""
+        """Create or update a VLAN group scoped to one NetBox site.
+
+        Groups are matched by name, not by site. An existing group is patched
+        with the supplied site and VID ranges. A dry run reports the planned
+        action without writing to NetBox.
+
+        Args:
+            job: Current NorFab job for events and branch provisioning.
+            name: VLAN group name used to find an existing group.
+            site: Name of the site that scopes the group; it must exist.
+            vid_ranges: Allowed VLAN ID ranges in the NetBox API format.
+            instance: NetBox instance name, or the worker default when omitted.
+            dry_run: Report the planned create or update without writing.
+            branch: Optional NetBox Branching plugin branch name.
+
+        Returns:
+            Result: Group name, site, and ranges with a created or updated status.
+
+        Raises:
+            ValueError: The named site does not exist.
+        """
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:create_vlan_group",
@@ -358,7 +378,37 @@ class NetboxVlansTasks:
         dry_run: bool = False,
         branch: Union[None, str] = None,
     ) -> Result:
-        """Create, update, or allocate one VLAN in a VLAN group."""
+        """Create, update, or allocate a VLAN in an existing group.
+
+        A supplied VID identifies the VLAN within its group. Without a VID,
+        an existing VLAN is matched by group and name, or the first available
+        VID is allocated. Repeated calls without a VID and with the same name
+        reuse that VLAN. Existing VLANs are patched without a local diff check.
+        Dry-run reports the selected VID but does not write attributes.
+
+        Args:
+            job: Current NorFab job for events and branch provisioning.
+            vlan_group: Name of the existing VLAN group.
+            name: VLAN name to create or assign to the matched VLAN.
+            vid: Explicit VLAN ID; omit to allocate from the group.
+            status: NetBox VLAN status, defaulting to active.
+            description: Optional VLAN description.
+            tenant: Optional tenant name.
+            role: Optional IPAM role name.
+            tags: Optional tag names to assign.
+            custom_fields: Optional NetBox custom-field values.
+            instance: NetBox instance name, or the worker default when omitted.
+            dry_run: Select a VLAN without creating or updating it.
+            branch: Optional NetBox Branching plugin branch name.
+
+        Returns:
+            Result: Selected VLAN ID, name, group, and action. Applied results
+            also include the NetBox object ID.
+
+        Raises:
+            ValueError: The group is missing, the match is ambiguous, or no
+                VLAN IDs remain available for allocation.
+        """
         instance = instance or self.default_instance
         ret = Result(
             task=f"{self.name}:create_vlan",
@@ -421,6 +471,7 @@ class NetboxVlansTasks:
             ret.status = "created"
 
         ret.result = {
+            "id": nb_vlan.id,
             "vid": int(nb_vlan.vid),
             "name": nb_vlan.name,
             "vlan_group": vlan_group,

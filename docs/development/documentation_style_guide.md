@@ -16,22 +16,21 @@ Use the page type that matches the reader intent:
 For most service task pages, prefer this order:
 
 1. **Purpose** (1–2 paragraphs)
-2. **Inputs** (kwargs, required vs optional, defaults)
-3. **Output** (what the result looks like)
-4. **Examples** (in tabbed format)
+2. **Output** (what the result looks like)
+3. **Examples** (in tabbed format)
    - CLI example in the `=== "CLI"` tab
    - Python example in the `=== "Python"` tab
-5. **Notes / Gotchas** (timeouts, filters, permissions)
-6. **Troubleshooting**
-7. **Task Command Shell Reference** in tree format
-8. **Python API Reference**
+4. **Notes / Gotchas** (timeouts, filters, permissions)
+5. **Troubleshooting**
+6. **Task Command Shell Reference** in tree format
+7. **Python API Reference**
 
 ## Agent workflow for service task docs
 
 When updating a service task page:
 
 1. Read the task implementation, input/output Pydantic models, and NFCLI/PICLE command model before editing.
-2. Derive Inputs from the Pydantic model and task signature.
+2. Do not add an Inputs section. Document task arguments in the Google-style task docstring and expose them through the Python API Reference.
 3. Add an Output section to every task page. If the exact output shape is unclear, write `TBD` and leave it for maintainer review.
 4. Derive CLI examples from NFCLI aliases and command structure.
 5. Derive Python examples from `client.run_job(...)` using the task API name and Python kwargs.
@@ -43,7 +42,7 @@ When updating a service task page:
 ## Writing style
 
 - Prefer short sentences and active voice.
-- Use **NetBox** for the product name in prose and headings. Keep lowercase `netbox` only for service names, task names, command paths, Python imports, and API references.
+- Use **Netbox** for the product name in prose and headings. Keep lowercase `netbox` for service names, task names, command paths, Python imports, and API references.
 - Use consistent terminology:
   - Pick one: **Service** vs **Worker** wording in headings and keep it consistent per section.
   - Use the same names for the same concept everywhere (e.g. `kwargs`, `workers`, `service`, `task`).

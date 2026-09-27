@@ -1,11 +1,8 @@
 from collections.abc import Iterator
-from types import SimpleNamespace
 from typing import Any
-from unittest.mock import Mock
 
 import pytest
 
-from norfab.workers.netbox_worker.netbox_worker import NetboxWorker
 from tests.services.netbox.common import get_pynetbox
 
 pytestmark = [pytest.mark.netbox, pytest.mark.netbox_sync_bgp_asn]
@@ -13,37 +10,106 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_sync_bgp_asn]
 
 @pytest.mark.netbox_create_asn
 class TestCreateBgpAsn:
-    def test_dry_run_allocates_from_named_range(self) -> None:
-        asn_range = SimpleNamespace(
-            start=64512,
-            end=65534,
-            available_asns=SimpleNamespace(list=Mock(return_value=[64512])),
-        )
-        nb = SimpleNamespace(
-            ipam=SimpleNamespace(
-                asn_ranges=SimpleNamespace(get=Mock(return_value=asn_range)),
-                asns=SimpleNamespace(),
+    def test_allocates_and_assigns_sites(self, nfclient: Any) -> None:
+        """Allocate through the public task and replace the assigned site list."""
+        nb = get_pynetbox(nfclient)
+        site_names = ["NORFAB ASN TASK SITE A", "NORFAB ASN TASK SITE B"]
+        if (
+            nb.ipam.asns.get(asn=4200999700)
+            or nb.ipam.asns.get(asn=4200999701)
+            or nb.ipam.asn_ranges.get(name="NORFAB ASN TASK RANGE")
+            or nb.ipam.rirs.get(name="NORFAB ASN TASK RIR")
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+        ):
+            pytest.skip("ASN task test objects already exist")
+
+        try:
+            rir = nb.ipam.rirs.create(
+                {"name": "NORFAB ASN TASK RIR", "slug": "norfab-asn-task-rir"}
             )
-        )
-        worker = object.__new__(NetboxWorker)
-        worker.name, worker.default_instance = "test", "test"
-        worker._get_pynetbox = Mock(return_value=nb)
-        worker.bulk_filter = Mock(return_value=[])
-        job = SimpleNamespace(event=Mock())
+            nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-asn-task-site-a"},
+                    {"name": site_names[1], "slug": "norfab-asn-task-site-b"},
+                ]
+            )
+            nb.ipam.asn_ranges.create(
+                {
+                    "name": "NORFAB ASN TASK RANGE",
+                    "slug": "norfab-asn-task-range",
+                    "start": 4200999700,
+                    "end": 4200999701,
+                    "rir": rir.id,
+                }
+            )
 
-        result = worker.create_asn(
-            job,
-            asn_range="private",
-            description="test allocation",
-            dry_run=True,
-        )
+            for dry_run in (True, False):
+                response = nfclient.run_job(
+                    "netbox",
+                    "create_asn",
+                    workers="any",
+                    kwargs={
+                        "asn_range": "NORFAB ASN TASK RANGE",
+                        "description": "NORFAB ASN TASK ALLOCATION",
+                        "sites": site_names,
+                        "dry_run": dry_run,
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                    assert result["result"]["asn"] == 4200999700
+                    assert result["result"]["status"] == (
+                        "create" if dry_run else "created"
+                    )
+                if dry_run:
+                    assert nb.ipam.asns.get(asn=4200999700) is None
 
-        assert result.result == {
-            "asn": 64512,
-            "description": "test allocation",
-            "status": "create",
-        }
-        asn_range.available_asns.list.assert_called_once_with()
+            asn = nb.ipam.asns.get(asn=4200999700)
+            assert {site.name for site in asn.sites} == set(site_names)
+
+            response = nfclient.run_job(
+                "netbox",
+                "create_asn",
+                workers="any",
+                kwargs={
+                    "asn_range": "NORFAB ASN TASK RANGE",
+                    "description": "NORFAB ASN TASK ALLOCATION",
+                    "sites": [site_names[1]],
+                },
+            )
+            for result in response.values():
+                assert not result["failed"], result
+                assert result["result"]["status"] == "updated"
+            asn = nb.ipam.asns.get(asn=4200999700)
+            assert [site.name for site in asn.sites] == [site_names[1]]
+
+            response = nfclient.run_job(
+                "netbox",
+                "create_asn",
+                workers="any",
+                kwargs={
+                    "asn_range": "NORFAB ASN TASK RANGE",
+                    "description": "NORFAB ASN TASK ALLOCATION",
+                    "site": site_names[0],
+                },
+            )
+            for result in response.values():
+                assert result["failed"], result
+                assert any("site" in error for error in result["errors"])
+        finally:
+            asn = nb.ipam.asns.get(asn=4200999700)
+            if asn:
+                asn.delete()
+            asn_range = nb.ipam.asn_ranges.get(name="NORFAB ASN TASK RANGE")
+            if asn_range:
+                asn_range.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
+            rir = nb.ipam.rirs.get(name="NORFAB ASN TASK RIR")
+            if rir:
+                rir.delete()
 
 
 class TestSyncBgpAsn:

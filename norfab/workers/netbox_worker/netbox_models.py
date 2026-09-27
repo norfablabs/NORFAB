@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Literal, Union
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     RootModel,
     StrictBool,
@@ -731,13 +732,316 @@ class GetContainerlabInventoryResult(Result):
 # --------------------------------------------------------------------------
 
 
+class DesignDocument(BaseModel):
+    """Design metadata and supported object collections in one document."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    design_input_schema: Union[str, dict, None] = None
+    jinja_functions: dict[str, str] = Field(default={})
+    custom_functions: dict[str, str] = Field(default={})
+    tenants: list[dict[str, Any]] = Field(default=[])
+    regions: list[dict[str, Any]] = Field(default=[])
+    manufacturers: list[dict[str, Any]] = Field(default=[])
+    platforms: list[dict[str, Any]] = Field(default=[])
+    device_types: list[dict[str, Any]] = Field(default=[])
+    device_roles: list[dict[str, Any]] = Field(default=[])
+    sites: list[dict[str, Any]] = Field(default=[])
+    roles: list[dict[str, Any]] = Field(default=[])
+    rirs: list[dict[str, Any]] = Field(default=[])
+    asn_ranges: list[dict[str, Any]] = Field(default=[])
+    asns: list[dict[str, Any]] = Field(default=[])
+    vlans: list[dict[str, Any]] = Field(default=[])
+    vlan_groups: list[dict[str, Any]] = Field(default=[])
+    vrfs: list[dict[str, Any]] = Field(default=[])
+    route_targets: list[dict[str, Any]] = Field(default=[])
+    rack_roles: list[dict[str, Any]] = Field(default=[])
+    racks: list[dict[str, Any]] = Field(default=[])
+    prefixes: list[dict[str, Any]] = Field(default=[])
+    devices: list[dict[str, Any]] = Field(default=[])
+    interfaces: list[dict[str, Any]] = Field(default=[])
+    power_ports: list[dict[str, Any]] = Field(default=[])
+    console_ports: list[dict[str, Any]] = Field(default=[])
+    power_outlets: list[dict[str, Any]] = Field(default=[])
+    console_server_ports: list[dict[str, Any]] = Field(default=[])
+    connections: list[dict[str, Any]] = Field(default=[])
+    ip_addresses: list[dict[str, Any]] = Field(default=[])
+    bgp_communities: list[dict[str, Any]] = Field(default=[])
+    routing_policies: list[dict[str, Any]] = Field(default=[])
+    bgp_peerings: list[dict[str, Any]] = Field(default=[])
+    vrrp_groups: list[dict[str, Any]] = Field(default=[])
+    vrrp_group_assignments: list[dict[str, Any]] = Field(default=[])
+    primary_ip: list[dict[str, Any]] = Field(default=[])
+    config_context: list[dict[str, Any]] = Field(default=[])
+    local_context_data: list[dict[str, Any]] = Field(default=[])
+
+    @model_validator(mode="after")
+    def validate_design_allocations(self) -> "DesignDocument":
+        for record in self.vlan_groups:
+            if "custom_function" in record:
+                continue
+            scope_fields = (
+                "rack",
+                "location",
+                "site",
+                "site_group",
+                "region",
+                "cluster",
+                "cluster_group",
+            )
+            selected = [
+                field for field in scope_fields if record.get(field) is not None
+            ]
+            if "site" in selected and any(
+                field in selected for field in ("rack", "location")
+            ):
+                selected.remove("site")
+            if len(selected) > 1:
+                raise ValueError(
+                    "vlan_groups accepts only one scope; site may qualify rack or location"
+                )
+            for field in scope_fields:
+                if field in record and (
+                    not isinstance(record[field], str) or not record[field]
+                ):
+                    raise ValueError(f"vlan_groups.{field} must be a name string")
+        for record in self.config_context:
+            if "custom_function" in record:
+                continue
+            if not isinstance(record.get("name"), str) or not isinstance(
+                record.get("data"), dict
+            ):
+                raise ValueError("config_context requires name and data dictionary")
+            if "sites" in record and (
+                not isinstance(record["sites"], list)
+                or not all(isinstance(name, str) and name for name in record["sites"])
+            ):
+                raise ValueError("config_context.sites must be a list of site names")
+        for record in self.local_context_data:
+            if not all(
+                isinstance(record.get(field), str) and record[field]
+                for field in ("device", "site")
+            ):
+                raise ValueError("local_context_data requires device and site names")
+            if "tenant" in record and not isinstance(record["tenant"], str):
+                raise ValueError("local_context_data.tenant must be a name string")
+            context = record.get("local_context_data")
+            if not isinstance(context, dict):
+                raise ValueError("local_context_data must be a dictionary")
+            if "custom_function" in context:
+                name = context["custom_function"]
+                if not isinstance(name, str) or name not in self.custom_functions:
+                    raise ValueError(f"unknown custom function: {name}")
+                if "netbox" in context or "dry_run" in context or "device" in context:
+                    raise ValueError(
+                        "device, netbox, and dry_run are supplied by deployment"
+                    )
+        for record in self.connections:
+            if "custom_function" in record:
+                continue
+            for field in ("a_terminations", "b_terminations"):
+                endpoints = record.get(field)
+                if not isinstance(endpoints, list) or len(endpoints) != 1:
+                    raise ValueError(
+                        f"connections.{field} requires one cable termination"
+                    )
+                endpoint = endpoints[0]
+                port_fields = {
+                    "interface",
+                    "power_port",
+                    "power_outlet",
+                    "console_port",
+                    "console_server_port",
+                }
+                if (
+                    not isinstance(endpoint, dict)
+                    or "device" not in endpoint
+                    or len(set(endpoint) & port_fields) != 1
+                    or len(endpoint) != 2
+                    or not all(
+                        isinstance(value, str) and value for value in endpoint.values()
+                    )
+                ):
+                    raise ValueError(
+                        "connection endpoints require device and one port name"
+                    )
+            if record["a_terminations"] == record["b_terminations"]:
+                raise ValueError("a connection requires two different terminations")
+        for record in self.vrfs:
+            if "custom_function" in record:
+                continue
+            for field in ("import_route_targets", "export_route_targets"):
+                if field in record and (
+                    not isinstance(record[field], list)
+                    or not all(
+                        isinstance(value, dict) and isinstance(value.get("name"), str)
+                        for value in record[field]
+                    )
+                ):
+                    raise ValueError(
+                        f"vrfs.{field} must be a list of route-target dictionaries with name"
+                    )
+        for record in self.bgp_peerings:
+            if "custom_function" not in record:
+                task_record = dict(record)
+                for field in ("import_policies", "export_policies"):
+                    if field not in record:
+                        continue
+                    policies = record[field]
+                    if not isinstance(policies, list) or not all(
+                        isinstance(policy, dict) and isinstance(policy.get("name"), str)
+                        for policy in policies
+                    ):
+                        raise ValueError(
+                            f"bgp_peerings.{field} requires policy dictionaries with name"
+                        )
+                    task_record[field] = [policy["name"] for policy in policies]
+                CreateBgpPeeringInput.model_validate(task_record)
+                if not record.get("name"):
+                    raise ValueError("design BGP peerings require a name")
+        for collection, fields in {
+            "tenants": ["group"],
+            "regions": ["parent"],
+            "platforms": ["manufacturer"],
+            "device_types": ["manufacturer", "default_platform"],
+            "sites": ["region", "tenant"],
+            "asn_ranges": ["rir"],
+            "vrfs": ["tenant"],
+            "route_targets": ["tenant"],
+            "racks": ["site", "role", "tenant"],
+            "devices": ["site", "role", "platform", "tenant"],
+            "prefixes": ["tenant", "role"],
+            "ip_addresses": ["tenant"],
+            "asns": ["rir", "tenant", "role"],
+            "vlans": ["group", "role", "tenant"],
+            "interfaces": ["device"],
+        }.items():
+            for record in getattr(self, collection):
+                if "custom_function" in record:
+                    continue
+                for field in fields:
+                    if record.get(field) is not None and not isinstance(
+                        record[field], str
+                    ):
+                        raise ValueError(f"{collection}.{field} must be a name string")
+        for record in self.devices:
+            if "custom_function" not in record and "device_type" in record:
+                reference = record["device_type"]
+                if (
+                    not isinstance(reference, dict)
+                    or set(reference) != {"manufacturer", "model"}
+                    or not all(isinstance(value, str) for value in reference.values())
+                ):
+                    raise ValueError(
+                        "device_type requires manufacturer and model strings"
+                    )
+        for field in type(self).model_fields:
+            records = getattr(self, field)
+            if not isinstance(records, list):
+                continue
+            for record in records:
+                if "custom_function" in record:
+                    name = record["custom_function"]
+                    if not isinstance(name, str) or name not in self.custom_functions:
+                        raise ValueError(f"unknown custom function: {name}")
+                    if "netbox" in record or "dry_run" in record:
+                        raise ValueError(
+                            "netbox and dry_run are supplied by deployment"
+                        )
+        for records, identity, task_name, model in (
+            (self.prefixes, "prefix", "create_prefix", CreatePrefixInput),
+            (self.ip_addresses, "address", "create_ip", CreateIpInput),
+            (self.asns, "asn", "create_asn", CreateBgpAsnInput),
+            (self.vlans, "vid", "create_vlan", CreateVlanInput),
+        ):
+            for record in records:
+                if "custom_function" in record:
+                    continue
+                if (identity in record) == (task_name in record):
+                    raise ValueError(
+                        f"records require exactly one of {identity} or {task_name}"
+                    )
+                if task_name in record:
+                    if set(record) != {task_name}:
+                        raise ValueError(f"task arguments belong inside {task_name}")
+                    model.model_validate(record[task_name])
+        for record in self.asns:
+            if "custom_function" in record:
+                continue
+            if "sites" in record and (
+                not isinstance(record["sites"], list)
+                or not all(isinstance(name, str) and name for name in record["sites"])
+            ):
+                raise ValueError("asns.sites must be a list of site names")
+            if "create_asn" in record:
+                arguments = record["create_asn"]
+                if not arguments.get("asn_range") or arguments.get("asn") is not None:
+                    raise ValueError(
+                        "create_asn requires asn_range without an explicit ASN; "
+                        "use an unwrapped asn record for a known number"
+                    )
+        for record in self.ip_addresses:
+            if "custom_function" in record:
+                continue
+            if ("device" in record) != ("interface" in record):
+                raise ValueError("IP assignment requires both device and interface")
+        for record in self.primary_ip:
+            if "custom_function" in record:
+                continue
+            if not all(record.get(field) for field in ("device", "site", "address")):
+                raise ValueError("primary_ip requires device, site, and address")
+            if record.get("field", "primary_ip4") not in ("primary_ip4", "primary_ip6"):
+                raise ValueError("primary_ip.field must be primary_ip4 or primary_ip6")
+        for record in self.vrrp_groups:
+            if "custom_function" in record:
+                continue
+            if not all(field in record for field in ("protocol", "group_id")):
+                raise ValueError("vrrp_groups require protocol and group_id")
+        for record in self.vrrp_group_assignments:
+            if "custom_function" in record:
+                continue
+            if not all(
+                field in record
+                for field in ("protocol", "group_id", "device", "interface", "priority")
+            ):
+                raise ValueError(
+                    "vrrp_group_assignments require protocol, group_id, device, interface, and priority"
+                )
+        for record in self.prefixes:
+            if "custom_function" in record or "create_prefix" in record:
+                continue
+            for field in ("location", "site", "site_group", "region"):
+                if field in record and not isinstance(record[field], str):
+                    raise ValueError(f"prefixes.{field} must be a name string")
+            if isinstance(record.get("vlan"), dict) and set(record["vlan"]) != {
+                "group",
+                "vid",
+            }:
+                raise ValueError("prefixes.vlan requires group and vid")
+        for record in self.vlans:
+            if "custom_function" in record:
+                continue
+            if "site" in record:
+                raise ValueError("vlans.site is not supported; scope the VLAN group")
+            if "vid" in record and not record.get("group"):
+                raise ValueError("explicit VLANs require a group name")
+            if "create_vlan" in record and "site" in record["create_vlan"]:
+                raise ValueError("vlans.create_vlan.site is not supported")
+            if "create_vlan" in record and record["create_vlan"].get("vid") is not None:
+                raise ValueError(
+                    "create_vlan is only for next-available allocation; "
+                    "use an unwrapped vid record for a known VLAN ID"
+                )
+        return self
+
+
 class DesignDeployInput(BaseModel, use_enum_values=True, populate_by_name=True):
     design: Union[StrictStr, dict[StrictStr, Any]] = Field(
         ...,
         description="NetBox design as YAML text, file URL, or parsed dictionary",
     )
     context: Union[StrictStr, dict[StrictStr, Any]] = Field(
-        default_factory=dict,
+        default={},
         description="Template context validated by design_input_schema",
     )
     instance: Union[None, StrictStr] = Field(
@@ -2645,11 +2949,10 @@ class CreateBgpAsnInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
         description="ASN range name to allocate the next available ASN from",
         alias="asn-range",
     )
-    site: Union[None, StrictStr] = Field(
-        None,
-        min_length=1,
-        description="Site scope used to select the ASN range",
+    sites: Union[None, List[StrictStr]] = Field(
+        None, description="Sites to assign the ASN to"
     )
+    role: Union[None, StrictStr] = Field(None, description="IPAM role name")
     asn: Union[None, StrictInt] = Field(
         None, ge=1, le=4294967295, description="Explicit ASN; allocate when omitted"
     )
@@ -2662,6 +2965,13 @@ class CreateBgpAsnInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
     custom_fields: Union[None, Dict[StrictStr, Any]] = Field(
         None, description="ASN custom fields"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_singular_site(cls, values: Any) -> Any:
+        if isinstance(values, dict) and "site" in values:
+            raise ValueError("site is not supported; use sites")
+        return values
 
     @model_validator(mode="after")
     def validate_asn_source(self) -> "CreateBgpAsnInput":

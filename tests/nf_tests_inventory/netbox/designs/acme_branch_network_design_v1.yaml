@@ -1,0 +1,1160 @@
+design_input_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    site:
+      type: string
+      minLength: 1
+    parent_prefix:
+      type: string
+      minLength: 1
+  required:
+    - site
+    - parent_prefix
+jinja_functions:
+  acme_site_description: nf://netbox/designs/acme_site_description.py
+custom_functions:
+  calculate_acme_device_context: nf://netbox/designs/calculate_acme_device_context.py
+# Version 1 of the task-oriented NetBox design DSL.
+#
+# Every top-level collection is a list of object records, equivalent to CSV rows.
+# Record fields map directly to the corresponding NetBox worker task arguments.
+# Device-owned objects use dictionaries where the key supplies the child name.
+
+tenants:
+  - name: ACME
+    description: ACME branch network design
+
+regions:
+  - name: ACME REGION
+
+manufacturers:
+  - name: ACME NETWORKS
+
+platforms:
+  - name: ACME OS
+    manufacturer: ACME NETWORKS
+
+device_roles:
+  - name: ACME ROUTER
+    color: f44336
+  - name: ACME AGGREGATION SWITCH
+    color: ff9800
+  - name: ACME ACCESS SWITCH
+    color: 4caf50
+  - name: ACME TERMINAL SERVER
+    color: 607d8b
+  - name: ACME PDU
+    color: 795548
+
+device_types:
+  - model: ACME BRANCH ROUTER
+    manufacturer: ACME NETWORKS
+    default_platform: ACME OS
+  - model: ACME AGG SWITCH
+    manufacturer: ACME NETWORKS
+    default_platform: ACME OS
+  - model: ACME ACCESS SWITCH
+    manufacturer: ACME NETWORKS
+    default_platform: ACME OS
+  - model: ACME TERMINAL SERVER
+    manufacturer: ACME NETWORKS
+  - model: ACME PDU
+    manufacturer: ACME NETWORKS
+
+sites:
+  - name: "{{ context.site }}"
+    description: "{{ context.site | acme_site_description }}"
+    tenant: ACME
+    region: ACME REGION
+    status: active
+
+config_context:
+  - name: ACME BRANCH BASELINE
+    description: ACME site-wide configuration defaults
+    is_active: true
+    weight: 1000
+    sites: ["{{ context.site }}"]
+    data:
+      acme:
+        managed: true
+
+roles:
+  - name: ACME-BRANCH-LAN
+    color: 4caf50
+  - name: ACME-BRANCH-LOOPBACK
+    color: 2196f3
+
+rirs:
+  - name: ACME PRIVATE
+    is_private: true
+
+asns:
+  - asn: 4200650000
+    tenant: ACME
+    rir: ACME PRIVATE
+    description: ACME external upstream ASN
+  - asn: 4200650001
+    tenant: ACME
+    rir: ACME PRIVATE
+    role: ACME-BRANCH-LAN
+    sites: ["{{ context.site }}"]
+    description: ACME core routers ASN
+
+  - asn: 4200650002
+    tenant: ACME
+    rir: ACME PRIVATE
+    role: ACME-BRANCH-LAN
+    sites: ["{{ context.site }}"]
+    description: ACME aggregation ASN
+  - asn: 4200650003
+    tenant: ACME
+    rir: ACME PRIVATE
+    role: ACME-BRANCH-LAN
+    sites: ["{{ context.site }}"]
+    description: ACME access ASN
+
+bgp_communities:
+  - value: "4200650001:100"
+    tenant: ACME
+    description: ACME branch routes
+
+routing_policies:
+  - name: ACME EXPORT
+    description: ACME branch export policy
+
+vlan_groups:
+  - name: "{{ context.site }} VLANS"
+    description: ACME branch VLAN group
+    site: "{{ context.site }}"
+    vid_ranges:
+      - [100, 199]
+
+vlans:
+  - group: "{{ context.site }} VLANS"
+    name: ACME USERS
+    tenant: ACME
+    vid: 100
+    status: active
+    description: ACME branch user access
+    role: ACME-BRANCH-LAN
+  - create_vlan:
+      vlan_group: "{{ context.site }} VLANS"
+      name: ACME GUEST
+      tenant: ACME
+      description: ACME Allocate the next available branch VLAN ID
+      status: active
+
+route_targets:
+  - name: "4200650001:100"
+    tenant: ACME
+    description: ACME branch import target
+
+vrfs:
+  - name: ACME BRANCH
+    tenant: ACME
+    rd: "4200650001:100"
+    import_route_targets:
+      - name: "4200650001:100"
+        tenant: ACME
+        description: ACME branch import target
+    export_route_targets:
+      - name: "4200650001:200"
+        tenant: ACME
+        description: ACME branch export target
+
+prefixes:
+  - prefix: "{{ context.parent_prefix }}"
+    tenant: ACME
+    description: "ACME {{ context.site }} allocation pool"
+    status: active
+  - prefix: 198.51.100.0/30
+    tenant: ACME
+    description: ACME upstream peering subnet
+    status: active
+  - prefix: 192.0.2.0/24
+    tenant: ACME
+    description: ACME explicit management prefix
+    status: active
+    region: ACME REGION
+    site: "{{ context.site }}"
+    vlan: {group: "{{ context.site }} VLANS", vid: 100}
+  - prefix: 198.19.230.0/24
+    vrf: ACME BRANCH
+    tenant: ACME
+    site: "{{ context.site }}"
+    description: ACME tenant VRF subnet
+  - create_prefix:
+      tenant: ACME
+      parent: "{{ context.parent_prefix }}"
+      description: "ACME {{ context.site }} user prefix"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: ACME-BRANCH-LAN
+      status: active
+  - create_prefix:
+      tenant: ACME
+      parent: "{{ context.parent_prefix }}"
+      description: "ACME {{ context.site }} loopback prefix"
+      prefixlen: 24
+      site: "{{ context.site }}"
+      role: ACME-BRANCH-LOOPBACK
+      status: active
+
+ip_addresses:
+  - address: 198.19.230.1/24
+    vrf: ACME BRANCH
+    tenant: ACME
+    description: ACME tenant VRF gateway
+  - address: 198.51.100.2/30
+    tenant: ACME
+    description: ACME Upstream BGP peer
+    status: active
+  - address: 192.0.2.20/32
+    tenant: ACME
+    description: ACME Reserved monitoring address
+    status: reserved
+
+# Loopback-based BGP requires underlay reachability; access eBGP also requires
+# multihop configuration. This design models NetBox objects, not device config.
+# Both session directions are explicit; create_reverse remains false.
+devices:
+  - name: acme-branch-rtr-1
+    tenant: ACME
+    site: "{{ context.site }}"
+    console_ports:
+      Console:
+        type: rj-45
+        connection:
+          device: acme-branch-terminal-server
+          console_server_port: "Line 1"
+          label: ACME-CONSOLE-acme-branch-rtr-1
+    power_ports:
+      PSU1:
+        type: iec-60320-c14
+        connection:
+          device: acme-branch-pdu
+          power_outlet: "Outlet 1"
+          label: ACME-POWER-acme-branch-rtr-1
+    role: ACME ROUTER
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME BRANCH ROUTER
+    platform: ACME OS
+    status: active
+    local_context_data:
+      acme:
+        profile: core-router
+        managed: true
+
+    interfaces:
+      Loopback100:
+        type: virtual
+        enabled: true
+        description: ACME dedicated BGP loopback
+        ip_addresses:
+          - address: 192.0.2.101/32
+            tenant: ACME
+            description: ACME BGP loopback acme-branch-rtr-1
+            status: active
+      Ethernet1:
+        type: 1000base-t
+        description: ACME Branch LAN gateway
+        enabled: true
+        mode: access
+        untagged_vlan:
+          group: "{{ context.site }} VLANS"
+          vid: 100
+        ip_addresses:
+          - create_ip:
+              tenant: ACME
+              prefix:
+                description: "ACME {{ context.site }} user prefix"
+                site: "{{ context.site }}"
+              description: acme-branch-rtr-1 Ethernet1
+              status: active
+              create_peer_ip: false
+
+      Ethernet2:
+        type: 10gbase-x-sfpp
+        description: ACME Core uplink to aggregation switch 1
+        enabled: true
+      Ethernet2.100:
+        type: virtual
+        parent: {device: acme-branch-rtr-1, name: Ethernet2}
+        description: ACME core tagged subinterface
+        enabled: true
+
+      Ethernet3:
+        type: 10gbase-x-sfpp
+        description: ACME Core uplink to aggregation switch 2
+        enabled: true
+
+      Loopback0:
+        type: virtual
+        description: ACME Router loopback
+        enabled: true
+        ip_addresses:
+          - create_ip:
+              tenant: ACME
+              prefix:
+                description: "ACME {{ context.site }} loopback prefix"
+                site: "{{ context.site }}"
+              description: acme-branch-rtr-1 Loopback0
+              status: active
+              is_primary: true
+              create_peer_ip: false
+
+      Ethernet4:
+        type: 1000base-t
+        description: ACME Upstream BGP peering
+        enabled: true
+        ip_addresses:
+          - address: 198.51.100.1/30
+            tenant: ACME
+            description: ACME interface address
+            status: active
+
+    bgp_peerings:
+      acme-branch-rtr-1-to-acme-branch-rtr-2:
+        local_address: 192.0.2.101
+        remote_address: 192.0.2.102
+        local_as: 4200650001
+        remote_as: 4200650001
+        status: active
+        description: ACME same-tier iBGP
+        create_reverse: false
+      acme-branch-rtr-1-to-acme-branch-agg-1:
+        local_address: 192.0.2.101
+        remote_address: 192.0.2.103
+        local_as: 4200650001
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-rtr-1-to-acme-branch-agg-2:
+        local_address: 192.0.2.101
+        remote_address: 192.0.2.104
+        local_as: 4200650001
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-rtr-1-upstream:
+        local_address: 198.51.100.1
+        remote_address: 198.51.100.2
+        local_as: 4200650001
+        remote_as: 4200650000
+        import_policies:
+          - name: ACME IMPORT
+            description: ACME branch import policy
+        export_policies:
+          - name: ACME EXPORT
+            description: ACME branch export policy
+        status: active
+        description: ACME branch upstream
+        create_reverse: false
+
+  - name: acme-branch-rtr-2
+    tenant: ACME
+    site: "{{ context.site }}"
+    console_ports:
+      Console:
+        type: rj-45
+        connection:
+          device: acme-branch-terminal-server
+          console_server_port: "Line 2"
+          label: ACME-CONSOLE-acme-branch-rtr-2
+    power_ports:
+      PSU1:
+        type: iec-60320-c14
+        connection:
+          device: acme-branch-pdu
+          power_outlet: "Outlet 2"
+          label: ACME-POWER-acme-branch-rtr-2
+    role: ACME ROUTER
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME BRANCH ROUTER
+    platform: ACME OS
+    status: active
+    interfaces:
+      Loopback100:
+        type: virtual
+        enabled: true
+        description: ACME dedicated BGP loopback
+        ip_addresses:
+          - address: 192.0.2.102/32
+            tenant: ACME
+            description: ACME BGP loopback acme-branch-rtr-2
+            status: active
+      Ethernet1:
+        type: 1000base-t
+        description: ACME Branch LAN gateway
+        enabled: true
+        mode: access
+        untagged_vlan:
+          group: "{{ context.site }} VLANS"
+          vid: 100
+        ip_addresses:
+          - create_ip:
+              tenant: ACME
+              prefix:
+                description: "ACME {{ context.site }} user prefix"
+                site: "{{ context.site }}"
+              description: acme-branch-rtr-2 Ethernet1
+              status: active
+              create_peer_ip: false
+      Ethernet2:
+        type: 10gbase-x-sfpp
+        description: ACME Core uplink to aggregation switch 1
+        enabled: true
+      Ethernet3:
+        type: 10gbase-x-sfpp
+        description: ACME Core uplink to aggregation switch 2
+        enabled: true
+      Loopback0:
+        type: virtual
+        description: ACME Router loopback
+        enabled: true
+        ip_addresses:
+          - create_ip:
+              tenant: ACME
+              prefix:
+                description: "ACME {{ context.site }} loopback prefix"
+                site: "{{ context.site }}"
+              description: acme-branch-rtr-2 Loopback0
+              status: active
+              is_primary: true
+              create_peer_ip: false
+
+    bgp_peerings:
+      acme-branch-rtr-2-to-acme-branch-rtr-1:
+        local_address: 192.0.2.102
+        remote_address: 192.0.2.101
+        local_as: 4200650001
+        remote_as: 4200650001
+        status: active
+        description: ACME same-tier iBGP
+        create_reverse: false
+      acme-branch-rtr-2-to-acme-branch-agg-1:
+        local_address: 192.0.2.102
+        remote_address: 192.0.2.103
+        local_as: 4200650001
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-rtr-2-to-acme-branch-agg-2:
+        local_address: 192.0.2.102
+        remote_address: 192.0.2.104
+        local_as: 4200650001
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+
+  - name: acme-branch-agg-1
+    tenant: ACME
+    site: "{{ context.site }}"
+    console_ports:
+      Console:
+        type: rj-45
+        connection:
+          device: acme-branch-terminal-server
+          console_server_port: "Line 3"
+          label: ACME-CONSOLE-acme-branch-agg-1
+    power_ports:
+      PSU1:
+        type: iec-60320-c14
+        connection:
+          device: acme-branch-pdu
+          power_outlet: "Outlet 3"
+          label: ACME-POWER-acme-branch-agg-1
+    role: ACME AGGREGATION SWITCH
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME AGG SWITCH
+    platform: ACME OS
+    status: active
+    local_context_data:
+      custom_function: calculate_acme_device_context
+      profile: aggregation
+    interfaces:
+      Loopback100:
+        type: virtual
+        enabled: true
+        description: ACME dedicated BGP loopback
+        ip_addresses:
+          - address: 192.0.2.103/32
+            tenant: ACME
+            description: ACME BGP loopback acme-branch-agg-1
+            status: active
+      Loopback0:
+        type: virtual
+        description: ACME Explicit management address
+        ip_addresses:
+          - address: 192.0.2.10/32
+            tenant: ACME
+            description: acme-branch-agg-1 Loopback0
+            status: active
+      Ethernet1:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to router 1
+        enabled: true
+      Ethernet2:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to router 2
+        enabled: true
+      Ethernet3:
+        type: 10gbase-x-sfpp
+        description: ACME Downlink to access switch 1
+        enabled: true
+        connection:
+          description: ACME access uplink
+          device: acme-branch-access-1
+          interface: Ethernet1
+          type: smf-os2
+          status: connected
+      Ethernet4:
+        type: 10gbase-x-sfpp
+        description: ACME Downlink to access switch 2
+        enabled: true
+        connection:
+          description: ACME access uplink
+          device: acme-branch-access-2
+          interface: Ethernet1
+          type: smf-os2
+          status: connected
+      Ethernet5:
+        type: 10gbase-x-sfpp
+        description: ACME Downlink to access switch 3
+        enabled: true
+        connection:
+          description: ACME access uplink
+          device: acme-branch-access-3
+          interface: Ethernet1
+          type: smf-os2
+          status: connected
+      Port-Channel1:
+        type: lag
+        description: ACME aggregation interconnect LAG
+      Ethernet6:
+        type: 10gbase-x-sfpp
+        lag: {device: acme-branch-agg-1, name: Port-Channel1}
+        description: ACME aggregation interconnect member 1
+        connection:
+          device: acme-branch-agg-2
+          interface: Ethernet6
+          type: smf-os2
+          status: connected
+      Ethernet7:
+        type: 10gbase-x-sfpp
+        lag: {device: acme-branch-agg-1, name: Port-Channel1}
+        description: ACME aggregation interconnect member 2
+        connection:
+          device: acme-branch-agg-2
+          interface: Ethernet7
+          type: smf-os2
+          status: connected
+      Vlan100:
+        type: virtual
+        description: ACME aggregation user gateway
+        mode: access
+        untagged_vlan: {group: "{{ context.site }} VLANS", vid: 100}
+        ip_addresses:
+          - address: 192.0.2.21/24
+            tenant: ACME
+        vrrp:
+          group_id: 10
+          name: ACME USER GATEWAY
+          vip: 192.0.2.1/24
+          priority: 200
+
+    bgp_peerings:
+      acme-branch-agg-1-to-acme-branch-rtr-1:
+        local_address: 192.0.2.103
+        remote_address: 192.0.2.101
+        local_as: 4200650002
+        remote_as: 4200650001
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-1-to-acme-branch-rtr-2:
+        local_address: 192.0.2.103
+        remote_address: 192.0.2.102
+        local_as: 4200650002
+        remote_as: 4200650001
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-1-to-acme-branch-agg-2:
+        local_address: 192.0.2.103
+        remote_address: 192.0.2.104
+        local_as: 4200650002
+        remote_as: 4200650002
+        status: active
+        description: ACME same-tier iBGP
+        create_reverse: false
+      acme-branch-agg-1-to-acme-branch-access-1:
+        local_address: 192.0.2.103
+        remote_address: 192.0.2.105
+        local_as: 4200650002
+        remote_as: 4200650003
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-1-to-acme-branch-access-2:
+        local_address: 192.0.2.103
+        remote_address: 192.0.2.106
+        local_as: 4200650002
+        remote_as: 4200650003
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-1-to-acme-branch-access-3:
+        local_address: 192.0.2.103
+        remote_address: 192.0.2.107
+        local_as: 4200650002
+        remote_as: 4200650003
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+
+  - name: acme-branch-agg-2
+    tenant: ACME
+    site: "{{ context.site }}"
+    console_ports:
+      Console:
+        type: rj-45
+        connection:
+          device: acme-branch-terminal-server
+          console_server_port: "Line 4"
+          label: ACME-CONSOLE-acme-branch-agg-2
+    power_ports:
+      PSU1:
+        type: iec-60320-c14
+        connection:
+          device: acme-branch-pdu
+          power_outlet: "Outlet 4"
+          label: ACME-POWER-acme-branch-agg-2
+    role: ACME AGGREGATION SWITCH
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME AGG SWITCH
+    platform: ACME OS
+    status: active
+    interfaces:
+      Loopback100:
+        type: virtual
+        enabled: true
+        description: ACME dedicated BGP loopback
+        ip_addresses:
+          - address: 192.0.2.104/32
+            tenant: ACME
+            description: ACME BGP loopback acme-branch-agg-2
+            status: active
+      Loopback0:
+        type: virtual
+        description: ACME Explicit management address
+        ip_addresses:
+          - address: 192.0.2.11/32
+            tenant: ACME
+            description: acme-branch-agg-2 Loopback0
+            status: active
+      Ethernet1:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to router 1
+        enabled: true
+      Ethernet2:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to router 2
+        enabled: true
+      Ethernet3:
+        type: 10gbase-x-sfpp
+        description: ACME Downlink to access switch 1
+        enabled: true
+        connection:
+          description: ACME access uplink
+          device: acme-branch-access-1
+          interface: Ethernet2
+          type: smf-os2
+          status: connected
+      Ethernet4:
+        type: 10gbase-x-sfpp
+        description: ACME Downlink to access switch 2
+        enabled: true
+        connection:
+          description: ACME access uplink
+          device: acme-branch-access-2
+          interface: Ethernet2
+          type: smf-os2
+          status: connected
+      Ethernet5:
+        type: 10gbase-x-sfpp
+        description: ACME Downlink to access switch 3
+        enabled: true
+        connection:
+          description: ACME access uplink
+          device: acme-branch-access-3
+          interface: Ethernet2
+          type: smf-os2
+          status: connected
+      Port-Channel1:
+        type: lag
+        description: ACME aggregation interconnect LAG
+      Ethernet6:
+        type: 10gbase-x-sfpp
+        lag: {device: acme-branch-agg-2, name: Port-Channel1}
+        description: ACME aggregation interconnect member 1
+      Ethernet7:
+        type: 10gbase-x-sfpp
+        lag: {device: acme-branch-agg-2, name: Port-Channel1}
+        description: ACME aggregation interconnect member 2
+      Vlan100:
+        type: virtual
+        description: ACME aggregation user gateway
+        mode: access
+        untagged_vlan: {group: "{{ context.site }} VLANS", vid: 100}
+        ip_addresses:
+          - address: 192.0.2.22/24
+            tenant: ACME
+        vrrp:
+          group_id: 10
+          name: ACME USER GATEWAY
+          vip: 192.0.2.1/24
+          priority: 100
+
+    bgp_peerings:
+      acme-branch-agg-2-to-acme-branch-rtr-1:
+        local_address: 192.0.2.104
+        remote_address: 192.0.2.101
+        local_as: 4200650002
+        remote_as: 4200650001
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-2-to-acme-branch-rtr-2:
+        local_address: 192.0.2.104
+        remote_address: 192.0.2.102
+        local_as: 4200650002
+        remote_as: 4200650001
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-2-to-acme-branch-agg-1:
+        local_address: 192.0.2.104
+        remote_address: 192.0.2.103
+        local_as: 4200650002
+        remote_as: 4200650002
+        status: active
+        description: ACME same-tier iBGP
+        create_reverse: false
+      acme-branch-agg-2-to-acme-branch-access-1:
+        local_address: 192.0.2.104
+        remote_address: 192.0.2.105
+        local_as: 4200650002
+        remote_as: 4200650003
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-2-to-acme-branch-access-2:
+        local_address: 192.0.2.104
+        remote_address: 192.0.2.106
+        local_as: 4200650002
+        remote_as: 4200650003
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-agg-2-to-acme-branch-access-3:
+        local_address: 192.0.2.104
+        remote_address: 192.0.2.107
+        local_as: 4200650002
+        remote_as: 4200650003
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+
+  - name: acme-branch-access-1
+    tenant: ACME
+    site: "{{ context.site }}"
+    console_ports:
+      Console:
+        type: rj-45
+        connection:
+          device: acme-branch-terminal-server
+          console_server_port: "Line 5"
+          label: ACME-CONSOLE-acme-branch-access-1
+    power_ports:
+      PSU1:
+        type: iec-60320-c14
+        connection:
+          device: acme-branch-pdu
+          power_outlet: "Outlet 5"
+          label: ACME-POWER-acme-branch-access-1
+    role: ACME ACCESS SWITCH
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME ACCESS SWITCH
+    platform: ACME OS
+    status: active
+    interfaces:
+      Loopback100:
+        type: virtual
+        enabled: true
+        description: ACME dedicated BGP loopback
+        ip_addresses:
+          - address: 192.0.2.105/32
+            tenant: ACME
+            description: ACME BGP loopback acme-branch-access-1
+            status: active
+      Ethernet1:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to aggregation switch 1
+        enabled: true
+        mode: tagged
+        tagged_vlans:
+          - group: "{{ context.site }} VLANS"
+            vid: 100
+          - name: ACME VOICE
+            tenant: ACME
+            vid: 110
+            group: "{{ context.site }} VLANS"
+            status: active
+          - name: ACME MANAGEMENT
+            tenant: ACME
+            vid: 120
+            group: "{{ context.site }} VLANS"
+            status: active
+      Ethernet2:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to aggregation switch 2
+        enabled: true
+        mode: tagged
+        tagged_vlans:
+          - group: "{{ context.site }} VLANS"
+            vid: 100
+          - name: ACME VOICE
+            tenant: ACME
+            vid: 110
+            group: "{{ context.site }} VLANS"
+            status: active
+          - name: ACME MANAGEMENT
+            tenant: ACME
+            vid: 120
+            group: "{{ context.site }} VLANS"
+            status: active
+      Ethernet3:
+        type: 1000base-t
+        description: ACME User access port
+        enabled: true
+        mode: access
+        untagged_vlan:
+          group: "{{ context.site }} VLANS"
+          vid: 100
+
+    bgp_peerings:
+      acme-branch-access-1-to-acme-branch-agg-1:
+        local_address: 192.0.2.105
+        remote_address: 192.0.2.103
+        local_as: 4200650003
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-access-1-to-acme-branch-agg-2:
+        local_address: 192.0.2.105
+        remote_address: 192.0.2.104
+        local_as: 4200650003
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+
+  - name: acme-branch-access-2
+    tenant: ACME
+    site: "{{ context.site }}"
+    console_ports:
+      Console:
+        type: rj-45
+        connection:
+          device: acme-branch-terminal-server
+          console_server_port: "Line 6"
+          label: ACME-CONSOLE-acme-branch-access-2
+    power_ports:
+      PSU1:
+        type: iec-60320-c14
+        connection:
+          device: acme-branch-pdu
+          power_outlet: "Outlet 6"
+          label: ACME-POWER-acme-branch-access-2
+    role: ACME ACCESS SWITCH
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME ACCESS SWITCH
+    platform: ACME OS
+    status: active
+    interfaces:
+      Loopback100:
+        type: virtual
+        enabled: true
+        description: ACME dedicated BGP loopback
+        ip_addresses:
+          - address: 192.0.2.106/32
+            tenant: ACME
+            description: ACME BGP loopback acme-branch-access-2
+            status: active
+      Ethernet1:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to aggregation switch 1
+        enabled: true
+        mode: tagged
+        tagged_vlans:
+          - group: "{{ context.site }} VLANS"
+            vid: 100
+          - name: ACME VOICE
+            tenant: ACME
+            vid: 110
+            group: "{{ context.site }} VLANS"
+            status: active
+          - name: ACME MANAGEMENT
+            tenant: ACME
+            vid: 120
+            group: "{{ context.site }} VLANS"
+            status: active
+      Ethernet2:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to aggregation switch 2
+        enabled: true
+        mode: tagged
+        tagged_vlans:
+          - group: "{{ context.site }} VLANS"
+            vid: 100
+          - name: ACME VOICE
+            tenant: ACME
+            vid: 110
+            group: "{{ context.site }} VLANS"
+            status: active
+          - name: ACME MANAGEMENT
+            tenant: ACME
+            vid: 120
+            group: "{{ context.site }} VLANS"
+            status: active
+      Ethernet3:
+        type: 1000base-t
+        description: ACME User access port
+        enabled: true
+        mode: access
+        untagged_vlan:
+          group: "{{ context.site }} VLANS"
+          vid: 100
+
+    bgp_peerings:
+      acme-branch-access-2-to-acme-branch-agg-1:
+        local_address: 192.0.2.106
+        remote_address: 192.0.2.103
+        local_as: 4200650003
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-access-2-to-acme-branch-agg-2:
+        local_address: 192.0.2.106
+        remote_address: 192.0.2.104
+        local_as: 4200650003
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+
+  - name: acme-branch-access-3
+    tenant: ACME
+    site: "{{ context.site }}"
+    console_ports:
+      Console:
+        type: rj-45
+        connection:
+          device: acme-branch-terminal-server
+          console_server_port: "Line 7"
+          label: ACME-CONSOLE-acme-branch-access-3
+    power_ports:
+      PSU1:
+        type: iec-60320-c14
+        connection:
+          device: acme-branch-pdu
+          power_outlet: "Outlet 7"
+          label: ACME-POWER-acme-branch-access-3
+    role: ACME ACCESS SWITCH
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME ACCESS SWITCH
+    platform: ACME OS
+    status: active
+    interfaces:
+      Loopback100:
+        type: virtual
+        enabled: true
+        description: ACME dedicated BGP loopback
+        ip_addresses:
+          - address: 192.0.2.107/32
+            tenant: ACME
+            description: ACME BGP loopback acme-branch-access-3
+            status: active
+      Ethernet1:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to aggregation switch 1
+        enabled: true
+        mode: tagged
+        tagged_vlans:
+          - group: "{{ context.site }} VLANS"
+            vid: 100
+          - name: ACME VOICE
+            tenant: ACME
+            vid: 110
+            group: "{{ context.site }} VLANS"
+            status: active
+          - name: ACME MANAGEMENT
+            tenant: ACME
+            vid: 120
+            group: "{{ context.site }} VLANS"
+            status: active
+      Ethernet2:
+        type: 10gbase-x-sfpp
+        description: ACME Uplink to aggregation switch 2
+        enabled: true
+        mode: tagged
+        tagged_vlans:
+          - group: "{{ context.site }} VLANS"
+            vid: 100
+          - name: ACME VOICE
+            tenant: ACME
+            vid: 110
+            group: "{{ context.site }} VLANS"
+            status: active
+          - name: ACME MANAGEMENT
+            tenant: ACME
+            vid: 120
+            group: "{{ context.site }} VLANS"
+            status: active
+      Ethernet3:
+        type: 1000base-t
+        description: ACME User access port
+        enabled: true
+        mode: access
+        untagged_vlan:
+          group: "{{ context.site }} VLANS"
+          vid: 100
+
+    bgp_peerings:
+      acme-branch-access-3-to-acme-branch-agg-1:
+        local_address: 192.0.2.107
+        remote_address: 192.0.2.103
+        local_as: 4200650003
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+      acme-branch-access-3-to-acme-branch-agg-2:
+        local_address: 192.0.2.107
+        remote_address: 192.0.2.104
+        local_as: 4200650003
+        remote_as: 4200650002
+        status: active
+        description: ACME inter-tier eBGP
+        create_reverse: false
+
+
+  - name: acme-branch-terminal-server
+    tenant: ACME
+    site: "{{ context.site }}"
+    role: ACME TERMINAL SERVER
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME TERMINAL SERVER
+    status: active
+    console_server_ports:
+      Line 1: {type: rj-45}
+      Line 2: {type: rj-45}
+      Line 3: {type: rj-45}
+      Line 4: {type: rj-45}
+      Line 5: {type: rj-45}
+      Line 6: {type: rj-45}
+      Line 7: {type: rj-45}
+
+  - name: acme-branch-pdu
+    tenant: ACME
+    site: "{{ context.site }}"
+    role: ACME PDU
+    device_type:
+      manufacturer: ACME NETWORKS
+      model: ACME PDU
+    status: active
+    power_outlets:
+      Outlet 1: {type: iec-60320-c13}
+      Outlet 2: {type: iec-60320-c13}
+      Outlet 3: {type: iec-60320-c13}
+      Outlet 4: {type: iec-60320-c13}
+      Outlet 5: {type: iec-60320-c13}
+      Outlet 6: {type: iec-60320-c13}
+      Outlet 7: {type: iec-60320-c13}
+
+vrrp_groups:
+  - protocol: vrrp2
+    group_id: 20
+    name: ACME MANAGEMENT GATEWAY
+    vip: 192.0.2.2/24
+    assignments:
+      - device: acme-branch-agg-1
+        interface: Vlan100
+        priority: 200
+      - device: acme-branch-agg-2
+        interface: Vlan100
+        priority: 100
+
+primary_ip:
+  - device: acme-branch-agg-1
+    site: "{{ context.site }}"
+    tenant: ACME
+    address: 192.0.2.10/32
+  - device: acme-branch-agg-2
+    site: "{{ context.site }}"
+    tenant: ACME
+    address: 192.0.2.11/32
+
+connections:
+  - label: ACME-RTR-1-AGG-1
+    type: smf-os2
+    status: connected
+    a_terminations:
+      - device: acme-branch-rtr-1
+        interface: Ethernet2
+    b_terminations:
+      - device: acme-branch-agg-1
+        interface: Ethernet1
+  - label: ACME-RTR-1-AGG-2
+    type: smf-os2
+    status: connected
+    a_terminations:
+      - device: acme-branch-rtr-1
+        interface: Ethernet3
+    b_terminations:
+      - device: acme-branch-agg-2
+        interface: Ethernet1
+  - label: ACME-RTR-2-AGG-1
+    type: smf-os2
+    status: connected
+    a_terminations:
+      - device: acme-branch-rtr-2
+        interface: Ethernet2
+    b_terminations:
+      - device: acme-branch-agg-1
+        interface: Ethernet2
+  - label: ACME-RTR-2-AGG-2
+    type: smf-os2
+    status: connected
+    a_terminations:
+      - device: acme-branch-rtr-2
+        interface: Ethernet3
+    b_terminations:
+      - device: acme-branch-agg-2
+        interface: Ethernet2

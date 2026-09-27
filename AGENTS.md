@@ -1,5 +1,17 @@
 # AGENTS.md - NorFab Repository Guide
 
+## Agent Working Rules
+
+1. Read the relevant repository guides before changing code or tests; follow their established patterns.
+2. Keep implementations simple and direct. Avoid unnecessary abstractions, compatibility paths, and helpers used only once or twice.
+3. Organize all tests in `Test...` classes. Write integration tests through the public interface against the real service; do not replace service behavior with mocks or test private internals.
+4. Keep test data explicit and readable. Prefer a short literal list of records over generated fixtures.
+5. Keep test setup and cleanup in the test method where practical. Make cleanup safe after partial failures and never delete pre-existing data.
+6. Preserve public task arguments and client interfaces unless a change is explicitly requested.
+7. Validate data at the appropriate boundary; avoid repeating the same checks deeper in the implementation.
+8. Write useful Google-style docstrings for tasks. Document every argument, the result, important behavior, limitations, and relevant errors; keep them accurate when changing a task.
+9. Do not add an Inputs section to service task documentation. The Python API reference at the end of the page renders task inputs from the task's Google-style docstring; keep that docstring accurate instead of duplicating arguments in prose.
+
 ## Project Overview
 
 **NorFab** (Network Automations Fabric) is a Service-Oriented Architecture (SOA) framework for extreme network automation. It runs equally on Windows, Linux, and macOS — locally on a laptop or distributed across servers.

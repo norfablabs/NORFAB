@@ -16,6 +16,7 @@
 1. NetBox `sync_device_ip` now excludes live addresses labelled `vrrp`, `glbp`, `hsrp`, or `carp`, as well as matching NetBox IPs assigned to non-interface objects. FHRP synchronization tasks own those addresses; `sync_vrrp` creates or reuses VRRP IPs and assigns them to FHRP groups.
 2. NetBox `sync_all` now runs `sync_vrrp` after IP address synchronization and before BGP peering synchronization.
 3. NetBox `get_bgp_peerings` now reports an error when multiple BGP sessions on a device share the same name. Its name-keyed response keeps the first session and skips later duplicates.
+4. Rewrote the Netbox design deployment engine around ordered object handlers and bulk pynetbox creates and updates, with nested device definitions, next-available allocations, custom functions, and configuration contexts. Previous design syntax is not backward compatible. See the [design deployment documentation](workers/netbox/services_netbox_service_tasks_design_deploy.md).
 
 ---
 

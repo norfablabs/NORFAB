@@ -23,6 +23,7 @@ from ..common import log_error_or_result, run_future_job
 from .netbox_picle_shell_cache import NetboxServiceCache
 from .netbox_picle_shell_check_sync import CheckSyncCommands
 from .netbox_picle_shell_common import NetboxClientRunJobArgs
+from .netbox_picle_shell_create_asn import CreateAsnShell
 from .netbox_picle_shell_create_bgp_peering import CreateBgpPeeringShell
 from .netbox_picle_shell_create_device_interfaces import CreateDeviceInterfacesShell
 from .netbox_picle_shell_create_ip import CreateIp
@@ -242,6 +243,10 @@ class GetCommands(BaseModel):
 
 
 class CreateCommands(BaseModel):
+    asn: CreateAsnShell = Field(
+        None,
+        description="Create an ASN or allocate one from a named range",
+    )
     prefix: CreatePrefixShell = Field(
         None,
         description="Allocate next available prefix from parent prefix",

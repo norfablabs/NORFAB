@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 26 September 2026*
+*Last updated: 27 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -702,27 +702,48 @@ NetBox data model and do not provide every safeguard of a dedicated task.
 
 ### Additive NetBox designs
 
-Applies static YAML or optionally renders Jinja2 target-state designs, then
-creates or updates every supplied field without deleting omitted objects.
-Global collections can be combined with nested device interfaces, IP and MAC
-assignments, interface VLANs, device BGP sessions, prefix IPs, and VRF route
-targets. A design containing only
-device names uses managed `undefined` region, site, manufacturer, device role,
-and device type objects for NetBox's mandatory references. The design Jinja2
-environment exposes interface-range expansion and callable or filter-form
-NetBox IP, prefix, VLAN-group, VLAN, and ASN allocations backed by independent worker
-tasks. The `design_deploy` task validates template context through inline JSON Schema or an external
-Pydantic model. Designs declare reusable Jinja functions from Python files
-served through `nf://` or `git://` URLs and support relative Jinja2 includes.
-Ordered Jinja calls can create allocation dependencies before later template calls use them.
-Designs also support physical hierarchy and cabling, BGP
-sessions, L2VPNs and interface terminations, VRRP groups and assignments, and
-custom fields on created objects. **Use cases:** rapid
-NetBox population, repeatable lab construction, allocation from managed pools,
-progressively enriching a minimal device list, and modelling routed leaf-spine fabrics. **Limitations:** designs are
-additive and do not remove objects omitted from later runs; allocation functions
-perform their dedicated NetBox tasks while the template renders. NFCLI exposes
-deployment through `netbox design deploy`.
+Deploys static or Jinja2-rendered YAML designs. Handlers for tenants, regions,
+manufacturers, platforms, device types, device roles, sites, rack roles, racks,
+IPAM roles, RIRs, ASN ranges, ASNs, VLAN groups, VLANs, VRFs, prefixes,
+devices, interfaces, console and power ports/outlets, IP addresses, FHRP groups and assignments, and device primary IPs
+bulk create missing records and patch existing records without calculating a diff.
+An explicit preprocessing step flattens nested device definitions into top-level
+records before validation; flattened collections without handlers are rejected.
+Dictionary input, template context validation through inline JSON Schema or an
+external Pydantic model, custom Jinja2 filters/functions, and dry-run are supported.
+Records wrapped in `create_ip`, `create_prefix`, `create_asn`, or `create_vlan`
+call the corresponding worker task with its arguments instead of using bulk writes.
+`create_asn` is reserved for next-available range allocation; known ASN numbers
+use direct bulk writes.
+Likewise, `create_vlan` allocates the next available VLAN ID; known IDs use bulk writes.
+VLAN records require a group and interface VLAN references accept group names directly; direct VLAN-to-site association is unsupported. A per-deployment reference cache avoids repeat lookups for VLANs, sites, route targets, VRFs, interfaces, console and power ports, VRRP groups, and IP addresses.
+VLAN groups can be scoped by name to a rack, location, site, site group, region, cluster, or cluster group; a site can disambiguate rack and location names.
+ASN records resolve site lists and IPAM roles. Explicit prefixes resolve named location, site, site-group or region scopes and group/VID VLAN references.
+Independent interfaces are created before interfaces with parent, LAG or bridge references. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last.
+Device types accept `default_platform` as a platform name.
+Route targets support bulk creation/update before VRFs; inline import/export
+route-target definitions are flattened and associated with their VRFs.
+Route-target and BGP-community definition lists require dictionaries, not bare strings.
+Routing-policy definitions, including BGP import/export lists, also require dictionaries.
+Interface, console, and power cables support top-level and nested definitions, bulk creation/update,
+and endpoint conflict checks without disconnecting existing cables.
+Unique-name relationships use direct strings, validated before deployment;
+device-type references use manufacturer and model dictionaries.
+Required slugs default from object names (device-type models) on creation;
+explicit and existing slugs are preserved.
+BGP communities and routing policies support bulk create/update;
+design communities match by value and optional description, and interface VRFs accept direct name references.
+BGP sessions use existing creation/update tasks after ASNs, IPs and policies.
+Inline import/export policy definitions are extracted before deployment.
+Custom creation functions loaded from file URLs run during their collection's
+deployment phase, receiving record arguments, `netbox`, and `dry_run`; custom
+code is responsible for honoring dry-run and returning serializable results.
+Deployment emits stage and collection summaries to logs and job events;
+preparation or handler failures stop processing and populate result errors.
+Omitted objects are not deleted. **Use cases:** repeatable NetBox prerequisite
+setup for network designs. **Limitations:** other design collections are rejected
+until their handlers are implemented.
+NFCLI exposes deployment through `netbox design deploy`.
 [Design deploy task](workers/netbox/services_netbox_service_tasks_design_deploy.md) ·
 [Create ASN task](workers/netbox/services_netbox_service_tasks_create_asn.md) ·
 [Create VLAN group task](workers/netbox/services_netbox_service_tasks_create_vlan_group.md) ·
@@ -977,7 +998,8 @@ objects are never deleted.
 ### Live BGP ASN reconciliation
 
 Creates or updates an explicit ASN, or allocates the next available ASN from a
-named ASN range. The same task backs the `netbox.create_asn` design filter.
+named ASN range. The task and `netbox create asn` NFCLI command accept a `sites`
+list to associate the ASN with multiple sites; the same task backs design allocations.
 Reconciles globally unique ASNs from supported live devices with NetBox IPAM,
 preserves existing descriptions by default, and optionally associates each ASN
 with the devices for which it is a local ASN. Missing ASNs are created only

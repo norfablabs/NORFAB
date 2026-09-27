@@ -1,8 +1,25 @@
 import pprint
+from typing import Any
 
 import pytest
 
 pytestmark = pytest.mark.nfcli
+
+
+class TestNetboxCreateAsn:
+    def test_dry_run_with_sites(
+        self, picle_shell: Any, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        shell, _ = picle_shell
+        shell.onecmd("top")
+        shell.onecmd(
+            "netbox create asn asn 4200999702 rir lab "
+            "sites SALTNORNIR-LAB,SALTNORNIR-LAB2 dry-run"
+        )
+
+        output = capsys.readouterr().out
+        assert "4200999702" in output
+        assert "create" in output
 
 
 class TestShowCommands:
