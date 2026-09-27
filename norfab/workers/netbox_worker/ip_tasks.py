@@ -175,6 +175,7 @@ class NetboxIpTasks:
         mask_len: Union[None, int] = None,
         create_peer_ip: Union[None, bool] = True,
         custom_fields: Union[None, dict] = None,
+        vrrp_group: Union[None, str] = None,
     ) -> Result:
         """
         Allocate the next available IP address from a given subnet.
@@ -206,6 +207,12 @@ class NetboxIpTasks:
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.
             interface (str, optional): The interface associated with the IP address.
+            vrrp_group (str, optional): Existing VRRP group name to assign the IP to.
+                Must uniquely identify a VRRPv2 or VRRPv3 group. Reuses an IP assigned
+                to that group within the selected prefix, optionally matching description.
+                Cannot accompany device, interface, or is_primary=True. Disables peer
+                allocation and defaults role to vrrp. Missing or ambiguous groups raise
+                NetboxAllocationError before allocation. Returned when supplied.
             vrf (str, optional): The VRF (Virtual Routing and Forwarding) instance.
             tags (list, optional): A list of tags to associate with the IP address.
             dns_name (str, optional): The DNS name for the IP address.
@@ -263,6 +270,22 @@ class NetboxIpTasks:
             f"'{device}:{interface}' from prefix '{prefix}', dry_run={dry_run}"
         )
 
+        nb_vrrp_group = None
+        if vrrp_group is not None:
+            try:
+                nb_vrrp_group = nb.ipam.fhrp_groups.get(name=vrrp_group)
+                if not nb_vrrp_group or nb_vrrp_group.protocol not in (
+                    "vrrp2",
+                    "vrrp3",
+                ):
+                    raise ValueError("expected an existing VRRPv2 or VRRPv3 group")
+            except Exception as exc:
+                raise NetboxAllocationError(
+                    f"Unable to resolve VRRP group '{vrrp_group}': {exc}"
+                ) from exc
+            create_peer_ip = False
+            role = role or "vrrp"
+
         # source parent prefix from Netbox
         if isinstance(prefix, str):
             # try converting prefix to network, if fails prefix is not an IP network
@@ -307,7 +330,16 @@ class NetboxIpTasks:
 
         # try to source existing IP from netbox
         for nb_prefix in nb_prefixes:
-            if device and interface and description:
+            if nb_vrrp_group is not None:
+                filters = {
+                    "assigned_object_type": "ipam.fhrpgroup",
+                    "assigned_object_id": nb_vrrp_group.id,
+                    "parent": str(nb_prefix),
+                }
+                if description:
+                    filters["description"] = description
+                nb_ip = nb.ipam.ip_addresses.get(**filters)
+            elif device and interface and description:
                 nb_ip = nb.ipam.ip_addresses.get(
                     device=device,
                     interface=interface,
@@ -482,6 +514,8 @@ class NetboxIpTasks:
                     "device": device,
                     "interface": interface,
                 }
+                if vrrp_group is not None:
+                    ret.result["vrrp_group"] = vrrp_group
                 # add branch to results
                 if branch is not None:
                     ret.result["branch"] = branch
@@ -499,6 +533,13 @@ class NetboxIpTasks:
             ret.status = "updated"
 
         # update IP address parameters
+        if nb_vrrp_group is not None and (
+            nb_ip.assigned_object_type != "ipam.fhrpgroup"
+            or nb_ip.assigned_object_id != nb_vrrp_group.id
+        ):
+            nb_ip.assigned_object_type = "ipam.fhrpgroup"
+            nb_ip.assigned_object_id = nb_vrrp_group.id
+            has_changes = True
         if custom_fields is not None:
             if not dry_run:
                 nb_ip.update({"custom_fields": custom_fields})
@@ -570,6 +611,8 @@ class NetboxIpTasks:
             "device": device,
             "interface": interface,
         }
+        if vrrp_group is not None:
+            ret.result["vrrp_group"] = vrrp_group
         # add branch to results
         if branch is not None:
             ret.result["branch"] = branch

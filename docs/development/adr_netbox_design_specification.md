@@ -160,9 +160,6 @@ interface `connection` entries use the same handler.
 
 ## TODO
 
-- Support FHRP-group assignment in `create_ip` and allocation-backed VRRP VIPs
-  in designs. Explicit IP records can reference an FHRP group, but `create_ip`
-  cannot assign an allocated address to one, and nested `vrrp.vip` currently
-  requires an explicit address. Allow VIP allocation from a prefix selected by
-  site and role, with stable reuse on repeated deployment, without calculating
-  addresses in Jinja2 or adding custom Python.
+- Support allocation calls in nested `vrrp.vip`, which currently requires an
+  explicit address. `create_ip` now supports assignment and stable reuse through
+  `vrrp_group` (existing group name), usable in top-level `ip_addresses` allocations.

@@ -823,6 +823,8 @@ allocation. **Use cases:** provisioning links, loopbacks, management addresses,
 new devices, and template-driven zero-touch workflows.
 **Limitations:** parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
+`create_ip` can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.
+
 [Create IP](workers/netbox/services_netbox_service_tasks_create_ip.md) ·
 [Bulk IP](workers/netbox/services_netbox_service_tasks_create_ip_bulk.md) ·
 [Create prefix](workers/netbox/services_netbox_service_tasks_create_prefix.md)

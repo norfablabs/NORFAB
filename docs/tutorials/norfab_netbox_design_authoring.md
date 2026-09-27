@@ -106,8 +106,9 @@ Loopback0:
 
 Check the task reference and implementation before adding allocation arguments.
 `create_prefix` supports VLAN association through `vlan` (VID) together with
-`vlan_group` (group name), never VID and site alone. However, `create_ip` cannot
-assign an allocated VIP to an FHRP group. A group's `vip`
+`vlan_group` (group name), never VID and site alone. `create_ip` supports `vrrp_group` with an existing VRRP group name to allocate
+and reuse an assigned VIP. Use a top-level `ip_addresses` allocation rather than
+an interface allocation for group VIPs. A group's nested `vip`
 accepts an explicit CIDR address, not an allocation call. See the
 [design specification TODOs](../development/adr_netbox_design_specification.md#todo).
 

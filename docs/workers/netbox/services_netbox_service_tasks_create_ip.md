@@ -11,27 +11,25 @@ Allocates the next available IP address from a parent prefix, or reuses an exist
 
 The task can also be called from Nornir templates through the [netbox.create_ip Jinja2 filter](../nornir/services_nornir_service_jinja2_filters.md#netboxcreate_ip).
 
-## Inputs
+## VRRP virtual IP allocation
 
-| Parameter | Required | Description |
-|---|---:|---|
-| `prefix` | Yes | Parent prefix as a network string, prefix description, or pynetbox filter dictionary |
-| `device` | No | Device name to associate with the IP address |
-| `interface` | No | Interface name to associate with the IP address |
-| `description` | No | IP address description |
-| `vrf` | No | VRF name for the IP address |
-| `tags` | No | Tags to associate with the IP address |
-| `dns_name` | No | DNS name for the IP address |
-| `tenant` | No | Tenant name to associate with the IP address |
-| `comments` | No | IP address comments |
-| `role` | No | IP address role, such as `loopback` or `anycast` |
-| `status` | No | IP address status |
-| `is_primary` | No | Set the IP address as the device primary IP |
-| `mask_len` | No | Allocate a child subnet of this length before creating the IP |
-| `create_peer_ip` | No | Create an IP address for the connected peer interface, default `True` |
-| `instance` | No | NetBox instance name to target |
-| `branch` | No | NetBox Branching plugin branch name to write to |
-| `dry_run` | No | Preview the candidate IP without writing |
+Supply `vrrp_group` with an existing, uniquely named VRRPv2 or VRRPv3 group.
+The task assigns the address to that group and defaults its role to `vrrp`.
+Repeated calls reuse the group's address within the selected prefix, optionally
+matching `description`. Missing, ambiguous, or non-VRRP groups fail before allocation.
+
+```yaml
+create_ip:
+  prefix:
+    site: LAB
+    role: MGMT
+  vrrp_group: LAB-mgmt
+```
+
+Group allocation cannot accompany `device`, `interface`, or `is_primary: true`.
+It disables peer allocation. Dry runs resolve the group without writing; the
+existing dry-run limitation for `mask_len` still applies. Results include
+`vrrp_group` when supplied. Omitting it preserves existing task behavior.
 
 ## Output
 

@@ -2118,6 +2118,22 @@ class SyncDevicePrefixesInput(
 
 
 class CreateIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    vrrp_group: Union[None, StrictStr] = Field(
+        None, min_length=1, description="Existing VRRP group name to assign the IP to"
+    )
+
+    @model_validator(mode="after")
+    def validate_vrrp_group(self) -> "CreateIpInput":
+        if self.vrrp_group is not None and (
+            self.device is not None
+            or self.interface is not None
+            or self.is_primary is True
+        ):
+            raise ValueError(
+                "vrrp_group cannot accompany device, interface, or is_primary=True"
+            )
+        return self
+
     custom_fields: Union[None, dict[StrictStr, Any]] = Field(
         None, description="Custom-field names and values for the IP address"
     )

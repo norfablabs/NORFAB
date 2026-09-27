@@ -1796,6 +1796,80 @@ class TestSyncDeviceIP:
 
 @pytest.mark.netbox_create_ip
 class TestCreateIP:
+
+    @pytest.mark.parametrize("protocol, mask_len", [("vrrp2", None), ("vrrp3", 32)])
+    def test_create_ip_vrrp_group(self, nfclient, protocol, mask_len):
+        """Allocate and reuse a group VIP, including previews and lookup failures."""
+        nb = get_pynetbox(nfclient)
+        parent = "198.19.247.0/24"
+        name = "NORFAB CREATE IP VRRP"
+        if (
+            list(nb.ipam.prefixes.filter(within_include=parent))
+            or list(nb.ipam.ip_addresses.filter(parent=parent))
+            or nb.ipam.fhrp_groups.get(name=name)
+        ):
+            pytest.skip("VRRP allocation test data already exists")
+        owned = []
+        try:
+            owned.append(nb.ipam.prefixes.create(prefix=parent))
+            group = nb.ipam.fhrp_groups.create(
+                name=name, protocol=protocol, group_id=247
+            )
+            owned.append(group)
+            address = None
+            for dry_run in (True, False, False, True):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_ip",
+                    workers="any",
+                    kwargs={
+                        "prefix": parent,
+                        "vrrp_group": name,
+                        "dry_run": dry_run,
+                        "mask_len": mask_len,
+                    },
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert result["result"]["vrrp_group"] == name
+                    if address is not None:
+                        assert result["result"]["address"] == address
+                    if not dry_run:
+                        address = result["result"]["address"]
+                ips = list(nb.ipam.ip_addresses.filter(parent=parent))
+                assert len(ips) == (1 if address else 0)
+                if ips:
+                    assert ips[0].assigned_object_type == "ipam.fhrpgroup"
+                    assert ips[0].assigned_object_id == group.id
+                    assert ips[0].role.value == "vrrp"
+            for options in (
+                {"vrrp_group": name + " MISSING"},
+                {"vrrp_group": name, "device": "leaf-1"},
+                {"vrrp_group": name, "interface": "Vlan100"},
+                {"vrrp_group": name, "is_primary": True},
+            ):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_ip",
+                    workers="any",
+                    kwargs={"prefix": parent, **options},
+                )
+                assert reply
+                for result in reply.values():
+                    assert result["failed"], result
+                    assert result["errors"], result
+                assert len(list(nb.ipam.ip_addresses.filter(parent=parent))) == 1
+        finally:
+            if owned:
+                for ip in nb.ipam.ip_addresses.filter(parent=parent):
+                    ip.delete()
+            if owned:
+                for child in nb.ipam.prefixes.filter(within=parent):
+                    child.delete()
+            for record in reversed(owned):
+                record.delete()
+
     @pytest.mark.parametrize(
         "prefix,mask_len",
         [
