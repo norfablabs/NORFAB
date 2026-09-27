@@ -149,7 +149,7 @@ Each design section contains a list of object records. The rows show the order i
 | 15 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
 | 16 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF references can inline target dictionaries. |
 | 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets must be dictionaries. |
-| 18 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. `create_prefix` allocation supports site scope only. |
+| 18 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
 | 19 | `devices` | `netbox.dcim.devices` | `site` and `name`, plus `tenant` when supplied | Nested components are flattened before writes. |
 | 20 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
 | 21 | `power_ports` | `netbox.dcim.power_ports` | `device`, `name` | Nested connection is flattened. |
@@ -157,8 +157,8 @@ Each design section contains a list of object records. The rows show the order i
 | 23 | `power_outlets` | `netbox.dcim.power_outlets` | `device`, `name` | Nested connection is flattened. |
 | 24 | `console_server_ports` | `netbox.dcim.console_server_ports` | `device`, `name` | Nested connection is flattened. |
 | 25 | `connections` | `netbox.dcim.cables` | Existing cable on both terminations | Creates interface, console, and power cables. Each end currently has one termination. An already-cabled port cannot be moved. |
-| 26 | `vrrp_groups` | `netbox.ipam.fhrp_groups` | `protocol`, `group_id` | Inline `vip` becomes an IP address. |
-| 27 | `ip_addresses` | `netbox.ipam.ip_addresses` | `address`, `vrf` | Addresses with specified values are bulk-written. `create_ip` allocates the next available address. |
+| 26 | `vrrp_groups` | `netbox.ipam.fhrp_groups` | `protocol`, `group_id` | Inline `vip` becomes an explicit IP address; use top-level `create_ip.vrrp_group` for allocation. |
+| 27 | `ip_addresses` | `netbox.ipam.ip_addresses` | `address`, `vrf` | Addresses with specified values are bulk-written. `create_ip` allocates the next available address and can assign it to an interface or named VRRP group. |
 | 28 | `vrrp_group_assignments` | `netbox.ipam.fhrp_group_assignments` | `group`, `interface` | Associates an existing group and interface with priority. |
 | 29 | `primary_ip` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Sets an existing `primary_ip4` or `primary_ip6`. It does not create the address. |
 | 30 | `bgp_communities` | `netbox.plugins.bgp.community` | `value`, plus `description` when supplied | A different description creates another community. Without description, the value must identify one object. |
@@ -179,8 +179,8 @@ Next-available allocation is useful when a design knows the pool and the object'
 | --- | --- |
 | [create_asn](services_netbox_service_tasks_create_asn.md) | Selects an available ASN from an existing named range. |
 | [create_vlan](services_netbox_service_tasks_create_vlan.md) | Selects an available VID from an existing VLAN group's allowed ranges. |
-| [create_prefix](services_netbox_service_tasks_create_prefix.md) | Allocates a child prefix of the requested length inside an existing parent prefix. |
-| [create_ip](services_netbox_service_tasks_create_ip.md) | Allocates an address from an existing prefix and can assign it to a device interface. |
+| [create_prefix](services_netbox_service_tasks_create_prefix.md) | Allocates a child prefix of the requested length inside an existing parent prefix; supports VLAN association by VID and group name. |
+| [create_ip](services_netbox_service_tasks_create_ip.md) | Allocates an address from an existing prefix and can assign it to a device interface or named VRRP group. |
 
 Both forms belong under `ip_addresses`. Specify each address when its value is known:
 
@@ -362,11 +362,38 @@ vlan_groups:
 
 The standalone [create_prefix task](services_netbox_service_tasks_create_prefix.md) takes a `parent` prefix or parent filter dictionary and a `prefixlen`, then allocates an available child prefix. A stable `description`, optionally with `site`, `role`, or `vrf`, helps it find the same child on repeat deployment. `create_prefix.parent` can select the parent through a dictionary of filters. The task accepts `site` for the allocated child's scope and the pair `vlan` (VID) and `vlan_group` (group name) to associate an existing VLAN. Site cannot replace the group for VLAN identification. It has no `location`, `site_group`, or `region` argument for the child.
 
+Both `vlan` and `vlan_group` must be supplied together. The VLAN must exist when allocation runs; VLANs defined in the same design are created before prefixes. A missing group or VLAN stops allocation. On repeat deployment, the association is updated if needed; omitting both arguments preserves it.
+
+```yaml
+vlan_groups:
+  - name: BRANCH VLANS
+    vid_ranges:
+      - [100, 199]
+vlans:
+  - name: USERS
+    vid: 100
+    group: BRANCH VLANS
+prefixes:
+  - prefix: 198.19.224.0/20
+  - create_prefix:
+      parent: 198.19.224.0/20
+      prefixlen: 24
+      description: Branch user subnet
+      vlan: 100
+      vlan_group: BRANCH VLANS
+```
+
 ### Create IP Next Available Allocation
 
 IPv4 /32 and IPv6 /128 allocations work with the default `create_peer_ip` setting. The task automatically skips peer creation and peer-subnet reuse for these host prefixes. There is no need to set `create_peer_ip: false` explicitly.
 
 The standalone [create_ip task](services_netbox_service_tasks_create_ip.md) takes a `prefix` string or filter dictionary and allocates an available IP. It can assign that IP to a `device` and `interface`. If nested under an interface's `ip_addresses`, the design supplies those two arguments during flattening.
+
+To allocate a VIP, supply `vrrp_group` with a unique existing VRRPv2 or VRRPv3 group name. Groups defined in the same design are deployed before IP allocations. The task reuses an address assigned to that group within the selected prefix, optionally matching `description`, and defaults the IP role to `vrrp`. Missing, ambiguous, or non-VRRP group names fail before allocation.
+
+Put this wrapper in the **top-level `ip_addresses` collection**. Do not nest it under an interface: `vrrp_group` cannot accompany `device`, `interface`, or `is_primary: true`. Group allocation disables peer IP allocation automatically. See the [allocated VIP example](#nested-vrrp-group-records) below.
+
+A dry run does not create the VLANs, groups, or prefixes proposed by the design. Allocation lookups therefore require those prerequisites to exist already. The `create_ip` dry-run limitation still applies: `mask_len` is ignored and no child subnet is created.
 
 ## Custom fields
 
@@ -1416,6 +1443,35 @@ For a top-level group, specify both `protocol` and `group_id`. Unlike the compac
       protocol: vrrp2
       group_id: 10
     ```
+
+=== "Allocated VIP"
+
+    Prerequisites: both devices and their Vlan100 interfaces. This design creates the pool and group before allocating the VIP. Interface assignments remain separate from the VIP's assignment to the group.
+
+    ```yaml
+    prefixes:
+      - prefix: 192.0.2.0/24
+        description: Branch management subnet
+    vrrp_groups:
+      - protocol: vrrp2
+        group_id: 20
+        name: BRANCH MANAGEMENT GATEWAY
+        assignments:
+          - device: branch-agg-1
+            interface: Vlan100
+            priority: 200
+          - device: branch-agg-2
+            interface: Vlan100
+            priority: 100
+    ip_addresses:
+      - create_ip:
+          prefix:
+            description: Branch management subnet
+          description: Branch management VIP
+          vrrp_group: BRANCH MANAGEMENT GATEWAY
+    ```
+
+    The group's `vip` field accepts an explicit CIDR address, not a `create_ip` wrapper. Omit `vip` when allocating the address through `ip_addresses` as above. The stable group name, prefix selection, and description let repeated deployments reuse the same VIP.
 
 ## Nested VRF Records
 
