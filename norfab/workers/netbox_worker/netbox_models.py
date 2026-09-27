@@ -3115,6 +3115,12 @@ class PrefixStatusEnum(str, Enum):
 
 
 class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    vlan: Union[None, StrictInt] = Field(
+        None, ge=1, le=4094, description="VLAN VID; requires vlan_group"
+    )
+    vlan_group: Union[None, StrictStr] = Field(
+        None, min_length=1, description="Existing VLAN group name; requires vlan"
+    )
     custom_fields: Union[None, dict[StrictStr, Any]] = Field(
         None, description="Custom-field names and values for the prefix"
     )
@@ -3147,6 +3153,12 @@ class CreatePrefixInput(NetboxCommonArgs, use_enum_values=True, populate_by_name
     status: Union[None, PrefixStatusEnum] = Field(
         None, description="Status of the prefix"
     )
+
+    @model_validator(mode="after")
+    def validate_vlan_group(self) -> "CreatePrefixInput":
+        if (self.vlan is None) != (self.vlan_group is None):
+            raise ValueError("vlan and vlan_group must be supplied together")
+        return self
 
 
 class CreatePrefixResult(Result):

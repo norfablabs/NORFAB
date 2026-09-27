@@ -734,6 +734,7 @@ explicit and existing slugs are preserved.
 BGP communities and routing policies support bulk create/update;
 Design object records pass custom fields through creation and PATCH updates, including next-available IP and prefix allocations. Custom-field definitions must exist for the target object type.
 design communities match by value and optional description, and interface VRFs accept direct name references.
+Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
 Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 IP allocation prefix filters resolve `role` by role name, not slug, and reject unknown names.
 BGP sessions use existing creation/update tasks after ASNs, IPs and policies.

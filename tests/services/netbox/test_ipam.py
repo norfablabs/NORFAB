@@ -2617,6 +2617,137 @@ class TestCreateIP:
 class TestCreatePrefix:
     nb_version = None
 
+    def test_create_prefix_vlan(self, nfclient):
+        """Resolve VID within its group and preserve prefix identity on updates."""
+        nb = get_pynetbox(nfclient)
+        parent = "198.19.246.0/24"
+        group_names = ["NORFAB PREFIX VLAN A", "NORFAB PREFIX VLAN B"]
+        if list(nb.ipam.prefixes.filter(within_include=parent)) or any(
+            nb.ipam.vlan_groups.get(name=name) for name in group_names
+        ):
+            pytest.skip("prefix VLAN test data already exists")
+        owned = []
+        try:
+            owned.append(nb.ipam.prefixes.create(prefix=parent))
+            group_a = nb.ipam.vlan_groups.create(
+                name=group_names[0], slug="norfab-prefix-vlan-a"
+            )
+            owned.append(group_a)
+            group_b = nb.ipam.vlan_groups.create(
+                name=group_names[1], slug="norfab-prefix-vlan-b"
+            )
+            owned.append(group_b)
+            vlan_a = nb.ipam.vlans.create(name="PREFIX A", vid=123, group=group_a.id)
+            owned.append(vlan_a)
+            vlan_b = nb.ipam.vlans.create(name="PREFIX B", vid=123, group=group_b.id)
+            owned.append(vlan_b)
+            kwargs = {
+                "parent": parent,
+                "prefixlen": 28,
+                "description": "NORFAB PREFIX VLAN CHILD",
+                "vlan": 123,
+                "vlan_group": group_names[0],
+            }
+            for dry_run in (True, False, False):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_prefix",
+                    workers="any",
+                    kwargs={**kwargs, "dry_run": dry_run},
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                    if dry_run:
+                        assert result["diff"]["vlan"] == {
+                            "-": None,
+                            "+": f"{vlan_a.vid} ({vlan_a.id})",
+                        }
+                children = list(nb.ipam.prefixes.filter(within=parent))
+                assert len(children) == (0 if dry_run else 1)
+                if not dry_run:
+                    assert children[0].vlan.id == vlan_a.id
+            child_id = children[0].id
+            kwargs["vlan_group"] = group_names[1]
+            for dry_run in (True, False):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_prefix",
+                    workers="any",
+                    kwargs={**kwargs, "dry_run": dry_run},
+                )
+                assert reply
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert not result["errors"], result
+                    assert result["diff"]["vlan"] == {
+                        "-": f"{vlan_a.vid} ({vlan_a.id})",
+                        "+": f"{vlan_b.vid} ({vlan_b.id})",
+                    }
+                children = list(nb.ipam.prefixes.filter(within=parent))
+                assert len(children) == 1
+                assert children[0].id == child_id
+                assert children[0].vlan.id == (vlan_a.id if dry_run else vlan_b.id)
+            kwargs.pop("vlan")
+            kwargs.pop("vlan_group")
+            reply = nfclient.run_job(
+                "netbox", "create_prefix", workers="any", kwargs=kwargs
+            )
+            assert reply
+            for result in reply.values():
+                assert not result["failed"], result
+                assert not result["errors"], result
+                assert "vlan" not in result["diff"]
+            assert nb.ipam.prefixes.get(id=child_id).vlan.id == vlan_b.id
+
+            for selection in [
+                {"vlan": 124, "vlan_group": group_names[0]},
+                {"vlan": 123, "vlan_group": "NORFAB PREFIX VLAN MISSING"},
+            ]:
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_prefix",
+                    workers="any",
+                    kwargs={**kwargs, **selection, "description": "must not allocate"},
+                )
+                assert reply
+                for result in reply.values():
+                    assert result["failed"], result
+                    assert result["errors"], result
+                assert len(list(nb.ipam.prefixes.filter(within=parent))) == 1
+        finally:
+            if owned:
+                for child in nb.ipam.prefixes.filter(within=parent):
+                    child.delete()
+            for record in reversed(owned):
+                record.delete()
+
+    @pytest.mark.parametrize(
+        "selection",
+        [
+            {"vlan": 100},
+            {"vlan": 100, "site": "NORFAB-LAB"},
+            {"vlan_group": "GROUP"},
+            {"vlan": 0, "vlan_group": "GROUP"},
+            {"vlan": 4095, "vlan_group": "GROUP"},
+            {"vlan": "100", "vlan_group": "GROUP"},
+            {"vlan": 100, "vlan_group": ""},
+        ],
+    )
+    def test_create_prefix_invalid_vlan_selection(self, nfclient, selection):
+        """A VID requires a group, never a site in place of the group."""
+        reply = nfclient.run_job(
+            "netbox",
+            "create_prefix",
+            workers="any",
+            kwargs={"parent": "198.19.246.0/24", **selection},
+        )
+        assert reply
+        for result in reply.values():
+            assert result["failed"], result
+            assert result["errors"], result
+
     def test_create_prefix(self, nfclient):
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)

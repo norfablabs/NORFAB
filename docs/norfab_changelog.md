@@ -3,6 +3,7 @@
 ## ENHANCEMENTS
 
 1. NetBox `check_device_sync` now accepts per-task `sync_kwargs` inline or from an `nf://` YAML file, allowing each dry-run synchronizer's filtering, mapping, and comparison options to be configured independently.
+2. NetBox `create_prefix` can associate an existing VLAN using `vlan` (VID) and `vlan_group` (group name), including updates and dry-run diffs. Both arguments are required together; a site cannot replace the VLAN group.
 
 ## BUGS
 

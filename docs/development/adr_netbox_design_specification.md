@@ -160,10 +160,6 @@ interface `connection` entries use the same handler.
 
 ## TODO
 
-- Support VLAN association in `create_prefix`. Explicit prefix records accept
-  `vlan` references by group and VID, but the allocation task has no VLAN
-  argument. Allow a next-available subnet allocated from the supplied parent,
-  with a site and role, to retain its VLAN association without custom Python.
 - Support FHRP-group assignment in `create_ip` and allocation-backed VRRP VIPs
   in designs. Explicit IP records can reference an FHRP group, but `create_ip`
   cannot assign an allocated address to one, and nested `vrrp.vip` currently

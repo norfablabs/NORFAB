@@ -53,11 +53,14 @@ class NetboxPrefixTasks:
         dry_run: bool = False,
         branch: str = None,
         custom_fields: Union[None, dict] = None,
+        vlan: Union[None, int] = None,
+        vlan_group: Union[None, str] = None,
     ) -> Result:
         """
         Creates a new IP prefix in NetBox or updates an existing one.
 
         Args:
+            job: NorFab job supplying progress events and execution context.
             parent (Union[str, dict]): Parent prefix to allocate new prefix from, could be:
 
                 - IPv4 prefix string e.g. 10.0.0.0/24
@@ -79,6 +82,11 @@ class NetboxPrefixTasks:
             comments (str, optional): Comments for the prefix.
             role (str, optional): Role to assign to the prefix.
             site (str, optional): Name of the site to associate with the prefix.
+            vlan (int, optional): Existing VLAN VID (1-4094), identified together
+                with vlan_group. Omission preserves the current association.
+                Site cannot substitute for the VLAN group.
+            vlan_group (str, optional): Existing VLAN group name. Must be supplied
+                together with vlan; neither the group nor VLAN is created.
             status (str, optional): Status of the prefix.
             instance (Union[None, str], optional): NetBox instance identifier.
             dry_run (bool, optional): If True, simulates the creation without making changes.
@@ -86,7 +94,14 @@ class NetboxPrefixTasks:
                 automatically creates branch if it does not exist in Netbox.
 
         Returns:
-            Result: An object containing the outcome, including status, details of the prefix, and resources used.
+            Result: Prefix details, status, resources, and changed fields. VLAN
+                changes use old/new "VID (ID)" values in diff["vlan"]. Dry runs
+                report the planned association without writing it.
+
+        Raises:
+            NetboxAllocationError: The parent or requested VLAN/group cannot be
+                resolved uniquely, allocation fails, or an existing prefix has
+                a different length. VLAN lookup failures occur before allocation.
         """
         instance = instance or self.default_instance
         log.info(
@@ -102,6 +117,19 @@ class NetboxPrefixTasks:
         tags = tags or []
         nb_prefix = None
         nb = self._get_pynetbox(instance, branch=branch, job=job)
+        nb_vlan = None
+        if vlan is not None:
+            try:
+                group = nb.ipam.vlan_groups.get(name=vlan_group)
+                if not group:
+                    raise ValueError(f"VLAN group '{vlan_group}' not found")
+                nb_vlan = nb.ipam.vlans.get(group_id=group.id, vid=vlan)
+                if not nb_vlan:
+                    raise ValueError(f"VLAN {vlan} not found in group '{vlan_group}'")
+            except Exception as exc:
+                raise NetboxAllocationError(
+                    f"Unable to resolve VLAN {vlan} in group '{vlan_group}': {exc}"
+                ) from exc
 
         job.event(
             f"processing prefix create request within '{parent}' for '/{prefixlen}' subnet"
@@ -201,6 +229,9 @@ class NetboxPrefixTasks:
                         )
                 ret.status = "unchanged"
                 ret.dry_run = True
+                if nb_vlan is not None:
+                    changed["vlan"] = {"-": None, "+": f"{nb_vlan.vid} ({nb_vlan.id})"}
+                    ret.diff = changed
                 ret.result = {
                     "prefix": nb_prefix,
                     "description": description,
@@ -236,6 +267,18 @@ class NetboxPrefixTasks:
             job.event(f"using existing prefix {nb_prefix}")
 
         # update prefix parameters
+        if nb_vlan is not None:
+            current_vlan_id = nb_prefix.vlan.id if nb_prefix.vlan else None
+            if current_vlan_id != nb_vlan.id:
+                changed["vlan"] = {
+                    "-": (
+                        f"{nb_prefix.vlan.vid} ({current_vlan_id})"
+                        if nb_prefix.vlan
+                        else None
+                    ),
+                    "+": f"{nb_vlan.vid} ({nb_vlan.id})",
+                }
+                nb_prefix.vlan = nb_vlan.id
         if custom_fields is not None:
             changed_fields = [
                 name

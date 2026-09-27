@@ -360,7 +360,7 @@ vlan_groups:
 
 ### Create Prefix Next Available Allocation
 
-The standalone [create_prefix task](services_netbox_service_tasks_create_prefix.md) takes a `parent` prefix or parent filter dictionary and a `prefixlen`, then allocates an available child prefix. A stable `description`, optionally with `site`, `role`, or `vrf`, helps it find the same child on repeat deployment. `create_prefix.parent` can select the parent through a dictionary of filters. The task accepts `site` for the allocated child's scope, but has no `location`, `site_group`, `region`, or `vlan` argument for the child.
+The standalone [create_prefix task](services_netbox_service_tasks_create_prefix.md) takes a `parent` prefix or parent filter dictionary and a `prefixlen`, then allocates an available child prefix. A stable `description`, optionally with `site`, `role`, or `vrf`, helps it find the same child on repeat deployment. `create_prefix.parent` can select the parent through a dictionary of filters. The task accepts `site` for the allocated child's scope and the pair `vlan` (VID) and `vlan_group` (group name) to associate an existing VLAN. Site cannot replace the group for VLAN identification. It has no `location`, `site_group`, or `region` argument for the child.
 
 ### Create IP Next Available Allocation
 
