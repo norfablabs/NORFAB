@@ -100,6 +100,9 @@ asns:
     role: ACME-BRANCH-LAN
     sites: ["{{ context.site }}"]
     description: ACME core routers ASN
+    custom_fields:
+      norfab_acme_site: "{{ context.site }}"
+      norfab_acme_sites: ["{{ context.site }}"]
 
   - asn: 4200650002
     tenant: ACME
@@ -138,6 +141,9 @@ vlans:
     status: active
     description: ACME branch user access
     role: ACME-BRANCH-LAN
+    custom_fields:
+      norfab_acme_site: "{{ context.site }}"
+      norfab_acme_sites: ["{{ context.site }}"]
   - create_vlan:
       vlan_group: "{{ context.site }} VLANS"
       name: ACME GUEST
@@ -163,6 +169,21 @@ vrfs:
         tenant: ACME
         description: ACME branch export target
 
+l2vpns:
+  - name: ACME BRANCH EVPN
+    type: vxlan
+    identifier: 10100
+    tenant: ACME
+    import_route_targets:
+      - name: "4200650001:100"
+    export_route_targets:
+      - name: "4200650001:100"
+    terminations:
+      - group: "{{ context.site }} VLANS"
+        vid: 100
+      - device: acme-branch-rtr-1
+        interface: Ethernet2.100
+
 prefixes:
   - prefix: "{{ context.parent_prefix }}"
     tenant: ACME
@@ -179,6 +200,9 @@ prefixes:
     region: ACME REGION
     site: "{{ context.site }}"
     vlan: {group: "{{ context.site }} VLANS", vid: 100}
+    custom_fields:
+      norfab_acme_site: "{{ context.site }}"
+      norfab_acme_sites: ["{{ context.site }}"]
   - prefix: 198.19.230.0/24
     vrf: ACME BRANCH
     tenant: ACME

@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 27 September 2026*
+*Last updated: 29 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -704,7 +704,7 @@ NetBox data model and do not provide every safeguard of a dedicated task.
 
 Deploys static or Jinja2-rendered YAML designs. Handlers for tenants, regions,
 manufacturers, platforms, device types, device roles, sites, rack roles, racks,
-IPAM roles, RIRs, ASN ranges, ASNs, VLAN groups, VLANs, VRFs, prefixes,
+IPAM roles, RIRs, ASN ranges, ASNs, VLAN groups, VLANs, VRFs, L2VPNs and their terminations, prefixes,
 devices, interfaces, console and power ports/outlets, IP addresses, FHRP groups and assignments, and device primary IPs
 bulk create missing records and patch existing records without calculating a diff.
 An explicit preprocessing step flattens nested device definitions into top-level
@@ -719,10 +719,14 @@ Likewise, `create_vlan` allocates the next available VLAN ID; known IDs use bulk
 VLAN records require a group and interface VLAN references accept group names directly; direct VLAN-to-site association is unsupported. A per-deployment reference cache avoids repeat lookups for VLANs, sites, route targets, VRFs, interfaces, console and power ports, VRRP groups, and IP addresses.
 VLAN groups can be scoped by name to a rack, location, site, site group, region, cluster, or cluster group; a site can disambiguate rack and location names.
 ASN records resolve site lists and IPAM roles. Explicit prefixes resolve named location, site, site-group or region scopes and group/VID VLAN references.
+Updating an ASN through a design adds new sites, tags, and custom-field list items without removing existing ones. Design VLAN and prefix updates add tags and custom-field list items. The `create_asn`, `create_vlan`, and `create_prefix` tasks follow the same rules for their respective objects.
+Design processors resolve names in object and multiobject custom fields using each field's related NetBox object type. On updates, tags, custom-field lists, and explicitly supported relationship lists add missing values. The referenced objects and custom-field definitions must exist when each record is processed.
 Independent interfaces are created before interfaces with parent, LAG or bridge references. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last.
 Device types accept `default_platform` as a platform name.
-Route targets support bulk creation/update before VRFs; inline import/export
-route-target definitions are flattened and associated with their VRFs.
+Route targets support bulk creation/update before VRFs and L2VPNs; inline
+import/export definitions are flattened and associated with their parent objects.
+L2VPN terminations attach device interfaces or group/VID VLANs through top-level
+or nested definitions, rejecting attachments already used by another L2VPN.
 Route-target and BGP-community definition lists require dictionaries, not bare strings.
 Routing-policy definitions, including BGP import/export lists, also require dictionaries.
 Interface, console, and power cables support top-level and nested definitions, bulk creation/update,
@@ -737,7 +741,7 @@ design communities match by value and optional description, and interface VRFs a
 Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
 Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 IP allocation prefix filters resolve `role` by role name, not slug, and reject unknown names.
-BGP sessions use existing creation/update tasks after ASNs, IPs and policies.
+BGP sessions use existing creation/update tasks after ASNs, IPs and policies. The `create_bgp_peering` wrapper is supported in designs; the standalone create task resolves custom-field references for new sessions and leaves existing sessions unchanged.
 Inline import/export policy definitions are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving record arguments, `netbox`, and `dry_run`; custom
@@ -926,9 +930,9 @@ records are reused and assigned the `vrrp` role; missing virtual IPs are created
 while addresses assigned to other objects are reported without reassignment.
 **Use cases:** first-hop redundancy inventory, priority drift detection,
 consistent group naming, and virtual-IP auditing. **Limitations:**
-synchronization is additive and does not delete stale FHRP data; an entirely
-empty parsed VRRP state fails before NetBox reconciliation begins, and live
-group records without a virtual address are reported and skipped.
+synchronization is additive and reports stale FHRP assignments as deletion
+candidates without deleting them. Empty live and NetBox VRRP states are in
+sync. Live group records without a virtual address are reported and skipped.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vrrp.md)
 
 ### Live VRF reconciliation
@@ -1006,6 +1010,12 @@ objects are never deleted.
 Creates or updates an explicit ASN, or allocates the next available ASN from a
 named ASN range. The task and `netbox create asn` NFCLI command accept a `sites`
 list to associate the ASN with multiple sites; the same task backs design allocations.
+Repeated `create_asn` calls add sites, tags, and items in list-valued custom
+fields to existing ASNs without removing existing values. Object and multiobject
+custom fields accept related object names, which the task resolves to IDs;
+missing or ambiguous names fail.
+`create_ip`, `create_prefix`, and `create_vlan` also resolve names in object and
+multiobject custom fields and add new list values on repeated calls.
 Reconciles globally unique ASNs from supported live devices with NetBox IPAM,
 preserves existing descriptions by default, and optionally associates each ASN
 with the devices for which it is a local ASN. Missing ASNs are created only

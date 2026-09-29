@@ -16,6 +16,8 @@ from .netbox_models import (
 )
 from .netbox_worker_utilities import (
     apply_description_policy,
+    merge_array_values,
+    merge_resolved_custom_fields,
     review_sync_task_result,
     sync_diff_has_changes,
 )
@@ -60,8 +62,8 @@ class NetboxBgpAsnTasks:
         reuses an ASN with the same description inside the named range, or
         allocates the first available number. Omitting the description means
         repeated range calls can allocate different ASNs. A non-empty sites
-        list replaces the ASN's site assignments; an empty or omitted list
-        leaves them alone.
+        list adds to the ASN's site assignments; an empty or omitted list
+        leaves them alone. Tags and array custom fields are also additive.
         Dry-run reports the selected number without writing relationships.
 
         Args:
@@ -72,9 +74,13 @@ class NetboxBgpAsnTasks:
                 supplied without a range, including updates.
             description: Description used to reuse allocations within a range.
             tenant: Optional tenant name.
-            tags: Optional tag names to assign.
-            custom_fields: Optional NetBox custom-field values.
-            sites: Optional site names to assign to the ASN.
+            tags: Optional tag names to add without removing existing tags.
+            custom_fields: Optional NetBox custom-field values. Object and
+                multiobject fields accept related object names or IDs; names
+                must identify exactly one object. Arrays merged with existing values;
+                empty arrays preserve existing arrays. Null and scalar values
+                replace existing values.
+            sites: Optional site names to add to the ASN's assignments.
             role: Optional IPAM role name.
             instance: NetBox instance name, or the worker default when omitted.
             dry_run: Select an ASN without creating or updating it.
@@ -86,8 +92,9 @@ class NetboxBgpAsnTasks:
             ``updated``.
 
         Raises:
-            ValueError: The range, RIR, or a site is missing; more than one
-                ASN matches the description; or the range has no free ASNs.
+            ValueError: The range, RIR, site, or related custom-field object is
+                missing; a related name is ambiguous; more than one ASN matches
+                the description; or the range has no free ASNs.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -161,14 +168,42 @@ class NetboxBgpAsnTasks:
                 raise ValueError(
                     f"ASN sites not found: {set(site_names) - set(site_ids)}"
                 )
-            nb_asn.sites = [site_ids[name] for name in site_names]
-            changed = True
-        if tags is not None:
-            nb_asn.tags = [{"name": tag} for tag in tags]
-            changed = True
-        if custom_fields is not None and nb_asn.custom_fields != custom_fields:
-            nb_asn.custom_fields = custom_fields
-            changed = True
+            current_ids = [site.id for site in nb_asn.sites]
+            merged_ids = merge_array_values(
+                current_ids, [site_ids[name] for name in site_names]
+            )
+            if merged_ids != current_ids:
+                nb_asn.sites = merged_ids
+                changed = True
+        if tags:
+            current_names = [tag.name for tag in nb_asn.tags]
+            merged_names = merge_array_values(current_names, tags)
+            if merged_names != current_names:
+                nb_asn.tags = [{"name": name} for name in merged_names]
+                changed = True
+        if custom_fields is not None:
+            reference_fields = self.bulk_filter(
+                nb.extras.custom_fields,
+                object_type="ipam.asn",
+                type=["object", "multiobject"],
+            )
+            object_fields = [
+                field for field in reference_fields if field.type.value == "object"
+            ]
+            multiobject_fields = [
+                field for field in reference_fields if field.type.value == "multiobject"
+            ]
+            current_fields, merged_fields = merge_resolved_custom_fields(
+                self,
+                nb,
+                nb_asn,
+                custom_fields,
+                object_fields,
+                multiobject_fields,
+            )
+            if merged_fields != current_fields:
+                nb_asn.custom_fields = merged_fields
+                changed = True
         if changed:
             nb_asn.save()
 

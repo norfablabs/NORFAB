@@ -31,6 +31,7 @@ lists of dictionaries, adding device and interface names from the parents:
 | Interface `connection` | Connection record with this interface as one endpoint |
 | Interface inline `vrf` | VRF record and interface reference |
 | Interface inline `untagged_vlan` or `tagged_vlans` | VLAN records and interface references |
+| L2VPN `terminations` list | L2VPN termination records with the parent L2VPN name |
 | VRRP assignment inline `group` | VRRP group record and assignment reference |
 | BGP inline `import_policies` or `export_policies` | Routing-policy records and policy-name references |
 
@@ -99,9 +100,11 @@ vlan_groups
 vlans
 route_targets
 vrfs
+l2vpns
 prefixes
 devices
 interfaces
+l2vpn_terminations
 connections
 ip_addresses
 bgp_communities
@@ -139,7 +142,9 @@ under the collection's `custom` results; exceptions stop deployment.
 | --- | --- |
 | `tenants`, `regions`, `manufacturers`, `platforms`, `device_types`, `device_roles`, `sites`, `roles`, `rirs` | Implemented per-collection handlers using pynetbox bulk create/update. |
 | `rack_roles`, `racks`, `asn_ranges`, `vrfs` | Implemented per-collection handlers using pynetbox bulk create/update. |
-| `route_targets` | Bulk create/update by name before VRFs. VRF `import_route_targets` and `export_route_targets` accept dictionaries with `name` only, extracted and deduplicated into the top-level collection. Additional fields define the target's properties. The VRF handler resolves IDs for NetBox `import_targets` and `export_targets`. |
+| `route_targets` | Bulk create/update by name before VRFs and L2VPNs. Their `import_route_targets` and `export_route_targets` accept dictionaries with `name`, extracted and deduplicated into the top-level collection. Additional fields define the target's properties. The parent handlers resolve IDs for NetBox `import_targets` and `export_targets`. |
+| `l2vpns` | Bulk create/update by name through `nb.vpn.l2vpns`. Nested `terminations` are extracted before validation. |
+| `l2vpn_terminations` | Bulk create/update through `nb.vpn.l2vpn_terminations` after interfaces exist. Each record selects a device interface or group/VID VLAN and its L2VPN. An attachment already assigned to another L2VPN is rejected. |
 | `asns` | Pynetbox bulk create/update; `create_asn` wrapper calls `bgp_asn_tasks.py`. |
 | `vlan_groups` | `process_vlan_groups` using pynetbox bulk create/update with direct API fields. |
 | `vlans` | Pynetbox bulk create/update; `create_vlan` wrapper calls `vlan_tasks.py`, including next-available VLAN ID allocation. |

@@ -897,9 +897,10 @@ class TestSyncBgpPeerings:
         for worker, res in ret.items():
             assert res["failed"] == False, f"{worker} failed: {res['errors']}"
             for device_name, device_res in res["result"].items():
-                assert (
-                    device_name in {"fn-ceos-sp-1", "fn-ceos-sp-2"}
-                ), f"{worker}: unexpected device '{device_name}' for spine filter"
+                assert device_name in {
+                    "fn-ceos-sp-1",
+                    "fn-ceos-sp-2",
+                }, f"{worker}: unexpected device '{device_name}' for spine filter"
                 assert (
                     len(device_res["created"]) > 0
                 ), f"{worker}: expected created sessions for '{device_name}'"
@@ -1615,6 +1616,119 @@ class TestCreateBgpPeering:
             assert sname not in res["result"].get(
                 "created", []
             ), f"{worker}: duplicate created"
+
+    def test_create_bgp_peering_resolves_custom_fields(self, nfclient: Any) -> None:
+        """Resolve named references on create and leave an existing session alone."""
+        nb = get_pynetbox(nfclient)
+        device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        session_name = f"{device}_test_custom_fields"
+        site_names = ["NORFAB BGP CF SITE A", "NORFAB BGP CF SITE B"]
+        field_names = {
+            "site": "norfab_bgp_create_site",
+            "sites": "norfab_bgp_create_sites",
+            "labels": "norfab_bgp_create_labels",
+            "note": "norfab_bgp_create_note",
+        }
+        if (
+            nb.plugins.bgp.session.get(name=session_name)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+            or any(
+                nb.extras.custom_fields.get(name=name) for name in field_names.values()
+            )
+        ):
+            pytest.skip("BGP custom-field test objects already exist")
+        try:
+            sites = [
+                nb.dcim.sites.create(name=name, slug=name.lower().replace(" ", "-"))
+                for name in site_names
+            ]
+            for field, field_type in (
+                ("site", "object"),
+                ("sites", "multiobject"),
+                ("labels", "json"),
+                ("note", "text"),
+            ):
+                payload = {
+                    "name": field_names[field],
+                    "type": field_type,
+                    "object_types": ["netbox_bgp.bgpsession"],
+                }
+                if field_type in ("object", "multiobject"):
+                    payload["related_object_type"] = "dcim.site"
+                nb.extras.custom_fields.create(**payload)
+            kwargs = {
+                "name": session_name,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "rir": "lab",
+                "create_reverse": False,
+            }
+            for index, (
+                requested,
+                expected_site,
+                expected_sites,
+                expected_labels,
+            ) in enumerate(
+                (
+                    (
+                        {
+                            field_names["site"]: site_names[0],
+                            field_names["sites"]: [site_names[0]],
+                            field_names["labels"]: ["first"],
+                            field_names["note"]: "original",
+                        },
+                        sites[0].id,
+                        [sites[0].id],
+                        ["first"],
+                    ),
+                    (
+                        {
+                            field_names["site"]: site_names[1],
+                            field_names["sites"]: [site_names[1]],
+                            field_names["labels"]: ["second"],
+                            field_names["note"]: "updated",
+                        },
+                        sites[0].id,
+                        [sites[0].id],
+                        ["first"],
+                    ),
+                )
+            ):
+                result = nfclient.run_job(
+                    "netbox",
+                    "create_bgp_peering",
+                    workers="any",
+                    kwargs={**kwargs, "custom_fields": requested},
+                )
+                for reply in result.values():
+                    assert not reply["failed"], reply
+                    assert not reply["errors"], reply
+                    assert (
+                        session_name
+                        in reply["result"]["created" if index == 0 else "exists"]
+                    )
+                session = nb.plugins.bgp.session.get(name=session_name)
+                assert session.custom_fields[field_names["site"]]["id"] == expected_site
+                assert [
+                    item["id"] for item in session.custom_fields[field_names["sites"]]
+                ] == expected_sites
+                assert session.custom_fields[field_names["labels"]] == expected_labels
+                assert session.custom_fields[field_names["note"]] == "original"
+        finally:
+            session = nb.plugins.bgp.session.get(name=session_name)
+            if session:
+                session.delete()
+            for name in field_names.values():
+                field = nb.extras.custom_fields.get(name=name)
+                if field:
+                    field.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
 
     def test_create_bgp_peering_single_dry_run(self, nfclient):
         """dry_run=True - name in create list, no session written to NetBox."""

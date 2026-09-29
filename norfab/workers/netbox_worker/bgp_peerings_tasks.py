@@ -24,6 +24,8 @@ from .netbox_models import (
 )
 from .netbox_worker_utilities import (
     apply_description_policy,
+    merge_array_values,
+    merge_resolved_custom_fields,
     resolve_ip,
     resolve_vrf,
     review_sync_task_result,
@@ -529,6 +531,15 @@ def resolve_bgp_session_payload_fields(
                 payload[field] = asn_id
         elif field in ("name", "description", "status"):
             payload[field] = value
+        elif field == "tags":
+            payload[field] = value
+        elif field == "custom_fields":
+            # A separate VRF update must take precedence over the old value
+            # included in the merged custom-field dictionary.
+            payload["custom_fields"] = {
+                **value,
+                **payload.get("custom_fields", {}),
+            }
         elif field == "vrf":
             if not vrf_custom_field:
                 pass
@@ -1127,6 +1138,7 @@ class NetboxBgpPeeringsTasks:
         export_policies: Union[None, list] = None,
         prefix_list_in: Union[None, str] = None,
         prefix_list_out: Union[None, str] = None,
+        tags: Union[None, list] = None,
         custom_fields: Union[None, dict] = None,
         # interface-driven resolution
         local_interface: Union[None, str] = None,
@@ -1168,6 +1180,9 @@ class NetboxBgpPeeringsTasks:
             peer_group (str, optional): Peer group name (resolved or created).
             import_policies (list, optional): List of import routing-policy names.
             export_policies (list, optional): List of export routing-policy names.
+            custom_fields (dict, optional): Custom-field values. Object and
+                multiobject fields accept related object names or IDs when
+                creating a session. Existing sessions are left unchanged.
             prefix_list_in (str, optional): Inbound prefix-list name.
             prefix_list_out (str, optional): Outbound prefix-list name.
             local_interface (str, optional): Local interface name or bracket-range pattern.
@@ -1187,6 +1202,10 @@ class NetboxBgpPeeringsTasks:
                 NetBox pointing to the VRF content-type.  The value is always a single
                 VRF object reference written into ``custom_fields[vrf_custom_field]``.
                 Default ``'vrf'`` means ``custom_fields['vrf']``.
+            lookup_cache (dict, optional): Reusable NetBox lookup data. Object
+                and multiobject custom-field definitions are cached under
+                ``custom_fields['netbox_bgp.bgpsession']`` when supplied custom
+                fields need resolution.
 
         Returns:
             Normal run::
@@ -1397,7 +1416,7 @@ class NetboxBgpPeeringsTasks:
         job.event(f"resolved {len(bgp_sessions)} BGP session create candidate(s)")
 
         # Step 5c: Pre-fetch existing sessions for idempotency (single API call)
-        existing_session_names = set()
+        existing_sessions = {}
         if all_device_names:
             job.event(
                 f"checking existing BGP sessions on {len(all_device_names)} device(s)"
@@ -1406,12 +1425,10 @@ class NetboxBgpPeeringsTasks:
                 existing = self.bulk_filter(
                     nb.plugins.bgp.session,
                     device=list(all_device_names),
-                    fields="name,id",
+                    fields="name,id,custom_fields",
                 )
-                existing_session_names = {s.name for s in existing}
-                job.event(
-                    f"found {len(existing_session_names)} existing BGP session(s)"
-                )
+                existing_sessions = {session.name: session for session in existing}
+                job.event(f"found {len(existing_sessions)} existing BGP session(s)")
             except Exception as exc:
                 msg = (
                     f"could not pre-fetch BGP sessions for {list(all_device_names)}: "
@@ -1428,6 +1445,23 @@ class NetboxBgpPeeringsTasks:
             result = {"created": [], "exists": []}
 
         payloads = []
+        if any(session.get("custom_fields") is not None for session in bgp_sessions):
+            lookup_cache.setdefault("custom_fields", {})
+            if "netbox_bgp.bgpsession" not in lookup_cache["custom_fields"]:
+                # Design deployments provide these definitions; direct calls
+                # fetch them once and keep them in the supplied lookup cache.
+                lookup_cache["custom_fields"]["netbox_bgp.bgpsession"] = {
+                    "object": [],
+                    "multiobject": [],
+                }
+                for field in self.bulk_filter(
+                    nb.extras.custom_fields,
+                    object_type="netbox_bgp.bgpsession",
+                    type=["object", "multiobject"],
+                ):
+                    lookup_cache["custom_fields"]["netbox_bgp.bgpsession"][
+                        field.type.value
+                    ].append(field)
 
         job.event("building BGP session create payloads")
         for bgp_session in bgp_sessions:
@@ -1457,7 +1491,7 @@ class NetboxBgpPeeringsTasks:
                 bgp_session["name"] = sname
 
             # Idempotency check (step 6i)
-            if sname in existing_session_names:
+            if sname in existing_sessions:
                 result["exists"].append(sname)
                 continue
 
@@ -1562,33 +1596,54 @@ class NetboxBgpPeeringsTasks:
                 "site": site_id,
             }
             if bgp_session.get("custom_fields") is not None:
-                payload["custom_fields"] = bgp_session["custom_fields"]
+                payload["custom_fields"] = dict(bgp_session["custom_fields"])
+            if "tags" in bgp_session:
+                payload["tags"] = merge_array_values(
+                    [], bgp_session["tags"], attribute="name"
+                )
 
             # Optional fields (step 6h)
-            payload.update(
-                resolve_bgp_session_payload_fields(
-                    {
-                        k: bgp_session[k]
-                        for k in (
-                            "vrf",
-                            "peer_group",
-                            "import_policies",
-                            "export_policies",
-                            "prefix_list_in",
-                            "prefix_list_out",
-                        )
-                        if bgp_session.get(k)
-                    },
-                    nb,
-                    rir_id,
-                    job,
-                    ret,
-                    self.name,
-                    addr_family,
-                    lookup_cache=lookup_cache,
-                    vrf_custom_field=vrf_custom_field,
-                )
+            resolved_fields = resolve_bgp_session_payload_fields(
+                {
+                    k: bgp_session[k]
+                    for k in (
+                        "vrf",
+                        "peer_group",
+                        "import_policies",
+                        "export_policies",
+                        "prefix_list_in",
+                        "prefix_list_out",
+                        "tags",
+                        "custom_fields",
+                    )
+                    if bgp_session.get(k)
+                },
+                nb,
+                rir_id,
+                job,
+                ret,
+                self.name,
+                addr_family,
+                lookup_cache=lookup_cache,
+                vrf_custom_field=vrf_custom_field,
             )
+            if "custom_fields" in resolved_fields:
+                payload.setdefault("custom_fields", {}).update(
+                    resolved_fields.pop("custom_fields")
+                )
+            payload.update(resolved_fields)
+            if bgp_session.get("custom_fields") is not None:
+                # Resolve names after VRF resolution adds its object reference.
+                _, payload["custom_fields"] = merge_resolved_custom_fields(
+                    self,
+                    nb,
+                    None,
+                    payload["custom_fields"],
+                    lookup_cache["custom_fields"]["netbox_bgp.bgpsession"]["object"],
+                    lookup_cache["custom_fields"]["netbox_bgp.bgpsession"][
+                        "multiobject"
+                    ],
+                )
 
             payloads.append(payload)
         if dry_run is True:
@@ -1667,6 +1722,8 @@ class NetboxBgpPeeringsTasks:
         export_policies: Union[None, list] = None,
         prefix_list_in: Union[None, str] = None,
         prefix_list_out: Union[None, str] = None,
+        tags: Union[None, list] = None,
+        custom_fields: Union[None, dict] = None,
         # bulk mode
         bulk_update: Union[None, list] = None,
         # shared
@@ -1702,6 +1759,9 @@ class NetboxBgpPeeringsTasks:
             export_policies (list, optional): New list of export routing-policy names.
             prefix_list_in (str, optional): Inbound prefix-list name.
             prefix_list_out (str, optional): Outbound prefix-list name.
+            tags (list, optional): Tag names to add to the session.
+            custom_fields (dict, optional): Custom fields to update. Array values
+                add missing members; object references accept names or IDs.
             bulk_update (list, optional): List of session update dicts for bulk mode.
             rir (str, optional): RIR name used when auto-creating ASNs.
             message (str, optional): Changelog message recorded on every NetBox write.
@@ -1774,6 +1834,8 @@ class NetboxBgpPeeringsTasks:
                 "export_policies",
                 "prefix_list_in",
                 "prefix_list_out",
+                "tags",
+                "custom_fields",
             )
             bgp_session = {
                 k: v
@@ -1796,12 +1858,29 @@ class NetboxBgpPeeringsTasks:
         nb_sessions_raw = self.bulk_filter(
             nb.plugins.bgp.session,
             name=session_names,
-            fields="id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
+            fields="id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,tags,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
         )
         normalised_nb = {
             s.name: normalise_nb_bgp_session(dict(s), vrf_custom_field=vrf_custom_field)
             for s in nb_sessions_raw
         }
+        nb_sessions_by_name = {session.name: session for session in nb_sessions_raw}
+        if any(session.get("custom_fields") is not None for session in bgp_sessions):
+            lookup_cache.setdefault("custom_fields", {})
+            if "netbox_bgp.bgpsession" not in lookup_cache["custom_fields"]:
+                # Direct task calls fetch definitions; designs supply them in the cache.
+                lookup_cache["custom_fields"]["netbox_bgp.bgpsession"] = {
+                    "object": [],
+                    "multiobject": [],
+                }
+                for field in self.bulk_filter(
+                    nb.extras.custom_fields,
+                    object_type="netbox_bgp.bgpsession",
+                    type=["object", "multiobject"],
+                ):
+                    lookup_cache["custom_fields"]["netbox_bgp.bgpsession"][
+                        field.type.value
+                    ].append(field)
         job.event(f"retrieved {len(normalised_nb)} BGP session(s) from NetBox")
 
         # Build updates dictionary by session name
@@ -1836,6 +1915,28 @@ class NetboxBgpPeeringsTasks:
                     normalised_updates[sname]["export_policies"] = sorted(
                         bgp_session_data.get("export_policies") or []
                     )
+                if "tags" in bgp_session_data:
+                    # Compare and write the complete additive tag list.
+                    normalised_nb[sname]["tags"] = merge_array_values(
+                        [], nb_sessions_by_name[sname].tags, attribute="name"
+                    )
+                    normalised_updates[sname]["tags"] = merge_array_values(
+                        nb_sessions_by_name[sname].tags,
+                        bgp_session_data["tags"],
+                        attribute="name",
+                    )
+                if bgp_session_data.get("custom_fields") is not None:
+                    fields = lookup_cache["custom_fields"]["netbox_bgp.bgpsession"]
+                    current, merged = merge_resolved_custom_fields(
+                        self,
+                        nb,
+                        nb_sessions_by_name[sname],
+                        bgp_session_data["custom_fields"],
+                        fields["object"],
+                        fields["multiobject"],
+                    )
+                    normalised_nb[sname]["custom_fields"] = current
+                    normalised_updates[sname]["custom_fields"] = merged
 
         # Compare complete dictionaries using make_diff; classify in_sync vs changed
         job.event("calculating BGP session update diff")
@@ -2118,7 +2219,9 @@ class NetboxBgpPeeringsTasks:
             log.error(msg)
             ret.errors.append(msg)
 
-        devices = [device_name for device_name in devices if device_name in valid_devices]
+        devices = [
+            device_name for device_name in devices if device_name in valid_devices
+        ]
         if not devices:
             return ret
 

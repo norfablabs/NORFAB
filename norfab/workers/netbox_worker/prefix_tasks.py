@@ -11,6 +11,10 @@ from .netbox_models import (
     CreatePrefixResult,
     NetboxFastApiArgs,
 )
+from .netbox_worker_utilities import (
+    merge_array_values,
+    merge_resolved_custom_fields,
+)
 
 log = logging.getLogger(__name__)
 
@@ -70,14 +74,17 @@ class NetboxPrefixTasks:
                     e.g. `{"prefix": "10.0.0.0/24", "site": "foo"}`
 
             custom_fields (dict, optional): Custom-field names and values to PATCH
-                on the allocated prefix. Definitions must already exist in Netbox.
-                The result diff lists changed field names only, not their values.
+                on the allocated prefix. New list items are added to existing
+                custom-field lists; scalar values and null replace old values.
+                Object and multiobject fields accept related object names or IDs.
+                Definitions must already exist in NetBox. The result diff lists
+                changed field names only, not their values.
             description (str): Description for the new prefix, prefix description used for
                 deduplication to source existing prefixes.
             prefixlen (int, optional): The prefix length of the new prefix to create, by default
                 allocates next available /30 point-to-point prefix.
             vrf (str, optional): Name of the VRF to associate with the prefix.
-            tags (Union[None, list], optional): List of tags to assign to the prefix.
+            tags (Union[None, list], optional): Tag names to add to the prefix.
             tenant (str, optional): Name of the tenant to associate with the prefix.
             comments (str, optional): Comments for the prefix.
             role (str, optional): Role to assign to the prefix.
@@ -280,15 +287,34 @@ class NetboxPrefixTasks:
                 }
                 nb_prefix.vlan = nb_vlan.id
         if custom_fields is not None:
+            reference_fields = self.bulk_filter(
+                nb.extras.custom_fields,
+                object_type="ipam.prefix",
+                type=["object", "multiobject"],
+            )
+            # Normalize existing references to IDs before comparing the merged
+            # values, so a repeat call does not report a false change.
+            current_fields, merged_fields = merge_resolved_custom_fields(
+                self,
+                nb,
+                nb_prefix,
+                custom_fields,
+                [field for field in reference_fields if field.type.value == "object"],
+                [
+                    field
+                    for field in reference_fields
+                    if field.type.value == "multiobject"
+                ],
+            )
             changed_fields = [
                 name
-                for name, value in custom_fields.items()
-                if nb_prefix.custom_fields.get(name) != value
+                for name in custom_fields
+                if current_fields.get(name) != merged_fields.get(name)
             ]
             if changed_fields:
                 changed["custom_fields"] = changed_fields
-            if not dry_run:
-                nb_prefix.update({"custom_fields": custom_fields})
+                if not dry_run:
+                    nb_prefix.update({"custom_fields": merged_fields})
         if description and description != nb_prefix.description:
             changed["description"] = {"-": str(nb_prefix.description), "+": description}
             nb_prefix.description = description
@@ -320,15 +346,16 @@ class NetboxPrefixTasks:
         if role and role != str(nb_prefix.role):
             changed["role"] = {"-": str(nb_prefix.role), "+": role}
             nb_prefix.role = {"name": role}
-        existing_tags = [str(t) for t in nb_prefix.tags]
-        if tags and not any(t in existing_tags for t in tags):
+        existing_tags = [tag.name for tag in nb_prefix.tags]
+        merged_tags = merge_array_values(nb_prefix.tags, tags, attribute="name")
+        merged_names = [tag["name"] for tag in merged_tags]
+        if merged_names != existing_tags:
             changed["tags"] = {
                 "-": existing_tags,
-                "+": [t for t in tags if t not in existing_tags] + existing_tags,
+                "+": merged_names,
             }
-            for t in tags:
-                if t not in existing_tags:
-                    nb_prefix.tags.append({"name": t})
+            if not dry_run:
+                nb_prefix.tags = merged_tags
 
         # save prefix into Netbox
         if dry_run is True:

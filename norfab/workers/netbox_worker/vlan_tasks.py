@@ -26,6 +26,8 @@ from .netbox_models import (
 from .netbox_worker_utilities import (
     apply_description_policy,
     map_interface_name,
+    merge_array_values,
+    merge_resolved_custom_fields,
     review_sync_task_result,
     sync_diff_has_changes,
 )
@@ -383,7 +385,9 @@ class NetboxVlansTasks:
         A supplied VID identifies the VLAN within its group. Without a VID,
         an existing VLAN is matched by group and name, or the first available
         VID is allocated. Repeated calls without a VID and with the same name
-        reuse that VLAN. Existing VLANs are patched without a local diff check.
+        reuse that VLAN. Tags and array custom fields add values on updates;
+        scalar custom fields replace their values.
+        Existing VLANs are patched without a local diff check.
         Dry-run reports the selected VID but does not write attributes.
 
         Args:
@@ -395,8 +399,11 @@ class NetboxVlansTasks:
             description: Optional VLAN description.
             tenant: Optional tenant name.
             role: Optional IPAM role name.
-            tags: Optional tag names to assign.
-            custom_fields: Optional NetBox custom-field values.
+            tags: Optional tag names to add without removing existing tags.
+            custom_fields: Optional NetBox custom-field values. Arrays add
+                missing values; empty arrays preserve existing arrays. Null and
+                scalar values replace existing values. Object and multiobject
+                fields accept related object names or IDs.
             instance: NetBox instance name, or the worker default when omitted.
             dry_run: Select a VLAN without creating or updating it.
             branch: Optional NetBox Branching plugin branch name.
@@ -455,12 +462,33 @@ class NetboxVlansTasks:
             payload["tenant"] = {"name": tenant}
         if role is not None:
             payload["role"] = {"name": role}
-        if tags is not None:
+        if tags:
             payload["tags"] = [{"name": tag} for tag in tags]
         if custom_fields is not None:
-            payload["custom_fields"] = custom_fields
+            reference_fields = self.bulk_filter(
+                nb.extras.custom_fields,
+                object_type="ipam.vlan",
+                type=["object", "multiobject"],
+            )
+            # Resolve names on creation and merge with current values on updates.
+            _, payload["custom_fields"] = merge_resolved_custom_fields(
+                self,
+                nb,
+                nb_vlan,
+                custom_fields,
+                [field for field in reference_fields if field.type.value == "object"],
+                [
+                    field
+                    for field in reference_fields
+                    if field.type.value == "multiobject"
+                ],
+            )
 
         if nb_vlan:
+            if tags:
+                payload["tags"] = merge_array_values(
+                    nb_vlan.tags, tags, attribute="name"
+                )
             nb_vlan.update(payload)
             ret.status = "updated"
         elif filters.get("vid") is None:

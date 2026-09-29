@@ -90,6 +90,8 @@ asns:
 ## Notes / Gotchas
 
 - The named ASN range and its RIR must already exist. ASN ranges have no site scope; `sites` associates the ASN with sites.
+- When updating an ASN, new `sites` and `tags` are added to the existing lists. Existing entries stay in place. The same applies to custom fields whose current and new values are both lists. An empty list (`[]`) makes no change to an existing list. For custom fields, `null` clears the value, and a new scalar value replaces the old one.
+- For object and multiobject custom fields, supply the related objects by name or ID. For example, a custom field referencing devices can receive `["router-1", "router-2"]`. The task looks up names in the field's related NetBox object type and sends their IDs. A name must match exactly one object; missing or ambiguous names cause an error.
 - In NFCLI, separate multiple site names with commas.
 - Repeated range allocations reuse an ASN with the same description inside that range.
 - Without a description, repeated range calls allocate the next available ASN.

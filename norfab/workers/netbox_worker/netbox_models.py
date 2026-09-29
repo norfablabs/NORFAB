@@ -333,6 +333,9 @@ class BgpSessionCommonFields(BaseModel):
     custom_fields: Union[None, Dict[StrictStr, Any]] = Field(
         None, description="BGP session custom fields"
     )
+    tags: Union[None, List[Union[StrictStr, dict]]] = Field(
+        None, description="BGP session tags"
+    )
 
 
 class BgpSessionBulkCreateFields(BgpSessionCommonFields):
@@ -484,6 +487,12 @@ class UpdateBgpPeeringInput(
     )
     prefix_list_out: Union[None, StrictStr] = Field(
         None, description="Outbound prefix list"
+    )
+    tags: Union[None, List[Union[StrictStr, dict]]] = Field(
+        None, description="Tags to add"
+    )
+    custom_fields: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="Custom fields to update"
     )
 
     # --- Bulk mode ---
@@ -754,6 +763,8 @@ class DesignDocument(BaseModel):
     vlans: list[dict[str, Any]] = Field(default=[])
     vlan_groups: list[dict[str, Any]] = Field(default=[])
     vrfs: list[dict[str, Any]] = Field(default=[])
+    l2vpns: list[dict[str, Any]] = Field(default=[])
+    l2vpn_terminations: list[dict[str, Any]] = Field(default=[])
     route_targets: list[dict[str, Any]] = Field(default=[])
     rack_roles: list[dict[str, Any]] = Field(default=[])
     racks: list[dict[str, Any]] = Field(default=[])
@@ -867,20 +878,61 @@ class DesignDocument(BaseModel):
                     )
             if record["a_terminations"] == record["b_terminations"]:
                 raise ValueError("a connection requires two different terminations")
-        for record in self.vrfs:
+        for collection in ("vrfs", "l2vpns"):
+            for record in getattr(self, collection):
+                if "custom_function" in record:
+                    continue
+                for field in ("import_route_targets", "export_route_targets"):
+                    if field in record and (
+                        not isinstance(record[field], list)
+                        or not all(
+                            isinstance(value, dict)
+                            and isinstance(value.get("name"), str)
+                            and value["name"]
+                            for value in record[field]
+                        )
+                    ):
+                        raise ValueError(
+                            f"{collection}.{field} must be a list of route-target dictionaries with name"
+                        )
+        attachments = set()
+        for record in self.l2vpn_terminations:
             if "custom_function" in record:
                 continue
-            for field in ("import_route_targets", "export_route_targets"):
-                if field in record and (
-                    not isinstance(record[field], list)
-                    or not all(
-                        isinstance(value, dict) and isinstance(value.get("name"), str)
-                        for value in record[field]
+            if not isinstance(record.get("l2vpn"), str) or not record["l2vpn"]:
+                raise ValueError("l2vpn_terminations requires an l2vpn name")
+            interface = "device" in record or "interface" in record
+            vlan = "group" in record or "vid" in record
+            if (
+                interface == vlan
+                or (
+                    interface
+                    and not all(
+                        isinstance(record.get(field), str) and record[field]
+                        for field in ("device", "interface")
                     )
-                ):
-                    raise ValueError(
-                        f"vrfs.{field} must be a list of route-target dictionaries with name"
+                )
+                or (
+                    vlan
+                    and (
+                        not isinstance(record.get("group"), str)
+                        or not record["group"]
+                        or not isinstance(record.get("vid"), int)
+                        or isinstance(record["vid"], bool)
                     )
+                )
+            ):
+                raise ValueError(
+                    "l2vpn_terminations requires either device and interface or group and vid"
+                )
+            attachment = (
+                ("dcim.interface", record["device"], record["interface"])
+                if interface
+                else ("ipam.vlan", record["group"], record["vid"])
+            )
+            if attachment in attachments:
+                raise ValueError(f"duplicate l2vpn termination: {attachment}")
+            attachments.add(attachment)
         for record in self.bgp_peerings:
             if "custom_function" not in record:
                 task_record = dict(record)
@@ -907,6 +959,7 @@ class DesignDocument(BaseModel):
             "sites": ["region", "tenant"],
             "asn_ranges": ["rir"],
             "vrfs": ["tenant"],
+            "l2vpns": ["tenant"],
             "route_targets": ["tenant"],
             "racks": ["site", "role", "tenant"],
             "devices": ["site", "role", "platform", "tenant"],
@@ -977,7 +1030,7 @@ class DesignDocument(BaseModel):
         for record in self.asns:
             if "custom_function" in record:
                 continue
-            if "sites" in record and (
+            if record.get("sites") is not None and (
                 not isinstance(record["sites"], list)
                 or not all(isinstance(name, str) and name for name in record["sites"])
             ):

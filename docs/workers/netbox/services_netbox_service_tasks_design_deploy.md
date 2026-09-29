@@ -146,41 +146,46 @@ Each design section contains a list of object records. The rows show the order i
 | 12 | `asn_ranges` | `netbox.ipam.asn_ranges` | `name` | Ranges are not site-scoped. |
 | 13 | `asns` | `netbox.ipam.asns` | `asn` | Explicit numbers are matched globally. `create_asn` allocates from a named range. Supports `sites` and `role`. |
 | 14 | `vlan_groups` | `netbox.ipam.vlan_groups` | `name` | Scope by rack, location, site, site group, region, cluster, or cluster group. |
-| 15 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
-| 16 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF references can inline target dictionaries. |
-| 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets must be dictionaries. |
-| 18 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
-| 19 | `devices` | `netbox.dcim.devices` | `site` and `name`, plus `tenant` when supplied | Nested components are flattened before writes. |
-| 20 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
-| 21 | `power_ports` | `netbox.dcim.power_ports` | `device`, `name` | Nested connection is flattened. |
-| 22 | `console_ports` | `netbox.dcim.console_ports` | `device`, `name` | Nested connection is flattened. |
-| 23 | `power_outlets` | `netbox.dcim.power_outlets` | `device`, `name` | Nested connection is flattened. |
-| 24 | `console_server_ports` | `netbox.dcim.console_server_ports` | `device`, `name` | Nested connection is flattened. |
-| 25 | `connections` | `netbox.dcim.cables` | Existing cable on both terminations | Creates interface, console, and power cables. Each end currently has one termination. An already-cabled port cannot be moved. |
-| 26 | `vrrp_groups` | `netbox.ipam.fhrp_groups` | `protocol`, `group_id` | Inline `vip` becomes an explicit IP address; use top-level `create_ip.vrrp_group` for allocation. |
-| 27 | `ip_addresses` | `netbox.ipam.ip_addresses` | `address`, `vrf` | Addresses with specified values are bulk-written. `create_ip` allocates the next available address and can assign it to an interface or named VRRP group. |
-| 28 | `vrrp_group_assignments` | `netbox.ipam.fhrp_group_assignments` | `group`, `interface` | Associates an existing group and interface with priority. |
-| 29 | `primary_ip` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Sets an existing `primary_ip4` or `primary_ip6`. It does not create the address. |
-| 30 | `bgp_communities` | `netbox.plugins.bgp.community` | `value`, plus `description` when supplied | A different description creates another community. Without description, the value must identify one object. |
-| 31 | `routing_policies` | `netbox.plugins.bgp.routing_policy` | `name` | Peering references can inline policy dictionaries. |
-| 32 | `bgp_peerings` | `netbox.plugins.bgp.session` | `name` | Uses `create_bgp_peering` for new sessions and `update_bgp_peering` for existing ones. New sessions default to `create_reverse: true`. Supports import/export policy dictionaries. |
-| 33 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary and `sites` scopes it. |
-| 34 | `local_context_data` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Replaces each device's local context dictionary last. |
+| 15 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. Existing VLANs gain new tags and custom-field list items. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
+| 16 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF and L2VPN references can inline target dictionaries. |
+| 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets must be dictionaries. Existing target lists gain missing targets. |
+| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets must be dictionaries. Existing target lists gain missing targets. Nested terminations are flattened. |
+| 19 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. Existing prefixes gain new tags and custom-field list items. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
+| 20 | `devices` | `netbox.dcim.devices` | `site` and `name`, plus `tenant` when supplied | Nested components are flattened before writes. |
+| 21 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
+| 22 | `l2vpn_terminations` | `netbox.vpn.l2vpn_terminations` | Attached interface or VLAN | Attachments require `l2vpn` and either `device` with `interface`, or VLAN `group` with `vid`. An attachment already used by another L2VPN is rejected. |
+| 23 | `power_ports` | `netbox.dcim.power_ports` | `device`, `name` | Nested connection is flattened. |
+| 24 | `console_ports` | `netbox.dcim.console_ports` | `device`, `name` | Nested connection is flattened. |
+| 25 | `power_outlets` | `netbox.dcim.power_outlets` | `device`, `name` | Nested connection is flattened. |
+| 26 | `console_server_ports` | `netbox.dcim.console_server_ports` | `device`, `name` | Nested connection is flattened. |
+| 27 | `connections` | `netbox.dcim.cables` | Existing cable on both terminations | Creates interface, console, and power cables. Each end currently has one termination. An already-cabled port cannot be moved. |
+| 28 | `vrrp_groups` | `netbox.ipam.fhrp_groups` | `protocol`, `group_id` | Inline `vip` becomes an explicit IP address; use top-level `create_ip.vrrp_group` for allocation. |
+| 29 | `ip_addresses` | `netbox.ipam.ip_addresses` | `address`, `vrf` | Addresses with specified values are bulk-written. `create_ip` allocates the next available address and can assign it to an interface or named VRRP group. |
+| 30 | `vrrp_group_assignments` | `netbox.ipam.fhrp_group_assignments` | `group`, `interface` | Associates an existing group and interface with priority. |
+| 31 | `primary_ip` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Sets an existing `primary_ip4` or `primary_ip6`. It does not create the address. |
+| 32 | `bgp_communities` | `netbox.plugins.bgp.community` | `value`, plus `description` when supplied | A different description creates another community. Without description, the value must identify one object. |
+| 33 | `routing_policies` | `netbox.plugins.bgp.routing_policy` | `name` | Peering references can inline policy dictionaries. |
+| 34 | `bgp_peerings` | `netbox.plugins.bgp.session` | `name` | Uses `create_bgp_peering` for new sessions and `update_bgp_peering` for existing ones. New sessions default to `create_reverse: true`. Supports import/export policy dictionaries. |
+| 35 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary and `sites` scopes it. |
+| 36 | `local_context_data` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Replaces each device's local context dictionary last. |
 
 Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as `device.site`, `device.role`, and `vlan.group`, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.
 
+When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Only config-context `sites` accepts site names; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
 
 
-## Built-In Next-Available Allocation Functions
 
-Next-available allocation is useful when a design knows the pool and the object's purpose, but not its final ASN, VLAN ID, subnet, or IP address. For example, several branches can use the same design and receive different available values from their own pools. Use a `create_*` wrapper to request a value. These wrappers call existing, standalone NorFab Netbox service tasks during the relevant deployment stage. The design does not implement allocation itself. The wrapper contains that task's arguments, without renaming them:
+## Built-In Task Wrappers
 
-| Next available allocation function | How it works |
+Task wrappers call standalone NorFab NetBox service tasks during the relevant deployment stage. The wrapper contains that task's arguments, without renaming them. The allocation wrappers are useful when a design knows the pool and the object's purpose, but not its final ASN, VLAN ID, subnet, or IP address. Several branches can use the same design and receive different available values from their own pools.
+
+| Task wrapper | How it works |
 | --- | --- |
 | [create_asn](services_netbox_service_tasks_create_asn.md) | Selects an available ASN from an existing named range. |
 | [create_vlan](services_netbox_service_tasks_create_vlan.md) | Selects an available VID from an existing VLAN group's allowed ranges. |
 | [create_prefix](services_netbox_service_tasks_create_prefix.md) | Allocates a child prefix of the requested length inside an existing parent prefix; supports VLAN association by VID and group name. |
 | [create_ip](services_netbox_service_tasks_create_ip.md) | Allocates an address from an existing prefix and can assign it to a device interface or named VRRP group. |
+| [create_bgp_peering](services_netbox_service_tasks_create_bgp_peering.md) | Creates a BGP session under `bgp_peerings`; can derive the local address from an interface and create a reverse session. |
 
 Both forms belong under `ip_addresses`. Specify each address when its value is known:
 
@@ -220,6 +225,19 @@ ip_addresses:
 ```
 
 For each object type, specified values are created or updated before next-available requests run. Allocation tasks look for an existing match on repeat deployment. Give each request a stable name or description and enough scope to identify it, otherwise a repeat run can allocate another value.
+
+`create_bgp_peering` is also available as a wrapper under `bgp_peerings`. It creates sessions after the design's devices, interfaces, IP addresses, and ASNs have been deployed. Use a stable session name so repeat deployments find the existing session:
+
+```yaml
+bgp_peerings:
+  - create_bgp_peering:
+      name: ACME BRANCH PEER
+      device: acme-branch-rtr-1
+      local_interface: Ethernet1
+      local_as: 4200650001
+      remote_as: 4200650000
+      create_reverse: false
+```
 
 ### Allocation examples
 
@@ -397,7 +415,13 @@ A dry run does not create the VLANs, groups, or prefixes proposed by the design.
 
 ## Custom fields
 
-Put a `custom_fields` dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use `null` to clear a nullable field.
+Put a `custom_fields` dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use `null` to clear a nullable scalar field.
+
+When updating an ASN, a design adds new sites and tags without removing existing
+ones. When updating a VLAN or prefix, it adds new tags. For these objects, if both the
+existing and supplied values of a custom field are lists, the design adds only
+new items. Supplying `[]` leaves an existing list unchanged. For custom fields,
+`null` clears the value, and a new scalar value replaces the old one.
 
 FHRP group assignments and ConfigContext objects do not support custom fields. Device-local context is ordinary JSON data, not a custom-field definition. The design does not create custom-field definitions.
 
@@ -1473,6 +1497,46 @@ For a top-level group, specify both `protocol` and `group_id`. Unlike the compac
 
     The group's `vip` field accepts an explicit CIDR address, not a `create_ip` wrapper. Omit `vip` when allocating the address through `ip_addresses` as above. The stable group name, prefix selection, and description let repeated deployments reuse the same VIP.
 
+## L2VPNs and Terminations
+
+Define L2VPNs in `l2vpns`. Like VRFs, they accept `import_route_targets` and
+`export_route_targets` as lists of dictionaries with `name`. These definitions
+are extracted into `route_targets` and deployed before the L2VPN. Repeating the
+same target dictionary in both lists creates it once.
+
+`terminations` under an L2VPN uses the same record shape as the top-level
+`l2vpn_terminations` collection, except that the parent supplies `l2vpn`.
+Each termination attaches one device interface (`device` and `interface`) or
+one VLAN (`group` and `vid`). The interface or VLAN must already exist or be
+defined earlier in the design. NetBox permits only one L2VPN termination per
+attached object; deployment reports a conflict rather than moving an object
+from another L2VPN. Omitted terminations are not deleted.
+
+```yaml
+l2vpns:
+  - name: BRANCH EVPN
+    type: vxlan
+    identifier: 10100
+    import_route_targets:
+      - name: "65100:100"
+    export_route_targets:
+      - name: "65100:100"
+    terminations:
+      - device: branch-router-1
+        interface: Ethernet1
+      - group: BRANCH VLANS
+        vid: 100
+
+l2vpn_terminations:
+  - l2vpn: BRANCH EVPN
+    device: branch-router-2
+    interface: Ethernet1
+```
+
+The `l2vpn_terminations` stage runs after interfaces. A dry run can report
+planned terminations even when their interfaces or VLANs are also planned and
+therefore have no IDs yet.
+
 ## Nested VRF Records
 
 VRFs accept `import_route_targets` and `export_route_targets` as lists of dictionaries. These route targets become top-level definitions and are deployed before their VRF, even when only `name` is supplied. A VRF can be defined at the top level or nested under a device interface.
@@ -1943,6 +2007,7 @@ Errors identify the collection that stopped deployment. Earlier collections are 
 ## Notes
 
 - A dry run does not create prerequisites, so it cannot fully resolve references to objects proposed earlier in the same design.
+- Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by related object name or ID. Names must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values; scalar and `null` values replace them. Custom-field definitions must already exist in NetBox.
 - Check that named parents, device types, sites, interfaces, and allocation pools exist or are created earlier in the design order.
 - Jinja filters, input models, and custom functions execute Python inside the worker. Use trusted files.
 - See the [ACME design example](https://github.com/norfablabs/NORFAB/blob/main/tests/nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml) for a full nested design.

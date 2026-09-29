@@ -20,6 +20,10 @@ Updates one or many existing BGP sessions in NetBox. Supports single-session mod
 7. In dry-run mode — the diff is returned without writing
 8. Otherwise, the changed fields are resolved (IPs, ASNs, policies) and the session is updated
 
+When updating a session, supplied tags and list-valued custom fields add missing
+values without removing existing ones. Object and multiobject custom fields accept
+related object names or IDs. Scalar custom fields replace their current values.
+
 ## Prerequisites
 
 - **NetBox BGP plugin** (`netbox-bgp`) must be installed and enabled on the NetBox instance.

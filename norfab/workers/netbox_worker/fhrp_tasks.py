@@ -300,14 +300,6 @@ class NetboxFhrpTasks:
                 log.error(f"{self.name} - Sync VRRP: {msg}")
                 ret.errors.append(msg)
         live_count = sum(len(records) for records in live_state.values())
-        if live_count == 0:
-            msg = "no usable live VRRP assignments returned"
-            job.event(msg, severity="ERROR")
-            log.error(f"{self.name} - Sync VRRP: {msg}")
-            ret.errors.append(msg)
-            ret.failed = True
-            return ret
-
         job.event(
             f"normalized {live_count} VRRP assignment(s) from "
             f"{len(live_state)} device(s)"
@@ -436,19 +428,20 @@ class NetboxFhrpTasks:
             actions["update"] = {
                 key: actions["update"][key] for key in sorted(actions["update"])
             }
-            actions["delete"] = []
+            actions["delete"] = sorted(actions["delete"])
 
         create_count = sum(len(actions["create"]) for actions in sync_diff.values())
         update_count = sum(len(actions["update"]) for actions in sync_diff.values())
+        delete_count = sum(len(actions["delete"]) for actions in sync_diff.values())
         in_sync_count = sum(len(actions["in_sync"]) for actions in sync_diff.values())
         job.event(
             "vrrp sync diff complete: "
-            f"{create_count} create, {update_count} update, "
+            f"{create_count} create, {update_count} update, {delete_count} delete, "
             f"{in_sync_count} in sync"
         )
         log.info(
             f"{self.name} - Sync VRRP diff: {create_count} create, "
-            f"{update_count} update, {in_sync_count} in sync"
+            f"{update_count} update, {delete_count} delete, {in_sync_count} in sync"
         )
 
         ret.result = {
@@ -463,8 +456,13 @@ class NetboxFhrpTasks:
             ret.dry_run = True
             return ret
 
-        if not sync_diff_has_changes(sync_diff):
-            job.event("no VRRP sync changes required")
+        if not sync_diff_has_changes(sync_diff, ignore_deletions=True):
+            if delete_count:
+                job.event(
+                    f"skipping {delete_count} VRRP deletion(s); deletion is not supported"
+                )
+            else:
+                job.event("no VRRP sync changes required")
             return ret
 
         if with_approval:
@@ -682,6 +680,10 @@ class NetboxFhrpTasks:
             job.event(f"completed VRRP changes for {device_name}")
 
         job.event("vrrp sync complete")
+        if delete_count:
+            job.event(
+                f"skipping {delete_count} VRRP deletion(s); deletion is not supported"
+            )
         create_count = sum(len(actions["created"]) for actions in ret.result.values())
         update_count = sum(len(actions["updated"]) for actions in ret.result.values())
         log.info(

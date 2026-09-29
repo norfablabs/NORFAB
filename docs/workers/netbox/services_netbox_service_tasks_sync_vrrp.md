@@ -186,14 +186,14 @@ all matching records are assigned to other NetBox objects, the task reports an
 error and leaves the address, FHRP group, and interface assignment unchanged.
 
 The normalized live and NetBox states store `virtual_address` as one string
-because a VRRP group has one virtual IP. The task is additive: it does not
-delete FHRP groups, assignments, or virtual IP addresses that are absent from
-live parsing. Use `dry_run` to inspect the plan, or `with_approval` to review it
+because a VRRP group has one virtual IP. The task reports NetBox assignments
+absent from live parsing in the diff's `delete` list, but does not delete them
+or their groups and virtual IP addresses. Use `dry_run` to inspect the plan, or `with_approval` to review it
 before writes are applied.
 
-If parsing returns no usable VRRP assignments across the selected devices, the
-task fails before loading synchronization state or searching NetBox IP
-addresses. This prevents an empty address filter from becoming an unfiltered
-NetBox IP query.
+When parsing returns no VRRP assignments and NetBox has no assignments for the
+selected devices, the task reports them in sync. Existing NetBox assignments
+appear as deletion candidates; a normal sync leaves them in place. NetBox IP
+addresses are queried only when creates or updates require them.
 
 ::: norfab.workers.netbox_worker.fhrp_tasks.NetboxFhrpTasks.sync_vrrp

@@ -1,3 +1,22 @@
+# 0.24.3
+
+## BUGS
+
+1. Fixed NetBox `check_device_sync` reporting devices out of sync when neither the live device nor NetBox has VRRP assignments.
+
+## ENHANCEMENTS
+
+1. NetBox `sync_vrrp` now includes NetBox-only assignments in the diff's `delete` list, so dry runs and `check_device_sync` report VRRP drift. Regular sync runs leave those assignments in NetBox and report no applied deletions.
+2. NetBox `create_asn` now adds supplied sites, tags, and custom-field list values to an existing ASN without removing its current values. Object and multiobject custom fields accept related object names or IDs; missing or ambiguous names fail.
+3. NetBox `create_ip` now resolves names in object and multiobject custom fields and adds new custom-field list values when reusing an existing IP address.
+4. NetBox `create_prefix` now resolves names in object and multiobject custom fields and adds new tags and custom-field list values when updating an existing prefix.
+5. NetBox `create_vlan` now resolves names in object and multiobject custom fields and adds new tags and custom-field list values when updating an existing VLAN.
+6. NetBox `create_bgp_peering` now resolves named object and multiobject custom-field references for new sessions. A session that already exists is reported under `exists` and left unchanged.
+7. NetBox `update_bgp_peering` now adds supplied tags and custom-field list values to existing sessions, resolves named custom-field object references, and includes these changes in dry-run diffs.
+8. NetBox `design_deploy` now creates and updates L2VPNs and their interface or VLAN terminations, accepts inline L2VPN route targets and terminations, and deduplicates route targets by name. Its processors resolve named object and multiobject custom-field references on creates and updates; updates add tags, custom-field list values, and supported relationship members such as ASN sites, VRF route targets, interface VLANs, BGP policies, and config context sites. Designs can use `create_bgp_peering` for new sessions and `update_bgp_peering` for existing ones.
+
+---
+
 # 0.24.2
 
 ## ENHANCEMENTS

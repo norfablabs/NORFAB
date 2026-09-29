@@ -27,6 +27,7 @@ from .netbox_models import (
 )
 from .netbox_worker_utilities import (
     map_interface_name,
+    merge_resolved_custom_fields,
     resolve_vrf,
     review_sync_task_result,
     sync_diff_has_changes,
@@ -203,7 +204,9 @@ class NetboxIpTasks:
                     `NetboxAllocationError`.
 
             custom_fields (dict, optional): Custom-field names and values to PATCH
-                on the allocated IP. Definitions must already exist in Netbox.
+                on the allocated IP. Object and multiobject fields accept related
+                object names or IDs. List values add to existing values; scalar
+                values and null replace them. Definitions must exist in NetBox.
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.
             interface (str, optional): The interface associated with the IP address.
@@ -541,9 +544,29 @@ class NetboxIpTasks:
             nb_ip.assigned_object_id = nb_vrrp_group.id
             has_changes = True
         if custom_fields is not None:
-            if not dry_run:
-                nb_ip.update({"custom_fields": custom_fields})
-            has_changes = True
+            reference_fields = self.bulk_filter(
+                nb.extras.custom_fields,
+                object_type="ipam.ipaddress",
+                type=["object", "multiobject"],
+            )
+            # The helper converts NetBox's reference objects to writeable IDs
+            # and adds new list values without duplicating existing ones.
+            current_fields, merged_fields = merge_resolved_custom_fields(
+                self,
+                nb,
+                nb_ip,
+                custom_fields,
+                [field for field in reference_fields if field.type.value == "object"],
+                [
+                    field
+                    for field in reference_fields
+                    if field.type.value == "multiobject"
+                ],
+            )
+            if merged_fields != current_fields:
+                if not dry_run:
+                    nb_ip.update({"custom_fields": merged_fields})
+                has_changes = True
         if description and description != nb_ip.description:
             nb_ip.description = description
             has_changes = True

@@ -468,9 +468,7 @@ class TestSyncVrrpEmptyResult:
     DEVICE = "fn-ceos-lf-3"
     NORNIR_WORKER = "nornir-worker-4"
 
-    def test_sync_vrrp_stops_when_getter_returns_no_assignments(
-        self, nfclient: Any
-    ) -> None:
+    def test_sync_vrrp_empty_live_and_netbox_are_in_sync(self, nfclient: Any) -> None:
         parsed = nfclient.run_job(
             "nornir",
             "parse_ttp",
@@ -495,6 +493,7 @@ class TestSyncVrrpEmptyResult:
                 interface_id=interface_id
             )
         }
+        assert not assignments_before
 
         response = nfclient.run_job(
             "netbox",
@@ -506,9 +505,14 @@ class TestSyncVrrpEmptyResult:
 
         assert response
         for result in response.values():
-            assert result["failed"] is True
-            assert "no usable live VRRP assignments returned" in result["errors"]
-            assert result["result"] == {}
+            assert result["failed"] is False
+            assert result["errors"] == []
+            assert result["result"][self.DEVICE] == {
+                "created": [],
+                "updated": [],
+                "deleted": [],
+                "in_sync": [],
+            }
         assignments_after = {
             assignment.id
             for interface_id in interface_ids
@@ -517,6 +521,43 @@ class TestSyncVrrpEmptyResult:
             )
         }
         assert assignments_after == assignments_before
+
+    def test_sync_vrrp_reports_deletion_without_deleting(self, nfclient: Any) -> None:
+        nb = get_pynetbox(nfclient)
+        device = nb.dcim.devices.get(name=self.DEVICE)
+        interface = next(iter(nb.dcim.interfaces.filter(device_id=device.id)))
+        group = None
+        assignment = None
+        try:
+            group = nb.ipam.fhrp_groups.create(
+                protocol="vrrp2", group_id=2999, name="TEST_VRRP_DELETION_PLAN"
+            )
+            assignment = nb.ipam.fhrp_group_assignments.create(
+                group=group.id,
+                interface_type="dcim.interface",
+                interface_id=interface.id,
+                priority=100,
+            )
+            response = nfclient.run_job(
+                "netbox",
+                "sync_vrrp",
+                workers="any",
+                kwargs={"devices": [self.DEVICE], "timeout": 120},
+                timeout=180,
+            )
+            key = f"{interface.name}:vrrp2:2999"
+            assert response
+            for result in response.values():
+                assert result["failed"] is False
+                assert result["errors"] == []
+                assert result["diff"][self.DEVICE]["delete"] == [key]
+                assert result["result"][self.DEVICE]["deleted"] == []
+            assert nb.ipam.fhrp_group_assignments.get(id=assignment.id) is not None
+        finally:
+            if assignment is not None:
+                assignment.delete()
+            if group is not None:
+                group.delete()
 
 
 class TestSyncVrrpAristaPeers:

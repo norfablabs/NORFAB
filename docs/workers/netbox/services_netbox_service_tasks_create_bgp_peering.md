@@ -17,13 +17,16 @@ Creates one or many BGP sessions in NetBox. Supports single-session mode (indivi
 4. For each spec — when `local_interface` is supplied, the interface is looked up in IPAM to derive `local_address`; P2P peer IP and remote device are derived from the subnet
 5. Worker pre-fetches all existing sessions for targeted devices (single API call) to support idempotency
 6. For each session spec:
-    - Idempotency check — if the session name already exists, it is added to `exists` and skipped
+    - Idempotency check: an existing session is left unchanged and reported in `exists`
     - In dry-run mode — the name is added to `create` and processing continues
     - Local and remote IPs are resolved from IPAM (or created when not found)
     - Local and remote ASNs are resolved from IPAM (or created when `rir` is provided)
     - Optional fields (peer group, routing policies, prefix lists) are resolved or created by name
     - When `create_reverse=True` a mirror session is built by swapping local/remote IPs and ASNs
 7. All prepared payloads are sent to NetBox in a single bulk-create call
+
+Object and multiobject custom fields accept related object names or IDs when creating a session. Use `update_bgp_peering` to change an existing session.
+When `custom_fields` is supplied, the task reuses reference-field definitions in `lookup_cache` or fetches and caches them for the next call. Calls without supplied custom fields do not fetch those definitions.
 
 ## Prerequisites
 

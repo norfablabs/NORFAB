@@ -1,6 +1,7 @@
 import ipaddress
 import pprint
 import random
+from typing import Any
 
 import pytest
 
@@ -784,9 +785,7 @@ class TestSyncDeviceIP:
                         "delete": [],
                         "in_sync": [],
                     }
-            assert not list(
-                pynb.ipam.ip_addresses.filter(address=self.JUNOS_VRRP_IP)
-            )
+            assert not list(pynb.ipam.ip_addresses.filter(address=self.JUNOS_VRRP_IP))
         finally:
             self._delete_ip_addresses(nfclient, self.JUNOS_VRRP_IP)
 
@@ -858,17 +857,15 @@ class TestSyncDeviceIP:
                 if self.ANYCAST_IP in res["result"][device]["created"]
             ]
             assert len(updated) == 1, f"{worker} expected one reuse, got {updated}"
-            assert len(created) == len(devices) - 1, (
-                f"{worker} expected {len(devices) - 1} create(s), got {created}"
-            )
+            assert (
+                len(created) == len(devices) - 1
+            ), f"{worker} expected {len(devices) - 1} create(s), got {created}"
 
         nb_anycast_ips = list(pynb.ipam.ip_addresses.filter(address=self.ANYCAST_IP))
         assert len(nb_anycast_ips) == len(devices)
         assert unassigned_ip.id in {ip.id for ip in nb_anycast_ips}
         assert len({ip.id for ip in nb_anycast_ips}) == len(devices)
-        assert {
-            ip.assigned_object.device.name for ip in nb_anycast_ips
-        } == set(devices)
+        assert {ip.assigned_object.device.name for ip in nb_anycast_ips} == set(devices)
         assert all(str(ip.role).lower() == "anycast" for ip in nb_anycast_ips)
 
         self._cleanup(nfclient, devices)
@@ -1796,6 +1793,85 @@ class TestSyncDeviceIP:
 
 @pytest.mark.netbox_create_ip
 class TestCreateIP:
+    def test_merges_named_custom_field_references(self, nfclient: Any) -> None:
+        """Resolve IP custom-field names and retain references on repeat calls."""
+        nb = get_pynetbox(nfclient)
+        parent = "198.19.249.0/29"
+        description = "NORFAB IP CUSTOM FIELD ALLOCATION"
+        site_names = ["NORFAB IP CF SITE A", "NORFAB IP CF SITE B"]
+        field_names = ["norfab_ip_cf_site", "norfab_ip_cf_sites"]
+        if (
+            nb.ipam.prefixes.get(prefix=parent)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+            or any(nb.extras.custom_fields.get(name=name) for name in field_names)
+        ):
+            pytest.skip("IP custom-field test objects already exist")
+
+        try:
+            nb.ipam.prefixes.create({"prefix": parent})
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-ip-cf-site-a"},
+                    {"name": site_names[1], "slug": "norfab-ip-cf-site-b"},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                [
+                    {
+                        "name": field_names[0],
+                        "type": "object",
+                        "object_types": ["ipam.ipaddress"],
+                        "related_object_type": "dcim.site",
+                    },
+                    {
+                        "name": field_names[1],
+                        "type": "multiobject",
+                        "object_types": ["ipam.ipaddress"],
+                        "related_object_type": "dcim.site",
+                    },
+                ]
+            )
+            for site_name in site_names:
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_ip",
+                    workers="any",
+                    kwargs={
+                        "prefix": parent,
+                        "description": description,
+                        "create_peer_ip": False,
+                        "custom_fields": {
+                            field_names[0]: site_name,
+                            field_names[1]: [site_name],
+                        },
+                    },
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                addresses = list(nb.ipam.ip_addresses.filter(parent=parent))
+                assert len(addresses) == 1
+                current = addresses[0]
+                assert current.custom_fields[field_names[0]]["id"] == next(
+                    site.id for site in sites if site.name == site_name
+                )
+                expected = sites[:1] if site_name == site_names[0] else sites
+                assert {
+                    item["id"] for item in current.custom_fields[field_names[1]]
+                } == {site.id for site in expected}
+        finally:
+            for address in nb.ipam.ip_addresses.filter(parent=parent):
+                address.delete()
+            prefix = nb.ipam.prefixes.get(prefix=parent)
+            if prefix:
+                prefix.delete()
+            for name in field_names:
+                field = nb.extras.custom_fields.get(name=name)
+                if field:
+                    field.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
 
     @pytest.mark.parametrize("protocol, mask_len", [("vrrp2", None), ("vrrp3", 32)])
     def test_create_ip_vrrp_group(self, nfclient, protocol, mask_len):
@@ -2690,6 +2766,97 @@ class TestCreateIP:
 @pytest.mark.netbox_create_prefix
 class TestCreatePrefix:
     nb_version = None
+
+    def test_adds_tags_and_array_custom_fields(self, nfclient: Any) -> None:
+        """Add tags and site references through repeated create_prefix calls."""
+        nb = get_pynetbox(nfclient)
+        parent = "198.19.248.0/24"
+        description = "NORFAB PREFIX ARRAY CHILD"
+        field_name = "norfab_prefix_array_sites"
+        tag_names = ["norfab-prefix-array-a", "norfab-prefix-array-b"]
+        site_names = ["NORFAB PREFIX ARRAY SITE A", "NORFAB PREFIX ARRAY SITE B"]
+        if (
+            list(nb.ipam.prefixes.filter(within_include=parent))
+            or list(nb.ipam.prefixes.filter(description=description))
+            or nb.extras.custom_fields.get(name=field_name)
+            or any(nb.extras.tags.get(name=name) for name in tag_names)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+        ):
+            pytest.skip("create prefix array test objects already exist")
+
+        parent_id = None
+        try:
+            parent_id = nb.ipam.prefixes.create({"prefix": parent}).id
+            nb.extras.tags.create(
+                [
+                    {"name": tag_names[0], "slug": tag_names[0]},
+                    {"name": tag_names[1], "slug": tag_names[1]},
+                ]
+            )
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-prefix-array-site-a"},
+                    {"name": site_names[1], "slug": "norfab-prefix-array-site-b"},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                {
+                    "name": field_name,
+                    "type": "multiobject",
+                    "object_types": ["ipam.prefix"],
+                    "related_object_type": "dcim.site",
+                }
+            )
+            for requested_tags, requested_sites in (
+                ([tag_names[0]], [site_names[0]]),
+                (tag_names, [site_names[1]]),
+                ([], []),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "create_prefix",
+                    workers="any",
+                    kwargs={
+                        "parent": parent,
+                        "prefixlen": 28,
+                        "description": description,
+                        "tags": requested_tags,
+                        "custom_fields": {field_name: requested_sites},
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                child = nb.ipam.prefixes.get(description=description)
+                expected_tags = (
+                    tag_names[:1] if requested_tags == [tag_names[0]] else tag_names
+                )
+                expected_sites = (
+                    [sites[0].id]
+                    if requested_tags == [tag_names[0]]
+                    else [site.id for site in sites]
+                )
+                assert {tag.name for tag in child.tags} == set(expected_tags)
+                assert {site["id"] for site in child.custom_fields[field_name]} == set(
+                    expected_sites
+                )
+        finally:
+            for child in nb.ipam.prefixes.filter(description=description):
+                child.delete()
+            if parent_id:
+                parent_record = nb.ipam.prefixes.get(parent_id)
+                if parent_record:
+                    parent_record.delete()
+            field = nb.extras.custom_fields.get(name=field_name)
+            if field:
+                field.delete()
+            for name in tag_names:
+                tag = nb.extras.tags.get(name=name)
+                if tag:
+                    tag.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
 
     def test_create_prefix_vlan(self, nfclient):
         """Resolve VID within its group and preserve prefix identity on updates."""

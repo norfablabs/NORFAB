@@ -23,6 +23,10 @@ from .netbox_models import (
     DesignDocument,
     NetboxFastApiArgs,
 )
+from .netbox_worker_utilities import (
+    merge_array_values,
+    merge_resolved_custom_fields,
+)
 
 log = logging.getLogger(__name__)
 
@@ -203,16 +207,26 @@ def flatten_design(design: dict) -> dict:
                 }
             )
 
-    for vrf in design.get("vrfs", []):
-        if "custom_function" in vrf:
-            continue
-        for field in ("import_route_targets", "export_route_targets"):
-            if field not in vrf:
+    # A route target can appear at the top level and in several VRFs or L2VPNs.
+    # NetBox identifies it by name, so keep the first definition for that name.
+    route_target_names = {target["name"] for target in design.get("route_targets", [])}
+    for collection in ("vrfs", "l2vpns"):
+        for record in design.get(collection, []):
+            if "custom_function" in record:
                 continue
-            for target in vrf[field]:
-                if isinstance(target, dict):
-                    if target not in design.setdefault("route_targets", []):
-                        design["route_targets"].append(target)
+            for field in ("import_route_targets", "export_route_targets"):
+                for target in record.get(field, []):
+                    if (
+                        isinstance(target, dict)
+                        and target["name"] not in route_target_names
+                    ):
+                        design.setdefault("route_targets", []).append(target)
+                        route_target_names.add(target["name"])
+            if collection == "l2vpns":
+                for termination in record.pop("terminations", []):
+                    design.setdefault("l2vpn_terminations", []).append(
+                        {**termination, "l2vpn": record["name"]}
+                    )
 
     for peering in design.get("bgp_peerings", []):
         if "custom_function" in peering:
@@ -228,16 +242,18 @@ def flatten_design(design: dict) -> dict:
 
 
 def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
-    """Seed one deployment's reference cache from existing sites and VLANs.
+    """Seed one deployment's reference cache from NetBox objects and fields.
 
     Handlers add IDs for objects created later. Exclude sites defined by this
-    design because the site handler will fetch and cache those itself.
+    design because the site handler will fetch and cache those itself. Object
+    and multiobject custom-field definitions are grouped by applicable type.
     """
     cache = {
         "vlans": {},
         "sites": {},
         "route_targets": {},
         "vrfs": {},
+        "l2vpns": {},
         "interfaces": {},
         "power_ports": {},
         "console_ports": {},
@@ -245,7 +261,20 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
         "console_server_ports": {},
         "fhrp_groups": {},
         "ip_addresses": {},
+        "custom_fields": {},
     }
+    # Fetch custom-field definitions to resolve object references, including
+    # multiobject arrays, in design records to NetBox object IDs.
+    for field in worker.bulk_filter(
+        nb.extras.custom_fields, type=["object", "multiobject"]
+    ):
+        for object_type in field.object_types:
+            fields = cache["custom_fields"].setdefault(
+                object_type, {"object": [], "multiobject": []}
+            )
+            fields[field.type.value].append(field)
+    # Site handlers cache sites created by this design later, so fetch only
+    # references to sites that must already exist in NetBox.
     site_names = {
         record["site"]
         for collection in (design.vlan_groups, design.devices, design.prefixes)
@@ -253,7 +282,7 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
         if record.get("site")
     }
     site_names.update(
-        name for record in design.asns for name in record.get("sites", [])
+        name for record in design.asns for name in (record.get("sites") or [])
     )
     site_names.difference_update(
         record["name"] for record in design.sites if "name" in record
@@ -268,6 +297,23 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
             }
         )
 
+    # Terminations can refer to an L2VPN without a matching L2VPN definition
+    # in this design, so include both sources in the lookup.
+    l2vpn_names = {record["name"] for record in design.l2vpns if "name" in record}
+    l2vpn_names.update(
+        record["l2vpn"] for record in design.l2vpn_terminations if "l2vpn" in record
+    )
+    if l2vpn_names:
+        cache["l2vpns"].update(
+            {
+                item.name: item.id
+                for item in worker.bulk_filter(
+                    nb.vpn.l2vpns, name=list(l2vpn_names), fields="id,name"
+                )
+            }
+        )
+
+    # Group and VID identify a VLAN; VID alone may match multiple groups.
     vlan_keys = {
         (record["group"], record["vid"]) for record in design.vlans if "vid" in record
     }
@@ -281,16 +327,22 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
         if isinstance(record.get("vlan"), dict) and "group" in record["vlan"]:
             vlan = record["vlan"]
             vlan_keys.add((vlan["group"], vlan["vid"]))
+    for record in design.l2vpn_terminations:
+        if "group" in record:
+            vlan_keys.add((record["group"], record["vid"]))
     if vlan_keys:
         for vlan in worker.bulk_filter(
             nb.ipam.vlans,
             vid=list({vid for _, vid in vlan_keys}),
-            fields="id,vid,name,group",
+            fields="id,vid,name,group,tags,custom_fields",
         ):
             if vlan.group and (vlan.group.name, vlan.vid) in vlan_keys:
                 cache["vlans"][(vlan.group.name, vlan.vid)] = {
                     "id": vlan.id,
                     "name": vlan.name,
+                    "tags": vlan.tags,
+                    "custom_fields": vlan.custom_fields,
+                    "object": vlan,
                 }
     return cache
 
@@ -325,6 +377,81 @@ def execute_custom_functions(
             {"function": record["custom_function"], "result": value}
         )
         log.info("completed custom design function '%s'", record["custom_function"])
+
+
+def merge_design_array_fields(
+    worker: Any,
+    nb: Any,
+    lookup_cache: dict,
+    endpoint: Any,
+    object_type: str,
+    created: list[dict],
+    updated: list[dict],
+    array_fields: tuple[str, ...] = (),
+    existing_by_id: dict[int, Any] | None = None,
+    array_value_attribute: str = "id",
+) -> None:
+    """Resolve custom-field names and add requested list members on updates.
+
+    Args:
+        worker: NetBox worker used to resolve related object names.
+        nb: NetBox API for name resolution.
+        lookup_cache: Custom-field definitions cached for this deployment.
+        endpoint: NetBox endpoint for reading updated objects by ID.
+        object_type: NetBox content type of the records.
+        created: Create payloads, modified in place.
+        updated: Update payloads, modified in place.
+        array_fields: Explicit native relationship arrays that accept additions.
+        existing_by_id: Existing NetBox records already read by the processor.
+        array_value_attribute: Related object attribute expected by the receiving
+            task. Most processors send IDs; BGP peering updates send policy names.
+    """
+    definitions = lookup_cache["custom_fields"].get(object_type, {})
+    for record in created:
+        if "tags" in record:
+            record["tags"] = merge_array_values([], record["tags"], attribute="name")
+        if "custom_fields" in record:
+            _, record["custom_fields"] = merge_resolved_custom_fields(
+                worker,
+                nb,
+                None,
+                record["custom_fields"],
+                definitions.get("object", []),
+                definitions.get("multiobject", []),
+            )
+    for record in updated:
+        if not any(
+            field in record for field in ("tags", "custom_fields", *array_fields)
+        ):
+            continue
+        current = (
+            existing_by_id[record["id"]]
+            if existing_by_id is not None
+            else endpoint.get(record["id"])
+        )
+        if "tags" in record:
+            record["tags"] = merge_array_values(
+                current.tags, record["tags"], attribute="name"
+            )
+        if "custom_fields" in record:
+            _, record["custom_fields"] = merge_resolved_custom_fields(
+                worker,
+                nb,
+                current,
+                record["custom_fields"],
+                definitions.get("object", []),
+                definitions.get("multiobject", []),
+            )
+        for field in array_fields:
+            if field in record:
+                if array_value_attribute == "name":
+                    record[field] = merge_array_values(
+                        [item.name for item in getattr(current, field)], record[field]
+                    )
+                else:
+                    record[field] = merge_array_values(
+                        getattr(current, field), record[field], attribute="id"
+                    )
 
 
 def process_tenants(
@@ -381,6 +508,9 @@ def process_tenants(
         for field in ("group",):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.tenancy.tenants, "tenancy.tenant", created, updated
+    )
     if not dry_run:
         if created:
             nb.tenancy.tenants.create(created)
@@ -448,6 +578,9 @@ def process_regions(
         for field in ("parent",):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.dcim.regions, "dcim.region", created, updated
+    )
     if not dry_run:
         if created:
             nb.dcim.regions.create(created)
@@ -511,6 +644,15 @@ def process_manufacturers(
     ]
     for record in created:
         record.setdefault("slug", slugify(record["name"]))
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.manufacturers,
+        "dcim.manufacturer",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             nb.dcim.manufacturers.create(created)
@@ -577,6 +719,9 @@ def process_platforms(
         for field in ("manufacturer",):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.dcim.platforms, "dcim.platform", created, updated
+    )
     if not dry_run:
         if created:
             nb.dcim.platforms.create(created)
@@ -645,6 +790,15 @@ def process_device_types(
         for field in ("manufacturer", "default_platform"):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.device_types,
+        "dcim.devicetype",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             nb.dcim.device_types.create(created)
@@ -706,6 +860,15 @@ def process_device_roles(
     ]
     for record in created:
         record.setdefault("slug", slugify(record["name"]))
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.device_roles,
+        "dcim.devicerole",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             nb.dcim.device_roles.create(created)
@@ -769,6 +932,9 @@ def process_sites(
         for field in ("region", "tenant"):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.dcim.sites, "dcim.site", created, updated
+    )
     if not dry_run:
         if created:
             lookup_cache["sites"].update(
@@ -828,6 +994,9 @@ def process_roles(
     ]
     for record in created:
         record.setdefault("slug", slugify(record["name"]))
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.ipam.roles, "ipam.role", created, updated
+    )
     if not dry_run:
         if created:
             nb.ipam.roles.create(created)
@@ -885,6 +1054,9 @@ def process_rirs(
     ]
     for record in created:
         record.setdefault("slug", slugify(record["name"]))
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.ipam.rirs, "ipam.rir", created, updated
+    )
     if not dry_run:
         if created:
             nb.ipam.rirs.create(created)
@@ -996,6 +1168,15 @@ def process_vlan_groups(
             "cluster_group",
         ):
             record.pop(field, None)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.vlan_groups,
+        "ipam.vlangroup",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             nb.ipam.vlan_groups.create(created)
@@ -1062,6 +1243,9 @@ def process_asn_ranges(
         for field in ("rir",):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.ipam.asn_ranges, "ipam.asnrange", created, updated
+    )
     if not dry_run:
         if created:
             nb.ipam.asn_ranges.create(created)
@@ -1123,6 +1307,9 @@ def process_rack_roles(
     ]
     for record in created:
         record.setdefault("slug", slugify(record["name"]))
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.dcim.rack_roles, "dcim.rackrole", created, updated
+    )
     if not dry_run:
         if created:
             nb.dcim.rack_roles.create(created)
@@ -1189,6 +1376,15 @@ def process_route_targets(
     for record in created + updated:
         if record.get("tenant") is not None:
             record["tenant"] = {"name": record["tenant"]}
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.route_targets,
+        "ipam.routetarget",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             targets.update(
@@ -1286,6 +1482,16 @@ def process_vrfs(
                     targets.get(target["name"]) if dry_run else targets[target["name"]]
                     for target in record.pop(source)
                 ]
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.vrfs,
+        "ipam.vrf",
+        created,
+        updated,
+        ("import_targets", "export_targets"),
+    )
     if not dry_run:
         if created:
             vrfs.update(
@@ -1297,6 +1503,241 @@ def process_vrfs(
         "created": [record["name"] for record in created],
         "updated": [record["name"] for record in updated],
     }
+    return changes
+
+
+def process_l2vpns(
+    worker: Any,
+    nb: Any,
+    records: list[dict],
+    dry_run: bool,
+    lookup_cache: dict,
+    job: Job,
+    instance: str,
+    branch: str | None,
+) -> dict:
+    """Match L2VPNs by name and resolve their import and export route targets.
+
+    Inline targets are deployed earlier. New L2VPN IDs are cached for
+    termination writes; dry runs report planned changes without writing.
+
+    Args:
+        worker: NetBox worker used for bulk reads.
+        nb: Pynetbox API bound to this deployment's instance and branch.
+        records: Flattened L2VPN records.
+        dry_run: Plan actions without writing to NetBox.
+        lookup_cache: Mutable references shared across collection handlers.
+        job: Current job; not used by this handler.
+        instance: NetBox instance; not used by this handler.
+        branch: NetBox branch; not used by this handler.
+
+    Returns:
+        dict: L2VPN names grouped under ``created`` and ``updated``.
+    """
+    l2vpns = lookup_cache["l2vpns"]
+    targets = lookup_cache["route_targets"]
+    target_names = {
+        target["name"]
+        for record in records
+        for field in ("import_route_targets", "export_route_targets")
+        for target in record.get(field, [])
+    }
+    missing = target_names - targets.keys()
+    if missing:
+        targets.update(
+            {
+                item.name: item.id
+                for item in worker.bulk_filter(
+                    nb.ipam.route_targets, name=list(missing), fields="id,name"
+                )
+            }
+        )
+    created, updated = [], []
+    for source in records:
+        payload = dict(source)
+        name = payload["name"]
+        if name in l2vpns:
+            payload["id"] = l2vpns[name]
+            updated.append(payload)
+        else:
+            payload.setdefault("slug", slugify(name))
+            created.append(payload)
+        if payload.get("tenant") is not None:
+            payload["tenant"] = {"name": payload["tenant"]}
+        for source_field, destination in (
+            ("import_route_targets", "import_targets"),
+            ("export_route_targets", "export_targets"),
+        ):
+            if source_field in payload:
+                payload[destination] = [
+                    targets.get(target["name"]) if dry_run else targets[target["name"]]
+                    for target in payload.pop(source_field)
+                ]
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.vpn.l2vpns,
+        "vpn.l2vpn",
+        created,
+        updated,
+        ("import_targets", "export_targets"),
+    )
+    if not dry_run:
+        if created:
+            l2vpns.update(
+                {item.name: item.id for item in nb.vpn.l2vpns.create(created)}
+            )
+        if updated:
+            nb.vpn.l2vpns.update(updated)
+    return {
+        "created": [record["name"] for record in created],
+        "updated": [record["name"] for record in updated],
+    }
+
+
+def process_l2vpn_terminations(
+    worker: Any,
+    nb: Any,
+    records: list[dict],
+    dry_run: bool,
+    lookup_cache: dict,
+    job: Job,
+    instance: str,
+    branch: str | None,
+) -> dict:
+    """Attach L2VPNs to device interfaces or VLANs without moving attachments.
+
+    NetBox permits only one L2VPN termination per attached object. Existing
+    attachments to a different L2VPN raise an error instead of being moved.
+
+    Args:
+        worker: NetBox worker used for bulk reads.
+        nb: Pynetbox API bound to this deployment's instance and branch.
+        records: Flattened termination records with an L2VPN name and attachment.
+        dry_run: Plan actions without writing to NetBox.
+        lookup_cache: Mutable references shared across collection handlers.
+        job: Current job; not used by this handler.
+        instance: NetBox instance; not used by this handler.
+        branch: NetBox branch; not used by this handler.
+
+    Returns:
+        dict: Attachment identities grouped under ``created`` and ``updated``.
+
+    Raises:
+        ValueError: If an attachment belongs to another L2VPN.
+        KeyError: If a referenced L2VPN, interface, or VLAN does not exist.
+    """
+    l2vpns = lookup_cache["l2vpns"]
+    missing_l2vpns = {record["l2vpn"] for record in records} - l2vpns.keys()
+    if missing_l2vpns:
+        l2vpns.update(
+            {
+                item.name: item.id
+                for item in worker.bulk_filter(
+                    nb.vpn.l2vpns, name=list(missing_l2vpns), fields="id,name"
+                )
+            }
+        )
+    interfaces = lookup_cache["interfaces"]
+    missing_devices = {
+        record["device"]
+        for record in records
+        if "device" in record
+        and (record["device"], record["interface"]) not in interfaces
+    }
+    if missing_devices:
+        interfaces.update(
+            {
+                (item.device.name, item.name): item
+                for item in worker.bulk_filter(
+                    nb.dcim.interfaces,
+                    device=list(missing_devices),
+                    fields="id,name,device",
+                )
+            }
+        )
+    assignments = []
+    for record in records:
+        if "device" in record:
+            object_type = "dcim.interface"
+            key = (record["device"], record["interface"])
+            if key in interfaces:
+                object_id = interfaces[key].id
+            elif dry_run:
+                object_id = None
+            else:
+                raise KeyError(f"interface {key} does not exist")
+            identity = f"{record['l2vpn']}:{record['device']}:{record['interface']}"
+        else:
+            object_type = "ipam.vlan"
+            key = (record["group"], record["vid"])
+            vlan = lookup_cache["vlans"].get(key)
+            if vlan:
+                object_id = vlan["id"]
+            elif dry_run:
+                object_id = None
+            else:
+                raise KeyError(f"VLAN {key} does not exist")
+            identity = f"{record['l2vpn']}:{record['group']}:{record['vid']}"
+        if record["l2vpn"] not in l2vpns and not dry_run:
+            raise KeyError(f"L2VPN '{record['l2vpn']}' does not exist")
+        assignments.append((record, object_type, object_id, identity))
+    existing = {}
+    for object_type, filter_name in (
+        ("dcim.interface", "interface_id"),
+        ("ipam.vlan", "vlan_id"),
+    ):
+        object_ids = list(
+            {item[2] for item in assignments if item[1] == object_type and item[2]}
+        )
+        if object_ids:
+            existing.update(
+                {
+                    (item.assigned_object_type, item.assigned_object_id): item
+                    for item in worker.bulk_filter(
+                        nb.vpn.l2vpn_terminations,
+                        fields="id,l2vpn,assigned_object_type,assigned_object_id",
+                        **{filter_name: object_ids},
+                    )
+                }
+            )
+    created, updated = [], []
+    changes = {"created": [], "updated": []}
+    for record, object_type, object_id, identity in assignments:
+        previous = existing.get((object_type, object_id))
+        if previous and previous.l2vpn.name != record["l2vpn"]:
+            raise ValueError(f"{identity} is already attached to {previous.l2vpn.name}")
+        payload = {
+            key: value
+            for key, value in record.items()
+            if key not in {"l2vpn", "device", "interface", "group", "vid"}
+        }
+        payload.update(
+            l2vpn=l2vpns.get(record["l2vpn"]) if dry_run else l2vpns[record["l2vpn"]],
+            assigned_object_type=object_type,
+            assigned_object_id=object_id,
+        )
+        if previous:
+            updated.append({**payload, "id": previous.id})
+            changes["updated"].append(identity)
+        else:
+            created.append(payload)
+            changes["created"].append(identity)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.vpn.l2vpn_terminations,
+        "vpn.l2vpntermination",
+        created,
+        updated,
+    )
+    if not dry_run:
+        if created:
+            nb.vpn.l2vpn_terminations.create(created)
+        if updated:
+            nb.vpn.l2vpn_terminations.update(updated)
     return changes
 
 
@@ -1352,6 +1793,9 @@ def process_racks(
         for field in ("site", "role", "tenant"):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.dcim.racks, "dcim.rack", created, updated
+    )
     if not dry_run:
         if created:
             nb.dcim.racks.create(created)
@@ -1450,6 +1894,9 @@ def process_devices(
             device_type = dict(record["device_type"])
             device_type["manufacturer__name"] = device_type.pop("manufacturer")
             record["device_type"] = device_type
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.dcim.devices, "dcim.device", created, updated
+    )
     if not dry_run:
         if created:
             nb.dcim.devices.create(created)
@@ -1537,6 +1984,16 @@ def process_interfaces(
         else:
             created.append(payload)
             changes["created"].append(f"{device}:{record['name']}")
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.interfaces,
+        "dcim.interface",
+        created,
+        updated,
+        ("tagged_vlans",),
+    )
     if not dry_run:
         dependent_names = {
             (record["device"], record["name"])
@@ -1615,7 +2072,8 @@ def process_prefixes(
     Identity is prefix plus VRF. Scope chooses location, site, site group,
     then region; VLAN references use group and VID. A location with a site
     is looked up within that site. Missing scopes fail; missing VLANs fail
-    outside dry-run mode.
+    outside dry-run mode. Existing prefix tags and custom-field lists gain
+    new values without losing current members.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -1639,7 +2097,9 @@ def process_prefixes(
         {
             (item.prefix, item.vrf.id if item.vrf else None): item
             for item in worker.bulk_filter(
-                nb.ipam.prefixes, prefix=prefixes, fields="id,prefix,vrf"
+                nb.ipam.prefixes,
+                prefix=prefixes,
+                fields="id,prefix,vrf,tags,custom_fields",
             )
         }
         if prefixes
@@ -1696,6 +2156,17 @@ def process_prefixes(
             record["vlan"] = cached["id"] if cached else None
             if not dry_run and record["vlan"] is None:
                 raise ValueError(f"prefix VLAN {vlan['group']}:{vlan['vid']} not found")
+    # The initial prefix read already has the fields needed for additive updates.
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.prefixes,
+        "ipam.prefix",
+        created,
+        updated,
+        existing_by_id={item.id: item for item in existing.values()},
+    )
     if not dry_run:
         if created:
             nb.ipam.prefixes.create(created)
@@ -1862,6 +2333,15 @@ def process_ip_addresses(
                 record[field] = {"name": record[field]}
         if isinstance(record.get("vrf"), str):
             record["vrf"] = {"name": record["vrf"]}
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.ip_addresses,
+        "ipam.ipaddress",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             ip_cache.update(
@@ -1905,6 +2385,7 @@ def process_asns(
     """Bulk-write numbered ASNs, then run create_asn range allocations.
 
     ASN number identifies explicit records; named sites resolve to cached IDs.
+    Existing ASN site and tag arrays retain their members and add new values.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -1925,7 +2406,9 @@ def process_asns(
     existing = (
         {
             item.asn: item
-            for item in worker.bulk_filter(nb.ipam.asns, asn=numbers, fields="id,asn")
+            for item in worker.bulk_filter(
+                nb.ipam.asns, asn=numbers, fields="id,asn,sites,tags,custom_fields"
+            )
         }
         if numbers
         else {}
@@ -1936,7 +2419,8 @@ def process_asns(
         for record in explicit
         if record["asn"] in existing
     ]
-    site_names = [name for record in explicit for name in record.get("sites", [])]
+    site_names = [name for record in explicit for name in (record.get("sites") or [])]
+    # This is the shared cache dictionary; newly resolved sites remain available to later handlers.
     sites = lookup_cache["sites"]
     missing_sites = set(site_names) - sites.keys()
     if missing_sites:
@@ -1949,12 +2433,30 @@ def process_asns(
             }
         )
     created = [dict(record) for record in created]
-    for record in created + updated:
+    # NetBox ASN writes require site IDs; the shared helper handles list additions.
+    for record in created:
         for field in ("rir", "tenant", "role"):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
         if "sites" in record:
             record["sites"] = [sites[name] for name in record["sites"]]
+    for record in updated:
+        for field in ("rir", "tenant", "role"):
+            if record.get(field) is not None:
+                record[field] = {"name": record[field]}
+        if "sites" in record:
+            record["sites"] = [sites[name] for name in record["sites"] or []]
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.asns,
+        "ipam.asn",
+        created,
+        updated,
+        ("sites",),
+        existing_by_id={item.id: item for item in existing.values()},
+    )
     if not dry_run:
         if created:
             nb.ipam.asns.create(created)
@@ -1992,8 +2494,9 @@ def process_vlans(
 ) -> dict:
     """Bulk-write known VLAN IDs before create_vlan allocations.
 
-    Group and VID form the identity. Created IDs populate the cache for
-    interface and prefix references later in the deployment.
+    Group and VID form the identity. Existing tags and custom-field lists gain
+    new values without losing current members. Created IDs populate the cache
+    for interface and prefix references later in the deployment.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -2025,6 +2528,21 @@ def process_vlans(
         for field in ("group", "role", "tenant"):
             if record.get(field) is not None:
                 record[field] = {"name": record[field]}
+    # The lookup cache keeps existing VLAN records with tags and custom fields.
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.vlans,
+        "ipam.vlan",
+        created,
+        updated,
+        existing_by_id={
+            item["id"]: item["object"]
+            for item in vlan_cache.values()
+            if "object" in item
+        },
+    )
     if not dry_run:
         if created:
             for item in nb.ipam.vlans.create(created):
@@ -2113,6 +2631,15 @@ def process_routing_policies(
         for record in records
         if record["name"] in existing
     ]
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.plugins.bgp.routing_policy,
+        "netbox_bgp.routingpolicy",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             nb.plugins.bgp.routing_policy.create(created)
@@ -2189,6 +2716,15 @@ def process_bgp_communities(
     for record in created + updated:
         if record.get("tenant") is not None:
             record["tenant"] = {"name": record["tenant"]}
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.plugins.bgp.community,
+        "netbox_bgp.community",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             nb.plugins.bgp.community.create(created)
@@ -2240,16 +2776,34 @@ def process_bgp_peerings(
     names = [record["name"] for record in records]
     existing = (
         {
-            item.name
+            item.name: item
             for item in worker.bulk_filter(
-                nb.plugins.bgp.session, name=names, fields="name"
+                nb.plugins.bgp.session,
+                name=names,
+                fields="id,name,import_policies,export_policies,custom_fields,tags",
             )
         }
         if names
-        else set()
+        else {}
     )
     created = [record for record in records if record["name"] not in existing]
-    updated = [record for record in records if record["name"] in existing]
+    updated = [
+        {**record, "id": existing[record["name"]].id}
+        for record in records
+        if record["name"] in existing
+    ]
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.plugins.bgp.session,
+        "netbox_bgp.bgpsession",
+        created,
+        updated,
+        array_fields=("import_policies", "export_policies"),
+        existing_by_id={item.id: item for item in existing.values()},
+        array_value_attribute="name",
+    )
     for create_reverse in (False, True):
         batch = [
             record
@@ -2264,6 +2818,7 @@ def process_bgp_peerings(
                 job=job,
                 instance=instance,
                 branch=branch,
+                lookup_cache=lookup_cache,
             )
             if result.failed or result.errors:
                 raise ValueError("; ".join(result.errors) or "BGP creation failed")
@@ -2274,6 +2829,7 @@ def process_bgp_peerings(
             job=job,
             instance=instance,
             branch=branch,
+            lookup_cache=lookup_cache,
         )
         if result.failed or result.errors:
             raise ValueError("; ".join(result.errors) or "BGP update failed")
@@ -2331,6 +2887,15 @@ def process_power_ports(
             updated.append({**payload, "id": existing[key].id})
         else:
             created.append(payload)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.power_ports,
+        "dcim.powerport",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             lookup_cache["power_ports"].update(
@@ -2401,6 +2966,15 @@ def process_console_ports(
             updated.append({**payload, "id": existing[key].id})
         else:
             created.append(payload)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.console_ports,
+        "dcim.consoleport",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             lookup_cache["console_ports"].update(
@@ -2471,6 +3045,15 @@ def process_power_outlets(
             updated.append({**payload, "id": existing[key].id})
         else:
             created.append(payload)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.power_outlets,
+        "dcim.poweroutlet",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             lookup_cache["power_outlets"].update(
@@ -2541,6 +3124,15 @@ def process_console_server_ports(
             updated.append({**payload, "id": existing[key].id})
         else:
             created.append(payload)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.dcim.console_server_ports,
+        "dcim.consoleserverport",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             lookup_cache["console_server_ports"].update(
@@ -2679,6 +3271,9 @@ def process_connections(
             ]
             created.append(payload)
             changes["created"].append(label)
+    merge_design_array_fields(
+        worker, nb, lookup_cache, nb.dcim.cables, "dcim.cable", created, updated
+    )
     if not dry_run:
         if created:
             nb.dcim.cables.create(created)
@@ -2741,6 +3336,15 @@ def process_vrrp_groups(
             updated.append({**record, "id": existing[key].id})
         else:
             created.append(record)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.ipam.fhrp_groups,
+        "ipam.fhrpgroup",
+        created,
+        updated,
+    )
     if not dry_run:
         if created:
             groups.update(
@@ -3061,7 +3665,8 @@ def process_config_context(
 
     A ``sites`` list contains site names, resolved to IDs before writing.
     Without a scope, NetBox applies the context globally, so designs should
-    scope contexts deliberately. Data is sent as supplied, without merging.
+    scope contexts deliberately. Existing sites gain new members; data is
+    sent as supplied, without merging.
 
     Args:
         worker: NetBox worker used for bulk reads.
@@ -3112,6 +3717,28 @@ def process_config_context(
             updated.append({**payload, "id": existing[record["name"]]})
         else:
             created.append(payload)
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.extras.config_contexts,
+        "extras.configcontext",
+        created,
+        updated,
+        (
+            "regions",
+            "site_groups",
+            "sites",
+            "locations",
+            "device_types",
+            "roles",
+            "platforms",
+            "cluster_groups",
+            "clusters",
+            "tenant_groups",
+            "tenants",
+        ),
+    )
     if not dry_run:
         if created:
             nb.extras.config_contexts.create(created)
@@ -3141,9 +3768,11 @@ DESIGN_HANDLERS_ORDER = {
     "vlans": process_vlans,
     "route_targets": process_route_targets,
     "vrfs": process_vrfs,
+    "l2vpns": process_l2vpns,
     "prefixes": process_prefixes,
     "devices": process_devices,
     "interfaces": process_interfaces,
+    "l2vpn_terminations": process_l2vpn_terminations,
     "power_ports": process_power_ports,
     "console_ports": process_console_ports,
     "power_outlets": process_power_outlets,
@@ -3186,6 +3815,10 @@ class NetboxDesignTasks:
         branch: str = None,
     ) -> Result:
         """Render and flatten a design, validate it, then deploy ordered collections.
+
+        Updates add tags, custom-field list entries, and the supported native
+        relationship lists. Scalar fields and context-data dictionaries replace
+        their current values. Object custom-field names resolve to NetBox IDs.
 
         Args:
             job: NorFab job injected by the task framework.

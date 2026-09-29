@@ -38,6 +38,13 @@ Returns the created or updated prefix data. In dry-run mode, returns the candida
   dry-run previews. Changing VLAN updates the prefix selected by the existing
   description/scope filters rather than allocating a replacement.
 - If `vrf` is provided, the parent prefix must belong to the same VRF.
+- When updating an existing prefix, new tags and new items in list-valued custom
+  fields are added without removing current values. Supplying `[]` leaves an
+  existing custom-field list unchanged. For custom fields, `null` clears the
+  value, and a new scalar value replaces the old one.
+- Object and multiobject custom fields accept related object names or IDs. The
+  task resolves names using each field's NetBox definition; missing or ambiguous
+  names fail.
 - Branch writes require the [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching).
 
 ## Examples

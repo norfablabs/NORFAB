@@ -16,6 +16,347 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_vlan_updates_add_tags_and_custom_field_values(self, nfclient: Any) -> None:
+        """Preserve VLAN array members when a design adds tags and site references."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        group_name = "NORFAB DESIGN ADDITIVE VLAN GROUP"
+        field_name = "norfab_design_vlan_sites"
+        object_field = "norfab_design_vlan_site"
+        tag_names = ["norfab-design-vlan-a", "norfab-design-vlan-b"]
+        site_names = ["NORFAB DESIGN VLAN SITE A", "NORFAB DESIGN VLAN SITE B"]
+        if (
+            nb.ipam.vlan_groups.get(name=group_name)
+            or nb.extras.custom_fields.get(name=field_name)
+            or nb.extras.custom_fields.get(name=object_field)
+            or any(nb.extras.tags.get(name=name) for name in tag_names)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+        ):
+            pytest.skip("design VLAN array test objects already exist")
+
+        try:
+            nb.ipam.vlan_groups.create(
+                {"name": group_name, "slug": "norfab-design-additive-vlan-group"}
+            )
+            nb.extras.tags.create(
+                [
+                    {"name": tag_names[0], "slug": tag_names[0]},
+                    {"name": tag_names[1], "slug": tag_names[1]},
+                ]
+            )
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-design-vlan-site-a"},
+                    {"name": site_names[1], "slug": "norfab-design-vlan-site-b"},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                [
+                    {
+                        "name": field_name,
+                        "type": "multiobject",
+                        "object_types": ["ipam.vlan"],
+                        "related_object_type": "dcim.site",
+                    },
+                    {
+                        "name": object_field,
+                        "type": "object",
+                        "object_types": ["ipam.vlan"],
+                        "related_object_type": "dcim.site",
+                    },
+                ]
+            )
+            for requested_tags, requested_sites in (
+                ([tag_names[0]], [site_names[0]]),
+                ([tag_names[1]], [site_names[1]]),
+                ([], []),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "vlans": [
+                                {
+                                    "group": group_name,
+                                    "vid": 3201,
+                                    "name": "NORFAB DESIGN ARRAY VLAN",
+                                    "tags": requested_tags,
+                                    "custom_fields": {
+                                        field_name: requested_sites,
+                                        object_field: site_names[
+                                            0 if requested_tags == [tag_names[0]] else 1
+                                        ],
+                                    },
+                                }
+                            ]
+                        }
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                group = nb.ipam.vlan_groups.get(name=group_name)
+                vlan = nb.ipam.vlans.get(group_id=group.id, vid=3201)
+                expected_tags = (
+                    tag_names[:1] if requested_tags == [tag_names[0]] else tag_names
+                )
+                expected_sites = (
+                    [sites[0].id]
+                    if requested_tags == [tag_names[0]]
+                    else [site.id for site in sites]
+                )
+                assert {tag.name for tag in vlan.tags} == set(expected_tags)
+                assert {site["id"] for site in vlan.custom_fields[field_name]} == set(
+                    expected_sites
+                )
+                assert vlan.custom_fields[object_field]["id"] == (
+                    sites[0].id if requested_tags == [tag_names[0]] else sites[1].id
+                )
+        finally:
+            group = nb.ipam.vlan_groups.get(name=group_name)
+            if group:
+                for vlan in nb.ipam.vlans.filter(group_id=group.id):
+                    vlan.delete()
+                group.delete()
+            for name in (field_name, object_field):
+                field = nb.extras.custom_fields.get(name=name)
+                if field:
+                    field.delete()
+            for name in tag_names:
+                tag = nb.extras.tags.get(name=name)
+                if tag:
+                    tag.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
+
+    def test_prefix_updates_add_tags_and_custom_field_values(
+        self, nfclient: Any
+    ) -> None:
+        """Preserve prefix array members when a design adds tags and sites."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        prefix_value = "198.19.253.0/24"
+        field_name = "norfab_design_prefix_sites"
+        object_field = "norfab_design_prefix_site"
+        tag_names = ["norfab-design-prefix-a", "norfab-design-prefix-b"]
+        site_names = ["NORFAB DESIGN PREFIX SITE A", "NORFAB DESIGN PREFIX SITE B"]
+        if (
+            list(nb.ipam.prefixes.filter(prefix=prefix_value))
+            or nb.extras.custom_fields.get(name=field_name)
+            or nb.extras.custom_fields.get(name=object_field)
+            or any(nb.extras.tags.get(name=name) for name in tag_names)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+        ):
+            pytest.skip("design prefix array test objects already exist")
+
+        prefix_id = None
+        try:
+            nb.extras.tags.create(
+                [
+                    {"name": tag_names[0], "slug": tag_names[0]},
+                    {"name": tag_names[1], "slug": tag_names[1]},
+                ]
+            )
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-design-prefix-site-a"},
+                    {"name": site_names[1], "slug": "norfab-design-prefix-site-b"},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                [
+                    {
+                        "name": field_name,
+                        "type": "multiobject",
+                        "object_types": ["ipam.prefix"],
+                        "related_object_type": "dcim.site",
+                    },
+                    {
+                        "name": object_field,
+                        "type": "object",
+                        "object_types": ["ipam.prefix"],
+                        "related_object_type": "dcim.site",
+                    },
+                ]
+            )
+            for requested_tags, requested_sites in (
+                ([tag_names[0]], [site_names[0]]),
+                ([tag_names[1]], [site_names[1]]),
+                ([], []),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "prefixes": [
+                                {
+                                    "prefix": prefix_value,
+                                    "tags": requested_tags,
+                                    "custom_fields": {
+                                        field_name: requested_sites,
+                                        object_field: site_names[
+                                            0 if requested_tags == [tag_names[0]] else 1
+                                        ],
+                                    },
+                                }
+                            ]
+                        }
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                prefix = nb.ipam.prefixes.get(prefix=prefix_value)
+                prefix_id = prefix.id
+                expected_tags = (
+                    tag_names[:1] if requested_tags == [tag_names[0]] else tag_names
+                )
+                expected_sites = (
+                    [sites[0].id]
+                    if requested_tags == [tag_names[0]]
+                    else [site.id for site in sites]
+                )
+                assert {tag.name for tag in prefix.tags} == set(expected_tags)
+                assert {site["id"] for site in prefix.custom_fields[field_name]} == set(
+                    expected_sites
+                )
+                assert prefix.custom_fields[object_field]["id"] == (
+                    sites[0].id if requested_tags == [tag_names[0]] else sites[1].id
+                )
+        finally:
+            prefix = (
+                nb.ipam.prefixes.get(prefix_id)
+                if prefix_id
+                else nb.ipam.prefixes.get(prefix=prefix_value)
+            )
+            if prefix:
+                prefix.delete()
+            for name in (field_name, object_field):
+                field = nb.extras.custom_fields.get(name=name)
+                if field:
+                    field.delete()
+            for name in tag_names:
+                tag = nb.extras.tags.get(name=name)
+                if tag:
+                    tag.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
+
+    def test_l2vpn_with_inline_targets_and_terminations(self, nfclient: Any) -> None:
+        """Create and repeat an L2VPN with inline targets and VLAN attachments."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        vpn_name = "NORFAB DESIGN L2VPN"
+        other_vpn_name = "NORFAB DESIGN OTHER L2VPN"
+        group_name = "NORFAB DESIGN L2VPN VLANS"
+        target_name = "64512:99124"
+        added_target_name = "64512:99125"
+        if (
+            nb.vpn.l2vpns.get(name=vpn_name)
+            or nb.vpn.l2vpns.get(name=other_vpn_name)
+            or nb.ipam.vlan_groups.get(name=group_name)
+            or nb.ipam.route_targets.get(name=target_name)
+            or nb.ipam.route_targets.get(name=added_target_name)
+        ):
+            pytest.skip("L2VPN test objects already exist")
+        design = {
+            "vlan_groups": [{"name": group_name}],
+            "vlans": [
+                {"name": "NORFAB L2VPN A", "group": group_name, "vid": 301},
+                {"name": "NORFAB L2VPN B", "group": group_name, "vid": 302},
+            ],
+            "l2vpns": [
+                {
+                    "name": vpn_name,
+                    "type": "vxlan",
+                    "identifier": 99124,
+                    "import_route_targets": [{"name": target_name}],
+                    "export_route_targets": [{"name": target_name}],
+                    "terminations": [{"group": group_name, "vid": 301}],
+                }
+            ],
+            "l2vpn_terminations": [
+                {"l2vpn": vpn_name, "group": group_name, "vid": 302}
+            ],
+        }
+        try:
+            preview = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={"design": design, "dry_run": True},
+            )
+            for result in preview.values():
+                assert not result["failed"], result
+                assert result["result"]["l2vpns"]["created"] == [vpn_name]
+                assert len(result["result"]["l2vpn_terminations"]["created"]) == 2
+            assert nb.vpn.l2vpns.get(name=vpn_name) is None
+            for action in ("created", "updated"):
+                if action == "updated":
+                    design["l2vpns"][0]["description"] = "updated L2VPN"
+                    design["l2vpns"][0]["import_route_targets"] = [
+                        {"name": added_target_name}
+                    ]
+                response = nfclient.run_job(
+                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                    assert result["result"]["l2vpns"][action] == [vpn_name]
+                    assert len(result["result"]["l2vpn_terminations"][action]) == 2
+                    assert target_name in result["result"]["route_targets"][action]
+            vpn = nb.vpn.l2vpns.get(name=vpn_name)
+            assert vpn.description == "updated L2VPN"
+            assert [target.name for target in vpn.import_targets] == [
+                target_name,
+                added_target_name,
+            ]
+            assert [target.name for target in vpn.export_targets] == [target_name]
+            group = nb.ipam.vlan_groups.get(name=group_name)
+            vlans = list(nb.ipam.vlans.filter(group_id=group.id))
+            terminations = list(nb.vpn.l2vpn_terminations.filter(l2vpn_id=vpn.id))
+            assert {
+                (item.assigned_object_type, item.assigned_object_id)
+                for item in terminations
+            } == {("ipam.vlan", vlan.id) for vlan in vlans}
+            conflict = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": {
+                        "l2vpns": [{"name": other_vpn_name, "type": "vxlan"}],
+                        "l2vpn_terminations": [
+                            {"l2vpn": other_vpn_name, "group": group_name, "vid": 301}
+                        ],
+                    }
+                },
+            )
+            for result in conflict.values():
+                assert result["failed"], result
+                assert "already attached" in str(result["errors"])
+        finally:
+            other_vpn = nb.vpn.l2vpns.get(name=other_vpn_name)
+            if other_vpn:
+                other_vpn.delete()
+            vpn = nb.vpn.l2vpns.get(name=vpn_name)
+            if vpn:
+                for termination in nb.vpn.l2vpn_terminations.filter(l2vpn_id=vpn.id):
+                    termination.delete()
+                vpn.delete()
+            group = nb.ipam.vlan_groups.get(name=group_name)
+            if group:
+                for vlan in nb.ipam.vlans.filter(group_id=group.id):
+                    vlan.delete()
+                group.delete()
+            for name in (target_name, added_target_name):
+                target = nb.ipam.route_targets.get(name=name)
+                if target:
+                    target.delete()
+
     def test_custom_fields(self, nfclient: Any) -> None:
         """Create, PATCH, preserve and clear custom fields through design deployment."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -331,6 +672,7 @@ class TestDesignDeploy:
         """Create a scoped context and compute local data after interfaces exist."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         site_name = "NORFAB DESIGN CONTEXT SITE"
+        added_site_name = "NORFAB DESIGN CONTEXT OTHER SITE"
         manufacturer_name = "NORFAB DESIGN CONTEXT MANUFACTURER"
         type_name = "NORFAB DESIGN CONTEXT TYPE"
         role_name = "NORFAB DESIGN CONTEXT ROLE"
@@ -341,7 +683,7 @@ class TestDesignDeploy:
             (nb.dcim.interfaces, {"device": device_names}),
             (nb.dcim.devices, {"name": device_names}),
             (nb.ipam.vrfs, {"name": "NORFAB DESIGN CONTEXT VRF"}),
-            (nb.dcim.sites, {"name": site_name}),
+            (nb.dcim.sites, {"name": [site_name, added_site_name]}),
             (nb.dcim.device_types, {"model": type_name}),
             (nb.dcim.device_roles, {"name": role_name}),
             (nb.dcim.manufacturers, {"name": manufacturer_name}),
@@ -360,7 +702,7 @@ class TestDesignDeploy:
             "manufacturers": [{"name": manufacturer_name}],
             "device_types": [{"model": type_name, "manufacturer": manufacturer_name}],
             "device_roles": [{"name": role_name}],
-            "sites": [{"name": site_name}],
+            "sites": [{"name": site_name}, {"name": added_site_name}],
             "vrfs": [{"name": "NORFAB DESIGN CONTEXT VRF"}],
             "devices": [
                 {
@@ -426,7 +768,9 @@ class TestDesignDeploy:
                     "object_types": ["dcim.device"],
                 }
             )
-            for _ in (1, 2):
+            for run in (1, 2):
+                if run == 2:
+                    design["config_context"][0]["sites"] = [added_site_name]
                 reply = nfclient.run_job(
                     "netbox", "design_deploy", workers="any", kwargs={"design": design}
                 )
@@ -461,7 +805,9 @@ class TestDesignDeploy:
                     ]
                     == 42
                 )
-                assert [site.name for site in context.sites] == [site_name]
+                assert {site.name for site in context.sites} == (
+                    {site_name} if run == 1 else {site_name, added_site_name}
+                )
                 assert nb.dcim.devices.get(name=device_names[0]).local_context_data == {
                     "acme": {"profile": "static"}
                 }
@@ -692,6 +1038,150 @@ class TestDesignDeploy:
                 record = endpoint.get(name=name)
                 if record:
                     record.delete()
+
+    def test_asn_updates_add_sites_tags_and_custom_field_values(
+        self, nfclient: Any
+    ) -> None:
+        """Add ASN array members on design updates without removing existing ones."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        asn_number = 4200999602
+        new_asn_number = 4200999603
+        rir_name = "NORFAB DESIGN ARRAY ASN RIR"
+        site_names = [
+            "NORFAB DESIGN ARRAY ASN SITE A",
+            "NORFAB DESIGN ARRAY ASN SITE B",
+        ]
+        tag_names = ["norfab-design-asn-a", "norfab-design-asn-b"]
+        field_name = "norfab_design_asn_sites"
+        if (
+            nb.ipam.asns.get(asn=asn_number)
+            or nb.ipam.asns.get(asn=new_asn_number)
+            or nb.ipam.rirs.get(name=rir_name)
+            or nb.extras.custom_fields.get(name=field_name)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+            or any(nb.extras.tags.get(name=name) for name in tag_names)
+        ):
+            pytest.skip("design ASN array test objects already exist")
+
+        try:
+            rir = nb.ipam.rirs.create(
+                {"name": rir_name, "slug": "norfab-design-array-asn-rir"}
+            )
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-design-array-asn-site-a"},
+                    {"name": site_names[1], "slug": "norfab-design-array-asn-site-b"},
+                ]
+            )
+            nb.extras.tags.create(
+                [
+                    {"name": tag_names[0], "slug": tag_names[0]},
+                    {"name": tag_names[1], "slug": tag_names[1]},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                {
+                    "name": field_name,
+                    "type": "multiobject",
+                    "object_types": ["ipam.asn"],
+                    "related_object_type": "dcim.site",
+                }
+            )
+            nb.ipam.asns.create(
+                {
+                    "asn": asn_number,
+                    "rir": rir.id,
+                    "sites": [sites[0].id],
+                    "tags": [{"name": tag_names[0]}],
+                    "custom_fields": {field_name: [sites[0].id]},
+                }
+            )
+            for requested_sites, requested_tags, requested_refs in (
+                ([site_names[1]], [tag_names[1]], [site_names[1]]),
+                ([], [], []),
+                (None, [], []),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "asns": [
+                                {
+                                    "asn": asn_number,
+                                    "sites": requested_sites,
+                                    "tags": requested_tags,
+                                    "custom_fields": {field_name: requested_refs},
+                                }
+                            ]
+                        }
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                asn = nb.ipam.asns.get(asn=asn_number)
+                assert {site.name for site in asn.sites} == set(site_names)
+                assert {tag.name for tag in asn.tags} == set(tag_names)
+                assert {site["id"] for site in asn.custom_fields[field_name]} == {
+                    site.id for site in sites
+                }
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": {
+                        "asns": [
+                            {"asn": asn_number, "custom_fields": {field_name: None}}
+                        ]
+                    }
+                },
+            )
+            for result in response.values():
+                assert not result["failed"], result
+            assert nb.ipam.asns.get(asn=asn_number).custom_fields[field_name] is None
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="any",
+                kwargs={
+                    "design": {
+                        "asns": [
+                            {
+                                "asn": new_asn_number,
+                                "rir": rir_name,
+                                "custom_fields": {field_name: [site_names[0]]},
+                            }
+                        ]
+                    }
+                },
+            )
+            for result in response.values():
+                assert not result["failed"], result
+            created = nb.ipam.asns.get(asn=new_asn_number)
+            assert [site["id"] for site in created.custom_fields[field_name]] == [
+                sites[0].id
+            ]
+        finally:
+            for number in (asn_number, new_asn_number):
+                asn = nb.ipam.asns.get(asn=number)
+                if asn:
+                    asn.delete()
+            field = nb.extras.custom_fields.get(name=field_name)
+            if field:
+                field.delete()
+            for name in tag_names:
+                tag = nb.extras.tags.get(name=name)
+                if tag:
+                    tag.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
+            rir = nb.ipam.rirs.get(name=rir_name)
+            if rir:
+                rir.delete()
 
     def test_allocated_asn_sites_and_role(self, nfclient: Any) -> None:
         """Allocate an ASN, attach its site and role, then reuse it."""
@@ -1149,6 +1639,7 @@ class TestDesignDeploy:
                 nb.plugins.bgp.session,
                 {"name": expected_peerings},
             ),
+            (nb.vpn.l2vpns, {"name": "ACME BRANCH EVPN"}),
             (nb.ipam.ip_addresses, {"parent": "198.19.224.0/20"}),
             (nb.ipam.ip_addresses, {"parent": "192.0.2.0/24"}),
             (nb.ipam.ip_addresses, {"parent": "198.51.100.0/30"}),
@@ -1231,15 +1722,47 @@ class TestDesignDeploy:
                 assert group.scope_type == "dcim.site"
                 assert group.scope_id == nb.dcim.sites.get(name=context["site"]).id
                 prefix = nb.ipam.prefixes.get(prefix="192.0.2.0/24")
+                site_id = nb.dcim.sites.get(name=context["site"]).id
+                for item in (
+                    nb.ipam.asns.get(asn=4200650001),
+                    nb.ipam.vlans.get(group_id=group.id, vid=100),
+                    prefix,
+                ):
+                    assert item.custom_fields["norfab_acme_site"]["id"] == site_id
+                    assert [
+                        site["id"] for site in item.custom_fields["norfab_acme_sites"]
+                    ] == [site_id]
+                vpn = nb.vpn.l2vpns.get(name="ACME BRANCH EVPN")
+                assert vpn.type.value == "vxlan"
+                assert vpn.identifier == 10100
+                assert [target.name for target in vpn.import_targets] == [
+                    "4200650001:100"
+                ]
+                assert [target.name for target in vpn.export_targets] == [
+                    "4200650001:100"
+                ]
+                assert {
+                    (item.assigned_object_type, item.assigned_object_id)
+                    for item in nb.vpn.l2vpn_terminations.filter(l2vpn_id=vpn.id)
+                } == {
+                    ("ipam.vlan", nb.ipam.vlans.get(group_id=group.id, vid=100).id),
+                    (
+                        "dcim.interface",
+                        nb.dcim.interfaces.get(
+                            device="acme-branch-rtr-1", name="Ethernet2.100"
+                        ).id,
+                    ),
+                }
                 assert prefix.scope_type == "dcim.site"
                 assert prefix.scope_id == nb.dcim.sites.get(name=context["site"]).id
                 assert prefix.vlan.vid == 100
                 allocated_prefix = nb.ipam.prefixes.get(
                     description=f"ACME {context['site']} user prefix"
                 )
-                assert allocated_prefix.vlan.id == nb.ipam.vlans.get(
-                    group_id=group.id, vid=100
-                ).id
+                assert (
+                    allocated_prefix.vlan.id
+                    == nb.ipam.vlans.get(group_id=group.id, vid=100).id
+                )
                 assert (
                     nb.ipam.prefixes.get(prefix="198.19.230.0/24").vrf.name
                     == "ACME BRANCH"
@@ -1300,7 +1823,7 @@ class TestDesignDeploy:
                         item.name
                         for item in nb.dcim.interfaces.filter(device=device_name)
                     ) == sorted(names), device_name
-                assert len(current_ids[5]) == 9
+                assert len(current_ids[6]) == 9
                 assert len(list(nb.ipam.vlans.filter(group_id=group.id))) == 4
                 assert {
                     vlan.vid: vlan.name
@@ -1379,6 +1902,10 @@ class TestDesignDeploy:
                 previous_ids = current_ids
         finally:
             cleanup_errors = []
+            vpn = nb.vpn.l2vpns.get(name="ACME BRANCH EVPN")
+            if vpn:
+                for termination in nb.vpn.l2vpn_terminations.filter(l2vpn_id=vpn.id):
+                    termination.delete()
             cable_ids = set()
             for device_name in device_names:
                 device = nb.dcim.devices.get(name=device_name)
@@ -1457,10 +1984,18 @@ class TestDesignDeploy:
             pytest.skip("ceos1 fixture is required")
         objects = [
             (nb.plugins.bgp.session, {"name": "NORFAB DESIGN BGP"}),
-            (nb.plugins.bgp.routing_policy, {"name": "NORFAB DESIGN BGP IMPORT"}),
+            (
+                nb.plugins.bgp.routing_policy,
+                {"name": ["NORFAB DESIGN BGP IMPORT", "NORFAB DESIGN BGP EXTRA"]},
+            ),
             (nb.ipam.ip_addresses, {"address": ["198.19.246.1/30", "198.19.246.2/30"]}),
             (nb.ipam.asns, {"asn": 4200999246}),
             (nb.ipam.rirs, {"name": "NORFAB DESIGN BGP RIR"}),
+            (
+                nb.extras.tags,
+                {"name": ["NORFAB DESIGN BGP TAG A", "NORFAB DESIGN BGP TAG B"]},
+            ),
+            (nb.extras.custom_fields, {"name": "norfab_design_bgp_device"}),
         ]
         for endpoint, filters in objects:
             if list(endpoint.filter(**filters)):
@@ -1481,6 +2016,8 @@ class TestDesignDeploy:
                     "local_as": 4200999246,
                     "remote_as": 4200999246,
                     "create_reverse": False,
+                    "tags": ["NORFAB DESIGN BGP TAG A"],
+                    "custom_fields": {"norfab_design_bgp_device": "ceos1"},
                     "import_policies": [
                         {
                             "name": "NORFAB DESIGN BGP IMPORT",
@@ -1491,8 +2028,21 @@ class TestDesignDeploy:
             ],
         }
         try:
-            for description in ("initial", "updated"):
+            nb.extras.custom_fields.create(
+                name="norfab_design_bgp_device",
+                type="object",
+                object_types=["netbox_bgp.bgpsession"],
+                related_object_type="dcim.device",
+            )
+            for name in ("NORFAB DESIGN BGP TAG A", "NORFAB DESIGN BGP TAG B"):
+                nb.extras.tags.create(name=name, slug=name.lower().replace(" ", "-"))
+            for description in ("initial", "updated", "updated"):
                 design["bgp_peerings"][0]["description"] = description
+                if description == "updated":
+                    design["bgp_peerings"][0]["import_policies"] = [
+                        {"name": "NORFAB DESIGN BGP EXTRA"}
+                    ]
+                    design["bgp_peerings"][0]["tags"] = ["NORFAB DESIGN BGP TAG B"]
                 reply = nfclient.run_job(
                     "netbox", "design_deploy", workers="any", kwargs={"design": design}
                 )
@@ -1502,9 +2052,32 @@ class TestDesignDeploy:
                     assert not result["errors"], result
                 session = nb.plugins.bgp.session.get(name="NORFAB DESIGN BGP")
                 assert session.description == description
-                assert [policy.name for policy in session.import_policies] == [
-                    "NORFAB DESIGN BGP IMPORT"
-                ]
+                assert session.custom_fields["norfab_design_bgp_device"]["id"] == (
+                    nb.dcim.devices.get(name="ceos1").id
+                )
+                assert {policy.name for policy in session.import_policies} == (
+                    {"NORFAB DESIGN BGP IMPORT"}
+                    if description == "initial"
+                    else {"NORFAB DESIGN BGP IMPORT", "NORFAB DESIGN BGP EXTRA"}
+                )
+                assert {tag.name for tag in session.tags} == (
+                    {"NORFAB DESIGN BGP TAG A"}
+                    if description == "initial"
+                    else {"NORFAB DESIGN BGP TAG A", "NORFAB DESIGN BGP TAG B"}
+                )
+            reply = nfclient.run_job(
+                "netbox",
+                "update_bgp_peering",
+                workers="any",
+                kwargs={
+                    "name": "NORFAB DESIGN BGP",
+                    "tags": ["NORFAB DESIGN BGP TAG B"],
+                    "custom_fields": {"norfab_design_bgp_device": "ceos1"},
+                },
+            )
+            for result in reply.values():
+                assert not result["failed"], result
+                assert "NORFAB DESIGN BGP" in result["result"]["in_sync"]
         finally:
             for endpoint, filters in objects:
                 for record in endpoint.filter(**filters):
@@ -1841,6 +2414,20 @@ tenants:
             {"routing_policies": ["ACME EXPORT"]},
             {"bgp_peerings": [{"name": "invalid", "import_policies": ["ACME IMPORT"]}]},
             {"bgp_peerings": [{"name": "invalid", "export_policies": ["ACME EXPORT"]}]},
+            {"l2vpns": [{"name": "invalid", "import_route_targets": ["64512:100"]}]},
+            {"l2vpn_terminations": [{"l2vpn": "invalid", "device": "ceos1"}]},
+            {"l2vpn_terminations": [{"l2vpn": "invalid", "group": "test"}]},
+            {
+                "l2vpn_terminations": [
+                    {
+                        "l2vpn": "invalid",
+                        "device": "ceos1",
+                        "interface": "Ethernet1",
+                        "group": "test",
+                        "vid": 100,
+                    }
+                ]
+            },
             {"platforms": [{"name": "invalid", "manufacturer": {"name": "ACME"}}]},
             {"vlans": [{"name": "invalid", "vid": 321}]},
             {

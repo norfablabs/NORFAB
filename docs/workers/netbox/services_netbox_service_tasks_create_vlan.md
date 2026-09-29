@@ -92,6 +92,8 @@ vlans:
 - The VLAN group must already exist and have available VID ranges for allocation.
 - With an explicit `vid`, identity is VLAN group plus VID.
 - Without `vid`, an existing VLAN with the same group and name is reused.
+- When updating a VLAN, new tags and new items in list-valued custom fields are added without removing existing ones. Supplying `[]` leaves an existing list unchanged. For custom fields, `null` clears the value, and a new scalar value replaces the old one.
+- Object and multiobject custom fields accept related object names or IDs. The task resolves names using each field's NetBox definition; missing or ambiguous names fail.
 - Branch writes require the NetBox Branching plugin.
 
 ## Troubleshooting

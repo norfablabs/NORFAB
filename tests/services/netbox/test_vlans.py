@@ -23,6 +23,109 @@ pytestmark = [
 
 @pytest.mark.netbox_create_vlan
 class TestCreateVlan:
+    def test_existing_vlan_adds_tags(self, nfclient: Any) -> None:
+        """Add tags and object references to an existing VLAN."""
+        nb = get_pynetbox(nfclient)
+        group_name = "NORFAB CREATE VLAN ARRAY GROUP"
+        tag_names = ["norfab-create-vlan-a", "norfab-create-vlan-b"]
+        site_names = ["NORFAB CREATE VLAN SITE A", "NORFAB CREATE VLAN SITE B"]
+        field_name = "norfab_create_vlan_sites"
+        if (
+            nb.ipam.vlan_groups.get(name=group_name)
+            or nb.extras.custom_fields.get(name=field_name)
+            or any(nb.extras.tags.get(name=name) for name in tag_names)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+        ):
+            pytest.skip("create VLAN array test objects already exist")
+        try:
+            group = nb.ipam.vlan_groups.create(
+                {
+                    "name": group_name,
+                    "slug": "norfab-create-vlan-array-group",
+                    "vid_ranges": [[100, 199]],
+                }
+            )
+            nb.extras.tags.create(
+                [
+                    {"name": tag_names[0], "slug": tag_names[0]},
+                    {"name": tag_names[1], "slug": tag_names[1]},
+                ]
+            )
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-create-vlan-site-a"},
+                    {"name": site_names[1], "slug": "norfab-create-vlan-site-b"},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                {
+                    "name": field_name,
+                    "type": "multiobject",
+                    "object_types": ["ipam.vlan"],
+                    "related_object_type": "dcim.site",
+                }
+            )
+            for requested, references in (
+                ([tag_names[0]], [site_names[0]]),
+                (tag_names, [site_names[1]]),
+                ([], []),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "create_vlan",
+                    workers="any",
+                    kwargs={
+                        "vlan_group": group_name,
+                        "name": "NORFAB ARRAY VLAN",
+                        "tags": requested,
+                        "custom_fields": {field_name: references},
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                vlan = nb.ipam.vlans.get(group_id=group.id, name="NORFAB ARRAY VLAN")
+                expected = tag_names[:1] if requested == [tag_names[0]] else tag_names
+                assert {tag.name for tag in vlan.tags} == set(expected)
+                expected_sites = (
+                    [sites[0].id]
+                    if requested == [tag_names[0]]
+                    else [site.id for site in sites]
+                )
+                assert {site["id"] for site in vlan.custom_fields[field_name]} == set(
+                    expected_sites
+                )
+            response = nfclient.run_job(
+                "netbox",
+                "create_vlan",
+                workers="any",
+                kwargs={
+                    "vlan_group": group_name,
+                    "name": "NORFAB ARRAY VLAN",
+                    "custom_fields": {field_name: None},
+                },
+            )
+            for result in response.values():
+                assert not result["failed"], result
+            vlan = nb.ipam.vlans.get(group_id=group.id, name="NORFAB ARRAY VLAN")
+            assert vlan.custom_fields[field_name] is None
+        finally:
+            group = nb.ipam.vlan_groups.get(name=group_name)
+            if group:
+                for vlan in nb.ipam.vlans.filter(group_id=group.id):
+                    vlan.delete()
+                group.delete()
+            field = nb.extras.custom_fields.get(name=field_name)
+            if field:
+                field.delete()
+            for name in tag_names:
+                tag = nb.extras.tags.get(name=name)
+                if tag:
+                    tag.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
+
     def test_dry_run_allocates_from_named_group(self) -> None:
         group = SimpleNamespace(
             id=10,

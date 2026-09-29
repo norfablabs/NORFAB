@@ -51,6 +51,7 @@ Returns the allocated or updated IP address data. When `create_peer_ip=True`, pe
 - When `mask_len` differs from the parent prefix length, the task creates or reuses a child prefix through `create_prefix`.
 - In dry-run mode, `mask_len` is ignored and the candidate IP is allocated directly from the parent prefix.
 - IPv4 /32 and IPv6 /128 allocations automatically disable peer creation and peer-subnet reuse, including when the supplied parent is itself a host prefix.
+- Object and multiobject custom fields accept related object names or IDs. The task resolves names using each field's NetBox definition, adds new list values on repeated calls, and replaces scalar or `null` values. Missing or ambiguous names fail.
 - Branch writes require the [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching).
 
 ## Examples

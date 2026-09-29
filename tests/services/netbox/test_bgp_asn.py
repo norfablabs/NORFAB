@@ -11,9 +11,12 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_sync_bgp_asn]
 @pytest.mark.netbox_create_asn
 class TestCreateBgpAsn:
     def test_allocates_and_assigns_sites(self, nfclient: Any) -> None:
-        """Allocate through the public task and replace the assigned site list."""
+        """Allocate an ASN and add sites on repeated create_asn calls."""
         nb = get_pynetbox(nfclient)
-        site_names = ["NORFAB ASN TASK SITE A", "NORFAB ASN TASK SITE B"]
+        site_names = [
+            "NORFAB ASN TASK SITE A",
+            "NORFAB ASN TASK SITE B",
+        ]
         if (
             nb.ipam.asns.get(asn=4200999700)
             or nb.ipam.asns.get(asn=4200999701)
@@ -81,7 +84,7 @@ class TestCreateBgpAsn:
                 assert not result["failed"], result
                 assert result["result"]["status"] == "updated"
             asn = nb.ipam.asns.get(asn=4200999700)
-            assert [site.name for site in asn.sites] == [site_names[1]]
+            assert {site.name for site in asn.sites} == set(site_names)
 
             response = nfclient.run_job(
                 "netbox",
@@ -97,9 +100,10 @@ class TestCreateBgpAsn:
                 assert result["failed"], result
                 assert any("site" in error for error in result["errors"])
         finally:
-            asn = nb.ipam.asns.get(asn=4200999700)
-            if asn:
-                asn.delete()
+            for number in (4200999700, 4200999701):
+                asn = nb.ipam.asns.get(asn=number)
+                if asn:
+                    asn.delete()
             asn_range = nb.ipam.asn_ranges.get(name="NORFAB ASN TASK RANGE")
             if asn_range:
                 asn_range.delete()
@@ -108,6 +112,320 @@ class TestCreateBgpAsn:
                 if site:
                     site.delete()
             rir = nb.ipam.rirs.get(name="NORFAB ASN TASK RIR")
+            if rir:
+                rir.delete()
+
+    def test_adds_tags_and_array_custom_fields(self, nfclient: Any) -> None:
+        """Keep ASN tags and site references when adding values on repeat calls."""
+        nb = get_pynetbox(nfclient)
+        asn_number = 4200999702
+        rir_name = "NORFAB ASN ARRAY RIR"
+        field_name = "norfab_asn_array_sites"
+        site_names = [
+            "NORFAB ASN ARRAY SITE A",
+            "NORFAB ASN ARRAY SITE B",
+        ]
+        tag_names = [
+            "norfab-asn-array-a",
+            "norfab-asn-array-b",
+        ]
+        if (
+            nb.ipam.asns.get(asn=asn_number)
+            or nb.ipam.rirs.get(name=rir_name)
+            or nb.extras.custom_fields.get(name=field_name)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+            or any(nb.extras.tags.get(name=name) for name in tag_names)
+        ):
+            pytest.skip("ASN array test objects already exist")
+
+        try:
+            nb.ipam.rirs.create({"name": rir_name, "slug": "norfab-asn-array-rir"})
+            created_sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-asn-array-site-a"},
+                    {"name": site_names[1], "slug": "norfab-asn-array-site-b"},
+                ]
+            )
+            nb.extras.tags.create(
+                [
+                    {"name": tag_names[0], "slug": tag_names[0]},
+                    {"name": tag_names[1], "slug": tag_names[1]},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                {
+                    "name": field_name,
+                    "type": "multiobject",
+                    "object_types": ["ipam.asn"],
+                    "related_object_type": "dcim.site",
+                }
+            )
+            for index, (tags, references) in enumerate(
+                (
+                    ([tag_names[0]], [created_sites[0].id]),
+                    (tag_names[:2], [created_sites[1].id]),
+                    ([], []),
+                )
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "create_asn",
+                    workers="any",
+                    kwargs={
+                        "asn": asn_number,
+                        "rir": rir_name,
+                        "tags": tags,
+                        "custom_fields": {field_name: references},
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                asn = nb.ipam.asns.get(asn=asn_number)
+                expected_tags = tag_names[:1] if index == 0 else tag_names[:2]
+                expected_sites = (
+                    [created_sites[0].id]
+                    if index == 0
+                    else [site.id for site in created_sites[:2]]
+                )
+                assert {tag.name for tag in asn.tags} == set(expected_tags)
+                assert {site["id"] for site in asn.custom_fields[field_name]} == set(
+                    expected_sites
+                )
+            response = nfclient.run_job(
+                "netbox",
+                "create_asn",
+                workers="any",
+                kwargs={
+                    "asn": asn_number,
+                    "rir": rir_name,
+                    "custom_fields": {field_name: None},
+                },
+            )
+            for result in response.values():
+                assert not result["failed"], result
+            assert nb.ipam.asns.get(asn=asn_number).custom_fields[field_name] is None
+
+            response = nfclient.run_job(
+                "netbox",
+                "create_asn",
+                workers="any",
+                kwargs={
+                    "asn": asn_number,
+                    "rir": rir_name,
+                    "custom_fields": {field_name: [site.id for site in created_sites]},
+                },
+            )
+            for result in response.values():
+                assert not result["failed"], result
+
+        finally:
+            asn = nb.ipam.asns.get(asn=asn_number)
+            if asn:
+                asn.delete()
+            field = nb.extras.custom_fields.get(name=field_name)
+            if field:
+                field.delete()
+            for name in tag_names:
+                tag = nb.extras.tags.get(name=name)
+                if tag:
+                    tag.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
+            rir = nb.ipam.rirs.get(name=rir_name)
+            if rir:
+                rir.delete()
+
+    def test_resolves_custom_field_object_names(self, nfclient: Any) -> None:
+        """Resolve ASN object custom fields by their related NetBox type."""
+        nb = get_pynetbox(nfclient)
+        asn_number = 4200999703
+        rir_name = "NORFAB ASN NAMED RIR"
+        site_names = ["NORFAB ASN NAMED SITE A", "NORFAB ASN NAMED SITE B"]
+        field_names = (
+            "norfab_asn_named_devices",
+            "norfab_asn_named_site",
+            "norfab_asn_named_labels",
+            "norfab_asn_named_interfaces",
+            "norfab_asn_named_policy",
+            "norfab_asn_named_note",
+        )
+        device_names = ["fn-ceos-lf-1", "fn-ceos-lf-2"]
+        devices = [nb.dcim.devices.get(name=name) for name in device_names]
+        policy_names = ["ALLOW-ALL", "ALLOW-10_8"]
+        policies = [
+            nb.plugins.bgp.routing_policy.get(name=name) for name in policy_names
+        ]
+        if not all(devices) or not all(policies):
+            pytest.skip("NetBox device and routing policy fixtures are required")
+        if (
+            nb.ipam.asns.get(asn=asn_number)
+            or nb.ipam.rirs.get(name=rir_name)
+            or any(nb.dcim.sites.get(name=name) for name in site_names)
+            or any(nb.extras.custom_fields.get(name=name) for name in field_names)
+        ):
+            pytest.skip("ASN named custom-field test objects already exist")
+
+        try:
+            nb.ipam.rirs.create({"name": rir_name, "slug": "norfab-asn-named-rir"})
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-asn-named-site-a"},
+                    {"name": site_names[1], "slug": "norfab-asn-named-site-b"},
+                ]
+            )
+            nb.extras.custom_fields.create(
+                [
+                    {
+                        "name": field_names[0],
+                        "type": "multiobject",
+                        "object_types": ["ipam.asn"],
+                        "related_object_type": "dcim.device",
+                    },
+                    {
+                        "name": field_names[1],
+                        "type": "object",
+                        "object_types": ["ipam.asn"],
+                        "related_object_type": "dcim.site",
+                    },
+                    {
+                        "name": field_names[2],
+                        "type": "json",
+                        "object_types": ["ipam.asn"],
+                    },
+                    {
+                        "name": field_names[3],
+                        "type": "multiobject",
+                        "object_types": ["ipam.asn"],
+                        "related_object_type": "dcim.interface",
+                    },
+                    {
+                        "name": field_names[4],
+                        "type": "multiobject",
+                        "object_types": ["ipam.asn"],
+                        "related_object_type": "netbox_bgp.routingpolicy",
+                    },
+                    {
+                        "name": field_names[5],
+                        "type": "text",
+                        "object_types": ["ipam.asn"],
+                    },
+                ]
+            )
+            for (
+                requested_devices,
+                requested_site,
+                requested_labels,
+                requested_policies,
+                note,
+            ) in (
+                (
+                    [device_names[0]],
+                    site_names[0],
+                    ["first"],
+                    [policy_names[0]],
+                    "first note",
+                ),
+                (
+                    [device_names[0], device_names[1]],
+                    site_names[1],
+                    ["second"],
+                    [policy_names[1]],
+                    "revised note",
+                ),
+                ([device_names[1]], site_names[1], [], [], "final note"),
+            ):
+                response = nfclient.run_job(
+                    "netbox",
+                    "create_asn",
+                    workers="any",
+                    kwargs={
+                        "asn": asn_number,
+                        "rir": rir_name,
+                        "custom_fields": {
+                            field_names[0]: requested_devices,
+                            field_names[1]: requested_site,
+                            field_names[2]: requested_labels,
+                            field_names[4]: requested_policies,
+                            field_names[5]: note,
+                        },
+                    },
+                )
+                for result in response.values():
+                    assert not result["failed"], result
+                asn = nb.ipam.asns.get(asn=asn_number)
+                expected_devices = (
+                    devices[:1] if requested_site == site_names[0] else devices
+                )
+                assert {item["id"] for item in asn.custom_fields[field_names[0]]} == {
+                    device.id for device in expected_devices
+                }
+                expected_site = (
+                    sites[0] if requested_site == site_names[0] else sites[1]
+                )
+                assert asn.custom_fields[field_names[1]]["id"] == expected_site.id
+                expected_labels = (
+                    ["first"]
+                    if requested_site == site_names[0]
+                    else ["first", "second"]
+                )
+                assert asn.custom_fields[field_names[2]] == expected_labels
+                expected_policies = (
+                    policies[:1] if requested_site == site_names[0] else policies
+                )
+                assert {item["id"] for item in asn.custom_fields[field_names[4]]} == {
+                    policy.id for policy in expected_policies
+                }
+                assert asn.custom_fields[field_names[5]] == note
+            response = nfclient.run_job(
+                "netbox",
+                "create_asn",
+                workers="any",
+                kwargs={
+                    "asn": asn_number,
+                    "rir": rir_name,
+                    "custom_fields": {field_names[5]: "scalar update only"},
+                },
+            )
+            for result in response.values():
+                assert not result["failed"], result
+            asn = nb.ipam.asns.get(asn=asn_number)
+            assert asn.custom_fields[field_names[5]] == "scalar update only"
+            assert asn.custom_fields[field_names[2]] == ["first", "second"]
+            assert {item["id"] for item in asn.custom_fields[field_names[0]]} == {
+                device.id for device in devices
+            }
+            assert {item["id"] for item in asn.custom_fields[field_names[4]]} == {
+                policy.id for policy in policies
+            }
+            if len(list(nb.dcim.interfaces.filter(name="Ethernet1"))) > 1:
+                response = nfclient.run_job(
+                    "netbox",
+                    "create_asn",
+                    workers="any",
+                    kwargs={
+                        "asn": asn_number,
+                        "rir": rir_name,
+                        "custom_fields": {field_names[3]: ["Ethernet1"]},
+                    },
+                )
+                for result in response.values():
+                    assert result["failed"], result
+                    assert "matched" in str(result["errors"])
+        finally:
+            asn = nb.ipam.asns.get(asn=asn_number)
+            if asn:
+                asn.delete()
+            for name in field_names:
+                field = nb.extras.custom_fields.get(name=name)
+                if field:
+                    field.delete()
+            for name in site_names:
+                site = nb.dcim.sites.get(name=name)
+                if site:
+                    site.delete()
+            rir = nb.ipam.rirs.get(name=rir_name)
             if rir:
                 rir.delete()
 

@@ -1374,6 +1374,22 @@ rirs = [
 # Custom fields data
 custom_fields = [
     {
+        "name": "norfab_acme_site",
+        "label": "ACME Site",
+        "type": "object",
+        "description": "Site referenced by ACME design ASN, VLAN, and prefix records",
+        "object_types": ["ipam.asn", "ipam.vlan", "ipam.prefix"],
+        "related_object_type": "dcim.site",
+    },
+    {
+        "name": "norfab_acme_sites",
+        "label": "ACME Sites",
+        "type": "multiobject",
+        "description": "Sites referenced by ACME design ASN, VLAN, and prefix records",
+        "object_types": ["ipam.asn", "ipam.vlan", "ipam.prefix"],
+        "related_object_type": "dcim.site",
+    },
+    {
         "name": "norfab_crud_test_text",
         "label": "NorFab CRUD Test Text",
         "type": "text",
