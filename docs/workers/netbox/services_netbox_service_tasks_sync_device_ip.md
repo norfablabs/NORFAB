@@ -26,7 +26,7 @@ over VRF and unassigned-record fallback matching.
 
 Roles are synchronized from the normalized TTP interface data. The
 `ip_address_role` value is written to NetBox when present, including roles such
-as `secondary` and `anycast`. The task also applies these fallbacks:
+as `secondary`, `anycast`, and `vip`. The task also applies these fallbacks:
 
 - Interfaces whose name starts with `loopback` or `lo` → role `loopback`
 - Addresses that fall within any configured `anycast_ranges` prefix → role `anycast`
@@ -135,17 +135,21 @@ For each live address, the task uses this order:
 | Same IP is assigned to the target interface | Reuse it and leave its VRF unchanged. For example, an IP discovered in `BLUE` but stored in `RED` remains in `RED`. | Reuse it and update its VRF to the VRF of the IP discovered from the live device. The existing record ID and assignment are preserved. |
 | Same IP is unassigned in NetBox | Reuse the first unassigned record across all VRFs, assign it to the interface, and leave its VRF unchanged. | Reuse the first unassigned record in the VRF of the IP discovered from the live device and assign it to the interface. |
 | Only an unassigned IP in another VRF exists | Reuse it and preserve its current VRF. | Ignore it and create a record in the VRF of the IP discovered from the live device. |
-| Same non-anycast IP is assigned to another interface | Report a duplicate conflict. | Report a conflict when it is in the same VRF as the IP discovered from the live device. A record in another VRF does not match, so a new record is created in the discovered IP's VRF. |
+| Same non-shared IP is assigned to another interface | Report a duplicate conflict. | Report a conflict when it is in the same VRF as the IP discovered from the live device. A record in another VRF does not match, so a new record is created in the discovered IP's VRF. |
 | Same IP is assigned to a non-interface object | Exclude the live address from IP synchronization. | Exclude the live address when the existing record is in the discovered IP's VRF. |
-| Same anycast IP is assigned to another interface | Create another anycast record for the target interface without a VRF. | Create another anycast record for the target interface in the VRF of the IP discovered from the live device. |
+| Same anycast or VIP IP is assigned to another interface | Create another record with the shared role for the target interface without a VRF. | Create another record with the shared role for the target interface in the VRF of the IP discovered from the live device. |
 | No matching IP exists | Create and assign an IP without a VRF. | Create and assign an IP in the VRF of the IP discovered from the live device. |
 
-### Anycast Support
+### Anycast and VIP Support
 
 Addresses within `anycast_ranges` receive the `anycast` role. An existing
 anycast record on the target interface is reused, so repeated syncs do not add
 another copy to that interface. If the same anycast address belongs to another
 interface, NetBox receives a separate record for the target interface.
+The same assignment behavior applies to addresses with the `vip` role parsed
+from live data or found on an existing NetBox IP. An unassigned VIP record can
+be reused once; subsequent interfaces receive separate records. Repeated syncs
+reuse the record already assigned to each target interface.
 
 !!! note
 
@@ -169,7 +173,7 @@ anycast_ranges = "nf://netbox/anycast_ranges.yaml"
 
 ### Duplicate IP Guard
 
-Before executing bulk writes the task checks that no non-anycast IP address appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.
+Before executing bulk writes the task checks that no IP address without the `anycast` or `vip` role appears more than once across the combined create and update payloads. If a duplicate is detected, all copies are removed from the payload and an error is recorded in the result, preventing NetBox from receiving conflicting assignments in a single request.
 
 ## Deletion Behavior
 

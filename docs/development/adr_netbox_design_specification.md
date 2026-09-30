@@ -25,7 +25,7 @@ lists of dictionaries, adding device and interface names from the parents:
 | Under a device | Collected as |
 | --- | --- |
 | `interfaces` dictionary | Interface records |
-| Device or interface `bgp_peerings` dictionary | BGP peering records; nested interface supplies `local_interface` |
+| Device or interface `bgp_peerings` list | BGP peering records; nested interface supplies `local_interface` |
 | Interface `ip_addresses` list | IP address records assigned to that interface |
 | Interface `vrrp_group_assignments` list | VRRP group assignment records for that interface |
 | Interface `connection` | Connection record with this interface as one endpoint |
@@ -154,7 +154,7 @@ under the collection's `custom` results; exceptions stop deployment.
 | `ip_addresses` | Pynetbox bulk create/update for explicit addresses; `create_ip` in `ip_tasks.py` for allocation. |
 | `bgp_communities` | Dictionaries with `value`; pynetbox bulk create/update by community value. Bare strings are rejected. |
 | `routing_policies` | Pynetbox bulk create/update by name, before sessions; includes extracted inline policies. |
-| `bgp_peerings` | `create_bgp_peering` for missing sessions and `update_bgp_peering` for existing names, using bulk input. |
+| `bgp_peerings` | Lists of session candidates, optionally named. `create_bgp_peering` creates missing sessions and leaves existing sessions unchanged. |
 | `vrrp_groups`, `vrrp_group_assignments` | Pynetbox bulk create/update; `sync_vrrp` in `fhrp_tasks.py` synchronizes live state and is not a design-creation task. |
 | `connections` | Pynetbox bulk create/update after interfaces exist. One interface per side; existing cables are matched by endpoints. Ports cabled elsewhere are rejected without disconnecting them. |
 

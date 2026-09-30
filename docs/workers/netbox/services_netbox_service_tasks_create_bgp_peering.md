@@ -7,14 +7,14 @@ tags:
 
 > task api name: `create_bgp_peering`
 
-Creates one or many BGP sessions in NetBox. Supports single-session mode (individual keyword arguments) and bulk mode (`bulk_create` list of dicts). IP addresses and ASNs are resolved from IPAM or created on-demand. When `local_interface` is provided the local address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote address is derived automatically. Optionally creates a mirror (reverse) session on the remote device.
+Creates one or many BGP sessions in NetBox. Supports single-session mode (individual keyword arguments) and bulk mode (`bulk_create` list of dicts). IP addresses and ASNs are resolved from IPAM or created on-demand. `local_ip_query` and `remote_ip_query` can find existing addresses with NetBox filters such as literal `device` and `interface` names. Explicit addresses take precedence over queries. When `local_interface` is provided the local address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote address is derived automatically. Optionally creates a mirror (reverse) session on the remote device.
 
 ## How It Works
 
 1. Client submits `create_bgp_peering` request to NetBox worker
 2. NetBox worker validates that the BGP plugin is installed
 3. Worker resolves the RIR ID once (when `rir` is provided) for on-demand ASN creation
-4. For each spec — when `local_interface` is supplied, the interface is looked up in IPAM to derive `local_address`; P2P peer IP and remote device are derived from the subnet
+4. For each spec, supplied IP queries find addresses first; when `local_interface` is supplied, the interface supplies a missing local address and can derive a missing P2P peer address
 5. Worker pre-fetches all existing sessions for targeted devices (single API call) to support idempotency
 6. For each session spec:
     - Idempotency check: an existing session is left unchanged and reported in `exists`
@@ -274,7 +274,7 @@ being stored as an object reference in the custom field.
                 "device": "ceos-spine-1",
                 "local_interface": "Ethernet1",
                 "local_as": 65001,
-                "asn_source": "custom_fields.asn",
+                "remote_as_query": {"asn": 65002},
                 "rir": "lab",
                 "branch": "my-bgp-branch",
             },
@@ -301,7 +301,7 @@ being stored as an object reference in the custom field.
                 "device": "ceos-spine-1",
                 "local_interface": "Ethernet[1-2]",
                 "local_as": 65001,
-                "asn_source": "custom_fields.asn",
+                "remote_as_query": {"asn": 65002},
                 "name_template": "{{ device }}_{{ vrf }}_{{ remote_address }}",
                 "vrf": "PROD",
                 "vrf_custom_field": "tenant_vrf",
@@ -331,11 +331,12 @@ being stored as an object reference in the custom field.
             workers="any",
             kwargs={
                 "device": "ceos-spine-1",
-                "local_interface": "Ethernet1",
-                "asn_source": {"asn": 65001},
-                "name_template": "{{ device }}_ASN{{ local_as }}_{{ remote_address }}",
+                "local_ip_query": {"device": "ceos-spine-1", "interface": "Ethernet1"},
+                "remote_ip_query": {"device": "ceos-leaf-1", "interface": "Ethernet1"},
+                "local_as_query": {"asn": 65001},
+                "remote_as_query": {"asn": 65002},
+                "name_template": "{{ device }}_{{ vrf }}_{{ remote_address }}",
                 "rir": "lab",
-                "dry_run": True,
             },
         )
     finally:

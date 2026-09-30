@@ -27,15 +27,17 @@ class CreateBgpPeeringShell(
         verbose_result = kwargs.pop("verbose_result", False)
         nowait = kwargs.pop("nowait", False)
 
-        # Parse JSON strings for bulk and asn_source arguments
+        # Parse JSON strings for bulk sessions and NetBox query filters.
         if isinstance(kwargs.get("bulk_create"), str):
             kwargs["bulk_create"] = json.loads(kwargs["bulk_create"])
-        if isinstance(kwargs.get("asn_source"), str):
-            # Try to parse as JSON dict; leave as string if it fails (dot-path str)
-            try:
-                kwargs["asn_source"] = json.loads(kwargs["asn_source"])
-            except (json.JSONDecodeError, ValueError):
-                pass
+        for field in (
+            "local_as_query",
+            "remote_as_query",
+            "local_ip_query",
+            "remote_ip_query",
+        ):
+            if isinstance(kwargs.get(field), str):
+                kwargs[field] = json.loads(kwargs[field])
         if isinstance(kwargs.get("import_policies"), str):
             kwargs["import_policies"] = [
                 p.strip() for p in kwargs["import_policies"].split(",") if p.strip()

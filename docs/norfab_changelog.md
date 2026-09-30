@@ -1,3 +1,15 @@
+# 0.24.4 (draft)
+
+## ENHANCEMENTS
+
+1. NetBox `create_bgp_peering` now uses `default` in generated session names when no VRF is supplied. This changes the name only; it does not assign a VRF to the session.
+2. NetBox `create_bgp_peering` now accepts separate `local_as_query` and `remote_as_query` NetBox ASN filters, including per-session filters in bulk requests. Device data paths through `asn_source` are no longer supported.
+3. NetBox `create_bgp_peering` now accepts `local_ip_query` and `remote_ip_query` filters to find existing IP addresses, including by device and interface names, before creating individual or bulk sessions.
+4. NetBox `sync_device_ip` now allows duplicate VIP addresses across interfaces in one sync, matching anycast behavior. The VIP role may come from live data or an existing NetBox IP.
+5. NetBox `create_ip` now supports one-based `ip_index` selection, including both usable addresses of a /31. Existing interface and VRRP-group assignments are reused before the index is considered. An indexed address already in NetBox can be duplicated for the anycast or VIP role. Without `ip_index`, normal allocation uses the next available address and sets the requested role.
+
+---
+
 # 0.24.3
 
 ## BUGS

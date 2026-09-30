@@ -225,6 +225,8 @@ def _cached_bgp_device_info(device_name: Union[None, str], lookup_cache: dict) -
 def _bgp_session_template_context(session: dict, lookup_cache: dict) -> dict:
     """Build the Jinja2 context for BGP session name rendering."""
     context = dict(session)
+    # Bulk entries may omit VRF; the default name template still needs it.
+    context.setdefault("vrf", context.get("vrf") or "default")
     device_name = session.get("device")
     remote_device = session.get("remote_device")
     if not remote_device:
@@ -255,40 +257,6 @@ def _remote_device_from_ip(ip_obj: Any) -> Union[None, str]:
     assigned_object = getattr(ip_obj, "assigned_object", None)
     remote_device = getattr(assigned_object, "device", None)
     return getattr(remote_device, "name", None)
-
-
-def resolve_asn_from_source(
-    device_data: Dict[str, Any], asn_source: Union[str, Dict[str, Any]], nb: Any
-) -> Union[None, str]:
-    """
-    Resolve an ASN from device data or a NetBox IPAM query.
-
-    asn_source can be:
-
-    - str  — dot-separated path through device_data dict/list
-    - dict — kwargs passed to nb.ipam.asns.get(**asn_source); uses asn_obj.asn
-    """
-    if isinstance(asn_source, dict):
-        asn_obj = nb.ipam.asns.get(**asn_source)
-        if asn_obj is not None:
-            return str(asn_obj.asn)
-    else:
-        node = device_data
-        for key in asn_source.split("."):
-            if isinstance(node, dict):
-                node = node.get(key)
-            elif isinstance(node, list):
-                try:
-                    node = node[int(key)]
-                except (ValueError, IndexError):
-                    node = None
-            else:
-                node = None
-            if node is None:
-                break
-        if node is not None:
-            return str(node)
-    return None
 
 
 def resolve_local_ip_via_peer(
@@ -1142,7 +1110,10 @@ class NetboxBgpPeeringsTasks:
         custom_fields: Union[None, dict] = None,
         # interface-driven resolution
         local_interface: Union[None, str] = None,
-        asn_source: Union[None, str, dict] = None,
+        local_as_query: Union[None, dict] = None,
+        remote_as_query: Union[None, dict] = None,
+        local_ip_query: Union[None, dict] = None,
+        remote_ip_query: Union[None, dict] = None,
         name_template: Union[None, str] = "{{device}}_{{vrf}}_{{remote_address}}",
         # mirror session
         create_reverse: bool = True,
@@ -1172,8 +1143,8 @@ class NetboxBgpPeeringsTasks:
             device (str, optional): Local device name. Required in single-session mode.
             local_address (str, optional): Local IP address string. Derived from ``local_interface`` when omitted.
             remote_address (str, optional): Remote IP address string. Derived from P2P peer when ``local_interface`` is used.
-            local_as (int, optional): Local AS number string. Derived from ``asn_source`` when omitted.
-            remote_as (int, optional): Remote AS number string. Derived from ``asn_source`` on remote device when omitted.
+            local_as (int, optional): Local AS number. Takes precedence over ``local_as_query``.
+            remote_as (int, optional): Remote AS number. Takes precedence over ``remote_as_query``.
             status (str): Session status. Default ``'active'``.
             description (str, optional): Session description.
             vrf (str, optional): VRF name.
@@ -1186,13 +1157,22 @@ class NetboxBgpPeeringsTasks:
             prefix_list_in (str, optional): Inbound prefix-list name.
             prefix_list_out (str, optional): Outbound prefix-list name.
             local_interface (str, optional): Local interface name or bracket-range pattern.
-            asn_source (str or dict, optional): Dot-path string through device data or
-                dict of kwargs for ``nb.ipam.asns.get`` for automatic ASN resolution.
+            local_as_query (dict, optional): Filters passed to ``nb.ipam.asns.get``
+                to find the local ASN when ``local_as`` is omitted.
+            remote_as_query (dict, optional): Filters passed to ``nb.ipam.asns.get``
+                to find the remote ASN when ``remote_as`` is omitted.
+            local_ip_query (dict, optional): Filters passed to
+                ``nb.ipam.ip_addresses.get`` when ``local_address`` is omitted.
+            remote_ip_query (dict, optional): Filters passed to
+                ``nb.ipam.ip_addresses.get`` when ``remote_address`` is omitted.
+                Filters may include literal device and interface names.
             name_template (str, optional): Jinja2 template string for session names.
-                Default ``'{{device}}_{{vrf}}_{{remote_address}}'``.
+                Default ``'{{device}}_{{vrf}}_{{remote_address}}'``; an omitted
+                VRF renders as ``default`` in the name only.
             create_reverse (bool): When ``True`` also create a mirror session on the
                 remote device with local and remote IPs/ASNs swapped. Default ``True``.
             bulk_create (list, optional): List of session dicts for bulk creation.
+                Each entry can supply its own ASN and IP address queries.
             rir (str, optional): RIR name used when auto-creating ASNs.
             message (str, optional): Changelog message recorded on every NetBox write.
             branch (str, optional): NetBox branching plugin branch name.
@@ -1257,6 +1237,10 @@ class NetboxBgpPeeringsTasks:
                 "remote_address": remote_address,
                 "local_as": local_as,
                 "remote_as": remote_as,
+                "local_as_query": local_as_query,
+                "remote_as_query": remote_as_query,
+                "local_ip_query": local_ip_query,
+                "remote_ip_query": remote_ip_query,
                 "status": status,
                 "description": description,
                 "vrf": vrf,
@@ -1280,8 +1264,38 @@ class NetboxBgpPeeringsTasks:
         base_bgp_sessions = []
 
         for bgp_session in bgp_sessions:
+            bgp_session = dict(bgp_session)
             bgp_session_device = bgp_session["device"]
             bgp_session_local_interface = bgp_session.get("local_interface")
+
+            # Query addresses before interface and name resolution. Explicit
+            # addresses take precedence over queries.
+            query_failed = False
+            for side in ("local", "remote"):
+                address_field = f"{side}_address"
+                query_field = f"{side}_ip_query"
+                query = bgp_session.get(query_field)
+                if bgp_session.get(address_field) is not None or query is None:
+                    continue
+                try:
+                    ip_obj = nb.ipam.ip_addresses.get(**query)
+                except ValueError as exc:
+                    ip_obj = None
+                    msg = f"{query_field} failed for '{bgp_session_device}': {exc}"
+                else:
+                    msg = (
+                        f"{query_field} found no IP for '{bgp_session_device}': "
+                        f"{query}"
+                    )
+                if ip_obj is None:
+                    job.event(msg, severity="ERROR")
+                    log.error(f"{self.name} - {msg}")
+                    ret.errors.append(msg)
+                    query_failed = True
+                    break
+                bgp_session[address_field] = ip_obj.address.split("/")[0]
+            if query_failed:
+                continue
 
             if bgp_session_local_interface:
                 # Expand bracket-range pattern e.g. "Ethernet[1-4]/1.101"
@@ -1327,7 +1341,9 @@ class NetboxBgpPeeringsTasks:
                         continue
 
                     ip_cidr = ip_list[0].address  # e.g. "10.0.0.1/31"
-                    local_addr = ip_cidr.split("/")[0]
+                    local_addr = (
+                        bgp_session.get("local_address") or ip_cidr.split("/")[0]
+                    )
 
                     bgp_session_remote_address = bgp_session.get("remote_address")
 
@@ -1398,6 +1414,10 @@ class NetboxBgpPeeringsTasks:
                 mirror_session["remote_address"] = bgp_session["local_address"]
                 mirror_session["local_as"] = bgp_session.get("remote_as")
                 mirror_session["remote_as"] = bgp_session.get("local_as")
+                mirror_session["local_as_query"] = bgp_session.get("remote_as_query")
+                mirror_session["remote_as_query"] = bgp_session.get("local_as_query")
+                mirror_session["local_ip_query"] = bgp_session.get("remote_ip_query")
+                mirror_session["remote_ip_query"] = bgp_session.get("local_ip_query")
                 mirror_session["remote_device"] = bgp_session["device"]
                 mirror_session["local_interface"] = None
                 mirror_session["name"] = None
@@ -1502,41 +1522,39 @@ class NetboxBgpPeeringsTasks:
 
             # --- Full resolution (non-dry-run) ---
 
-            # Resolve ASNs from asn_source if not supplied (steps 6b / 6c)
-            if asn_source and not bgp_session_local_as:
-                dev_data = (all_device_names.get(bgp_session_device) or {}).get(
-                    "data", {}
-                )
-                bgp_session_local_as = resolve_asn_from_source(dev_data, asn_source, nb)
-                if not bgp_session_local_as:
-                    msg = f"could not resolve local AS for '{sname}' via asn_source"
+            # Explicit ASN numbers win; otherwise query NetBox for each side.
+            local_query = bgp_session.get("local_as_query")
+            remote_query = bgp_session.get("remote_as_query")
+            if bgp_session_local_as is None and local_query is not None:
+                try:
+                    asn_obj = nb.ipam.asns.get(**local_query)
+                except ValueError as exc:
+                    asn_obj = None
+                    msg = f"local_as_query failed for '{sname}': {exc}"
+                else:
+                    msg = f"local_as_query found no ASN for '{sname}': {local_query}"
+                # NetBox may reject ambiguous filters or return no matching ASN.
+                if asn_obj is None:
                     job.event(msg, severity="ERROR")
                     log.error(f"{self.name} - {msg}")
                     ret.errors.append(msg)
                     continue
+                bgp_session_local_as = asn_obj.asn
 
-            if asn_source and not bgp_session_remote_as:
-                if not remote_device:
-                    msg = (
-                        f"cannot resolve remote AS for '{sname}': remote device not "
-                        f"identified and remote_as not provided"
-                    )
+            if bgp_session_remote_as is None and remote_query is not None:
+                try:
+                    asn_obj = nb.ipam.asns.get(**remote_query)
+                except ValueError as exc:
+                    asn_obj = None
+                    msg = f"remote_as_query failed for '{sname}': {exc}"
+                else:
+                    msg = f"remote_as_query found no ASN for '{sname}': {remote_query}"
+                if asn_obj is None:
                     job.event(msg, severity="ERROR")
                     log.error(f"{self.name} - {msg}")
                     ret.errors.append(msg)
                     continue
-                remote_dev_data = (all_device_names.get(remote_device) or {}).get(
-                    "data", {}
-                )
-                bgp_session_remote_as = resolve_asn_from_source(
-                    remote_dev_data, asn_source, nb
-                )
-                if not bgp_session_remote_as:
-                    msg = f"could not resolve remote AS for '{sname}' via asn_source"
-                    job.event(msg, severity="ERROR")
-                    log.error(f"{self.name} - {msg}")
-                    ret.errors.append(msg)
-                    continue
+                bgp_session_remote_as = asn_obj.asn
 
             # Resolve IP IDs and ASN IDs (steps 6d / 6e)
             local_ip_id = resolve_ip(
@@ -1603,6 +1621,7 @@ class NetboxBgpPeeringsTasks:
                 )
 
             # Optional fields (step 6h)
+            # Tags are already converted to NetBox name references in payload.
             resolved_fields = resolve_bgp_session_payload_fields(
                 {
                     k: bgp_session[k]
@@ -1613,7 +1632,6 @@ class NetboxBgpPeeringsTasks:
                         "export_policies",
                         "prefix_list_in",
                         "prefix_list_out",
-                        "tags",
                         "custom_fields",
                     )
                     if bgp_session.get(k)

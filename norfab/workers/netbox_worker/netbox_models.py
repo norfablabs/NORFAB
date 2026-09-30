@@ -341,19 +341,37 @@ class BgpSessionCommonFields(BaseModel):
 class BgpSessionBulkCreateFields(BgpSessionCommonFields):
     """Fields for a single BGP session entry used in bulk_create."""
 
+    name: Union[None, StrictStr] = Field(
+        None, description="Session name; derived from name_template when omitted"
+    )
     device: StrictStr = Field(..., description="Local device name")
     local_interface: Union[None, StrictStr] = Field(
         None, description="Local interface name or bracket-range pattern"
+    )
+    local_as_query: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="NetBox ASN filters for the local AS when local_as is omitted"
+    )
+    remote_as_query: Union[None, Dict[StrictStr, Any]] = Field(
+        None,
+        description="NetBox ASN filters for the remote AS when remote_as is omitted",
+    )
+    local_ip_query: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="NetBox IP address filters when local_address is omitted"
+    )
+    remote_ip_query: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="NetBox IP address filters when remote_address is omitted"
     )
 
     @model_validator(mode="after")
     def validate_required_fields(self) -> "BgpSessionBulkCreateFields":
         if self.local_interface:
             return self
-        if self.local_address and self.remote_address:
+        if (self.local_address or self.local_ip_query) and (
+            self.remote_address or self.remote_ip_query
+        ):
             return self
         raise ValueError(
-            "Bulk session entries require device and either local_interface or both local_address and remote_address."
+            "Bulk session entries require device and either local_interface or local and remote addresses or IP queries."
         )
 
 
@@ -396,11 +414,18 @@ class CreateBgpPeeringInput(
         None,
         description="Local interface name or bracket-range pattern to resolve local_address from IPAM.",
     )
-    asn_source: Union[None, StrictStr, Dict[StrictStr, Any]] = Field(
+    local_as_query: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="NetBox ASN filters for the local AS when local_as is omitted"
+    )
+    remote_as_query: Union[None, Dict[StrictStr, Any]] = Field(
         None,
-        description=(
-            "Dot-path string through device data e.g. 'custom_fields.asn' or dictionary for ASN filter query"
-        ),
+        description="NetBox ASN filters for the remote AS when remote_as is omitted",
+    )
+    local_ip_query: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="NetBox IP address filters when local_address is omitted"
+    )
+    remote_ip_query: Union[None, Dict[StrictStr, Any]] = Field(
+        None, description="NetBox IP address filters when remote_address is omitted"
     )
     name_template: Union[None, StrictStr] = Field(
         "{{device}}_{{vrf}}_{{remote_address}}",
@@ -446,9 +471,12 @@ class CreateBgpPeeringInput(
         if bulk_create is None:
             if not values.get("device"):
                 raise ValueError("Single-session mode requires 'device'.")
-            if not values.get("local_address") and not values.get("local_interface"):
+            if not any(
+                values.get(field)
+                for field in ("local_address", "local_interface", "local_ip_query")
+            ):
                 raise ValueError(
-                    "Single-session mode requires either 'local_address' or 'local_interface'."
+                    "Single-session mode requires 'local_address', 'local_interface', or 'local_ip_query'."
                 )
         return values
 
@@ -949,8 +977,6 @@ class DesignDocument(BaseModel):
                         )
                     task_record[field] = [policy["name"] for policy in policies]
                 CreateBgpPeeringInput.model_validate(task_record)
-                if not record.get("name"):
-                    raise ValueError("design BGP peerings require a name")
         for collection, fields in {
             "tenants": ["group"],
             "regions": ["parent"],
@@ -2244,6 +2270,12 @@ class CreateIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=Tru
         None,
         description="Mask length for the IP address; creates a child subnet of this length within the parent prefix",
         alias="mask-len",
+    )
+    ip_index: Union[None, StrictInt] = Field(
+        None,
+        ge=1,
+        description="One-based index of a usable IP in the selected subnet",
+        alias="ip-index",
     )
     create_peer_ip: Union[None, StrictBool] = Field(
         True,

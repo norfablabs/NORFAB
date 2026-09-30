@@ -89,6 +89,12 @@ rirs:
   - name: ACME PRIVATE
     is_private: true
 
+asn_ranges:
+  - name: ACME BRANCH ALLOCATED ASNS
+    rir: ACME PRIVATE
+    start: 4200650100
+    end: 4200650109
+
 asns:
   - asn: 4200650000
     tenant: ACME
@@ -116,6 +122,18 @@ asns:
     role: ACME-BRANCH-LAN
     sites: ["{{ context.site }}"]
     description: ACME access ASN
+  - create_asn:
+      asn_range: ACME BRANCH ALLOCATED ASNS
+      description: ACME allocated branch ASN
+      tenant: ACME
+      role: ACME-BRANCH-LAN
+      sites: ["{{ context.site }}"]
+  - create_asn:
+      asn_range: ACME BRANCH ALLOCATED ASNS
+      description: ACME allocated aggregation ASN
+      tenant: ACME
+      role: ACME-BRANCH-LAN
+      sites: ["{{ context.site }}"]
 
 bgp_communities:
   - value: "4200650001:100"
@@ -193,6 +211,10 @@ prefixes:
     tenant: ACME
     description: ACME upstream peering subnet
     status: active
+  - prefix: 198.51.100.4/31
+    tenant: ACME
+    description: ACME aggregation interconnect subnet
+    status: active
   - prefix: 192.0.2.0/24
     tenant: ACME
     description: ACME explicit management prefix
@@ -246,9 +268,20 @@ ip_addresses:
     description: ACME Reserved monitoring address
     status: reserved
 
+# Query the two dedicated BGP loopback interfaces for an iBGP session.
 # Loopback-based BGP requires underlay reachability; access eBGP also requires
 # multihop configuration. This design models NetBox objects, not device config.
 # Both session directions are explicit; create_reverse remains false.
+bgp_peerings:
+  - device: acme-branch-rtr-1
+    local_ip_query: {device: acme-branch-rtr-1, interface: Loopback100}
+    remote_ip_query: {device: acme-branch-rtr-2, interface: Loopback100}
+    local_as_query: {description: ACME allocated branch ASN}
+    remote_as_query: {description: ACME allocated branch ASN}
+    status: active
+    description: ACME same-tier iBGP
+    create_reverse: false
+
 devices:
   - name: acme-branch-rtr-1
     # Requires the dcim.device custom field supplied by the test inventory.
@@ -350,23 +383,16 @@ devices:
             status: active
 
     bgp_peerings:
-      acme-branch-rtr-1-to-acme-branch-rtr-2:
-        local_address: 192.0.2.101
-        remote_address: 192.0.2.102
-        local_as: 4200650001
-        remote_as: 4200650001
-        status: active
-        description: ACME same-tier iBGP
-        create_reverse: false
-      acme-branch-rtr-1-to-acme-branch-agg-1:
+      - name: acme-branch-rtr-1-to-acme-branch-agg-1
         local_address: 192.0.2.101
         remote_address: 192.0.2.103
-        local_as: 4200650001
-        remote_as: 4200650002
+        # Resolve both ASNs allocated above without assuming their range positions.
+        local_as_query: {description: ACME allocated branch ASN}
+        remote_as_query: {description: ACME allocated aggregation ASN}
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-rtr-1-to-acme-branch-agg-2:
+      - name: acme-branch-rtr-1-to-acme-branch-agg-2
         local_address: 192.0.2.101
         remote_address: 192.0.2.104
         local_as: 4200650001
@@ -374,9 +400,9 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-rtr-1-upstream:
-        local_address: 198.51.100.1
-        remote_address: 198.51.100.2
+      - name: acme-branch-rtr-1-upstream
+        # Ethernet4's /30 supplies both the local and peer addresses.
+        local_interface: Ethernet4
         local_as: 4200650001
         remote_as: 4200650000
         import_policies:
@@ -463,7 +489,7 @@ devices:
               create_peer_ip: false
 
     bgp_peerings:
-      acme-branch-rtr-2-to-acme-branch-rtr-1:
+      - name: acme-branch-rtr-2-to-acme-branch-rtr-1
         local_address: 192.0.2.102
         remote_address: 192.0.2.101
         local_as: 4200650001
@@ -471,7 +497,7 @@ devices:
         status: active
         description: ACME same-tier iBGP
         create_reverse: false
-      acme-branch-rtr-2-to-acme-branch-agg-1:
+      - name: acme-branch-rtr-2-to-acme-branch-agg-1
         local_address: 192.0.2.102
         remote_address: 192.0.2.103
         local_as: 4200650001
@@ -479,7 +505,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-rtr-2-to-acme-branch-agg-2:
+      - name: acme-branch-rtr-2-to-acme-branch-agg-2
         local_address: 192.0.2.102
         remote_address: 192.0.2.104
         local_as: 4200650001
@@ -573,6 +599,19 @@ devices:
       Port-Channel1:
         type: lag
         description: ACME aggregation interconnect LAG
+        ip_addresses:
+          - address: 198.51.100.4/31
+            tenant: ACME
+            description: ACME aggregation 1 interconnect address
+            status: active
+        # Flattening supplies device and local_interface; the create task
+        # derives both addresses and the session name from the interface.
+        bgp_peerings:
+          - local_as_query: {description: ACME allocated aggregation ASN}
+            remote_as_query: {description: ACME allocated aggregation ASN}
+            status: active
+            description: ACME same-tier iBGP
+            create_reverse: false
       Ethernet6:
         type: 10gbase-x-sfpp
         lag: {device: acme-branch-agg-1, name: Port-Channel1}
@@ -606,7 +645,7 @@ devices:
           priority: 200
 
     bgp_peerings:
-      acme-branch-agg-1-to-acme-branch-rtr-1:
+      - name: acme-branch-agg-1-to-acme-branch-rtr-1
         local_address: 192.0.2.103
         remote_address: 192.0.2.101
         local_as: 4200650002
@@ -614,7 +653,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-1-to-acme-branch-rtr-2:
+      - name: acme-branch-agg-1-to-acme-branch-rtr-2
         local_address: 192.0.2.103
         remote_address: 192.0.2.102
         local_as: 4200650002
@@ -622,15 +661,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-1-to-acme-branch-agg-2:
-        local_address: 192.0.2.103
-        remote_address: 192.0.2.104
-        local_as: 4200650002
-        remote_as: 4200650002
-        status: active
-        description: ACME same-tier iBGP
-        create_reverse: false
-      acme-branch-agg-1-to-acme-branch-access-1:
+      - name: acme-branch-agg-1-to-acme-branch-access-1
         local_address: 192.0.2.103
         remote_address: 192.0.2.105
         local_as: 4200650002
@@ -638,7 +669,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-1-to-acme-branch-access-2:
+      - name: acme-branch-agg-1-to-acme-branch-access-2
         local_address: 192.0.2.103
         remote_address: 192.0.2.106
         local_as: 4200650002
@@ -646,7 +677,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-1-to-acme-branch-access-3:
+      - name: acme-branch-agg-1-to-acme-branch-access-3
         local_address: 192.0.2.103
         remote_address: 192.0.2.107
         local_as: 4200650002
@@ -737,6 +768,11 @@ devices:
       Port-Channel1:
         type: lag
         description: ACME aggregation interconnect LAG
+        ip_addresses:
+          - address: 198.51.100.5/31
+            tenant: ACME
+            description: ACME aggregation 2 interconnect address
+            status: active
       Ethernet6:
         type: 10gbase-x-sfpp
         lag: {device: acme-branch-agg-2, name: Port-Channel1}
@@ -760,7 +796,7 @@ devices:
           priority: 100
 
     bgp_peerings:
-      acme-branch-agg-2-to-acme-branch-rtr-1:
+      - name: acme-branch-agg-2-to-acme-branch-rtr-1
         local_address: 192.0.2.104
         remote_address: 192.0.2.101
         local_as: 4200650002
@@ -768,7 +804,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-2-to-acme-branch-rtr-2:
+      - name: acme-branch-agg-2-to-acme-branch-rtr-2
         local_address: 192.0.2.104
         remote_address: 192.0.2.102
         local_as: 4200650002
@@ -776,15 +812,15 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-2-to-acme-branch-agg-1:
-        local_address: 192.0.2.104
-        remote_address: 192.0.2.103
+      - name: acme-branch-agg-2-to-acme-branch-agg-1
+        local_address: 198.51.100.5
+        remote_address: 198.51.100.4
         local_as: 4200650002
         remote_as: 4200650002
         status: active
         description: ACME same-tier iBGP
         create_reverse: false
-      acme-branch-agg-2-to-acme-branch-access-1:
+      - name: acme-branch-agg-2-to-acme-branch-access-1
         local_address: 192.0.2.104
         remote_address: 192.0.2.105
         local_as: 4200650002
@@ -792,7 +828,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-2-to-acme-branch-access-2:
+      - name: acme-branch-agg-2-to-acme-branch-access-2
         local_address: 192.0.2.104
         remote_address: 192.0.2.106
         local_as: 4200650002
@@ -800,7 +836,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-agg-2-to-acme-branch-access-3:
+      - name: acme-branch-agg-2-to-acme-branch-access-3
         local_address: 192.0.2.104
         remote_address: 192.0.2.107
         local_as: 4200650002
@@ -888,7 +924,7 @@ devices:
           vid: 100
 
     bgp_peerings:
-      acme-branch-access-1-to-acme-branch-agg-1:
+      - name: acme-branch-access-1-to-acme-branch-agg-1
         local_address: 192.0.2.105
         remote_address: 192.0.2.103
         local_as: 4200650003
@@ -896,7 +932,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-access-1-to-acme-branch-agg-2:
+      - name: acme-branch-access-1-to-acme-branch-agg-2
         local_address: 192.0.2.105
         remote_address: 192.0.2.104
         local_as: 4200650003
@@ -984,7 +1020,7 @@ devices:
           vid: 100
 
     bgp_peerings:
-      acme-branch-access-2-to-acme-branch-agg-1:
+      - name: acme-branch-access-2-to-acme-branch-agg-1
         local_address: 192.0.2.106
         remote_address: 192.0.2.103
         local_as: 4200650003
@@ -992,7 +1028,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-access-2-to-acme-branch-agg-2:
+      - name: acme-branch-access-2-to-acme-branch-agg-2
         local_address: 192.0.2.106
         remote_address: 192.0.2.104
         local_as: 4200650003
@@ -1080,7 +1116,7 @@ devices:
           vid: 100
 
     bgp_peerings:
-      acme-branch-access-3-to-acme-branch-agg-1:
+      - name: acme-branch-access-3-to-acme-branch-agg-1
         local_address: 192.0.2.107
         remote_address: 192.0.2.103
         local_as: 4200650003
@@ -1088,7 +1124,7 @@ devices:
         status: active
         description: ACME inter-tier eBGP
         create_reverse: false
-      acme-branch-access-3-to-acme-branch-agg-2:
+      - name: acme-branch-access-3-to-acme-branch-agg-2
         local_address: 192.0.2.107
         remote_address: 192.0.2.104
         local_as: 4200650003

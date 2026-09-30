@@ -2,6 +2,7 @@ import copy
 import fnmatch
 import ipaddress
 import logging
+from itertools import islice
 from typing import Any, Union
 
 import yaml
@@ -174,12 +175,13 @@ class NetboxIpTasks:
         dry_run: Union[None, bool] = False,
         branch: Union[None, str] = None,
         mask_len: Union[None, int] = None,
+        ip_index: Union[None, int] = None,
         create_peer_ip: Union[None, bool] = True,
         custom_fields: Union[None, dict] = None,
         vrrp_group: Union[None, str] = None,
     ) -> Result:
         """
-        Allocate the next available IP address from a given subnet.
+        Allocate the next available or indexed usable IP address from a subnet.
 
         .. warning::
 
@@ -189,7 +191,9 @@ class NetboxIpTasks:
 
         This task finds or creates an IP address in NetBox, updates its metadata,
         optionally links it to a device/interface, and supports a dry run mode for
-        previewing changes.
+        previewing changes. Existing group or interface assignments are reused
+        before ``ip_index`` selects an address for a new allocation. An indexed
+        address already in NetBox can be duplicated for anycast or VIP roles.
 
         Args:
             prefix (str): The prefix from which to allocate the IP address, could be:
@@ -229,6 +233,11 @@ class NetboxIpTasks:
                 update existing IP address. On new IP address creation will create child
                 subnet of `mask_len` within parent `prefix`, new subnet not created for
                 existing IP addresses. Ignored when ``dry_run=True``.
+            ip_index (int, optional): One-based position among usable IPs in the
+                selected subnet. On a /31 or /127, both addresses are usable.
+                Out-of-range positions raise ``NetboxAllocationError``. When
+                ``mask_len`` creates a child subnet, dry runs use the parent
+                subnet because they do not create child subnets.
             create_peer_ip (bool, optional): If True creates IP address for link peer -
                 remote device interface connected to requested device and interface.
                 Disabled for IPv4 /32 and IPv6 /128 allocations, which have no
@@ -330,7 +339,6 @@ class NetboxIpTasks:
             raise NetboxAllocationError(
                 f"Unable to source parent prefix from Netbox - {prefix}"
             )
-
         # try to source existing IP from netbox
         for nb_prefix in nb_prefixes:
             if nb_vrrp_group is not None:
@@ -363,8 +371,10 @@ class NetboxIpTasks:
         else:
             for nb_prefix in nb_prefixes:
                 parent_prefix_len = int(str(nb_prefix).split("/")[1])
+                if ip_index is not None:
+                    break
                 # check if can create child subnet in prefix
-                if mask_len and mask_len != parent_prefix_len:
+                elif mask_len and mask_len != parent_prefix_len:
                     try:
                         candidate = self.create_prefix(
                             job=job,
@@ -389,6 +399,7 @@ class NetboxIpTasks:
 
         # create new IP address
         if not nb_ip:
+            parent_prefix_len = ipaddress.ip_network(str(nb_prefix)).prefixlen
             # A host prefix has only one address, regardless of peer settings.
             allocation_prefix = ipaddress.ip_network(str(nb_prefix))
             host_allocation = (
@@ -397,7 +408,7 @@ class NetboxIpTasks:
             if host_allocation:
                 create_peer_ip = False
             # check if interface has link peer that has IP within parent prefix
-            if device and interface and not host_allocation:
+            if device and interface and not host_allocation and ip_index is None:
                 connection = self.get_connections(
                     job=job,
                     devices=[device],
@@ -505,13 +516,44 @@ class NetboxIpTasks:
                         f"Unable to find a child subnet of mask length '{mask_len}' "
                         f"with sufficient available IPs inside '{nb_prefix}'"
                     )
-            # execute dry run on new IP
-            if dry_run is True:
-                nb_ip = nb_prefix.available_ips.list()[0]
+            if ip_index is not None:
+                network = ipaddress.ip_network(str(nb_prefix))
+                # hosts() includes both /31 endpoints and excludes IPv4 broadcasts.
+                selected_ip = next(
+                    islice(network.hosts(), ip_index - 1, ip_index), None
+                )
+                if selected_ip is None:
+                    raise NetboxAllocationError(
+                        f"ip_index {ip_index} exceeds the usable IPs in {network}"
+                    )
+                address = f"{selected_ip}/{network.prefixlen}"
+                existing_ip = None
+                for ip in nb.ipam.ip_addresses.filter(address=address):
+                    if getattr(ip.vrf, "name", None) == vrf:
+                        existing_ip = ip
+                        break
+                if existing_ip and role not in ("anycast", "vip"):
+                    raise NetboxAllocationError(
+                        f"cannot create IP address {address}: it already exists"
+                    )
+                if dry_run:
+                    preview_address = address
+                else:
+                    if existing_ip and existing_ip.role != role:
+                        # NetBox requires the existing record to have a shared role.
+                        existing_ip.update({"role": role})
+                    nb_ip = nb.ipam.ip_addresses.create(address=address, role=role)
+            else:
+                if dry_run:
+                    preview_address = str(nb_prefix.available_ips.list()[0])
+                else:
+                    nb_ip = nb_prefix.available_ips.create()
+
+            if dry_run:
                 ret.status = "unchanged"
                 ret.dry_run = True
                 ret.result = {
-                    "address": str(nb_ip),
+                    "address": preview_address,
                     "description": description,
                     "vrf": vrf,
                     "device": device,
@@ -522,14 +564,11 @@ class NetboxIpTasks:
                 # add branch to results
                 if branch is not None:
                     ret.result["branch"] = branch
-                job.event(f"dry-run: would create IP address '{nb_ip}'")
+                job.event(f"dry-run: would create IP address '{preview_address}'")
                 return ret
-            # create new IP
-            else:
-                nb_ip = nb_prefix.available_ips.create()
-                job.event(
-                    f"created '{nb_ip}' IP address for '{device}:{interface}' within '{nb_prefix}' prefix"
-                )
+            job.event(
+                f"created '{nb_ip}' IP address for '{device}:{interface}' within '{nb_prefix}' prefix"
+            )
             ret.status = "created"
         else:
             job.event(f"using existing IP address {nb_ip}")
@@ -857,6 +896,8 @@ class NetboxIpTasks:
             existing IP role update to `anycast`
         2. Parsed TTP IP roles are synchronized to NetBox, except for FHRP
             addresses using the `vrrp`, `glbp`, `hsrp`, or `carp` roles.
+        3. Addresses with the `anycast` or `vip` role may be assigned to multiple
+            interfaces, with a separate NetBox IP record for each interface.
 
         Args:
             job: NorFab Job object containing relevant metadata.
@@ -1022,8 +1063,7 @@ class NetboxIpTasks:
 
         # per-device result tracking
         device_results = {
-            device_name: SyncActionSummary().model_dump()
-            for device_name in devices
+            device_name: SyncActionSummary().model_dump() for device_name in devices
         }
         ret.result = device_results
         ret.diff = {
@@ -1145,10 +1185,8 @@ class NetboxIpTasks:
             # Prefer the matching IP already assigned to the target interface.
             for nb_ip in matching_nb_ips:
                 if (
-                    nb_ip["assigned_object_type"]
-                    == ip_live["assigned_object_type"]
-                    and nb_ip["assigned_object_id"]
-                    == ip_live["assigned_object_id"]
+                    nb_ip["assigned_object_type"] == ip_live["assigned_object_type"]
+                    and nb_ip["assigned_object_id"] == ip_live["assigned_object_id"]
                 ):
                     matching_nb_ips = [nb_ip]
                     break
@@ -1178,17 +1216,18 @@ class NetboxIpTasks:
                 if nb_ip["assigned_object_id"]:
                     # ip already assigned to same interface
                     if (
-                        nb_ip["assigned_object_type"]
-                        == ip_live["assigned_object_type"]
-                        and nb_ip["assigned_object_id"]
-                        == ip_live["assigned_object_id"]
+                        nb_ip["assigned_object_type"] == ip_live["assigned_object_type"]
+                        and nb_ip["assigned_object_id"] == ip_live["assigned_object_id"]
                     ):
-                        # if Netbox IP has anycast role, override live IP to use anycast role too
-                        if nb_ip["role"] == "anycast":
-                            msg = f"Found existing Netbox IP with 'anycast' role {nb_ip['address']}, assigning anycast role to live IP"
+                        # Preserve a shared role already assigned in NetBox.
+                        if (
+                            nb_ip["role"] in ("anycast", "vip")
+                            and ip_live["role"] != "anycast"
+                        ):
+                            msg = f"found existing NetBox IP with '{nb_ip['role']}' role {nb_ip['address']}, assigning {nb_ip['role']} role to live IP"
                             log.info(msg)
                             job.event(msg)
-                            ip_live["role"] = "anycast"
+                            ip_live["role"] = nb_ip["role"]
                         # check if vrf or role need an update
                         if any(
                             nb_ip[k] != ip_live[k]
@@ -1213,6 +1252,11 @@ class NetboxIpTasks:
                         nb_ip = candidate_nb_ip
                         break
                 if nb_ip:
+                    if (
+                        nb_ip["role"] in ("anycast", "vip")
+                        and ip_live["role"] != "anycast"
+                    ):
+                        ip_live["role"] = nb_ip["role"]
                     if (
                         ip_live["assigned_object_id"] is None
                         and nb_ip["role"] == ip_live["role"]
@@ -1241,13 +1285,16 @@ class NetboxIpTasks:
                 for nb_ip in matching_nb_ips:
                     # existing NB IP already assigned to an interface
                     if nb_ip["assigned_object_id"]:
-                        # if existing Netbox IP role is anycast - override live IP role to anycast too
-                        if nb_ip["role"] == "anycast":
-                            msg = f"Found existing Netbox IP with 'anycast' role {nb_ip['address']}, assigning anycast role to live IP"
+                        # Inherit a shared role from an existing NetBox assignment.
+                        if (
+                            nb_ip["role"] in ("anycast", "vip")
+                            and ip_live["role"] != "anycast"
+                        ):
+                            msg = f"found existing NetBox IP with '{nb_ip['role']}' role {nb_ip['address']}, using {nb_ip['role']} role for live IP"
                             log.info(msg)
                             job.event(msg)
-                            nb_ip_resolved_role = "anycast"
-                            ip_live["role"] = "anycast"
+                            nb_ip_resolved_role = nb_ip["role"]
+                            ip_live["role"] = nb_ip["role"]
                         # attempt to resolve IP role
                         else:
                             nb_ip_resolved_role = (
@@ -1267,14 +1314,16 @@ class NetboxIpTasks:
                                 "id": nb_ip["id"],
                                 "role": nb_ip_resolved_role,
                             }
-                        # create anycast ip if existing and discovered IPs are anycast
-                        if nb_ip_resolved_role == ip_live["role"] == "anycast":
+                        # Shared addresses need a record for each interface.
+                        if nb_ip_resolved_role == ip_live["role"] and ip_live[
+                            "role"
+                        ] in ("anycast", "vip"):
                             bulk_create_ip[key] = _ip_payload(ip_live, ignore_vrf)
                             break
-                        # existing ip role did not resolve to anycast - report conflict
-                        if nb_ip_resolved_role != "anycast":
+                        # A non-shared address assigned elsewhere is a conflict.
+                        if nb_ip_resolved_role not in ("anycast", "vip"):
                             msg = (
-                                f"duplicate non anycast ip found, {device_name}:{intf_name}->{ip_live['address']}, "
+                                f"duplicate non anycast, non vip ip found, {device_name}:{intf_name}->{ip_live['address']}, "
                                 f"overlaps with {nb_ip['device']}:{nb_ip['interface']}->{nb_ip['address']}"
                             )
                             log.error(msg)
@@ -1294,14 +1343,14 @@ class NetboxIpTasks:
                 SyncActionSummary().model_dump(),
             )
 
-        # check that update and create payloads have no non-anycast duplicate IPs
+        # check that update and create payloads have no non-shared duplicate IPs
         # Netbox has a bug allowing to create duplicate IPs in single create request
-        job.event("checking IP address payloads for duplicate non-anycast addresses")
+        job.event("checking IP address payloads for duplicate non-shared addresses")
         ip_address_seen = {}  # {address: [key, ...]}
         for key, ip_data in {**bulk_create_ip, **bulk_update_ip}.items():
             addr = str(ipaddress.ip_interface(key[2]).ip)
             role = ip_data.get("role") or ""
-            if role != "anycast":
+            if role not in ("anycast", "vip"):
                 ip_address_seen.setdefault(addr, []).append(key)
         for addr, dup_keys in ip_address_seen.items():
             if len(dup_keys) > 1:

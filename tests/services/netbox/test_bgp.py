@@ -2136,38 +2136,55 @@ class TestCreateBgpPeering:
         assert session, f"session '{sname}' not found in NetBox"
         assert session.description == "test optional fields", "description not saved"
 
-    def test_create_bgp_peering_asn_source_dict(self, nfclient):
-        """Regression: Bug #1 - asn_source as dict must not raise AttributeError.
-        Before the fix, nb.ipam.asn.get (singular) caused AttributeError at runtime."""
+    def test_create_bgp_peering_asn_queries(self, nfclient):
+        """Separate ASN queries resolve each side, including bulk entries."""
+        nb = get_pynetbox(nfclient)
         device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
-        sname = f"{device}_asn_source_dict"
-        # ASN 99999999 almost certainly does not exist - resolve_asn_from_source must
-        # return None gracefully instead of crashing with AttributeError on nb.ipam.asn
+        seed_name = f"{device}_asn_query_seed"
+        seed = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": seed_name,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_REMOTE_AS,
+                "remote_as": _TEST_LOCAL_AS,
+                "create_reverse": False,
+                "rir": "lab",
+            },
+        )
+        assert all(not res["failed"] for res in seed.values()), seed
+
+        sname = f"{device}_asn_queries"
         ret = nfclient.run_job(
             "netbox",
             "create_bgp_peering",
             workers="any",
             kwargs={
-                "name": sname,
-                "device": device,
-                "local_address": _TEST_LOCAL_IP,
-                "remote_address": _TEST_REMOTE_IP,
-                # local_as omitted intentionally - resolved via asn_source dict path
-                "remote_as": _TEST_REMOTE_AS,
-                "asn_source": {"asn": 99999999},
+                "bulk_create": [
+                    {
+                        "name": sname,
+                        "device": device,
+                        "local_address": _TEST_LOCAL_IP,
+                        "remote_address": _TEST_REMOTE_IP,
+                        "local_as_query": {"asn": _TEST_LOCAL_AS},
+                        "remote_as_query": {"asn": _TEST_REMOTE_AS},
+                    }
+                ],
+                "create_reverse": False,
                 "rir": "lab",
             },
         )
         pprint.pprint(ret)
         for worker, res in ret.items():
-            # Task must return a result object (no unhandled AttributeError crash)
-            assert (
-                res is not None
-            ), f"{worker}: task returned None - likely AttributeError"
-            # Session must NOT be created since local AS could not be resolved
-            assert sname not in res["result"].get(
-                "created", []
-            ), f"{worker}: session created despite unresolvable ASN"
+            assert res["failed"] is False, f"{worker}: {res['errors']}"
+            assert sname in res["result"]["created"]
+        session = nb.plugins.bgp.session.get(name=sname)
+        assert session.local_as.asn == _TEST_LOCAL_AS
+        assert session.remote_as.asn == _TEST_REMOTE_AS
 
     def test_create_bgp_peering_nonexistent_vrf_warns(self, nfclient):
         """VRF not in NetBox - auto-created and assigned to the session."""

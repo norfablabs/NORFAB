@@ -1571,11 +1571,14 @@ class TestDesignDeploy:
             "198.19.230.0/24",
             "192.0.2.0/24",
             "198.51.100.0/30",
+            "198.51.100.4/31",
         ]
         expected_addresses = [
             "198.19.230.1/24",
             "198.51.100.1/30",
             "198.51.100.2/30",
+            "198.51.100.4/31",
+            "198.51.100.5/31",
             "192.0.2.20/32",
             "192.0.2.101/32",
             "192.0.2.102/32",
@@ -1609,7 +1612,7 @@ class TestDesignDeploy:
         ]
         expected_peerings = [
             "acme-branch-rtr-1-upstream",
-            "acme-branch-rtr-1-to-acme-branch-rtr-2",
+            "acme-branch-rtr-1_default_192.0.2.102",
             "acme-branch-rtr-1-to-acme-branch-agg-1",
             "acme-branch-rtr-1-to-acme-branch-agg-2",
             "acme-branch-rtr-2-to-acme-branch-rtr-1",
@@ -1617,7 +1620,7 @@ class TestDesignDeploy:
             "acme-branch-rtr-2-to-acme-branch-agg-2",
             "acme-branch-agg-1-to-acme-branch-rtr-1",
             "acme-branch-agg-1-to-acme-branch-rtr-2",
-            "acme-branch-agg-1-to-acme-branch-agg-2",
+            "acme-branch-agg-1_default_198.51.100.5",
             "acme-branch-agg-1-to-acme-branch-access-1",
             "acme-branch-agg-1-to-acme-branch-access-2",
             "acme-branch-agg-1-to-acme-branch-access-3",
@@ -1643,16 +1646,36 @@ class TestDesignDeploy:
             (nb.ipam.ip_addresses, {"parent": "198.19.224.0/20"}),
             (nb.ipam.ip_addresses, {"parent": "192.0.2.0/24"}),
             (nb.ipam.ip_addresses, {"parent": "198.51.100.0/30"}),
+            (nb.ipam.ip_addresses, {"parent": "198.51.100.4/31"}),
             (nb.dcim.interfaces, {"device": device_names}),
             (nb.dcim.devices, {"name": device_names}),
             (nb.ipam.prefixes, {"within_include": "198.19.224.0/20"}),
-            (nb.ipam.prefixes, {"prefix": ["192.0.2.0/24", "198.51.100.0/30"]}),
+            (
+                nb.ipam.prefixes,
+                {
+                    "prefix": [
+                        "192.0.2.0/24",
+                        "198.51.100.0/30",
+                        "198.51.100.4/31",
+                    ]
+                },
+            ),
             (nb.ipam.vlan_groups, {"name": "NORFAB ACME TEST VLANS"}),
             (nb.ipam.vrfs, {"name": "ACME BRANCH", "rd": "4200650001:100"}),
             (nb.ipam.route_targets, {"name": ["4200650001:100", "4200650001:200"]}),
             (nb.plugins.bgp.routing_policy, {"name": ["ACME IMPORT", "ACME EXPORT"]}),
             (nb.plugins.bgp.community, {"value": "4200650001:100"}),
             (nb.ipam.asns, {"asn": [4200650000, 4200650001, 4200650002, 4200650003]}),
+            (
+                nb.ipam.asns,
+                {
+                    "description": [
+                        "ACME allocated branch ASN",
+                        "ACME allocated aggregation ASN",
+                    ]
+                },
+            ),
+            (nb.ipam.asn_ranges, {"name": "ACME BRANCH ALLOCATED ASNS"}),
             (nb.ipam.rirs, {"name": "ACME PRIVATE"}),
             (nb.ipam.roles, {"name": ["ACME-BRANCH-LAN", "ACME-BRANCH-LOOPBACK"]}),
             (
@@ -1697,6 +1720,7 @@ class TestDesignDeploy:
             pytest.skip("VRRP group IDs 10 or 20 already exist")
         try:
             previous_ids = None
+            previous_allocated_asns = None
             for run in range(deployments):
                 reply = nfclient.run_job(
                     "netbox",
@@ -1732,6 +1756,36 @@ class TestDesignDeploy:
                     assert [
                         site["id"] for site in item.custom_fields["norfab_acme_sites"]
                     ] == [site_id]
+                allocated_asns = {
+                    description: nb.ipam.asns.get(description=description)
+                    for description in (
+                        "ACME allocated branch ASN",
+                        "ACME allocated aggregation ASN",
+                    )
+                }
+                assert all(allocated_asns.values())
+                assert len({asn.asn for asn in allocated_asns.values()}) == 2
+                for asn in allocated_asns.values():
+                    assert 4200650100 <= asn.asn <= 4200650109
+                    assert asn.rir.name == "ACME PRIVATE"
+                    assert [site.id for site in asn.sites] == [site_id]
+                allocated_numbers = {
+                    description: asn.asn for description, asn in allocated_asns.items()
+                }
+                if previous_allocated_asns is not None:
+                    assert allocated_numbers == previous_allocated_asns
+                previous_allocated_asns = allocated_numbers
+                allocated_peering = nb.plugins.bgp.session.get(
+                    name="acme-branch-rtr-1-to-acme-branch-agg-1"
+                )
+                assert (
+                    allocated_peering.local_as.asn
+                    == allocated_numbers["ACME allocated branch ASN"]
+                )
+                assert (
+                    allocated_peering.remote_as.asn
+                    == allocated_numbers["ACME allocated aggregation ASN"]
+                )
                 vpn = nb.vpn.l2vpns.get(name="ACME BRANCH EVPN")
                 assert vpn.type.value == "vxlan"
                 assert vpn.identifier == 10100
@@ -1818,12 +1872,42 @@ class TestDesignDeploy:
                 ]
                 assert all(current_ids), current_ids
                 assert len(current_ids[0]) == 25
+                loopback_peering = nb.plugins.bgp.session.get(
+                    name="acme-branch-rtr-1_default_192.0.2.102"
+                )
+                assert loopback_peering.device.name == "acme-branch-rtr-1"
+                assert loopback_peering.local_address.address == "192.0.2.101/32"
+                assert loopback_peering.remote_address.address == "192.0.2.102/32"
+                assert (
+                    loopback_peering.local_as.asn
+                    == allocated_numbers["ACME allocated branch ASN"]
+                )
+                assert (
+                    loopback_peering.remote_as.asn
+                    == allocated_numbers["ACME allocated branch ASN"]
+                )
+                upstream = nb.plugins.bgp.session.get(name="acme-branch-rtr-1-upstream")
+                assert upstream.local_address.address == "198.51.100.1/30"
+                assert upstream.remote_address.address == "198.51.100.2/30"
+                interconnect = nb.plugins.bgp.session.get(
+                    name="acme-branch-agg-1_default_198.51.100.5"
+                )
+                assert interconnect.local_address.address == "198.51.100.4/31"
+                assert interconnect.remote_address.address == "198.51.100.5/31"
+                assert (
+                    interconnect.local_as.asn
+                    == allocated_numbers["ACME allocated aggregation ASN"]
+                )
+                assert (
+                    interconnect.remote_as.asn
+                    == allocated_numbers["ACME allocated aggregation ASN"]
+                )
                 for device_name, names in expected_interfaces.items():
                     assert sorted(
                         item.name
                         for item in nb.dcim.interfaces.filter(device=device_name)
                     ) == sorted(names), device_name
-                assert len(current_ids[6]) == 9
+                assert len(current_ids[7]) == 9
                 assert len(list(nb.ipam.vlans.filter(group_id=group.id))) == 4
                 assert {
                     vlan.vid: vlan.name
@@ -1978,12 +2062,13 @@ class TestDesignDeploy:
                 assert not list(endpoint.filter(**filters)), filters
 
     def test_bgp_peering_policies(self, nfclient: Any) -> None:
-        """Deploy an ASN, IPs, nested routing policy and BGP session, then update."""
+        """Derive a session name and leave its existing fields unchanged."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         if not nb.dcim.devices.get(name="ceos1"):
             pytest.skip("ceos1 fixture is required")
+        session_name = "ceos1_default_198.19.246.2"
         objects = [
-            (nb.plugins.bgp.session, {"name": "NORFAB DESIGN BGP"}),
+            (nb.plugins.bgp.session, {"name": session_name}),
             (
                 nb.plugins.bgp.routing_policy,
                 {"name": ["NORFAB DESIGN BGP IMPORT", "NORFAB DESIGN BGP EXTRA"]},
@@ -2009,7 +2094,6 @@ class TestDesignDeploy:
             ],
             "bgp_peerings": [
                 {
-                    "name": "NORFAB DESIGN BGP",
                     "device": "ceos1",
                     "local_address": "198.19.246.1",
                     "remote_address": "198.19.246.2",
@@ -2036,7 +2120,7 @@ class TestDesignDeploy:
             )
             for name in ("NORFAB DESIGN BGP TAG A", "NORFAB DESIGN BGP TAG B"):
                 nb.extras.tags.create(name=name, slug=name.lower().replace(" ", "-"))
-            for description in ("initial", "updated", "updated"):
+            for run, description in enumerate(("initial", "updated", "updated")):
                 design["bgp_peerings"][0]["description"] = description
                 if description == "updated":
                     design["bgp_peerings"][0]["import_policies"] = [
@@ -2050,34 +2134,19 @@ class TestDesignDeploy:
                 for result in reply.values():
                     assert not result["failed"], result
                     assert not result["errors"], result
-                session = nb.plugins.bgp.session.get(name="NORFAB DESIGN BGP")
-                assert session.description == description
+                    assert result["result"]["bgp_peerings"]["created"] == (
+                        [session_name] if run == 0 else []
+                    )
+                    assert result["result"]["bgp_peerings"]["updated"] == []
+                session = nb.plugins.bgp.session.get(name=session_name)
+                assert session.description == "initial"
                 assert session.custom_fields["norfab_design_bgp_device"]["id"] == (
                     nb.dcim.devices.get(name="ceos1").id
                 )
-                assert {policy.name for policy in session.import_policies} == (
-                    {"NORFAB DESIGN BGP IMPORT"}
-                    if description == "initial"
-                    else {"NORFAB DESIGN BGP IMPORT", "NORFAB DESIGN BGP EXTRA"}
-                )
-                assert {tag.name for tag in session.tags} == (
-                    {"NORFAB DESIGN BGP TAG A"}
-                    if description == "initial"
-                    else {"NORFAB DESIGN BGP TAG A", "NORFAB DESIGN BGP TAG B"}
-                )
-            reply = nfclient.run_job(
-                "netbox",
-                "update_bgp_peering",
-                workers="any",
-                kwargs={
-                    "name": "NORFAB DESIGN BGP",
-                    "tags": ["NORFAB DESIGN BGP TAG B"],
-                    "custom_fields": {"norfab_design_bgp_device": "ceos1"},
-                },
-            )
-            for result in reply.values():
-                assert not result["failed"], result
-                assert "NORFAB DESIGN BGP" in result["result"]["in_sync"]
+                assert {policy.name for policy in session.import_policies} == {
+                    "NORFAB DESIGN BGP IMPORT"
+                }
+                assert {tag.name for tag in session.tags} == {"NORFAB DESIGN BGP TAG A"}
         finally:
             for endpoint, filters in objects:
                 for record in endpoint.filter(**filters):

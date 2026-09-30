@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 29 September 2026*
+*Last updated: 30 September 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -741,7 +741,7 @@ design communities match by value and optional description, and interface VRFs a
 Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
 Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 IP allocation prefix filters resolve `role` by role name, not slug, and reject unknown names.
-BGP sessions use existing creation/update tasks after ASNs, IPs and policies. The `create_bgp_peering` wrapper is supported in designs; the standalone create task resolves custom-field references for new sessions and leaves existing sessions unchanged.
+BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. The standalone create task resolves custom-field references for new sessions.
 Inline import/export policy definitions are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving record arguments, `netbox`, and `dry_run`; custom
@@ -828,6 +828,10 @@ new devices, and template-driven zero-touch workflows.
 **Limitations:** parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
 `create_ip` can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.
+It can use one-based `ip_index` for the initial VRRP-group address or another new allocation, and creates separate
+anycast or VIP records when the indexed address already exists.
+Without `ip_index`, normal allocation uses the next available address and sets
+the requested role.
 
 [Create IP](workers/netbox/services_netbox_service_tasks_create_ip.md) ·
 [Bulk IP](workers/netbox/services_netbox_service_tasks_create_ip_bulk.md) ·
@@ -962,6 +966,8 @@ interface MAC addresses with NetBox, including interface-first IP matching,
 shared inline or `nf://` interface-name mapping, filters, inline or `nf://`
 anycast ranges, VRF/site association, controlled deletion behavior, and stable
 create, update, delete, and in-sync diff reports.
+IP sync allows separate interface assignments for shared anycast and VIP
+addresses, including VIP roles parsed from devices or inherited from NetBox.
 Parsed VRRP, GLBP, HSRP, and CARP addresses are excluded from IP
 synchronization. The VRRP sync task creates VRRP addresses and associates them
 with FHRP groups. IP records assigned to other non-interface objects are also
@@ -983,7 +989,8 @@ prerequisites; templates and transformer files execute as trusted code.
 
 ### BGP peering lifecycle
 
-Creates or updates individual and bulk BGP sessions, and reconciles live BGP
+Creates or updates individual and bulk BGP sessions, including separate NetBox
+IP and ASN queries for each side of a new session, and reconciles live BGP
 neighbors with NetBox using five-tuple session identity, live-data filters,
 dry-run, optional stale-session deletion, and tri-state existing-description
 preservation. **Use cases:** routing

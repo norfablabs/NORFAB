@@ -9,6 +9,10 @@ tags:
 
 Allocates the next available IP address from a parent prefix, or reuses an existing matching IP address. The task can assign the IP to a device interface, update metadata, set the address as primary, and optionally create an address for the connected peer interface.
 
+Set `ip_index` to select a usable address by its one-based position in the subnet. For example, index `1` selects `.1` in an IPv4 `/30`, while indexes `1` and `2` select both addresses of a `/31`. An index beyond the usable addresses fails. Existing group or interface assignments are reused before allocating a child subnet. Dry runs with `mask_len` still preview an address from the parent prefix.
+
+An existing assignment to the requested interface is reused first. If none is found, `ip_index` selects a specific usable address; without it, the task allocates the next available address. The requested `role`, including `anycast` or `vip`, is set on the allocated IP. If an indexed address already exists, the task can create another record for `anycast` or `vip` after setting the existing record's role. An existing indexed address with another requested role causes an error.
+
 The task can also be called from Nornir templates through the [netbox.create_ip Jinja2 filter](../nornir/services_nornir_service_jinja2_filters.md#netboxcreate_ip).
 
 ## VRRP virtual IP allocation
@@ -27,6 +31,7 @@ create_ip:
 ```
 
 Group allocation cannot accompany `device`, `interface`, or `is_primary: true`.
+`ip_index` selects the initial group address; later calls reuse the group's IP.
 It disables peer allocation. Dry runs resolve the group without writing; the
 existing dry-run limitation for `mask_len` still applies. Results include
 `vrrp_group` when supplied. Omitting it preserves existing task behavior.
@@ -51,6 +56,7 @@ Returns the allocated or updated IP address data. When `create_peer_ip=True`, pe
 - When `mask_len` differs from the parent prefix length, the task creates or reuses a child prefix through `create_prefix`.
 - In dry-run mode, `mask_len` is ignored and the candidate IP is allocated directly from the parent prefix.
 - IPv4 /32 and IPv6 /128 allocations automatically disable peer creation and peer-subnet reuse, including when the supplied parent is itself a host prefix.
+- `ip_index` is one-based over usable IPs; `/31` and `/127` include both endpoints.
 - Object and multiobject custom fields accept related object names or IDs. The task resolves names using each field's NetBox definition, adds new list values on repeated calls, and replaces scalar or `null` values. Missing or ambiguous names fail.
 - Branch writes require the [NetBox Branching Plugin](https://github.com/netboxlabs/netbox-branching).
 

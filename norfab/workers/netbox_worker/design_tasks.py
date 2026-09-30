@@ -66,9 +66,9 @@ def flatten_design(design: dict) -> dict:
                 design.setdefault(collection, []).append(
                     {**port, "name": name, "device": device["name"]}
                 )
-        for name, peering in device.pop("bgp_peerings", {}).items():
+        for peering in device.pop("bgp_peerings", []):
             design.setdefault("bgp_peerings", []).append(
-                {**peering, "name": name, "device": device["name"]}
+                {**peering, "device": device["name"]}
             )
 
     for interface in design.get("interfaces", []):
@@ -84,11 +84,10 @@ def flatten_design(design: dict) -> dict:
             else:
                 address.update(device=device, interface=name)
             design.setdefault("ip_addresses", []).append(address)
-        for peering_name, peering in interface.pop("bgp_peerings", {}).items():
+        for peering in interface.pop("bgp_peerings", []):
             design.setdefault("bgp_peerings", []).append(
                 {
                     **peering,
-                    "name": peering_name,
                     "device": device,
                     "local_interface": name,
                 }
@@ -2746,11 +2745,11 @@ def process_bgp_peerings(
     instance: str,
     branch: str | None,
 ) -> dict:
-    """Match sessions by name and delegate writes to BGP worker tasks.
+    """Create missing BGP sessions and leave existing sessions unchanged.
 
     Routing-policy dictionaries become names. Reverse-session creation is
     batched separately because the worker task takes one flag per batch.
-    Existing sessions are updated through the task, not bulk pynetbox.
+    The create task derives missing names and checks NetBox for existing sessions.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -2773,41 +2772,11 @@ def process_bgp_peerings(
     log.debug(
         "process_bgp_peerings: processing %d records, dry_run=%s", len(records), dry_run
     )
-    names = [record["name"] for record in records]
-    existing = (
-        {
-            item.name: item
-            for item in worker.bulk_filter(
-                nb.plugins.bgp.session,
-                name=names,
-                fields="id,name,import_policies,export_policies,custom_fields,tags",
-            )
-        }
-        if names
-        else {}
-    )
-    created = [record for record in records if record["name"] not in existing]
-    updated = [
-        {**record, "id": existing[record["name"]].id}
-        for record in records
-        if record["name"] in existing
-    ]
-    merge_design_array_fields(
-        worker,
-        nb,
-        lookup_cache,
-        nb.plugins.bgp.session,
-        "netbox_bgp.bgpsession",
-        created,
-        updated,
-        array_fields=("import_policies", "export_policies"),
-        existing_by_id={item.id: item for item in existing.values()},
-        array_value_attribute="name",
-    )
+    changes = {"created": [], "updated": []}
     for create_reverse in (False, True):
         batch = [
             record
-            for record in created
+            for record in records
             if record.get("create_reverse", True) == create_reverse
         ]
         if batch:
@@ -2822,21 +2791,8 @@ def process_bgp_peerings(
             )
             if result.failed or result.errors:
                 raise ValueError("; ".join(result.errors) or "BGP creation failed")
-    if updated:
-        result = worker.update_bgp_peering(
-            bulk_update=updated,
-            dry_run=dry_run,
-            job=job,
-            instance=instance,
-            branch=branch,
-            lookup_cache=lookup_cache,
-        )
-        if result.failed or result.errors:
-            raise ValueError("; ".join(result.errors) or "BGP update failed")
-    return {
-        "created": [record["name"] for record in created],
-        "updated": [record["name"] for record in updated],
-    }
+            changes["created"].extend(result.result["create" if dry_run else "created"])
+    return changes
 
 
 def process_power_ports(
