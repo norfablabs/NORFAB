@@ -1,4 +1,4 @@
-# 0.24.4 (draft)
+# 0.24.4
 
 ## ENHANCEMENTS
 
