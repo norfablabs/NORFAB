@@ -1917,6 +1917,16 @@ class TestDesignDeploy:
                     assert nb.ipam.prefixes.get(prefix=value), value
                 for value in expected_addresses:
                     assert nb.ipam.ip_addresses.get(address=value), value
+                shared_vips = list(nb.ipam.ip_addresses.filter(address="192.0.2.23/24"))
+                assert len(shared_vips) == 2
+                assert {ip.role.value for ip in shared_vips} == {"vip"}
+                assert {
+                    (ip.assigned_object.device.name, ip.assigned_object.name)
+                    for ip in shared_vips
+                } == {
+                    ("acme-branch-agg-1", "Vlan100"),
+                    ("acme-branch-agg-2", "Vlan100"),
+                }
                 for description in allocated_addresses:
                     assert nb.ipam.ip_addresses.get(
                         description=description

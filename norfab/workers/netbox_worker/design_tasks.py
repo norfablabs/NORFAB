@@ -2203,8 +2203,9 @@ def process_ip_addresses(
 ) -> dict:
     """Bulk-write explicit IPs, then run create_ip allocations.
 
-    Identity is address plus VRF. Assignments resolve interfaces or FHRP
-    groups from the cache; allocated addresses may require later reads.
+    Identity is address plus VRF and, for shared IPs, assignment. Assignments
+    resolve interfaces or FHRP groups from the cache; allocated addresses may
+    require later reads.
     If both assignment forms appear on one record, the interface wins.
 
     Args:
@@ -2225,21 +2226,22 @@ def process_ip_addresses(
     )
     explicit = [record for record in records if "address" in record]
     addresses = [str(ip_interface(record["address"])) for record in explicit]
-    existing = (
-        {
-            (item.address, item.vrf.id if item.vrf else None): item
-            for item in worker.bulk_filter(
-                nb.ipam.ip_addresses, address=addresses, fields="id,address,vrf"
-            )
-        }
-        if addresses
-        else {}
-    )
+    existing = {}
+    if addresses:
+        for item in worker.bulk_filter(
+            nb.ipam.ip_addresses,
+            address=addresses,
+            fields="id,address,vrf,role,assigned_object_type,assigned_object_id",
+        ):
+            existing.setdefault(
+                (item.address, item.vrf.id if item.vrf else None), []
+            ).append(item)
     ip_cache = lookup_cache["ip_addresses"]
     ip_cache.update(
         {
             (item.address, item.vrf.name if item.vrf else None): item.id
-            for item in existing.values()
+            for items in existing.values()
+            for item in items
         }
     )
     interfaces = lookup_cache["interfaces"]
@@ -2290,6 +2292,8 @@ def process_ip_addresses(
             }
         )
     created, updated = [], []
+    role_updates = []
+    claimed_unassigned = set()
     for record, address in zip(explicit, addresses):
         payload = {
             key: value
@@ -2321,10 +2325,48 @@ def process_ip_addresses(
         elif isinstance(vrf, str):
             vrf = lookup_cache["vrfs"].get((vrf, None)) or nb.ipam.vrfs.get(name=vrf).id
         key = (address, vrf)
-        if key in existing:
-            updated.append({**payload, "id": existing[key].id})
-        else:
+        matches = existing.get(key, [])
+        assignment = (
+            payload.get("assigned_object_type"),
+            payload.get("assigned_object_id"),
+        )
+        current = next(
+            (
+                item
+                for item in matches
+                if (item.assigned_object_type, item.assigned_object_id) == assignment
+            ),
+            None,
+        )
+        if current is None:
+            current = next(
+                (
+                    item
+                    for item in matches
+                    if not item.assigned_object_id and item.id not in claimed_unassigned
+                ),
+                None,
+            )
+        if (
+            current is None
+            and payload.get("role") in ("vip", "anycast")
+            and assignment[1]
+        ):
+            # NetBox requires existing copies to have a shared role before a
+            # second assignment can use the same address.
+            for item in matches:
+                if getattr(item.role, "value", item.role) != payload["role"]:
+                    role_updates.append({"id": item.id, "role": payload["role"]})
             created.append(payload)
+        elif current is None and matches:
+            updated.append({**payload, "id": matches[0].id})
+        elif current is None:
+            created.append(payload)
+        else:
+            updated.append({**payload, "id": current.id})
+            # An unassigned record can only be claimed once in this deployment.
+            if not current.assigned_object_id:
+                claimed_unassigned.add(current.id)
     created = [dict(record) for record in created]
     for record in created + updated:
         for field in ("tenant",):
@@ -2342,6 +2384,8 @@ def process_ip_addresses(
         updated,
     )
     if not dry_run:
+        if role_updates:
+            nb.ipam.ip_addresses.update(role_updates)
         if created:
             ip_cache.update(
                 {

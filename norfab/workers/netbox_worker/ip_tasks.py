@@ -612,7 +612,7 @@ class NetboxIpTasks:
         if vrf and vrf != nb_ip.vrf:
             nb_ip.vrf = {"name": vrf}
             has_changes = True
-        if tenant and tenant != nb_ip.tenant:
+        if tenant and tenant != getattr(nb_ip.tenant, "name", None):
             nb_ip.tenant = {"name": tenant}
             has_changes = True
         if dns_name and dns_name != nb_ip.dns_name:
@@ -621,7 +621,7 @@ class NetboxIpTasks:
         if comments and comments != nb_ip.comments:
             nb_ip.comments = comments
             has_changes = True
-        if role and role != nb_ip.role:
+        if role and role != getattr(nb_ip.role, "value", nb_ip.role):
             nb_ip.role = role
             has_changes = True
         if tags and not any(t in nb_ip.tags for t in tags):

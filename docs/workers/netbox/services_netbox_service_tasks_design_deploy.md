@@ -189,6 +189,8 @@ Task wrappers call standalone NorFab NetBox service tasks during the relevant de
 
 Both forms belong under `ip_addresses`. Specify each address when its value is known:
 
+To put the same VIP or anycast address on two interfaces, add the address under each interface with `role: vip` or `role: anycast`. NetBox creates a separate IP record for each interface. Running the design again keeps both records on their original interfaces.
+
 ```yaml
 ip_addresses:
   - address: 192.0.2.10/24

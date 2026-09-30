@@ -638,6 +638,10 @@ devices:
         ip_addresses:
           - address: 192.0.2.21/24
             tenant: ACME
+          - address: 192.0.2.23/24
+            role: vip
+            tenant: ACME
+            description: ACME shared user VIP
         vrrp:
           group_id: 10
           name: ACME USER GATEWAY
@@ -789,6 +793,10 @@ devices:
         ip_addresses:
           - address: 192.0.2.22/24
             tenant: ACME
+          - address: 192.0.2.23/24
+            role: vip
+            tenant: ACME
+            description: ACME shared user VIP
         vrrp:
           group_id: 10
           name: ACME USER GATEWAY
