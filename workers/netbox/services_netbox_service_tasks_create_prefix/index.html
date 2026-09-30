@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7154,6 +7154,13 @@
   dry-run previews. Changing VLAN updates the prefix selected by the existing
   description/scope filters rather than allocating a replacement.</li>
 <li>If <code>vrf</code> is provided, the parent prefix must belong to the same VRF.</li>
+<li>When updating an existing prefix, new tags and new items in list-valued custom
+  fields are added without removing current values. Supplying <code>[]</code> leaves an
+  existing custom-field list unchanged. For custom fields, <code>null</code> clears the
+  value, and a new scalar value replaces the old one.</li>
+<li>Object and multiobject custom fields accept related object names or IDs. The
+  task resolves names using each field's NetBox definition; missing or ambiguous
+  names fail.</li>
 <li>Branch writes require the <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a>.</li>
 </ul>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -7316,8 +7323,11 @@ nf#
             <td>
               <div class="doc-md-description">
                 <p>Custom-field names and values to PATCH
-on the allocated prefix. Definitions must already exist in Netbox.
-The result diff lists changed field names only, not their values.</p>
+on the allocated prefix. New list items are added to existing
+custom-field lists; scalar values and null replace old values.
+Object and multiobject fields accept related object names or IDs.
+Definitions must already exist in NetBox. The result diff lists
+changed field names only, not their values.</p>
               </div>
             </td>
             <td>
@@ -7383,7 +7393,7 @@ allocates next available /30 point-to-point prefix.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of tags to assign to the prefix.</p>
+                <p>Tag names to add to the prefix.</p>
               </div>
             </td>
             <td>
@@ -7610,11 +7620,7 @@ a different length. VLAN lookup failures occur before allocation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\prefix_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 29</span>
 <span class="normal"> 30</span>
 <span class="normal"> 31</span>
 <span class="normal"> 32</span>
@@ -7959,7 +7965,34 @@ a different length. VLAN lookup failures occur before allocation.</p>
 <span class="normal">371</span>
 <span class="normal">372</span>
 <span class="normal">373</span>
-<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreatePrefixInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreatePrefixResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -8007,14 +8040,17 @@ a different length. VLAN lookup failures occur before allocation.</p>
 <span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site&quot;: &quot;foo&quot;}`</span>
 
 <span class="sd">        custom_fields (dict, optional): Custom-field names and values to PATCH</span>
-<span class="sd">            on the allocated prefix. Definitions must already exist in Netbox.</span>
-<span class="sd">            The result diff lists changed field names only, not their values.</span>
+<span class="sd">            on the allocated prefix. New list items are added to existing</span>
+<span class="sd">            custom-field lists; scalar values and null replace old values.</span>
+<span class="sd">            Object and multiobject fields accept related object names or IDs.</span>
+<span class="sd">            Definitions must already exist in NetBox. The result diff lists</span>
+<span class="sd">            changed field names only, not their values.</span>
 <span class="sd">        description (str): Description for the new prefix, prefix description used for</span>
 <span class="sd">            deduplication to source existing prefixes.</span>
 <span class="sd">        prefixlen (int, optional): The prefix length of the new prefix to create, by default</span>
 <span class="sd">            allocates next available /30 point-to-point prefix.</span>
 <span class="sd">        vrf (str, optional): Name of the VRF to associate with the prefix.</span>
-<span class="sd">        tags (Union[None, list], optional): List of tags to assign to the prefix.</span>
+<span class="sd">        tags (Union[None, list], optional): Tag names to add to the prefix.</span>
 <span class="sd">        tenant (str, optional): Name of the tenant to associate with the prefix.</span>
 <span class="sd">        comments (str, optional): Comments for the prefix.</span>
 <span class="sd">        role (str, optional): Role to assign to the prefix.</span>
@@ -8217,15 +8253,34 @@ a different length. VLAN lookup failures occur before allocation.</p>
             <span class="p">}</span>
             <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span> <span class="o">=</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.prefix&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="c1"># Normalize existing references to IDs before comparing the merged</span>
+        <span class="c1"># values, so a repeat call does not report a false change.</span>
+        <span class="n">current_fields</span><span class="p">,</span> <span class="n">merged_fields</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">nb</span><span class="p">,</span>
+            <span class="n">nb_prefix</span><span class="p">,</span>
+            <span class="n">custom_fields</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+            <span class="p">[</span>
+                <span class="n">field</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
         <span class="n">changed_fields</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">name</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">custom_fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">custom_fields</span>
+            <span class="k">if</span> <span class="n">current_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">merged_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="n">changed_fields</span><span class="p">:</span>
             <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">changed_fields</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-            <span class="n">nb_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">custom_fields</span><span class="p">})</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">nb_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">merged_fields</span><span class="p">})</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
         <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
@@ -8257,15 +8312,16 @@ a different length. VLAN lookup failures occur before allocation.</p>
     <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
         <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
-    <span class="n">existing_tags</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span> <span class="ow">in</span> <span class="n">existing_tags</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
+    <span class="n">existing_tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
+    <span class="n">merged_tags</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+    <span class="n">merged_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">merged_tags</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">merged_names</span> <span class="o">!=</span> <span class="n">existing_tags</span><span class="p">:</span>
         <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="n">existing_tags</span><span class="p">,</span>
-            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">]</span> <span class="o">+</span> <span class="n">existing_tags</span><span class="p">,</span>
+            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">merged_names</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">:</span>
-                <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">})</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">merged_tags</span>
 
     <span class="c1"># save prefix into Netbox</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -8438,7 +8494,7 @@ a different length. VLAN lookup failures occur before allocation.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

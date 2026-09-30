@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2715,15 +2715,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-next-available-allocation-functions" class="md-nav__link">
+  <a href="#built-in-task-wrappers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Built-In Next-Available Allocation Functions
+        Built-In Task Wrappers
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Built-In Next-Available Allocation Functions">
+    <nav class="md-nav" aria-label="Built-In Task Wrappers">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2824,6 +2824,17 @@
     <span class="md-ellipsis">
       
         Nested VRRP Group Records
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#l2vpns-and-terminations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L2VPNs and Terminations
       
     </span>
   </a>
@@ -7287,15 +7298,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-next-available-allocation-functions" class="md-nav__link">
+  <a href="#built-in-task-wrappers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Built-In Next-Available Allocation Functions
+        Built-In Task Wrappers
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Built-In Next-Available Allocation Functions">
+    <nav class="md-nav" aria-label="Built-In Task Wrappers">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -7396,6 +7407,17 @@
     <span class="md-ellipsis">
       
         Nested VRRP Group Records
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#l2vpns-and-terminations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L2VPNs and Terminations
       
     </span>
   </a>
@@ -7766,136 +7788,150 @@
 <td><code>vlans</code></td>
 <td><code>netbox.ipam.vlans</code></td>
 <td><code>group</code>, <code>vid</code></td>
-<td>VLANs with a specified ID require both fields. <code>create_vlan</code> allocates a VID. Direct VLAN <code>site</code> is unsupported.</td>
+<td>VLANs with a specified ID require both fields. Existing VLANs gain new tags and custom-field list items. <code>create_vlan</code> allocates a VID. Direct VLAN <code>site</code> is unsupported.</td>
 </tr>
 <tr>
 <td style="text-align: right;">16</td>
 <td><code>route_targets</code></td>
 <td><code>netbox.ipam.route_targets</code></td>
 <td><code>name</code></td>
-<td>VRF references can inline target dictionaries.</td>
+<td>VRF and L2VPN references can inline target dictionaries.</td>
 </tr>
 <tr>
 <td style="text-align: right;">17</td>
 <td><code>vrfs</code></td>
 <td><code>netbox.ipam.vrfs</code></td>
 <td><code>name</code>, <code>rd</code></td>
-<td>Import/export route targets must be dictionaries.</td>
+<td>Import/export route targets must be dictionaries. Existing target lists gain missing targets.</td>
 </tr>
 <tr>
 <td style="text-align: right;">18</td>
-<td><code>prefixes</code></td>
-<td><code>netbox.ipam.prefixes</code></td>
-<td><code>prefix</code>, <code>vrf</code></td>
-<td>Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by <code>{group, vid}</code>. <code>create_prefix</code> supports site scope and VLAN association through <code>vlan</code> (VID) plus <code>vlan_group</code> (name).</td>
+<td><code>l2vpns</code></td>
+<td><code>netbox.vpn.l2vpns</code></td>
+<td><code>name</code></td>
+<td>Import/export route targets must be dictionaries. Existing target lists gain missing targets. Nested terminations are flattened.</td>
 </tr>
 <tr>
 <td style="text-align: right;">19</td>
+<td><code>prefixes</code></td>
+<td><code>netbox.ipam.prefixes</code></td>
+<td><code>prefix</code>, <code>vrf</code></td>
+<td>Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by <code>{group, vid}</code>. Existing prefixes gain new tags and custom-field list items. <code>create_prefix</code> supports site scope and VLAN association through <code>vlan</code> (VID) plus <code>vlan_group</code> (name).</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
 <td><code>devices</code></td>
 <td><code>netbox.dcim.devices</code></td>
 <td><code>site</code> and <code>name</code>, plus <code>tenant</code> when supplied</td>
 <td>Nested components are flattened before writes.</td>
 </tr>
 <tr>
-<td style="text-align: right;">20</td>
+<td style="text-align: right;">21</td>
 <td><code>interfaces</code></td>
 <td><code>netbox.dcim.interfaces</code></td>
 <td><code>device</code>, <code>name</code></td>
 <td>Independent interfaces are written before those with <code>parent</code>, <code>lag</code>, or <code>bridge</code>.</td>
 </tr>
 <tr>
-<td style="text-align: right;">21</td>
+<td style="text-align: right;">22</td>
+<td><code>l2vpn_terminations</code></td>
+<td><code>netbox.vpn.l2vpn_terminations</code></td>
+<td>Attached interface or VLAN</td>
+<td>Attachments require <code>l2vpn</code> and either <code>device</code> with <code>interface</code>, or VLAN <code>group</code> with <code>vid</code>. An attachment already used by another L2VPN is rejected.</td>
+</tr>
+<tr>
+<td style="text-align: right;">23</td>
 <td><code>power_ports</code></td>
 <td><code>netbox.dcim.power_ports</code></td>
 <td><code>device</code>, <code>name</code></td>
 <td>Nested connection is flattened.</td>
 </tr>
 <tr>
-<td style="text-align: right;">22</td>
+<td style="text-align: right;">24</td>
 <td><code>console_ports</code></td>
 <td><code>netbox.dcim.console_ports</code></td>
 <td><code>device</code>, <code>name</code></td>
 <td>Nested connection is flattened.</td>
 </tr>
 <tr>
-<td style="text-align: right;">23</td>
+<td style="text-align: right;">25</td>
 <td><code>power_outlets</code></td>
 <td><code>netbox.dcim.power_outlets</code></td>
 <td><code>device</code>, <code>name</code></td>
 <td>Nested connection is flattened.</td>
 </tr>
 <tr>
-<td style="text-align: right;">24</td>
+<td style="text-align: right;">26</td>
 <td><code>console_server_ports</code></td>
 <td><code>netbox.dcim.console_server_ports</code></td>
 <td><code>device</code>, <code>name</code></td>
 <td>Nested connection is flattened.</td>
 </tr>
 <tr>
-<td style="text-align: right;">25</td>
+<td style="text-align: right;">27</td>
 <td><code>connections</code></td>
 <td><code>netbox.dcim.cables</code></td>
 <td>Existing cable on both terminations</td>
 <td>Creates interface, console, and power cables. Each end currently has one termination. An already-cabled port cannot be moved.</td>
 </tr>
 <tr>
-<td style="text-align: right;">26</td>
+<td style="text-align: right;">28</td>
 <td><code>vrrp_groups</code></td>
 <td><code>netbox.ipam.fhrp_groups</code></td>
 <td><code>protocol</code>, <code>group_id</code></td>
 <td>Inline <code>vip</code> becomes an explicit IP address; use top-level <code>create_ip.vrrp_group</code> for allocation.</td>
 </tr>
 <tr>
-<td style="text-align: right;">27</td>
+<td style="text-align: right;">29</td>
 <td><code>ip_addresses</code></td>
 <td><code>netbox.ipam.ip_addresses</code></td>
 <td><code>address</code>, <code>vrf</code></td>
 <td>Addresses with specified values are bulk-written. <code>create_ip</code> allocates the next available address and can assign it to an interface or named VRRP group.</td>
 </tr>
 <tr>
-<td style="text-align: right;">28</td>
+<td style="text-align: right;">30</td>
 <td><code>vrrp_group_assignments</code></td>
 <td><code>netbox.ipam.fhrp_group_assignments</code></td>
 <td><code>group</code>, <code>interface</code></td>
 <td>Associates an existing group and interface with priority.</td>
 </tr>
 <tr>
-<td style="text-align: right;">29</td>
+<td style="text-align: right;">31</td>
 <td><code>primary_ip</code></td>
 <td><code>netbox.dcim.devices</code></td>
 <td>Device: <code>site</code> and <code>name</code>, plus <code>tenant</code> when supplied</td>
 <td>Sets an existing <code>primary_ip4</code> or <code>primary_ip6</code>. It does not create the address.</td>
 </tr>
 <tr>
-<td style="text-align: right;">30</td>
+<td style="text-align: right;">32</td>
 <td><code>bgp_communities</code></td>
 <td><code>netbox.plugins.bgp.community</code></td>
 <td><code>value</code>, plus <code>description</code> when supplied</td>
 <td>A different description creates another community. Without description, the value must identify one object.</td>
 </tr>
 <tr>
-<td style="text-align: right;">31</td>
+<td style="text-align: right;">33</td>
 <td><code>routing_policies</code></td>
 <td><code>netbox.plugins.bgp.routing_policy</code></td>
 <td><code>name</code></td>
 <td>Peering references can inline policy dictionaries.</td>
 </tr>
 <tr>
-<td style="text-align: right;">32</td>
+<td style="text-align: right;">34</td>
 <td><code>bgp_peerings</code></td>
 <td><code>netbox.plugins.bgp.session</code></td>
-<td><code>name</code></td>
-<td>Uses <code>create_bgp_peering</code> for new sessions and <code>update_bgp_peering</code> for existing ones. New sessions default to <code>create_reverse: true</code>. Supports import/export policy dictionaries.</td>
+<td>Supplied or generated <code>name</code></td>
+<td>Uses <code>create_bgp_peering</code> to create missing sessions. Existing sessions are left unchanged. New sessions default to <code>create_reverse: true</code>. Supports import/export policy dictionaries.</td>
 </tr>
 <tr>
-<td style="text-align: right;">33</td>
+<td style="text-align: right;">35</td>
 <td><code>config_context</code></td>
 <td><code>netbox.extras.config_contexts</code></td>
 <td><code>name</code></td>
 <td><code>data</code> is a dictionary and <code>sites</code> scopes it.</td>
 </tr>
 <tr>
-<td style="text-align: right;">34</td>
+<td style="text-align: right;">36</td>
 <td><code>local_context_data</code></td>
 <td><code>netbox.dcim.devices</code></td>
 <td>Device: <code>site</code> and <code>name</code>, plus <code>tenant</code> when supplied</td>
@@ -7904,12 +7940,13 @@
 </tbody>
 </table>
 <p>Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as <code>device.site</code>, <code>device.role</code>, and <code>vlan.group</code>, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.</p>
-<h2 id="built-in-next-available-allocation-functions">Built-In Next-Available Allocation Functions<a class="headerlink" href="#built-in-next-available-allocation-functions" title="Permanent link">¤</a></h2>
-<p>Next-available allocation is useful when a design knows the pool and the object's purpose, but not its final ASN, VLAN ID, subnet, or IP address. For example, several branches can use the same design and receive different available values from their own pools. Use a <code>create_*</code> wrapper to request a value. These wrappers call existing, standalone NorFab Netbox service tasks during the relevant deployment stage. The design does not implement allocation itself. The wrapper contains that task's arguments, without renaming them:</p>
+<p>When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Only config-context <code>sites</code> accepts site names; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group <code>vid_ranges</code>, local context data, and config-context <code>data</code> retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.</p>
+<h2 id="built-in-task-wrappers">Built-In Task Wrappers<a class="headerlink" href="#built-in-task-wrappers" title="Permanent link">¤</a></h2>
+<p>Task wrappers call standalone NorFab NetBox service tasks during the relevant deployment stage. The wrapper contains that task's arguments, without renaming them. The allocation wrappers are useful when a design knows the pool and the object's purpose, but not its final ASN, VLAN ID, subnet, or IP address. Several branches can use the same design and receive different available values from their own pools.</p>
 <table>
 <thead>
 <tr>
-<th>Next available allocation function</th>
+<th>Task wrapper</th>
 <th>How it works</th>
 </tr>
 </thead>
@@ -7930,9 +7967,14 @@
 <td><a href="../services_netbox_service_tasks_create_ip/">create_ip</a></td>
 <td>Allocates an address from an existing prefix and can assign it to a device interface or named VRRP group.</td>
 </tr>
+<tr>
+<td><a href="../services_netbox_service_tasks_create_bgp_peering/">create_bgp_peering</a></td>
+<td>Creates a BGP session under <code>bgp_peerings</code>; can derive the local address from an interface and create a reverse session.</td>
+</tr>
 </tbody>
 </table>
 <p>Both forms belong under <code>ip_addresses</code>. Specify each address when its value is known:</p>
+<p>To put the same VIP or anycast address on two interfaces, add the address under each interface with <code>role: vip</code> or <code>role: anycast</code>. NetBox creates a separate IP record for each interface. Running the design again keeps both records on their original interfaces.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">ip_addresses</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.10/24</span>
 <span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME gateway 1</span>
@@ -7964,6 +8006,15 @@
 <span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME gateway 5</span>
 </code></pre></div>
 <p>For each object type, specified values are created or updated before next-available requests run. Allocation tasks look for an existing match on repeat deployment. Give each request a stable name or description and enough scope to identify it, otherwise a repeat run can allocate another value.</p>
+<p>Entries under <code>bgp_peerings</code> call <code>create_bgp_peering</code> after the design's devices, interfaces, IP addresses, and ASNs have been deployed. Use a stable supplied or generated session name so repeat deployments find the existing session. Existing sessions are not updated by the design:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bgp_peerings</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME BRANCH PEER</span>
+<span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">acme-branch-rtr-1</span>
+<span class="w">    </span><span class="nt">local_interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
+<span class="w">    </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4200650001</span>
+<span class="w">    </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4200650000</span>
+<span class="w">    </span><span class="nt">create_reverse</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
 <h3 id="allocation-examples">Allocation examples<a class="headerlink" href="#allocation-examples" title="Permanent link">¤</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:5"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Combined example</label><label for="__tabbed_3_2">ASN</label><label for="__tabbed_3_3">VLAN</label><label for="__tabbed_3_4">Prefix</label><label for="__tabbed_3_5">IP address</label></div>
 <div class="tabbed-content">
@@ -8108,7 +8159,12 @@
 <p>Put this wrapper in the <strong>top-level <code>ip_addresses</code> collection</strong>. Do not nest it under an interface: <code>vrrp_group</code> cannot accompany <code>device</code>, <code>interface</code>, or <code>is_primary: true</code>. Group allocation disables peer IP allocation automatically. See the <a href="#nested-vrrp-group-records">allocated VIP example</a> below.</p>
 <p>A dry run does not create the VLANs, groups, or prefixes proposed by the design. Allocation lookups therefore require those prerequisites to exist already. The <code>create_ip</code> dry-run limitation still applies: <code>mask_len</code> is ignored and no child subnet is created.</p>
 <h2 id="custom-fields">Custom fields<a class="headerlink" href="#custom-fields" title="Permanent link">¤</a></h2>
-<p>Put a <code>custom_fields</code> dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use <code>null</code> to clear a nullable field.</p>
+<p>Put a <code>custom_fields</code> dictionary on an object record. Its keys are Netbox custom-field names, not labels. Definitions must already exist and be enabled for that object type. The design passes values through to Netbox, which validates their types and choices. Updates PATCH supplied values without clearing omitted custom fields. Use <code>null</code> to clear a nullable scalar field.</p>
+<p>When updating an ASN, a design adds new sites and tags without removing existing
+ones. When updating a VLAN or prefix, it adds new tags. For these objects, if both the
+existing and supplied values of a custom field are lists, the design adds only
+new items. Supplying <code>[]</code> leaves an existing list unchanged. For custom fields,
+<code>null</code> clears the value, and a new scalar value replaces the old one.</p>
 <p>FHRP group assignments and ConfigContext objects do not support custom fields. Device-local context is ordinary JSON data, not a custom-field definition. The design does not create custom-field definitions.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Device and interface</label><label for="__tabbed_4_2">Next-available allocation</label><label for="__tabbed_4_3">Clear a value</label></div>
 <div class="tabbed-content">
@@ -8342,13 +8398,13 @@
 <span class="w">        </span><span class="nt">ip_addresses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[{</span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="nv">192.0.2.21/24</span><span class="p p-Indicator">}]</span>
 <span class="w">        </span><span class="nt">vrrp</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">group_id</span><span class="p">:</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="nt"> vip</span><span class="p">:</span><span class="w"> </span><span class="nv">192.0.2.1/24</span><span class="p p-Indicator">,</span><span class="nt"> priority</span><span class="p">:</span><span class="w"> </span><span class="nv">200</span><span class="p p-Indicator">}</span>
 <span class="w">        </span><span class="nt">bgp_peerings</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">branch-agg-1-to-branch-router-1</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-agg-1-to-branch-router-1</span>
 <span class="w">            </span><span class="nt">remote_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.11</span>
 <span class="w">            </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65100</span>
 <span class="w">            </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65200</span>
 <span class="w">            </span><span class="nt">create_reverse</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="nt">bgp_peerings</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">branch-agg-1-loopback-peer</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-agg-1-loopback-peer</span>
 <span class="w">        </span><span class="nt">local_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.101</span>
 <span class="w">        </span><span class="nt">remote_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.102</span>
 <span class="w">        </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65100</span>
@@ -8498,14 +8554,14 @@
 </div>
 <div class="tabbed-block">
 <p>Prerequisites: Named site, role, device type, both IP addresses, both ASNs, and the BGP plugin.</p>
-<p>Device-level <code>bgp_peerings</code> is keyed by session name. Flattening adds <code>device</code> and <code>name</code>. Supply addresses explicitly when no local interface is given.</p>
+<p>Device-level <code>bgp_peerings</code> is a list. Flattening adds <code>device</code>; <code>name</code> is optional and is generated by <code>create_bgp_peering</code> when omitted. Supply addresses explicitly when no local interface is given.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">devices</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-agg-1</span>
 <span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH-1</span>
 <span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AGGREGATION</span>
 <span class="w">    </span><span class="nt">device_type</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">manufacturer</span><span class="p">:</span><span class="w"> </span><span class="nv">ACME</span><span class="p p-Indicator">,</span><span class="nt"> model</span><span class="p">:</span><span class="w"> </span><span class="nv">AGG SWITCH</span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">bgp_peerings</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">branch-agg-1-to-router-1</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-agg-1-to-router-1</span>
 <span class="w">        </span><span class="nt">local_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.101</span>
 <span class="w">        </span><span class="nt">remote_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.102</span>
 <span class="w">        </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65100</span>
@@ -8807,7 +8863,7 @@
 <span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">virtual</span>
 <span class="w">        </span><span class="nt">ip_addresses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[{</span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="nv">192.0.2.101/32</span><span class="p p-Indicator">}]</span>
 <span class="w">        </span><span class="nt">bgp_peerings</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">branch-agg-1-to-branch-router-1</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-agg-1-to-branch-router-1</span>
 <span class="w">            </span><span class="nt">remote_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.102</span>
 <span class="w">            </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65100</span>
 <span class="w">            </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65200</span>
@@ -9075,6 +9131,40 @@
 </div>
 </div>
 </div>
+<h2 id="l2vpns-and-terminations">L2VPNs and Terminations<a class="headerlink" href="#l2vpns-and-terminations" title="Permanent link">¤</a></h2>
+<p>Define L2VPNs in <code>l2vpns</code>. Like VRFs, they accept <code>import_route_targets</code> and
+<code>export_route_targets</code> as lists of dictionaries with <code>name</code>. These definitions
+are extracted into <code>route_targets</code> and deployed before the L2VPN. Repeating the
+same target dictionary in both lists creates it once.</p>
+<p><code>terminations</code> under an L2VPN uses the same record shape as the top-level
+<code>l2vpn_terminations</code> collection, except that the parent supplies <code>l2vpn</code>.
+Each termination attaches one device interface (<code>device</code> and <code>interface</code>) or
+one VLAN (<code>group</code> and <code>vid</code>). The interface or VLAN must already exist or be
+defined earlier in the design. NetBox permits only one L2VPN termination per
+attached object; deployment reports a conflict rather than moving an object
+from another L2VPN. Omitted terminations are not deleted.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">l2vpns</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EVPN</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vxlan</span>
+<span class="w">    </span><span class="nt">identifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10100</span>
+<span class="w">    </span><span class="nt">import_route_targets</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">    </span><span class="nt">export_route_targets</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">    </span><span class="nt">terminations</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-1</span>
+<span class="w">        </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VLANS</span>
+<span class="w">        </span><span class="nt">vid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+
+<span class="nt">l2vpn_terminations</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">l2vpn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EVPN</span>
+<span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-2</span>
+<span class="w">    </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
+</code></pre></div>
+<p>The <code>l2vpn_terminations</code> stage runs after interfaces. A dry run can report
+planned terminations even when their interfaces or VLANs are also planned and
+therefore have no IDs yet.</p>
 <h2 id="nested-vrf-records">Nested VRF Records<a class="headerlink" href="#nested-vrf-records" title="Permanent link">¤</a></h2>
 <p>VRFs accept <code>import_route_targets</code> and <code>export_route_targets</code> as lists of dictionaries. These route targets become top-level definitions and are deployed before their VRF, even when only <code>name</code> is supplied. A VRF can be defined at the top level or nested under a device interface.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">VRF route targets</label><label for="__tabbed_8_2">Interface VRF and route targets</label></div>
@@ -9527,6 +9617,7 @@ and any errors.
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">¤</a></h2>
 <ul>
 <li>A dry run does not create prerequisites, so it cannot fully resolve references to objects proposed earlier in the same design.</li>
+<li>Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by related object name or ID. Names must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values; scalar and <code>null</code> values replace them. Custom-field definitions must already exist in NetBox.</li>
 <li>Check that named parents, device types, sites, interfaces, and allocation pools exist or are created earlier in the design order.</li>
 <li>Jinja filters, input models, and custom functions execute Python inside the worker. Use trusted files.</li>
 <li>See the <a href="https://github.com/norfablabs/NORFAB/blob/main/tests/nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml">ACME design example</a> for a full nested design.</li>
@@ -9562,6 +9653,9 @@ nf#
     <div class="doc doc-contents first">
 
         <p>Render and flatten a design, validate it, then deploy ordered collections.</p>
+<p>Updates add tags, custom-field list entries, and the supported native
+relationship lists. Scalar fields and context-data dictionaries replace
+their current values. Object custom-field names resolve to NetBox IDs.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -9700,275 +9794,279 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3165</span>
-<span class="normal">3166</span>
-<span class="normal">3167</span>
-<span class="normal">3168</span>
-<span class="normal">3169</span>
-<span class="normal">3170</span>
-<span class="normal">3171</span>
-<span class="normal">3172</span>
-<span class="normal">3173</span>
-<span class="normal">3174</span>
-<span class="normal">3175</span>
-<span class="normal">3176</span>
-<span class="normal">3177</span>
-<span class="normal">3178</span>
-<span class="normal">3179</span>
-<span class="normal">3180</span>
-<span class="normal">3181</span>
-<span class="normal">3182</span>
-<span class="normal">3183</span>
-<span class="normal">3184</span>
-<span class="normal">3185</span>
-<span class="normal">3186</span>
-<span class="normal">3187</span>
-<span class="normal">3188</span>
-<span class="normal">3189</span>
-<span class="normal">3190</span>
-<span class="normal">3191</span>
-<span class="normal">3192</span>
-<span class="normal">3193</span>
-<span class="normal">3194</span>
-<span class="normal">3195</span>
-<span class="normal">3196</span>
-<span class="normal">3197</span>
-<span class="normal">3198</span>
-<span class="normal">3199</span>
-<span class="normal">3200</span>
-<span class="normal">3201</span>
-<span class="normal">3202</span>
-<span class="normal">3203</span>
-<span class="normal">3204</span>
-<span class="normal">3205</span>
-<span class="normal">3206</span>
-<span class="normal">3207</span>
-<span class="normal">3208</span>
-<span class="normal">3209</span>
-<span class="normal">3210</span>
-<span class="normal">3211</span>
-<span class="normal">3212</span>
-<span class="normal">3213</span>
-<span class="normal">3214</span>
-<span class="normal">3215</span>
-<span class="normal">3216</span>
-<span class="normal">3217</span>
-<span class="normal">3218</span>
-<span class="normal">3219</span>
-<span class="normal">3220</span>
-<span class="normal">3221</span>
-<span class="normal">3222</span>
-<span class="normal">3223</span>
-<span class="normal">3224</span>
-<span class="normal">3225</span>
-<span class="normal">3226</span>
-<span class="normal">3227</span>
-<span class="normal">3228</span>
-<span class="normal">3229</span>
-<span class="normal">3230</span>
-<span class="normal">3231</span>
-<span class="normal">3232</span>
-<span class="normal">3233</span>
-<span class="normal">3234</span>
-<span class="normal">3235</span>
-<span class="normal">3236</span>
-<span class="normal">3237</span>
-<span class="normal">3238</span>
-<span class="normal">3239</span>
-<span class="normal">3240</span>
-<span class="normal">3241</span>
-<span class="normal">3242</span>
-<span class="normal">3243</span>
-<span class="normal">3244</span>
-<span class="normal">3245</span>
-<span class="normal">3246</span>
-<span class="normal">3247</span>
-<span class="normal">3248</span>
-<span class="normal">3249</span>
-<span class="normal">3250</span>
-<span class="normal">3251</span>
-<span class="normal">3252</span>
-<span class="normal">3253</span>
-<span class="normal">3254</span>
-<span class="normal">3255</span>
-<span class="normal">3256</span>
-<span class="normal">3257</span>
-<span class="normal">3258</span>
-<span class="normal">3259</span>
-<span class="normal">3260</span>
-<span class="normal">3261</span>
-<span class="normal">3262</span>
-<span class="normal">3263</span>
-<span class="normal">3264</span>
-<span class="normal">3265</span>
-<span class="normal">3266</span>
-<span class="normal">3267</span>
-<span class="normal">3268</span>
-<span class="normal">3269</span>
-<span class="normal">3270</span>
-<span class="normal">3271</span>
-<span class="normal">3272</span>
-<span class="normal">3273</span>
-<span class="normal">3274</span>
-<span class="normal">3275</span>
-<span class="normal">3276</span>
-<span class="normal">3277</span>
-<span class="normal">3278</span>
-<span class="normal">3279</span>
-<span class="normal">3280</span>
-<span class="normal">3281</span>
-<span class="normal">3282</span>
-<span class="normal">3283</span>
-<span class="normal">3284</span>
-<span class="normal">3285</span>
-<span class="normal">3286</span>
-<span class="normal">3287</span>
-<span class="normal">3288</span>
-<span class="normal">3289</span>
-<span class="normal">3290</span>
-<span class="normal">3291</span>
-<span class="normal">3292</span>
-<span class="normal">3293</span>
-<span class="normal">3294</span>
-<span class="normal">3295</span>
-<span class="normal">3296</span>
-<span class="normal">3297</span>
-<span class="normal">3298</span>
-<span class="normal">3299</span>
-<span class="normal">3300</span>
-<span class="normal">3301</span>
-<span class="normal">3302</span>
-<span class="normal">3303</span>
-<span class="normal">3304</span>
-<span class="normal">3305</span>
-<span class="normal">3306</span>
-<span class="normal">3307</span>
-<span class="normal">3308</span>
-<span class="normal">3309</span>
-<span class="normal">3310</span>
-<span class="normal">3311</span>
-<span class="normal">3312</span>
-<span class="normal">3313</span>
-<span class="normal">3314</span>
-<span class="normal">3315</span>
-<span class="normal">3316</span>
-<span class="normal">3317</span>
-<span class="normal">3318</span>
-<span class="normal">3319</span>
-<span class="normal">3320</span>
-<span class="normal">3321</span>
-<span class="normal">3322</span>
-<span class="normal">3323</span>
-<span class="normal">3324</span>
-<span class="normal">3325</span>
-<span class="normal">3326</span>
-<span class="normal">3327</span>
-<span class="normal">3328</span>
-<span class="normal">3329</span>
-<span class="normal">3330</span>
-<span class="normal">3331</span>
-<span class="normal">3332</span>
-<span class="normal">3333</span>
-<span class="normal">3334</span>
-<span class="normal">3335</span>
-<span class="normal">3336</span>
-<span class="normal">3337</span>
-<span class="normal">3338</span>
-<span class="normal">3339</span>
-<span class="normal">3340</span>
-<span class="normal">3341</span>
-<span class="normal">3342</span>
-<span class="normal">3343</span>
-<span class="normal">3344</span>
-<span class="normal">3345</span>
-<span class="normal">3346</span>
-<span class="normal">3347</span>
-<span class="normal">3348</span>
-<span class="normal">3349</span>
-<span class="normal">3350</span>
-<span class="normal">3351</span>
-<span class="normal">3352</span>
-<span class="normal">3353</span>
-<span class="normal">3354</span>
-<span class="normal">3355</span>
-<span class="normal">3356</span>
-<span class="normal">3357</span>
-<span class="normal">3358</span>
-<span class="normal">3359</span>
-<span class="normal">3360</span>
-<span class="normal">3361</span>
-<span class="normal">3362</span>
-<span class="normal">3363</span>
-<span class="normal">3364</span>
-<span class="normal">3365</span>
-<span class="normal">3366</span>
-<span class="normal">3367</span>
-<span class="normal">3368</span>
-<span class="normal">3369</span>
-<span class="normal">3370</span>
-<span class="normal">3371</span>
-<span class="normal">3372</span>
-<span class="normal">3373</span>
-<span class="normal">3374</span>
-<span class="normal">3375</span>
-<span class="normal">3376</span>
-<span class="normal">3377</span>
-<span class="normal">3378</span>
-<span class="normal">3379</span>
-<span class="normal">3380</span>
-<span class="normal">3381</span>
-<span class="normal">3382</span>
-<span class="normal">3383</span>
-<span class="normal">3384</span>
-<span class="normal">3385</span>
-<span class="normal">3386</span>
-<span class="normal">3387</span>
-<span class="normal">3388</span>
-<span class="normal">3389</span>
-<span class="normal">3390</span>
-<span class="normal">3391</span>
-<span class="normal">3392</span>
-<span class="normal">3393</span>
-<span class="normal">3394</span>
-<span class="normal">3395</span>
-<span class="normal">3396</span>
-<span class="normal">3397</span>
-<span class="normal">3398</span>
-<span class="normal">3399</span>
-<span class="normal">3400</span>
-<span class="normal">3401</span>
-<span class="normal">3402</span>
-<span class="normal">3403</span>
-<span class="normal">3404</span>
-<span class="normal">3405</span>
-<span class="normal">3406</span>
-<span class="normal">3407</span>
-<span class="normal">3408</span>
-<span class="normal">3409</span>
-<span class="normal">3410</span>
-<span class="normal">3411</span>
-<span class="normal">3412</span>
-<span class="normal">3413</span>
-<span class="normal">3414</span>
-<span class="normal">3415</span>
-<span class="normal">3416</span>
-<span class="normal">3417</span>
-<span class="normal">3418</span>
-<span class="normal">3419</span>
-<span class="normal">3420</span>
-<span class="normal">3421</span>
-<span class="normal">3422</span>
-<span class="normal">3423</span>
-<span class="normal">3424</span>
-<span class="normal">3425</span>
-<span class="normal">3426</span>
-<span class="normal">3427</span>
-<span class="normal">3428</span>
-<span class="normal">3429</span>
-<span class="normal">3430</span>
-<span class="normal">3431</span>
-<span class="normal">3432</span>
-<span class="normal">3433</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3794</span>
+<span class="normal">3795</span>
+<span class="normal">3796</span>
+<span class="normal">3797</span>
+<span class="normal">3798</span>
+<span class="normal">3799</span>
+<span class="normal">3800</span>
+<span class="normal">3801</span>
+<span class="normal">3802</span>
+<span class="normal">3803</span>
+<span class="normal">3804</span>
+<span class="normal">3805</span>
+<span class="normal">3806</span>
+<span class="normal">3807</span>
+<span class="normal">3808</span>
+<span class="normal">3809</span>
+<span class="normal">3810</span>
+<span class="normal">3811</span>
+<span class="normal">3812</span>
+<span class="normal">3813</span>
+<span class="normal">3814</span>
+<span class="normal">3815</span>
+<span class="normal">3816</span>
+<span class="normal">3817</span>
+<span class="normal">3818</span>
+<span class="normal">3819</span>
+<span class="normal">3820</span>
+<span class="normal">3821</span>
+<span class="normal">3822</span>
+<span class="normal">3823</span>
+<span class="normal">3824</span>
+<span class="normal">3825</span>
+<span class="normal">3826</span>
+<span class="normal">3827</span>
+<span class="normal">3828</span>
+<span class="normal">3829</span>
+<span class="normal">3830</span>
+<span class="normal">3831</span>
+<span class="normal">3832</span>
+<span class="normal">3833</span>
+<span class="normal">3834</span>
+<span class="normal">3835</span>
+<span class="normal">3836</span>
+<span class="normal">3837</span>
+<span class="normal">3838</span>
+<span class="normal">3839</span>
+<span class="normal">3840</span>
+<span class="normal">3841</span>
+<span class="normal">3842</span>
+<span class="normal">3843</span>
+<span class="normal">3844</span>
+<span class="normal">3845</span>
+<span class="normal">3846</span>
+<span class="normal">3847</span>
+<span class="normal">3848</span>
+<span class="normal">3849</span>
+<span class="normal">3850</span>
+<span class="normal">3851</span>
+<span class="normal">3852</span>
+<span class="normal">3853</span>
+<span class="normal">3854</span>
+<span class="normal">3855</span>
+<span class="normal">3856</span>
+<span class="normal">3857</span>
+<span class="normal">3858</span>
+<span class="normal">3859</span>
+<span class="normal">3860</span>
+<span class="normal">3861</span>
+<span class="normal">3862</span>
+<span class="normal">3863</span>
+<span class="normal">3864</span>
+<span class="normal">3865</span>
+<span class="normal">3866</span>
+<span class="normal">3867</span>
+<span class="normal">3868</span>
+<span class="normal">3869</span>
+<span class="normal">3870</span>
+<span class="normal">3871</span>
+<span class="normal">3872</span>
+<span class="normal">3873</span>
+<span class="normal">3874</span>
+<span class="normal">3875</span>
+<span class="normal">3876</span>
+<span class="normal">3877</span>
+<span class="normal">3878</span>
+<span class="normal">3879</span>
+<span class="normal">3880</span>
+<span class="normal">3881</span>
+<span class="normal">3882</span>
+<span class="normal">3883</span>
+<span class="normal">3884</span>
+<span class="normal">3885</span>
+<span class="normal">3886</span>
+<span class="normal">3887</span>
+<span class="normal">3888</span>
+<span class="normal">3889</span>
+<span class="normal">3890</span>
+<span class="normal">3891</span>
+<span class="normal">3892</span>
+<span class="normal">3893</span>
+<span class="normal">3894</span>
+<span class="normal">3895</span>
+<span class="normal">3896</span>
+<span class="normal">3897</span>
+<span class="normal">3898</span>
+<span class="normal">3899</span>
+<span class="normal">3900</span>
+<span class="normal">3901</span>
+<span class="normal">3902</span>
+<span class="normal">3903</span>
+<span class="normal">3904</span>
+<span class="normal">3905</span>
+<span class="normal">3906</span>
+<span class="normal">3907</span>
+<span class="normal">3908</span>
+<span class="normal">3909</span>
+<span class="normal">3910</span>
+<span class="normal">3911</span>
+<span class="normal">3912</span>
+<span class="normal">3913</span>
+<span class="normal">3914</span>
+<span class="normal">3915</span>
+<span class="normal">3916</span>
+<span class="normal">3917</span>
+<span class="normal">3918</span>
+<span class="normal">3919</span>
+<span class="normal">3920</span>
+<span class="normal">3921</span>
+<span class="normal">3922</span>
+<span class="normal">3923</span>
+<span class="normal">3924</span>
+<span class="normal">3925</span>
+<span class="normal">3926</span>
+<span class="normal">3927</span>
+<span class="normal">3928</span>
+<span class="normal">3929</span>
+<span class="normal">3930</span>
+<span class="normal">3931</span>
+<span class="normal">3932</span>
+<span class="normal">3933</span>
+<span class="normal">3934</span>
+<span class="normal">3935</span>
+<span class="normal">3936</span>
+<span class="normal">3937</span>
+<span class="normal">3938</span>
+<span class="normal">3939</span>
+<span class="normal">3940</span>
+<span class="normal">3941</span>
+<span class="normal">3942</span>
+<span class="normal">3943</span>
+<span class="normal">3944</span>
+<span class="normal">3945</span>
+<span class="normal">3946</span>
+<span class="normal">3947</span>
+<span class="normal">3948</span>
+<span class="normal">3949</span>
+<span class="normal">3950</span>
+<span class="normal">3951</span>
+<span class="normal">3952</span>
+<span class="normal">3953</span>
+<span class="normal">3954</span>
+<span class="normal">3955</span>
+<span class="normal">3956</span>
+<span class="normal">3957</span>
+<span class="normal">3958</span>
+<span class="normal">3959</span>
+<span class="normal">3960</span>
+<span class="normal">3961</span>
+<span class="normal">3962</span>
+<span class="normal">3963</span>
+<span class="normal">3964</span>
+<span class="normal">3965</span>
+<span class="normal">3966</span>
+<span class="normal">3967</span>
+<span class="normal">3968</span>
+<span class="normal">3969</span>
+<span class="normal">3970</span>
+<span class="normal">3971</span>
+<span class="normal">3972</span>
+<span class="normal">3973</span>
+<span class="normal">3974</span>
+<span class="normal">3975</span>
+<span class="normal">3976</span>
+<span class="normal">3977</span>
+<span class="normal">3978</span>
+<span class="normal">3979</span>
+<span class="normal">3980</span>
+<span class="normal">3981</span>
+<span class="normal">3982</span>
+<span class="normal">3983</span>
+<span class="normal">3984</span>
+<span class="normal">3985</span>
+<span class="normal">3986</span>
+<span class="normal">3987</span>
+<span class="normal">3988</span>
+<span class="normal">3989</span>
+<span class="normal">3990</span>
+<span class="normal">3991</span>
+<span class="normal">3992</span>
+<span class="normal">3993</span>
+<span class="normal">3994</span>
+<span class="normal">3995</span>
+<span class="normal">3996</span>
+<span class="normal">3997</span>
+<span class="normal">3998</span>
+<span class="normal">3999</span>
+<span class="normal">4000</span>
+<span class="normal">4001</span>
+<span class="normal">4002</span>
+<span class="normal">4003</span>
+<span class="normal">4004</span>
+<span class="normal">4005</span>
+<span class="normal">4006</span>
+<span class="normal">4007</span>
+<span class="normal">4008</span>
+<span class="normal">4009</span>
+<span class="normal">4010</span>
+<span class="normal">4011</span>
+<span class="normal">4012</span>
+<span class="normal">4013</span>
+<span class="normal">4014</span>
+<span class="normal">4015</span>
+<span class="normal">4016</span>
+<span class="normal">4017</span>
+<span class="normal">4018</span>
+<span class="normal">4019</span>
+<span class="normal">4020</span>
+<span class="normal">4021</span>
+<span class="normal">4022</span>
+<span class="normal">4023</span>
+<span class="normal">4024</span>
+<span class="normal">4025</span>
+<span class="normal">4026</span>
+<span class="normal">4027</span>
+<span class="normal">4028</span>
+<span class="normal">4029</span>
+<span class="normal">4030</span>
+<span class="normal">4031</span>
+<span class="normal">4032</span>
+<span class="normal">4033</span>
+<span class="normal">4034</span>
+<span class="normal">4035</span>
+<span class="normal">4036</span>
+<span class="normal">4037</span>
+<span class="normal">4038</span>
+<span class="normal">4039</span>
+<span class="normal">4040</span>
+<span class="normal">4041</span>
+<span class="normal">4042</span>
+<span class="normal">4043</span>
+<span class="normal">4044</span>
+<span class="normal">4045</span>
+<span class="normal">4046</span>
+<span class="normal">4047</span>
+<span class="normal">4048</span>
+<span class="normal">4049</span>
+<span class="normal">4050</span>
+<span class="normal">4051</span>
+<span class="normal">4052</span>
+<span class="normal">4053</span>
+<span class="normal">4054</span>
+<span class="normal">4055</span>
+<span class="normal">4056</span>
+<span class="normal">4057</span>
+<span class="normal">4058</span>
+<span class="normal">4059</span>
+<span class="normal">4060</span>
+<span class="normal">4061</span>
+<span class="normal">4062</span>
+<span class="normal">4063</span>
+<span class="normal">4064</span>
+<span class="normal">4065</span>
+<span class="normal">4066</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -9992,6 +10090,10 @@ nf#
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Render and flatten a design, validate it, then deploy ordered collections.</span>
+
+<span class="sd">    Updates add tags, custom-field list entries, and the supported native</span>
+<span class="sd">    relationship lists. Scalar fields and context-data dictionaries replace</span>
+<span class="sd">    their current values. Object custom-field names resolve to NetBox IDs.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab job injected by the task framework.</span>
@@ -10366,7 +10468,7 @@ nf#
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

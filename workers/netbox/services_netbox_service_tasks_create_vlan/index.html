@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7315,6 +7315,8 @@
 <li>The VLAN group must already exist and have available VID ranges for allocation.</li>
 <li>With an explicit <code>vid</code>, identity is VLAN group plus VID.</li>
 <li>Without <code>vid</code>, an existing VLAN with the same group and name is reused.</li>
+<li>When updating a VLAN, new tags and new items in list-valued custom fields are added without removing existing ones. Supplying <code>[]</code> leaves an existing list unchanged. For custom fields, <code>null</code> clears the value, and a new scalar value replaces the old one.</li>
+<li>Object and multiobject custom fields accept related object names or IDs. The task resolves names using each field's NetBox definition; missing or ambiguous names fail.</li>
 <li>Branch writes require the NetBox Branching plugin.</li>
 </ul>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¤</a></h2>
@@ -7339,7 +7341,9 @@
 <p>A supplied VID identifies the VLAN within its group. Without a VID,
 an existing VLAN is matched by group and name, or the first available
 VID is allocated. Repeated calls without a VID and with the same name
-reuse that VLAN. Existing VLANs are patched without a local diff check.
+reuse that VLAN. Tags and array custom fields add values on updates;
+scalar custom fields replace their values.
+Existing VLANs are patched without a local diff check.
 Dry-run reports the selected VID but does not write attributes.</p>
 
 
@@ -7491,7 +7495,7 @@ Dry-run reports the selected VID but does not write attributes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional tag names to assign.</p>
+                <p>Optional tag names to add without removing existing tags.</p>
               </div>
             </td>
             <td>
@@ -7507,7 +7511,10 @@ Dry-run reports the selected VID but does not write attributes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional NetBox custom-field values.</p>
+                <p>Optional NetBox custom-field values. Arrays add
+missing values; empty arrays preserve existing arrays. Null and
+scalar values replace existing values. Object and multiobject
+fields accept related object names or IDs.</p>
               </div>
             </td>
             <td>
@@ -7625,9 +7632,7 @@ VLAN IDs remain available for allocation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\vlan_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
 <span class="normal">356</span>
@@ -7755,7 +7760,35 @@ VLAN IDs remain available for allocation.</p>
 <span class="normal">478</span>
 <span class="normal">479</span>
 <span class="normal">480</span>
-<span class="normal">481</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateVlanInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateVlanResult</span><span class="p">,</span>
@@ -7790,7 +7823,9 @@ VLAN IDs remain available for allocation.</p>
 <span class="sd">    A supplied VID identifies the VLAN within its group. Without a VID,</span>
 <span class="sd">    an existing VLAN is matched by group and name, or the first available</span>
 <span class="sd">    VID is allocated. Repeated calls without a VID and with the same name</span>
-<span class="sd">    reuse that VLAN. Existing VLANs are patched without a local diff check.</span>
+<span class="sd">    reuse that VLAN. Tags and array custom fields add values on updates;</span>
+<span class="sd">    scalar custom fields replace their values.</span>
+<span class="sd">    Existing VLANs are patched without a local diff check.</span>
 <span class="sd">    Dry-run reports the selected VID but does not write attributes.</span>
 
 <span class="sd">    Args:</span>
@@ -7802,8 +7837,11 @@ VLAN IDs remain available for allocation.</p>
 <span class="sd">        description: Optional VLAN description.</span>
 <span class="sd">        tenant: Optional tenant name.</span>
 <span class="sd">        role: Optional IPAM role name.</span>
-<span class="sd">        tags: Optional tag names to assign.</span>
-<span class="sd">        custom_fields: Optional NetBox custom-field values.</span>
+<span class="sd">        tags: Optional tag names to add without removing existing tags.</span>
+<span class="sd">        custom_fields: Optional NetBox custom-field values. Arrays add</span>
+<span class="sd">            missing values; empty arrays preserve existing arrays. Null and</span>
+<span class="sd">            scalar values replace existing values. Object and multiobject</span>
+<span class="sd">            fields accept related object names or IDs.</span>
 <span class="sd">        instance: NetBox instance name, or the worker default when omitted.</span>
 <span class="sd">        dry_run: Select a VLAN without creating or updating it.</span>
 <span class="sd">        branch: Optional NetBox Branching plugin branch name.</span>
@@ -7862,12 +7900,33 @@ VLAN IDs remain available for allocation.</p>
         <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tenant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
-    <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
         <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tag</span><span class="p">}</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_fields</span>
+        <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.vlan&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="c1"># Resolve names on creation and merge with current values on updates.</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">nb</span><span class="p">,</span>
+            <span class="n">nb_vlan</span><span class="p">,</span>
+            <span class="n">custom_fields</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+            <span class="p">[</span>
+                <span class="n">field</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">nb_vlan</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
+                <span class="n">nb_vlan</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+            <span class="p">)</span>
         <span class="n">nb_vlan</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;updated&quot;</span>
     <span class="k">elif</span> <span class="n">filters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vid&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -8015,7 +8074,7 @@ VLAN IDs remain available for allocation.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

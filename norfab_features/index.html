@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -10056,7 +10056,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 27 September 2026</em></p>
+<p><em>Last updated: 30 September 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10809,7 +10809,7 @@ NetBox data model and do not provide every safeguard of a dedicated task.
 <h3 id="additive-netbox-designs">Additive NetBox designs<a class="headerlink" href="#additive-netbox-designs" title="Permanent link">¤</a></h3>
 <p>Deploys static or Jinja2-rendered YAML designs. Handlers for tenants, regions,
 manufacturers, platforms, device types, device roles, sites, rack roles, racks,
-IPAM roles, RIRs, ASN ranges, ASNs, VLAN groups, VLANs, VRFs, prefixes,
+IPAM roles, RIRs, ASN ranges, ASNs, VLAN groups, VLANs, VRFs, L2VPNs and their terminations, prefixes,
 devices, interfaces, console and power ports/outlets, IP addresses, FHRP groups and assignments, and device primary IPs
 bulk create missing records and patch existing records without calculating a diff.
 An explicit preprocessing step flattens nested device definitions into top-level
@@ -10824,10 +10824,14 @@ Likewise, <code>create_vlan</code> allocates the next available VLAN ID; known I
 VLAN records require a group and interface VLAN references accept group names directly; direct VLAN-to-site association is unsupported. A per-deployment reference cache avoids repeat lookups for VLANs, sites, route targets, VRFs, interfaces, console and power ports, VRRP groups, and IP addresses.
 VLAN groups can be scoped by name to a rack, location, site, site group, region, cluster, or cluster group; a site can disambiguate rack and location names.
 ASN records resolve site lists and IPAM roles. Explicit prefixes resolve named location, site, site-group or region scopes and group/VID VLAN references.
-Independent interfaces are created before interfaces with parent, LAG or bridge references. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last.
+Updating an ASN through a design adds new sites, tags, and custom-field list items without removing existing ones. Design VLAN and prefix updates add tags and custom-field list items. The <code>create_asn</code>, <code>create_vlan</code>, and <code>create_prefix</code> tasks follow the same rules for their respective objects.
+Design processors resolve names in object and multiobject custom fields using each field's related NetBox object type. On updates, tags, custom-field lists, and explicitly supported relationship lists add missing values. The referenced objects and custom-field definitions must exist when each record is processed.
+Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last.
 Device types accept <code>default_platform</code> as a platform name.
-Route targets support bulk creation/update before VRFs; inline import/export
-route-target definitions are flattened and associated with their VRFs.
+Route targets support bulk creation/update before VRFs and L2VPNs; inline
+import/export definitions are flattened and associated with their parent objects.
+L2VPN terminations attach device interfaces or group/VID VLANs through top-level
+or nested definitions, rejecting attachments already used by another L2VPN.
 Route-target and BGP-community definition lists require dictionaries, not bare strings.
 Routing-policy definitions, including BGP import/export lists, also require dictionaries.
 Interface, console, and power cables support top-level and nested definitions, bulk creation/update,
@@ -10842,7 +10846,7 @@ design communities match by value and optional description, and interface VRFs a
 Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
 Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 IP allocation prefix filters resolve <code>role</code> by role name, not slug, and reject unknown names.
-BGP sessions use existing creation/update tasks after ASNs, IPs and policies.
+BGP sessions in designs use <code>create_bgp_peering</code> after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. The standalone create task resolves custom-field references for new sessions.
 Inline import/export policy definitions are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving record arguments, <code>netbox</code>, and <code>dry_run</code>; custom
@@ -10912,7 +10916,11 @@ allocation. <strong>Use cases:</strong> provisioning links, loopbacks, managemen
 new devices, and template-driven zero-touch workflows.
 <strong>Limitations:</strong> parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
-<code>create_ip</code> can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.</p>
+<code>create_ip</code> can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.
+It can use one-based <code>ip_index</code> for the initial VRRP-group address or another new allocation, and creates separate
+anycast or VIP records when the indexed address already exists.
+Without <code>ip_index</code>, normal allocation uses the next available address and sets
+the requested role.</p>
 <p><a href="../workers/netbox/services_netbox_service_tasks_create_ip/">Create IP</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_create_ip_bulk/">Bulk IP</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_create_prefix/">Create prefix</a></p>
@@ -11005,9 +11013,9 @@ records are reused and assigned the <code>vrrp</code> role; missing virtual IPs 
 while addresses assigned to other objects are reported without reassignment.
 <strong>Use cases:</strong> first-hop redundancy inventory, priority drift detection,
 consistent group naming, and virtual-IP auditing. <strong>Limitations:</strong>
-synchronization is additive and does not delete stale FHRP data; an entirely
-empty parsed VRRP state fails before NetBox reconciliation begins, and live
-group records without a virtual address are reported and skipped.
+synchronization is additive and reports stale FHRP assignments as deletion
+candidates without deleting them. Empty live and NetBox VRRP states are in
+sync. Live group records without a virtual address are reported and skipped.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_vrrp/">Task details</a></p>
 <h3 id="live-vrf-reconciliation">Live VRF reconciliation<a class="headerlink" href="#live-vrf-reconciliation" title="Permanent link">¤</a></h3>
 <p>Reconciles global VRFs and descriptions from live devices, adds all observed
@@ -11033,6 +11041,8 @@ interface MAC addresses with NetBox, including interface-first IP matching,
 shared inline or <code>nf://</code> interface-name mapping, filters, inline or <code>nf://</code>
 anycast ranges, VRF/site association, controlled deletion behavior, and stable
 create, update, delete, and in-sync diff reports.
+IP sync allows separate interface assignments for shared anycast and VIP
+addresses, including VIP roles parsed from devices or inherited from NetBox.
 Parsed VRRP, GLBP, HSRP, and CARP addresses are excluded from IP
 synchronization. The VRRP sync task creates VRRP addresses and associates them
 with FHRP groups. IP records assigned to other non-interface objects are also
@@ -11050,7 +11060,8 @@ custom TTP parsing templates, name mapping, and trusted Python transformers.
 prerequisites; templates and transformer files execute as trusted code.
 <a href="../workers/netbox/services_netbox_service_tasks_sync_device_inventory/">Task details</a></p>
 <h3 id="bgp-peering-lifecycle">BGP peering lifecycle<a class="headerlink" href="#bgp-peering-lifecycle" title="Permanent link">¤</a></h3>
-<p>Creates or updates individual and bulk BGP sessions, and reconciles live BGP
+<p>Creates or updates individual and bulk BGP sessions, including separate NetBox
+IP and ASN queries for each side of a new session, and reconciles live BGP
 neighbors with NetBox using five-tuple session identity, live-data filters,
 dry-run, optional stale-session deletion, and tri-state existing-description
 preservation. <strong>Use cases:</strong> routing
@@ -11073,6 +11084,12 @@ objects are never deleted.
 <p>Creates or updates an explicit ASN, or allocates the next available ASN from a
 named ASN range. The task and <code>netbox create asn</code> NFCLI command accept a <code>sites</code>
 list to associate the ASN with multiple sites; the same task backs design allocations.
+Repeated <code>create_asn</code> calls add sites, tags, and items in list-valued custom
+fields to existing ASNs without removing existing values. Object and multiobject
+custom fields accept related object names, which the task resolves to IDs;
+missing or ambiguous names fail.
+<code>create_ip</code>, <code>create_prefix</code>, and <code>create_vlan</code> also resolve names in object and
+multiobject custom fields and add new list values on repeated calls.
 Reconciles globally unique ASNs from supported live devices with NetBox IPAM,
 preserves existing descriptions by default, and optionally associates each ASN
 with the devices for which it is a local ASN. Missing ASNs are created only
@@ -11532,7 +11549,7 @@ protection must be designed as part of deployment.
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7317,7 +7317,7 @@ interface {{ interface }}
 
     <div class="doc doc-contents first">
 
-        <p>Allocate the next available IP address from a given subnet.</p>
+        <p>Allocate the next available or indexed usable IP address from a subnet.</p>
 <p>.. warning::</p>
 <pre><code>**Dry-run limitation**: when ``dry_run=True``, ``mask_len`` is ignored and
 the candidate IP address is allocated directly from the parent prefix using
@@ -7325,7 +7325,9 @@ the parent prefix mask length — no child subnet is created.
 </code></pre>
 <p>This task finds or creates an IP address in NetBox, updates its metadata,
 optionally links it to a device/interface, and supports a dry run mode for
-previewing changes.</p>
+previewing changes. Existing group or interface assignments are reused
+before <code>ip_index</code> selects an address for a new allocation. An indexed
+address already in NetBox can be duplicated for anycast or VIP roles.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -7375,7 +7377,9 @@ previewing changes.</p>
             <td>
               <div class="doc-md-description">
                 <p>Custom-field names and values to PATCH
-on the allocated IP. Definitions must already exist in Netbox.</p>
+on the allocated IP. Object and multiobject fields accept related
+object names or IDs. List values add to existing values; scalar
+values and null replace them. Definitions must exist in NetBox.</p>
               </div>
             </td>
             <td>
@@ -7601,6 +7605,26 @@ existing IP addresses. Ignored when <code>dry_run=True</code>.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>ip_index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-based position among usable IPs in the
+selected subnet. On a /31 or /127, both addresses are usable.
+Out-of-range positions raise <code>NetboxAllocationError</code>. When
+<code>mask_len</code> creates a child subnet, dry runs use the parent
+subnet because they do not create child subnets.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>create_peer_ip</code>
             </td>
             <td>
@@ -7675,9 +7699,7 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
@@ -8164,7 +8186,69 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 <span class="normal">629</span>
 <span class="normal">630</span>
 <span class="normal">631</span>
-<span class="normal">632</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span>
+<span class="normal">652</span>
+<span class="normal">653</span>
+<span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpResult</span><span class="p">,</span>
@@ -8197,12 +8281,13 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
     <span class="n">dry_run</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mask_len</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ip_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">create_peer_ip</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">custom_fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">vrrp_group</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Allocate the next available IP address from a given subnet.</span>
+<span class="sd">    Allocate the next available or indexed usable IP address from a subnet.</span>
 
 <span class="sd">    .. warning::</span>
 
@@ -8212,7 +8297,9 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 
 <span class="sd">    This task finds or creates an IP address in NetBox, updates its metadata,</span>
 <span class="sd">    optionally links it to a device/interface, and supports a dry run mode for</span>
-<span class="sd">    previewing changes.</span>
+<span class="sd">    previewing changes. Existing group or interface assignments are reused</span>
+<span class="sd">    before ``ip_index`` selects an address for a new allocation. An indexed</span>
+<span class="sd">    address already in NetBox can be duplicated for anycast or VIP roles.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        prefix (str): The prefix from which to allocate the IP address, could be:</span>
@@ -8227,7 +8314,9 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 <span class="sd">                `NetboxAllocationError`.</span>
 
 <span class="sd">        custom_fields (dict, optional): Custom-field names and values to PATCH</span>
-<span class="sd">            on the allocated IP. Definitions must already exist in Netbox.</span>
+<span class="sd">            on the allocated IP. Object and multiobject fields accept related</span>
+<span class="sd">            object names or IDs. List values add to existing values; scalar</span>
+<span class="sd">            values and null replace them. Definitions must exist in NetBox.</span>
 <span class="sd">        description (str, optional): A description for the allocated IP address.</span>
 <span class="sd">        device (str, optional): The device associated with the IP address.</span>
 <span class="sd">        interface (str, optional): The interface associated with the IP address.</span>
@@ -8250,6 +8339,11 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 <span class="sd">            update existing IP address. On new IP address creation will create child</span>
 <span class="sd">            subnet of `mask_len` within parent `prefix`, new subnet not created for</span>
 <span class="sd">            existing IP addresses. Ignored when ``dry_run=True``.</span>
+<span class="sd">        ip_index (int, optional): One-based position among usable IPs in the</span>
+<span class="sd">            selected subnet. On a /31 or /127, both addresses are usable.</span>
+<span class="sd">            Out-of-range positions raise ``NetboxAllocationError``. When</span>
+<span class="sd">            ``mask_len`` creates a child subnet, dry runs use the parent</span>
+<span class="sd">            subnet because they do not create child subnets.</span>
 <span class="sd">        create_peer_ip (bool, optional): If True creates IP address for link peer -</span>
 <span class="sd">            remote device interface connected to requested device and interface.</span>
 <span class="sd">            Disabled for IPv4 /32 and IPv6 /128 allocations, which have no</span>
@@ -8351,7 +8445,6 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
         <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Unable to source parent prefix from Netbox - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-
     <span class="c1"># try to source existing IP from netbox</span>
     <span class="k">for</span> <span class="n">nb_prefix</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">nb_vrrp_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8384,8 +8477,10 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">nb_prefix</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
             <span class="n">parent_prefix_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">ip_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">break</span>
             <span class="c1"># check if can create child subnet in prefix</span>
-            <span class="k">if</span> <span class="n">mask_len</span> <span class="ow">and</span> <span class="n">mask_len</span> <span class="o">!=</span> <span class="n">parent_prefix_len</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">mask_len</span> <span class="ow">and</span> <span class="n">mask_len</span> <span class="o">!=</span> <span class="n">parent_prefix_len</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_prefix</span><span class="p">(</span>
                         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
@@ -8410,6 +8505,7 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 
     <span class="c1"># create new IP address</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_ip</span><span class="p">:</span>
+        <span class="n">parent_prefix_len</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">))</span><span class="o">.</span><span class="n">prefixlen</span>
         <span class="c1"># A host prefix has only one address, regardless of peer settings.</span>
         <span class="n">allocation_prefix</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">))</span>
         <span class="n">host_allocation</span> <span class="o">=</span> <span class="p">(</span>
@@ -8418,7 +8514,7 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
         <span class="k">if</span> <span class="n">host_allocation</span><span class="p">:</span>
             <span class="n">create_peer_ip</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># check if interface has link peer that has IP within parent prefix</span>
-        <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">host_allocation</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">host_allocation</span> <span class="ow">and</span> <span class="n">ip_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connections</span><span class="p">(</span>
                 <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
                 <span class="n">devices</span><span class="o">=</span><span class="p">[</span><span class="n">device</span><span class="p">],</span>
@@ -8526,13 +8622,44 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
                     <span class="sa">f</span><span class="s2">&quot;Unable to find a child subnet of mask length &#39;</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;with sufficient available IPs inside &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
                 <span class="p">)</span>
-        <span class="c1"># execute dry run on new IP</span>
-        <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ip_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">network</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">))</span>
+            <span class="c1"># hosts() includes both /31 endpoints and excludes IPv4 broadcasts.</span>
+            <span class="n">selected_ip</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">islice</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">hosts</span><span class="p">(),</span> <span class="n">ip_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ip_index</span><span class="p">),</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">selected_ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;ip_index </span><span class="si">{</span><span class="n">ip_index</span><span class="si">}</span><span class="s2"> exceeds the usable IPs in </span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">selected_ip</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">network</span><span class="o">.</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">existing_ip</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">vrf</span><span class="p">:</span>
+                    <span class="n">existing_ip</span> <span class="o">=</span> <span class="n">ip</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">existing_ip</span> <span class="ow">and</span> <span class="n">role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;anycast&quot;</span><span class="p">,</span> <span class="s2">&quot;vip&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;cannot create IP address </span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">: it already exists&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">preview_address</span> <span class="o">=</span> <span class="n">address</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">existing_ip</span> <span class="ow">and</span> <span class="n">existing_ip</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="n">role</span><span class="p">:</span>
+                    <span class="c1"># NetBox requires the existing record to have a shared role.</span>
+                    <span class="n">existing_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">})</span>
+                <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">preview_address</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">list</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">),</span>
+                <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="n">preview_address</span><span class="p">,</span>
                 <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
                 <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
                 <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span>
@@ -8543,14 +8670,11 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
             <span class="c1"># add branch to results</span>
             <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dry-run: would create IP address &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dry-run: would create IP address &#39;</span><span class="si">{</span><span class="n">preview_address</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
-        <span class="c1"># create new IP</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;created &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39; IP address for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; within &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span>
-            <span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;created &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39; IP address for &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; within &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span>
+        <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;created&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;using existing IP address </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -8565,16 +8689,36 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_vrrp_group</span><span class="o">.</span><span class="n">id</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-            <span class="n">nb_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">custom_fields</span><span class="p">})</span>
-        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.ipaddress&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="c1"># The helper converts NetBox&#39;s reference objects to writeable IDs</span>
+        <span class="c1"># and adds new list values without duplicating existing ones.</span>
+        <span class="n">current_fields</span><span class="p">,</span> <span class="n">merged_fields</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">nb</span><span class="p">,</span>
+            <span class="n">nb_ip</span><span class="p">,</span>
+            <span class="n">custom_fields</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+            <span class="p">[</span>
+                <span class="n">field</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">merged_fields</span> <span class="o">!=</span> <span class="n">current_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">nb_ip</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">merged_fields</span><span class="p">})</span>
+            <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">vrf</span> <span class="ow">and</span> <span class="n">vrf</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span><span class="p">:</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">vrf</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">}</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">tenant</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">}</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">dns_name</span> <span class="ow">and</span> <span class="n">dns_name</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">dns_name</span><span class="p">:</span>
@@ -8583,7 +8727,7 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
     <span class="k">if</span> <span class="n">comments</span> <span class="ow">and</span> <span class="n">comments</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">comments</span><span class="p">:</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">comments</span> <span class="o">=</span> <span class="n">comments</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span> <span class="ow">in</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
@@ -8760,8 +8904,11 @@ interface {{ interface }}
             <td>
               <div class="doc-md-description">
                 <p>Custom-field names and values to PATCH
-on the allocated prefix. Definitions must already exist in Netbox.
-The result diff lists changed field names only, not their values.</p>
+on the allocated prefix. New list items are added to existing
+custom-field lists; scalar values and null replace old values.
+Object and multiobject fields accept related object names or IDs.
+Definitions must already exist in NetBox. The result diff lists
+changed field names only, not their values.</p>
               </div>
             </td>
             <td>
@@ -8827,7 +8974,7 @@ allocates next available /30 point-to-point prefix.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of tags to assign to the prefix.</p>
+                <p>Tag names to add to the prefix.</p>
               </div>
             </td>
             <td>
@@ -9054,11 +9201,7 @@ a different length. VLAN lookup failures occur before allocation.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\prefix_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 29</span>
 <span class="normal"> 30</span>
 <span class="normal"> 31</span>
 <span class="normal"> 32</span>
@@ -9403,7 +9546,34 @@ a different length. VLAN lookup failures occur before allocation.</p>
 <span class="normal">371</span>
 <span class="normal">372</span>
 <span class="normal">373</span>
-<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreatePrefixInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreatePrefixResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -9451,14 +9621,17 @@ a different length. VLAN lookup failures occur before allocation.</p>
 <span class="sd">                e.g. `{&quot;prefix&quot;: &quot;10.0.0.0/24&quot;, &quot;site&quot;: &quot;foo&quot;}`</span>
 
 <span class="sd">        custom_fields (dict, optional): Custom-field names and values to PATCH</span>
-<span class="sd">            on the allocated prefix. Definitions must already exist in Netbox.</span>
-<span class="sd">            The result diff lists changed field names only, not their values.</span>
+<span class="sd">            on the allocated prefix. New list items are added to existing</span>
+<span class="sd">            custom-field lists; scalar values and null replace old values.</span>
+<span class="sd">            Object and multiobject fields accept related object names or IDs.</span>
+<span class="sd">            Definitions must already exist in NetBox. The result diff lists</span>
+<span class="sd">            changed field names only, not their values.</span>
 <span class="sd">        description (str): Description for the new prefix, prefix description used for</span>
 <span class="sd">            deduplication to source existing prefixes.</span>
 <span class="sd">        prefixlen (int, optional): The prefix length of the new prefix to create, by default</span>
 <span class="sd">            allocates next available /30 point-to-point prefix.</span>
 <span class="sd">        vrf (str, optional): Name of the VRF to associate with the prefix.</span>
-<span class="sd">        tags (Union[None, list], optional): List of tags to assign to the prefix.</span>
+<span class="sd">        tags (Union[None, list], optional): Tag names to add to the prefix.</span>
 <span class="sd">        tenant (str, optional): Name of the tenant to associate with the prefix.</span>
 <span class="sd">        comments (str, optional): Comments for the prefix.</span>
 <span class="sd">        role (str, optional): Role to assign to the prefix.</span>
@@ -9661,15 +9834,34 @@ a different length. VLAN lookup failures occur before allocation.</p>
             <span class="p">}</span>
             <span class="n">nb_prefix</span><span class="o">.</span><span class="n">vlan</span> <span class="o">=</span> <span class="n">nb_vlan</span><span class="o">.</span><span class="n">id</span>
     <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.prefix&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="c1"># Normalize existing references to IDs before comparing the merged</span>
+        <span class="c1"># values, so a repeat call does not report a false change.</span>
+        <span class="n">current_fields</span><span class="p">,</span> <span class="n">merged_fields</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">nb</span><span class="p">,</span>
+            <span class="n">nb_prefix</span><span class="p">,</span>
+            <span class="n">custom_fields</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span><span class="p">],</span>
+            <span class="p">[</span>
+                <span class="n">field</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
         <span class="n">changed_fields</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">name</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">custom_fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">custom_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">custom_fields</span>
+            <span class="k">if</span> <span class="n">current_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">merged_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="n">changed_fields</span><span class="p">:</span>
             <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">changed_fields</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-            <span class="n">nb_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">custom_fields</span><span class="p">})</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+                <span class="n">nb_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">:</span> <span class="n">merged_fields</span><span class="p">})</span>
     <span class="k">if</span> <span class="n">description</span> <span class="ow">and</span> <span class="n">description</span> <span class="o">!=</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
         <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">}</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
@@ -9701,15 +9893,16 @@ a different length. VLAN lookup failures occur before allocation.</p>
     <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
         <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span><span class="p">),</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
         <span class="n">nb_prefix</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">role</span><span class="p">}</span>
-    <span class="n">existing_tags</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span> <span class="ow">in</span> <span class="n">existing_tags</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
+    <span class="n">existing_tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
+    <span class="n">merged_tags</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span><span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+    <span class="n">merged_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">merged_tags</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">merged_names</span> <span class="o">!=</span> <span class="n">existing_tags</span><span class="p">:</span>
         <span class="n">changed</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="n">existing_tags</span><span class="p">,</span>
-            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">]</span> <span class="o">+</span> <span class="n">existing_tags</span><span class="p">,</span>
+            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">merged_names</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_tags</span><span class="p">:</span>
-                <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">})</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">nb_prefix</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">merged_tags</span>
 
     <span class="c1"># save prefix into Netbox</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -9893,7 +10086,7 @@ a different length. VLAN lookup failures occur before allocation.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

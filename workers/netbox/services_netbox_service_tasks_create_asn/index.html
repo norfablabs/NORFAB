@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7313,6 +7313,8 @@ nf#<span class="w"> </span>netbox<span class="w"> </span>create<span class="w"> 
 <h2 id="notes-gotchas">Notes / Gotchas<a class="headerlink" href="#notes-gotchas" title="Permanent link">¤</a></h2>
 <ul>
 <li>The named ASN range and its RIR must already exist. ASN ranges have no site scope; <code>sites</code> associates the ASN with sites.</li>
+<li>When updating an ASN, new <code>sites</code> and <code>tags</code> are added to the existing lists. Existing entries stay in place. The same applies to custom fields whose current and new values are both lists. An empty list (<code>[]</code>) makes no change to an existing list. For custom fields, <code>null</code> clears the value, and a new scalar value replaces the old one.</li>
+<li>For object and multiobject custom fields, supply the related objects by name or ID. For example, a custom field referencing devices can receive <code>["router-1", "router-2"]</code>. The task looks up names in the field's related NetBox object type and sends their IDs. A name must match exactly one object; missing or ambiguous names cause an error.</li>
 <li>In NFCLI, separate multiple site names with commas.</li>
 <li>Repeated range allocations reuse an ASN with the same description inside that range.</li>
 <li>Without a description, repeated range calls allocate the next available ASN.</li>
@@ -7356,8 +7358,8 @@ netbox<span class="w"> </span>create<span class="w"> </span>asn
 reuses an ASN with the same description inside the named range, or
 allocates the first available number. Omitting the description means
 repeated range calls can allocate different ASNs. A non-empty sites
-list replaces the ASN's site assignments; an empty or omitted list
-leaves them alone.
+list adds to the ASN's site assignments; an empty or omitted list
+leaves them alone. Tags and array custom fields are also additive.
 Dry-run reports the selected number without writing relationships.</p>
 
 
@@ -7478,7 +7480,7 @@ supplied without a range, including updates.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional tag names to assign.</p>
+                <p>Optional tag names to add without removing existing tags.</p>
               </div>
             </td>
             <td>
@@ -7494,7 +7496,11 @@ supplied without a range, including updates.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional NetBox custom-field values.</p>
+                <p>Optional NetBox custom-field values. Object and
+multiobject fields accept related object names or IDs; names
+must identify exactly one object. Arrays merged with existing values;
+empty arrays preserve existing arrays. Null and scalar values
+replace existing values.</p>
               </div>
             </td>
             <td>
@@ -7510,7 +7516,7 @@ supplied without a range, including updates.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional site names to assign to the ASN.</p>
+                <p>Optional site names to add to the ASN's assignments.</p>
               </div>
             </td>
             <td>
@@ -7643,8 +7649,9 @@ supplied without a range, including updates.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The range, RIR, or a site is missing; more than one
-ASN matches the description; or the range has no free ASNs.</p>
+                <p>The range, RIR, site, or related custom-field object is
+missing; a related name is ambiguous; more than one ASN matches
+the description; or the range has no free ASNs.</p>
               </div>
             </td>
           </tr>
@@ -7654,9 +7661,7 @@ ASN matches the description; or the range has no free ASNs.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_asn_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 29</span>
 <span class="normal"> 30</span>
 <span class="normal"> 31</span>
 <span class="normal"> 32</span>
@@ -7809,7 +7814,42 @@ ASN matches the description; or the range has no free ASNs.</p>
 <span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
-<span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpAsnResult</span><span class="p">,</span>
@@ -7845,8 +7885,8 @@ ASN matches the description; or the range has no free ASNs.</p>
 <span class="sd">    reuses an ASN with the same description inside the named range, or</span>
 <span class="sd">    allocates the first available number. Omitting the description means</span>
 <span class="sd">    repeated range calls can allocate different ASNs. A non-empty sites</span>
-<span class="sd">    list replaces the ASN&#39;s site assignments; an empty or omitted list</span>
-<span class="sd">    leaves them alone.</span>
+<span class="sd">    list adds to the ASN&#39;s site assignments; an empty or omitted list</span>
+<span class="sd">    leaves them alone. Tags and array custom fields are also additive.</span>
 <span class="sd">    Dry-run reports the selected number without writing relationships.</span>
 
 <span class="sd">    Args:</span>
@@ -7857,9 +7897,13 @@ ASN matches the description; or the range has no free ASNs.</p>
 <span class="sd">            supplied without a range, including updates.</span>
 <span class="sd">        description: Description used to reuse allocations within a range.</span>
 <span class="sd">        tenant: Optional tenant name.</span>
-<span class="sd">        tags: Optional tag names to assign.</span>
-<span class="sd">        custom_fields: Optional NetBox custom-field values.</span>
-<span class="sd">        sites: Optional site names to assign to the ASN.</span>
+<span class="sd">        tags: Optional tag names to add without removing existing tags.</span>
+<span class="sd">        custom_fields: Optional NetBox custom-field values. Object and</span>
+<span class="sd">            multiobject fields accept related object names or IDs; names</span>
+<span class="sd">            must identify exactly one object. Arrays merged with existing values;</span>
+<span class="sd">            empty arrays preserve existing arrays. Null and scalar values</span>
+<span class="sd">            replace existing values.</span>
+<span class="sd">        sites: Optional site names to add to the ASN&#39;s assignments.</span>
 <span class="sd">        role: Optional IPAM role name.</span>
 <span class="sd">        instance: NetBox instance name, or the worker default when omitted.</span>
 <span class="sd">        dry_run: Select an ASN without creating or updating it.</span>
@@ -7871,8 +7915,9 @@ ASN matches the description; or the range has no free ASNs.</p>
 <span class="sd">        ``updated``.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: The range, RIR, or a site is missing; more than one</span>
-<span class="sd">            ASN matches the description; or the range has no free ASNs.</span>
+<span class="sd">        ValueError: The range, RIR, site, or related custom-field object is</span>
+<span class="sd">            missing; a related name is ambiguous; more than one ASN matches</span>
+<span class="sd">            the description; or the range has no free ASNs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
@@ -7946,14 +7991,42 @@ ASN matches the description; or the range has no free ASNs.</p>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;ASN sites not found: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">site_names</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">site_ids</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-        <span class="n">nb_asn</span><span class="o">.</span><span class="n">sites</span> <span class="o">=</span> <span class="p">[</span><span class="n">site_ids</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">site_names</span><span class="p">]</span>
-        <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nb_asn</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tag</span><span class="p">}</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
-        <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">custom_fields</span> <span class="o">!=</span> <span class="n">custom_fields</span><span class="p">:</span>
-        <span class="n">nb_asn</span><span class="o">.</span><span class="n">custom_fields</span> <span class="o">=</span> <span class="n">custom_fields</span>
-        <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">current_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">sites</span><span class="p">]</span>
+        <span class="n">merged_ids</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
+            <span class="n">current_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">site_ids</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">site_names</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">merged_ids</span> <span class="o">!=</span> <span class="n">current_ids</span><span class="p">:</span>
+            <span class="n">nb_asn</span><span class="o">.</span><span class="n">sites</span> <span class="o">=</span> <span class="n">merged_ids</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">current_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">nb_asn</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
+        <span class="n">merged_names</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span><span class="n">current_names</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">merged_names</span> <span class="o">!=</span> <span class="n">current_names</span><span class="p">:</span>
+            <span class="n">nb_asn</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">merged_names</span><span class="p">]</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">custom_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
+            <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;ipam.asn&quot;</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">object_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span>
+        <span class="p">]</span>
+        <span class="n">multiobject_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reference_fields</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;multiobject&quot;</span>
+        <span class="p">]</span>
+        <span class="n">current_fields</span><span class="p">,</span> <span class="n">merged_fields</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">nb</span><span class="p">,</span>
+            <span class="n">nb_asn</span><span class="p">,</span>
+            <span class="n">custom_fields</span><span class="p">,</span>
+            <span class="n">object_fields</span><span class="p">,</span>
+            <span class="n">multiobject_fields</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">merged_fields</span> <span class="o">!=</span> <span class="n">current_fields</span><span class="p">:</span>
+            <span class="n">nb_asn</span><span class="o">.</span><span class="n">custom_fields</span> <span class="o">=</span> <span class="n">merged_fields</span>
+            <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
         <span class="n">nb_asn</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
@@ -8094,7 +8167,7 @@ ASN matches the description; or the range has no free ASNs.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

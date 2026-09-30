@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7260,16 +7260,16 @@
 <blockquote>
 <p>task api name: <code>create_bgp_peering</code></p>
 </blockquote>
-<p>Creates one or many BGP sessions in NetBox. Supports single-session mode (individual keyword arguments) and bulk mode (<code>bulk_create</code> list of dicts). IP addresses and ASNs are resolved from IPAM or created on-demand. When <code>local_interface</code> is provided the local address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote address is derived automatically. Optionally creates a mirror (reverse) session on the remote device.</p>
+<p>Creates one or many BGP sessions in NetBox. Supports single-session mode (individual keyword arguments) and bulk mode (<code>bulk_create</code> list of dicts). IP addresses and ASNs are resolved from IPAM or created on-demand. <code>local_ip_query</code> and <code>remote_ip_query</code> can find existing addresses with NetBox filters such as literal <code>device</code> and <code>interface</code> names. Explicit addresses take precedence over queries. When <code>local_interface</code> is provided the local address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote address is derived automatically. Optionally creates a mirror (reverse) session on the remote device.</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
 <ol>
 <li>Client submits <code>create_bgp_peering</code> request to NetBox worker</li>
 <li>NetBox worker validates that the BGP plugin is installed</li>
 <li>Worker resolves the RIR ID once (when <code>rir</code> is provided) for on-demand ASN creation</li>
-<li>For each spec — when <code>local_interface</code> is supplied, the interface is looked up in IPAM to derive <code>local_address</code>; P2P peer IP and remote device are derived from the subnet</li>
+<li>For each spec, supplied IP queries find addresses first; when <code>local_interface</code> is supplied, the interface supplies a missing local address and can derive a missing P2P peer address</li>
 <li>Worker pre-fetches all existing sessions for targeted devices (single API call) to support idempotency</li>
 <li>For each session spec:<ul>
-<li>Idempotency check — if the session name already exists, it is added to <code>exists</code> and skipped</li>
+<li>Idempotency check: an existing session is left unchanged and reported in <code>exists</code></li>
 <li>In dry-run mode — the name is added to <code>create</code> and processing continues</li>
 <li>Local and remote IPs are resolved from IPAM (or created when not found)</li>
 <li>Local and remote ASNs are resolved from IPAM (or created when <code>rir</code> is provided)</li>
@@ -7279,6 +7279,8 @@
 </li>
 <li>All prepared payloads are sent to NetBox in a single bulk-create call</li>
 </ol>
+<p>Object and multiobject custom fields accept related object names or IDs when creating a session. Use <code>update_bgp_peering</code> to change an existing session.
+When <code>custom_fields</code> is supplied, the task reuses reference-field definitions in <code>lookup_cache</code> or fetches and caches them for the next call. Calls without supplied custom fields do not fetch those definitions.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¤</a></h2>
 <ul>
 <li><strong>NetBox BGP plugin</strong> (<code>netbox-bgp</code>) must be installed and enabled on the NetBox instance.</li>
@@ -7477,7 +7479,7 @@ being stored as an object reference in the custom field.</p>
             <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
             <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
             <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
-            <span class="s2">&quot;asn_source&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_fields.asn&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_as_query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">},</span>
             <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
             <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="s2">&quot;my-bgp-branch&quot;</span><span class="p">,</span>
         <span class="p">},</span>
@@ -7501,7 +7503,7 @@ being stored as an object reference in the custom field.</p>
             <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
             <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet[1-2]&quot;</span><span class="p">,</span>
             <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">,</span>
-            <span class="s2">&quot;asn_source&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_fields.asn&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remote_as_query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">},</span>
             <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device }}_{{ vrf }}_{{ remote_address }}&quot;</span><span class="p">,</span>
             <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="s2">&quot;PROD&quot;</span><span class="p">,</span>
             <span class="s2">&quot;vrf_custom_field&quot;</span><span class="p">:</span> <span class="s2">&quot;tenant_vrf&quot;</span><span class="p">,</span>
@@ -7528,11 +7530,12 @@ being stored as an object reference in the custom field.</p>
         <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;local_interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;asn_source&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">},</span>
-            <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device }}_ASN{{ local_as }}_{{ remote_address }}&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;local_ip_query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-spine-1&quot;</span><span class="p">,</span> <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;remote_ip_query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;ceos-leaf-1&quot;</span><span class="p">,</span> <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethernet1&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;local_as_query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65001</span><span class="p">},</span>
+            <span class="s2">&quot;remote_as_query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">65002</span><span class="p">},</span>
+            <span class="s2">&quot;name_template&quot;</span><span class="p">:</span> <span class="s2">&quot;{{ device }}_{{ vrf }}_{{ remote_address }}&quot;</span><span class="p">,</span>
             <span class="s2">&quot;rir&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -7713,7 +7716,7 @@ address is derived automatically.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Local AS number string. Derived from <code>asn_source</code> when omitted.</p>
+                <p>Local AS number. Takes precedence over <code>local_as_query</code>.</p>
               </div>
             </td>
             <td>
@@ -7729,7 +7732,7 @@ address is derived automatically.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Remote AS number string. Derived from <code>asn_source</code> on remote device when omitted.</p>
+                <p>Remote AS number. Takes precedence over <code>remote_as_query</code>.</p>
               </div>
             </td>
             <td>
@@ -7834,6 +7837,24 @@ address is derived automatically.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>custom_fields</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Custom-field values. Object and
+multiobject fields accept related object names or IDs when
+creating a session. Existing sessions are left unchanged.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>prefix_list_in</code>
             </td>
             <td>
@@ -7882,15 +7903,67 @@ address is derived automatically.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>asn_source</code>
+                <code>local_as_query</code>
             </td>
             <td>
-                  <code><span title="str">str</span> or <span title="dict">dict</span></code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Dot-path string through device data or
-dict of kwargs for <code>nb.ipam.asns.get</code> for automatic ASN resolution.</p>
+                <p>Filters passed to <code>nb.ipam.asns.get</code>
+to find the local ASN when <code>local_as</code> is omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>remote_as_query</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Filters passed to <code>nb.ipam.asns.get</code>
+to find the remote ASN when <code>remote_as</code> is omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>local_ip_query</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Filters passed to
+<code>nb.ipam.ip_addresses.get</code> when <code>local_address</code> is omitted.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>remote_ip_query</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Filters passed to
+<code>nb.ipam.ip_addresses.get</code> when <code>remote_address</code> is omitted.
+Filters may include literal device and interface names.</p>
               </div>
             </td>
             <td>
@@ -7907,7 +7980,8 @@ dict of kwargs for <code>nb.ipam.asns.get</code> for automatic ASN resolution.</
             <td>
               <div class="doc-md-description">
                 <p>Jinja2 template string for session names.
-Default <code>'{{device}}_{{vrf}}_{{remote_address}}'</code>.</p>
+Default <code>'{{device}}_{{vrf}}_{{remote_address}}'</code>; an omitted
+VRF renders as <code>default</code> in the name only.</p>
               </div>
             </td>
             <td>
@@ -7940,7 +8014,8 @@ remote device with local and remote IPs/ASNs swapped. Default <code>True</code>.
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of session dicts for bulk creation.</p>
+                <p>List of session dicts for bulk creation.
+Each entry can supply its own ASN and IP address queries.</p>
               </div>
             </td>
             <td>
@@ -8031,6 +8106,25 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
                   <code>&#39;vrf&#39;</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>lookup_cache</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Reusable NetBox lookup data. Object
+and multiobject custom-field definitions are cached under
+<code>custom_fields['netbox_bgp.bgpsession']</code> when supplied custom
+fields need resolution.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -8072,7 +8166,28 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1096</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span>
+<span class="normal">1086</span>
+<span class="normal">1087</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span>
+<span class="normal">1091</span>
+<span class="normal">1092</span>
+<span class="normal">1093</span>
+<span class="normal">1094</span>
+<span class="normal">1095</span>
+<span class="normal">1096</span>
 <span class="normal">1097</span>
 <span class="normal">1098</span>
 <span class="normal">1099</span>
@@ -8612,7 +8727,80 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
 <span class="normal">1633</span>
 <span class="normal">1634</span>
 <span class="normal">1635</span>
-<span class="normal">1636</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span>
+<span class="normal">1646</span>
+<span class="normal">1647</span>
+<span class="normal">1648</span>
+<span class="normal">1649</span>
+<span class="normal">1650</span>
+<span class="normal">1651</span>
+<span class="normal">1652</span>
+<span class="normal">1653</span>
+<span class="normal">1654</span>
+<span class="normal">1655</span>
+<span class="normal">1656</span>
+<span class="normal">1657</span>
+<span class="normal">1658</span>
+<span class="normal">1659</span>
+<span class="normal">1660</span>
+<span class="normal">1661</span>
+<span class="normal">1662</span>
+<span class="normal">1663</span>
+<span class="normal">1664</span>
+<span class="normal">1665</span>
+<span class="normal">1666</span>
+<span class="normal">1667</span>
+<span class="normal">1668</span>
+<span class="normal">1669</span>
+<span class="normal">1670</span>
+<span class="normal">1671</span>
+<span class="normal">1672</span>
+<span class="normal">1673</span>
+<span class="normal">1674</span>
+<span class="normal">1675</span>
+<span class="normal">1676</span>
+<span class="normal">1677</span>
+<span class="normal">1678</span>
+<span class="normal">1679</span>
+<span class="normal">1680</span>
+<span class="normal">1681</span>
+<span class="normal">1682</span>
+<span class="normal">1683</span>
+<span class="normal">1684</span>
+<span class="normal">1685</span>
+<span class="normal">1686</span>
+<span class="normal">1687</span>
+<span class="normal">1688</span>
+<span class="normal">1689</span>
+<span class="normal">1690</span>
+<span class="normal">1691</span>
+<span class="normal">1692</span>
+<span class="normal">1693</span>
+<span class="normal">1694</span>
+<span class="normal">1695</span>
+<span class="normal">1696</span>
+<span class="normal">1697</span>
+<span class="normal">1698</span>
+<span class="normal">1699</span>
+<span class="normal">1700</span>
+<span class="normal">1701</span>
+<span class="normal">1702</span>
+<span class="normal">1703</span>
+<span class="normal">1704</span>
+<span class="normal">1705</span>
+<span class="normal">1706</span>
+<span class="normal">1707</span>
+<span class="normal">1708</span>
+<span class="normal">1709</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpPeeringInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpPeeringResult</span><span class="p">,</span>
@@ -8646,10 +8834,14 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
     <span class="n">export_policies</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">prefix_list_in</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">prefix_list_out</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">custom_fields</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="c1"># interface-driven resolution</span>
     <span class="n">local_interface</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">asn_source</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">local_as_query</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">remote_as_query</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">local_ip_query</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">remote_ip_query</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name_template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;{{device}}_{{vrf}}_{{remote_address}}&quot;</span><span class="p">,</span>
     <span class="c1"># mirror session</span>
     <span class="n">create_reverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -8679,24 +8871,36 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
 <span class="sd">        device (str, optional): Local device name. Required in single-session mode.</span>
 <span class="sd">        local_address (str, optional): Local IP address string. Derived from ``local_interface`` when omitted.</span>
 <span class="sd">        remote_address (str, optional): Remote IP address string. Derived from P2P peer when ``local_interface`` is used.</span>
-<span class="sd">        local_as (int, optional): Local AS number string. Derived from ``asn_source`` when omitted.</span>
-<span class="sd">        remote_as (int, optional): Remote AS number string. Derived from ``asn_source`` on remote device when omitted.</span>
+<span class="sd">        local_as (int, optional): Local AS number. Takes precedence over ``local_as_query``.</span>
+<span class="sd">        remote_as (int, optional): Remote AS number. Takes precedence over ``remote_as_query``.</span>
 <span class="sd">        status (str): Session status. Default ``&#39;active&#39;``.</span>
 <span class="sd">        description (str, optional): Session description.</span>
 <span class="sd">        vrf (str, optional): VRF name.</span>
 <span class="sd">        peer_group (str, optional): Peer group name (resolved or created).</span>
 <span class="sd">        import_policies (list, optional): List of import routing-policy names.</span>
 <span class="sd">        export_policies (list, optional): List of export routing-policy names.</span>
+<span class="sd">        custom_fields (dict, optional): Custom-field values. Object and</span>
+<span class="sd">            multiobject fields accept related object names or IDs when</span>
+<span class="sd">            creating a session. Existing sessions are left unchanged.</span>
 <span class="sd">        prefix_list_in (str, optional): Inbound prefix-list name.</span>
 <span class="sd">        prefix_list_out (str, optional): Outbound prefix-list name.</span>
 <span class="sd">        local_interface (str, optional): Local interface name or bracket-range pattern.</span>
-<span class="sd">        asn_source (str or dict, optional): Dot-path string through device data or</span>
-<span class="sd">            dict of kwargs for ``nb.ipam.asns.get`` for automatic ASN resolution.</span>
+<span class="sd">        local_as_query (dict, optional): Filters passed to ``nb.ipam.asns.get``</span>
+<span class="sd">            to find the local ASN when ``local_as`` is omitted.</span>
+<span class="sd">        remote_as_query (dict, optional): Filters passed to ``nb.ipam.asns.get``</span>
+<span class="sd">            to find the remote ASN when ``remote_as`` is omitted.</span>
+<span class="sd">        local_ip_query (dict, optional): Filters passed to</span>
+<span class="sd">            ``nb.ipam.ip_addresses.get`` when ``local_address`` is omitted.</span>
+<span class="sd">        remote_ip_query (dict, optional): Filters passed to</span>
+<span class="sd">            ``nb.ipam.ip_addresses.get`` when ``remote_address`` is omitted.</span>
+<span class="sd">            Filters may include literal device and interface names.</span>
 <span class="sd">        name_template (str, optional): Jinja2 template string for session names.</span>
-<span class="sd">            Default ``&#39;{{device}}_{{vrf}}_{{remote_address}}&#39;``.</span>
+<span class="sd">            Default ``&#39;{{device}}_{{vrf}}_{{remote_address}}&#39;``; an omitted</span>
+<span class="sd">            VRF renders as ``default`` in the name only.</span>
 <span class="sd">        create_reverse (bool): When ``True`` also create a mirror session on the</span>
 <span class="sd">            remote device with local and remote IPs/ASNs swapped. Default ``True``.</span>
 <span class="sd">        bulk_create (list, optional): List of session dicts for bulk creation.</span>
+<span class="sd">            Each entry can supply its own ASN and IP address queries.</span>
 <span class="sd">        rir (str, optional): RIR name used when auto-creating ASNs.</span>
 <span class="sd">        message (str, optional): Changelog message recorded on every NetBox write.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name.</span>
@@ -8706,6 +8910,10 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
 <span class="sd">            NetBox pointing to the VRF content-type.  The value is always a single</span>
 <span class="sd">            VRF object reference written into ``custom_fields[vrf_custom_field]``.</span>
 <span class="sd">            Default ``&#39;vrf&#39;`` means ``custom_fields[&#39;vrf&#39;]``.</span>
+<span class="sd">        lookup_cache (dict, optional): Reusable NetBox lookup data. Object</span>
+<span class="sd">            and multiobject custom-field definitions are cached under</span>
+<span class="sd">            ``custom_fields[&#39;netbox_bgp.bgpsession&#39;]`` when supplied custom</span>
+<span class="sd">            fields need resolution.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Normal run::</span>
@@ -8757,6 +8965,10 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="n">remote_address</span><span class="p">,</span>
             <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="n">local_as</span><span class="p">,</span>
             <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="n">remote_as</span><span class="p">,</span>
+            <span class="s2">&quot;local_as_query&quot;</span><span class="p">:</span> <span class="n">local_as_query</span><span class="p">,</span>
+            <span class="s2">&quot;remote_as_query&quot;</span><span class="p">:</span> <span class="n">remote_as_query</span><span class="p">,</span>
+            <span class="s2">&quot;local_ip_query&quot;</span><span class="p">:</span> <span class="n">local_ip_query</span><span class="p">,</span>
+            <span class="s2">&quot;remote_ip_query&quot;</span><span class="p">:</span> <span class="n">remote_ip_query</span><span class="p">,</span>
             <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
             <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
             <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
@@ -8780,8 +8992,38 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
     <span class="n">base_bgp_sessions</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">bgp_session</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">:</span>
+        <span class="n">bgp_session</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bgp_session</span><span class="p">)</span>
         <span class="n">bgp_session_device</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
         <span class="n">bgp_session_local_interface</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_interface&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Query addresses before interface and name resolution. Explicit</span>
+        <span class="c1"># addresses take precedence over queries.</span>
+        <span class="n">query_failed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="s2">&quot;remote&quot;</span><span class="p">):</span>
+            <span class="n">address_field</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2">_address&quot;</span>
+            <span class="n">query_field</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2">_ip_query&quot;</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query_field</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">address_field</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">query</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ip_obj</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">query</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">ip_obj</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query_field</span><span class="si">}</span><span class="s2"> failed for &#39;</span><span class="si">{</span><span class="n">bgp_session_device</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query_field</span><span class="si">}</span><span class="s2"> found no IP for &#39;</span><span class="si">{</span><span class="n">bgp_session_device</span><span class="si">}</span><span class="s2">&#39;: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">ip_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">query_failed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+            <span class="n">bgp_session</span><span class="p">[</span><span class="n">address_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_obj</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">query_failed</span><span class="p">:</span>
+            <span class="k">continue</span>
 
         <span class="k">if</span> <span class="n">bgp_session_local_interface</span><span class="p">:</span>
             <span class="c1"># Expand bracket-range pattern e.g. &quot;Ethernet[1-4]/1.101&quot;</span>
@@ -8827,7 +9069,9 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
                     <span class="k">continue</span>
 
                 <span class="n">ip_cidr</span> <span class="o">=</span> <span class="n">ip_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">address</span>  <span class="c1"># e.g. &quot;10.0.0.1/31&quot;</span>
-                <span class="n">local_addr</span> <span class="o">=</span> <span class="n">ip_cidr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">local_addr</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_address&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ip_cidr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
 
                 <span class="n">bgp_session_remote_address</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_address&quot;</span><span class="p">)</span>
 
@@ -8898,6 +9142,10 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;remote_address&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;local_address&quot;</span><span class="p">]</span>
             <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;local_as&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_as&quot;</span><span class="p">)</span>
             <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;remote_as&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_as&quot;</span><span class="p">)</span>
+            <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;local_as_query&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_as_query&quot;</span><span class="p">)</span>
+            <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;remote_as_query&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_as_query&quot;</span><span class="p">)</span>
+            <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;local_ip_query&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_ip_query&quot;</span><span class="p">)</span>
+            <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;remote_ip_query&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_ip_query&quot;</span><span class="p">)</span>
             <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;remote_device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span>
             <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;local_interface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">mirror_session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -8916,7 +9164,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bgp_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session create candidate(s)&quot;</span><span class="p">)</span>
 
     <span class="c1"># Step 5c: Pre-fetch existing sessions for idempotency (single API call)</span>
-    <span class="n">existing_session_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">existing_sessions</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">all_device_names</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;checking existing BGP sessions on </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
@@ -8925,12 +9173,10 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
                 <span class="n">device</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">),</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,id&quot;</span><span class="p">,</span>
+                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,id,custom_fields&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">existing_session_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">}</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">existing_session_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> existing BGP session(s)&quot;</span>
-            <span class="p">)</span>
+            <span class="n">existing_sessions</span> <span class="o">=</span> <span class="p">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">session</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">}</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">existing_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> existing BGP session(s)&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;could not pre-fetch BGP sessions for </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2">: &quot;</span>
@@ -8947,6 +9193,23 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;exists&quot;</span><span class="p">:</span> <span class="p">[]}</span>
 
     <span class="n">payloads</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">):</span>
+        <span class="n">lookup_cache</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="s2">&quot;netbox_bgp.bgpsession&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]:</span>
+            <span class="c1"># Design deployments provide these definitions; direct calls</span>
+            <span class="c1"># fetch them once and keep them in the supplied lookup cache.</span>
+            <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">][</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;multiobject&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">,</span>
+                <span class="n">object_type</span><span class="o">=</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;multiobject&quot;</span><span class="p">],</span>
+            <span class="p">):</span>
+                <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">][</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">][</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;building BGP session create payloads&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">bgp_session</span> <span class="ow">in</span> <span class="n">bgp_sessions</span><span class="p">:</span>
@@ -8976,7 +9239,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sname</span>
 
         <span class="c1"># Idempotency check (step 6i)</span>
-        <span class="k">if</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">existing_session_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">existing_sessions</span><span class="p">:</span>
             <span class="n">result</span><span class="p">[</span><span class="s2">&quot;exists&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
             <span class="k">continue</span>
 
@@ -8987,41 +9250,39 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
 
         <span class="c1"># --- Full resolution (non-dry-run) ---</span>
 
-        <span class="c1"># Resolve ASNs from asn_source if not supplied (steps 6b / 6c)</span>
-        <span class="k">if</span> <span class="n">asn_source</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bgp_session_local_as</span><span class="p">:</span>
-            <span class="n">dev_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_device_names</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bgp_session_device</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{}</span>
-            <span class="p">)</span>
-            <span class="n">bgp_session_local_as</span> <span class="o">=</span> <span class="n">resolve_asn_from_source</span><span class="p">(</span><span class="n">dev_data</span><span class="p">,</span> <span class="n">asn_source</span><span class="p">,</span> <span class="n">nb</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">bgp_session_local_as</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;could not resolve local AS for &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; via asn_source&quot;</span>
+        <span class="c1"># Explicit ASN numbers win; otherwise query NetBox for each side.</span>
+        <span class="n">local_query</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_as_query&quot;</span><span class="p">)</span>
+        <span class="n">remote_query</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_as_query&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bgp_session_local_as</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">local_query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">asn_obj</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">local_query</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">asn_obj</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;local_as_query failed for &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;local_as_query found no ASN for &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">local_query</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="c1"># NetBox may reject ambiguous filters or return no matching ASN.</span>
+            <span class="k">if</span> <span class="n">asn_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="k">continue</span>
+            <span class="n">bgp_session_local_as</span> <span class="o">=</span> <span class="n">asn_obj</span><span class="o">.</span><span class="n">asn</span>
 
-        <span class="k">if</span> <span class="n">asn_source</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bgp_session_remote_as</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">remote_device</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;cannot resolve remote AS for &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39;: remote device not &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;identified and remote_as not provided&quot;</span>
-                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">bgp_session_remote_as</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">remote_query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">asn_obj</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">remote_query</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">asn_obj</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;remote_as_query failed for &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;remote_as_query found no ASN for &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">remote_query</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="n">asn_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="n">remote_dev_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_device_names</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">remote_device</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{}</span>
-            <span class="p">)</span>
-            <span class="n">bgp_session_remote_as</span> <span class="o">=</span> <span class="n">resolve_asn_from_source</span><span class="p">(</span>
-                <span class="n">remote_dev_data</span><span class="p">,</span> <span class="n">asn_source</span><span class="p">,</span> <span class="n">nb</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">bgp_session_remote_as</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;could not resolve remote AS for &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; via asn_source&quot;</span>
-                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="k">continue</span>
+            <span class="n">bgp_session_remote_as</span> <span class="o">=</span> <span class="n">asn_obj</span><span class="o">.</span><span class="n">asn</span>
 
         <span class="c1"># Resolve IP IDs and ASN IDs (steps 6d / 6e)</span>
         <span class="n">local_ip_id</span> <span class="o">=</span> <span class="n">resolve_ip</span><span class="p">(</span>
@@ -9081,33 +9342,54 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
             <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site_id</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;tags&quot;</span> <span class="ow">in</span> <span class="n">bgp_session</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_array_values</span><span class="p">(</span>
+                <span class="p">[],</span> <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">],</span> <span class="n">attribute</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Optional fields (step 6h)</span>
-        <span class="n">payload</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="n">resolve_bgp_session_payload_fields</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="n">k</span><span class="p">:</span> <span class="n">bgp_session</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span>
-                        <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;peer_group&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;import_policies&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;export_policies&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;prefix_list_in&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;prefix_list_out&quot;</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-                <span class="p">},</span>
-                <span class="n">nb</span><span class="p">,</span>
-                <span class="n">rir_id</span><span class="p">,</span>
-                <span class="n">job</span><span class="p">,</span>
-                <span class="n">ret</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="n">addr_family</span><span class="p">,</span>
-                <span class="n">lookup_cache</span><span class="o">=</span><span class="n">lookup_cache</span><span class="p">,</span>
-                <span class="n">vrf_custom_field</span><span class="o">=</span><span class="n">vrf_custom_field</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="c1"># Tags are already converted to NetBox name references in payload.</span>
+        <span class="n">resolved_fields</span> <span class="o">=</span> <span class="n">resolve_bgp_session_payload_fields</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">bgp_session</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;peer_group&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;import_policies&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;export_policies&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;prefix_list_in&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;prefix_list_out&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;custom_fields&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="p">},</span>
+            <span class="n">nb</span><span class="p">,</span>
+            <span class="n">rir_id</span><span class="p">,</span>
+            <span class="n">job</span><span class="p">,</span>
+            <span class="n">ret</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">addr_family</span><span class="p">,</span>
+            <span class="n">lookup_cache</span><span class="o">=</span><span class="n">lookup_cache</span><span class="p">,</span>
+            <span class="n">vrf_custom_field</span><span class="o">=</span><span class="n">vrf_custom_field</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;custom_fields&quot;</span> <span class="ow">in</span> <span class="n">resolved_fields</span><span class="p">:</span>
+            <span class="n">payload</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">resolved_fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">payload</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">resolved_fields</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Resolve names after VRF resolution adds its object reference.</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merge_resolved_custom_fields</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">nb</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">],</span>
+                <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">][</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">][</span><span class="s2">&quot;object&quot;</span><span class="p">],</span>
+                <span class="n">lookup_cache</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">][</span><span class="s2">&quot;netbox_bgp.bgpsession&quot;</span><span class="p">][</span>
+                    <span class="s2">&quot;multiobject&quot;</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
 
         <span class="n">payloads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -9282,7 +9564,7 @@ Default <code>'vrf'</code> means <code>custom_fields['vrf']</code>.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

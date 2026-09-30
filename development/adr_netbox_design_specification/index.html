@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7021,7 +7021,7 @@ lists of dictionaries, adding device and interface names from the parents:</p>
 <td>Interface records</td>
 </tr>
 <tr>
-<td>Device or interface <code>bgp_peerings</code> dictionary</td>
+<td>Device or interface <code>bgp_peerings</code> list</td>
 <td>BGP peering records; nested interface supplies <code>local_interface</code></td>
 </tr>
 <tr>
@@ -7043,6 +7043,10 @@ lists of dictionaries, adding device and interface names from the parents:</p>
 <tr>
 <td>Interface inline <code>untagged_vlan</code> or <code>tagged_vlans</code></td>
 <td>VLAN records and interface references</td>
+</tr>
+<tr>
+<td>L2VPN <code>terminations</code> list</td>
+<td>L2VPN termination records with the parent L2VPN name</td>
 </tr>
 <tr>
 <td>VRRP assignment inline <code>group</code></td>
@@ -7114,9 +7118,11 @@ vlan_groups
 vlans
 route_targets
 vrfs
+l2vpns
 prefixes
 devices
 interfaces
+l2vpn_terminations
 connections
 ip_addresses
 bgp_communities
@@ -7161,7 +7167,15 @@ under the collection's <code>custom</code> results; exceptions stop deployment.<
 </tr>
 <tr>
 <td><code>route_targets</code></td>
-<td>Bulk create/update by name before VRFs. VRF <code>import_route_targets</code> and <code>export_route_targets</code> accept dictionaries with <code>name</code> only, extracted and deduplicated into the top-level collection. Additional fields define the target's properties. The VRF handler resolves IDs for NetBox <code>import_targets</code> and <code>export_targets</code>.</td>
+<td>Bulk create/update by name before VRFs and L2VPNs. Their <code>import_route_targets</code> and <code>export_route_targets</code> accept dictionaries with <code>name</code>, extracted and deduplicated into the top-level collection. Additional fields define the target's properties. The parent handlers resolve IDs for NetBox <code>import_targets</code> and <code>export_targets</code>.</td>
+</tr>
+<tr>
+<td><code>l2vpns</code></td>
+<td>Bulk create/update by name through <code>nb.vpn.l2vpns</code>. Nested <code>terminations</code> are extracted before validation.</td>
+</tr>
+<tr>
+<td><code>l2vpn_terminations</code></td>
+<td>Bulk create/update through <code>nb.vpn.l2vpn_terminations</code> after interfaces exist. Each record selects a device interface or group/VID VLAN and its L2VPN. An attachment already assigned to another L2VPN is rejected.</td>
 </tr>
 <tr>
 <td><code>asns</code></td>
@@ -7201,7 +7215,7 @@ under the collection's <code>custom</code> results; exceptions stop deployment.<
 </tr>
 <tr>
 <td><code>bgp_peerings</code></td>
-<td><code>create_bgp_peering</code> for missing sessions and <code>update_bgp_peering</code> for existing names, using bulk input.</td>
+<td>Lists of session candidates, optionally named. <code>create_bgp_peering</code> creates missing sessions and leaves existing sessions unchanged.</td>
 </tr>
 <tr>
 <td><code>vrrp_groups</code>, <code>vrrp_group_assignments</code></td>
@@ -7306,7 +7320,7 @@ interface <code>connection</code> entries use the same handler.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
