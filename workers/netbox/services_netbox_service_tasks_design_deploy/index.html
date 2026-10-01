@@ -8212,7 +8212,7 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 </div>
 <h2 id="custom-functions">Custom functions<a class="headerlink" href="#custom-functions" title="Permanent link">¤</a></h2>
 <p>Custom functions let a design run Python during deployment for use cases such as custom next-available allocation, Netbox lookups, or object creation that needs additional logic.</p>
-<p>The following contract applies to <code>custom_function</code> on an object record. <a href="#device-local-context">Device-local context functions</a> have a different contract.</p>
+<p>The following contract applies to <code>custom_function</code> on an object record. A function <a href="#device-local-context">inside <code>local_context_data</code></a> has a different return contract: its dictionary becomes the device's context data.</p>
 <p>When <code>branch</code> is supplied to <code>design_deploy</code>, the provided <code>netbox</code> client is already configured for that branch. Queries and writes through this client use the deployment branch. Custom functions do not need to initialize branching themselves.</p>
 <table>
 <thead>
@@ -8224,6 +8224,12 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>dict</code></td>
+<td>Deployment</td>
+<td>Design input context after optional schema validation.</td>
+</tr>
 <tr>
 <td><code>netbox</code></td>
 <td><code>pynetbox.core.api.Api</code></td>
@@ -8244,7 +8250,9 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 </tr>
 </tbody>
 </table>
-<p><code>custom_function</code> selects the registered function and is not passed as an argument. Do not supply <code>netbox</code> or <code>dry_run</code> in the record, because deployment supplies them. No device object or design <code>context</code> is passed automatically.</p>
+<p><code>custom_function</code> selects the registered function and is not passed as an argument. Do not supply <code>context</code>, <code>netbox</code>, or <code>dry_run</code> in the record, because deployment supplies them. No device object is passed automatically.</p>
+<p>Every ordinary top-level object collection can mix object definitions and custom function records. Custom function records pass through flattening and lookup preparation without requiring object identity fields such as a route target <code>name</code> or a VLAN <code>group</code>. The collection handler processes object definitions first, then the custom functions run in record order. The function receives its record's remaining fields and handles its own Netbox writes. <code>local_context_data</code> uses the <a href="#device-local-context">separate device-local contract</a>.</p>
+<p>For these object records, the return value is a report to the caller. Deployment appends it to the collection's <code>custom</code> list in the same order as the custom function records. It does not use the value to create or update an object, supply fields to another handler, or resolve references in later collections. The function must make any Netbox writes itself and honor <code>dry_run</code>. A string, number, dictionary, list, or <code>None</code> can be returned; choose a JSON-serializable value that is useful to callers.</p>
 <table>
 <thead>
 <tr>
@@ -8255,7 +8263,7 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 <tbody>
 <tr>
 <td>Returns a value</td>
-<td>Appends <code>{"function": NAME, "result": VALUE}</code> under the object's <code>custom</code> results list, such as <code>vlans.custom</code>. Return JSON-serializable data. The value is not passed to the object handler or written to Netbox automatically.</td>
+<td>Appends <code>{"function": NAME, "result": VALUE}</code> under the collection's <code>custom</code> results list, such as <code>route_targets.custom</code>.</td>
 </tr>
 <tr>
 <td>Returns nothing</td>
@@ -8270,20 +8278,20 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Route target allocation</label><label for="__tabbed_5_2">Calculated VLAN name</label><label for="__tabbed_5_3">Jinja2 loop and community allocation</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>This example allocates a route target. Register the Python file under <code>custom_functions</code>, then use <code>custom_function: allocate_route_target</code> in a <code>route_targets</code> record. The function runs during the route-target deployment stage, after route-target records without <code>custom_function</code> have been processed. The record's other fields become keyword arguments, and deployment also supplies <code>netbox</code> and <code>dry_run</code>.</p>
+<p>This example allocates a route target. Register the Python file under <code>custom_functions</code>, then use <code>custom_function: allocate_bgp_route_target</code> in a <code>route_targets</code> record. The function runs during the route-target deployment stage, after route-target records without <code>custom_function</code> have been processed. The record's other fields become keyword arguments, and deployment also supplies <code>context</code>, <code>netbox</code>, and <code>dry_run</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">custom_functions</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">allocate_route_target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/designs/allocate_route_target.py</span>
+<span class="w">  </span><span class="nt">allocate_bgp_route_target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/designs/allocate_bgp_route_target.py</span>
 
 <span class="nt">tenants</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME</span>
 
 <span class="nt">route_targets</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allocate_route_target</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allocate_bgp_route_target</span>
 <span class="w">    </span><span class="nt">tenant</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME</span>
 <span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME branch route target</span>
 </code></pre></div>
-<p>The referenced <code>nf://netbox/designs/allocate_route_target.py</code> contains:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">allocate_route_target</span><span class="p">(</span><span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">tenant</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
+<p>The referenced <code>nf://netbox/designs/allocate_bgp_route_target.py</code> contains:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">allocate_bgp_route_target</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">tenant</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
     <span class="c1"># Replace this fixed value with a real allocation rule when needed.</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;65000:100&quot;</span>
     <span class="n">existing</span> <span class="o">=</span> <span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">route_targets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -8296,7 +8304,10 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
             <span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
 </code></pre></div>
-<p>The <code>tenant</code> and <code>description</code> fields become function arguments. Deployment supplies <code>netbox</code> and <code>dry_run</code>, so do not put them in the record. This dummy allocator always returns <code>65000:100</code>. It also creates or updates that route target unless <code>dry_run</code> is true. Returning a value alone would only add it to the deployment result, not create an object. The return value appears under <code>route_targets.custom</code>. Custom functions must handle their own lookups and writes, including dry-run behavior. Only load trusted Python files.</p>
+<p>The <code>tenant</code> and <code>description</code> fields become function arguments. Deployment supplies <code>context</code>, <code>netbox</code>, and <code>dry_run</code>, so do not put them in the record. This dummy allocator chooses <code>65000:100</code> and creates or updates that route target unless <code>dry_run</code> is true. Its <code>return {"name": name}</code> produces this excerpt of the deployment result:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;route_targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;custom&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;allocate_bgp_route_target&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;65000:100&quot;</span><span class="p">}}]}}</span>
+</code></pre></div>
+<p>The dictionary describes what the function did; the returned <code>name</code> is not used for the Netbox write or for later VRF or L2VPN references. Returning <code>name</code> as a string would instead put <code>"65000:100"</code> in <code>result</code>. Custom functions must handle their own lookups and writes, including dry-run behavior. Only load trusted Python files.</p>
 </div>
 <div class="tabbed-block">
 <p>This function calculates a VLAN name from the additional <code>profile</code> argument, then creates or updates the VLAN. The VLAN group must already exist when the <code>vlans</code> stage runs.</p>
@@ -8313,7 +8324,7 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 <span class="w">    </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
 </code></pre></div>
 <p>The referenced <code>nf://netbox/designs/create_profile_vlan.py</code> contains:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_profile_vlan</span><span class="p">(</span><span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">profile</span><span class="p">):</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_profile_vlan</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">profile</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">vid</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">vlan_group</span> <span class="o">=</span> <span class="n">netbox</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">vlan_groups</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">vlan_group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -8339,11 +8350,11 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 <span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">for device in context.devices %</span><span class="p p-Indicator">}</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allocate_device_community</span>
 <span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">device</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<span class="w">    </span><span class="nt">asn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65100</span>
 <span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">endfor %</span><span class="p p-Indicator">}</span>
 </code></pre></div>
-<p>Supply a context such as <code>{"devices": ["branch-rtr-1", "branch-rtr-2"]}</code>. The referenced <code>nf://netbox/designs/allocate_device_community.py</code> contains:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">allocate_device_community</span><span class="p">(</span><span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">asn</span><span class="p">):</span>
+<p>Supply a context such as <code>{"devices": ["branch-rtr-1", "branch-rtr-2"], "asn": 65100}</code>. The referenced <code>nf://netbox/designs/allocate_device_community.py</code> contains:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">allocate_device_community</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+    <span class="n">asn</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s2">&quot;asn&quot;</span><span class="p">]</span>
     <span class="n">description</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Community for </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">communities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">netbox</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">community</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
     <span class="n">existing</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
@@ -8366,7 +8377,7 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
         <span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
 </code></pre></div>
-<p>The record passes <code>asn=65100</code> to the function, so allocated values start at <code>65100:100</code>. Each created community is identified on repeat deployment by <code>Community for &lt;device&gt;</code>. The returned dictionary appears under <code>bgp_communities.custom</code>. A dry run makes no reservations, so multiple records may propose the same free value.</p>
+<p>The design context passes <code>asn=65100</code> to the function, so allocated values start at <code>65100:100</code>. Each created community is identified on repeat deployment by <code>Community for &lt;device&gt;</code>. The returned dictionary appears under <code>bgp_communities.custom</code>. A dry run makes no reservations, so multiple records may propose the same free value.</p>
 <p>This simplified allocator is intended for sequential deployments. It does not reserve values against concurrent allocations. The built-in handler for explicit community records matches <code>value</code> and, when supplied, <code>description</code>. A different description creates a separate community. If description is omitted, more than one matching value is an error.</p>
 </div>
 </div>
@@ -9286,7 +9297,7 @@ therefore have no IDs yet.</p>
 </div>
 <h2 id="configuration-context">Configuration context<a class="headerlink" href="#configuration-context" title="Permanent link">¤</a></h2>
 <p>Top-level <code>config_context</code> creates or updates reusable Netbox ConfigContext objects. Its <code>data</code> is a dictionary, and its scope determines which devices receive it. Device-specific values belong in <a href="#device-local-context">device local context</a>.</p>
-<p>A <code>custom_function</code> on a <code>config_context</code> record uses the same <a href="#custom-functions">arguments and return handling as any ordinary custom function</a>: deployment supplies <code>netbox</code> and <code>dry_run</code>, and the record supplies additional keyword arguments. It receives no device object. Its return value is recorded under <code>config_context.custom</code>, not saved as context data automatically. The function must perform its own writes. The Jinja calculation example below instead renders <code>data</code> for the normal handler to save.</p>
+<p>A <code>custom_function</code> on a <code>config_context</code> record uses the same <a href="#custom-functions">arguments and return handling as any ordinary custom function</a>: deployment supplies <code>context</code>, <code>netbox</code>, and <code>dry_run</code>, and the record supplies additional keyword arguments. It receives no device object. Its return value is recorded under <code>config_context.custom</code>, not saved as context data automatically. The function must perform its own writes. The Jinja calculation example below instead renders <code>data</code> for the normal handler to save.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Shared site context</label><label for="__tabbed_10_2">Calculated site context</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -9340,13 +9351,14 @@ therefore have no IDs yet.</p>
 </div>
 <h2 id="device-local-context">Device local context<a class="headerlink" href="#device-local-context" title="Permanent link">¤</a></h2>
 <p><code>local_context_data</code> updates a <code>local_context_data</code> field on one device, not a reusable ConfigContext object. Both nested and top-level local context definitions run in the final deployment stage, after all other design objects have been created or updated. Custom functions can query those objects through the provided <code>netbox</code> client to calculate device context. Local context replaces the previous dictionary rather than merging with it.</p>
+<p>A <code>custom_function</code> inside <code>local_context_data</code> must return the <strong>complete context-data dictionary</strong> to store on the matched device. For example, <code>return {"routing": {"router_id": "192.0.2.1"}}</code> sets the device's <code>local_context_data</code> to exactly that dictionary. The handler performs the device update; the function does not need to call <code>device.update()</code> or <code>netbox.dcim.devices.update()</code>. The return value is not placed under a <code>custom</code> result list or passed to another design collection.</p>
 <div class="admonition note">
 <p class="admonition-title">Final-stage queries and branching</p>
 <p>During a normal deployment, objects from all preceding stages are available in Netbox when device-local context functions run. If <code>branch</code> was supplied to <code>design_deploy</code>, the provided <code>netbox</code> client already targets that branch. During a dry run, planned objects are not created and may be unavailable.</p>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Device-local context functions receive the device object</p>
-<p>A function referenced <strong>inside <code>local_context_data</code></strong> receives <code>device</code>, <code>netbox</code>, and <code>dry_run</code>, plus any arguments beside <code>custom_function</code>. <code>device</code> is the matched <strong>pynetbox device object</strong>, not its name. The function can inspect <code>device.id</code>, <code>device.name</code>, or other device fields. It must return a dictionary, which the handler writes to the device's local context.</p>
+<p>A function referenced <strong>inside <code>local_context_data</code></strong> receives <code>device</code>, <code>context</code>, <code>netbox</code>, and <code>dry_run</code>, plus any arguments beside <code>custom_function</code>. <code>device</code> is the matched <strong>pynetbox device object</strong>, not its name. The function can inspect <code>device.id</code>, <code>device.name</code>, or other device fields. It must return a dictionary, which the handler writes to the device's local context.</p>
 </div>
 <p>The function receives the full device record so it can inspect fields beyond its identity. Related objects such as interfaces can be queried through <code>netbox</code>.</p>
 <p><strong>Local Context Custom Function Input</strong></p>
@@ -9365,6 +9377,12 @@ therefore have no IDs yet.</p>
 <td><code>pynetbox.core.response.Record</code></td>
 <td>Deployment</td>
 <td>Matched Netbox device object, available after earlier deployment stages. Inspect fields such as <code>device.id</code> and <code>device.name</code>.</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td><code>dict</code></td>
+<td>Deployment</td>
+<td>Design input context after optional schema validation.</td>
 </tr>
 <tr>
 <td><code>netbox</code></td>
@@ -9386,7 +9404,7 @@ therefore have no IDs yet.</p>
 </tr>
 </tbody>
 </table>
-<p><code>custom_function</code> selects the function and is not passed to it. Do not supply <code>device</code>, <code>netbox</code>, or <code>dry_run</code> inside the local-context dictionary. Outer device identity fields, such as <code>site</code> and <code>tenant</code>, select the device and are not forwarded as function arguments.</p>
+<p><code>custom_function</code> selects the function and is not passed to it. Do not supply <code>device</code>, <code>context</code>, <code>netbox</code>, or <code>dry_run</code> inside the local-context dictionary. Outer device identity fields, such as <code>site</code> and <code>tenant</code>, select the device and are not forwarded as function arguments.</p>
 <table>
 <thead>
 <tr>
@@ -9397,11 +9415,11 @@ therefore have no IDs yet.</p>
 <tbody>
 <tr>
 <td>Returns a dictionary</td>
-<td>Writes it as the device's entire <code>local_context_data</code>, replacing the previous value. The result lists the device name under <code>local_context_data.updated</code>, not under <code>custom</code>.</td>
+<td>Writes that dictionary as the device's entire <code>local_context_data</code>, replacing the previous value. The result lists the device name under <code>local_context_data.updated</code>, not under <code>custom</code>.</td>
 </tr>
 <tr>
 <td>Returns a dictionary during a dry run</td>
-<td>Does not write it. The function runs only if the device already exists. Earlier planned objects may still be absent.</td>
+<td>Does not write it. The function runs only if the device already exists. Earlier planned objects may still be absent. Missing devices are skipped and omitted from <code>local_context_data.updated</code>.</td>
 </tr>
 <tr>
 <td>Returns another type, including <code>None</code></td>
@@ -9516,6 +9534,7 @@ therefore have no IDs yet.</p>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_isis_context</span><span class="p">(</span>
     <span class="n">device</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">netbox</span><span class="p">:</span> <span class="n">Api</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">interface</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -9546,7 +9565,7 @@ therefore have no IDs yet.</p>
     <span class="p">}</span>
 </code></pre></div>
 <p><code>create_ip</code> allocates a /32 from the pool and assigns it to <code>Loopback0</code>. The function reads that interface's IPv4 address and converts it into a twelve-digit system ID. For example, if the allocated address is <code>192.0.2.102/32</code>, the NET ID is <code>49.0001.1920.0000.2102.00</code>. It rejects missing or multiple IPv4 addresses rather than selecting one arbitrarily.</p>
-<p>Deployment supplies <code>device</code>, <code>netbox</code>, and <code>dry_run</code>. YAML supplies <code>interface</code> and <code>area</code>, not a predetermined router ID. The function only returns a dictionary. The local-context handler writes it to the device.</p>
+<p>Deployment supplies <code>device</code>, <code>context</code>, <code>netbox</code>, and <code>dry_run</code>. YAML supplies <code>interface</code> and <code>area</code>, not a predetermined router ID. The function only returns a dictionary. The local-context handler writes it to the device.</p>
 <p>During a dry run, the function is skipped if the device does not yet exist. If the device exists but its loopback or IP is only planned, the lookup fails because dry runs do not create them.</p>
 </div>
 <div class="tabbed-block">
@@ -9794,44 +9813,7 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3794</span>
-<span class="normal">3795</span>
-<span class="normal">3796</span>
-<span class="normal">3797</span>
-<span class="normal">3798</span>
-<span class="normal">3799</span>
-<span class="normal">3800</span>
-<span class="normal">3801</span>
-<span class="normal">3802</span>
-<span class="normal">3803</span>
-<span class="normal">3804</span>
-<span class="normal">3805</span>
-<span class="normal">3806</span>
-<span class="normal">3807</span>
-<span class="normal">3808</span>
-<span class="normal">3809</span>
-<span class="normal">3810</span>
-<span class="normal">3811</span>
-<span class="normal">3812</span>
-<span class="normal">3813</span>
-<span class="normal">3814</span>
-<span class="normal">3815</span>
-<span class="normal">3816</span>
-<span class="normal">3817</span>
-<span class="normal">3818</span>
-<span class="normal">3819</span>
-<span class="normal">3820</span>
-<span class="normal">3821</span>
-<span class="normal">3822</span>
-<span class="normal">3823</span>
-<span class="normal">3824</span>
-<span class="normal">3825</span>
-<span class="normal">3826</span>
-<span class="normal">3827</span>
-<span class="normal">3828</span>
-<span class="normal">3829</span>
-<span class="normal">3830</span>
-<span class="normal">3831</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3831</span>
 <span class="normal">3832</span>
 <span class="normal">3833</span>
 <span class="normal">3834</span>
@@ -10066,7 +10048,52 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 <span class="normal">4063</span>
 <span class="normal">4064</span>
 <span class="normal">4065</span>
-<span class="normal">4066</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4066</span>
+<span class="normal">4067</span>
+<span class="normal">4068</span>
+<span class="normal">4069</span>
+<span class="normal">4070</span>
+<span class="normal">4071</span>
+<span class="normal">4072</span>
+<span class="normal">4073</span>
+<span class="normal">4074</span>
+<span class="normal">4075</span>
+<span class="normal">4076</span>
+<span class="normal">4077</span>
+<span class="normal">4078</span>
+<span class="normal">4079</span>
+<span class="normal">4080</span>
+<span class="normal">4081</span>
+<span class="normal">4082</span>
+<span class="normal">4083</span>
+<span class="normal">4084</span>
+<span class="normal">4085</span>
+<span class="normal">4086</span>
+<span class="normal">4087</span>
+<span class="normal">4088</span>
+<span class="normal">4089</span>
+<span class="normal">4090</span>
+<span class="normal">4091</span>
+<span class="normal">4092</span>
+<span class="normal">4093</span>
+<span class="normal">4094</span>
+<span class="normal">4095</span>
+<span class="normal">4096</span>
+<span class="normal">4097</span>
+<span class="normal">4098</span>
+<span class="normal">4099</span>
+<span class="normal">4100</span>
+<span class="normal">4101</span>
+<span class="normal">4102</span>
+<span class="normal">4103</span>
+<span class="normal">4104</span>
+<span class="normal">4105</span>
+<span class="normal">4106</span>
+<span class="normal">4107</span>
+<span class="normal">4108</span>
+<span class="normal">4109</span>
+<span class="normal">4110</span>
+<span class="normal">4111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -10265,27 +10292,30 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
                         <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;custom_function&quot;</span>
                     <span class="p">}</span>
                     <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span>
-                        <span class="o">**</span><span class="n">arguments</span><span class="p">,</span> <span class="n">netbox</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span>
+                        <span class="o">**</span><span class="n">arguments</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">netbox</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span>
                     <span class="p">)</span>
         <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">validated</span><span class="o">.</span><span class="n">local_context_data</span><span class="p">:</span>
-            <span class="n">context</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;local_context_data&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="s2">&quot;custom_function&quot;</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+            <span class="n">local_context</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;local_context_data&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;custom_function&quot;</span> <span class="ow">in</span> <span class="n">local_context</span><span class="p">:</span>
                 <span class="n">function_kwargs</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
-                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">local_context</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;custom_function&quot;</span>
                 <span class="p">}</span>
                 <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span>
-                    <span class="n">custom_functions</span><span class="p">[</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;custom_function&quot;</span><span class="p">]]</span>
+                    <span class="n">custom_functions</span><span class="p">[</span><span class="n">local_context</span><span class="p">[</span><span class="s2">&quot;custom_function&quot;</span><span class="p">]]</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span>
                     <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
                     <span class="n">netbox</span><span class="o">=</span><span class="n">nb</span><span class="p">,</span>
                     <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">function_kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="n">handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">DESIGN_HANDLERS_ORDER</span><span class="p">)</span>
         <span class="n">handlers</span><span class="p">[</span><span class="s2">&quot;local_context_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
-            <span class="n">process_local_context_data</span><span class="p">,</span> <span class="n">custom_functions</span><span class="o">=</span><span class="n">custom_functions</span>
+            <span class="n">process_local_context_data</span><span class="p">,</span>
+            <span class="n">custom_functions</span><span class="o">=</span><span class="n">custom_functions</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to prepare netbox design: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -10314,7 +10344,12 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
                 <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">execute_custom_functions</span><span class="p">(</span>
-                <span class="n">nb</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">custom_functions</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span>
+                <span class="n">nb</span><span class="p">,</span>
+                <span class="n">context</span><span class="p">,</span>
+                <span class="n">records</span><span class="p">,</span>
+                <span class="n">custom_functions</span><span class="p">,</span>
+                <span class="n">dry_run</span><span class="p">,</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="n">changes</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>

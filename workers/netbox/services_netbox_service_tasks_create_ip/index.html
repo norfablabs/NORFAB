@@ -7186,6 +7186,7 @@ existing dry-run limitation for <code>mask_len</code> still applies. Results inc
 <li>When <code>mask_len</code> differs from the parent prefix length, the task creates or reuses a child prefix through <code>create_prefix</code>.</li>
 <li>In dry-run mode, <code>mask_len</code> is ignored and the candidate IP is allocated directly from the parent prefix.</li>
 <li>IPv4 /32 and IPv6 /128 allocations automatically disable peer creation and peer-subnet reuse, including when the supplied parent is itself a host prefix.</li>
+<li>If peer allocation fails, the task returns the peer error in <code>errors</code>; the local IP may already be allocated.</li>
 <li><code>ip_index</code> is one-based over usable IPs; <code>/31</code> and <code>/127</code> include both endpoints.</li>
 <li>Object and multiobject custom fields accept related object names or IDs. The task resolves names using each field's NetBox definition, adds new list values on repeated calls, and replaces scalar or <code>null</code> values. Missing or ambiguous names fail.</li>
 <li>Branch writes require the <a href="https://github.com/netboxlabs/netbox-branching">NetBox Branching Plugin</a>.</li>
@@ -7405,6 +7406,23 @@ values and null replace them. Definitions must exist in NetBox.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>is_primary</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, set the allocated IPv4 or IPv6
+address as the device's primary IP, including when already assigned.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>vrrp_group</code>
             </td>
             <td>
@@ -7498,6 +7516,23 @@ NetboxAllocationError before allocation. Returned when supplied.</p>
             <td>
               <div class="doc-md-description">
                 <p>Additional comments for the IP address.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>status</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Status for the IP address, such as active,
+reserved, or deprecated. Updates an existing IP when different.</p>
               </div>
             </td>
             <td>
@@ -7604,7 +7639,8 @@ subnet because they do not create child subnets.</p>
                 <p>If True creates IP address for link peer -
 remote device interface connected to requested device and interface.
 Disabled for IPv4 /32 and IPv6 /128 allocations, which have no
-room for a peer. Host allocations also skip peer-subnet reuse.</p>
+room for a peer. Host allocations also skip peer-subnet reuse.
+Peer allocation errors are returned while the local IP remains allocated.</p>
               </div>
             </td>
             <td>
@@ -8217,7 +8253,38 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 <span class="normal">691</span>
 <span class="normal">692</span>
 <span class="normal">693</span>
-<span class="normal">694</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpResult</span><span class="p">,</span>
@@ -8289,6 +8356,8 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 <span class="sd">        description (str, optional): A description for the allocated IP address.</span>
 <span class="sd">        device (str, optional): The device associated with the IP address.</span>
 <span class="sd">        interface (str, optional): The interface associated with the IP address.</span>
+<span class="sd">        is_primary (bool, optional): If True, set the allocated IPv4 or IPv6</span>
+<span class="sd">            address as the device&#39;s primary IP, including when already assigned.</span>
 <span class="sd">        vrrp_group (str, optional): Existing VRRP group name to assign the IP to.</span>
 <span class="sd">            Must uniquely identify a VRRPv2 or VRRPv3 group. Reuses an IP assigned</span>
 <span class="sd">            to that group within the selected prefix, optionally matching description.</span>
@@ -8300,6 +8369,8 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 <span class="sd">        dns_name (str, optional): The DNS name for the IP address.</span>
 <span class="sd">        tenant (str, optional): The tenant associated with the IP address.</span>
 <span class="sd">        comments (str, optional): Additional comments for the IP address.</span>
+<span class="sd">        status (str, optional): Status for the IP address, such as active,</span>
+<span class="sd">            reserved, or deprecated. Updates an existing IP when different.</span>
 <span class="sd">        instance (str, optional): The NetBox instance to use.</span>
 <span class="sd">        dry_run (bool, optional): If True, do not actually allocate the IP address.</span>
 <span class="sd">        branch (str, optional): Branch name to use, need to have branching plugin</span>
@@ -8317,6 +8388,7 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
 <span class="sd">            remote device interface connected to requested device and interface.</span>
 <span class="sd">            Disabled for IPv4 /32 and IPv6 /128 allocations, which have no</span>
 <span class="sd">            room for a peer. Host allocations also skip peer-subnet reuse.</span>
+<span class="sd">            Peer allocation errors are returned while the local IP remains allocated.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary containing the result of the IP allocation.</span>
@@ -8699,6 +8771,9 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
     <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
         <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">and</span> <span class="n">status</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span><span class="p">):</span>
+        <span class="n">nb_ip</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">tags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span> <span class="ow">in</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
@@ -8715,13 +8790,25 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
         <span class="p">):</span>
             <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_id</span> <span class="o">=</span> <span class="n">nb_interface</span><span class="o">.</span><span class="n">id</span>
             <span class="n">nb_ip</span><span class="o">.</span><span class="n">assigned_object_type</span> <span class="o">=</span> <span class="s2">&quot;dcim.interface&quot;</span>
-            <span class="k">if</span> <span class="n">is_primary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">nb_device</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-                <span class="n">nb_device</span><span class="o">.</span><span class="n">primary_ip4</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">id</span>
             <span class="n">has_changes</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">nb_interface</span><span class="si">}</span><span class="s2"> - association </span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2"> IP address with interface&quot;</span>
             <span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_primary</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">device_record</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">))</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="n">device_record</span><span class="o">.</span><span class="n">primary_ip4</span>
+                    <span class="ow">or</span> <span class="n">device_record</span><span class="o">.</span><span class="n">primary_ip4</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">id</span>
+                <span class="p">):</span>
+                    <span class="n">device_record</span><span class="o">.</span><span class="n">primary_ip4</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">id</span>
+                    <span class="n">nb_device</span> <span class="o">=</span> <span class="n">device_record</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">device_record</span><span class="o">.</span><span class="n">primary_ip6</span>
+                <span class="ow">or</span> <span class="n">device_record</span><span class="o">.</span><span class="n">primary_ip6</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">id</span>
+            <span class="p">):</span>
+                <span class="n">device_record</span><span class="o">.</span><span class="n">primary_ip6</span> <span class="o">=</span> <span class="n">nb_ip</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">nb_device</span> <span class="o">=</span> <span class="n">device_record</span>
     <span class="k">if</span> <span class="n">mask_len</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
         <span class="n">address</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">nb_ip</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">address</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -8731,11 +8818,11 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">elif</span> <span class="n">has_changes</span><span class="p">:</span>
-        <span class="n">nb_ip</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; IP address parameters&quot;</span><span class="p">)</span>
-        <span class="c1"># make IP primary for device</span>
-        <span class="k">if</span> <span class="n">is_primary</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">nb_device</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">has_changes</span> <span class="ow">or</span> <span class="n">nb_device</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">has_changes</span><span class="p">:</span>
+            <span class="n">nb_ip</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; IP address parameters&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nb_device</span><span class="p">:</span>
             <span class="n">nb_device</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
@@ -8759,11 +8846,22 @@ room for a peer. Host allocations also skip peer-subnet reuse.</p>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;creating IP address for link peer &#39;</span><span class="si">{</span><span class="n">create_peer_ip_data</span><span class="p">[</span><span class="s1">&#39;device&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">create_peer_ip_data</span><span class="p">[</span><span class="s1">&#39;interface&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
         <span class="p">)</span>
-        <span class="n">peer_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_ip</span><span class="p">(</span>
-            <span class="o">**</span><span class="n">create_peer_ip_data</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">),</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">peer_ip</span><span class="o">.</span><span class="n">failed</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;peer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peer_ip</span><span class="o">.</span><span class="n">result</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">peer_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_ip</span><span class="p">(</span>
+                <span class="o">**</span><span class="n">create_peer_ip_data</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">),</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;failed to allocate link peer IP: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">; local IP &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39; may already be allocated&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">peer_ip</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;failed to allocate link peer IP; local IP &#39;</span><span class="si">{</span><span class="n">nb_ip</span><span class="si">}</span><span class="s2">&#39; may already be allocated&quot;</span>
+                <span class="p">)</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">peer_ip</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;peer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peer_ip</span><span class="o">.</span><span class="n">result</span>
 
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IP address task complete for &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>

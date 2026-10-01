@@ -10056,7 +10056,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 30 September 2026</em></p>
+<p><em>Last updated: 1 October 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10406,7 +10406,8 @@ or more YAML definitions and recursively merge common and worker-specific
 configuration. <strong>Use cases:</strong> environment overlays, repeatable deployment, and
 centralized worker configuration. <strong>Limitations:</strong> merge order and glob overlap
 must be managed deliberately; sensitive values require appropriate secret and
-file controls.
+file controls. Dictionary-backed inventories preserve the caller's configuration
+for reuse across instances.
 <a href="../reference_norfab_inventory/">Inventory details</a></p>
 <h3 id="templated-inventory">Templated inventory<a class="headerlink" href="#templated-inventory" title="Permanent link">¤</a></h3>
 <p>Renders inventory files with Jinja2 before loading them. <strong>Use cases:</strong> computed
@@ -10429,8 +10430,9 @@ excluded from source control and protected appropriately.
 <code>depends_on</code> relationships, staggers worker process creation to control peak
 startup CPU, and runs configured startup, exit, Nornir-startup, and Nornir-exit
 Python hooks. <strong>Use cases:</strong> waiting for a source-of-truth service, preloading
-data, registering integrations, and cleanup. <strong>Limitations:</strong> hooks are trusted
-code; dependency ordering does not replace external service health orchestration.
+data, registering integrations, and cleanup. Invalid hook imports fail inventory
+loading with the attach point and function identified. <strong>Limitations:</strong> hooks are
+trusted code; dependency ordering does not replace external service health orchestration.
 <a href="../customization/norfab_hooks/">Hook details</a></p>
 <h3 id="worker-capacity-and-resource-controls">Worker capacity and resource controls<a class="headerlink" href="#worker-capacity-and-resource-controls" title="Permanent link">¤</a></h3>
 <p>Configures per-worker concurrent-job limits, compressed job storage, watchdog
@@ -10826,7 +10828,7 @@ VLAN groups can be scoped by name to a rack, location, site, site group, region,
 ASN records resolve site lists and IPAM roles. Explicit prefixes resolve named location, site, site-group or region scopes and group/VID VLAN references.
 Updating an ASN through a design adds new sites, tags, and custom-field list items without removing existing ones. Design VLAN and prefix updates add tags and custom-field list items. The <code>create_asn</code>, <code>create_vlan</code>, and <code>create_prefix</code> tasks follow the same rules for their respective objects.
 Design processors resolve names in object and multiobject custom fields using each field's related NetBox object type. On updates, tags, custom-field lists, and explicitly supported relationship lists add missing values. The referenced objects and custom-field definitions must exist when each record is processed.
-Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last.
+Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last. Dry runs omit missing devices from local-context update results.
 Device types accept <code>default_platform</code> as a platform name.
 Route targets support bulk creation/update before VRFs and L2VPNs; inline
 import/export definitions are flattened and associated with their parent objects.
@@ -10849,8 +10851,9 @@ IP allocation prefix filters resolve <code>role</code> by role name, not slug, a
 BGP sessions in designs use <code>create_bgp_peering</code> after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. The standalone create task resolves custom-field references for new sessions.
 Inline import/export policy definitions are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
-deployment phase, receiving record arguments, <code>netbox</code>, and <code>dry_run</code>; custom
+deployment phase, receiving the design <code>context</code>, record arguments, <code>netbox</code>, and <code>dry_run</code>; custom
 code is responsible for honoring dry-run and returning serializable results.
+Every ordinary top-level collection can mix object definitions and custom function records; custom records pass through flattening and lookup preparation without ordinary object identity fields. Device local context uses a separate function contract.
 Deployment emits stage and collection summaries to logs and job events;
 preparation or handler failures stop processing and populate result errors.
 Omitted objects are not deleted. <strong>Use cases:</strong> repeatable NetBox prerequisite
@@ -10910,10 +10913,11 @@ links.
 <a href="../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/">Task details</a></p>
 <h3 id="ip-address-and-prefix-allocation">IP address and prefix allocation<a class="headerlink" href="#ip-address-and-prefix-allocation" title="Permanent link">¤</a></h3>
 <p>Allocates next-available addresses or child prefixes, assigns interface and
-primary IP data, carries tenant/VRF/site/role/tags metadata, supports connected
+primary IP data, carries tenant/VRF/site/role/status/tags metadata, supports connected
 peer addressing and point-to-point peer derivation, and performs bulk interface
 allocation. <strong>Use cases:</strong> provisioning links, loopbacks, management addresses,
 new devices, and template-driven zero-touch workflows.
+Peer allocation errors are reported after the local address is allocated.
 <strong>Limitations:</strong> parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
 <code>create_ip</code> can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.
@@ -11062,7 +11066,8 @@ prerequisites; templates and transformer files execute as trusted code.
 <h3 id="bgp-peering-lifecycle">BGP peering lifecycle<a class="headerlink" href="#bgp-peering-lifecycle" title="Permanent link">¤</a></h3>
 <p>Creates or updates individual and bulk BGP sessions, including separate NetBox
 IP and ASN queries for each side of a new session, and reconciles live BGP
-neighbors with NetBox using five-tuple session identity, live-data filters,
+neighbors with NetBox using five-tuple session identity and ID-based updates,
+including unnamed sessions, live-data filters,
 dry-run, optional stale-session deletion, and tri-state existing-description
 preservation. <strong>Use cases:</strong> routing
 source-of-truth onboarding and drift control.
@@ -11172,7 +11177,8 @@ with Nornir plugins.
 simulated network CLI endpoints.</p>
 <h3 id="simulated-network-startup">Simulated network startup<a class="headerlink" href="#simulated-network-startup" title="Permanent link">¤</a></h3>
 <p>Starts named FakeNOS networks in isolated child processes from file-based or
-inline inventory, with multiple independent networks per worker. <strong>Use cases:</strong>
+inline inventory, with multiple independent networks per worker. Starting a
+network with an existing name fails; use <code>restart</code> to replace it. <strong>Use cases:</strong>
 fast automation development, large endpoint mocks, demos, parser fixtures,
 failure injection, and CI without device images. <strong>Limitations:</strong> simulation
 implements configured command responses and is not a full network operating

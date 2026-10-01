@@ -12,7 +12,7 @@
         <meta name="author" content="Denis Mulyalin">
       
       
-        <link rel="canonical" href="https://docs.norfablabs.com/development/adr_netbox_design_specification/">
+        <link rel="canonical" href="https://docs.norfablabs.com/development/bug_hunt/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>ADR: NetBox design deployment - Network Automations Fabric [NORFAB]</title>
+        <title>Bug hunt - Network Automations Fabric [NORFAB]</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#adr-netbox-design-deployment" class="md-skip">
+        <a href="#bug-hunt" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ADR: NetBox design deployment
+              Bug hunt
             
           </span>
         </div>
@@ -6927,10 +6927,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#core-rule" class="md-nav__link">
+  <a href="#1-create_ip-cannot-promote-an-already-assigned-ip-to-primary" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Core rule
+        1. create_ip cannot promote an already assigned IP to primary
       
     </span>
   </a>
@@ -6938,10 +6938,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#input-and-processing" class="md-nav__link">
+  <a href="#2-circuit-test-data-seeding-fails-on-netbox-below-35" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Input and processing
+        2. Circuit test-data seeding fails on NetBox below 3.5
       
     </span>
   </a>
@@ -6949,10 +6949,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#object-to-task-mapping" class="md-nav__link">
+  <a href="#3-circuit-test-data-seeding-mutates-its-reusable-fixture-records" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Object-to-task mapping
+        3. Circuit test-data seeding mutates its reusable fixture records
       
     </span>
   </a>
@@ -6960,10 +6960,461 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#todo" class="md-nav__link">
+  <a href="#4-create_ip-ignores-the-requested-ip-status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TODO
+        4. create_ip ignores the requested IP status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-create_ip-reports-success-when-requested-peer-allocation-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. create_ip reports success when requested peer allocation fails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-netbox-ip-tests-delete-addresses-they-did-not-create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. NetBox IP tests delete addresses they did not create
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-delete_fetched_files-can-delete-outside-its-cache-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. delete_fetched_files can delete outside its cache directory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-constructing-an-inventory-consumes-the-callers-configuration-dictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Constructing an inventory consumes the caller's configuration dictionary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-agent-cli-tool-filter-help-is-missing-because-of-a-field-typo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Agent CLI tool-filter help is missing because of a field typo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-netbox-ip-cleanup-helper-reads-only-the-first-api-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. NetBox IP cleanup helper reads only the first API page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-invalid-configured-hooks-are-dropped-while-inventory-loading-succeeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Invalid configured hooks are dropped while inventory loading succeeds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-task-input-validation-discards-pydantics-converted-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Task input validation discards Pydantic's converted values
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-task-output-validation-accepts-non-result-return-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Task output validation accepts non-Result return values
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-workflow-reports-a-successful-task-after-a-condition-error-or-stopped-failed-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Workflow reports a successful task after a condition error or stopped failed step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-inline-workflow-execution-removes-metadata-from-the-callers-dictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Inline workflow execution removes metadata from the caller's dictionary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-containerlab-command-collection-can-block-indefinitely-before-checking-its-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Containerlab command collection can block indefinitely before checking its timeout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-containerlab-inspect-masks-a-command-failure-with-a-none-membership-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Containerlab inspect masks a command failure with a None membership error
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-starting-an-existing-fakenos-network-loses-control-of-the-old-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Starting an existing FakeNOS network loses control of the old process
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-fakenos-child-errors-are-returned-as-successful-string-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. FakeNOS child errors are returned as successful string results
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20-fastapi-and-fastmcp-discovery-stop-retrying-a-service-after-a-partial-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        20. FastAPI and FastMCP discovery stop retrying a service after a partial failure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#21-one-cycle-api-discovery-calls-sleep-after-their-work-is-finished" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21. One-cycle API discovery calls sleep after their work is finished
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#22-re-storing-a-bearer-token-under-another-user-corrupts-ownership-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22. Re-storing a bearer token under another user corrupts ownership metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#23-nfweb-topology-history-can-disappear-for-the-same-device-set-after-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        23. NFWeb topology history can disappear for the same device set after selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#24-nfweb-can-serve-topology-snapshots-after-the-retention-window-expires" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24. NFWeb can serve topology snapshots after the retention window expires
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25-nfweb-monitoring-keeps-and-serves-expired-samples-after-polling-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25. NFWeb monitoring keeps and serves expired samples after polling failures
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#26-file-downloads-can-leave-their-destination-open-and-skip-integrity-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26. File downloads can leave their destination open and skip integrity checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#27-nfpclientfetch_file-accepts-a-zero-chunk-size-and-then-divides-by-zero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27. NFPClient.fetch_file accepts a zero chunk size and then divides by zero
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#28-every-nfweb-monitoring-collector-test-fails-during-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        28. Every NFWeb monitoring collector test fails during setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#29-nornir-test-assertions-raise-nameerror-when-they-should-report-a-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        29. Nornir test assertions raise NameError when they should report a failure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#30-netbox-prefix-tests-delete-pre-existing-child-prefixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        30. NetBox prefix tests delete pre-existing child prefixes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#31-agent-dynamic-model-builders-carry-unused-model-name-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        31. Agent dynamic-model builders carry unused model-name arguments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#32-nfcli-snmp-shell-has-three-unused-imports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        32. NFCLI SNMP shell has three unused imports
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#33-nfcli-file-completion-crashes-when-file-sharing-is-unavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        33. NFCLI file completion crashes when File Sharing is unavailable
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#34-a-second-read-of-completed-job-events-can-wait-forever" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        34. A second read of completed job events can wait forever
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#35-nfweb-monitoring-fails-to-publish-a-partial-sample-when-the-worker-stats-job-times-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        35. NFWeb monitoring fails to publish a partial sample when the worker stats job times out
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#36-agent-tool-calls-discard-configured-job_data-after-the-first-invocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        36. Agent tool calls discard configured job_data after the first invocation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#37-textual-worker-monitoring-ignores-its-service-and-worker-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        37. Textual worker monitoring ignores its service and worker filters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#38-textual-monitoring-performs-blocking-broker-jobs-during-screen-mounting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        38. Textual monitoring performs blocking broker jobs during screen mounting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#39-robot-library-destroys-norfab-at-the-end-of-the-first-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        39. Robot library destroys NorFab at the end of the first suite
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#40-robot-nrtest-can-crash-while-reporting-a-failed-task" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        40. Robot nr.test can crash while reporting a failed task
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#41-robot-keyword-state-leaks-after-an-exception-or-client-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        41. Robot keyword state leaks after an exception or client timeout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#42-nfcli-create-ip-bulk-crashes-when-the-optional-interface-list-is-omitted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        42. NFCLI create ip bulk crashes when the optional interface list is omitted
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#43-netbox-create_ip_bulk-reports-success-when-individual-allocations-fail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        43. NetBox create_ip_bulk reports success when individual allocations fail
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#44-netbox-create_ip_bulk-crashes-when-its-optional-devices-argument-is-omitted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        44. NetBox create_ip_bulk crashes when its optional devices argument is omitted
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#static-checker-triage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Static-checker triage
       
     </span>
   </a>
@@ -6990,253 +7441,374 @@
   
 
 
-<h1 id="adr-netbox-design-deployment">ADR: NetBox design deployment<a class="headerlink" href="#adr-netbox-design-deployment" title="Permanent link">¤</a></h1>
-<h2 id="core-rule">Core rule<a class="headerlink" href="#core-rule" title="Permanent link">¤</a></h2>
-<p>Render YAML into NetBox object lists, then use pynetbox to bulk create missing
-objects and bulk update existing ones. The design task decides which records go
-into each batch and processes object types in NetBox dependency order. Existing
-worker tasks handle operations that need allocation or other special behavior.</p>
-<h2 id="input-and-processing">Input and processing<a class="headerlink" href="#input-and-processing" title="Permanent link">¤</a></h2>
-<p>Unique-name relationships use strings, for example <code>manufacturer: ACME NETWORKS</code>,
-<code>region: ACME REGION</code>, and <code>rir: ACME PRIVATE</code>. Handlers convert these to NetBox
-name lookups; name-only dictionaries are rejected. Device-type references use
-<code>{manufacturer: ACME NETWORKS, model: ACME BRANCH ROUTER}</code> because model alone
-does not identify a device type.</p>
-<p>Design metadata (<code>design_input_schema</code>, <code>jinja_functions</code>) and object lists are
-top-level keys in one YAML document; metadata precedes templated collections.
-Jinja2 may expand short loops into object lists. <code>devices</code> remains a list and
-is the only collection with
-special nested handling for now. The engine unwinds its nested definitions into
-lists of dictionaries, adding device and interface names from the parents:</p>
-<table>
-<thead>
-<tr>
-<th>Under a device</th>
-<th>Collected as</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>interfaces</code> dictionary</td>
-<td>Interface records</td>
-</tr>
-<tr>
-<td>Device or interface <code>bgp_peerings</code> list</td>
-<td>BGP peering records; nested interface supplies <code>local_interface</code></td>
-</tr>
-<tr>
-<td>Interface <code>ip_addresses</code> list</td>
-<td>IP address records assigned to that interface</td>
-</tr>
-<tr>
-<td>Interface <code>vrrp_group_assignments</code> list</td>
-<td>VRRP group assignment records for that interface</td>
-</tr>
-<tr>
-<td>Interface <code>connection</code></td>
-<td>Connection record with this interface as one endpoint</td>
-</tr>
-<tr>
-<td>Interface inline <code>vrf</code></td>
-<td>VRF record and interface reference</td>
-</tr>
-<tr>
-<td>Interface inline <code>untagged_vlan</code> or <code>tagged_vlans</code></td>
-<td>VLAN records and interface references</td>
-</tr>
-<tr>
-<td>L2VPN <code>terminations</code> list</td>
-<td>L2VPN termination records with the parent L2VPN name</td>
-</tr>
-<tr>
-<td>VRRP assignment inline <code>group</code></td>
-<td>VRRP group record and assignment reference</td>
-</tr>
-<tr>
-<td>BGP inline <code>import_policies</code> or <code>export_policies</code></td>
-<td>Routing-policy records and policy-name references</td>
-</tr>
-</tbody>
-</table>
-<p>An interface has one VRF association. An identity-only dictionary remains a
-reference; additional VRF fields define an inline object. Inline VLAN definitions
-include <code>name</code> and <code>vid</code>; inline VRRP groups include <code>group_id</code>. Routing policies,
-including BGP import/export lists, require dictionaries with <code>name</code>; bare strings
-are rejected. The BGP handler passes names to the worker tasks. Identical extracted
-definitions are collected only once.
-Connections may also be declared in a top-level list.</p>
-<ol>
-<li>Render the full design with Jinja2, including its context and custom filters.</li>
-<li>Parse YAML, then call <code>flatten_design()</code> explicitly to move nested records
-   into top-level lists and add parent references. This step does not access
-   NetBox or change the supplied design. Handlers receive only flat records.</li>
-<li>Validate the flattened document with Pydantic before any handler writes.
-   Collections whose handlers are not implemented remain unsupported.</li>
-<li>For each object type below, look up existing records by their NetBox identity.
-   Send missing records to pynetbox bulk <code>create()</code> and existing records with IDs
-   to bulk <code>update()</code>. Apply supplied fields without calculating a diff.
-   For new objects requiring slugs, handlers default to <code>slugify(name)</code>
-   (<code>slugify(model)</code> for device types). Supplied slugs and existing slugs are preserved.</li>
-<li>Call existing NetBox worker tasks for next-available allocations such as
-   <code>create_asn</code>, <code>create_vlan</code>, <code>create_prefix</code>, and <code>create_ip</code>.</li>
-</ol>
-<p>Use task names as explicit wrappers: <code>create_asn</code>, <code>create_vlan</code>,
-<code>create_prefix</code>, and <code>create_ip</code>. Each contains that task's input arguments.
-Unwrapped records use direct pynetbox fields and bulk writes. Nested
-<code>create_ip</code> records inherit their device and interface. Deployment controls
-<code>instance</code>, <code>branch</code>, and <code>dry_run</code> apply to all task calls.
-Known ASN numbers use unwrapped <code>asn</code> records and bulk pynetbox writes.
-<code>create_asn</code> requires <code>asn_range</code> and no explicit ASN number; it allocates the
-next available ASN in that range.
-Known VLAN IDs use unwrapped <code>vid</code> records and bulk pynetbox writes.
-Every VLAN requires a group; direct VLAN-to-site association is unsupported.
-Set <code>site</code> on the VLAN group to scope that group to a site.
-VLAN definitions and interface VLAN references accept <code>group: GROUP NAME</code>;
-handlers resolve this shorthand for the NetBox API.
-<code>create_vlan</code> takes a <code>vlan_group</code> without <code>vid</code> to allocate the next available ID.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">ip_addresses</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.1/24</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">create_ip</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.0/24</span>
-<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch gateway</span>
-</code></pre></div>
-<p>Process supported top-level keys and extracted nested objects in this order:</p>
-<div class="highlight"><pre><span></span><code>tenants
-regions
-manufacturers
-platforms
-device_types
-device_roles
-sites
-rack_roles
-racks
-roles
-rirs
-asn_ranges
-asns
-vlan_groups
-vlans
-route_targets
-vrfs
-l2vpns
-prefixes
-devices
-interfaces
-l2vpn_terminations
-connections
-ip_addresses
-bgp_communities
-routing_policies
-bgp_peerings
-vrrp_groups
-vrrp_group_assignments
-</code></pre></div>
-<p>Each type needs a handler in <code>design_tasks.py</code> that collects its records, determines
-their identity, and selects the pynetbox batch or existing allocation task.
-Device nesting is a deliberate convenience handled during collection; it does
-not change the creation order or the bulk create/update approach.</p>
-<h2 id="object-to-task-mapping">Object-to-task mapping<a class="headerlink" href="#object-to-task-mapping" title="Permanent link">¤</a></h2>
-<p>Custom creators are registered by name and file URL in <code>custom_functions</code>.
-Calls run after the collection's built-in writes and allocations, in listed order:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">custom_functions</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">branch_asn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/functions/branch_asn.py</span>
-<span class="nt">asns</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">custom_function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch_asn</span>
-<span class="w">    </span><span class="nt">asn_range</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH</span>
-</code></pre></div>
-<p>The file exports the registered function name. Sibling arguments are passed
-unchanged, plus the design <code>context</code>, <code>netbox</code> (the deployment's pynetbox instance),
-and <code>dry_run</code>.
-References and call signatures are checked before writes. Functions must honor
-<code>dry_run</code>, return serializable data, and raise on failure. Returned data appears
-under the collection's <code>custom</code> results; exceptions stop deployment.</p>
-<table>
-<thead>
-<tr>
-<th>Design objects</th>
-<th>Creation/update path</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>tenants</code>, <code>regions</code>, <code>manufacturers</code>, <code>platforms</code>, <code>device_types</code>, <code>device_roles</code>, <code>sites</code>, <code>roles</code>, <code>rirs</code></td>
-<td>Implemented per-collection handlers using pynetbox bulk create/update.</td>
-</tr>
-<tr>
-<td><code>rack_roles</code>, <code>racks</code>, <code>asn_ranges</code>, <code>vrfs</code></td>
-<td>Implemented per-collection handlers using pynetbox bulk create/update.</td>
-</tr>
-<tr>
-<td><code>route_targets</code></td>
-<td>Bulk create/update by name before VRFs and L2VPNs. Their <code>import_route_targets</code> and <code>export_route_targets</code> accept dictionaries with <code>name</code>, extracted and deduplicated into the top-level collection. Additional fields define the target's properties. The parent handlers resolve IDs for NetBox <code>import_targets</code> and <code>export_targets</code>.</td>
-</tr>
-<tr>
-<td><code>l2vpns</code></td>
-<td>Bulk create/update by name through <code>nb.vpn.l2vpns</code>. Nested <code>terminations</code> are extracted before validation.</td>
-</tr>
-<tr>
-<td><code>l2vpn_terminations</code></td>
-<td>Bulk create/update through <code>nb.vpn.l2vpn_terminations</code> after interfaces exist. Each record selects a device interface or group/VID VLAN and its L2VPN. An attachment already assigned to another L2VPN is rejected.</td>
-</tr>
-<tr>
-<td><code>asns</code></td>
-<td>Pynetbox bulk create/update; <code>create_asn</code> wrapper calls <code>bgp_asn_tasks.py</code>.</td>
-</tr>
-<tr>
-<td><code>vlan_groups</code></td>
-<td><code>process_vlan_groups</code> using pynetbox bulk create/update with direct API fields.</td>
-</tr>
-<tr>
-<td><code>vlans</code></td>
-<td>Pynetbox bulk create/update; <code>create_vlan</code> wrapper calls <code>vlan_tasks.py</code>, including next-available VLAN ID allocation.</td>
-</tr>
-<tr>
-<td><code>prefixes</code></td>
-<td>Pynetbox bulk create/update for explicit prefixes; <code>create_prefix</code> in <code>prefix_tasks.py</code> for allocation.</td>
-</tr>
-<tr>
-<td><code>devices</code></td>
-<td>Pynetbox bulk create/update after nested records are extracted; no dedicated <code>create_device</code> task exists.</td>
-</tr>
-<tr>
-<td><code>interfaces</code></td>
-<td>Pynetbox bulk create/update; <code>create_device_interfaces</code> in <code>interfaces_tasks.py</code> only creates missing interfaces and is not the update path.</td>
-</tr>
-<tr>
-<td><code>ip_addresses</code></td>
-<td>Pynetbox bulk create/update for explicit addresses; <code>create_ip</code> in <code>ip_tasks.py</code> for allocation.</td>
-</tr>
-<tr>
-<td><code>bgp_communities</code></td>
-<td>Dictionaries with <code>value</code>; pynetbox bulk create/update by community value. Bare strings are rejected.</td>
-</tr>
-<tr>
-<td><code>routing_policies</code></td>
-<td>Pynetbox bulk create/update by name, before sessions; includes extracted inline policies.</td>
-</tr>
-<tr>
-<td><code>bgp_peerings</code></td>
-<td>Lists of session candidates, optionally named. <code>create_bgp_peering</code> creates missing sessions and leaves existing sessions unchanged.</td>
-</tr>
-<tr>
-<td><code>vrrp_groups</code>, <code>vrrp_group_assignments</code></td>
-<td>Pynetbox bulk create/update; <code>sync_vrrp</code> in <code>fhrp_tasks.py</code> synchronizes live state and is not a design-creation task.</td>
-</tr>
-<tr>
-<td><code>connections</code></td>
-<td>Pynetbox bulk create/update after interfaces exist. One interface per side; existing cables are matched by endpoints. Ports cabled elsewhere are rejected without disconnecting them.</td>
-</tr>
-</tbody>
-</table>
-<p>Device types are defined as a top-level list and created after their manufacturers
-and accept <code>default_platform: PLATFORM NAME</code>, converted to a NetBox name reference.
-They follow platforms and precede devices. Top-level connections and nested
-interface <code>connection</code> entries use the same handler.</p>
-<h2 id="todo">TODO<a class="headerlink" href="#todo" title="Permanent link">¤</a></h2>
+<h1 id="bug-hunt">Bug hunt<a class="headerlink" href="#bug-hunt" title="Permanent link">¤</a></h1>
+<p>Repository state at start: clean <code>master</code>. Findings below are triaged one at a time. No implementation or test files were changed.</p>
+<h2 id="1-create_ip-cannot-promote-an-already-assigned-ip-to-primary">1. <code>create_ip</code> cannot promote an already assigned IP to primary<a class="headerlink" href="#1-create_ip-cannot-promote-an-already-assigned-ip-to-primary" title="Permanent link">¤</a></h2>
 <ul>
-<li>Support allocation calls in nested <code>vrrp.vip</code>, which currently requires an
-  explicit address. <code>create_ip</code> now supports assignment and stable reuse through
-  <code>vrrp_group</code> (existing group name), usable in top-level <code>ip_addresses</code> allocations.</li>
+<li><strong>Status:</strong> Fixed.</li>
+<li><strong>Severity:</strong> Medium. An otherwise successful task silently leaves the device's primary IP unchanged.</li>
+<li><strong>Location:</strong> <code>norfab/workers/netbox_worker/ip_tasks.py:632-665</code>; input contract at <code>norfab/workers/netbox_worker/netbox_models.py:2264-2267</code>.</li>
+<li><strong>Trigger:</strong> Call <code>create_ip</code> with <code>device</code>, <code>interface</code>, and <code>is_primary=True</code> when the matching IP is already assigned to that interface. The existing assignment makes the condition at line 638 false. <code>nb_device</code> remains <code>None</code>, so the primary-IP save at line 663 never occurs. The current test at <code>tests/services/netbox/test_ipam.py:2651</code> only checks that a fresh allocation succeeds; it never asserts the device's primary IP or retries an existing assignment.</li>
+<li><strong>Proposed fix:</strong> Handle primary assignment independently of whether the IP/interface association changed. Set the device's <code>primary_ip4</code> or <code>primary_ip6</code> according to the allocated address family, and save only if the requested primary differs. Add an integration test through <code>create_ip</code> that first assigns an address without <code>is_primary</code>, then calls it again with <code>is_primary=True</code> and checks the NetBox device record.</li>
+<li><strong>Evidence:</strong> Code-path inspection. A live NetBox instance was not used for this finding.</li>
+</ul>
+<h2 id="2-circuit-test-data-seeding-fails-on-netbox-below-35">2. Circuit test-data seeding fails on NetBox below 3.5<a class="headerlink" href="#2-circuit-test-data-seeding-fails-on-netbox-below-35" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for the supported legacy test environment.</li>
+<li><strong>Location:</strong> <code>tests/netbox_data.py:3552-3561</code>.</li>
+<li><strong>Trigger:</strong> Run <code>create_circuits()</code> when <code>NB_VERSION &lt; 3.5</code>. Line 3560 calls <code>circuit.pop("provider_account")</code>, but <code>circuit</code> is not assigned until line 3561. This raises <code>UnboundLocalError</code>; the surrounding <code>except</code> logs it and skips the circuit. Ruff reports the undefined name as F821.</li>
+<li><strong>Proposed fix:</strong> Remove <code>provider_account</code> from a copy of <code>item</code> before the create call, and use that copy throughout the iteration. Test the legacy version branch with a small explicit circuit record and an endpoint that records the create payload.</li>
+<li><strong>Evidence:</strong> Ruff F821 and code-path inspection. No legacy NetBox service was available for an integration run.</li>
+</ul>
+<h2 id="3-circuit-test-data-seeding-mutates-its-reusable-fixture-records">3. Circuit test-data seeding mutates its reusable fixture records<a class="headerlink" href="#3-circuit-test-data-seeding-mutates-its-reusable-fixture-records" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for repeated population runs in one Python process.</li>
+<li><strong>Location:</strong> <code>tests/netbox_data.py:2791-2867,3552-3557,3630-3631</code> and the matching B-side termination handling.</li>
+<li><strong>Trigger:</strong> <code>create_circuits()</code> pops <code>termination_a</code> and <code>termination_b</code> directly from dictionaries in the module-level <code>circuits</code> list. A second call raises <code>KeyError</code> before reaching NetBox. The first call also removes cable data from termination dictionaries. This makes fixture setup dependent on call order and prevents reliable retries after partial failure.</li>
+<li><strong>Proposed fix:</strong> Copy each circuit and its nested termination dictionaries before removing setup-only keys. Keep the module-level fixture records intact. Add a test that runs preparation twice against the same literal record and checks that both create payloads match.</li>
+<li><strong>Evidence:</strong> Code-path inspection; the mutation and second-call failure follow directly from Python <code>dict.pop</code> semantics.</li>
+</ul>
+<h2 id="4-create_ip-ignores-the-requested-ip-status">4. <code>create_ip</code> ignores the requested IP status<a class="headerlink" href="#4-create_ip-ignores-the-requested-ip-status" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Status:</strong> Fixed.</li>
+<li><strong>Severity:</strong> Medium. Callers can request <code>reserved</code> or <code>deprecated</code> and receive an IP with NetBox's default status while the task reports success.</li>
+<li><strong>Location:</strong> <code>norfab/workers/netbox_worker/ip_tasks.py:159-179,463-550,577-665</code>; input contract at <code>norfab/workers/netbox_worker/netbox_models.py:2260-2263</code>.</li>
+<li><strong>Trigger:</strong> Call <code>create_ip(prefix=..., status="reserved")</code> for a new or existing IP. The code forwards <code>status</code> to child-prefix creation and peer creation, but never sets <code>nb_ip.status</code> or passes it to IP creation. The IP therefore keeps its existing or default status.</li>
+<li><strong>Proposed fix:</strong> Apply the requested status to the IP record in the same metadata update block as role and description. Ensure the new-IP path includes it and the existing-IP path updates it only when different. Add public-task integration cases for new and existing addresses, then read the status back from NetBox.</li>
+<li><strong>Evidence:</strong> Complete read of the <code>create_ip</code> body and <code>rg</code> search of every <code>status</code> reference in that task. No live NetBox run.</li>
+</ul>
+<h2 id="5-create_ip-reports-success-when-requested-peer-allocation-fails">5. <code>create_ip</code> reports success when requested peer allocation fails<a class="headerlink" href="#5-create_ip-reports-success-when-requested-peer-allocation-fails" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Status:</strong> Fixed.</li>
+<li><strong>Severity:</strong> Medium. A link can be left with only one endpoint address while the initiating task reports success.</li>
+<li><strong>Location:</strong> <code>norfab/workers/netbox_worker/ip_tasks.py:440-453,682-691</code>.</li>
+<li><strong>Trigger:</strong> Request <code>create_ip</code> for a connected interface with <code>create_peer_ip=True</code> when the peer's allocation fails, for example because its interface cannot be resolved or the subnet has no remaining IP. The recursive peer call returns a failed <code>Result</code>; the caller merely omits <code>ret.result["peer"]</code> and returns its own successful result.</li>
+<li><strong>Proposed fix:</strong> Propagate the peer result's failure into the parent result, with the peer error and clear indication that the local IP may already have been created. Cover this with an integration case through the public task where the peer allocation is made to fail after the local allocation.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the recursive call and its sole <code>failed == False</code> branch. No live NetBox run.</li>
+</ul>
+<h2 id="6-netbox-ip-tests-delete-addresses-they-did-not-create">6. NetBox IP tests delete addresses they did not create<a class="headerlink" href="#6-netbox-ip-tests-delete-addresses-they-did-not-create" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> High for runs against a shared or reused NetBox instance; the test suite can destroy existing IP records.</li>
+<li><strong>Location:</strong> <code>tests/services/netbox/common.py:91-113</code> and repeated calls in <code>tests/services/netbox/test_ipam.py</code>, including <code>test_create_ip_is_primary</code> at line 2655.</li>
+<li><strong>Trigger:</strong> Run the <code>create_ip</code> integration tests when a target prefix such as <code>10.0.0.0/24</code> already contains IP records. The <code>delete_ips</code> helper lists every address under the prefix and deletes it before the test allocates any addresses. It does not track which records the test created.</li>
+<li><strong>Proposed fix:</strong> Give each test a dedicated prefix that it first verifies is free, or record IDs created by that test and delete only those IDs in <code>finally</code>. Avoid using the broad deletion helper in test setup. This follows the repository rule to never delete pre-existing data.</li>
+<li><strong>Evidence:</strong> Helper and call-site inspection. I did not run these tests because they would mutate a NetBox instance without a known isolated fixture.</li>
+</ul>
+<h2 id="7-delete_fetched_files-can-delete-outside-its-cache-directory">7. <code>delete_fetched_files</code> can delete outside its cache directory<a class="headerlink" href="#7-delete_fetched_files-can-delete-outside-its-cache-directory" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> High. A caller of the public client method can accidentally remove unrelated local files or directories.</li>
+<li><strong>Location:</strong> <code>norfab/core/client.py:1625-1663</code>.</li>
+<li><strong>Trigger:</strong> Pass an absolute path or a path beginning with <code>..</code> as <code>filepath</code>. <code>os.path.join(files_folder, filepath)</code> accepts both; the absolute path replaces <code>files_folder</code>, and <code>..</code> escapes it. The method then calls <code>os.remove</code> or <code>shutil.rmtree</code> on glob matches without checking that their resolved paths remain under <code>fetchedfiles</code>.</li>
+<li><strong>Proposed fix:</strong> Resolve the cache root and every matched path and reject any match whose <code>os.path.commonpath</code> is not the cache root. Validate the supplied pattern before glob expansion as well. Apply the same containment approach already used by <code>fetch_file</code> at lines 1726-1736. Add a public-client test using a temporary sibling file that must remain intact after an escaping pattern.</li>
+<li><strong>Evidence:</strong> Code-path inspection and a non-destructive Python check showing that <code>os.path.join</code> preserves <code>..</code> and replaces the base for absolute paths. I did not call the deletion method.</li>
+</ul>
+<h2 id="8-constructing-an-inventory-consumes-the-callers-configuration-dictionary">8. Constructing an inventory consumes the caller's configuration dictionary<a class="headerlink" href="#8-constructing-an-inventory-consumes-the-callers-configuration-dictionary" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Status:</strong> Fixed.</li>
+<li><strong>Severity:</strong> Medium. Reusing an inventory dictionary for a second NorFab instance fails or starts with missing configuration.</li>
+<li><strong>Location:</strong> <code>norfab/core/inventory.py:361-412</code>. <code>NorFabInventory.__init__</code> passes the caller's <code>data</code> directly to <code>load_data</code>, which removes all recognized top-level keys with <code>pop</code>.</li>
+<li><strong>Trigger:</strong> Construct <code>NorFabInventory(data=shared_dict)</code> and then reuse <code>shared_dict</code>. The first constructor empties it; the second sees a falsey <code>data</code> value and raises the generic missing-inventory <code>RuntimeError</code>. Some NFAPI tests already work around this by passing <code>inventory_data.copy()</code>.</li>
+<li><strong>Proposed fix:</strong> Copy the input at the boundary before <code>load_data</code> removes keys. Use a deep copy if nested inventory objects can also be mutated during initialization. Add a public-constructor test checking that the input remains equal to its original value and can create two inventories.</li>
+<li><strong>Evidence:</strong> Isolated run of the public <code>NorFabInventory</code> constructor with a minimal broker/topology dictionary printed <code>input_after_first {}</code>. No service startup or repository files were involved.</li>
+</ul>
+<h2 id="9-agent-cli-tool-filter-help-is-missing-because-of-a-field-typo">9. Agent CLI tool-filter help is missing because of a field typo<a class="headerlink" href="#9-agent-cli-tool-filter-help-is-missing-because-of-a-field-typo" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low. The <code>list-tools</code> command's <code>name</code> argument lacks its intended description in generated CLI/model metadata.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfcli_shell/client_agent/client_agent_picle_shell.py:19-20</code>.</li>
+<li><strong>Trigger:</strong> Inspect the Pydantic schema or CLI help for <code>ListToolsCommand.name</code>. <code>Field(..., descritpion=...)</code> misspells <code>description</code>, so Pydantic treats it as deprecated extra schema data rather than the field description.</li>
+<li><strong>Proposed fix:</strong> Change the keyword to <code>description</code> and check the command's public help/schema. The repository's spelling rule also calls for correcting this typo.</li>
+<li><strong>Evidence:</strong> <code>poetry run pytest -q core/test_simple_inventory_datastore.py</code> passed all 22 tests but emitted a Pydantic warning that explicitly identified <code>descritpion</code> as an unsupported extra keyword. A repo search found one occurrence.</li>
+</ul>
+<h2 id="10-netbox-ip-cleanup-helper-reads-only-the-first-api-page">10. NetBox IP cleanup helper reads only the first API page<a class="headerlink" href="#10-netbox-ip-cleanup-helper-reads-only-the-first-api-page" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for test reliability when a prefix contains more addresses than the NetBox response page size.</li>
+<li><strong>Location:</strong> <code>tests/services/netbox/common.py:91-115</code>.</li>
+<li><strong>Trigger:</strong> Call <code>delete_ips</code> on a prefix whose IP list spans multiple NetBox REST pages. The helper iterates only <code>ips["result"]["results"]</code> from one GET response and never follows <code>next</code>. It therefore leaves later-page addresses in place, which can alter allocation results in subsequent tests.</li>
+<li><strong>Proposed fix:</strong> Replace this broad cleanup approach with per-test tracking of created IDs, as in finding 6. If a generic helper remains necessary, follow NetBox pagination and limit deletion to records explicitly owned by the test.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the REST response handling. No destructive NetBox run.</li>
+</ul>
+<h2 id="11-invalid-configured-hooks-are-dropped-while-inventory-loading-succeeds">11. Invalid configured hooks are dropped while inventory loading succeeds<a class="headerlink" href="#11-invalid-configured-hooks-are-dropped-while-inventory-loading-succeeds" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Status:</strong> Fixed.</li>
+<li><strong>Severity:</strong> Medium when a startup or exit hook is required for initialization or cleanup.</li>
+<li><strong>Location:</strong> <code>norfab/core/inventory.py:127-165,395-413</code>.</li>
+<li><strong>Trigger:</strong> Put a misspelled module or function name in an inventory hook. <code>make_hooks</code> catches the import error, logs it, and continues without that hook. <code>NorFabInventory</code> succeeds, so later startup or exit logic proceeds without the configured function. The helper's own docstring says loading errors raise an exception.</li>
+<li><strong>Proposed fix:</strong> Raise a configuration error that identifies the attach point and function when a hook cannot be imported. Add an inventory-constructor test for an invalid hook and assert that startup fails before work begins.</li>
+<li><strong>Evidence:</strong> Code-path inspection; existing <code>test_hooks_load</code> covers only valid hooks.</li>
+<li><strong>Resolution:</strong> Hook loading now raises a <code>ValueError</code> identifying the attach point and function. An inventory-constructor test verifies that an invalid hook prevents inventory loading.</li>
+</ul>
+<h2 id="12-task-input-validation-discards-pydantics-converted-values">12. Task input validation discards Pydantic's converted values<a class="headerlink" href="#12-task-input-validation-discards-pydantics-converted-values" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. An input accepted by a task's schema can still fail inside the task because it receives the original type.</li>
+<li><strong>Location:</strong> <code>norfab/core/worker.py:445-458,615-620</code>.</li>
+<li><strong>Trigger:</strong> A task input model declares <code>value: int</code>, and the caller supplies <code>"1"</code>. Pydantic accepts and converts the value, but <code>validate_input</code> discards the model instance. The wrapper calls the task with the original string. A task computing <code>value + 1</code> raises <code>TypeError</code> after validation succeeds.</li>
+<li><strong>Proposed fix:</strong> Decide at the task boundary whether accepted inputs should be normalized or whether models should reject coercible types. If normalization is intended, pass validated model values to the function while preserving special arguments and public signatures. Add a public task-call test that checks the value actually received by the task.</li>
+<li><strong>Evidence:</strong> Isolated call to a <code>@Task(input=M)</code> function with <code>M.value: int</code>: <code>value=1</code> returned 2; <code>value="1"</code> raised <code>TypeError</code> inside the function after validation. The check ran in a separate Python process and changed no files.</li>
+</ul>
+<h2 id="13-task-output-validation-accepts-non-result-return-values">13. Task output validation accepts non-<code>Result</code> return values<a class="headerlink" href="#13-task-output-validation-accepts-non-result-return-values" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. A task can return an arbitrary value despite declaring an output model, leaving downstream worker/client handling to fail later.</li>
+<li><strong>Location:</strong> <code>norfab/core/worker.py:458-463,625-628</code>.</li>
+<li><strong>Trigger:</strong> A decorated task returns a string or dictionary rather than <code>Result</code>. <code>validate_output</code> only invokes the output model inside <code>if isinstance(ret, Result)</code>, so it skips validation and the wrapper returns the invalid value unchanged.</li>
+<li><strong>Proposed fix:</strong> Reject return values that are not <code>Result</code> (or explicitly support and validate mappings if that is part of the intended task contract). Add a public decorated-task test for a wrong return type.</li>
+<li><strong>Evidence:</strong> Isolated <code>Task(input=M, output=Result)</code> call with a function returning <code>"unexpected"</code> returned that string without an error.</li>
+</ul>
+<h2 id="14-workflow-reports-a-successful-task-after-a-condition-error-or-stopped-failed-step">14. Workflow reports a successful task after a condition error or stopped failed step<a class="headerlink" href="#14-workflow-reports-a-successful-task-after-a-condition-error-or-stopped-failed-step" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. A caller checking the workflow task's top-level <code>failed</code> field can treat an incomplete or failed workflow as successful.</li>
+<li><strong>Location:</strong> <code>norfab/workers/workflow_worker/workflow_worker.py:318-319,360-375,388-407</code>.</li>
+<li><strong>Trigger:</strong> A <code>run_if_*</code> condition refers to a missing prior step, or a step fails while <code>stop_on_failure=True</code>. The worker records an inner failed/error step and breaks, but returns the initial <code>Result</code> without setting <code>ret.failed</code> or <code>ret.errors</code>. Existing workflow tests check nested step data but do not assert the outer task result for these paths.</li>
+<li><strong>Proposed fix:</strong> Define whether an aborted workflow is a failed task, then set the outer failure and error fields for condition errors and stop-on-failure cases. Add public workflow-task integration assertions for both the nested step and top-level result.</li>
+<li><strong>Evidence:</strong> Code-path inspection against <code>tests/services/workflow/test_run.py:177-230</code>. No live workflow service run.</li>
+</ul>
+<h2 id="15-inline-workflow-execution-removes-metadata-from-the-callers-dictionary">15. Inline workflow execution removes metadata from the caller's dictionary<a class="headerlink" href="#15-inline-workflow-execution-removes-metadata-from-the-callers-dictionary" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low for direct in-process callers that reuse a workflow definition.</li>
+<li><strong>Location:</strong> <code>norfab/workers/workflow_worker/workflow_worker.py:304-331</code>.</li>
+<li><strong>Trigger:</strong> Call <code>run</code> twice with the same inline dictionary. The first call removes <code>name</code>, <code>description</code>, and <code>remove_no_match_results</code> using <code>pop</code>. The second call uses defaults, so its result key and filtering behavior can differ. The URL path produces a fresh dictionary and avoids this issue.</li>
+<li><strong>Proposed fix:</strong> Copy the workflow dictionary before removing metadata, or read the metadata with <code>get</code> and iterate only step entries. Add a public task test that reuses the same inline definition and verifies both results are identical.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the public task. No service run. The URL filename-derived <code>workflow_name</code> at lines 322-324 is also dead code because line 329 overwrites it unconditionally.</li>
+</ul>
+<h2 id="16-containerlab-command-collection-can-block-indefinitely-before-checking-its-timeout">16. Containerlab command collection can block indefinitely before checking its timeout<a class="headerlink" href="#16-containerlab-command-collection-can-block-indefinitely-before-checking-its-timeout" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> High for long-running or noisy Containerlab commands; a task can hang beyond its declared timeout.</li>
+<li><strong>Location:</strong> <code>norfab/workers/containerlab_worker/containerlab_worker.py:315-347</code>.</li>
+<li><strong>Trigger:</strong> The helper calls blocking <code>proc.stderr.readline()</code> inside its timeout loop and reads stdout only after the child exits. A child that emits no newline on stderr can block that read, so the timeout check is not reached. A child that fills the stdout pipe while the parent reads stderr can also block on writing stdout, leaving both processes waiting.</li>
+<li><strong>Proposed fix:</strong> Drain stdout and stderr concurrently with <code>communicate(timeout=...)</code> or dedicated reader threads, then terminate/kill and reap the child on timeout. Keep forwarding progress events if needed without blocking either pipe. Add a focused subprocess test using a bounded child that writes enough stdout to fill a pipe and another that stays quiet beyond the timeout.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the subprocess loop. No Containerlab process was launched.</li>
+</ul>
+<h2 id="17-containerlab-inspect-masks-a-command-failure-with-a-none-membership-error">17. Containerlab <code>inspect</code> masks a command failure with a <code>None</code> membership error<a class="headerlink" href="#17-containerlab-inspect-masks-a-command-failure-with-a-none-membership-error" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium. A failed named-lab inspection returns an unrelated Python error rather than its Containerlab diagnostics.</li>
+<li><strong>Location:</strong> <code>norfab/workers/containerlab_worker/containerlab_worker.py:349-358,570-598</code>.</li>
+<li><strong>Trigger:</strong> Call <code>inspect(lab_name=...)</code> and have the Containerlab command exit nonzero or produce no expected output. <code>run_containerlab_command</code> sets <code>ret.failed=True</code> and leaves <code>ret.result=None</code>. <code>inspect</code> then evaluates <code>lab_name not in ret.result</code>, raising <code>TypeError</code> and masking the original <code>ret.errors</code>. The existing missing-lab test asserts only <code>failed</code>, so it does not catch the diagnostic loss.</li>
+<li><strong>Proposed fix:</strong> Return the failed <code>Result</code> before checking whether the lab name appears in parsed output. Check that the result is a suitable collection before membership testing. Assert the original command error in the public <code>inspect</code> integration test.</li>
+<li><strong>Evidence:</strong> Code-path inspection; no Containerlab service run.</li>
+</ul>
+<h2 id="18-starting-an-existing-fakenos-network-loses-control-of-the-old-process">18. Starting an existing FakeNOS network loses control of the old process<a class="headerlink" href="#18-starting-an-existing-fakenos-network-loses-control-of-the-old-process" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Status:</strong> Fixed.</li>
+<li><strong>Severity:</strong> High. The old network can remain running after its process handle and stop event are discarded.</li>
+<li><strong>Location:</strong> <code>norfab/workers/fakenos_worker/fakenos_worker.py:345-405</code>.</li>
+<li><strong>Trigger:</strong> Call the public <code>start</code> task twice with the same network name. There is no existing-name guard. The second call starts a new child and overwrites <code>self.networks[network]</code>; subsequent <code>stop</code> or worker shutdown can reach only the new child. Port binding can also fail in the second child while the original remains live.</li>
+<li><strong>Proposed fix:</strong> Make <code>start</code> return the existing live network for the same name, or fail with an explicit already-running error. Use the dedicated <code>restart</code> task to replace it. Add a public service test that calls <code>start</code> twice and verifies that one tracked process remains and <code>stop</code> terminates it.</li>
+<li><strong>Evidence:</strong> Lifecycle code-path inspection. Existing start tests use distinct network names; no duplicate-start test was found. No FakeNOS service run.</li>
+</ul>
+<h2 id="19-fakenos-child-errors-are-returned-as-successful-string-results">19. FakeNOS child errors are returned as successful string results<a class="headerlink" href="#19-fakenos-child-errors-are-returned-as-successful-string-results" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. An inspection can report a nonsensical host count and <code>failed=False</code> after the child fails to enumerate hosts.</li>
+<li><strong>Location:</strong> <code>norfab/workers/fakenos_worker/fakenos_worker.py:80-107,167-192,458-491</code>.</li>
+<li><strong>Trigger:</strong> The child catches an exception from <code>_get_hosts_as_list</code>, stores an error message string in <code>result_queue</code>, and the parent only raises queue values that are <code>Exception</code> objects. The string passes through as <code>hosts</code>; <code>inspect_networks</code> computes <code>len(hosts)</code> and returns success.</li>
+<li><strong>Proposed fix:</strong> Send a structured success/error envelope through the queue and raise or mark the task failed when the child reports an error. Add a public inspection test for a child-side failure and assert that the returned task is failed with the original message.</li>
+<li><strong>Evidence:</strong> Code-path inspection of both sides of the queue. No FakeNOS service run.</li>
+</ul>
+<h2 id="20-fastapi-and-fastmcp-discovery-stop-retrying-a-service-after-a-partial-failure">20. FastAPI and FastMCP discovery stop retrying a service after a partial failure<a class="headerlink" href="#20-fastapi-and-fastmcp-discovery-stop-retrying-a-service-after-a-partial-failure" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. Some task endpoints or MCP tools can remain missing until discovery is manually retriggered or the worker restarts.</li>
+<li><strong>Location:</strong> <code>norfab/workers/fastapi_worker/fastapi_worker.py:168-173,187-245</code> and <code>norfab/workers/fastmcp_worker/fastmcp_worker.py:405-410,424-486</code>.</li>
+<li><strong>Trigger:</strong> FastAPI records a service key before all its routes register; a later exception ends the cycle, and subsequent cycles skip that service. FastMCP does the same before constructing all tools. It also catches individual tool-construction errors, leaving the service marked discovered despite a missing tool. Later startup cycles skip the service in both workers.</li>
+<li><strong>Proposed fix:</strong> Mark a service complete only after all its eligible tasks have been processed successfully. Retry missing routes and tools on later cycles. Add integration cases where an initial transient failure is corrected during startup discovery.</li>
+<li><strong>Evidence:</strong> Code-path inspection of both retry loops. No FastAPI or FastMCP service run.</li>
+</ul>
+<h2 id="21-one-cycle-api-discovery-calls-sleep-after-their-work-is-finished">21. One-cycle API discovery calls sleep after their work is finished<a class="headerlink" href="#21-one-cycle-api-discovery-calls-sleep-after-their-work-is-finished" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium. Explicit discovery jobs have avoidable latency after doing their work.</li>
+<li><strong>Location:</strong> <code>norfab/workers/fastapi_worker/fastapi_worker.py:258-261,671-685</code> and <code>norfab/workers/fastmcp_worker/fastmcp_worker.py:488-491,890-913</code>.</li>
+<li><strong>Trigger:</strong> The public FastAPI <code>discover</code> task calls its loop with <code>cycles=1</code> and still sleeps ten seconds after decrementing to zero. FastMCP's one-cycle discovery follows the same pattern and sleeps five seconds.</li>
+<li><strong>Proposed fix:</strong> Sleep only when another cycle will run and the worker has not been asked to exit in both workers. Add focused public discovery timing assertions or equivalent deterministic checks around the final-cycle branch.</li>
+<li><strong>Evidence:</strong> Code-path inspection. No service run.</li>
+</ul>
+<h2 id="22-re-storing-a-bearer-token-under-another-user-corrupts-ownership-metadata">22. Re-storing a bearer token under another user corrupts ownership metadata<a class="headerlink" href="#22-re-storing-a-bearer-token-under-another-user-corrupts-ownership-metadata" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. Listing and deleting tokens by username can disagree about who owns a valid token.</li>
+<li><strong>Location:</strong> <code>norfab/workers/fastapi_worker/fastapi_worker.py:496-531,533-575,583-624</code> and the same store/list/delete pattern in <code>norfab/workers/fastmcp_worker/fastmcp_worker.py:767-863</code>.</li>
+<li><strong>Trigger:</strong> Store token <code>T</code> for user A, then call <code>bearer_token_store(username=B, token=T)</code>. The second call reuses the cached value containing <code>username=A</code> but writes it with cache tag B. Listing B's tokens shows an entry labeled A; deleting A's tokens by tag leaves T active, while deleting B's tokens removes A's token.</li>
+<li><strong>Proposed fix:</strong> Reject an attempt to bind an existing token to a different username, or explicitly replace both value and tag in one documented operation, in both workers. Add public task tests covering duplicate token storage across two usernames, listing, revocation, and <code>bearer_token_check</code>.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the cache value/tag handling. Existing tests use a single username per token. No live FastAPI worker run.</li>
+</ul>
+<h2 id="23-nfweb-topology-history-can-disappear-for-the-same-device-set-after-selection">23. NFWeb topology history can disappear for the same device set after selection<a class="headerlink" href="#23-nfweb-topology-history-can-disappear-for-the-same-device-set-after-selection" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium for mixed-case device names in a multi-device scope.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfweb/topology/collector.py:62,201-209</code> and <code>norfab/clients/nfweb/topology/history.py:60-72,87-109</code>.</li>
+<li><strong>Trigger:</strong> Start NFWeb with configured devices <code>['a', 'B']</code>. The collector stores the scope as <code>['B', 'a']</code> using default sorting. Selecting those same devices in the browser stores <code>['a', 'B']</code> using casefold sorting. History queries compare device lists for exact equality, so snapshots from the first scope no longer appear even though the device set is identical.</li>
+<li><strong>Proposed fix:</strong> Canonicalize device scopes with one sort rule at both initialization and selection, and consider comparing normalized sets when reading older snapshots. Add a history/collector test with mixed-case names that selects the same set after startup.</li>
+<li><strong>Evidence:</strong> Code-path inspection plus an isolated Python check confirming the two sort orders differ for <code>['a', 'B']</code>. No NFWeb server run.</li>
+</ul>
+<h2 id="24-nfweb-can-serve-topology-snapshots-after-the-retention-window-expires">24. NFWeb can serve topology snapshots after the retention window expires<a class="headerlink" href="#24-nfweb-can-serve-topology-snapshots-after-the-retention-window-expires" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for the documented maximum history window and stale browser state.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfweb/topology/history.py:20-41,60-85,161-170</code> and <code>norfab/clients/nfweb/topology/web.py:182-189</code>.</li>
+<li><strong>Trigger:</strong> Insert a snapshot, then leave NFWeb idle beyond the configured retention window. Cleanup runs at store initialization and after inserts only. <code>history()</code> and <code>logs()</code> apply a cutoff at read time, but <code>latest()</code> and <code>get(snapshot_id)</code> do not. A new WebSocket connection can receive an expired snapshot as its latest state, and a direct snapshot request can retrieve expired data before another insert triggers cleanup.</li>
+<li><strong>Proposed fix:</strong> Apply the retention cutoff in <code>latest()</code> and <code>get()</code> queries as well as periodic cleanup for bounded on-disk storage. Add a store test that advances time beyond retention without inserting another snapshot and checks all read methods.</li>
+<li><strong>Evidence:</strong> Code-path inspection. No NFWeb server run.</li>
+</ul>
+<h2 id="25-nfweb-monitoring-keeps-and-serves-expired-samples-after-polling-failures">25. NFWeb monitoring keeps and serves expired samples after polling failures<a class="headerlink" href="#25-nfweb-monitoring-keeps-and-serves-expired-samples-after-polling-failures" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium. A prolonged collection failure leaves the dashboard showing stale data as its latest sample and retains history past the configured window.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfweb/monitoring/collector.py:44-52,89-114</code> and <code>norfab/clients/nfweb/monitoring/web.py:35-56,94-108</code>.</li>
+<li><strong>Trigger:</strong> Collect one monitoring sample, then have later <code>collect_once</code> calls raise for longer than <code>retention_minutes</code>. <code>collect</code> returns from its exception handler before pruning <code>history</code>. The <code>latest</code> property and HTTP/history/WebSocket handlers return the old sample without checking its age.</li>
+<li><strong>Proposed fix:</strong> Prune history against current UTC time on reads or on every collection attempt, including failed attempts, and make <code>latest</code> return <code>None</code> when its sample has expired. Add a collector/API test that advances beyond retention while collection raises.</li>
+<li><strong>Evidence:</strong> Code-path inspection. Existing monitoring tests cover normal sample pruning, not repeated failures beyond retention.</li>
+</ul>
+<h2 id="26-file-downloads-can-leave-their-destination-open-and-skip-integrity-checks">26. File downloads can leave their destination open and skip integrity checks<a class="headerlink" href="#26-file-downloads-can-leave-their-destination-open-and-skip-integrity-checks" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for failed or empty downloads, especially on Windows where open handles can block later file operations.</li>
+<li><strong>Location:</strong> <code>norfab/core/client.py:1740-1822</code> and <code>norfab/workers/filesharing_worker/local_files_tasks.py:251-268</code>.</li>
+<li><strong>Trigger:</strong> Fetch an empty file. The client opens the destination, but the worker sends no <code>STREAM</code> chunk, so <code>handle_stream</code> never closes the handle or verifies the hash. The client reports success and removes the transfer entry. A failed fetch after opening the destination follows the same no-cleanup path and can leave a partial file open.</li>
+<li><strong>Proposed fix:</strong> Own and close the destination in a <code>finally</code> block in <code>NFPClient.fetch_file</code>, including success, empty file, exception, and failed-job paths. Verify the final file hash after the worker job returns, including zero-byte files, and remove or clearly mark partial files on failure. Add public file-sharing integration cases for an empty file and a mid-transfer failure.</li>
+<li><strong>Evidence:</strong> Code-path inspection. Existing fetch tests do not cover empty files or cleanup after failure.</li>
+</ul>
+<h2 id="27-nfpclientfetch_file-accepts-a-zero-chunk-size-and-then-divides-by-zero">27. <code>NFPClient.fetch_file</code> accepts a zero chunk size and then divides by zero<a class="headerlink" href="#27-nfpclientfetch_file-accepts-a-zero-chunk-size-and-then-divides-by-zero" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low. A bad public argument raises unexpectedly and leaves a transfer entry behind.</li>
+<li><strong>Location:</strong> <code>norfab/core/client.py:1665-1672,1740-1763</code>.</li>
+<li><strong>Trigger:</strong> Call <code>fetch_file(..., chunk_size=0)</code> for an existing file. The method records <code>self.file_transfers[uuid]</code>, then computes <code>size_bytes / chunk_size</code> and raises <code>ZeroDivisionError</code> without removing the entry. Negative chunk sizes can also produce nonsensical request counts.</li>
+<li><strong>Proposed fix:</strong> Validate <code>chunk_size &gt; 0</code> and <code>pipeline &gt; 0</code> before creating a transfer entry or making network calls. Add public-client boundary tests for zero and negative values and assert that no transfer state remains.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the argument boundary and division. No file transfer run.</li>
+</ul>
+<h2 id="28-every-nfweb-monitoring-collector-test-fails-during-setup">28. Every NFWeb monitoring collector test fails during setup<a class="headerlink" href="#28-every-nfweb-monitoring-collector-test-fails-during-setup" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for test coverage: the monitoring behavior under test is never reached.</li>
+<li><strong>Location:</strong> <code>tests/clients/nfweb/test_monitoring.py:15-39</code> and the broker/worker process records at lines 47-51 and 81-85; required model field at <code>norfab/core/monitoring.py:16-27</code>.</li>
+<li><strong>Trigger:</strong> Run <code>poetry run pytest -q clients/nfweb/test_monitoring.py</code> from <code>tests/</code>. All five tests fail in <code>make_client()</code> because its <code>ClientMonitoringStats.process</code> data omits required <code>threads</code>. The broker and worker process records in the same helper omit it too, so fixing only the first record would still leave later validation failures.</li>
+<li><strong>Proposed fix:</strong> Update the test's explicit process records to the current monitoring schema, then rerun all five tests to expose any further stale fields. Longer term, exercise NFWeb through its public interface with a real client/service where practical, as the repository test guidance requires.</li>
+<li><strong>Evidence:</strong> Focused pytest run: 5 failed, all at the <code>process.threads</code> validation error during setup. The whole NFWeb Python suite produced 43 passed and the same 5 failures. No service was started.</li>
+</ul>
+<h2 id="29-nornir-test-assertions-raise-nameerror-when-they-should-report-a-failure">29. Nornir test assertions raise <code>NameError</code> when they should report a failure<a class="headerlink" href="#29-nornir-test-assertions-raise-nameerror-when-they-should-report-a-failure" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium for diagnosis: failing integration assertions lose the actual mismatch and report an unrelated name error.</li>
+<li><strong>Location:</strong> <code>tests/services/nornir/test_parse.py:464-468</code> and <code>tests/services/nornir/test_tests.py:359-364</code>.</li>
+<li><strong>Trigger:</strong> In <code>test_nornir_parse_ttp_with_host_filter</code>, if worker 2 returns unexpected results, the assertion message evaluates <code>nornir-worker-2</code> as an expression with undefined names. In <code>test_nornir_test_remove_tasks_false</code>, a traceback in task output evaluates undefined <code>test_name</code> instead of the available <code>task_name</code>.</li>
+<li><strong>Proposed fix:</strong> Use a literal worker label or an in-scope variable in the first assertion, and <code>task_name</code> in the second. Re-run the focused integration tests; a small isolated failing-assertion check can verify each message without changing service behavior.</li>
+<li><strong>Evidence:</strong> Ruff F821 and assertion-path inspection. No Nornir service run.</li>
+</ul>
+<h2 id="30-netbox-prefix-tests-delete-pre-existing-child-prefixes">30. NetBox prefix tests delete pre-existing child prefixes<a class="headerlink" href="#30-netbox-prefix-tests-delete-pre-existing-child-prefixes" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> High for a shared or reused NetBox instance.</li>
+<li><strong>Location:</strong> <code>tests/services/netbox/common.py:64-88</code>, called throughout <code>tests/services/netbox/test_ipam.py</code>.</li>
+<li><strong>Trigger:</strong> Run a prefix allocation test when its parent prefix already contains child prefixes. The setup helper queries all prefixes <code>within</code> the parent and deletes every returned record, without identifying which ones the test created. This is the prefix equivalent of finding 6 and violates the repository rule to preserve pre-existing data. It also processes only the first paginated REST response, leaving any later pages in place.</li>
+<li><strong>Proposed fix:</strong> Give tests a dedicated verified-free parent prefix and delete only child prefix IDs created by that test in <code>finally</code>. If a generic cleanup helper remains, follow pagination and require explicit ownership of every deleted record.</li>
+<li><strong>Evidence:</strong> Helper and call-site inspection. I did not run the destructive NetBox tests.</li>
+</ul>
+<h2 id="31-agent-dynamic-model-builders-carry-unused-model-name-arguments">31. Agent dynamic-model builders carry unused model-name arguments<a class="headerlink" href="#31-agent-dynamic-model-builders-carry-unused-model-name-arguments" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Maintenance only; no behavioral failure established.</li>
+<li><strong>Location:</strong> <code>norfab/core/agent.py:271-276,282-284</code> and <code>norfab/workers/agent_worker/agent_worker.py:164-171,176-180</code>.</li>
+<li><strong>Trigger:</strong> Both <code>make_pydantic_model</code> implementations receive <code>model_name</code> but always return <code>models["Model"]</code> without using it. Their callers pass the tool name, suggesting the generated model was intended to have a distinct name, but currently the argument has no effect.</li>
+<li><strong>Proposed fix:</strong> If model names are not needed, remove the unused argument from these internal builders and call sites. If they are needed for schema/tool diagnostics, use the argument when generating or selecting the model and add a public agent tool-discovery check.</li>
+<li><strong>Evidence:</strong> Vulture reported both parameters at 100% confidence; code-path inspection confirmed they are unused.</li>
+</ul>
+<h2 id="32-nfcli-snmp-shell-has-three-unused-imports">32. NFCLI SNMP shell has three unused imports<a class="headerlink" href="#32-nfcli-snmp-shell-has-three-unused-imports" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Maintenance only; no behavioral failure established.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfcli_shell/nornir/nornir_picle_shell_snmp.py:8,20,30</code>.</li>
+<li><strong>Trigger:</strong> Module import loads <code>StrictBool</code>, <code>SnmpMultiSetInput</code>, and <code>TabulateTableModel</code>, but the module never references them.</li>
+<li><strong>Proposed fix:</strong> Remove the imports after checking whether any were intended for a missing command model. Ruff can apply the safe import removal once that review is complete.</li>
+<li><strong>Evidence:</strong> <code>poetry run ruff check norfab --select F401,F541</code> reported exactly these three production-code F401 findings and no F541 findings.</li>
+</ul>
+<h2 id="33-nfcli-file-completion-crashes-when-file-sharing-is-unavailable">33. NFCLI file completion crashes when File Sharing is unavailable<a class="headerlink" href="#33-nfcli-file-completion-crashes-when-file-sharing-is-unavailable" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium for interactive CLI usability during a service outage.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfcli_shell/common.py:325-350</code>.</li>
+<li><strong>Trigger:</strong> A completion request calls <code>walk_norfab_files</code> while the <code>filesharing.walk</code> job fails, returns no worker result, or returns <code>result=None</code>. The helper immediately takes the first response item and iterates <code>wres["result"]</code>, raising <code>StopIteration</code> or <code>TypeError</code> instead of returning no completions. It also ignores the worker's <code>failed</code> flag.</li>
+<li><strong>Proposed fix:</strong> Treat an empty or failed response as an empty completion list and log the service error at an appropriate level. Add a focused CLI completion test for an unavailable File Sharing worker through the public completion interface.</li>
+<li><strong>Evidence:</strong> Code-path inspection; <code>nfcli/test_shell_common.py</code> passed 7 tests but does not cover this outage case.</li>
+</ul>
+<h2 id="34-a-second-read-of-completed-job-events-can-wait-forever">34. A second read of completed job events can wait forever<a class="headerlink" href="#34-a-second-read-of-completed-job-events-can-wait-forever" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for clients that subscribe to or re-read a job future's events more than once.</li>
+<li><strong>Location:</strong> <code>norfab/core/client.py:623-656</code>.</li>
+<li><strong>Trigger:</strong> Finish an <code>NFPJobFuture</code>, consume <code>future.events()</code> once, then call <code>future.events()</code> again without a timeout. <code>mark_done</code> queues one terminal marker. The first iterator consumes it; the second blocks on an empty queue because <code>events()</code> never checks <code>done_event</code> when the queue is empty. Concurrent consumers have the same one-marker problem.</li>
+<li><strong>Proposed fix:</strong> Make <code>events()</code> stop when <code>done_event</code> is set and the event queue is drained, with a bounded wake-up strategy for a blocking read. Document whether event consumption is single-consumer, and test the chosen public future behavior after completion.</li>
+<li><strong>Evidence:</strong> Code-path inspection of queue and marker handling. No service run.</li>
+</ul>
+<h2 id="35-nfweb-monitoring-fails-to-publish-a-partial-sample-when-the-worker-stats-job-times-out">35. NFWeb monitoring fails to publish a partial sample when the worker stats job times out<a class="headerlink" href="#35-nfweb-monitoring-fails-to-publish-a-partial-sample-when-the-worker-stats-job-times-out" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. A common fabric outage leaves the browser on an old sample instead of showing an updated failure state.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfweb/monitoring/collector.py:94-105,119-145</code> and <code>norfab/core/client.py:658-681,1890-1921</code>.</li>
+<li><strong>Trigger:</strong> <code>NFPClient.run_job(..., task="get_stats")</code> returns <code>None</code> on timeout. <code>MonitoringCollector.collect_once</code> immediately calls <code>worker_reply.items()</code>, raising <code>AttributeError</code>. The outer <code>collect</code> catches it and publishes no snapshot, even though the method otherwise builds a <code>partial</code> or <code>failed</code> snapshot with worker errors. A missing broker reply can similarly fail at <code>broker_reply.get</code>.</li>
+<li><strong>Proposed fix:</strong> Normalize absent broker and worker replies to explicit errors before iterating or accessing them, then publish a snapshot with unreachable/degraded components. Add a public NFWeb monitoring test with timed-out broker and worker calls, verifying a new error-bearing sample.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the documented <code>run_job</code> timeout return and monitoring collector. No broker outage was induced.</li>
+</ul>
+<h2 id="36-agent-tool-calls-discard-configured-job_data-after-the-first-invocation">36. Agent tool calls discard configured <code>job_data</code> after the first invocation<a class="headerlink" href="#36-agent-tool-calls-discard-configured-job_data-after-the-first-invocation" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium. Repeated calls to the same tool can receive different task arguments without any change in agent configuration.</li>
+<li><strong>Location:</strong> <code>norfab/core/agent.py:217-242</code> and <code>norfab/workers/agent_worker/agent_worker.py:119-147</code>.</li>
+<li><strong>Trigger:</strong> Define a tool with <code>norfab.kwargs.job_data</code>. The first call uses <code>pop("job_data", {})</code> on the stored tool dictionary, removing that configuration. A second call to the same runnable sees no configured <code>job_data</code>. If the first call also merges LLM-provided values, it mutates the popped dictionary that came from the definition.</li>
+<li><strong>Proposed fix:</strong> Read the configured job data without mutating the tool definition, and copy it before merging per-call values. Apply the same change to both inline and worker agent implementations. Add a public tool invocation test that calls one tool twice and checks identical configured arguments.</li>
+<li><strong>Evidence:</strong> Code-path inspection of both implementations. No LLM or agent service run.</li>
+</ul>
+<h2 id="37-textual-worker-monitoring-ignores-its-service-and-worker-filters">37. Textual worker monitoring ignores its service and worker filters<a class="headerlink" href="#37-textual-worker-monitoring-ignores-its-service-and-worker-filters" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium. The panel displays and polls workers outside the scope configured by its caller.</li>
+<li><strong>Location:</strong> <code>norfab/clients/textual/apps/monitoring.py:127-148,426-450</code>.</li>
+<li><strong>Trigger:</strong> Construct <code>WorkerStatsPanel(services=["nornir", "netbox"], workers=...)</code>, as the monitoring screen does. The constructor stores both filters, but <code>fetch_data</code> always calls <code>run_job(service="all", workers="all", task="get_stats")</code> and never uses <code>self.services</code> or <code>self.target_workers</code> for filtering. It can also incur unnecessary calls to unrelated workers on each refresh.</li>
+<li><strong>Proposed fix:</strong> Apply the configured worker selector when fetching, then filter rows by the configured service list, or simplify the public panel arguments if the intended behavior is truly all workers. Add a panel test through its public behavior with two services and a restricted worker selection.</li>
+<li><strong>Evidence:</strong> Code-path inspection and reference search showing the stored filters have no other reads. No Textual UI run.</li>
+</ul>
+<h2 id="38-textual-monitoring-performs-blocking-broker-jobs-during-screen-mounting">38. Textual monitoring performs blocking broker jobs during screen mounting<a class="headerlink" href="#38-textual-monitoring-performs-blocking-broker-jobs-during-screen-mounting" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for startup responsiveness when broker or workers are slow or unavailable.</li>
+<li><strong>Location:</strong> <code>norfab/clients/textual/apps/monitoring.py:71-77,147-148,321-325</code>.</li>
+<li><strong>Trigger:</strong> Mount the monitoring screen while a broker or worker request is slow. <code>BasePanel.on_mount</code> calls <code>self.fetch_data()</code> synchronously on the UI thread. <code>WorkerStatsPanel.fetch_data</code> runs a blocking <code>NFPClient.run_job</code> without a short timeout, so the interface can freeze until the job's default timeout. Subsequent refreshes correctly use an executor, but the initial mount does not.</li>
+<li><strong>Proposed fix:</strong> Schedule the first paint through the same async/executor path used by <code>_do_refresh</code>, and show a loading state until it completes. Set bounded monitoring request timeouts appropriate for the refresh interval. Add a UI lifecycle check with a deliberately slow client response.</li>
+<li><strong>Evidence:</strong> Code-path inspection. No Textual UI run.</li>
+</ul>
+<h2 id="39-robot-library-destroys-norfab-at-the-end-of-the-first-suite">39. Robot library destroys NorFab at the end of the first suite<a class="headerlink" href="#39-robot-library-destroys-norfab-at-the-end-of-the-first-suite" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for Robot runs containing multiple suites or nested suites.</li>
+<li><strong>Location:</strong> <code>norfab/clients/robot_client.py:22-45</code>.</li>
+<li><strong>Trigger:</strong> <code>NorFabRobot</code> declares <code>ROBOT_LIBRARY_SCOPE = "GLOBAL"</code>, so one library instance can serve the whole Robot run. Its listener calls <code>self.nf.destroy()</code> on every <code>end_suite</code> event. After the first suite finishes, later suites retain the global library instance but its client and fabric are shut down.</li>
+<li><strong>Proposed fix:</strong> Align teardown with the global library lifetime, for example by using an end-of-run listener hook or a reference-counted suite lifecycle. Add a Robot integration run containing two suites in one process and verify both can execute jobs.</li>
+<li><strong>Evidence:</strong> Lifecycle code-path inspection. Existing Robot fixtures are separate suite files; no multi-suite run was performed.</li>
+</ul>
+<h2 id="40-robot-nrtest-can-crash-while-reporting-a-failed-task">40. Robot <code>nr.test</code> can crash while reporting a failed task<a class="headerlink" href="#40-robot-nrtest-can-crash-while-reporting-a-failed-task" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium. The original task failure is obscured and the keyword cannot finish its normal error report.</li>
+<li><strong>Location:</strong> <code>norfab/clients/robot_client.py:113-132</code>.</li>
+<li><strong>Trigger:</strong> A task result has <code>failed=True</code> and <code>exception=None</code>, which is allowed by the result structure. The condition enters the failure branch, then formats <code>result["exception"].strip()</code>, raising <code>AttributeError</code> before the intended <code>ContinuableFailure</code> and detailed test log.</li>
+<li><strong>Proposed fix:</strong> Format the exception defensively, falling back to the task result or a generic failure message. Add a Robot keyword integration case for a failed task without an exception string.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the short-circuit condition and unconditional <code>.strip()</code> call. No Robot suite run.</li>
+</ul>
+<h2 id="41-robot-keyword-state-leaks-after-an-exception-or-client-timeout">41. Robot keyword state leaks after an exception or client timeout<a class="headerlink" href="#41-robot-keyword-state-leaks-after-an-exception-or-client-timeout" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for multi-keyword test cases because later keywords can target the wrong workers.</li>
+<li><strong>Location:</strong> <code>norfab/clients/robot_client.py:15-19,47-61,63-137,222-279,286-343</code>.</li>
+<li><strong>Trigger:</strong> Call <code>Workers</code> and then an <code>nr.*</code> keyword whose client job times out or whose result processing raises. Each keyword calls <code>clean_global_data()</code> only after processing its result, so the exception skips cleanup. The module-global <code>DATA["workers"]</code> remains and can affect the next keyword or test case. Some host state is popped earlier, making the leaked selection inconsistent.</li>
+<li><strong>Proposed fix:</strong> Keep per-library-instance state and clear it in a <code>finally</code> block around each job keyword. Add a Robot integration case with a failing keyword followed by another keyword that should use default targeting.</li>
+<li><strong>Evidence:</strong> Code-path inspection of all three job keywords and global state cleanup. No Robot suite run.</li>
+</ul>
+<h2 id="42-nfcli-create-ip-bulk-crashes-when-the-optional-interface-list-is-omitted">42. NFCLI <code>create ip bulk</code> crashes when the optional interface list is omitted<a class="headerlink" href="#42-nfcli-create-ip-bulk-crashes-when-the-optional-interface-list-is-omitted" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium for a documented optional CLI argument.</li>
+<li><strong>Location:</strong> <code>norfab/clients/nfcli_shell/netbox/netbox_picle_shell_create_ip_bulk.py:35-40,66-79</code>.</li>
+<li><strong>Trigger:</strong> Run the bulk IP command without <code>interface-list</code>. The model declares <code>interface_list</code> optional with default <code>None</code>, but <code>CreateIpBulk.run</code> evaluates <code>"[" in kwargs["interface_list"]</code> unconditionally. If the key is absent it raises <code>KeyError</code>; if present as <code>None</code> it raises <code>TypeError</code>, before submitting any job.</li>
+<li><strong>Proposed fix:</strong> Parse JSON only when <code>interface_list</code> is a string. Keep the optional argument absent or <code>None</code> when not supplied. Add a public shell command test for bulk IP allocation without an interface list.</li>
+<li><strong>Evidence:</strong> Model and command-path inspection. No NetBox job run.</li>
+</ul>
+<h2 id="43-netbox-create_ip_bulk-reports-success-when-individual-allocations-fail">43. NetBox <code>create_ip_bulk</code> reports success when individual allocations fail<a class="headerlink" href="#43-netbox-create_ip_bulk-reports-success-when-individual-allocations-fail" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Medium to high for automation that trusts the bulk task's <code>failed</code> field.</li>
+<li><strong>Location:</strong> <code>norfab/workers/netbox_worker/ip_tasks.py:799-830</code>.</li>
+<li><strong>Trigger:</strong> One selected interface's <code>create_ip</code> call returns a failed <code>Result</code>, for example because allocation is exhausted or its interface lookup fails. <code>create_ip_bulk</code> stores only <code>create_ip.result</code> and never checks <code>create_ip.failed</code> or propagates <code>create_ip.errors</code>. The bulk result remains successful even when some interface allocations failed.</li>
+<li><strong>Proposed fix:</strong> Accumulate per-interface status and errors, mark the bulk task failed or partial when any allocation fails, and preserve enough detail to identify affected device/interfaces. Add a public bulk-task integration case with one successful and one failed allocation.</li>
+<li><strong>Evidence:</strong> Code-path inspection of the entire bulk loop. No NetBox service run.</li>
+</ul>
+<h2 id="44-netbox-create_ip_bulk-crashes-when-its-optional-devices-argument-is-omitted">44. NetBox <code>create_ip_bulk</code> crashes when its optional <code>devices</code> argument is omitted<a class="headerlink" href="#44-netbox-create_ip_bulk-crashes-when-its-optional-devices-argument-is-omitted" title="Permanent link">¤</a></h2>
+<ul>
+<li><strong>Severity:</strong> Low to medium. The published input model and task docstring both allow <code>devices=None</code>, but the task fails before querying interfaces.</li>
+<li><strong>Location:</strong> <code>norfab/workers/netbox_worker/netbox_models.py:2287-2300</code> and <code>norfab/workers/netbox_worker/ip_tasks.py:710-715,769-785</code>.</li>
+<li><strong>Trigger:</strong> Call the public bulk task with a prefix and an interface selector but no <code>devices</code>. The first log line handles <code>None</code> with <code>len(devices or [])</code>, then the event message calls <code>len(devices)</code> and raises <code>TypeError</code>. The downstream <code>get_interfaces</code> task also accepts <code>devices=None</code>.</li>
+<li><strong>Proposed fix:</strong> Decide whether omitted devices means all matching devices or is invalid. If all is supported, handle <code>None</code> consistently. If it is invalid, make <code>devices</code> required in the input model and documentation so validation fails at the boundary. Add a public bulk-task test for the chosen contract.</li>
+<li><strong>Evidence:</strong> Code-path and input-model inspection. No NetBox service run.</li>
+</ul>
+<h2 id="static-checker-triage">Static-checker triage<a class="headerlink" href="#static-checker-triage" title="Permanent link">¤</a></h2>
+<ul>
+<li><code>poetry run vulture norfab tests --min-confidence 80</code> reported the two unused <code>model_name</code> parameters recorded in finding 31, plus callback parameters in <code>nfapi.py</code> whose names are required by the callback signatures.</li>
+<li><code>poetry run ruff check norfab --select F821,F841</code> passed. A repository-wide Ruff run has many existing annotation/style findings; <code>tests/netbox_data.py</code> accounts for most F821 warnings because <code>nb</code> is installed into module globals at runtime in <code>main()</code>. Those <code>nb</code> warnings are not independently reported as bugs.</li>
+<li><code>poetry run pytest -q core/test_simple_inventory_datastore.py</code> from <code>tests/</code> passed: 22 tests. It emitted the warning recorded in finding 9. A core DB test attempt stalled while starting its shared fixture and was interrupted; it yielded no result. Running collection from the repository root fails for that inventory test because its path assumes the documented <code>tests/</code> working directory; collection from <code>tests/</code> succeeds.</li>
+<li><code>poetry run pytest -q clients/nfweb/test_history.py</code> from <code>tests/</code> passed: 3 tests. Those tests do not cover the idle-expiration read path in finding 24.</li>
+<li><code>poetry run pytest -q clients/nfweb --disable-warnings --tb=line</code> from <code>tests/</code> yielded 43 passed and 5 failed, all covered by finding 28. <code>poetry run pytest -q nfcli/test_shell_common.py --disable-warnings --tb=line</code> passed: 7 tests.</li>
 </ul>
 
 

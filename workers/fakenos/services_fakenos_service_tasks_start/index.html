@@ -7341,7 +7341,9 @@ nf#
 <p>If <em>inventory</em> is a URL or file path, it is fetched and parsed before
 the network is started.  The network entry stored in
 <code>self.networks</code> preserves the resolved inventory dict so that
-<code>restart</code> can reuse it without re-fetching.</p>
+<code>restart</code> can reuse it without re-fetching.
+Starting a network with an existing name raises <code>ValueError</code>; use
+<code>restart</code> to replace it.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -7409,6 +7411,52 @@ Used to emit progress events visible to callers.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Result</code></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Status and details of the started network.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a network with the same name is already tracked.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -7491,7 +7539,18 @@ Used to emit progress events visible to callers.</p>
 <span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span>
-<span class="normal">405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">FakeNOSStartInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">FakeNOSNetworkActionResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
@@ -7515,6 +7574,8 @@ Used to emit progress events visible to callers.</p>
 <span class="sd">    the network is started.  The network entry stored in</span>
 <span class="sd">    ``self.networks`` preserves the resolved inventory dict so that</span>
 <span class="sd">    ``restart`` can reuse it without re-fetching.</span>
+<span class="sd">    Starting a network with an existing name raises ``ValueError``; use</span>
+<span class="sd">    ``restart`` to replace it.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab job context injected by the ``@Task`` decorator.</span>
@@ -7527,8 +7588,17 @@ Used to emit progress events visible to callers.</p>
 <span class="sd">              as YAML.</span>
 <span class="sd">            * ``None`` to use the default inventory from the worker</span>
 <span class="sd">              configuration.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result: Status and details of the started network.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If a network with the same name is already tracked.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">network</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FakeNOS network &#39;</span><span class="si">{</span><span class="n">network</span><span class="si">}</span><span class="s2">&#39; already exists; use restart&quot;</span><span class="p">)</span>
 
     <span class="c1"># fetch inventory</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">inventory</span><span class="p">):</span>

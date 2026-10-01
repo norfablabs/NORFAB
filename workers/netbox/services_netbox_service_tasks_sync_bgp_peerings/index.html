@@ -7448,6 +7448,10 @@
 </div>
 <p><strong>Live-run mode</strong> (<code>dry_run=False</code>, default) applies changes and returns the same structure.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Existing sessions are matched by device, local address and AS, and remote
+address and AS. Updates use their NetBox IDs, including when a session has no
+name. An unnamed matched session receives the rendered <code>name_template</code> name;
+dry-run and live update results show that rendered name.</p>
 <p><strong>Dry-run mode</strong> returns what <em>would</em> happen without writing to NetBox.</p>
 <p><strong>Live-run mode</strong> applies changes and returns the same structure showing what was done.</p>
 <h2 id="description-preservation">Description Preservation<a class="headerlink" href="#description-preservation" title="Permanent link">¤</a></h2>
@@ -7724,7 +7728,8 @@ nf#
         <p>Synchronize BGP sessions between live devices and NetBox.</p>
 <p>Collects BGP session data from devices via Nornir <code>parse_ttp</code> with
 <code>get="bgp_neighbors"</code>, compares against existing NetBox BGP sessions and
-creates, updates, or (optionally) deletes sessions in NetBox accordingly.</p>
+creates, updates, or (optionally) deletes sessions in NetBox accordingly.
+Matched sessions are updated by NetBox ID, including sessions with no name.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -8123,53 +8128,7 @@ live text.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\bgp_peerings_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2040</span>
-<span class="normal">2041</span>
-<span class="normal">2042</span>
-<span class="normal">2043</span>
-<span class="normal">2044</span>
-<span class="normal">2045</span>
-<span class="normal">2046</span>
-<span class="normal">2047</span>
-<span class="normal">2048</span>
-<span class="normal">2049</span>
-<span class="normal">2050</span>
-<span class="normal">2051</span>
-<span class="normal">2052</span>
-<span class="normal">2053</span>
-<span class="normal">2054</span>
-<span class="normal">2055</span>
-<span class="normal">2056</span>
-<span class="normal">2057</span>
-<span class="normal">2058</span>
-<span class="normal">2059</span>
-<span class="normal">2060</span>
-<span class="normal">2061</span>
-<span class="normal">2062</span>
-<span class="normal">2063</span>
-<span class="normal">2064</span>
-<span class="normal">2065</span>
-<span class="normal">2066</span>
-<span class="normal">2067</span>
-<span class="normal">2068</span>
-<span class="normal">2069</span>
-<span class="normal">2070</span>
-<span class="normal">2071</span>
-<span class="normal">2072</span>
-<span class="normal">2073</span>
-<span class="normal">2074</span>
-<span class="normal">2075</span>
-<span class="normal">2076</span>
-<span class="normal">2077</span>
-<span class="normal">2078</span>
-<span class="normal">2079</span>
-<span class="normal">2080</span>
-<span class="normal">2081</span>
-<span class="normal">2082</span>
-<span class="normal">2083</span>
-<span class="normal">2084</span>
-<span class="normal">2085</span>
-<span class="normal">2086</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2086</span>
 <span class="normal">2087</span>
 <span class="normal">2088</span>
 <span class="normal">2089</span>
@@ -8714,7 +8673,58 @@ live text.</p>
 <span class="normal">2628</span>
 <span class="normal">2629</span>
 <span class="normal">2630</span>
-<span class="normal">2631</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">2631</span>
+<span class="normal">2632</span>
+<span class="normal">2633</span>
+<span class="normal">2634</span>
+<span class="normal">2635</span>
+<span class="normal">2636</span>
+<span class="normal">2637</span>
+<span class="normal">2638</span>
+<span class="normal">2639</span>
+<span class="normal">2640</span>
+<span class="normal">2641</span>
+<span class="normal">2642</span>
+<span class="normal">2643</span>
+<span class="normal">2644</span>
+<span class="normal">2645</span>
+<span class="normal">2646</span>
+<span class="normal">2647</span>
+<span class="normal">2648</span>
+<span class="normal">2649</span>
+<span class="normal">2650</span>
+<span class="normal">2651</span>
+<span class="normal">2652</span>
+<span class="normal">2653</span>
+<span class="normal">2654</span>
+<span class="normal">2655</span>
+<span class="normal">2656</span>
+<span class="normal">2657</span>
+<span class="normal">2658</span>
+<span class="normal">2659</span>
+<span class="normal">2660</span>
+<span class="normal">2661</span>
+<span class="normal">2662</span>
+<span class="normal">2663</span>
+<span class="normal">2664</span>
+<span class="normal">2665</span>
+<span class="normal">2666</span>
+<span class="normal">2667</span>
+<span class="normal">2668</span>
+<span class="normal">2669</span>
+<span class="normal">2670</span>
+<span class="normal">2671</span>
+<span class="normal">2672</span>
+<span class="normal">2673</span>
+<span class="normal">2674</span>
+<span class="normal">2675</span>
+<span class="normal">2676</span>
+<span class="normal">2677</span>
+<span class="normal">2678</span>
+<span class="normal">2679</span>
+<span class="normal">2680</span>
+<span class="normal">2681</span>
+<span class="normal">2682</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncBgpPeeringsInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncBgpPeeringsResult</span><span class="p">,</span>
@@ -8757,6 +8767,7 @@ live text.</p>
 <span class="sd">    Collects BGP session data from devices via Nornir ``parse_ttp`` with</span>
 <span class="sd">    ``get=&quot;bgp_neighbors&quot;``, compares against existing NetBox BGP sessions and</span>
 <span class="sd">    creates, updates, or (optionally) deletes sessions in NetBox accordingly.</span>
+<span class="sd">    Matched sessions are updated by NetBox ID, including sessions with no name.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object.</span>
@@ -9196,7 +9207,7 @@ live text.</p>
     <span class="n">bulk_update</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">identity</span><span class="p">,</span> <span class="n">field_changes</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]}</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]}</span>
             <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">field_changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">new_value</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new_value&quot;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span>
@@ -9251,11 +9262,15 @@ live text.</p>
             <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">updated_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated&quot;</span><span class="p">,</span> <span class="p">[]))</span>
-        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">full_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">updated_names</span><span class="p">:</span>
-                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+        <span class="n">updated_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">update_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">identity_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]:</span>
+                <span class="n">old_session</span> <span class="o">=</span> <span class="n">normalised_nb</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">]</span>
+                <span class="n">old_name</span> <span class="o">=</span> <span class="n">old_session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">old_session</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">updated_ids</span><span class="p">:</span>
+                    <span class="n">device_results</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">old_name</span> <span class="ow">or</span> <span class="n">normalised_live</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="n">identity</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                    <span class="p">)</span>
         <span class="k">if</span> <span class="n">update_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">ret</span>
