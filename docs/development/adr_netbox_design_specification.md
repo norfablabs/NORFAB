@@ -133,7 +133,8 @@ asns:
 ```
 
 The file exports the registered function name. Sibling arguments are passed
-unchanged, plus `netbox` (the deployment's pynetbox instance) and `dry_run`.
+unchanged, plus the design `context`, `netbox` (the deployment's pynetbox instance),
+and `dry_run`.
 References and call signatures are checked before writes. Functions must honor
 `dry_run`, return serializable data, and raise on failure. Returned data appears
 under the collection's `custom` results; exceptions stop deployment.

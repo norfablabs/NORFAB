@@ -159,8 +159,11 @@ def make_hooks(base_dir: str, hooks: List) -> Dict[str, List]:
                 hook["function"] = getattr(hook_module, hook_function_name)
                 ret[attachpoint].append(hook)
                 log.info(f"Successfully loaded hook function {hook['function']}")
-            except Exception:
-                log.exception(f"Failed loading hook {hook}")
+            except Exception as exc:
+                raise ValueError(
+                    f"Failed loading hook {hook.get('function')!r} "
+                    f"for attach point {attachpoint!r}"
+                ) from exc
 
     return ret
 
@@ -382,7 +385,7 @@ class NorFabInventory:
 
         if data:
             self.base_dir = os.path.abspath(base_dir or os.getcwd())
-            self.load_data(data)
+            self.load_data(copy.deepcopy(data))
         elif path:
             path = os.path.abspath(path)
             self.base_dir = base_dir or os.path.split(path)[0]

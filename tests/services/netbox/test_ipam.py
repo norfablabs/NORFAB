@@ -1891,6 +1891,131 @@ class TestSyncDeviceIP:
 
 @pytest.mark.netbox_create_ip
 class TestCreateIP:
+    def test_create_ip_reports_peer_allocation_error(self, nfclient: Any) -> None:
+        """Keep the local IP and report an exhausted peer allocation."""
+        nb = get_pynetbox(nfclient)
+        parent = "198.19.249.8/31"
+        if nb.ipam.prefixes.get(prefix=parent) or list(
+            nb.ipam.ip_addresses.filter(parent=parent)
+        ):
+            pytest.skip("peer allocation test prefix already contains data")
+
+        prefix = nb.ipam.prefixes.create(prefix=parent)
+        try:
+            nb.ipam.ip_addresses.create(address="198.19.249.8/31")
+            reply = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={
+                    "prefix": parent,
+                    "device": "fceos4",
+                    "interface": "Port-Channel1.101",
+                    "create_peer_ip": True,
+                },
+            )
+            result = next(iter(reply.values()))
+            assert not result["failed"]
+            assert result["result"]["address"] == "198.19.249.9/31"
+            assert "peer" not in result["result"]
+            assert result["errors"]
+            assert "failed to allocate link peer IP" in result["errors"][0]
+            assert (
+                "local IP '198.19.249.9/31' may already be allocated"
+                in result["errors"][0]
+            )
+            assert nb.ipam.ip_addresses.get(address="198.19.249.9/31")
+        finally:
+            for ip in nb.ipam.ip_addresses.filter(parent=parent):
+                ip.delete()
+            prefix.delete()
+
+    def test_create_ip_sets_and_updates_status(self, nfclient: Any) -> None:
+        """Apply the requested status to new and reused IP addresses."""
+        nb = get_pynetbox(nfclient)
+        parent = "198.19.249.0/29"
+        description = "NORFAB IP STATUS TEST"
+        if nb.ipam.prefixes.get(prefix=parent) or list(
+            nb.ipam.ip_addresses.filter(parent=parent)
+        ):
+            pytest.skip("IP status test prefix already contains data")
+
+        prefix = nb.ipam.prefixes.create(prefix=parent)
+        try:
+            addresses = []
+            for requested_status in ("reserved", "deprecated"):
+                reply = nfclient.run_job(
+                    "netbox",
+                    "create_ip",
+                    workers="any",
+                    kwargs={
+                        "prefix": parent,
+                        "description": description,
+                        "status": requested_status,
+                        "create_peer_ip": False,
+                    },
+                )
+                result = next(iter(reply.values()))
+                assert not result["failed"], result
+                addresses.append(result["result"]["address"])
+                ip = nb.ipam.ip_addresses.get(address=addresses[-1])
+                assert ip.status.value == requested_status
+            assert addresses[0] == addresses[1]
+        finally:
+            for ip in nb.ipam.ip_addresses.filter(parent=parent):
+                ip.delete()
+            prefix.delete()
+
+    def test_promote_existing_interface_ip_to_primary(self, nfclient: Any) -> None:
+        """A repeated allocation can promote its existing interface IP."""
+        nb = get_pynetbox(nfclient)
+        parent = "198.19.248.32/29"
+        device_name = "fn-ceos-sp-1"
+        if nb.ipam.prefixes.get(prefix=parent) or list(
+            nb.ipam.ip_addresses.filter(parent=parent)
+        ):
+            pytest.skip("primary IP test prefix already contains data")
+
+        device = nb.dcim.devices.get(name=device_name)
+        original_primary = device.primary_ip4.id if device.primary_ip4 else None
+        prefix = nb.ipam.prefixes.create(prefix=parent)
+        try:
+            kwargs = {
+                "prefix": parent,
+                "device": device_name,
+                "interface": "Loopback0",
+                "create_peer_ip": False,
+            }
+            first = nfclient.run_job(
+                "netbox", "create_ip", workers="any", kwargs=kwargs
+            )
+            first_result = next(iter(first.values()))
+            assert not first_result["failed"], first_result
+            address = first_result["result"]["address"]
+
+            second = nfclient.run_job(
+                "netbox",
+                "create_ip",
+                workers="any",
+                kwargs={**kwargs, "is_primary": True},
+            )
+            second_result = next(iter(second.values()))
+            assert not second_result["failed"], second_result
+            assert second_result["result"]["address"] == address
+            allocated_ip = nb.ipam.ip_addresses.get(address=address)
+            assert (
+                nb.dcim.devices.get(name=device_name).primary_ip4.id == allocated_ip.id
+            )
+        finally:
+            device = nb.dcim.devices.get(name=device_name)
+            current_primary = device.primary_ip4.id if device.primary_ip4 else None
+            if current_primary != original_primary:
+                device.primary_ip4 = original_primary
+                device.save()
+            for ip in nb.ipam.ip_addresses.filter(parent=parent):
+                ip.delete()
+            prefix.delete()
+
     def test_ip_index_with_child_subnet(self, nfclient: Any) -> None:
         """An indexed address reuses its interface and child subnet on repeat."""
         nb = get_pynetbox(nfclient)

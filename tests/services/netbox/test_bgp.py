@@ -1045,6 +1045,45 @@ class TestSyncBgpPeerings:
                 "_BGP_" in renamed_name
             ), f"renamed session '{renamed_name}' does not match template '{template}'"
 
+    def test_sync_bgp_peerings_updates_unnamed_session(self, nfclient):
+        """Sync finds an unnamed session by identity and updates it by NetBox ID."""
+        nb = get_pynetbox(nfclient)
+        device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        first = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [device], "rir": "lab"},
+        )
+        for response in first.values():
+            assert response["failed"] is False, response["errors"]
+        session = next(iter(nb.plugins.bgp.session.filter(device=device)))
+        original_name = session.name
+        session.name = None
+        session.description = "out of sync"
+        session.save()
+
+        preview = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [device], "rir": "lab", "dry_run": True},
+        )
+        for response in preview.values():
+            assert original_name in response["result"][device]["update"]
+        assert nb.plugins.bgp.session.get(session.id).name is None
+
+        result = nfclient.run_job(
+            "netbox",
+            "sync_bgp_peerings",
+            workers="any",
+            kwargs={"devices": [device], "rir": "lab"},
+        )
+        for response in result.values():
+            assert response["failed"] is False, response["errors"]
+            assert original_name in response["result"][device]["updated"]
+        assert nb.plugins.bgp.session.get(session.id).name == original_name
+
     def test_sync_bgp_peerings_duplicate_names_use_tuple_identity(self, nfclient):
         """Same-name NetBox sessions must remain distinct five-tuple identities."""
         nb = get_pynetbox(nfclient)
@@ -2570,6 +2609,66 @@ class TestUpdateBgpPeering:
                 ), f"{worker}: '{sname}' not in updated"
         for sname, desc in zip(names, ["bulk updated 1", "bulk updated 2"]):
             assert nb.plugins.bgp.session.get(name=sname).description == desc
+
+    def test_update_bgp_peering_bulk_by_id_with_unnamed_sessions(self, nfclient):
+        """NetBox IDs select distinct sessions even when both names are empty."""
+        nb = get_pynetbox(nfclient)
+        device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        names = [f"{device}_id_update_1", f"{device}_id_update_2"]
+        addresses = [
+            (_TEST_LOCAL_IP, _TEST_REMOTE_IP),
+            (_TEST_P2P_LOCAL, _TEST_P2P_REMOTE),
+        ]
+        for name, (local_address, remote_address) in zip(names, addresses):
+            nfclient.run_job(
+                "netbox",
+                "create_bgp_peering",
+                workers="any",
+                kwargs={
+                    "name": name,
+                    "device": device,
+                    "local_address": local_address,
+                    "remote_address": remote_address,
+                    "local_as": _TEST_LOCAL_AS,
+                    "remote_as": _TEST_REMOTE_AS,
+                    "rir": "lab",
+                    "create_reverse": False,
+                },
+            )
+        sessions = [nb.plugins.bgp.session.get(name=name) for name in names]
+        try:
+            for session in sessions:
+                session.name = None
+                session.save()
+            updates = [
+                {
+                    "id": sessions[0].id,
+                    "name": "ignored",
+                    "new_name": names[0],
+                    "description": "first",
+                },
+                {"id": sessions[1].id, "new_name": names[1], "description": "second"},
+            ]
+            result = nfclient.run_job(
+                "netbox",
+                "update_bgp_peering",
+                workers="any",
+                kwargs={"bulk_update": updates},
+            )
+            for response in result.values():
+                assert response["failed"] is False, response["errors"]
+                assert set(response["result"]["updated"]) == {
+                    sessions[0].id,
+                    sessions[1].id,
+                }
+            assert nb.plugins.bgp.session.get(sessions[0].id).description == "first"
+            assert nb.plugins.bgp.session.get(sessions[1].id).description == "second"
+            assert nb.plugins.bgp.session.get(sessions[0].id).name == names[0]
+            assert nb.plugins.bgp.session.get(sessions[1].id).name == names[1]
+        finally:
+            for session in sessions:
+                if session is not None:
+                    nb.plugins.bgp.session.get(session.id).delete()
 
     def test_update_bgp_peering_bulk_dry_run(self, nfclient):
         """dry_run=True + bulk - diffs in update list, no writes."""

@@ -1,3 +1,23 @@
+# 0.24.5
+
+## BUGS
+
+1. Fixed inventory construction from a dictionary consuming the caller's configuration. The same dictionary can now be reused to create multiple inventories.
+2. Invalid inventory hooks now fail inventory loading with the attach point and function in the error, preventing startup without a configured hook.
+3. Fixed NetBox `design_deploy` failing to flatten route-target custom function records without a `name`. Custom function records in route targets, VRRP groups, and console and power port collections now pass through flattening unchanged.
+4. Fixed NetBox `design_deploy` lookup preparation treating custom function records as ordinary objects. Every ordinary top-level collection can now mix object definitions and custom functions without requiring the custom records to supply object lookup fields.
+5. Fixed NetBox `design_deploy` dry runs reporting a device local context update for devices that do not yet exist and were skipped.
+6. Fixed NetBox `sync_bgp_peerings` failing after creates when matched NetBox BGP sessions have no name. Sync now updates all matched sessions by NetBox ID, and `update_bgp_peering` accepts IDs in bulk updates while retaining name-based selection.
+7. Fixed NetBox `create_ip` leaving a device's primary IP unchanged when `is_primary=True` is requested for an IP already assigned to its interface. The task now sets the matching IPv4 or IPv6 primary IP without saving an unchanged IP record.
+8. Fixed NetBox `create_ip` ignoring the requested IP status. New and existing IP addresses now receive the requested status when it differs from their current value.
+9. Fixed starting an existing FakeNOS network loses control of the old process issue
+
+## ENHANCEMENTS
+
+1. NetBox `create_ip` now includes link peer allocation errors in its result after allocating the local IP, including errors raised by the peer task.
+
+---
+
 # 0.24.4
 
 ## ENHANCEMENTS

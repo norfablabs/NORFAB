@@ -16,6 +16,194 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    @pytest.mark.parametrize(
+        "function_backed", [False, True], ids=["static", "function"]
+    )
+    def test_dry_run_skips_missing_device_local_context(
+        self, nfclient: Any, function_backed: bool
+    ) -> None:
+        """Do not report local-context updates for devices absent in a dry run."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        device_name = "norfab-design-missing-local-context-device"
+        if nb.dcim.devices.get(name=device_name):
+            pytest.skip("missing local-context test device already exists")
+        local_data = (
+            {"custom_function": "calculate_acme_device_context", "profile": "test"}
+            if function_backed
+            else {"profile": "test"}
+        )
+        design = {
+            "custom_functions": {
+                "calculate_acme_device_context": "nf://netbox/designs/calculate_acme_device_context.py"
+            },
+            "local_context_data": [
+                {
+                    "device": device_name,
+                    "site": "norfab-design-missing-local-context-site",
+                    "local_context_data": local_data,
+                }
+            ],
+        }
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={"design": design, "dry_run": True},
+        )
+        for result in response.values():
+            assert not result["failed"], result
+            assert result["result"]["local_context_data"] == {
+                "created": [],
+                "updated": [],
+            }
+
+    def test_custom_function_in_every_collection(self, nfclient: Any) -> None:
+        """Run custom records in every ordinary design collection."""
+        collections = [
+            "tenants",
+            "regions",
+            "manufacturers",
+            "platforms",
+            "device_types",
+            "device_roles",
+            "sites",
+            "rack_roles",
+            "racks",
+            "roles",
+            "rirs",
+            "asn_ranges",
+            "asns",
+            "vlan_groups",
+            "vlans",
+            "route_targets",
+            "vrfs",
+            "l2vpns",
+            "prefixes",
+            "devices",
+            "interfaces",
+            "l2vpn_terminations",
+            "power_ports",
+            "console_ports",
+            "power_outlets",
+            "console_server_ports",
+            "connections",
+            "vrrp_groups",
+            "ip_addresses",
+            "vrrp_group_assignments",
+            "primary_ip",
+            "bgp_communities",
+            "routing_policies",
+            "bgp_peerings",
+            "config_context",
+        ]
+        design = {
+            "custom_functions": {
+                "echo_design_record": "nf://netbox/designs/echo_design_record.py"
+            },
+            **{
+                name: [{"custom_function": "echo_design_record", "marker": name}]
+                for name in collections
+            },
+        }
+        design["asns"][0]["sites"] = ["custom site"]
+        design["vlans"][0]["vid"] = 120
+        design["interfaces"][0]["tagged_vlans"] = [{"label": "custom vlan"}]
+        design["prefixes"][0]["vlan"] = {"group": "custom group"}
+        design["l2vpn_terminations"][0]["group"] = "custom group"
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={"design": design, "context": {"request": "test"}, "dry_run": True},
+        )
+        for result in response.values():
+            assert not result["failed"], result
+            for name in collections:
+                assert result["result"][name]["custom"] == [
+                    {
+                        "function": "echo_design_record",
+                        "result": {
+                            "context": {"request": "test"},
+                            "dry_run": True,
+                            "arguments": {
+                                key: value
+                                for key, value in design[name][0].items()
+                                if key != "custom_function"
+                            },
+                        },
+                    }
+                ]
+
+    def test_custom_records_are_not_flattened(self, nfclient: Any) -> None:
+        """Pass custom records through flattening without changing their arguments."""
+        payloads = {
+            "route_targets": {
+                "range_name": "range1",
+                "devices": ["device1", "device2"],
+            },
+            "vrrp_groups": {
+                "vip": "192.0.2.1/32",
+                "assignments": [{"device": "device1"}],
+            },
+            "power_ports": {
+                "connection": {"device": "device2", "power_outlet": "PSU1"}
+            },
+            "console_ports": {
+                "connection": {"device": "device2", "console_server_port": "Console1"}
+            },
+            "power_outlets": {
+                "connection": {"device": "device2", "power_port": "PSU1"}
+            },
+            "console_server_ports": {
+                "connection": {"device": "device2", "console_port": "Console1"}
+            },
+        }
+        design = {
+            "custom_functions": {
+                "echo_design_record": "nf://netbox/designs/echo_design_record.py"
+            },
+            "route_targets": [
+                {"custom_function": "echo_design_record", **payloads["route_targets"]}
+            ],
+            "vrrp_groups": [
+                {"custom_function": "echo_design_record", **payloads["vrrp_groups"]}
+            ],
+            "power_ports": [
+                {"custom_function": "echo_design_record", **payloads["power_ports"]}
+            ],
+            "console_ports": [
+                {"custom_function": "echo_design_record", **payloads["console_ports"]}
+            ],
+            "power_outlets": [
+                {"custom_function": "echo_design_record", **payloads["power_outlets"]}
+            ],
+            "console_server_ports": [
+                {
+                    "custom_function": "echo_design_record",
+                    **payloads["console_server_ports"],
+                }
+            ],
+        }
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={"design": design, "context": {"request": "test"}, "dry_run": True},
+        )
+        for result in response.values():
+            assert not result["failed"], result
+            for collection, arguments in payloads.items():
+                assert result["result"][collection]["custom"] == [
+                    {
+                        "function": "echo_design_record",
+                        "result": {
+                            "context": {"request": "test"},
+                            "dry_run": True,
+                            "arguments": arguments,
+                        },
+                    }
+                ]
+
     def test_vlan_updates_add_tags_and_custom_field_values(self, nfclient: Any) -> None:
         """Preserve VLAN array members when a design adds tags and site references."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -772,7 +960,10 @@ class TestDesignDeploy:
                 if run == 2:
                     design["config_context"][0]["sites"] = [added_site_name]
                 reply = nfclient.run_job(
-                    "netbox", "design_deploy", workers="any", kwargs={"design": design}
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": design, "context": {"profile": "test"}},
                 )
                 for result in reply.values():
                     assert not result["failed"], result
@@ -1662,7 +1853,10 @@ class TestDesignDeploy:
             ),
             (nb.ipam.vlan_groups, {"name": "NORFAB ACME TEST VLANS"}),
             (nb.ipam.vrfs, {"name": "ACME BRANCH", "rd": "4200650001:100"}),
-            (nb.ipam.route_targets, {"name": ["4200650001:100", "4200650001:200"]}),
+            (
+                nb.ipam.route_targets,
+                {"name": ["4200650001:100", "4200650001:200", "4200650001:300"]},
+            ),
             (nb.plugins.bgp.routing_policy, {"name": ["ACME IMPORT", "ACME EXPORT"]}),
             (nb.plugins.bgp.community, {"value": "4200650001:100"}),
             (nb.ipam.asns, {"asn": [4200650000, 4200650001, 4200650002, 4200650003]}),
@@ -1739,10 +1933,19 @@ class TestDesignDeploy:
                         "unchanged" not in changes
                         for changes in result["result"].values()
                     )
+                    assert result["result"]["route_targets"]["custom"] == [
+                        {
+                            "function": "allocate_bgp_route_target",
+                            "result": {"name": "4200650001:300"},
+                        }
+                    ]
                     if run:
                         for collection, changes in result["result"].items():
                             assert not changes["created"], (collection, changes)
                 group = nb.ipam.vlan_groups.get(name="NORFAB ACME TEST VLANS")
+                allocated_target = nb.ipam.route_targets.get(name="4200650001:300")
+                assert allocated_target.description == "ACME allocated route target"
+                assert allocated_target.tenant.name == "ACME"
                 assert group.scope_type == "dcim.site"
                 assert group.scope_id == nb.dcim.sites.get(name=context["site"]).id
                 prefix = nb.ipam.prefixes.get(prefix="192.0.2.0/24")
@@ -2184,7 +2387,11 @@ tenants:
                     "netbox",
                     "design_deploy",
                     workers="any",
-                    kwargs={"design": design, "dry_run": dry_run},
+                    kwargs={
+                        "design": design,
+                        "context": {"tenant_name": names[1]},
+                        "dry_run": dry_run,
+                    },
                 )
                 assert reply
                 for result in reply.values():
@@ -2193,6 +2400,7 @@ tenants:
                     assert result["result"]["tenants"]["custom"][0]["result"] == {
                         "name": names[1],
                         "dry_run": dry_run,
+                        "context_tenant": names[1],
                     }
                 assert bool(nb.tenancy.tenants.get(name=names[1])) is not dry_run
         finally:

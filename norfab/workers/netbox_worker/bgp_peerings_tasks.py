@@ -439,7 +439,10 @@ def bgp_session_name_from_identity_diff(
             name_diff[device_name]["delete"].append(session_data.get("name"))
         for identity, field_changes in actions["update"].items():
             session_data = target_data.get(device_name, {}).get(identity, {})
-            name_diff[device_name]["update"][session_data.get("name")] = field_changes
+            name = (
+                session_data.get("name") or source_data[device_name][identity]["name"]
+            )
+            name_diff[device_name]["update"][name] = field_changes
         for identity in actions["in_sync"]:
             session_data = target_data.get(device_name, {}).get(identity, {})
             name_diff[device_name]["in_sync"].append(session_data.get("name"))
@@ -1781,6 +1784,8 @@ class NetboxBgpPeeringsTasks:
             custom_fields (dict, optional): Custom fields to update. Array values
                 add missing members; object references accept names or IDs.
             bulk_update (list, optional): List of session update dicts for bulk mode.
+                Each entry selects an existing session by ``id`` or ``name``;
+                ``id`` takes precedence. Use ``new_name`` to rename it.
             rir (str, optional): RIR name used when auto-creating ASNs.
             message (str, optional): Changelog message recorded on every NetBox write.
             branch (str, optional): NetBox branching plugin branch name.
@@ -1870,19 +1875,37 @@ class NetboxBgpPeeringsTasks:
             ret.dry_run = True
             result = {"update": [], "in_sync": []}
 
-        # Fetch all existing sessions in a single batch call
-        session_names = [s["name"] for s in bgp_sessions]
-        job.event(f"fetching {len(session_names)} BGP session(s) from NetBox")
-        nb_sessions_raw = self.bulk_filter(
-            nb.plugins.bgp.session,
-            name=session_names,
-            fields="id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,tags,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out",
-        )
+        # Fetch sessions by ID when available, otherwise by name.
+        session_ids = []
+        session_names = []
+        for session in bgp_sessions:
+            if session.get("id") is not None:
+                session_ids.append(session["id"])
+            else:
+                session_names.append(session["name"])
+        job.event(f"fetching {len(bgp_sessions)} BGP session(s) from NetBox")
+        session_fields = "id,name,description,status,local_address,remote_address,local_as,remote_as,custom_fields,tags,peer_group,import_policies,export_policies,prefix_list_in,prefix_list_out"
+        nb_sessions_raw = []
+        if session_ids:
+            nb_sessions_raw.extend(
+                self.bulk_filter(
+                    nb.plugins.bgp.session, id=session_ids, fields=session_fields
+                )
+            )
+        if session_names:
+            nb_sessions_raw.extend(
+                self.bulk_filter(
+                    nb.plugins.bgp.session, name=session_names, fields=session_fields
+                )
+            )
         normalised_nb = {
-            s.name: normalise_nb_bgp_session(dict(s), vrf_custom_field=vrf_custom_field)
+            s.id: normalise_nb_bgp_session(dict(s), vrf_custom_field=vrf_custom_field)
             for s in nb_sessions_raw
         }
-        nb_sessions_by_name = {session.name: session for session in nb_sessions_raw}
+        nb_sessions_by_id = {session.id: session for session in nb_sessions_raw}
+        ids_by_name = {
+            session.name: session.id for session in nb_sessions_raw if session.name
+        }
         if any(session.get("custom_fields") is not None for session in bgp_sessions):
             lookup_cache.setdefault("custom_fields", {})
             if "netbox_bgp.bgpsession" not in lookup_cache["custom_fields"]:
@@ -1901,14 +1924,18 @@ class NetboxBgpPeeringsTasks:
                     ].append(field)
         job.event(f"retrieved {len(normalised_nb)} BGP session(s) from NetBox")
 
-        # Build updates dictionary by session name
+        # Build updates dictionary by NetBox ID
         job.event("normalising BGP session update data")
         normalised_updates = {}
+        selected_by_id = set(session_ids)
         for bgp_session in bgp_sessions:
-            sname = bgp_session["name"]
+            session_id = bgp_session.get("id") or ids_by_name.get(
+                bgp_session.get("name")
+            )
+            label = bgp_session.get("name") or session_id
             # Report sessions not found in NetBox
-            if sname not in normalised_nb:
-                msg = f"BGP session '{sname}' not found in NetBox, skipping update"
+            if session_id not in normalised_nb:
+                msg = f"BGP session '{label}' not found in NetBox, skipping update"
                 job.event(msg, severity="ERROR")
                 log.error(f"{self.name} - {msg}")
                 ret.errors.append(msg)
@@ -1918,43 +1945,45 @@ class NetboxBgpPeeringsTasks:
                     bgp_session["import_policies"] = [bgp_session["import_policies"]]
                 if isinstance(bgp_session.get("export_policies"), str):
                     bgp_session["export_policies"] = [bgp_session["export_policies"]]
-                bgp_session_data = {
-                    k: v for k, v in bgp_session.items() if k != "new_name"
+                update = {
+                    k: v for k, v in bgp_session.items() if k not in ("new_name", "id")
                 }
-                bgp_session_data["name"] = bgp_session.get(
-                    "new_name", bgp_session_data["name"]
+                update["name"] = (
+                    bgp_session["new_name"]
+                    if bgp_session.get("new_name") is not None
+                    else normalised_nb[session_id]["name"]
                 )
-                normalised_updates[sname] = dict(bgp_session_data)
-                if "import_policies" in bgp_session_data:
-                    normalised_updates[sname]["import_policies"] = sorted(
-                        bgp_session_data.get("import_policies") or []
+                normalised_updates[session_id] = update
+                if "import_policies" in update:
+                    update["import_policies"] = sorted(
+                        update.get("import_policies") or []
                     )
-                if "export_policies" in bgp_session_data:
-                    normalised_updates[sname]["export_policies"] = sorted(
-                        bgp_session_data.get("export_policies") or []
+                if "export_policies" in update:
+                    update["export_policies"] = sorted(
+                        update.get("export_policies") or []
                     )
-                if "tags" in bgp_session_data:
+                if "tags" in update:
                     # Compare and write the complete additive tag list.
-                    normalised_nb[sname]["tags"] = merge_array_values(
-                        [], nb_sessions_by_name[sname].tags, attribute="name"
+                    normalised_nb[session_id]["tags"] = merge_array_values(
+                        [], nb_sessions_by_id[session_id].tags, attribute="name"
                     )
-                    normalised_updates[sname]["tags"] = merge_array_values(
-                        nb_sessions_by_name[sname].tags,
-                        bgp_session_data["tags"],
+                    update["tags"] = merge_array_values(
+                        nb_sessions_by_id[session_id].tags,
+                        update["tags"],
                         attribute="name",
                     )
-                if bgp_session_data.get("custom_fields") is not None:
+                if update.get("custom_fields") is not None:
                     fields = lookup_cache["custom_fields"]["netbox_bgp.bgpsession"]
                     current, merged = merge_resolved_custom_fields(
                         self,
                         nb,
-                        nb_sessions_by_name[sname],
-                        bgp_session_data["custom_fields"],
+                        nb_sessions_by_id[session_id],
+                        update["custom_fields"],
                         fields["object"],
                         fields["multiobject"],
                     )
-                    normalised_nb[sname]["custom_fields"] = current
-                    normalised_updates[sname]["custom_fields"] = merged
+                    normalised_nb[session_id]["custom_fields"] = current
+                    update["custom_fields"] = merged
 
         # Compare complete dictionaries using make_diff; classify in_sync vs changed
         job.event("calculating BGP session update diff")
@@ -1963,10 +1992,16 @@ class NetboxBgpPeeringsTasks:
             {"_": normalised_nb},
         )["_"]
 
-        changed_snames = set(sessions_diff["update"].keys())
-        result["in_sync"].extend(sessions_diff["in_sync"])
+        result["in_sync"].extend(
+            (
+                session_id
+                if session_id in selected_by_id
+                else normalised_nb[session_id]["name"]
+            )
+            for session_id in sessions_diff["in_sync"]
+        )
         job.event(
-            f"BGP session update diff complete: {len(changed_snames)} update, "
+            f"BGP session update diff complete: {len(sessions_diff['update'])} update, "
             f"{len(sessions_diff['in_sync'])} in sync"
         )
 
@@ -1975,8 +2010,12 @@ class NetboxBgpPeeringsTasks:
                 "dry-run requested, returning BGP session update diff without changes"
             )
             result["update"] = [
-                {"name": sname, "diff": changes}
-                for sname, changes in sessions_diff["update"].items()
+                {
+                    "name": normalised_nb[session_id]["name"],
+                    **({"id": session_id} if session_id in selected_by_id else {}),
+                    "diff": changes,
+                }
+                for session_id, changes in sessions_diff["update"].items()
             ]
             ret.result = result
             ret.dry_run = True
@@ -1986,8 +2025,8 @@ class NetboxBgpPeeringsTasks:
         # Build update payloads — iterate over diff to get only changed fields per session
         job.event("building BGP session update payloads")
         update_payloads = []
-        for sname, field_changes in sessions_diff["update"].items():
-            nb_session = normalised_nb[sname]
+        for session_id, field_changes in sessions_diff["update"].items():
+            nb_session = normalised_nb[session_id]
             addr_family = get_addr_family(nb_session["local_address"] or "0.0.0.0")
             payload = {"id": nb_session["id"]}
             payload.update(
@@ -2003,7 +2042,7 @@ class NetboxBgpPeeringsTasks:
                     vrf_custom_field=vrf_custom_field,
                 )
             )
-            update_payloads.append((sname, payload))
+            update_payloads.append((session_id, payload))
         job.event(f"prepared {len(update_payloads)} BGP session update payload(s)")
 
         # Bulk update
@@ -2026,7 +2065,14 @@ class NetboxBgpPeeringsTasks:
                     ret.result = result
                     log.error(f"{self.name} - {msg}")
                     return ret
-                result["updated"].extend(name for name, _ in batch)
+                result["updated"].extend(
+                    (
+                        session_id
+                        if session_id in selected_by_id
+                        else normalised_nb[session_id]["name"]
+                    )
+                    for session_id, _ in batch
+                )
             msg = f"updated {len(update_payloads)} BGP session(s)"
             job.event(msg)
             log.info(f"{self.name} - {msg}")
@@ -2080,6 +2126,7 @@ class NetboxBgpPeeringsTasks:
         Collects BGP session data from devices via Nornir ``parse_ttp`` with
         ``get="bgp_neighbors"``, compares against existing NetBox BGP sessions and
         creates, updates, or (optionally) deletes sessions in NetBox accordingly.
+        Matched sessions are updated by NetBox ID, including sessions with no name.
 
         Args:
             job: NorFab Job object.
@@ -2519,7 +2566,7 @@ class NetboxBgpPeeringsTasks:
         bulk_update = []
         for device_name, actions in identity_diff.items():
             for identity, field_changes in actions["update"].items():
-                entry = {"name": normalised_nb[device_name][identity]["name"]}
+                entry = {"id": normalised_nb[device_name][identity]["id"]}
                 for field, change in field_changes.items():
                     new_value = change["new_value"]
                     if field == "name":
@@ -2574,11 +2621,15 @@ class NetboxBgpPeeringsTasks:
                 batch_size=batch_size,
             )
             ret.errors.extend(update_result.errors)
-            updated_names = set(update_result.result.get("updated", []))
-            for device_name, actions in full_diff.items():
-                for sname in actions["update"]:
-                    if sname in updated_names:
-                        device_results[device_name]["updated"].append(sname)
+            updated_ids = set(update_result.result.get("updated", []))
+            for device_name, actions in identity_diff.items():
+                for identity in actions["update"]:
+                    old_session = normalised_nb[device_name][identity]
+                    old_name = old_session["name"]
+                    if old_session["id"] in updated_ids:
+                        device_results[device_name]["updated"].append(
+                            old_name or normalised_live[device_name][identity]["name"]
+                        )
             if update_result.failed:
                 ret.failed = True
                 return ret

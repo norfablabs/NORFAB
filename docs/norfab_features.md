@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 30 September 2026*
+*Last updated: 1 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -193,7 +193,8 @@ or more YAML definitions and recursively merge common and worker-specific
 configuration. **Use cases:** environment overlays, repeatable deployment, and
 centralized worker configuration. **Limitations:** merge order and glob overlap
 must be managed deliberately; sensitive values require appropriate secret and
-file controls.
+file controls. Dictionary-backed inventories preserve the caller's configuration
+for reuse across instances.
 [Inventory details](reference_norfab_inventory.md)
 
 ### Templated inventory
@@ -222,8 +223,9 @@ Starts an ordered selection of broker/workers, lets workers declare
 `depends_on` relationships, staggers worker process creation to control peak
 startup CPU, and runs configured startup, exit, Nornir-startup, and Nornir-exit
 Python hooks. **Use cases:** waiting for a source-of-truth service, preloading
-data, registering integrations, and cleanup. **Limitations:** hooks are trusted
-code; dependency ordering does not replace external service health orchestration.
+data, registering integrations, and cleanup. Invalid hook imports fail inventory
+loading with the attach point and function identified. **Limitations:** hooks are
+trusted code; dependency ordering does not replace external service health orchestration.
 [Hook details](customization/norfab_hooks.md)
 
 ### Worker capacity and resource controls
@@ -721,7 +723,7 @@ VLAN groups can be scoped by name to a rack, location, site, site group, region,
 ASN records resolve site lists and IPAM roles. Explicit prefixes resolve named location, site, site-group or region scopes and group/VID VLAN references.
 Updating an ASN through a design adds new sites, tags, and custom-field list items without removing existing ones. Design VLAN and prefix updates add tags and custom-field list items. The `create_asn`, `create_vlan`, and `create_prefix` tasks follow the same rules for their respective objects.
 Design processors resolve names in object and multiobject custom fields using each field's related NetBox object type. On updates, tags, custom-field lists, and explicitly supported relationship lists add missing values. The referenced objects and custom-field definitions must exist when each record is processed.
-Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last.
+Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last. Dry runs omit missing devices from local-context update results.
 Device types accept `default_platform` as a platform name.
 Route targets support bulk creation/update before VRFs and L2VPNs; inline
 import/export definitions are flattened and associated with their parent objects.
@@ -744,8 +746,9 @@ IP allocation prefix filters resolve `role` by role name, not slug, and reject u
 BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. The standalone create task resolves custom-field references for new sessions.
 Inline import/export policy definitions are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
-deployment phase, receiving record arguments, `netbox`, and `dry_run`; custom
+deployment phase, receiving the design `context`, record arguments, `netbox`, and `dry_run`; custom
 code is responsible for honoring dry-run and returning serializable results.
+Every ordinary top-level collection can mix object definitions and custom function records; custom records pass through flattening and lookup preparation without ordinary object identity fields. Device local context uses a separate function contract.
 Deployment emits stage and collection summaries to logs and job events;
 preparation or handler failures stop processing and populate result errors.
 Omitted objects are not deleted. **Use cases:** repeatable NetBox prerequisite
@@ -821,10 +824,11 @@ links.
 ### IP address and prefix allocation
 
 Allocates next-available addresses or child prefixes, assigns interface and
-primary IP data, carries tenant/VRF/site/role/tags metadata, supports connected
+primary IP data, carries tenant/VRF/site/role/status/tags metadata, supports connected
 peer addressing and point-to-point peer derivation, and performs bulk interface
 allocation. **Use cases:** provisioning links, loopbacks, management addresses,
 new devices, and template-driven zero-touch workflows.
+Peer allocation errors are reported after the local address is allocated.
 **Limitations:** parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
 `create_ip` can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.
@@ -991,7 +995,8 @@ prerequisites; templates and transformer files execute as trusted code.
 
 Creates or updates individual and bulk BGP sessions, including separate NetBox
 IP and ASN queries for each side of a new session, and reconciles live BGP
-neighbors with NetBox using five-tuple session identity, live-data filters,
+neighbors with NetBox using five-tuple session identity and ID-based updates,
+including unnamed sessions, live-data filters,
 dry-run, optional stale-session deletion, and tri-state existing-description
 preservation. **Use cases:** routing
 source-of-truth onboarding and drift control.
@@ -1129,7 +1134,8 @@ simulated network CLI endpoints.
 ### Simulated network startup
 
 Starts named FakeNOS networks in isolated child processes from file-based or
-inline inventory, with multiple independent networks per worker. **Use cases:**
+inline inventory, with multiple independent networks per worker. Starting a
+network with an existing name fails; use `restart` to replace it. **Use cases:**
 fast automation development, large endpoint mocks, demos, parser fixtures,
 failure injection, and CI without device images. **Limitations:** simulation
 implements configured command responses and is not a full network operating

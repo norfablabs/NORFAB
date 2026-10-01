@@ -7,14 +7,14 @@ tags:
 
 > task api name: `update_bgp_peering`
 
-Updates one or many existing BGP sessions in NetBox. Supports single-session mode (`name` plus field kwargs) and bulk mode (`bulk_update` list of dicts). Only non-None fields are updated. Idempotency is enforced via `DeepDiff`: sessions with no effective changes are reported in `in_sync` and no write is performed.
+Updates one or many existing BGP sessions in NetBox. Supports single-session mode (`name` plus field kwargs) and bulk mode (`bulk_update` list of dicts). Each bulk entry selects a session by NetBox `id` or existing `name`; `id` takes precedence when both are given. Use `new_name` to rename a session. Only non-None fields are updated. Idempotency is enforced via `DeepDiff`: sessions with no effective changes are reported in `in_sync` and no write is performed.
 
 ## How It Works
 
 1. Client submits `update_bgp_peering` request to NetBox worker
 2. NetBox worker validates that the BGP plugin is installed
 3. Worker resolves the RIR ID once (when `rir` is provided) for on-demand ASN creation
-4. For each session spec, the current session is fetched from NetBox by name
+4. For each session spec, the current session is fetched from NetBox by ID or name
 5. The proposed field values are compared against current NetBox values using `DeepDiff`
 6. If there are no differences, the session is added to `in_sync` — no write is performed
 7. In dry-run mode — the diff is returned without writing
@@ -52,6 +52,9 @@ Normal mode returns updated and in-sync BGP session details. In dry-run mode, th
 ```
 
 Sessions with no effective changes appear in `in_sync` regardless of dry-run mode.
+Sessions selected by ID appear under their numeric ID in `updated` and
+`in_sync`. Their dry-run update entries include both the current `name`
+(possibly `null`) and `id`.
 
 ## VRF Custom Field
 

@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -62,6 +63,24 @@ def test_runtime_inventory_rejects_circular_worker_dependencies(
             },
             base_dir=str(tmp_path),
         )
+
+
+class TestInventoryDataReuse:
+    def test_constructor_preserves_input_data(self) -> None:
+        data = {
+            "broker": {"endpoint": "tcp://127.0.0.1:5555"},
+            "topology": {"broker": True, "workers": []},
+        }
+        original = deepcopy(data)
+
+        first = NorFabInventory(data=data)
+        second = NorFabInventory(data=data)
+
+        assert data == original
+        assert first.broker == second.broker == original["broker"]
+        assert first.topology == second.topology == original["topology"]
+        first.broker["endpoint"] = "tcp://127.0.0.1:5556"
+        assert data == original
 
 
 class TestInventoryLoad:
@@ -225,6 +244,16 @@ class TestInventoryLoadFromDictionary:
 
 class TestHooksInventory:
     inventory = NorFabInventory("./nf_tests_inventory/inventory.yaml")
+
+    def test_invalid_hook_fails_inventory_construction(self, tmp_path: Path):
+        with pytest.raises(
+            ValueError,
+            match="Failed loading hook 'missing_hooks:startup' for attach point 'startup'",
+        ):
+            NorFabInventory(
+                data={"hooks": {"startup": [{"function": "missing_hooks:startup"}]}},
+                base_dir=str(tmp_path),
+            )
 
     def test_hooks_load(self):
         assert self.inventory.hooks, "no hooks loaded"

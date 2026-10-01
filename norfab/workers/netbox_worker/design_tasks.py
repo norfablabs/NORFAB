@@ -160,6 +160,8 @@ def flatten_design(design: dict) -> dict:
         ("console_server_ports", "console_server_port"),
     ):
         for port in design.get(collection, []):
+            if "custom_function" in port:
+                continue
             connection = port.pop("connection", None)
             if connection is not None:
                 remote_device = connection.pop("device")
@@ -186,6 +188,8 @@ def flatten_design(design: dict) -> dict:
                     }
                 )
     for group in design.get("vrrp_groups", []):
+        if "custom_function" in group:
+            continue
         vip = group.pop("vip", None)
         if vip:
             design.setdefault("ip_addresses", []).append(
@@ -208,7 +212,11 @@ def flatten_design(design: dict) -> dict:
 
     # A route target can appear at the top level and in several VRFs or L2VPNs.
     # NetBox identifies it by name, so keep the first definition for that name.
-    route_target_names = {target["name"] for target in design.get("route_targets", [])}
+    route_target_names = {
+        target["name"]
+        for target in design.get("route_targets", [])
+        if "custom_function" not in target
+    }
     for collection in ("vrfs", "l2vpns"):
         for record in design.get(collection, []):
             if "custom_function" in record:
@@ -278,13 +286,18 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
         record["site"]
         for collection in (design.vlan_groups, design.devices, design.prefixes)
         for record in collection
-        if record.get("site")
+        if "custom_function" not in record and record.get("site")
     }
     site_names.update(
-        name for record in design.asns for name in (record.get("sites") or [])
+        name
+        for record in design.asns
+        if "custom_function" not in record
+        for name in (record.get("sites") or [])
     )
     site_names.difference_update(
-        record["name"] for record in design.sites if "name" in record
+        record["name"]
+        for record in design.sites
+        if "custom_function" not in record and "name" in record
     )
     if site_names:
         cache["sites"].update(
@@ -298,9 +311,15 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
 
     # Terminations can refer to an L2VPN without a matching L2VPN definition
     # in this design, so include both sources in the lookup.
-    l2vpn_names = {record["name"] for record in design.l2vpns if "name" in record}
+    l2vpn_names = {
+        record["name"]
+        for record in design.l2vpns
+        if "custom_function" not in record and "name" in record
+    }
     l2vpn_names.update(
-        record["l2vpn"] for record in design.l2vpn_terminations if "l2vpn" in record
+        record["l2vpn"]
+        for record in design.l2vpn_terminations
+        if "custom_function" not in record and "l2vpn" in record
     )
     if l2vpn_names:
         cache["l2vpns"].update(
@@ -314,19 +333,27 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
 
     # Group and VID identify a VLAN; VID alone may match multiple groups.
     vlan_keys = {
-        (record["group"], record["vid"]) for record in design.vlans if "vid" in record
+        (record["group"], record["vid"])
+        for record in design.vlans
+        if "custom_function" not in record and "vid" in record
     }
     for record in design.interfaces:
+        if "custom_function" in record:
+            continue
         for vlan in record.get("tagged_vlans", []):
             vlan_keys.add((vlan["group"], vlan["vid"]))
         if isinstance(record.get("untagged_vlan"), dict):
             vlan = record["untagged_vlan"]
             vlan_keys.add((vlan["group"], vlan["vid"]))
     for record in design.prefixes:
+        if "custom_function" in record:
+            continue
         if isinstance(record.get("vlan"), dict) and "group" in record["vlan"]:
             vlan = record["vlan"]
             vlan_keys.add((vlan["group"], vlan["vid"]))
     for record in design.l2vpn_terminations:
+        if "custom_function" in record:
+            continue
         if "group" in record:
             vlan_keys.add((record["group"], record["vid"]))
     if vlan_keys:
@@ -348,6 +375,7 @@ def build_lookup_cache(worker: Any, nb: Any, design: DesignDocument) -> dict:
 
 def execute_custom_functions(
     nb: Any,
+    context: dict,
     records: list[dict],
     functions: dict,
     dry_run: bool,
@@ -355,7 +383,7 @@ def execute_custom_functions(
 ) -> None:
     """Execute a collection's custom calls in order and append their results.
 
-    Pass sibling arguments unchanged, plus netbox and dry_run. Exceptions
+    Pass sibling arguments unchanged, plus context, netbox, and dry_run. Exceptions
     propagate to the deployment error handler; completed results are retained.
     """
     for record in records:
@@ -370,7 +398,7 @@ def execute_custom_functions(
             dry_run,
         )
         value = functions[record["custom_function"]](
-            **arguments, netbox=nb, dry_run=dry_run
+            **arguments, context=context, netbox=nb, dry_run=dry_run
         )
         results.setdefault("custom", []).append(
             {"function": record["custom_function"], "result": value}
@@ -3563,12 +3591,14 @@ def process_local_context_data(
     instance: str,
     branch: str | None,
     custom_functions: dict,
+    context: dict,
 ) -> dict:
     """Patch per-device local context data after all other design objects.
 
     Match by site and device name, plus tenant when supplied. A static
     ``local_context_data`` dictionary is sent unchanged. A custom function
-    receives the pynetbox device record, ``netbox``, ``dry_run``, and sibling
+    receives the pynetbox device record, design ``context``, ``netbox``,
+    ``dry_run``, and sibling
     fields inside the local context dictionary as keyword arguments. It must
     return a dictionary. Existing data is replaced, not merged. In dry-run,
     functions are skipped for devices that
@@ -3584,9 +3614,11 @@ def process_local_context_data(
         instance: NetBox instance; not used by this handler.
         branch: NetBox branch; not used by this handler.
         custom_functions: Callable functions registered by the design.
+        context: Validated design input context.
 
     Returns:
-        dict: Device names under ``updated``; ``created`` is always empty.
+        dict: Matched device names under ``updated``; ``created`` is always empty.
+            A dry run omits devices that do not yet exist.
 
     Raises:
         ValueError: If a device match is ambiguous or a function returns
@@ -3610,6 +3642,7 @@ def process_local_context_data(
         else []
     )
     updated = []
+    updated_names = []
     for record in records:
         matches = [
             device
@@ -3629,26 +3662,30 @@ def process_local_context_data(
                 f"{record['site']}:{record['device']}"
             )
         device = matches[0]
-        context = record["local_context_data"]
-        if "custom_function" in context:
+        local_data = record["local_context_data"]
+        if "custom_function" in local_data:
             function_kwargs = {
-                key: value for key, value in context.items() if key != "custom_function"
+                key: value
+                for key, value in local_data.items()
+                if key != "custom_function"
             }
-            context = custom_functions[context["custom_function"]](
+            local_data = custom_functions[local_data["custom_function"]](
                 device=device,
+                context=context,
                 netbox=nb,
                 dry_run=dry_run,
                 **function_kwargs,
             )
-            if not isinstance(context, dict):
+            if not isinstance(local_data, dict):
                 raise ValueError(
                     f"local context function '{record['local_context_data']['custom_function']}' "
                     "must return a dictionary"
                 )
-        updated.append({"id": device.id, "local_context_data": context})
+        updated.append({"id": device.id, "local_context_data": local_data})
+        updated_names.append(record["device"])
     if updated and not dry_run:
         nb.dcim.devices.update(updated)
-    return {"created": [], "updated": [record["device"] for record in records]}
+    return {"created": [], "updated": updated_names}
 
 
 def process_config_context(
@@ -3990,27 +4027,30 @@ class NetboxDesignTasks:
                             if key != "custom_function"
                         }
                         inspect.signature(function).bind(
-                            **arguments, netbox=nb, dry_run=dry_run
+                            **arguments, context=context, netbox=nb, dry_run=dry_run
                         )
             for record in validated.local_context_data:
-                context = record["local_context_data"]
-                if "custom_function" in context:
+                local_context = record["local_context_data"]
+                if "custom_function" in local_context:
                     function_kwargs = {
                         key: value
-                        for key, value in context.items()
+                        for key, value in local_context.items()
                         if key != "custom_function"
                     }
                     inspect.signature(
-                        custom_functions[context["custom_function"]]
+                        custom_functions[local_context["custom_function"]]
                     ).bind(
                         device=None,
+                        context=context,
                         netbox=nb,
                         dry_run=dry_run,
                         **function_kwargs,
                     )
             handlers = dict(DESIGN_HANDLERS_ORDER)
             handlers["local_context_data"] = partial(
-                process_local_context_data, custom_functions=custom_functions
+                process_local_context_data,
+                custom_functions=custom_functions,
+                context=context,
             )
         except Exception as exc:
             msg = f"failed to prepare netbox design: {exc}"
@@ -4039,7 +4079,12 @@ class NetboxDesignTasks:
                     branch=branch,
                 )
                 execute_custom_functions(
-                    nb, records, custom_functions, dry_run, ret.result[collection]
+                    nb,
+                    context,
+                    records,
+                    custom_functions,
+                    dry_run,
+                    ret.result[collection],
                 )
                 changes = ret.result[collection]
                 msg = (

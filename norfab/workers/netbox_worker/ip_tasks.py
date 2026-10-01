@@ -214,6 +214,8 @@ class NetboxIpTasks:
             description (str, optional): A description for the allocated IP address.
             device (str, optional): The device associated with the IP address.
             interface (str, optional): The interface associated with the IP address.
+            is_primary (bool, optional): If True, set the allocated IPv4 or IPv6
+                address as the device's primary IP, including when already assigned.
             vrrp_group (str, optional): Existing VRRP group name to assign the IP to.
                 Must uniquely identify a VRRPv2 or VRRPv3 group. Reuses an IP assigned
                 to that group within the selected prefix, optionally matching description.
@@ -225,6 +227,8 @@ class NetboxIpTasks:
             dns_name (str, optional): The DNS name for the IP address.
             tenant (str, optional): The tenant associated with the IP address.
             comments (str, optional): Additional comments for the IP address.
+            status (str, optional): Status for the IP address, such as active,
+                reserved, or deprecated. Updates an existing IP when different.
             instance (str, optional): The NetBox instance to use.
             dry_run (bool, optional): If True, do not actually allocate the IP address.
             branch (str, optional): Branch name to use, need to have branching plugin
@@ -242,6 +246,7 @@ class NetboxIpTasks:
                 remote device interface connected to requested device and interface.
                 Disabled for IPv4 /32 and IPv6 /128 allocations, which have no
                 room for a peer. Host allocations also skip peer-subnet reuse.
+                Peer allocation errors are returned while the local IP remains allocated.
 
         Returns:
             dict: A dictionary containing the result of the IP allocation.
@@ -624,6 +629,9 @@ class NetboxIpTasks:
         if role and role != getattr(nb_ip.role, "value", nb_ip.role):
             nb_ip.role = role
             has_changes = True
+        if status and status != getattr(nb_ip.status, "value", nb_ip.status):
+            nb_ip.status = status
+            has_changes = True
         if tags and not any(t in nb_ip.tags for t in tags):
             for t in tags:
                 if t not in nb_ip.tags:
@@ -640,13 +648,25 @@ class NetboxIpTasks:
             ):
                 nb_ip.assigned_object_id = nb_interface.id
                 nb_ip.assigned_object_type = "dcim.interface"
-                if is_primary is not None:
-                    nb_device = nb.dcim.devices.get(name=device)
-                    nb_device.primary_ip4 = nb_ip.id
                 has_changes = True
                 log.info(
                     f"{device}:{nb_interface} - association {nb_ip} IP address with interface"
                 )
+            if is_primary is True:
+                device_record = nb.dcim.devices.get(name=device)
+                if ipaddress.ip_interface(str(nb_ip)).version == 4:
+                    if (
+                        not device_record.primary_ip4
+                        or device_record.primary_ip4.id != nb_ip.id
+                    ):
+                        device_record.primary_ip4 = nb_ip.id
+                        nb_device = device_record
+                elif (
+                    not device_record.primary_ip6
+                    or device_record.primary_ip6.id != nb_ip.id
+                ):
+                    device_record.primary_ip6 = nb_ip.id
+                    nb_device = device_record
         if mask_len and not str(nb_ip).endswith(f"/{mask_len}"):
             address = str(nb_ip).split("/")[0]
             nb_ip.address = f"{address}/{mask_len}"
@@ -656,11 +676,11 @@ class NetboxIpTasks:
         if dry_run is True:
             ret.status = "unchanged"
             ret.dry_run = True
-        elif has_changes:
-            nb_ip.save()
-            job.event(f"updated '{str(nb_ip)}' IP address parameters")
-            # make IP primary for device
-            if is_primary is True and nb_device:
+        elif has_changes or nb_device:
+            if has_changes:
+                nb_ip.save()
+                job.event(f"updated '{str(nb_ip)}' IP address parameters")
+            if nb_device:
                 nb_device.save()
         else:
             ret.status = "unchanged"
@@ -684,11 +704,22 @@ class NetboxIpTasks:
             job.event(
                 f"creating IP address for link peer '{create_peer_ip_data['device']}:{create_peer_ip_data['interface']}'"
             )
-            peer_ip = self.create_ip(
-                **create_peer_ip_data, prefix=str(nb_prefix), job=job
-            )
-            if peer_ip.failed == False:
-                ret.result["peer"] = peer_ip.result
+            try:
+                peer_ip = self.create_ip(
+                    **create_peer_ip_data, prefix=str(nb_prefix), job=job
+                )
+            except Exception as exc:
+                ret.errors.append(
+                    f"failed to allocate link peer IP: {exc}; local IP '{nb_ip}' may already be allocated"
+                )
+            else:
+                if peer_ip.failed:
+                    ret.errors.append(
+                        f"failed to allocate link peer IP; local IP '{nb_ip}' may already be allocated"
+                    )
+                    ret.errors.extend(peer_ip.errors)
+                else:
+                    ret.result["peer"] = peer_ip.result
 
         job.event(f"IP address task complete for '{str(nb_ip)}'")
         return ret

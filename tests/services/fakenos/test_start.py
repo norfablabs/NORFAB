@@ -30,6 +30,45 @@ pytestmark = [
 
 
 class TestStartTask:
+    def test_start_existing_network_keeps_original_process(self, nfclient):
+        network = "duplicate-start-test"
+        started = False
+        try:
+            first = _start_network(nfclient, network, NET1_INVENTORY)
+            assert all(not data["failed"] for data in first.values())
+            started = True
+            pids = {
+                worker: data["result"][network]["pid"]
+                for worker, data in first.items()
+            }
+
+            second = _start_network(nfclient, network, NET1_INVENTORY)
+            assert all(data["failed"] for data in second.values())
+            assert all(
+                "already exists" in str(data["errors"])
+                for data in second.values()
+            )
+
+            inspected = nfclient.run_job("fakenos", "inspect_networks")
+            for worker, data in inspected.items():
+                assert set(data["result"]) == {network}
+                assert data["result"][network]["pid"] == pids[worker]
+                assert data["result"][network]["alive"] is True
+
+            stopped = nfclient.run_job(
+                "fakenos", "stop", kwargs={"network": network}
+            )
+            assert all(
+                data["result"][network] == "stopped" for data in stopped.values()
+            )
+            inspected = nfclient.run_job(
+                "fakenos", "inspect_networks", kwargs={"details": False}
+            )
+            assert all(network not in data["result"] for data in inspected.values())
+        finally:
+            if started:
+                nfclient.run_job("fakenos", "stop", kwargs={"network": network})
+
     def test_start_task_net1(self, nfclient):
         _stop_all_networks(nfclient)
 

@@ -2,9 +2,11 @@ from typing import Any
 
 
 def calculate_acme_device_context(
-    device: Any, netbox: Any, dry_run: bool, profile: str
+    device: Any, context: dict, netbox: Any, dry_run: bool, profile: str
 ) -> dict:
     """Calculate local context from the deployed device and its interfaces."""
+    if context.get("profile", profile) != profile:
+        raise ValueError("design context profile does not match")
     return {
         "acme": {
             "profile": profile,

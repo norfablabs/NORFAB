@@ -102,6 +102,11 @@ name_template="{device}_BGP_{name}"
 
 ## Output
 
+Existing sessions are matched by device, local address and AS, and remote
+address and AS. Updates use their NetBox IDs, including when a session has no
+name. An unnamed matched session receives the rendered `name_template` name;
+dry-run and live update results show that rendered name.
+
 **Dry-run mode** returns what *would* happen without writing to NetBox.
 
 **Live-run mode** applies changes and returns the same structure showing what was done.

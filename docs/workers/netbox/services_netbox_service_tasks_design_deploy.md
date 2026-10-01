@@ -479,45 +479,50 @@ FHRP group assignments and ConfigContext objects do not support custom fields. D
 
 Custom functions let a design run Python during deployment for use cases such as custom next-available allocation, Netbox lookups, or object creation that needs additional logic.
 
-The following contract applies to `custom_function` on an object record. [Device-local context functions](#device-local-context) have a different contract.
+The following contract applies to `custom_function` on an object record. A function [inside `local_context_data`](#device-local-context) has a different return contract: its dictionary becomes the device's context data.
 
 When `branch` is supplied to `design_deploy`, the provided `netbox` client is already configured for that branch. Queries and writes through this client use the deployment branch. Custom functions do not need to initialize branching themselves.
 
 | Argument | Type | Supplied by | Meaning |
 | --- | --- | --- | --- |
+| `context` | `dict` | Deployment | Design input context after optional schema validation. |
 | `netbox` | `pynetbox.core.api.Api` | Deployment | Pynetbox client bound to the deployment's Netbox instance and branch. Use it for queries and writes. |
 | `dry_run` | `bool` | Deployment | Whether this is a preview. The function must avoid writes when `True`. Deployment does not intercept its API calls. |
 | Other record fields | As defined in YAML | Design record | Every field except `custom_function` is passed unchanged as a keyword argument. For example, `profile: foo` becomes `profile="foo"`. |
 
-`custom_function` selects the registered function and is not passed as an argument. Do not supply `netbox` or `dry_run` in the record, because deployment supplies them. No device object or design `context` is passed automatically.
+`custom_function` selects the registered function and is not passed as an argument. Do not supply `context`, `netbox`, or `dry_run` in the record, because deployment supplies them. No device object is passed automatically.
+
+Every ordinary top-level object collection can mix object definitions and custom function records. Custom function records pass through flattening and lookup preparation without requiring object identity fields such as a route target `name` or a VLAN `group`. The collection handler processes object definitions first, then the custom functions run in record order. The function receives its record's remaining fields and handles its own Netbox writes. `local_context_data` uses the [separate device-local contract](#device-local-context).
+
+For these object records, the return value is a report to the caller. Deployment appends it to the collection's `custom` list in the same order as the custom function records. It does not use the value to create or update an object, supply fields to another handler, or resolve references in later collections. The function must make any Netbox writes itself and honor `dry_run`. A string, number, dictionary, list, or `None` can be returned; choose a JSON-serializable value that is useful to callers.
 
 | Function outcome | Deployment behavior |
 | --- | --- |
-| Returns a value | Appends `{"function": NAME, "result": VALUE}` under the object's `custom` results list, such as `vlans.custom`. Return JSON-serializable data. The value is not passed to the object handler or written to Netbox automatically. |
+| Returns a value | Appends `{"function": NAME, "result": VALUE}` under the collection's `custom` results list, such as `route_targets.custom`. |
 | Returns nothing | Records `null` as the function result. |
 | Raises an exception | Reports the failure and stops deployment. Earlier writes are not rolled back. |
 
 === "Route target allocation"
 
-    This example allocates a route target. Register the Python file under `custom_functions`, then use `custom_function: allocate_route_target` in a `route_targets` record. The function runs during the route-target deployment stage, after route-target records without `custom_function` have been processed. The record's other fields become keyword arguments, and deployment also supplies `netbox` and `dry_run`.
+    This example allocates a route target. Register the Python file under `custom_functions`, then use `custom_function: allocate_bgp_route_target` in a `route_targets` record. The function runs during the route-target deployment stage, after route-target records without `custom_function` have been processed. The record's other fields become keyword arguments, and deployment also supplies `context`, `netbox`, and `dry_run`.
 
     ```yaml
     custom_functions:
-      allocate_route_target: nf://netbox/designs/allocate_route_target.py
+      allocate_bgp_route_target: nf://netbox/designs/allocate_bgp_route_target.py
 
     tenants:
       - name: ACME
 
     route_targets:
-      - custom_function: allocate_route_target
+      - custom_function: allocate_bgp_route_target
         tenant: ACME
         description: ACME branch route target
     ```
 
-    The referenced `nf://netbox/designs/allocate_route_target.py` contains:
+    The referenced `nf://netbox/designs/allocate_bgp_route_target.py` contains:
 
     ```python
-    def allocate_route_target(netbox, dry_run, tenant, description):
+    def allocate_bgp_route_target(context, netbox, dry_run, tenant, description):
         # Replace this fixed value with a real allocation rule when needed.
         name = "65000:100"
         existing = netbox.ipam.route_targets.get(name=name)
@@ -531,7 +536,13 @@ When `branch` is supplied to `design_deploy`, the provided `netbox` client is al
         return {"name": name}
     ```
 
-    The `tenant` and `description` fields become function arguments. Deployment supplies `netbox` and `dry_run`, so do not put them in the record. This dummy allocator always returns `65000:100`. It also creates or updates that route target unless `dry_run` is true. Returning a value alone would only add it to the deployment result, not create an object. The return value appears under `route_targets.custom`. Custom functions must handle their own lookups and writes, including dry-run behavior. Only load trusted Python files.
+    The `tenant` and `description` fields become function arguments. Deployment supplies `context`, `netbox`, and `dry_run`, so do not put them in the record. This dummy allocator chooses `65000:100` and creates or updates that route target unless `dry_run` is true. Its `return {"name": name}` produces this excerpt of the deployment result:
+
+    ```json
+    {"route_targets": {"custom": [{"function": "allocate_bgp_route_target", "result": {"name": "65000:100"}}]}}
+    ```
+
+    The dictionary describes what the function did; the returned `name` is not used for the Netbox write or for later VRF or L2VPN references. Returning `name` as a string would instead put `"65000:100"` in `result`. Custom functions must handle their own lookups and writes, including dry-run behavior. Only load trusted Python files.
 
 === "Calculated VLAN name"
 
@@ -554,7 +565,7 @@ When `branch` is supplied to `design_deploy`, the provided `netbox` client is al
     The referenced `nf://netbox/designs/create_profile_vlan.py` contains:
 
     ```python
-    def create_profile_vlan(netbox, dry_run, group, vid, profile):
+    def create_profile_vlan(context, netbox, dry_run, group, vid, profile):
         name = f"{profile.upper()}-{vid}"
         vlan_group = netbox.ipam.vlan_groups.get(name=group)
         if vlan_group is None:
@@ -584,14 +595,14 @@ When `branch` is supplied to `design_deploy`, the provided `netbox` client is al
     {% for device in context.devices %}
       - custom_function: allocate_device_community
         device: "{{ device }}"
-        asn: 65100
     {% endfor %}
     ```
 
-    Supply a context such as `{"devices": ["branch-rtr-1", "branch-rtr-2"]}`. The referenced `nf://netbox/designs/allocate_device_community.py` contains:
+    Supply a context such as `{"devices": ["branch-rtr-1", "branch-rtr-2"], "asn": 65100}`. The referenced `nf://netbox/designs/allocate_device_community.py` contains:
 
     ```python
-    def allocate_device_community(netbox, dry_run, device, asn):
+    def allocate_device_community(context, netbox, dry_run, device):
+        asn = context["asn"]
         description = f"Community for {device}"
         communities = list(netbox.plugins.bgp.community.all())
         existing = next(
@@ -615,7 +626,7 @@ When `branch` is supplied to `design_deploy`, the provided `netbox` client is al
         return {"device": device, "value": value}
     ```
 
-    The record passes `asn=65100` to the function, so allocated values start at `65100:100`. Each created community is identified on repeat deployment by `Community for <device>`. The returned dictionary appears under `bgp_communities.custom`. A dry run makes no reservations, so multiple records may propose the same free value.
+    The design context passes `asn=65100` to the function, so allocated values start at `65100:100`. Each created community is identified on repeat deployment by `Community for <device>`. The returned dictionary appears under `bgp_communities.custom`. A dry run makes no reservations, so multiple records may propose the same free value.
 
     This simplified allocator is intended for sequential deployments. It does not reserve values against concurrent allocations. The built-in handler for explicit community records matches `value` and, when supplied, `description`. A different description creates a separate community. If description is omitted, more than one matching value is an error.
 
@@ -1676,7 +1687,7 @@ This works for top-level `bgp_peerings` and peerings nested under devices or int
 
 Top-level `config_context` creates or updates reusable Netbox ConfigContext objects. Its `data` is a dictionary, and its scope determines which devices receive it. Device-specific values belong in [device local context](#device-local-context).
 
-A `custom_function` on a `config_context` record uses the same [arguments and return handling as any ordinary custom function](#custom-functions): deployment supplies `netbox` and `dry_run`, and the record supplies additional keyword arguments. It receives no device object. Its return value is recorded under `config_context.custom`, not saved as context data automatically. The function must perform its own writes. The Jinja calculation example below instead renders `data` for the normal handler to save.
+A `custom_function` on a `config_context` record uses the same [arguments and return handling as any ordinary custom function](#custom-functions): deployment supplies `context`, `netbox`, and `dry_run`, and the record supplies additional keyword arguments. It receives no device object. Its return value is recorded under `config_context.custom`, not saved as context data automatically. The function must perform its own writes. The Jinja calculation example below instead renders `data` for the normal handler to save.
 
 === "Shared site context"
 
@@ -1740,13 +1751,15 @@ A `custom_function` on a `config_context` record uses the same [arguments and re
 
 `local_context_data` updates a `local_context_data` field on one device, not a reusable ConfigContext object. Both nested and top-level local context definitions run in the final deployment stage, after all other design objects have been created or updated. Custom functions can query those objects through the provided `netbox` client to calculate device context. Local context replaces the previous dictionary rather than merging with it.
 
+A `custom_function` inside `local_context_data` must return the **complete context-data dictionary** to store on the matched device. For example, `return {"routing": {"router_id": "192.0.2.1"}}` sets the device's `local_context_data` to exactly that dictionary. The handler performs the device update; the function does not need to call `device.update()` or `netbox.dcim.devices.update()`. The return value is not placed under a `custom` result list or passed to another design collection.
+
 !!! note "Final-stage queries and branching"
 
     During a normal deployment, objects from all preceding stages are available in Netbox when device-local context functions run. If `branch` was supplied to `design_deploy`, the provided `netbox` client already targets that branch. During a dry run, planned objects are not created and may be unavailable.
 
 !!! important "Device-local context functions receive the device object"
 
-    A function referenced **inside `local_context_data`** receives `device`, `netbox`, and `dry_run`, plus any arguments beside `custom_function`. `device` is the matched **pynetbox device object**, not its name. The function can inspect `device.id`, `device.name`, or other device fields. It must return a dictionary, which the handler writes to the device's local context.
+    A function referenced **inside `local_context_data`** receives `device`, `context`, `netbox`, and `dry_run`, plus any arguments beside `custom_function`. `device` is the matched **pynetbox device object**, not its name. The function can inspect `device.id`, `device.name`, or other device fields. It must return a dictionary, which the handler writes to the device's local context.
 
 The function receives the full device record so it can inspect fields beyond its identity. Related objects such as interfaces can be queried through `netbox`.
 
@@ -1755,16 +1768,17 @@ The function receives the full device record so it can inspect fields beyond its
 | Argument | Type | Supplied by | Meaning |
 | --- | --- | --- | --- |
 | `device` | `pynetbox.core.response.Record` | Deployment | Matched Netbox device object, available after earlier deployment stages. Inspect fields such as `device.id` and `device.name`. |
+| `context` | `dict` | Deployment | Design input context after optional schema validation. |
 | `netbox` | `pynetbox.core.api.Api` | Deployment | Pynetbox client bound to the deployment's Netbox instance and branch. Use it to query the modeled device state. |
 | `dry_run` | `bool` | Deployment | Whether this is a preview. The handler skips its write when `True`. The function should calculate and return data without making writes itself. |
 | Other fields inside `local_context_data` | As defined in YAML | Design record | Fields beside `custom_function` are passed unchanged as keyword arguments, such as `interface` and `area` in the example below. |
 
-`custom_function` selects the function and is not passed to it. Do not supply `device`, `netbox`, or `dry_run` inside the local-context dictionary. Outer device identity fields, such as `site` and `tenant`, select the device and are not forwarded as function arguments.
+`custom_function` selects the function and is not passed to it. Do not supply `device`, `context`, `netbox`, or `dry_run` inside the local-context dictionary. Outer device identity fields, such as `site` and `tenant`, select the device and are not forwarded as function arguments.
 
 | Function outcome | Deployment behavior |
 | --- | --- |
-| Returns a dictionary | Writes it as the device's entire `local_context_data`, replacing the previous value. The result lists the device name under `local_context_data.updated`, not under `custom`. |
-| Returns a dictionary during a dry run | Does not write it. The function runs only if the device already exists. Earlier planned objects may still be absent. |
+| Returns a dictionary | Writes that dictionary as the device's entire `local_context_data`, replacing the previous value. The result lists the device name under `local_context_data.updated`, not under `custom`. |
+| Returns a dictionary during a dry run | Does not write it. The function runs only if the device already exists. Earlier planned objects may still be absent. Missing devices are skipped and omitted from `local_context_data.updated`. |
 | Returns another type, including `None` | Reports an error and stops deployment. A dictionary is required. |
 | Raises an exception | Reports the failure and stops deployment. Earlier writes are not rolled back. |
 
@@ -1887,6 +1901,7 @@ The function receives the full device record so it can inspect fields beyond its
 
     def calculate_isis_context(
         device: Record,
+        context: dict,
         netbox: Api,
         dry_run: bool,
         interface: str,
@@ -1919,7 +1934,7 @@ The function receives the full device record so it can inspect fields beyond its
 
     `create_ip` allocates a /32 from the pool and assigns it to `Loopback0`. The function reads that interface's IPv4 address and converts it into a twelve-digit system ID. For example, if the allocated address is `192.0.2.102/32`, the NET ID is `49.0001.1920.0000.2102.00`. It rejects missing or multiple IPv4 addresses rather than selecting one arbitrarily.
 
-    Deployment supplies `device`, `netbox`, and `dry_run`. YAML supplies `interface` and `area`, not a predetermined router ID. The function only returns a dictionary. The local-context handler writes it to the device.
+    Deployment supplies `device`, `context`, `netbox`, and `dry_run`. YAML supplies `interface` and `area`, not a predetermined router ID. The function only returns a dictionary. The local-context handler writes it to the device.
 
     During a dry run, the function is skipped if the device does not yet exist. If the device exists but its loopback or IP is only planned, the lookup fails because dry runs do not create them.
 

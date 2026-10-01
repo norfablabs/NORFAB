@@ -352,6 +352,8 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
         the network is started.  The network entry stored in
         ``self.networks`` preserves the resolved inventory dict so that
         ``restart`` can reuse it without re-fetching.
+        Starting a network with an existing name raises ``ValueError``; use
+        ``restart`` to replace it.
 
         Args:
             job: NorFab job context injected by the ``@Task`` decorator.
@@ -364,8 +366,17 @@ class FakeNOSWorker(NFPWorker, FakeNOSNornirInventoryTasks):
                   as YAML.
                 * ``None`` to use the default inventory from the worker
                   configuration.
+
+        Returns:
+            Result: Status and details of the started network.
+
+        Raises:
+            ValueError: If a network with the same name is already tracked.
         """
         ret = Result()
+
+        if network in self.networks:
+            raise ValueError(f"FakeNOS network '{network}' already exists; use restart")
 
         # fetch inventory
         if self.is_url(inventory):

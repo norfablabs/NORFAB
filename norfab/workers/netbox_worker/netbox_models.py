@@ -481,6 +481,20 @@ class CreateBgpPeeringInput(
         return values
 
 
+class BgpSessionBulkUpdateFields(BgpSessionCommonFields):
+    """BGP session update selected by NetBox ID or existing name."""
+
+    name: Union[None, StrictStr] = Field(None, description="Existing session name")
+    id: Union[None, StrictInt] = Field(None, description="NetBox session ID")
+    new_name: Union[None, StrictStr] = Field(None, description="New session name")
+
+    @model_validator(mode="after")
+    def validate_selector(self) -> "BgpSessionBulkUpdateFields":
+        if self.id is None and self.name is None:
+            raise ValueError("Bulk update requires 'id' or 'name'.")
+        return self
+
+
 class UpdateBgpPeeringInput(
     NetboxBulkBatchArgs,
     NetboxCommonArgs,
@@ -524,7 +538,7 @@ class UpdateBgpPeeringInput(
     )
 
     # --- Bulk mode ---
-    bulk_update: Union[None, List[BgpSessionCommonFields]] = Field(
+    bulk_update: Union[None, List[BgpSessionBulkUpdateFields]] = Field(
         None,
         description="List of BGP sessions to update in bulk.",
     )
