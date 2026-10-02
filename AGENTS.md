@@ -4,13 +4,11 @@
 
 1. Read the relevant repository guides before changing code or tests; follow their established patterns.
 2. Keep implementations simple and direct. Avoid unnecessary abstractions, compatibility paths, and helpers used only once or twice.
-3. Organize all tests in `Test...` classes. Write integration tests through the public interface against the real service; do not replace service behavior with mocks or test private internals.
-4. Keep test data explicit and readable. Prefer a short literal list of records over generated fixtures.
-5. Keep test setup and cleanup in the test method where practical. Make cleanup safe after partial failures and never delete pre-existing data.
-6. Preserve public task arguments and client interfaces unless a change is explicitly requested.
-7. Validate data at the appropriate boundary; avoid repeating the same checks deeper in the implementation.
-8. Write useful Google-style docstrings for tasks. Document every argument, the result, important behavior, limitations, and relevant errors; keep them accurate when changing a task.
-9. Do not add an Inputs section to service task documentation. The Python API reference at the end of the page renders task inputs from the task's Google-style docstring; keep that docstring accurate instead of duplicating arguments in prose.
+3. Follow `docs/testing/norfab_testing_framework.md` when writing or running tests.
+4. Preserve public task arguments and client interfaces unless a change is explicitly requested.
+5. Validate data at the appropriate boundary; avoid repeating the same checks deeper in the implementation.
+6. Write useful Google-style docstrings for tasks. Document every argument, the result, important behavior, limitations, and relevant errors; keep them accurate when changing a task.
+7. Do not add an Inputs section to service task documentation. The Python API reference at the end of the page renders task inputs from the task's Google-style docstring; keep that docstring accurate instead of duplicating arguments in prose.
 
 ## Project Overview
 
@@ -129,16 +127,6 @@ poetry run inv --list
 poetry run inv checks
 poetry run inv docs-build
 poetry run inv docs-serve
-poetry run inv docker-tests-core
-poetry run inv docker-tests-nornir
-```
-
-Docker suite tasks use the canonical `docker-tests-<suite>` form and also
-accept `docker-test-<suite>` aliases. Use task help to see selectors, marker,
-keyword, Python-version, build, and file-parallel options:
-
-```bash
-poetry run inv --help docker-tests-nornir
 ```
 
 ### Running
@@ -153,69 +141,12 @@ poetry run nfcli --create-env norfab
 
 ### Testing
 
+Run from the repository root. See [NORFAB Testing Framework](docs/testing/norfab_testing_framework.md) for build options, test selection, and reports.
+
 ```bash
-# Run pytest suites in isolated Docker runners
-poetry run inv docker-tests-core
-poetry run inv docker-tests-nornir
-poetry run inv docker-tests-netbox
-
-# Run one test or select a marker subset
-poetry run inv docker-tests-nornir --selector=tests/services/nornir/test_worker.py
-poetry run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
-
-# Discover test_*.py and run one isolated container per file, two at a time
-poetry run inv docker-tests-netbox --parallel-runs=2
-
-# Validate/build all Docker test services or run the distributed topology
-poetry run inv docker-tests-config
 poetry run inv docker-tests-build
-poetry run inv docker-tests-distributed
-```
-
-Docker runtime files and JUnit reports are stored under the selected service's
-ignored `docker/norfab-docker-tests/<service>/__norfab__/` directory.
-Docker suite tasks scope pytest collection to the suite's conventional test
-directory before applying its marker; an explicit `--selector` overrides that
-default collection root.
-The NetBox suite is further split into test-file Invoke runners named
-`docker-tests-netbox-<file>`, such as `docker-tests-netbox-crud`. Each uses
-`docker compose run` with the shared
-NetBox test image, an explicit `norfab-tests-netbox-<group>-<run-id>` container
-name, and a file-specific runtime/JUnit directory. `docker-tests-netbox` and
-`docker-tests-all` launch all of these dedicated group containers.
-With `--parallel-runs=N`, test roots are derived from `tests/services/<suite>`,
-`tests/clients/<suite>`, or `tests/<suite>` and per-file runtimes are stored
-under `<service>/parallel/<test-file>/__norfab__/`. At most `N` per-file
-containers run concurrently.
-Individual `docker-tests-<suite>` tasks report the container exit status but
-do not fail Invoke; `docker-tests-all` runs the regular suite containers in
-parallel and returns non-zero after summarizing all failed suites. It excludes
-the Containerlab suite, idle performance profiler, and distributed topology,
-which remain available through their dedicated tasks.
-Every Docker suite invocation writes a timestamped Markdown summary under
-`docker/norfab-docker-tests/reports/`, including runs narrowed by selectors,
-markers, keywords, extra pytest arguments, or per-file parallelism. Reports are
-based only on JUnit XML artifacts created or updated by that invocation;
-`docker-tests-all` produces one consolidated report for the complete run.
-The distributed task validates the client's cached broker public certificate;
-if an older runtime key is present, rerun it with `--force-certificates` to
-replace that public certificate. It never copies the broker private key.
-
-Direct pytest remains available for focused local debugging:
-
-```bash
-# Run all tests (from repo root, requires a running/startable NorFab)
-cd tests && poetry run pytest
-
-# Run a specific service test suite
-cd tests && poetry run pytest services/nornir
-
-# Run NFCLI shell tests
-cd tests && poetry run pytest nfcli
-cd tests && poetry run pytest -m nfcli
-
-# Run tests with output
-cd tests && poetry run pytest -s -v
+poetry run inv docker-tests-core
+poetry run inv docker-tests-all
 ```
 
 ### Linting & Formatting
@@ -366,6 +297,5 @@ Selected rule sets: `E`, `F`, `I`, `ANN`
 - Documentation style guide for docs changes: `docs/development/documentation_style_guide.md`
 - Feature catalogue: `docs/norfab_features.md`
 - Testing framework: `docs/testing/norfab_testing_framework.md`
-- NetBox service tests and refactoring guidance: `docs/testing/netbox_service_tests.md`
 - Invoke developer automation ADR: `docs/development/adr_invoke_developer_automation.md`
 - Docker test commands: `docker/norfab-docker-tests/README.md`

@@ -292,6 +292,5 @@ nav:
     - Single-Owner ZeroMQ Socket I/O: development/adr_norfab_single_owner_zeromq_socket_io.md
   - Testing:
     - NORFAB Testing Framework: testing/norfab_testing_framework.md
-    - Netbox Service Tests: testing/netbox_service_tests.md
 
 - Contact Us: norfab_help_with_norfab.md

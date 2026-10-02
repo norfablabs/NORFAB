@@ -948,7 +948,7 @@ that can be derived safely from the live three-field parser output.
 - `CLAUDE.md`
 - `docs/development/adr_tasks_pydantic_models_guide.md`
 - `docs/development/documentation_style_guide.md`
-- `docs/testing/netbox_service_tests.md`
+- `docs/testing/norfab_testing_framework.md`
 - `docs/development/adr_netbox_sync_device_interfaces_plan.md`
 - `norfab/workers/netbox_worker/interfaces_tasks.py`
 - `norfab/workers/netbox_worker/netbox_models.py`

@@ -1,457 +1,206 @@
 # NORFAB Testing Framework
 
-## Overview
-
-NORFAB uses `pytest` for core, client, worker, and service integration tests. Most service tests start a real NorFab process tree through shared fixtures and exercise workers through `NFPClient.run_job()`.
-
-The test suite is intentionally organized by the NORFAB architecture:
-
-- Core framework behavior lives under `tests/core/`.
-- Service-worker suites live under `tests/services/<service>/`.
-- Larger service suites are split by task area; smaller services may still have only one or two files in their service folder.
-- Shared test inventories and data live under `tests/nf_tests_inventory/`.
-
 ## TL;DR
 
-Run tests from the `tests/` directory through Poetry.
+For local debugging, run pytest from `tests/` with the required services available:
 
 ```bash
+# Enter the test root so relative pytest paths resolve.
 cd tests
-poetry run pytest
+# Run the Nornir worker tests locally.
+poetry run pytest services/nornir/test_worker.py
 ```
 
-Run by folder or file:
+For isolated Docker runs, return to the repository root and use Invoke:
 
 ```bash
+# Build the Docker images used by the test suites.
+poetry run inv docker-tests-build
+# Run only the Nornir suite in Docker.
+poetry run inv docker-tests-nornir
+# Run all regular suites and write one consolidated report.
+poetry run inv docker-tests-all
+```
+
+Choose a suite run or the all-suites run. Invoke prints `Docker test report: <path>`; open that file under `docker/norfab-docker-tests/reports/` for the final result.
+
+## Tests and local pytest
+
+Tests follow the code layout: `tests/core/`, `tests/services/<service>/`, `tests/clients/`, and `tests/nfcli/`. Shared fixtures are in `tests/conftest.py`; integration test inventory is in `tests/nf_tests_inventory/`. NetBox test helpers are in `tests/services/netbox/common.py`, with seed data in `tests/netbox_data.py`.
+
+Run pytest through Poetry from `tests/`:
+
+```bash
+# Enter the test root so relative pytest paths resolve.
+cd tests
+# Run the full Nornir test directory.
 poetry run pytest services/nornir
-poetry run pytest services/netbox/test_interfaces.py
-poetry run pytest nfcli
-```
-
-Run by service marker:
-
-```bash
-poetry run pytest -m nornir
-poetry run pytest -m netbox
-poetry run pytest -m containerlab
-poetry run pytest -m fastmcp
-poetry run pytest -m nfcli
-```
-
-Run by task marker:
-
-```bash
-poetry run pytest -m nornir_cli
-poetry run pytest -m netbox_get_interfaces
-poetry run pytest -m containerlab_deploy
-poetry run pytest -m filesharing_fetch_file
-```
-
-Combine markers:
-
-```bash
-poetry run pytest -m "netbox and netbox_get_interfaces"
-poetry run pytest -m "nornir and not nornir_snmp"
-poetry run pytest -m "containerlab and containerlab_deploy"
-poetry run pytest services/netbox -m "not netbox_crud_create"
-```
-
-List available markers:
-
-```bash
-poetry run pytest --markers
-```
-
-## Test Organization
-
-```text
-tests/
-  conftest.py
-  netbox_data.py
-  nf_tests_inventory/
-  nfcli/
-    test_shell_client.py
-    test_shell_common.py
-  core/
-    test_broker.py
-    test_client.py
-    test_nfapi.py
-    test_simple_inventory_datastore.py
-    test_worker.py
-  clients/
-    agent/
-      test_client_agent.py
-  services/
-    containerlab/
-      common.py
-      test_deploy.py
-      test_deploy_netbox.py
-      test_inspect.py
-      test_inventory.py
-      test_restart.py
-      test_save.py
-      test_worker.py
-    dummy/
-      test_plugin.py
-    fakenos/
-      common.py
-      test_inspect.py
-      test_inventory.py
-      test_restart.py
-      test_start.py
-      test_stop.py
-      test_worker.py
-    fastapi/
-      common.py
-      test_server.py
-      test_worker.py
-    fastmcp/
-      common.py
-      test_auth.py
-      test_prompts.py
-      test_tools.py
-      test_tools_call.py
-      test_worker.py
-    filesharing/
-      test_fetch_file.py
-      test_file_details.py
-      test_list_files.py
-      test_walk.py
-      test_worker.py
-    netbox/
-      common.py
-      test_worker.py
-      test_graphql.py
-      test_interfaces.py
-      test_devices.py
-      test_connections.py
-      test_inventory.py
-      test_circuits.py
-      test_bgp.py
-      test_ipam.py
-      test_cache.py
-      test_containerlab.py
-      test_designs.py
-      test_crud.py
-      test_sync.py
-    nornir/
-      test_cfg.py
-      test_cli.py
-      test_file_copy.py
-      test_jinja2.py
-      test_juniper_integration.py
-      test_netbox_ipam.py
-      test_network.py
-      test_parse.py
-      test_runtime_inventory.py
-      test_snmp.py
-      test_task.py
-      test_tests.py
-      test_worker.py
-    workflow/
-      test_run.py
-      test_worker.py
-```
-
-## Support Files
-
-- `tests/conftest.py` provides shared pytest fixtures.
-- `tests/nf_tests_inventory/` contains the inventory used by integration tests.
-- `tests/netbox_data.py` contains NetBox test data and NetBox population helpers.
-- `tests/services/netbox/common.py` contains shared NetBox test helpers used by NetBox and Nornir tests.
-
-Do not put generated runtime output under source control. Directories such as `__norfab__/`, `.pytest_cache/`, `.ruff_cache/`, and `__pycache__/` are runtime artifacts.
-
-## Fixtures
-
-### `nfclient`
-
-Starts NorFab from `./nf_tests_inventory/inventory.yaml`, waits for workers, yields a client, and destroys NorFab after the test session finishes.
-
-```python
-@pytest.fixture(scope="session")
-def nfclient():
-    nf = NorFab(inventory="./nf_tests_inventory/inventory.yaml")
-    nf.start()
-    time.sleep(3)
-    yield nf.make_client()
-    nf.destroy()
-```
-
-Use this fixture for service integration tests that call real workers. Because the fixture is session-scoped, tests must clean up any external or worker state they create instead of relying on a per-file NorFab restart.
-
-### `nfclient_dict_inventory`
-
-Starts NorFab from a dictionary-based inventory for the test session. Use it when a test needs a custom topology or worker map without adding a permanent inventory file.
-
-### `picle_shell`
-
-Starts NorFab for the test session and mounts the interactive NFCLI shell model. Use it for shell and CLI behavior tests.
-
-## Running Tests
-
-Follow the repository convention from `CLAUDE.md`: run pytest from the `tests/` directory through Poetry.
-
-```bash
-cd tests
-poetry run pytest
-```
-
-Run a split service suite:
-
-```bash
-cd tests
-poetry run pytest services/nornir
-```
-
-Run one task marker:
-
-```bash
-cd tests
-poetry run pytest services/netbox
-poetry run pytest services/containerlab/test_deploy.py
-```
-
-Run NFCLI shell tests:
-
-```bash
-cd tests
-poetry run pytest nfcli
-poetry run pytest -m nfcli
-```
-
-Run one file, class, or test:
-
-```bash
-cd tests
-poetry run pytest services/netbox/test_interfaces.py
+# Run one NetBox test class.
 poetry run pytest services/netbox/test_interfaces.py::TestGetInterfaces
-poetry run pytest services/netbox/test_interfaces.py::TestGetInterfaces::test_get_interfaces
+# Run only NetBox get_interfaces tests.
+poetry run pytest services/netbox -m "netbox and netbox_get_interfaces"
+# Run NFCLI tests with printed output and individual test names.
+poetry run pytest nfcli -s -v
 ```
 
-Run by marker:
+Use a directory, file, class, or method path to narrow collection; use `-m` for registered service or task markers. Local integration tests start NorFab through fixtures and need their configured external services. Local pytest shows its results in the terminal and does not create an Invoke Markdown report.
+
+### Available pytest markers
+
+| Service | Marker | Description |
+|---|---|---|
+| Core | `core` | NORFAB core component tests |
+| Nornir | `nornir` | Nornir service tests |
+| NetBox | `netbox` | NetBox service tests |
+| Containerlab | `containerlab` | Containerlab service tests |
+| FakeNOS | `fakenos` | FakeNOS service tests |
+| FastAPI | `fastapi` | FastAPI service tests |
+| FastMCP | `fastmcp` | FastMCP service tests |
+| FileSharing | `filesharing` | FileSharing service tests |
+| FileSharing | `filesharing_git` | File Sharing authenticated Git remote tests |
+| FileSharing | `filesharing_get_remotes` | FileSharing get_remotes task tests |
+| FileSharing | `filesharing_create_remote_git` | FileSharing create_remote_git task tests |
+| FileSharing | `filesharing_delete_remote_git` | FileSharing delete_remote_git task tests |
+| FileSharing | `filesharing_git_clone` | FileSharing git_clone task tests |
+| FileSharing | `filesharing_resolve_git_url` | FileSharing resolve_git_url task tests |
+| Workflow | `workflow` | Workflow service tests |
+| Dummy | `dummy` | dummy plugin service tests |
+| Client agent | `clientagent` | Client agent tests |
+| NFCLI | `nfcli` | NFCLI shell client tests |
+| Nornir | `nornir_cfg` | Nornir cfg task tests |
+| Nornir | `nornir_cli` | Nornir CLI task tests |
+| Nornir | `nornir_fakenos` | Tests that use FakeNOS-backed devices through Nornir |
+| Nornir | `nornir_file_copy` | Nornir file_copy task tests |
+| Nornir | `nornir_network` | Nornir network task tests |
+| Nornir | `nornir_parse` | Nornir parse task tests |
+| Nornir | `nornir_runtime_inventory` | Nornir runtime_inventory task tests |
+| Nornir | `nornir_snmp` | Nornir snmp task tests |
+| Nornir | `nornir_task` | Nornir task task tests |
+| Nornir | `nornir_test` | Nornir test task tests |
+| NetBox | `netbox_cache_clear` | NetBox cache_clear task tests |
+| NetBox | `netbox_cache_get` | NetBox cache_get task tests |
+| NetBox | `netbox_cache_list` | NetBox cache_list task tests |
+| NetBox | `netbox_check_device_sync` | NetBox check_device_sync task tests |
+| NetBox | `netbox_create_bgp_peering` | NetBox create_bgp_peering task tests |
+| NetBox | `netbox_create_asn` | NetBox create_asn task tests |
+| NetBox | `netbox_design_deploy` | NetBox design_deploy task tests |
+| NetBox | `netbox_create_device_interfaces` | NetBox create_device_interfaces task tests |
+| NetBox | `netbox_create_ip` | NetBox create_ip task tests |
+| NetBox | `netbox_create_ip_bulk` | NetBox create_ip_bulk task tests |
+| NetBox | `netbox_create_prefix` | NetBox create_prefix task tests |
+| NetBox | `netbox_create_vlan` | NetBox create_vlan task tests |
+| NetBox | `netbox_crud` | NetBox CRUD task tests |
+| NetBox | `netbox_crud_create` | NetBox crud_create task tests |
+| NetBox | `netbox_crud_delete` | NetBox crud_delete task tests |
+| NetBox | `netbox_crud_get_changelogs` | NetBox crud_get_changelogs task tests |
+| NetBox | `netbox_crud_list_objects` | NetBox crud_list_objects task tests |
+| NetBox | `netbox_crud_read` | NetBox crud_read task tests |
+| NetBox | `netbox_crud_search` | NetBox crud_search task tests |
+| NetBox | `netbox_crud_update` | NetBox crud_update task tests |
+| NetBox | `netbox_get_bgp_peerings` | NetBox get_bgp_peerings task tests |
+| NetBox | `netbox_get_circuits` | NetBox get_circuits task tests |
+| NetBox | `netbox_get_connections` | NetBox get_connections task tests |
+| NetBox | `netbox_get_containerlab_inventory` | NetBox get_containerlab_inventory task tests |
+| NetBox | `netbox_get_devices` | NetBox get_devices task tests |
+| NetBox | `netbox_get_interfaces` | NetBox get_interfaces task tests |
+| NetBox | `netbox_get_nornir_inventory` | NetBox get_nornir_inventory task tests |
+| NetBox | `netbox_get_topology` | NetBox get_topology task tests |
+| NetBox | `netbox_graphql` | NetBox graphql task tests |
+| NetBox | `netbox_sync_all` | NetBox sync_all task tests |
+| NetBox | `netbox_sync_bgp_asn` | NetBox sync_bgp_asn task tests |
+| NetBox | `netbox_sync_bgp_community` | NetBox sync_bgp_community task tests |
+| NetBox | `netbox_sync_bgp_peerings` | NetBox sync_bgp_peerings task tests |
+| NetBox | `netbox_sync_device_interfaces` | NetBox sync_device_interfaces task tests |
+| NetBox | `netbox_sync_vlans` | NetBox sync_vlans task tests |
+| NetBox | `netbox_sync_vrrp` | NetBox sync_vrrp task tests |
+| NetBox | `netbox_sync_vrfs` | NetBox sync_vrfs task tests |
+| NetBox | `netbox_sync_device_inventory` | NetBox sync_device_inventory task tests |
+| NetBox | `netbox_sync_device_ip` | NetBox sync_device_ip task tests |
+| NetBox | `netbox_sync_device_prefixes` | NetBox sync_device_prefixes task tests |
+| NetBox | `netbox_sync_mac_addresses` | NetBox sync_mac_addresses task tests |
+| NetBox | `netbox_update_bgp_peering` | NetBox update_bgp_peering task tests |
+| NetBox | `netbox_update_interfaces_description` | NetBox update_interfaces_description task tests |
+| Containerlab | `containerlab_deploy` | Containerlab deploy task tests |
+| Containerlab | `containerlab_deploy_netbox` | Containerlab deploy_netbox task tests |
+| Containerlab | `containerlab_get_nornir_inventory` | Containerlab get_nornir_inventory task tests |
+| Containerlab | `containerlab_inspect` | Containerlab inspect task tests |
+| Containerlab | `containerlab_restart_lab` | Containerlab restart_lab task tests |
+| Containerlab | `containerlab_save` | Containerlab save task tests |
+| FakeNOS | `fakenos_get_nornir_inventory` | FakeNOS get_nornir_inventory task tests |
+| FakeNOS | `fakenos_auto_start` | FakeNOS inventory auto_start tests |
+| FakeNOS | `fakenos_inspect_networks` | FakeNOS inspect_networks task tests |
+| FakeNOS | `fakenos_restart` | FakeNOS restart task tests |
+| FakeNOS | `fakenos_start` | FakeNOS start task tests |
+| FakeNOS | `fakenos_stop` | FakeNOS stop task tests |
+| FastMCP | `fastmcp_get_prompts` | FastMCP get_prompts task tests |
+| FastMCP | `fastmcp_get_tools` | FastMCP get_tools task tests |
+| FileSharing | `filesharing_fetch_file` | FileSharing fetch_file task tests |
+| FileSharing | `filesharing_file_details` | FileSharing file_details task tests |
+| FileSharing | `filesharing_list_files` | FileSharing list_files task tests |
+| FileSharing | `filesharing_walk` | FileSharing walk task tests |
+| Workflow | `workflow_run` | Workflow run task tests |
+
+Group tests in `Test...` classes. Exercise real services through the public client interface and the `nfclient` fixture. Keep test data explicit, clean up only data created by the test, and make cleanup safe after partial failures. Put service markers on test files and register new task markers in `pyproject.toml`.
+
+## Docker test environment
+
+Invoke runs pytest in isolated Docker Compose containers using the shared test inventory. Run these commands from the repository root:
 
 ```bash
-cd tests
-poetry run pytest services/netbox -m netbox
-poetry run pytest services/netbox -m netbox_get_interfaces
-poetry run pytest services/netbox -m "netbox and not netbox_crud_create"
-poetry run pytest nfcli -m nfcli
+# List all available Invoke commands.
+poetry run inv --list
+
+# Check the Docker Compose test configuration without starting containers.
+poetry run inv docker-tests-config
+# Build images for every test suite.
+poetry run inv docker-tests-build
+
+# Build only the Nornir test image.
+poetry run inv docker-tests-build --suite=nornir
+# Rebuild the Nornir image before running its suite.
+poetry run inv docker-tests-nornir --build
+
+# Run all tests in the Nornir suite.
+poetry run inv docker-tests-nornir
+# Run one Nornir test file in the suite container.
+poetry run inv docker-tests-nornir --selector=tests/services/nornir/test_worker.py
+# Run only NetBox get_devices tests.
+poetry run inv docker-tests-netbox --marker="netbox and netbox_get_devices"
+
+# Run the NetBox CRUD file in a dedicated container.
+poetry run inv docker-tests-netbox-crud
+# Run Nornir files in separate containers, at most two concurrently.
+poetry run inv docker-tests-nornir --parallel-runs=2
 ```
 
-Use verbose output when diagnosing worker behavior:
+Suite names are `core`, `nornir`, `netbox`, `fakenos`, `containerlab`, `workflow`, `agent`, `fastmcp`, `fastapi`, `filesharing`, `dummy`, and `nfcli`. `docker-tests-all` runs the regular suites concurrently; run `docker-tests-containerlab` separately. The distributed topology uses `docker-tests-distributed`. The default suite run collects its test directory and applies its service marker. `--selector` accepts a directory, file, or pytest node ID; `--marker`, `--keyword`, and `--pytest-args` narrow the run. The default NetBox suite runs each `test_*.py` file in a dedicated container. See `poetry run inv --help docker-tests-nornir` for all options.
+
+### Run Compose directly
+
+From `docker/norfab-docker-tests/`, you can build and run a Compose service without Invoke:
 
 ```bash
-cd tests
-poetry run pytest -s -v services/netbox/test_worker.py::TestNetboxWorker
-```
-
-## Docker Test Environments
-
-Docker test runners live under `docker/norfab-docker-tests/`. Each runner reuses
-the canonical `tests/nf_tests_inventory` tree and mounts a service-local
-`__norfab__` runtime folder for logs, artifacts, keys, and generated files.
-
-Run from `docker/norfab-docker-tests/`:
-
-```bash
-docker compose build
-docker compose run --rm core-tests
+# Enter the Docker test environment directory.
+cd docker/norfab-docker-tests
+# Build the Nornir test image with Compose.
+docker compose build nornir-service-tests
+# Run the Nornir service's default pytest command.
 docker compose run --rm nornir-service-tests
-docker compose run --rm netbox-service-tests
-docker compose run --rm fakenos-service-tests
-docker compose run --rm containerlab-service-tests
-docker compose run --rm workflow-service-tests
-docker compose run --rm agent-tests
-docker compose run --rm fastmcp-service-tests
-docker compose run --rm fastapi-service-tests
+# Override that command to run one file with the Nornir marker.
+docker compose run --rm nornir-service-tests -m nornir tests/services/nornir/test_worker.py
 ```
 
-Docker runners use these service markers by default:
+Arguments after the service name replace its default Compose command, so include `-m nornir` when selecting tests this way. Compose writes JUnit XML under `nornir-service-tests/__norfab__/artifacts/`, but does not create the Invoke Markdown summary. The container exit status indicates whether the direct run passed.
 
-```text
-core-tests                 -m core
-nornir-service-tests       -m nornir
-netbox-service-tests       -m netbox
-fakenos-service-tests      -m fakenos
-containerlab-service-tests -m containerlab
-workflow-service-tests     -m workflow
-agent-tests                -m clientagent
-fastmcp-service-tests      -m fastmcp
-fastapi-service-tests      -m fastapi
-```
+### Read Invoke reports
 
-Docker runners can set `NORFAB_TEST_WORKERS` to a comma-separated worker
-allowlist. The shared `nfclient` fixture preserves any dependency metadata from
-the inventory topology while starting that subset. Each marker-based Docker
-runner uses this to avoid starting unrelated workers; local pytest runs still
-start the complete topology by default.
+Each Invoke test run prints the path of its timestamped Markdown report in `docker/norfab-docker-tests/reports/`. Reports are named `docker-tests-<suite>-<timestamp>.md` or `docker-tests-all-<timestamp>.md`.
 
-An idle resource baseline is available with `poetry run inv
-docker-profile-idle`. It starts the dedicated `idle-norfab` Compose service
-with a broker and one worker for every service configured in the shared test
-inventory, samples Docker CPU, memory, and block I/O for ten minutes, and writes
-the measurements to
-`docker/norfab-docker-tests/idle-norfab/__norfab__/artifacts/idle-profile.csv`.
-The worker list is sourced only from the service's `compose.yaml` command.
-Duration, sample interval, warm-up, stability thresholds, and whether an
-unstable result fails the task are configurable; see
-`poetry run inv --help docker-profile-idle`.
+- The summary table shows passed, failed, errors, skipped, duration, and suite status.
+- `Failures and report problems` shows failing tests and error details.
+- `JUnit artifacts` lists XML files produced by that run. JUnit files and worker logs are under the suite's ignored `docker/norfab-docker-tests/<compose-service>/__norfab__/` tree; NetBox group and file-parallel runs use `groups/` and `parallel/` subdirectories.
+- `NO REPORT` means no JUnit file was produced; `INVALID REPORT` means the XML could not be parsed. Check the container output and runtime logs.
 
-Every runner exports `NORFAB_INVENTORY_DIR` with the mounted inventory directory,
-so `nfcli -c` launched inside a running container resolves both the inventory
-file and its base directory automatically.
+Individual suite and NetBox file tasks report failures but do not return a failing Invoke status. Always check their report. `docker-tests-all` returns a nonzero status if a suite fails. Reports use only JUnit files created or updated during that run.
 
-Pass pytest selectors after the Compose service name to run narrower slices:
-
-```bash
-docker compose run --rm nornir-service-tests -m "nornir and nornir_cli"
-docker compose run --rm netbox-service-tests -m "netbox and netbox_get_devices"
-docker compose run --rm containerlab-service-tests tests/services/containerlab/test_inspect.py
-docker compose run --rm fastmcp-service-tests tests/services/fastmcp/test_tools.py::TestGetTools::test_get_tools
-```
-
-## Markers
-
-Markers are registered in `pyproject.toml` under `[tool.pytest.ini_options]`.
-
-Use service markers on whole files:
-
-```python
-pytestmark = pytest.mark.netbox
-```
-
-Use `<service>_<task>` markers for tests associated with a specific NorFab task:
-
-```python
-@pytest.mark.netbox_get_interfaces
-class TestGetInterfaces:
-    ...
-```
-
-This gives three stable ways to run tests:
-
-- By path, such as `services/netbox/test_interfaces.py`.
-- By class, such as `::TestGetInterfaces`.
-- By service or task marker, such as `-m "netbox and netbox_get_interfaces"`.
-
-## Writing Service Tests
-
-Keep test classes grouped by NORFAB task or closely related behavior.
-
-```python
-import pytest
-
-pytestmark = pytest.mark.netbox
-
-
-@pytest.mark.netbox_get_interfaces
-class TestGetInterfaces:
-    def test_get_interfaces(self, nfclient):
-        ret = nfclient.run_job(
-            "netbox",
-            "get_interfaces",
-            workers="any",
-            kwargs={"devices": ["ceos1"]},
-        )
-
-        for worker, res in ret.items():
-            assert not res["errors"], f"{worker} returned errors"
-            assert "ceos1" in res["result"]
-```
-
-Prefer explicit imports. Do not use `import *` in tests. Standard library, third-party, and worker-code imports should live in the test file that uses them. Import only shared NetBox helper names from `services/netbox/common.py`.
-
-```python
-import pprint
-
-import pytest
-
-try:
-    from tests.services.netbox.common import clear_nb_cache, get_nb_version
-except ModuleNotFoundError as exc:
-    if exc.name not in {"tests", "tests.services", "tests.services.netbox", "tests.services.netbox.common"}:
-        raise
-    from services.netbox.common import clear_nb_cache, get_nb_version
-```
-
-The fallback supports both repo-root invocation and `cd tests` invocation.
-
-## Refactoring Guidelines
-
-Split a test file when one of these is true:
-
-- The file is difficult to navigate or review.
-- Classes already form clear task groups.
-- The file mixes independent service areas such as BGP, IPAM, CRUD, cache, and sync.
-- Targeted runs are becoming awkward.
-
-When splitting a service suite:
-
-1. Keep existing `Test...` classes when they already group behavior well.
-2. Move shared helpers into a service common module, such as `tests/services/netbox/common.py`.
-3. Keep helper imports explicit.
-4. Add a file-level service marker.
-5. Add `<service>_<task>` markers only to tests tied to a specific NorFab task.
-6. Register new service or task markers in `pyproject.toml`.
-7. Preserve `cd tests && poetry run pytest ...` compatibility.
-8. Update the related document in `docs/testing/`.
-
-Do not split small service files into tiny fragments just to make the tree symmetrical. A small service folder with one or two focused files is fine while it stays easy to scan.
-
-## Response Assertions
-
-Service tests usually receive a worker-keyed dictionary:
-
-```python
-{
-    "worker-name": {
-        "errors": [],
-        "failed": False,
-        "result": {},
-        "messages": [],
-    }
-}
-```
-
-Common assertion patterns:
-
-```python
-assert not res["errors"], f"{worker} returned errors"
-assert res["failed"] is False, f"{worker} failed"
-assert "expected_key" in res["result"]
-```
-
-Use direct NetBox or service API reads only when the test must verify external state, such as object creation, deletion, or idempotency.
-
-## Cleanup
-
-Tests that create external state must clean it up. Prefer `try/finally` when a test creates data before assertions.
-
-```python
-def test_create_and_cleanup(self, nfclient):
-    branch = "test-branch"
-    try:
-        ret = nfclient.run_job("netbox", "create_branch", kwargs={"branch": branch})
-        assert ret
-    finally:
-        delete_branch(branch, nfclient)
-```
-
-Cleanup helpers for NetBox tests belong in `tests/services/netbox/common.py`.
-
-## Troubleshooting
-
-- If imports fail, make sure Poetry installed the needed extras for the service under test.
-- If workers do not appear, inspect broker state with `nfclient.mmi("mmi.service.broker", "show_workers")`.
-- If NetBox tests fail with connection errors, check `tests/netbox_data.py` and `tests/nf_tests_inventory/netbox/common.yaml`.
-- If cache behavior looks stale, use the service cache clear task or helper before running assertions.
-- If a test run leaves runtime data behind, check `tests/nf_tests_inventory/__norfab__/` and worker logs.
-
-## Related Documentation
-
-- [NetBox Service Tests](netbox_service_tests.md)
-- [NORFAB Getting Started](../norfab_getting_started.md)
-- [NORFAB Architecture](../reference_architecture_norfab.md)
-- [Services and Workers Documentation](../services_overview.md)
-- [Service Plugin Development](../customization/service_plugin_overview.md)
+See `docker/norfab-docker-tests/README.md` for service prerequisites and detailed container setup.
