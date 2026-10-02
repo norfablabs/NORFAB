@@ -16,6 +16,26 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_peer_group_dry_run(self, nfclient: Any) -> None:
+        """Plan a peer group without writing it to NetBox."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "NORFAB DESIGN BGP DRY RUN PEERS"
+        if nb.plugins.bgp.peer_group.get(name=name):
+            pytest.skip("dry-run peer group already exists")
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={"design": {"peer_groups": [{"name": name}]}, "dry_run": True},
+        )
+        for result in response.values():
+            assert not result["failed"], result
+            assert result["result"]["peer_groups"] == {
+                "created": [name],
+                "updated": [],
+            }
+        assert nb.plugins.bgp.peer_group.get(name=name) is None
+
     @pytest.mark.parametrize(
         "function_backed", [False, True], ids=["static", "function"]
     )
@@ -93,6 +113,7 @@ class TestDesignDeploy:
             "primary_ip",
             "bgp_communities",
             "routing_policies",
+            "peer_groups",
             "bgp_peerings",
             "config_context",
         ]
@@ -1858,6 +1879,10 @@ class TestDesignDeploy:
                 {"name": ["4200650001:100", "4200650001:200", "4200650001:300"]},
             ),
             (nb.plugins.bgp.routing_policy, {"name": ["ACME IMPORT", "ACME EXPORT"]}),
+            (
+                nb.plugins.bgp.peer_group,
+                {"name": ["ACME UPSTREAM PEERS", "ACME LOOPBACK PEERS"]},
+            ),
             (nb.plugins.bgp.community, {"value": "4200650001:100"}),
             (nb.ipam.asns, {"asn": [4200650000, 4200650001, 4200650002, 4200650003]}),
             (
@@ -1871,7 +1896,16 @@ class TestDesignDeploy:
             ),
             (nb.ipam.asn_ranges, {"name": "ACME BRANCH ALLOCATED ASNS"}),
             (nb.ipam.rirs, {"name": "ACME PRIVATE"}),
-            (nb.ipam.roles, {"name": ["ACME-BRANCH-LAN", "ACME-BRANCH-LOOPBACK"]}),
+            (
+                nb.ipam.roles,
+                {
+                    "name": [
+                        "ACME-BRANCH-LAN",
+                        "ACME-BRANCH-LOOPBACK",
+                        "ACME UPSTREAM ASN",
+                    ]
+                },
+            ),
             (
                 nb.dcim.device_types,
                 {
@@ -2092,6 +2126,10 @@ class TestDesignDeploy:
                 upstream = nb.plugins.bgp.session.get(name="acme-branch-rtr-1-upstream")
                 assert upstream.local_address.address == "198.51.100.1/30"
                 assert upstream.remote_address.address == "198.51.100.2/30"
+                assert upstream.remote_as.asn == 4200650000
+                assert upstream.peer_group.name == "ACME UPSTREAM PEERS"
+                assert loopback_peering.peer_group.name == "ACME LOOPBACK PEERS"
+                assert nb.ipam.asns.get(asn=4200650000).role.name == "ACME UPSTREAM ASN"
                 interconnect = nb.plugins.bgp.session.get(
                     name="acme-branch-agg-1_default_198.51.100.5"
                 )
@@ -2282,9 +2320,16 @@ class TestDesignDeploy:
         session_name = "ceos1_default_198.19.246.2"
         objects = [
             (nb.plugins.bgp.session, {"name": session_name}),
+            (nb.plugins.bgp.peer_group, {"name": "NORFAB DESIGN BGP PEERS"}),
             (
                 nb.plugins.bgp.routing_policy,
-                {"name": ["NORFAB DESIGN BGP IMPORT", "NORFAB DESIGN BGP EXTRA"]},
+                {
+                    "name": [
+                        "NORFAB DESIGN BGP IMPORT",
+                        "NORFAB DESIGN BGP EXTRA",
+                        "NORFAB DESIGN BGP EXPORT",
+                    ]
+                },
             ),
             (nb.ipam.ip_addresses, {"address": ["198.19.246.1/30", "198.19.246.2/30"]}),
             (nb.ipam.asns, {"asn": 4200999246}),
@@ -2312,7 +2357,10 @@ class TestDesignDeploy:
                     "remote_address": "198.19.246.2",
                     "local_as": 4200999246,
                     "remote_as": 4200999246,
-                    "create_reverse": False,
+                    "peer_group": {
+                        "name": "NORFAB DESIGN BGP PEERS",
+                        "description": "Design peer group",
+                    },
                     "tags": ["NORFAB DESIGN BGP TAG A"],
                     "custom_fields": {"norfab_design_bgp_device": "ceos1"},
                     "import_policies": [
@@ -2321,6 +2369,7 @@ class TestDesignDeploy:
                             "description": "inline policy",
                         }
                     ],
+                    "export_policies": ["NORFAB DESIGN BGP EXPORT"],
                 }
             ],
         }
@@ -2335,6 +2384,8 @@ class TestDesignDeploy:
                 nb.extras.tags.create(name=name, slug=name.lower().replace(" ", "-"))
             for run, description in enumerate(("initial", "updated", "updated")):
                 design["bgp_peerings"][0]["description"] = description
+                if run == 1:
+                    design["bgp_peerings"][0]["peer_group"] = "NORFAB DESIGN BGP PEERS"
                 if description == "updated":
                     design["bgp_peerings"][0]["import_policies"] = [
                         {"name": "NORFAB DESIGN BGP EXTRA"}
@@ -2351,13 +2402,21 @@ class TestDesignDeploy:
                         [session_name] if run == 0 else []
                     )
                     assert result["result"]["bgp_peerings"]["updated"] == []
+                    assert result["result"]["peer_groups"] == {
+                        "created": ["NORFAB DESIGN BGP PEERS"] if run == 0 else [],
+                        "updated": [] if run == 0 else ["NORFAB DESIGN BGP PEERS"],
+                    }
                 session = nb.plugins.bgp.session.get(name=session_name)
                 assert session.description == "initial"
+                assert session.peer_group.name == "NORFAB DESIGN BGP PEERS"
                 assert session.custom_fields["norfab_design_bgp_device"]["id"] == (
                     nb.dcim.devices.get(name="ceos1").id
                 )
                 assert {policy.name for policy in session.import_policies} == {
                     "NORFAB DESIGN BGP IMPORT"
+                }
+                assert {policy.name for policy in session.export_policies} == {
+                    "NORFAB DESIGN BGP EXPORT"
                 }
                 assert {tag.name for tag in session.tags} == {"NORFAB DESIGN BGP TAG A"}
         finally:
@@ -2699,8 +2758,9 @@ tenants:
             {"route_targets": ["64512:100"]},
             {"bgp_communities": ["64512:100"]},
             {"routing_policies": ["ACME EXPORT"]},
-            {"bgp_peerings": [{"name": "invalid", "import_policies": ["ACME IMPORT"]}]},
-            {"bgp_peerings": [{"name": "invalid", "export_policies": ["ACME EXPORT"]}]},
+            {"bgp_peerings": [{"name": "invalid", "import_policies": [42]}]},
+            {"bgp_peerings": [{"name": "invalid", "export_policies": [42]}]},
+            {"bgp_peerings": [{"name": "invalid", "peer_group": {}}]},
             {"l2vpns": [{"name": "invalid", "import_route_targets": ["64512:100"]}]},
             {"l2vpn_terminations": [{"l2vpn": "invalid", "device": "ceos1"}]},
             {"l2vpn_terminations": [{"l2vpn": "invalid", "group": "test"}]},

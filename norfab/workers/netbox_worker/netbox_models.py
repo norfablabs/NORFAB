@@ -821,6 +821,7 @@ class DesignDocument(BaseModel):
     ip_addresses: list[dict[str, Any]] = Field(default=[])
     bgp_communities: list[dict[str, Any]] = Field(default=[])
     routing_policies: list[dict[str, Any]] = Field(default=[])
+    peer_groups: list[dict[str, Any]] = Field(default=[])
     bgp_peerings: list[dict[str, Any]] = Field(default=[])
     vrrp_groups: list[dict[str, Any]] = Field(default=[])
     vrrp_group_assignments: list[dict[str, Any]] = Field(default=[])
@@ -975,6 +976,11 @@ class DesignDocument(BaseModel):
             if attachment in attachments:
                 raise ValueError(f"duplicate l2vpn termination: {attachment}")
             attachments.add(attachment)
+        for record in self.peer_groups:
+            if "custom_function" not in record and (
+                not isinstance(record.get("name"), str) or not record["name"]
+            ):
+                raise ValueError("peer_groups requires a non-empty name")
         for record in self.bgp_peerings:
             if "custom_function" not in record:
                 task_record = dict(record)

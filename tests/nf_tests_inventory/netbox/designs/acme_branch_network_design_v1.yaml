@@ -85,6 +85,8 @@ roles:
     color: 4caf50
   - name: ACME-BRANCH-LOOPBACK
     color: 2196f3
+  - name: ACME UPSTREAM ASN
+    color: 9c27b0
 
 rirs:
   - name: ACME PRIVATE
@@ -100,6 +102,8 @@ asns:
   - asn: 4200650000
     tenant: ACME
     rir: ACME PRIVATE
+    role: ACME UPSTREAM ASN
+    sites: ["{{ context.site }}"]
     description: ACME external upstream ASN
   - asn: 4200650001
     tenant: ACME
@@ -144,6 +148,10 @@ bgp_communities:
 routing_policies:
   - name: ACME EXPORT
     description: ACME branch export policy
+
+peer_groups:
+  - name: ACME UPSTREAM PEERS
+    description: ACME external upstream sessions
 
 vlan_groups:
   - name: "{{ context.site }} VLANS"
@@ -282,6 +290,9 @@ bgp_peerings:
     remote_ip_query: {device: acme-branch-rtr-2, interface: Loopback100}
     local_as_query: {description: ACME allocated branch ASN}
     remote_as_query: {description: ACME allocated branch ASN}
+    peer_group:
+      name: ACME LOOPBACK PEERS
+      description: ACME same-tier loopback sessions
     status: active
     description: ACME same-tier iBGP
     create_reverse: false
@@ -408,7 +419,8 @@ devices:
         # Ethernet4's /30 supplies both the local and peer addresses.
         local_interface: Ethernet4
         local_as: 4200650001
-        remote_as: 4200650000
+        remote_as_query: {site: "{{ context.site | lower | replace(' ', '-') }}", role: ACME UPSTREAM ASN}
+        peer_group: ACME UPSTREAM PEERS
         import_policies:
           - name: ACME IMPORT
             description: ACME branch import policy

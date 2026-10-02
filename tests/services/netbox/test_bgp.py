@@ -1551,11 +1551,11 @@ class TestSyncBgpPeerings:
 # ---------------------------------------------------------------------------
 
 # Helper IP addresses used exclusively by create/update tests
-_TEST_LOCAL_IP = "198.51.100.1"
-_TEST_REMOTE_IP = "198.51.100.2"
+_TEST_LOCAL_IP = "203.0.113.241"
+_TEST_REMOTE_IP = "203.0.113.242"
 # /31 P2P pair
-_TEST_P2P_LOCAL = "198.51.100.4"
-_TEST_P2P_REMOTE = "198.51.100.5"
+_TEST_P2P_LOCAL = "203.0.113.244"
+_TEST_P2P_REMOTE = "203.0.113.245"
 _TEST_LOCAL_AS = 64999
 _TEST_REMOTE_AS = 64998
 
@@ -1655,6 +1655,74 @@ class TestCreateBgpPeering:
             assert sname not in res["result"].get(
                 "created", []
             ), f"{worker}: duplicate created"
+
+    def test_create_bgp_peering_uses_session_identity(self, nfclient):
+        """Match existing sessions and repeated bulk entries by object identity."""
+        nb = get_pynetbox(nfclient)
+        device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        seed_name = f"{device}_identity_seed"
+        seed = nfclient.run_job(
+            "netbox",
+            "create_bgp_peering",
+            workers="any",
+            kwargs={
+                "name": seed_name,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+                "create_reverse": False,
+                "rir": "lab",
+            },
+        )
+        assert all(not result["failed"] for result in seed.values()), seed
+        alias_name = f"{device}_identity_alias"
+        duplicate_name = f"{device}_identity_duplicate"
+        sessions = [
+            {
+                "name": alias_name,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_LOCAL_AS,
+                "remote_as": _TEST_REMOTE_AS,
+            },
+            {
+                "name": seed_name,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_REMOTE_AS,
+                "remote_as": _TEST_LOCAL_AS,
+            },
+            {
+                "name": duplicate_name,
+                "device": device,
+                "local_address": _TEST_LOCAL_IP,
+                "remote_address": _TEST_REMOTE_IP,
+                "local_as": _TEST_REMOTE_AS,
+                "remote_as": _TEST_LOCAL_AS,
+            },
+        ]
+        for dry_run in (True, False):
+            reply = nfclient.run_job(
+                "netbox",
+                "create_bgp_peering",
+                workers="any",
+                kwargs={
+                    "bulk_create": sessions,
+                    "create_reverse": False,
+                    "dry_run": dry_run,
+                    "rir": "lab",
+                },
+            )
+            for result in reply.values():
+                assert not result["failed"], result
+                assert result["result"]["exists"] == [alias_name, duplicate_name]
+                action = "create" if dry_run else "created"
+                assert result["result"][action] == [seed_name]
+        assert len(list(nb.plugins.bgp.session.filter(device=device))) == 2
 
     def test_create_bgp_peering_resolves_custom_fields(self, nfclient: Any) -> None:
         """Resolve named references on create and leave an existing session alone."""
@@ -2176,9 +2244,13 @@ class TestCreateBgpPeering:
         assert session.description == "test optional fields", "description not saved"
 
     def test_create_bgp_peering_asn_queries(self, nfclient):
-        """Separate ASN queries resolve each side, including bulk entries."""
+        """Bulk ASN queries resolve named roles on each side."""
         nb = get_pynetbox(nfclient)
         device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
+        role_names = ["NORFAB BGP QUERY LOCAL", "NORFAB BGP QUERY REMOTE"]
+        role_slugs = ["norfab-bgp-query-local", "norfab-bgp-query-remote"]
+        if any(nb.ipam.roles.get(name=name) for name in role_names):
+            pytest.skip("ASN query test roles already exist")
         seed_name = f"{device}_asn_query_seed"
         seed = nfclient.run_job(
             "netbox",
@@ -2198,32 +2270,55 @@ class TestCreateBgpPeering:
         assert all(not res["failed"] for res in seed.values()), seed
 
         sname = f"{device}_asn_queries"
-        ret = nfclient.run_job(
-            "netbox",
-            "create_bgp_peering",
-            workers="any",
-            kwargs={
-                "bulk_create": [
-                    {
-                        "name": sname,
-                        "device": device,
-                        "local_address": _TEST_LOCAL_IP,
-                        "remote_address": _TEST_REMOTE_IP,
-                        "local_as_query": {"asn": _TEST_LOCAL_AS},
-                        "remote_as_query": {"asn": _TEST_REMOTE_AS},
-                    }
-                ],
-                "create_reverse": False,
-                "rir": "lab",
-            },
-        )
-        pprint.pprint(ret)
-        for worker, res in ret.items():
-            assert res["failed"] is False, f"{worker}: {res['errors']}"
-            assert sname in res["result"]["created"]
-        session = nb.plugins.bgp.session.get(name=sname)
-        assert session.local_as.asn == _TEST_LOCAL_AS
-        assert session.remote_as.asn == _TEST_REMOTE_AS
+        roles = []
+        try:
+            for name, slug in zip(role_names, role_slugs):
+                roles.append(nb.ipam.roles.create(name=name, slug=slug))
+            for asn, role in zip((_TEST_LOCAL_AS, _TEST_REMOTE_AS), roles):
+                record = nb.ipam.asns.get(asn=asn)
+                record.role = role.id
+                record.save()
+
+            ret = nfclient.run_job(
+                "netbox",
+                "create_bgp_peering",
+                workers="any",
+                kwargs={
+                    "bulk_create": [
+                        {
+                            "name": sname,
+                            "device": device,
+                            "local_address": _TEST_LOCAL_IP,
+                            "remote_address": _TEST_REMOTE_IP,
+                            "local_as_query": {
+                                "asn": _TEST_LOCAL_AS,
+                                "role": role_names[0],
+                            },
+                            "remote_as_query": {
+                                "asn": _TEST_REMOTE_AS,
+                                "role": role_names[1],
+                            },
+                        }
+                    ],
+                    "create_reverse": False,
+                    "rir": "lab",
+                },
+            )
+            for worker, res in ret.items():
+                assert res["failed"] is False, f"{worker}: {res['errors']}"
+                assert sname in res["result"]["created"]
+            session = nb.plugins.bgp.session.get(name=sname)
+            assert session.local_as.asn == _TEST_LOCAL_AS
+            assert session.remote_as.asn == _TEST_REMOTE_AS
+        finally:
+            role_ids = {role.id for role in roles}
+            for asn in (_TEST_LOCAL_AS, _TEST_REMOTE_AS):
+                record = nb.ipam.asns.get(asn=asn)
+                if record and record.role and record.role.id in role_ids:
+                    record.role = None
+                    record.save()
+            for role in roles:
+                role.delete()
 
     def test_create_bgp_peering_nonexistent_vrf_warns(self, nfclient):
         """VRF not in NetBox - auto-created and assigned to the session."""

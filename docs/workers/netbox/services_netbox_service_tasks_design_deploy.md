@@ -164,10 +164,11 @@ Each design section contains a list of object records. The rows show the order i
 | 30 | `vrrp_group_assignments` | `netbox.ipam.fhrp_group_assignments` | `group`, `interface` | Associates an existing group and interface with priority. |
 | 31 | `primary_ip` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Sets an existing `primary_ip4` or `primary_ip6`. It does not create the address. |
 | 32 | `bgp_communities` | `netbox.plugins.bgp.community` | `value`, plus `description` when supplied | A different description creates another community. Without description, the value must identify one object. |
-| 33 | `routing_policies` | `netbox.plugins.bgp.routing_policy` | `name` | Peering references can inline policy dictionaries. |
-| 34 | `bgp_peerings` | `netbox.plugins.bgp.session` | Supplied or generated `name` | Uses `create_bgp_peering` to create missing sessions. Existing sessions are left unchanged. New sessions default to `create_reverse: true`. Supports import/export policy dictionaries. |
-| 35 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary and `sites` scopes it. |
-| 36 | `local_context_data` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Replaces each device's local context dictionary last. |
+| 33 | `routing_policies` | `netbox.plugins.bgp.routing_policy` | `name` | Peering references can inline policy dictionaries or use policy names. |
+| 34 | `peer_groups` | `netbox.plugins.bgp.peer_group` | `name` | Peering references can provide a name or inline dictionary. |
+| 35 | `bgp_peerings` | `netbox.plugins.bgp.session` | Supplied or generated `name` | Uses `create_bgp_peering` to create missing sessions. Existing sessions are left unchanged. Design peerings default to `create_reverse: false`. Supports named or inline peer groups and import/export policies. |
+| 36 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary and `sites` scopes it. |
+| 37 | `local_context_data` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Replaces each device's local context dictionary last. |
 
 Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as `device.site`, `device.role`, and `vlan.group`, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.
 
@@ -230,6 +231,8 @@ For each object type, specified values are created or updated before next-availa
 
 Entries under `bgp_peerings` call `create_bgp_peering` after the design's devices, interfaces, IP addresses, and ASNs have been deployed. Use a stable supplied or generated session name so repeat deployments find the existing session. Existing sessions are not updated by the design:
 
+Design peerings create only the specified direction by default. Set `create_reverse: true` on a peering to create the reverse session as well. The standalone `create_bgp_peering` task retains its own default.
+
 ```yaml
 bgp_peerings:
   - name: ACME BRANCH PEER
@@ -237,7 +240,6 @@ bgp_peerings:
     local_interface: Ethernet1
     local_as: 4200650001
     remote_as: 4200650000
-    create_reverse: false
 ```
 
 ### Allocation examples
@@ -634,7 +636,7 @@ For these object records, the return value is a report to the caller. Deployment
 
 Nesting keeps a device and its related objects together, making the design more natural to read and shorter to write. Interfaces, IP addresses, and peerings inherit their device or interface names instead of repeating them in separate top-level records.
 
-Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console_ports`, `power_outlets`, `console_server_ports`, and `local_context_data`. An interface may contain `ip_addresses`, `bgp_peerings`, `connection`, `vrf`, `untagged_vlan`, `tagged_vlans`, and `vrrp`. The task flattens these before validation or writes. It adds device and interface names to extracted records and merges them with records already at the top level. Inline VRFs, VLANs, VRRP groups, route targets, and routing policies are also collected into their earlier collections. Interface VRF identity dictionaries and VLAN group/VID dictionaries remain references. Nested route-target and routing-policy dictionaries are always collected as definitions, even with only a name.
+Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console_ports`, `power_outlets`, `console_server_ports`, and `local_context_data`. An interface may contain `ip_addresses`, `bgp_peerings`, `connection`, `vrf`, `untagged_vlan`, `tagged_vlans`, and `vrrp`. The task flattens these before validation or writes. It adds device and interface names to extracted records and merges them with records already at the top level. Inline VRFs, VLANs, VRRP groups, route targets, routing policies, and BGP peer groups are also collected into their earlier collections. Interface VRF identity dictionaries and VLAN group/VID dictionaries remain references. Nested route-target, routing-policy, and peer-group dictionaries are collected as definitions, even with only a name.
 
 === "All nested fields"
 
@@ -1636,13 +1638,15 @@ VRFs accept `import_route_targets` and `export_route_targets` as lists of dictio
 
 ## Nested BGP Peering Records
 
-BGP peerings accept `import_policies` and `export_policies` as lists of routing-policy dictionaries. The design extracts these into top-level `routing_policies`, creates or updates them before BGP sessions, and associates them with the peering. Dictionaries containing only `name` are also treated as policy definitions. Strings are not supported.
+BGP peerings accept `import_policies` and `export_policies` as lists of routing-policy names or dictionaries. The design extracts these into top-level `routing_policies`, creates or updates them before BGP sessions, and associates them with the peering. A policy name or a dictionary containing only `name` is also treated as a policy definition.
+
+`peer_group` accepts a name or a dictionary with `name` and other peer-group fields. Both forms are collected into top-level `peer_groups` and created or updated before the BGP session. The peering then passes the group name to `create_bgp_peering`.
 
 This works for top-level `bgp_peerings` and peerings nested under devices or interfaces.
 
 === "Peering routing policies"
 
-    Prerequisites: the device, both IP addresses, both ASNs, and the BGP plugin. Policy dictionaries are extracted and deployed before the peering. `create_reverse: false` creates only the specified direction.
+    Prerequisites: the device, both IP addresses, both ASNs, and the BGP plugin. Inline peer groups and policies are deployed before the peering. `create_reverse: false` creates only the specified direction.
 
     ```yaml
     bgp_peerings:
@@ -1653,12 +1657,14 @@ This works for top-level `bgp_peerings` and peerings nested under devices or int
         local_as: 65100
         remote_as: 65200
         create_reverse: false
+        peer_group:
+          name: BRANCH PEERS
+          description: Branch BGP neighbors
         import_policies:
           - name: BRANCH IMPORT
             description: Branch inbound policy
         export_policies:
-          - name: BRANCH EXPORT
-            description: Branch outbound policy
+          - BRANCH EXPORT
     ```
 
     Equivalent using top-level keys:
@@ -1668,7 +1674,9 @@ This works for top-level `bgp_peerings` and peerings nested under devices or int
     - name: BRANCH IMPORT
       description: Branch inbound policy
     - name: BRANCH EXPORT
-      description: Branch outbound policy
+    peer_groups:
+    - name: BRANCH PEERS
+      description: Branch BGP neighbors
     bgp_peerings:
     - name: branch-to-core
       device: branch-router-1
@@ -1677,10 +1685,11 @@ This works for top-level `bgp_peerings` and peerings nested under devices or int
       local_as: 65100
       remote_as: 65200
       create_reverse: false
+      peer_group: BRANCH PEERS
       import_policies:
-      - name: BRANCH IMPORT
+      - BRANCH IMPORT
       export_policies:
-      - name: BRANCH EXPORT
+      - BRANCH EXPORT
     ```
 
 ## Configuration context

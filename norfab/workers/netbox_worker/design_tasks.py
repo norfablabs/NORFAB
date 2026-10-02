@@ -235,12 +235,36 @@ def flatten_design(design: dict) -> dict:
                         {**termination, "l2vpn": record["name"]}
                     )
 
+    # Device and interface peerings are now in the top-level collection. Set
+    # the design default on every ordinary peering before it reaches the task.
+    for peering in design.get("bgp_peerings", []):
+        if "custom_function" not in peering:
+            peering.setdefault("create_reverse", False)
+
+    # Deploy peer groups before sessions, keeping only their names on peerings.
+    for peering in design.get("bgp_peerings", []):
+        if "custom_function" in peering:
+            continue
+        peer_group = peering.get("peer_group")
+        if peer_group is None:
+            continue
+        peer_group = {"name": peer_group} if isinstance(peer_group, str) else peer_group
+        if peer_group not in design.setdefault("peer_groups", []):
+            design["peer_groups"].append(peer_group)
+        peering["peer_group"] = peer_group.get("name")
+
+    # Turn policy names into definitions for the earlier routing-policy stage.
+    # The peering processor later converts these dictionaries back to names.
     for peering in design.get("bgp_peerings", []):
         if "custom_function" in peering:
             continue
         for field in ("import_policies", "export_policies"):
             if field not in peering:
                 continue
+            peering[field] = [
+                {"name": policy} if isinstance(policy, str) else policy
+                for policy in peering[field]
+            ]
             for policy in peering[field]:
                 if isinstance(policy, dict):
                     if policy not in design.setdefault("routing_policies", []):
@@ -2722,6 +2746,68 @@ def process_routing_policies(
     }
 
 
+def process_peer_groups(
+    worker: Any,
+    nb: Any,
+    records: list[dict],
+    dry_run: bool,
+    lookup_cache: dict,
+    job: Job,
+    instance: str,
+    branch: str | None,
+) -> dict:
+    """Create or update BGP peer groups by name before their sessions.
+
+    Args:
+        worker: NetBox worker used for bulk reads and custom-field resolution.
+        nb: Pynetbox API bound to this deployment's instance and branch.
+        records: Flattened peer-group definitions.
+        dry_run: Report planned writes without changing NetBox.
+        lookup_cache: Mutable references shared across collection handlers.
+        job: Current design job.
+        instance: NetBox instance name.
+        branch: NetBox branch name, if any.
+
+    Returns:
+        dict: Peer-group names grouped under ``created`` and ``updated``.
+    """
+    identities = [record["name"] for record in records]
+    existing = (
+        {
+            item.name: item
+            for item in worker.bulk_filter(
+                nb.plugins.bgp.peer_group, name=identities, fields="id,name"
+            )
+        }
+        if identities
+        else {}
+    )
+    created = [dict(record) for record in records if record["name"] not in existing]
+    updated = [
+        {**record, "id": existing[record["name"]].id}
+        for record in records
+        if record["name"] in existing
+    ]
+    merge_design_array_fields(
+        worker,
+        nb,
+        lookup_cache,
+        nb.plugins.bgp.peer_group,
+        "netbox_bgp.peergroup",
+        created,
+        updated,
+    )
+    if not dry_run:
+        if created:
+            nb.plugins.bgp.peer_group.create(created)
+        if updated:
+            nb.plugins.bgp.peer_group.update(updated)
+    return {
+        "created": [record["name"] for record in created],
+        "updated": [record["name"] for record in updated],
+    }
+
+
 def process_bgp_communities(
     worker: Any,
     nb: Any,
@@ -3821,6 +3907,7 @@ DESIGN_HANDLERS_ORDER = {
     "primary_ip": process_primary_ip,
     "bgp_communities": process_bgp_communities,
     "routing_policies": process_routing_policies,
+    "peer_groups": process_peer_groups,
     "bgp_peerings": process_bgp_peerings,
     "config_context": process_config_context,
     "local_context_data": process_local_context_data,

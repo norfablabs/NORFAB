@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 1 October 2026*
+*Last updated: 2 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -737,14 +737,14 @@ Unique-name relationships use direct strings, validated before deployment;
 device-type references use manufacturer and model dictionaries.
 Required slugs default from object names (device-type models) on creation;
 explicit and existing slugs are preserved.
-BGP communities and routing policies support bulk create/update;
+BGP communities, routing policies, and peer groups support bulk create/update;
 Design object records pass custom fields through creation and PATCH updates, including next-available IP and prefix allocations. Custom-field definitions must exist for the target object type.
 design communities match by value and optional description, and interface VRFs accept direct name references.
 Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
 Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 IP allocation prefix filters resolve `role` by role name, not slug, and reject unknown names.
-BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. The standalone create task resolves custom-field references for new sessions.
-Inline import/export policy definitions are extracted before deployment.
+BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. Design peerings create only the specified direction unless `create_reverse: true` is set. The standalone create task resolves custom-field references for new sessions.
+Named or inline peer groups and import/export policies are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving the design `context`, record arguments, `netbox`, and `dry_run`; custom
 code is responsible for honoring dry-run and returning serializable results.
@@ -994,7 +994,9 @@ prerequisites; templates and transformer files execute as trusted code.
 ### BGP peering lifecycle
 
 Creates or updates individual and bulk BGP sessions, including separate NetBox
-IP and ASN queries for each side of a new session, and reconciles live BGP
+IP and ASN queries for each side of a new session. Creation matches existing
+sessions and repeated bulk entries by device name, IP addresses, and ASN numbers. ASN query
+role names are converted to slugs for NetBox filtering. The service reconciles live BGP
 neighbors with NetBox using five-tuple session identity and ID-based updates,
 including unnamed sessions, live-data filters,
 dry-run, optional stale-session deletion, and tri-state existing-description

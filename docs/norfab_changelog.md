@@ -1,3 +1,22 @@
+# 0.24.6 (draft)
+
+## BUGS
+
+1. Fixed NetBox `create_bgp_peering` ASN queries using a role name directly as a NetBox filter. The `role` value in `local_as_query` and `remote_as_query` is now slugified before lookup.
+2. Fixed NetBox `create_bgp_peering` attempting to create existing sessions when their names differ and repeated sessions within one bulk request. Sessions now match by device name, local and remote IP addresses, and local and remote ASN numbers before resolving object references.
+3. Fixed NetBox `create_bgp_peering` failing the entire task when a requested device does not exist. Existing-session lookup now excludes unknown devices so their sessions are skipped with an error.
+
+## ENHANCEMENTS
+
+1. NetBox `design_deploy` now creates or updates top-level and inline BGP peer groups before peerings. BGP peering import and export policies now accept names as well as inline dictionaries.
+2. NetBox `create_bgp_peering` checks for duplicate sessions using device names, IP addresses, and ASN numbers before resolving object references.
+
+## CHANGES
+
+1. NetBox `design_deploy` now defaults BGP peerings to `create_reverse: false`; set it to `true` to create the reverse session.
+
+---
+
 # 0.24.5
 
 ## BUGS

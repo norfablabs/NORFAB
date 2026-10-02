@@ -15,15 +15,14 @@ Creates one or many BGP sessions in NetBox. Supports single-session mode (indivi
 2. NetBox worker validates that the BGP plugin is installed
 3. Worker resolves the RIR ID once (when `rir` is provided) for on-demand ASN creation
 4. For each spec, supplied IP queries find addresses first; when `local_interface` is supplied, the interface supplies a missing local address and can derive a missing P2P peer address
-5. Worker pre-fetches all existing sessions for targeted devices (single API call) to support idempotency
+5. Worker pre-fetches existing sessions for targeted devices and indexes their device names, IP addresses, and ASN numbers
 6. For each session spec:
-    - Idempotency check: an existing session is left unchanged and reported in `exists`
-    - In dry-run mode — the name is added to `create` and processing continues
-    - Local and remote IPs are resolved from IPAM (or created when not found)
-    - Local and remote ASNs are resolved from IPAM (or created when `rir` is provided)
+    - Idempotency check: existing sessions and repeated bulk entries are reported in `exists` by object identity, regardless of name
+    - In dry-run mode, new sessions are reported in `create` without writes
+    - Local and remote IPs and ASNs are resolved from IPAM after the duplicate check; normal runs can create missing references
     - Optional fields (peer group, routing policies, prefix lists) are resolved or created by name
     - When `create_reverse=True` a mirror session is built by swapping local/remote IPs and ASNs
-7. All prepared payloads are sent to NetBox in a single bulk-create call
+7. Remaining payloads are sent to NetBox in bulk-create calls
 
 Object and multiobject custom fields accept related object names or IDs when creating a session. Use `update_bgp_peering` to change an existing session.
 When `custom_fields` is supplied, the task reuses reference-field definitions in `lookup_cache` or fetches and caches them for the next call. Calls without supplied custom fields do not fetch those definitions.
@@ -42,7 +41,7 @@ Normal mode returns the created, existing, and skipped BGP session details. In d
 
 ## Dry Run Mode
 
-`dry_run=True` returns session names without any NetBox writes:
+`dry_run=True` returns session names without any NetBox writes. It resolves ASN queries and compares session values with existing sessions:
 
 ```python
 {
