@@ -22,6 +22,7 @@ try:
     from tests.services.netbox.common import (
         delete_all_mac_addresses,
         delete_branch,
+        delete_test_sync_ips,
         get_pynetbox,
     )
 except ModuleNotFoundError as exc:
@@ -35,6 +36,7 @@ except ModuleNotFoundError as exc:
     from services.netbox.common import (
         delete_all_mac_addresses,
         delete_branch,
+        delete_test_sync_ips,
         get_pynetbox,
     )
 
@@ -50,9 +52,7 @@ pytestmark = pytest.mark.netbox
         (
             {
                 "vlans": {"global": {"create": [], "update": {}, "delete": []}},
-                "interfaces": {
-                    "router-1": {"create": [], "update": {}, "delete": []}
-                },
+                "interfaces": {"router-1": {"create": [], "update": {}, "delete": []}},
             },
             False,
         ),
@@ -65,9 +65,7 @@ def test_sync_diff_has_changes(diff: dict, expected: bool) -> None:
 
 
 def test_sync_diff_has_changes_can_ignore_deletions() -> None:
-    diff = {
-        "device": {"create": [], "update": {}, "delete": ["Loopback99"]}
-    }
+    diff = {"device": {"create": [], "update": {}, "delete": ["Loopback99"]}}
 
     assert sync_diff_has_changes(diff) is True
     assert sync_diff_has_changes(diff, ignore_deletions=True) is False
@@ -1552,17 +1550,11 @@ class TestSyncAll:
             group = nb.ipam.fhrp_groups.get(id=group_id)
             if group:
                 group.delete()
-        # TEST_SYNC IP addresses
-        for parent_prefix in ["10.3.0.0/16", "2001:beef::/32"]:
-            for ip in nb.ipam.ip_addresses.filter(parent=parent_prefix):
-                ip.delete()
-        # MAC addresses - delete by device filter (assigned MACs) and by known
-        # MAC address values to catch unassigned/orphaned MACs left by other tests
+        # Delete IPs only from this test area's devices.
+        delete_test_sync_ips(None, devices)
+        # MAC addresses assigned to this test area's devices.
         for device in devices:
             for mac in nb.dcim.mac_addresses.filter(device=device):
-                mac.delete()
-        for mac_addr in ["02:00:00:11:00:09", "02:00:00:12:00:09"]:
-            for mac in nb.dcim.mac_addresses.filter(mac_address=mac_addr):
                 mac.delete()
         # TEST_SYNC interfaces - delete children before parents to avoid 409 conflicts.
         # Exclude 'Ethernet9': pre-existing interface updated by sync; needed by TestSyncMacAddresses.
@@ -1762,9 +1754,7 @@ class TestSyncAll:
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
             for device in self.SPINE_DEVICES:
-                assert self.TEST_VRRP_KEY in res["result"][device]["vrrp"][
-                    "created"
-                ]
+                assert self.TEST_VRRP_KEY in res["result"][device]["vrrp"]["created"]
 
         nb = get_pynetbox(None)
         group_ids = set()

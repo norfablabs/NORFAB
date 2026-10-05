@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 2 October 2026*
+*Last updated: 5 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -687,9 +687,11 @@ low-level interface provides fewer task-specific guardrails.
 ### GraphQL queries
 
 Builds and runs single, aliased, or raw GraphQL queries. **Use cases:** selective
-reads, reporting, and reducing response payloads. **Limitations:** queries depend
-on the target NetBox GraphQL schema; the public `graphql` task is deprecated in
-code in favour of the lower-level helper for new internal development.
+reads, reporting, and reducing response payloads. The paginated `netbox_graphql`
+task returns an empty result and preserves request errors when a page fails.
+**Limitations:** queries depend on the target NetBox GraphQL schema; the public
+`graphql` task is deprecated in code in favour of the lower-level helper for new
+internal development.
 [Task details](workers/netbox/services_netbox_service_tasks_graphql.md)
 
 ### Generic object CRUD

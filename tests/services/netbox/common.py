@@ -1,3 +1,5 @@
+import ipaddress
+
 import pynetbox
 
 try:
@@ -181,13 +183,30 @@ def delete_mac_addresses_from_interface(nfclient, device, interface):
 
 
 def delete_test_sync_ips(nfclient, devices):
-    """Delete IPs in 10.3.0.0/16 and 2001:beef::/32 ranges that are assigned to
-    interfaces with TEST_SYNC in their description on the given devices."""
+    """Delete test-range IPs assigned to interfaces on the given devices."""
     pynb = get_pynetbox(nfclient)
-    for parent_prefix in ["10.3.0.0/16", "2001:beef::/32"]:
-        for ip in pynb.ipam.ip_addresses.filter(parent=parent_prefix):
-            ip.delete()
-    print(f"Deleted TEST_SYNC IPs in 10.3.0.0/16 and 2001:beef::/32")
+    devices = devices if isinstance(devices, list) else [devices]
+    networks = (
+        ipaddress.ip_network("10.3.0.0/16"),
+        ipaddress.ip_network("10.83.0.0/16"),
+        ipaddress.ip_network("10.84.0.0/16"),
+        ipaddress.ip_network("10.184.0.0/16"),
+        ipaddress.ip_network("172.83.0.0/16"),
+        ipaddress.ip_network("172.183.0.0/16"),
+        ipaddress.ip_network("198.21.0.0/16"),
+        ipaddress.ip_network("198.51.83.0/24"),
+        ipaddress.ip_network("198.51.183.0/24"),
+        ipaddress.ip_network("2001:beef::/32"),
+        ipaddress.ip_network("2001:83::/32"),
+        ipaddress.ip_network("2001:83ef::/32"),
+        ipaddress.ip_network("2001:83b8::/32"),
+    )
+    for device in devices:
+        for ip in pynb.ipam.ip_addresses.filter(device=device):
+            address = ipaddress.ip_interface(ip.address).ip
+            if any(address in network for network in networks):
+                ip.delete()
+    print(f"Deleted TEST_SYNC IPs on {devices}")
 
 
 def delete_all_mac_addresses(nfclient, devices):

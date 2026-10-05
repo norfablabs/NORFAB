@@ -1,0 +1,2654 @@
+name: NETBOX_IPAM_LF_3
+initial_prompt: '{base_prompt}>'
+commands:
+  show ip bgp neighbors vrf all | json:
+    output: |
+      {
+        "vrfs": {
+          "default": {
+            "peerList": [
+              {
+                "peerAddress": "10.84.0.8",
+                "asn": "65001",
+                "linkType": "external",
+                "routerId": "10.84.10.1",
+                "vrf": "default",
+                "version": 4,
+                "description": "ceos-spine-1 Ethernet4",
+                "negotiatedVersion": 4,
+                "updateGroupIndex": -1,
+                "lastRcvd": 8,
+                "lastSent": 17,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "configHoldTime": 180,
+                "configKeepaliveTime": 60,
+                "minHoldTime": 3,
+                "configMinHoldTime": 3,
+                "sendFailureHoldTime": 0,
+                "holdTimeLeft": 172,
+                "keepaliveTimeLeft": 40,
+                "state": "Established",
+                "establishedTime": 1143,
+                "establishedTransitions": 1,
+                "lastState": "OpenConfirm",
+                "lastEvent": "Established",
+                "enRRefreshstalePathRemoval": false,
+                "outboundEnRRefreshEnabled": true,
+                "neighborCapabilities": {
+                  "negotiationDisabled": false,
+                  "unsupportedCapReceived": false,
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    }
+                  },
+                  "fourOctetAsnCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "routeRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "enhancedRouteRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "sendEorMessages": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "addPathsCaps": {
+                    "ipv4Unicast": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    }
+                  },
+                  "grCaps": {
+                    "advertised": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    },
+                    "received": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    }
+                  }
+                },
+                "endOfRibs": {
+                  "incoming": {
+                    "ipv4Unicast": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810272.421191,
+                      "stalePathsDeleted": 0,
+                      "pathsReceivedBeforeEor": 4
+                    }
+                  }
+                },
+                "nexthopLuOriginateIpv4Uni": false,
+                "thirdPartyNexthopLuOriginateIpv4Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv4Uni": false,
+                "nexthopLuOriginateIpv6Uni": false,
+                "thirdPartyNexthopLuOriginateIpv6Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv6Uni": false,
+                "rejectAsSetConfedSetV4Uni": false,
+                "rejectAsSetConfedSetV6Uni": false,
+                "aigpSessionIpv4Uni": false,
+                "aigpSessionIpv4LabeledUni": false,
+                "aigpSessionIpv6Uni": false,
+                "aigpSessionIpv6LabeledUni": false,
+                "fwdFailoverTriggerSessionIpv4Uni": false,
+                "fwdFailoverTriggerSessionIpv6Uni": false,
+                "outMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 4,
+                  "keepalives": 24,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "inMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 7,
+                  "keepalives": 24,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "sentMessages": 29,
+                "receivedMessages": 32,
+                "prefixesSent": 4,
+                "prefixesReceived": 6,
+                "v4BestPaths": 3,
+                "v4BestEcmpPaths": 0,
+                "v6PrefixesSent": 0,
+                "v6PrefixesReceived": 0,
+                "v6BestPaths": 0,
+                "v6BestEcmpPaths": 0,
+                "totalRoutesWarnLimit": 204800,
+                "maxTotalRoutes": 256000,
+                "dropStats": {
+                  "inDropAsloop": 0,
+                  "inDropClusterIdLoop": 0,
+                  "inDropMalformedMpbgp": 0,
+                  "inDropOrigId": 0,
+                  "inDropNhLocal": 0,
+                  "inDropNhAfV6": 0,
+                  "prefixDroppedMartianV4": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixDroppedMartianV6": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixLuDroppedV4": 0,
+                  "prefixLuDroppedMartianV4": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixLuDroppedV6": 0,
+                  "prefixLuDroppedMartianV6": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixEvpnDroppedUnsupportedRouteType": 0,
+                  "prefixBgpLsDroppedReceptionUnsupported": 0,
+                  "outDropV4LocalAddr": 0,
+                  "outDropV6LocalAddr": 0,
+                  "prefixVpnIpv4DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv4DroppedMaxRouteLimitViolated": 0,
+                  "prefixVpnIpv6DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv6DroppedMaxRouteLimitViolated": 0,
+                  "prefixEvpnDroppedImportMatchFailure": 0,
+                  "prefixEvpnDroppedMaxRouteLimitViolated": 0,
+                  "prefixRtMembershipDroppedLocalAsReject": 0,
+                  "prefixRtMembershipDroppedMaxRouteLimitViolated": 0,
+                  "inDropAsSetConfedSetV4Uni": 0,
+                  "inDropAsSetConfedSetV6Uni": 0
+                },
+                "peerInUpdateErrors": {
+                  "inUpdErrWithdraw": 0,
+                  "inUpdErrIgnore": 0,
+                  "inUpdErrDisableAfiSafi": 0,
+                  "disabledAfiSafi": "None",
+                  "lastUpdErrTime": 0
+                },
+                "bgpSoftReconfigInbound": "Default",
+                "rpkiOriginValidationMethod": "disabled",
+                "rpkiOriginValidationSendExtComm": false,
+                "rpkiOriginValidationRouteMap": "",
+                "rpkiOriginValidationWaitForRoaSync": false,
+                "rpkiIpv4OvValidPaths": 0,
+                "rpkiIpv4OvInvalidPaths": 0,
+                "rpkiIpv4OvUnknownPaths": 0,
+                "rpkiIpv6OvValidPaths": 0,
+                "rpkiIpv6OvInvalidPaths": 0,
+                "rpkiIpv6OvUnknownPaths": 0,
+                "orrPosition": {},
+                "inboundUpdateProcessingDelay": 0,
+                "inboundUpdateProcessingDelayState": "inactive",
+                "inboundUpdateProcessingDelayStateDetail": "",
+                "inboundUpdateProcessingDelayLeft": 0,
+                "localAsn": "65103",
+                "localRouterId": "10.84.10.13",
+                "ttl": 1,
+                "maxTtlHops": 255,
+                "updateSource": "10.84.0.9",
+                "localPort": 33761,
+                "remotePort": 179,
+                "prependOwnDisabled": false,
+                "peerTcpInfo": {
+                  "state": "ESTABLISHED",
+                  "options": 7,
+                  "sendWindowScale": 7,
+                  "rcvWindowScale": 7,
+                  "retransTimeout": 204000,
+                  "delayedAckTimeout": 40000,
+                  "maxSegmentSize": 1448,
+                  "sndRtt": 1079,
+                  "sndRttVariance": 1928,
+                  "slowStartThreshold": 2147483647,
+                  "congestionWindow": 10,
+                  "rcvRtt": 0,
+                  "rcvWindow": 14480,
+                  "totalRetrans": 0,
+                  "outputQueueLength": 0,
+                  "outputMaxQueueLength": 87040,
+                  "inputQueueLength": 0,
+                  "inputMaxQueueLength": 32768,
+                  "connectionOptions": {
+                    "timestampsEnabled": true,
+                    "selectiveAcknowledgementsEnabled": true,
+                    "windowScaleEnabled": true,
+                    "ecnEnabled": false
+                  }
+                },
+                "ifName": "Ethernet1",
+                "afiSafiInfo": {
+                  "ipv4Unicast": {
+                    "localNexthop": "10.84.0.9"
+                  }
+                }
+              },
+              {
+                "peerAddress": "10.84.0.10",
+                "asn": "65002",
+                "linkType": "external",
+                "routerId": "10.84.10.2",
+                "vrf": "default",
+                "version": 4,
+                "description": "ceos-spine-2 Ethernet4",
+                "negotiatedVersion": 4,
+                "updateGroupIndex": -1,
+                "lastRcvd": 24,
+                "lastSent": 11,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "configHoldTime": 180,
+                "configKeepaliveTime": 60,
+                "minHoldTime": 3,
+                "configMinHoldTime": 3,
+                "sendFailureHoldTime": 0,
+                "holdTimeLeft": 156,
+                "keepaliveTimeLeft": 47,
+                "state": "Established",
+                "establishedTime": 1142,
+                "establishedTransitions": 1,
+                "lastState": "OpenConfirm",
+                "lastEvent": "Established",
+                "enRRefreshstalePathRemoval": false,
+                "outboundEnRRefreshEnabled": true,
+                "neighborCapabilities": {
+                  "negotiationDisabled": false,
+                  "unsupportedCapReceived": false,
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    }
+                  },
+                  "fourOctetAsnCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "routeRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "enhancedRouteRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "sendEorMessages": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "addPathsCaps": {
+                    "ipv4Unicast": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    }
+                  },
+                  "grCaps": {
+                    "advertised": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    },
+                    "received": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    }
+                  }
+                },
+                "endOfRibs": {
+                  "incoming": {
+                    "ipv4Unicast": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810360.511425,
+                      "stalePathsDeleted": 0,
+                      "pathsReceivedBeforeEor": 4
+                    }
+                  }
+                },
+                "nexthopLuOriginateIpv4Uni": false,
+                "thirdPartyNexthopLuOriginateIpv4Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv4Uni": false,
+                "nexthopLuOriginateIpv6Uni": false,
+                "thirdPartyNexthopLuOriginateIpv6Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv6Uni": false,
+                "rejectAsSetConfedSetV4Uni": false,
+                "rejectAsSetConfedSetV6Uni": false,
+                "aigpSessionIpv4Uni": false,
+                "aigpSessionIpv4LabeledUni": false,
+                "aigpSessionIpv6Uni": false,
+                "aigpSessionIpv6LabeledUni": false,
+                "fwdFailoverTriggerSessionIpv4Uni": false,
+                "fwdFailoverTriggerSessionIpv6Uni": false,
+                "outMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 7,
+                  "keepalives": 24,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "inMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 6,
+                  "keepalives": 22,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "sentMessages": 32,
+                "receivedMessages": 29,
+                "prefixesSent": 4,
+                "prefixesReceived": 6,
+                "v4BestPaths": 3,
+                "v4BestEcmpPaths": 0,
+                "v6PrefixesSent": 0,
+                "v6PrefixesReceived": 0,
+                "v6BestPaths": 0,
+                "v6BestEcmpPaths": 0,
+                "totalRoutesWarnLimit": 204800,
+                "maxTotalRoutes": 256000,
+                "dropStats": {
+                  "inDropAsloop": 0,
+                  "inDropClusterIdLoop": 0,
+                  "inDropMalformedMpbgp": 0,
+                  "inDropOrigId": 0,
+                  "inDropNhLocal": 0,
+                  "inDropNhAfV6": 0,
+                  "prefixDroppedMartianV4": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixDroppedMartianV6": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixLuDroppedV4": 0,
+                  "prefixLuDroppedMartianV4": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixLuDroppedV6": 0,
+                  "prefixLuDroppedMartianV6": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixEvpnDroppedUnsupportedRouteType": 0,
+                  "prefixBgpLsDroppedReceptionUnsupported": 0,
+                  "outDropV4LocalAddr": 0,
+                  "outDropV6LocalAddr": 0,
+                  "prefixVpnIpv4DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv4DroppedMaxRouteLimitViolated": 0,
+                  "prefixVpnIpv6DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv6DroppedMaxRouteLimitViolated": 0,
+                  "prefixEvpnDroppedImportMatchFailure": 0,
+                  "prefixEvpnDroppedMaxRouteLimitViolated": 0,
+                  "prefixRtMembershipDroppedLocalAsReject": 0,
+                  "prefixRtMembershipDroppedMaxRouteLimitViolated": 0,
+                  "inDropAsSetConfedSetV4Uni": 0,
+                  "inDropAsSetConfedSetV6Uni": 0
+                },
+                "peerInUpdateErrors": {
+                  "inUpdErrWithdraw": 0,
+                  "inUpdErrIgnore": 0,
+                  "inUpdErrDisableAfiSafi": 0,
+                  "disabledAfiSafi": "None",
+                  "lastUpdErrTime": 0
+                },
+                "bgpSoftReconfigInbound": "Default",
+                "rpkiOriginValidationMethod": "disabled",
+                "rpkiOriginValidationSendExtComm": false,
+                "rpkiOriginValidationRouteMap": "",
+                "rpkiOriginValidationWaitForRoaSync": false,
+                "rpkiIpv4OvValidPaths": 0,
+                "rpkiIpv4OvInvalidPaths": 0,
+                "rpkiIpv4OvUnknownPaths": 0,
+                "rpkiIpv6OvValidPaths": 0,
+                "rpkiIpv6OvInvalidPaths": 0,
+                "rpkiIpv6OvUnknownPaths": 0,
+                "orrPosition": {},
+                "inboundUpdateProcessingDelay": 0,
+                "inboundUpdateProcessingDelayState": "inactive",
+                "inboundUpdateProcessingDelayStateDetail": "",
+                "inboundUpdateProcessingDelayLeft": 0,
+                "localAsn": "65103",
+                "localRouterId": "10.84.10.13",
+                "ttl": 1,
+                "maxTtlHops": 255,
+                "updateSource": "10.84.0.11",
+                "localPort": 179,
+                "remotePort": 41807,
+                "prependOwnDisabled": false,
+                "peerTcpInfo": {
+                  "state": "ESTABLISHED",
+                  "options": 7,
+                  "sendWindowScale": 7,
+                  "rcvWindowScale": 7,
+                  "retransTimeout": 204000,
+                  "delayedAckTimeout": 40000,
+                  "maxSegmentSize": 1448,
+                  "sndRtt": 389,
+                  "sndRttVariance": 576,
+                  "slowStartThreshold": 2147483647,
+                  "congestionWindow": 10,
+                  "rcvRtt": 0,
+                  "rcvWindow": 14480,
+                  "totalRetrans": 0,
+                  "outputQueueLength": 0,
+                  "outputMaxQueueLength": 87040,
+                  "inputQueueLength": 0,
+                  "inputMaxQueueLength": 32768,
+                  "connectionOptions": {
+                    "timestampsEnabled": true,
+                    "selectiveAcknowledgementsEnabled": true,
+                    "windowScaleEnabled": true,
+                    "ecnEnabled": false
+                  }
+                },
+                "ifName": "Ethernet2",
+                "afiSafiInfo": {
+                  "ipv4Unicast": {
+                    "localNexthop": "10.84.0.11"
+                  }
+                }
+              },
+              {
+                "peerAddress": "10.84.10.1",
+                "asn": "65001",
+                "linkType": "external",
+                "routerId": "10.84.10.1",
+                "vrf": "default",
+                "version": 4,
+                "description": "ceos-spine-1 Loopback0 EVPN",
+                "peerGroupName": "EVPN-OVERLAY",
+                "negotiatedVersion": 4,
+                "updateGroupIndex": -1,
+                "lastRcvd": 22,
+                "lastSent": 2,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "configHoldTime": 180,
+                "configKeepaliveTime": 60,
+                "minHoldTime": 3,
+                "configMinHoldTime": 3,
+                "sendFailureHoldTime": 0,
+                "holdTimeLeft": 158,
+                "keepaliveTimeLeft": 43,
+                "state": "Established",
+                "establishedTime": 1141,
+                "establishedTransitions": 1,
+                "lastState": "OpenConfirm",
+                "lastEvent": "Established",
+                "advertisedCommunities": {
+                  "standard": true,
+                  "extended": true,
+                  "large": false
+                },
+                "enRRefreshstalePathRemoval": false,
+                "outboundEnRRefreshEnabled": true,
+                "neighborCapabilities": {
+                  "negotiationDisabled": false,
+                  "unsupportedCapReceived": false,
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    },
+                    "l2VpnEvpn": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    }
+                  },
+                  "fourOctetAsnCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "routeRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "enhancedRouteRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "sendEorMessages": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "addPathsCaps": {
+                    "ipv4Unicast": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    },
+                    "l2VpnEvpn": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    }
+                  },
+                  "grCaps": {
+                    "advertised": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    },
+                    "received": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    }
+                  }
+                },
+                "endOfRibs": {
+                  "incoming": {
+                    "ipv4Unicast": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810273.421729,
+                      "stalePathsDeleted": 0,
+                      "pathsReceivedBeforeEor": 4
+                    },
+                    "l2VpnEvpn": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810272.421242,
+                      "stalePathsDeleted": 0
+                    }
+                  }
+                },
+                "nexthopLuOriginateIpv4Uni": false,
+                "thirdPartyNexthopLuOriginateIpv4Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv4Uni": false,
+                "nexthopLuOriginateIpv6Uni": false,
+                "thirdPartyNexthopLuOriginateIpv6Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv6Uni": false,
+                "rejectAsSetConfedSetV4Uni": false,
+                "rejectAsSetConfedSetV6Uni": false,
+                "aigpSessionIpv4Uni": false,
+                "aigpSessionIpv4LabeledUni": false,
+                "aigpSessionIpv6Uni": false,
+                "aigpSessionIpv6LabeledUni": false,
+                "fwdFailoverTriggerSessionIpv4Uni": false,
+                "fwdFailoverTriggerSessionIpv6Uni": false,
+                "outMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 8,
+                  "keepalives": 24,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "inMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 8,
+                  "keepalives": 24,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "sentMessages": 33,
+                "receivedMessages": 33,
+                "prefixesSent": 7,
+                "prefixesReceived": 6,
+                "v4BestPaths": 0,
+                "v4BestEcmpPaths": 0,
+                "v6PrefixesSent": 0,
+                "v6PrefixesReceived": 0,
+                "v6BestPaths": 0,
+                "v6BestEcmpPaths": 0,
+                "evpnSent": 0,
+                "evpnReceived": 0,
+                "evpnBestPaths": 0,
+                "evpnBestEcmpPaths": 0,
+                "totalRoutesWarnLimit": 204800,
+                "maxTotalRoutes": 256000,
+                "dropStats": {
+                  "inDropAsloop": 1,
+                  "inDropClusterIdLoop": 0,
+                  "inDropMalformedMpbgp": 0,
+                  "inDropOrigId": 0,
+                  "inDropNhLocal": 0,
+                  "inDropNhAfV6": 0,
+                  "prefixDroppedMartianV4": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixDroppedMartianV6": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixLuDroppedV4": 0,
+                  "prefixLuDroppedMartianV4": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixLuDroppedV6": 0,
+                  "prefixLuDroppedMartianV6": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixEvpnDroppedUnsupportedRouteType": 0,
+                  "prefixBgpLsDroppedReceptionUnsupported": 0,
+                  "outDropV4LocalAddr": 0,
+                  "outDropV6LocalAddr": 0,
+                  "prefixVpnIpv4DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv4DroppedMaxRouteLimitViolated": 0,
+                  "prefixVpnIpv6DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv6DroppedMaxRouteLimitViolated": 0,
+                  "prefixEvpnDroppedImportMatchFailure": 0,
+                  "prefixEvpnDroppedMaxRouteLimitViolated": 0,
+                  "prefixRtMembershipDroppedLocalAsReject": 0,
+                  "prefixRtMembershipDroppedMaxRouteLimitViolated": 0,
+                  "inDropAsSetConfedSetV4Uni": 0,
+                  "inDropAsSetConfedSetV6Uni": 0
+                },
+                "peerInUpdateErrors": {
+                  "inUpdErrWithdraw": 0,
+                  "inUpdErrIgnore": 0,
+                  "inUpdErrDisableAfiSafi": 0,
+                  "disabledAfiSafi": "None",
+                  "lastUpdErrTime": 0
+                },
+                "bgpSoftReconfigInbound": "Default",
+                "rpkiOriginValidationMethod": "disabled",
+                "rpkiOriginValidationSendExtComm": false,
+                "rpkiOriginValidationRouteMap": "",
+                "rpkiOriginValidationWaitForRoaSync": false,
+                "rpkiIpv4OvValidPaths": 0,
+                "rpkiIpv4OvInvalidPaths": 0,
+                "rpkiIpv4OvUnknownPaths": 0,
+                "rpkiIpv6OvValidPaths": 0,
+                "rpkiIpv6OvInvalidPaths": 0,
+                "rpkiIpv6OvUnknownPaths": 0,
+                "orrPosition": {},
+                "inboundUpdateProcessingDelay": 0,
+                "inboundUpdateProcessingDelayState": "inactive",
+                "inboundUpdateProcessingDelayStateDetail": "",
+                "inboundUpdateProcessingDelayLeft": 0,
+                "localAsn": "65103",
+                "localRouterId": "10.84.10.13",
+                "ttlConfig": "ebgpMultiHop",
+                "ttl": 3,
+                "maxTtlHops": 3,
+                "updateSource": "10.84.10.13",
+                "localPort": 179,
+                "remotePort": 42685,
+                "prependOwnDisabled": false,
+                "peerTcpInfo": {
+                  "state": "ESTABLISHED",
+                  "options": 7,
+                  "sendWindowScale": 7,
+                  "rcvWindowScale": 7,
+                  "retransTimeout": 204000,
+                  "delayedAckTimeout": 40000,
+                  "maxSegmentSize": 1448,
+                  "sndRtt": 790,
+                  "sndRttVariance": 1388,
+                  "slowStartThreshold": 2147483647,
+                  "congestionWindow": 2,
+                  "rcvRtt": 0,
+                  "rcvWindow": 14480,
+                  "totalRetrans": 2,
+                  "outputQueueLength": 0,
+                  "outputMaxQueueLength": 87040,
+                  "inputQueueLength": 0,
+                  "inputMaxQueueLength": 32768,
+                  "connectionOptions": {
+                    "timestampsEnabled": true,
+                    "selectiveAcknowledgementsEnabled": true,
+                    "windowScaleEnabled": true,
+                    "ecnEnabled": false
+                  }
+                },
+                "ifName": "Loopback0",
+                "afiSafiInfo": {
+                  "ipv4Unicast": {
+                    "localNexthop": "10.84.10.13"
+                  },
+                  "l2VpnEvpn": {
+                    "localNexthop": ""
+                  }
+                }
+              },
+              {
+                "peerAddress": "10.84.10.2",
+                "asn": "65002",
+                "linkType": "external",
+                "routerId": "10.84.10.2",
+                "vrf": "default",
+                "version": 4,
+                "description": "ceos-spine-2 Loopback0 EVPN",
+                "peerGroupName": "EVPN-OVERLAY",
+                "negotiatedVersion": 4,
+                "updateGroupIndex": -1,
+                "lastRcvd": 25,
+                "lastSent": 29,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "configHoldTime": 180,
+                "configKeepaliveTime": 60,
+                "minHoldTime": 3,
+                "configMinHoldTime": 3,
+                "sendFailureHoldTime": 0,
+                "holdTimeLeft": 155,
+                "keepaliveTimeLeft": 21,
+                "state": "Established",
+                "establishedTime": 1141,
+                "establishedTransitions": 1,
+                "lastState": "OpenConfirm",
+                "lastEvent": "Established",
+                "advertisedCommunities": {
+                  "standard": true,
+                  "extended": true,
+                  "large": false
+                },
+                "enRRefreshstalePathRemoval": false,
+                "outboundEnRRefreshEnabled": true,
+                "neighborCapabilities": {
+                  "negotiationDisabled": false,
+                  "unsupportedCapReceived": false,
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    },
+                    "l2VpnEvpn": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    }
+                  },
+                  "fourOctetAsnCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "routeRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "enhancedRouteRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "sendEorMessages": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "addPathsCaps": {
+                    "ipv4Unicast": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    },
+                    "l2VpnEvpn": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    }
+                  },
+                  "grCaps": {
+                    "advertised": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    },
+                    "received": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    }
+                  }
+                },
+                "endOfRibs": {
+                  "incoming": {
+                    "ipv4Unicast": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810360.511147,
+                      "stalePathsDeleted": 0,
+                      "pathsReceivedBeforeEor": 4
+                    },
+                    "l2VpnEvpn": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810360.511216,
+                      "stalePathsDeleted": 0
+                    }
+                  }
+                },
+                "nexthopLuOriginateIpv4Uni": false,
+                "thirdPartyNexthopLuOriginateIpv4Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv4Uni": false,
+                "nexthopLuOriginateIpv6Uni": false,
+                "thirdPartyNexthopLuOriginateIpv6Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv6Uni": false,
+                "rejectAsSetConfedSetV4Uni": false,
+                "rejectAsSetConfedSetV6Uni": false,
+                "aigpSessionIpv4Uni": false,
+                "aigpSessionIpv4LabeledUni": false,
+                "aigpSessionIpv6Uni": false,
+                "aigpSessionIpv6LabeledUni": false,
+                "fwdFailoverTriggerSessionIpv4Uni": false,
+                "fwdFailoverTriggerSessionIpv6Uni": false,
+                "outMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 9,
+                  "keepalives": 23,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "inMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 8,
+                  "keepalives": 23,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "sentMessages": 33,
+                "receivedMessages": 32,
+                "prefixesSent": 7,
+                "prefixesReceived": 6,
+                "v4BestPaths": 0,
+                "v4BestEcmpPaths": 0,
+                "v6PrefixesSent": 0,
+                "v6PrefixesReceived": 0,
+                "v6BestPaths": 0,
+                "v6BestEcmpPaths": 0,
+                "evpnSent": 0,
+                "evpnReceived": 0,
+                "evpnBestPaths": 0,
+                "evpnBestEcmpPaths": 0,
+                "totalRoutesWarnLimit": 204800,
+                "maxTotalRoutes": 256000,
+                "dropStats": {
+                  "inDropAsloop": 1,
+                  "inDropClusterIdLoop": 0,
+                  "inDropMalformedMpbgp": 0,
+                  "inDropOrigId": 0,
+                  "inDropNhLocal": 0,
+                  "inDropNhAfV6": 0,
+                  "prefixDroppedMartianV4": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixDroppedMartianV6": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixLuDroppedV4": 0,
+                  "prefixLuDroppedMartianV4": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixLuDroppedV6": 0,
+                  "prefixLuDroppedMartianV6": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixEvpnDroppedUnsupportedRouteType": 0,
+                  "prefixBgpLsDroppedReceptionUnsupported": 0,
+                  "outDropV4LocalAddr": 0,
+                  "outDropV6LocalAddr": 0,
+                  "prefixVpnIpv4DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv4DroppedMaxRouteLimitViolated": 0,
+                  "prefixVpnIpv6DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv6DroppedMaxRouteLimitViolated": 0,
+                  "prefixEvpnDroppedImportMatchFailure": 0,
+                  "prefixEvpnDroppedMaxRouteLimitViolated": 0,
+                  "prefixRtMembershipDroppedLocalAsReject": 0,
+                  "prefixRtMembershipDroppedMaxRouteLimitViolated": 0,
+                  "inDropAsSetConfedSetV4Uni": 0,
+                  "inDropAsSetConfedSetV6Uni": 0
+                },
+                "peerInUpdateErrors": {
+                  "inUpdErrWithdraw": 0,
+                  "inUpdErrIgnore": 0,
+                  "inUpdErrDisableAfiSafi": 0,
+                  "disabledAfiSafi": "None",
+                  "lastUpdErrTime": 0
+                },
+                "bgpSoftReconfigInbound": "Default",
+                "rpkiOriginValidationMethod": "disabled",
+                "rpkiOriginValidationSendExtComm": false,
+                "rpkiOriginValidationRouteMap": "",
+                "rpkiOriginValidationWaitForRoaSync": false,
+                "rpkiIpv4OvValidPaths": 0,
+                "rpkiIpv4OvInvalidPaths": 0,
+                "rpkiIpv4OvUnknownPaths": 0,
+                "rpkiIpv6OvValidPaths": 0,
+                "rpkiIpv6OvInvalidPaths": 0,
+                "rpkiIpv6OvUnknownPaths": 0,
+                "orrPosition": {},
+                "inboundUpdateProcessingDelay": 0,
+                "inboundUpdateProcessingDelayState": "inactive",
+                "inboundUpdateProcessingDelayStateDetail": "",
+                "inboundUpdateProcessingDelayLeft": 0,
+                "localAsn": "65103",
+                "localRouterId": "10.84.10.13",
+                "ttlConfig": "ebgpMultiHop",
+                "ttl": 3,
+                "maxTtlHops": 3,
+                "updateSource": "10.84.10.13",
+                "localPort": 179,
+                "remotePort": 42877,
+                "prependOwnDisabled": false,
+                "peerTcpInfo": {
+                  "state": "ESTABLISHED",
+                  "options": 7,
+                  "sendWindowScale": 7,
+                  "rcvWindowScale": 7,
+                  "retransTimeout": 204000,
+                  "delayedAckTimeout": 40000,
+                  "maxSegmentSize": 1448,
+                  "sndRtt": 582,
+                  "sndRttVariance": 922,
+                  "slowStartThreshold": 2147483647,
+                  "congestionWindow": 10,
+                  "rcvRtt": 0,
+                  "rcvWindow": 14480,
+                  "totalRetrans": 0,
+                  "outputQueueLength": 0,
+                  "outputMaxQueueLength": 87040,
+                  "inputQueueLength": 0,
+                  "inputMaxQueueLength": 32768,
+                  "connectionOptions": {
+                    "timestampsEnabled": true,
+                    "selectiveAcknowledgementsEnabled": true,
+                    "windowScaleEnabled": true,
+                    "ecnEnabled": false
+                  }
+                },
+                "ifName": "Loopback0",
+                "afiSafiInfo": {
+                  "ipv4Unicast": {
+                    "localNexthop": "10.84.10.13"
+                  },
+                  "l2VpnEvpn": {
+                    "localNexthop": ""
+                  }
+                }
+              }
+            ]
+          },
+          "CONTROL_PLANE": {
+            "peerList": [
+              {
+                "peerAddress": "10.184.0.8",
+                "asn": "65001",
+                "linkType": "external",
+                "routerId": "10.184.0.8",
+                "vrf": "CONTROL_PLANE",
+                "version": 4,
+                "description": "ceos-spine-1 Ethernet4.101",
+                "negotiatedVersion": 4,
+                "updateGroupIndex": -1,
+                "lastRcvd": 22,
+                "lastSent": 19,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "configHoldTime": 180,
+                "configKeepaliveTime": 60,
+                "minHoldTime": 3,
+                "configMinHoldTime": 3,
+                "sendFailureHoldTime": 0,
+                "holdTimeLeft": 158,
+                "keepaliveTimeLeft": 38,
+                "state": "Established",
+                "establishedTime": 1143,
+                "establishedTransitions": 1,
+                "lastState": "OpenConfirm",
+                "lastEvent": "Established",
+                "enRRefreshstalePathRemoval": false,
+                "outboundEnRRefreshEnabled": true,
+                "neighborCapabilities": {
+                  "negotiationDisabled": false,
+                  "unsupportedCapReceived": false,
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    }
+                  },
+                  "fourOctetAsnCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "routeRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "enhancedRouteRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "sendEorMessages": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "addPathsCaps": {
+                    "ipv4Unicast": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    }
+                  },
+                  "grCaps": {
+                    "advertised": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    },
+                    "received": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    }
+                  }
+                },
+                "endOfRibs": {
+                  "incoming": {
+                    "ipv4Unicast": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810271.109349,
+                      "stalePathsDeleted": 0,
+                      "pathsReceivedBeforeEor": 6
+                    }
+                  }
+                },
+                "nexthopLuOriginateIpv4Uni": false,
+                "thirdPartyNexthopLuOriginateIpv4Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv4Uni": false,
+                "nexthopLuOriginateIpv6Uni": false,
+                "thirdPartyNexthopLuOriginateIpv6Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv6Uni": false,
+                "rejectAsSetConfedSetV4Uni": false,
+                "rejectAsSetConfedSetV6Uni": false,
+                "aigpSessionIpv4Uni": false,
+                "aigpSessionIpv6Uni": false,
+                "fwdFailoverTriggerSessionIpv4Uni": false,
+                "fwdFailoverTriggerSessionIpv6Uni": false,
+                "outMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 6,
+                  "keepalives": 24,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "inMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 3,
+                  "keepalives": 24,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "sentMessages": 31,
+                "receivedMessages": 28,
+                "prefixesSent": 3,
+                "prefixesReceived": 6,
+                "v4BestPaths": 6,
+                "v4BestEcmpPaths": 0,
+                "v6PrefixesSent": 0,
+                "v6PrefixesReceived": 0,
+                "v6BestPaths": 0,
+                "v6BestEcmpPaths": 0,
+                "totalRoutesWarnLimit": 204800,
+                "maxTotalRoutes": 256000,
+                "dropStats": {
+                  "inDropAsloop": 0,
+                  "inDropClusterIdLoop": 0,
+                  "inDropMalformedMpbgp": 0,
+                  "inDropOrigId": 0,
+                  "inDropNhLocal": 0,
+                  "inDropNhAfV6": 0,
+                  "prefixDroppedMartianV4": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixDroppedMartianV6": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixLuDroppedV4": 0,
+                  "prefixLuDroppedMartianV4": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixLuDroppedV6": 0,
+                  "prefixLuDroppedMartianV6": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixEvpnDroppedUnsupportedRouteType": 0,
+                  "prefixBgpLsDroppedReceptionUnsupported": 0,
+                  "outDropV4LocalAddr": 0,
+                  "outDropV6LocalAddr": 0,
+                  "prefixVpnIpv4DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv4DroppedMaxRouteLimitViolated": 0,
+                  "prefixVpnIpv6DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv6DroppedMaxRouteLimitViolated": 0,
+                  "prefixEvpnDroppedImportMatchFailure": 0,
+                  "prefixEvpnDroppedMaxRouteLimitViolated": 0,
+                  "prefixRtMembershipDroppedLocalAsReject": 0,
+                  "prefixRtMembershipDroppedMaxRouteLimitViolated": 0,
+                  "inDropAsSetConfedSetV4Uni": 0,
+                  "inDropAsSetConfedSetV6Uni": 0
+                },
+                "peerInUpdateErrors": {
+                  "inUpdErrWithdraw": 0,
+                  "inUpdErrIgnore": 0,
+                  "inUpdErrDisableAfiSafi": 0,
+                  "disabledAfiSafi": "None",
+                  "lastUpdErrTime": 0
+                },
+                "bgpSoftReconfigInbound": "Default",
+                "rpkiOriginValidationMethod": "disabled",
+                "rpkiOriginValidationSendExtComm": false,
+                "rpkiOriginValidationRouteMap": "",
+                "rpkiOriginValidationWaitForRoaSync": false,
+                "rpkiIpv4OvValidPaths": 0,
+                "rpkiIpv4OvInvalidPaths": 0,
+                "rpkiIpv4OvUnknownPaths": 0,
+                "rpkiIpv6OvValidPaths": 0,
+                "rpkiIpv6OvInvalidPaths": 0,
+                "rpkiIpv6OvUnknownPaths": 0,
+                "orrPosition": {},
+                "inboundUpdateProcessingDelay": 0,
+                "inboundUpdateProcessingDelayState": "inactive",
+                "inboundUpdateProcessingDelayStateDetail": "",
+                "inboundUpdateProcessingDelayLeft": 0,
+                "localAsn": "65103",
+                "localRouterId": "10.184.1.13",
+                "ttl": 1,
+                "maxTtlHops": 255,
+                "updateSource": "10.184.0.9",
+                "localPort": 35011,
+                "remotePort": 179,
+                "prependOwnDisabled": false,
+                "peerTcpInfo": {
+                  "state": "ESTABLISHED",
+                  "options": 7,
+                  "sendWindowScale": 7,
+                  "rcvWindowScale": 7,
+                  "retransTimeout": 204000,
+                  "delayedAckTimeout": 40000,
+                  "maxSegmentSize": 1448,
+                  "sndRtt": 596,
+                  "sndRttVariance": 958,
+                  "slowStartThreshold": 2147483647,
+                  "congestionWindow": 10,
+                  "rcvRtt": 0,
+                  "rcvWindow": 14480,
+                  "totalRetrans": 0,
+                  "outputQueueLength": 0,
+                  "outputMaxQueueLength": 87040,
+                  "inputQueueLength": 0,
+                  "inputMaxQueueLength": 32768,
+                  "connectionOptions": {
+                    "timestampsEnabled": true,
+                    "selectiveAcknowledgementsEnabled": true,
+                    "windowScaleEnabled": true,
+                    "ecnEnabled": false
+                  }
+                },
+                "ifName": "Ethernet1.101",
+                "afiSafiInfo": {
+                  "ipv4Unicast": {
+                    "localNexthop": "10.184.0.9"
+                  }
+                }
+              },
+              {
+                "peerAddress": "10.184.0.10",
+                "asn": "65002",
+                "linkType": "external",
+                "routerId": "10.184.0.14",
+                "vrf": "CONTROL_PLANE",
+                "version": 4,
+                "description": "ceos-spine-2 Ethernet4.101",
+                "negotiatedVersion": 4,
+                "updateGroupIndex": -1,
+                "lastRcvd": 33,
+                "lastSent": 7,
+                "holdTime": 180,
+                "keepaliveTime": 60,
+                "configHoldTime": 180,
+                "configKeepaliveTime": 60,
+                "minHoldTime": 3,
+                "configMinHoldTime": 3,
+                "sendFailureHoldTime": 0,
+                "holdTimeLeft": 147,
+                "keepaliveTimeLeft": 36,
+                "state": "Established",
+                "establishedTime": 1143,
+                "establishedTransitions": 1,
+                "lastState": "OpenConfirm",
+                "lastEvent": "Established",
+                "enRRefreshstalePathRemoval": false,
+                "outboundEnRRefreshEnabled": true,
+                "neighborCapabilities": {
+                  "negotiationDisabled": false,
+                  "unsupportedCapReceived": false,
+                  "multiprotocolCaps": {
+                    "ipv4Unicast": {
+                      "advertised": true,
+                      "received": true,
+                      "enabled": true
+                    }
+                  },
+                  "fourOctetAsnCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "routeRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "enhancedRouteRefreshCap": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "sendEorMessages": {
+                    "advertised": true,
+                    "received": true,
+                    "enabled": true
+                  },
+                  "addPathsCaps": {
+                    "ipv4Unicast": {
+                      "receivingAddPaths": {
+                        "receiveCapabilityAdvertised": true,
+                        "sendCapabilityReceived": false,
+                        "enabled": false
+                      },
+                      "sendingAddPaths": {
+                        "sendCapabilityAdvertised": false,
+                        "receiveCapabilityReceived": true,
+                        "enabled": false
+                      }
+                    }
+                  },
+                  "grCaps": {
+                    "advertised": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    },
+                    "received": {
+                      "restartTime": 300,
+                      "bgpRestarted": true,
+                      "gracefulNotificationSupported": true
+                    }
+                  }
+                },
+                "endOfRibs": {
+                  "incoming": {
+                    "ipv4Unicast": {
+                      "status": "received",
+                      "eorReceivedTime": 1789810359.701324,
+                      "stalePathsDeleted": 0,
+                      "pathsReceivedBeforeEor": 6
+                    }
+                  }
+                },
+                "nexthopLuOriginateIpv4Uni": false,
+                "thirdPartyNexthopLuOriginateIpv4Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv4Uni": false,
+                "nexthopLuOriginateIpv6Uni": false,
+                "thirdPartyNexthopLuOriginateIpv6Uni": false,
+                "nexthopLuOriginateLfibBackupIpForwardIpv6Uni": false,
+                "rejectAsSetConfedSetV4Uni": false,
+                "rejectAsSetConfedSetV6Uni": false,
+                "aigpSessionIpv4Uni": false,
+                "aigpSessionIpv6Uni": false,
+                "fwdFailoverTriggerSessionIpv4Uni": false,
+                "fwdFailoverTriggerSessionIpv6Uni": false,
+                "outMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 4,
+                  "keepalives": 25,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "inMessageStats": {
+                  "opens": 1,
+                  "notifications": 0,
+                  "updates": 6,
+                  "keepalives": 23,
+                  "rtRefreshes": 0,
+                  "beginOfRtRefreshes": 0,
+                  "endOfRtRefreshes": 0
+                },
+                "sentMessages": 30,
+                "receivedMessages": 30,
+                "prefixesSent": 9,
+                "prefixesReceived": 6,
+                "v4BestPaths": 0,
+                "v4BestEcmpPaths": 0,
+                "v6PrefixesSent": 0,
+                "v6PrefixesReceived": 0,
+                "v6BestPaths": 0,
+                "v6BestEcmpPaths": 0,
+                "totalRoutesWarnLimit": 204800,
+                "maxTotalRoutes": 256000,
+                "dropStats": {
+                  "inDropAsloop": 1,
+                  "inDropClusterIdLoop": 0,
+                  "inDropMalformedMpbgp": 0,
+                  "inDropOrigId": 0,
+                  "inDropNhLocal": 0,
+                  "inDropNhAfV6": 0,
+                  "prefixDroppedMartianV4": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixDroppedMartianV6": 0,
+                  "prefixDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixLuDroppedV4": 0,
+                  "prefixLuDroppedMartianV4": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV4": 0,
+                  "prefixLuDroppedV6": 0,
+                  "prefixLuDroppedMartianV6": 0,
+                  "prefixLuDroppedMaxRouteLimitViolatedV6": 0,
+                  "prefixEvpnDroppedUnsupportedRouteType": 0,
+                  "prefixBgpLsDroppedReceptionUnsupported": 0,
+                  "outDropV4LocalAddr": 0,
+                  "outDropV6LocalAddr": 0,
+                  "prefixVpnIpv4DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv4DroppedMaxRouteLimitViolated": 0,
+                  "prefixVpnIpv6DroppedImportMatchFailure": 0,
+                  "prefixVpnIpv6DroppedMaxRouteLimitViolated": 0,
+                  "prefixEvpnDroppedImportMatchFailure": 0,
+                  "prefixEvpnDroppedMaxRouteLimitViolated": 0,
+                  "prefixRtMembershipDroppedLocalAsReject": 0,
+                  "prefixRtMembershipDroppedMaxRouteLimitViolated": 0,
+                  "inDropAsSetConfedSetV4Uni": 0,
+                  "inDropAsSetConfedSetV6Uni": 0
+                },
+                "peerInUpdateErrors": {
+                  "inUpdErrWithdraw": 0,
+                  "inUpdErrIgnore": 0,
+                  "inUpdErrDisableAfiSafi": 0,
+                  "disabledAfiSafi": "None",
+                  "lastUpdErrTime": 0
+                },
+                "bgpSoftReconfigInbound": "Default",
+                "rpkiOriginValidationMethod": "disabled",
+                "rpkiOriginValidationSendExtComm": false,
+                "rpkiOriginValidationRouteMap": "",
+                "rpkiOriginValidationWaitForRoaSync": false,
+                "rpkiIpv4OvValidPaths": 0,
+                "rpkiIpv4OvInvalidPaths": 0,
+                "rpkiIpv4OvUnknownPaths": 0,
+                "rpkiIpv6OvValidPaths": 0,
+                "rpkiIpv6OvInvalidPaths": 0,
+                "rpkiIpv6OvUnknownPaths": 0,
+                "orrPosition": {},
+                "inboundUpdateProcessingDelay": 0,
+                "inboundUpdateProcessingDelayState": "inactive",
+                "inboundUpdateProcessingDelayStateDetail": "",
+                "inboundUpdateProcessingDelayLeft": 0,
+                "localAsn": "65103",
+                "localRouterId": "10.184.1.13",
+                "ttl": 1,
+                "maxTtlHops": 255,
+                "updateSource": "10.184.0.11",
+                "localPort": 35719,
+                "remotePort": 179,
+                "prependOwnDisabled": false,
+                "peerTcpInfo": {
+                  "state": "ESTABLISHED",
+                  "options": 7,
+                  "sendWindowScale": 7,
+                  "rcvWindowScale": 7,
+                  "retransTimeout": 204000,
+                  "delayedAckTimeout": 40000,
+                  "maxSegmentSize": 1448,
+                  "sndRtt": 603,
+                  "sndRttVariance": 960,
+                  "slowStartThreshold": 2147483647,
+                  "congestionWindow": 10,
+                  "rcvRtt": 0,
+                  "rcvWindow": 14480,
+                  "totalRetrans": 0,
+                  "outputQueueLength": 0,
+                  "outputMaxQueueLength": 87040,
+                  "inputQueueLength": 0,
+                  "inputMaxQueueLength": 32768,
+                  "connectionOptions": {
+                    "timestampsEnabled": true,
+                    "selectiveAcknowledgementsEnabled": true,
+                    "windowScaleEnabled": true,
+                    "ecnEnabled": false
+                  }
+                },
+                "ifName": "Ethernet2.101",
+                "afiSafiInfo": {
+                  "ipv4Unicast": {
+                    "localNexthop": "10.184.0.11"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+  show inventory | json:
+    output: |
+      {
+          "systemInformation": {
+              "name": "cEOSLab",
+              "description": "cEOSLab",
+              "hardwareRev": "",
+              "serialNum": "18E6788113F0764E8BC50A563AF3BF5E",
+              "mfgDate": "",
+              "hwEpoch": ""
+          },
+          "powerSupplySlots": {},
+          "fanTraySlots": {},
+          "portCount": 3,
+          "internalPortCount": 0,
+          "cpuPortCount": 0,
+          "dataLinkPortCount": 0,
+          "switchedPortCount": 0,
+          "frontPanelFabricPortCount": 0,
+          "fabricPortCount": 0,
+          "switchManagementPortCount": 0,
+          "switchedBootstrapPortCount": 2,
+          "unconnectedPortCount": 0,
+          "switchedFortyGOnlyPortCount": 0,
+          "managementPortCount": 1,
+          "xcvrSlots": {},
+          "mgmtXcvrSlots": {},
+          "auxiliaryXcvrSlots": {},
+          "fabricXcvrSlots": {},
+          "cardSlots": {},
+          "storageSerials": {},
+          "subcompSerNums": {},
+          "fpgas": {}
+      }
+  enable:
+    output: null
+    new_prompt: '{base_prompt}#'
+    prompt: '{base_prompt}>'
+    help: enter privileged exec mode
+  terminal width 511:
+    output: |
+      Width set to 511 columns.
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: set terminal width
+  term width 0:
+    alias: terminal width 511
+  terminal length 0:
+    output: |
+      Pagination disabled.
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: disable pagination
+  term length 0:
+    alias: terminal length 0
+  show running-config section interface:
+    alias: show run section interface
+  show running-config section vlan:
+    alias: show run section vlan
+  show running-config section vrf:
+    alias: show run section vrf
+  configure terminal:
+    output: null
+    new_prompt: '{base_prompt}(config)#'
+    prompt: '{base_prompt}#'
+    help: enter configuration mode
+  config term:
+    alias: configure terminal
+  conf t:
+    alias: configure terminal
+  end:
+    output: |2+
+
+    new_prompt: '{base_prompt}#'
+    prompt: '{base_prompt}(config)#'
+    help: leave configuration mode
+  delete file_copy_test.txt:
+    output: |2+
+
+    prompt: '{base_prompt}#'
+    help: delete copied test file
+  exit:
+    output: true
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    - '{base_prompt}(config)#'
+    help: exit shell
+  _default_:
+    output: |
+      % Invalid input
+    help: output for unknown commands
+  show version:
+    output: |
+      Arista cEOSLab
+      Hardware version:
+      Serial number: D03FE1DE81A401F1AAD67A4B15E096C8
+      Hardware MAC address: 001c.73f3.053c
+      System MAC address: 001c.73f3.053c
+
+      Software image version: 4.35.2F-46221466.4352F (engineering build)
+      Architecture: x86_64
+      Internal build version: 4.35.2F-46221466.4352F
+      Internal build ID: 6f39e5bb-e6c7-4637-b931-ecb30d43e034
+      Image format version: 1.0
+      Image optimization: None
+
+      Kernel version: 5.15.0-181-generic
+
+      Uptime: 1 day, 0 hours and 13 minutes
+      Total memory: 32827124 kB
+      Free memory: 15075568 kB
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show clock:
+    output: |
+      Sun Aug 16 01:16:14 2026
+      Timezone: UTC
+      Clock source: local
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show hostname:
+    output: |
+      Hostname: ceos-leaf-3
+      FQDN:     ceos-leaf-3
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ntp associations:
+    output: |
+      NTP is disabled.
+           remote          refid      st t when  poll reach   delay   offset  jitter
+      ==============================================================================
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ntp status:
+    output: |
+      NTP is disabled.
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface management0:
+    output: |
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640e (bia 0242.ac64.640e)
+        Internet address is 172.183.100.14/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 13 minutes, 36 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 428 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 301 bps (0.0% with framing overhead), 0 packets/sec
+           15384 packets input, 3064133 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           7090 packets output, 2213925 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface Management0:
+    output: |
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640e (bia 0242.ac64.640e)
+        Internet address is 172.183.100.14/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 13 minutes, 38 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 433 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 341 bps (0.0% with framing overhead), 0 packets/sec
+           15388 packets input, 3064429 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           7095 packets output, 2215507 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ip int brief:
+    output: |2
+                                                                                                Address
+      Interface           IP Address              Status       Protocol                  MTU    Owner
+      ------------------- ----------------------- ------------ -------------------- ----------- -------
+      Ethernet1           10.84.0.9/31            up           up                       1500
+      Ethernet1.101       10.184.0.9/31           up           up                       1500
+      Ethernet2           10.84.0.11/31           up           up                       1500
+      Ethernet2.101       10.184.0.11/31          up           up                       1500
+      Ethernet6.330       10.83.15.29/30           down         lowerlayerdown              0
+      Loopback0           10.84.10.13/32          up           up                      65535
+      Loopback10          10.83.3.1/32             up           up                      65535
+      Loopback11          unassigned              up           up                      65535
+      Loopback101         10.184.1.13/32          up           up                      65535
+      Loopback250         10.83.250.250/32         up           up                      65535
+      Management0         172.183.100.14/24       up           up                       1500
+      Vlan230             10.83.13.25/29           down         lowerlayerdown           1500
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show ip interface brief:
+    output: |2
+                                                                                                Address
+      Interface           IP Address              Status       Protocol                  MTU    Owner
+      ------------------- ----------------------- ------------ -------------------- ----------- -------
+      Ethernet1           10.84.0.9/31            up           up                       1500
+      Ethernet1.101       10.184.0.9/31           up           up                       1500
+      Ethernet2           10.84.0.11/31           up           up                       1500
+      Ethernet2.101       10.184.0.11/31          up           up                       1500
+      Ethernet6.330       10.83.15.29/30           down         lowerlayerdown              0
+      Loopback0           10.84.10.13/32          up           up                      65535
+      Loopback10          10.83.3.1/32             up           up                      65535
+      Loopback11          unassigned              up           up                      65535
+      Loopback101         10.184.1.13/32          up           up                      65535
+      Loopback250         10.83.250.250/32         up           up                      65535
+      Management0         172.183.100.14/24       up           up                       1500
+      Vlan230             10.83.13.25/29           down         lowerlayerdown           1500
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.ab0d.d0ad (bia aac1.ab0d.d0ad)
+        Description: P2P to ceos-spine-1 Ethernet4
+        Internet address is 10.84.0.9/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 13 minutes, 43 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 148 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13212 packets input, 1633138 bytes
+           Received 10 broadcasts, 2907 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           2 packets output, 148 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet1.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.ab0d.d0ad
+        Description: Control Plane P2P to ceos-spine-1 Ethernet4.101
+        Internet address is 10.184.0.9/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 13 minutes, 43 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet2 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.ab91.663b (bia aac1.ab91.663b)
+        Description: P2P to ceos-spine-2 Ethernet4
+        Internet address is 10.84.0.11/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 13 minutes, 43 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 147 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13192 packets input, 1631701 bytes
+           Received 8 broadcasts, 2907 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 953 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet2.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.ab91.663b
+        Description: Control Plane P2P to ceos-spine-2 Ethernet4.101
+        Internet address is 10.184.0.11/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 13 minutes, 43 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet6.330 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Subinterface, address is 0000.0000.0000
+        Description: TEST_SYNC_SUBINTERFACE
+        IP MTU 0 bytes (default)
+        Down 1 day, 13 minutes, 43 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.84.10.13/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 44 seconds
+      Loopback10 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV4
+        Internet address is 10.83.3.1/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:83ef:10:3::1, subnet is 2001:83ef:10:3::1/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 44 seconds
+      Loopback11 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV6
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:83ef:10:3::11, subnet is 2001:83ef:10:3::11/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 44 seconds
+      Loopback101 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: Control Plane Router ID
+        Internet address is 10.184.1.13/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 44 seconds
+      Loopback250 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_ANYCAST_IPV4
+        Internet address is 10.83.250.250/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:83ef:250::250, subnet is 2001:83ef:250::250/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 44 seconds
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640e (bia 0242.ac64.640e)
+        Internet address is 172.183.100.14/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 13 minutes, 45 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 447 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 476 bps (0.0% with framing overhead), 0 packets/sec
+           15399 packets input, 3065343 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           7107 packets output, 2220939 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Port-Channel33 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Port-Channel, address is 0000.0000.0000
+        Description: TEST_SYNC_LAG_TRUNK
+        Ethernet MTU 9214 bytes
+        Full-duplex, Unconfigured
+        Active members in this channel: 0
+        Fallback mode is: off
+        Down 1 day, 13 minutes, 35 seconds
+        1 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 0 bps (- with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (- with framing overhead), 0 packets/sec
+           0 packets input, 0 bytes
+           Received 0 broadcasts, 0 multicast
+           0 input errors, 0 input discards
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 output discards
+      Vlan230 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Vlan, address is 001c.73f3.053c (bia 001c.73f3.053c)
+        Description: TEST_SYNC_SVI_PRIMARY_SECONDARY
+        Internet address is 10.83.13.25/29
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default)
+        Down 1 day, 13 minutes, 46 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.ab0d.d0ad (bia aac1.ab0d.d0ad)
+        Description: P2P to ceos-spine-1 Ethernet4
+        Internet address is 10.84.0.9/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 13 minutes, 45 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 147 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13212 packets input, 1633138 bytes
+           Received 10 broadcasts, 2907 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           2 packets output, 148 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet1.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.ab0d.d0ad
+        Description: Control Plane P2P to ceos-spine-1 Ethernet4.101
+        Internet address is 10.184.0.9/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 13 minutes, 45 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet2 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.ab91.663b (bia aac1.ab91.663b)
+        Description: P2P to ceos-spine-2 Ethernet4
+        Internet address is 10.84.0.11/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 13 minutes, 45 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 148 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13193 packets input, 1631790 bytes
+           Received 8 broadcasts, 2907 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 953 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Ethernet2.101 is up, line protocol is up (connected)
+        Hardware is Subinterface, address is aac1.ab91.663b
+        Description: Control Plane P2P to ceos-spine-2 Ethernet4.101
+        Internet address is 10.184.0.11/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Up 1 day, 13 minutes, 45 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Ethernet6.330 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Subinterface, address is 0000.0000.0000
+        Description: TEST_SYNC_SUBINTERFACE
+        IP MTU 0 bytes (default)
+        Down 1 day, 13 minutes, 45 seconds
+        Last clearing of "show interface" counters never
+           0 packets input
+           0 packets output
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.84.10.13/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 47 seconds
+      Loopback10 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV4
+        Internet address is 10.83.3.1/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:83ef:10:3::1, subnet is 2001:83ef:10:3::1/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 47 seconds
+      Loopback11 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_LOOPBACK_IPV6
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:83ef:10:3::11, subnet is 2001:83ef:10:3::11/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 47 seconds
+      Loopback101 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: Control Plane Router ID
+        Internet address is 10.184.1.13/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 47 seconds
+      Loopback250 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: TEST_SYNC_ANYCAST_IPV4
+        Internet address is 10.83.250.250/32
+        Broadcast address is 255.255.255.255
+        IPv6 link-local address is fe80::ff:fe00:0/64
+        IPv6 global unicast address(es):
+          2001:83ef:250::250, subnet is 2001:83ef:250::250/128
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 47 seconds
+      Management0 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is 0242.ac64.640e (bia 0242.ac64.640e)
+        Internet address is 172.183.100.14/24
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: on, uni-link: n/a
+        Up 1 day, 13 minutes, 47 seconds
+        Loopback Mode : None
+        3 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 460 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 720 bps (0.0% with framing overhead), 0 packets/sec
+           15410 packets input, 3065937 bytes
+           Received 0 broadcasts, 0 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           7128 packets output, 2230281 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+      Port-Channel33 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Port-Channel, address is 0000.0000.0000
+        Description: TEST_SYNC_LAG_TRUNK
+        Ethernet MTU 9214 bytes
+        Full-duplex, Unconfigured
+        Active members in this channel: 0
+        Fallback mode is: off
+        Down 1 day, 13 minutes, 38 seconds
+        1 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 0 bps (- with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (- with framing overhead), 0 packets/sec
+           0 packets input, 0 bytes
+           Received 0 broadcasts, 0 multicast
+           0 input errors, 0 input discards
+           0 packets output, 0 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 output discards
+      Vlan230 is down, line protocol is lowerlayerdown (notconnect)
+        Hardware is Vlan, address is 001c.73f3.053c (bia 001c.73f3.053c)
+        Description: TEST_SYNC_SVI_PRIMARY_SECONDARY
+        Internet address is 10.83.13.25/29
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default)
+        Down 1 day, 13 minutes, 48 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface Ethernet1:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.ab0d.d0ad (bia aac1.ab0d.d0ad)
+        Description: P2P to ceos-spine-1 Ethernet4
+        Internet address is 10.84.0.9/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 13 minutes, 48 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 146 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13212 packets input, 1633138 bytes
+           Received 10 broadcasts, 2907 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           2 packets output, 148 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface ethernet1:
+    output: |
+      Ethernet1 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.ab0d.d0ad (bia aac1.ab0d.d0ad)
+        Description: P2P to ceos-spine-1 Ethernet4
+        Internet address is 10.84.0.9/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 13 minutes, 50 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 145 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13212 packets input, 1633138 bytes
+           Received 10 broadcasts, 2907 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           2 packets output, 148 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface Loopback0:
+    output: |
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.84.10.13/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 53 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interface loopback0:
+    output: |
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.84.10.13/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 55 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces Loopback0:
+    output: |
+      Loopback0 is up, line protocol is up (connected)
+        Hardware is Loopback
+        Description: RID
+        Internet address is 10.84.10.13/32
+        Broadcast address is 255.255.255.255
+        IP MTU 65535 bytes (default)
+        Up 1 day, 13 minutes, 58 seconds
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces Ethernet2:
+    output: |
+      Ethernet2 is up, line protocol is up (connected)
+        Hardware is Ethernet, address is aac1.ab91.663b (bia aac1.ab91.663b)
+        Description: P2P to ceos-spine-2 Ethernet4
+        Internet address is 10.84.0.11/31
+        Broadcast address is 255.255.255.255
+        IP MTU 1500 bytes (default), BW 1000000 kbit
+        Full-duplex, 1Gb/s, auto negotiation: off, uni-link: n/a
+        Up 1 day, 13 minutes, 59 seconds
+        Loopback Mode : None
+        2 link status changes since last clear
+        Last clearing of "show interface" counters never
+        5 minutes input rate 149 bps (0.0% with framing overhead), 0 packets/sec
+        5 minutes output rate 0 bps (0.0% with framing overhead), 0 packets/sec
+           13194 packets input, 1632065 bytes
+           Received 8 broadcasts, 2908 multicast
+           0 runts, 0 giants
+           0 input errors, 0 CRC, 0 alignment, 0 symbol, 0 input discards
+           0 PAUSE input
+           8 packets output, 953 bytes
+           Sent 0 broadcasts, 0 multicast
+           0 output errors, 0 collisions
+           0 late collision, 0 deferred, 0 output discards
+           0 PAUSE output
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show int description:
+    output: |
+      Interface                      Status         Protocol           Description
+      Et1                            up             up                 P2P to ceos-spine-1 Ethernet4
+      Et1.101                        up             up                 Control Plane P2P to ceos-spine-1 Ethernet4.101
+      Et2                            up             up                 P2P to ceos-spine-2 Ethernet4
+      Et2.101                        up             up                 Control Plane P2P to ceos-spine-2 Ethernet4.101
+      Et6.330                        down           lowerlayerdown     TEST_SYNC_SUBINTERFACE
+      Lo0                            up             up                 RID
+      Lo10                           up             up                 TEST_SYNC_LOOPBACK_IPV4
+      Lo11                           up             up                 TEST_SYNC_LOOPBACK_IPV6
+      Lo101                          up             up                 Control Plane Router ID
+      Lo250                          up             up                 TEST_SYNC_ANYCAST_IPV4
+      Ma0                            up             up
+      Po33                           down           lowerlayerdown     TEST_SYNC_LAG_TRUNK
+      Vl230                          down           lowerlayerdown     TEST_SYNC_SVI_PRIMARY_SECONDARY
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show interfaces description:
+    output: |
+      Interface                      Status         Protocol           Description
+      Et1                            up             up                 P2P to ceos-spine-1 Ethernet4
+      Et1.101                        up             up                 Control Plane P2P to ceos-spine-1 Ethernet4.101
+      Et2                            up             up                 P2P to ceos-spine-2 Ethernet4
+      Et2.101                        up             up                 Control Plane P2P to ceos-spine-2 Ethernet4.101
+      Et6.330                        down           lowerlayerdown     TEST_SYNC_SUBINTERFACE
+      Lo0                            up             up                 RID
+      Lo10                           up             up                 TEST_SYNC_LOOPBACK_IPV4
+      Lo11                           up             up                 TEST_SYNC_LOOPBACK_IPV6
+      Lo101                          up             up                 Control Plane Router ID
+      Lo250                          up             up                 TEST_SYNC_ANYCAST_IPV4
+      Ma0                            up             up
+      Po33                           down           lowerlayerdown     TEST_SYNC_LAG_TRUNK
+      Vl230                          down           lowerlayerdown     TEST_SYNC_SVI_PRIMARY_SECONDARY
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show run section vlan:
+    output: |
+      vlan 130
+         name TEST_L3_TRUNK_A
+      !
+      vlan 131
+         name TEST_L3_TRUNK_B
+      !
+      vlan 230
+         name TEST_L3_ACCESS
+      !
+      vlan 330
+         name TEST_L3_SUBIF
+      !
+      interface Port-Channel33
+         switchport trunk native vlan 130
+         switchport trunk allowed vlan 130-131,230
+      !
+      interface Ethernet1.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet2.101
+         encapsulation dot1q vlan 101
+      !
+      interface Ethernet5
+         switchport access vlan 230
+      !
+      interface Ethernet6.330
+         encapsulation dot1q vlan 330
+      !
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show run section vrf:
+    output: |
+      vrf instance CONTROL_PLANE
+         description Control plane VRF for ceos-leaf-3
+      !
+      vrf instance TENANT_A
+         description Tenant A services
+      !
+      vrf instance TENANT_B
+         description Tenant B services
+      !
+      ip routing vrf CONTROL_PLANE
+      ip routing vrf TENANT_A
+      ip routing vrf TENANT_B
+      !
+      router bgp 65103
+         vrf CONTROL_PLANE
+            rd 65103:101
+            route-target import vpn-ipv6 65000:101
+            route-target import vpn-ipv4 65000:101
+            route-target export vpn-ipv6 65000:101
+            route-target export vpn-ipv4 65000:101
+            route-target import vpn-ipv4 route-map CONTROL_PLANE_IMPORT
+            route-target export vpn-ipv4 route-map CONTROL_PLANE_EXPORT
+         !
+         vrf TENANT_A
+            rd 65103:201
+            route-target import vpn-ipv6 65000:201
+            route-target import vpn-ipv4 65000:201
+            route-target import vpn-ipv6 65000:301
+            route-target import vpn-ipv4 65000:301
+            route-target export vpn-ipv6 65000:201
+            route-target export vpn-ipv4 65000:201
+            route-target export vpn-ipv6 65000:302
+            route-target export vpn-ipv4 65000:302
+            route-target import vpn-ipv4 route-map TENANT_A_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_A_EXPORT
+            redistribute connected
+         !
+         vrf TENANT_B
+            rd 65103:202
+            route-target import vpn-ipv6 65000:202
+            route-target import vpn-ipv4 65000:202
+            route-target export vpn-ipv6 65000:202
+            route-target export vpn-ipv4 65000:202
+            route-target import vpn-ipv4 route-map TENANT_B_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_B_EXPORT
+            redistribute connected
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show run section interface:
+    output: |
+      no service interface inactive port-id allocation disabled
+      interface Port-Channel33
+         description TEST_SYNC_LAG_TRUNK
+         switchport trunk native vlan 130
+         switchport trunk allowed vlan 130-131,230
+         switchport mode trunk
+      interface Ethernet1
+         description P2P to ceos-spine-1 Ethernet4
+         no switchport
+         ip address 10.84.0.9/31
+      interface Ethernet1.101
+         description Control Plane P2P to ceos-spine-1 Ethernet4.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.184.0.9/31
+      interface Ethernet2
+         description P2P to ceos-spine-2 Ethernet4
+         no switchport
+         ip address 10.84.0.11/31
+      interface Ethernet2.101
+         description Control Plane P2P to ceos-spine-2 Ethernet4.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.184.0.11/31
+      interface Ethernet3
+         description TEST_SYNC_LAG_MEMBER_A
+         channel-group 33 mode active
+      interface Ethernet4
+         description TEST_SYNC_LAG_MEMBER_B
+         channel-group 33 mode active
+      interface Ethernet5
+         description TEST_SYNC_ACCESS_PORT
+         switchport access vlan 230
+      interface Ethernet6
+         description TEST_SYNC_ROUTED_WITH_MAC
+         mac-address 02:00:00:03:00:06
+         no switchport
+         ip address 10.83.14.25/30
+      interface Ethernet6.330
+         description TEST_SYNC_SUBINTERFACE
+         encapsulation dot1q vlan 330
+         ip address 10.83.15.29/30
+      interface Loopback0
+         description RID
+         ip address 10.84.10.13/32
+      interface Loopback10
+         description TEST_SYNC_LOOPBACK_IPV4
+         ip address 10.83.3.1/32
+         ipv6 address 2001:83ef:10:3::1/128
+      interface Loopback11
+         description TEST_SYNC_LOOPBACK_IPV6
+         ipv6 address 2001:83ef:10:3::11/128
+      interface Loopback101
+         description Control Plane Router ID
+         vrf CONTROL_PLANE
+         ip address 10.184.1.13/32
+      interface Loopback250
+         description TEST_SYNC_ANYCAST_IPV4
+         ip address 10.83.250.250/32
+         ipv6 address 2001:83ef:250::250/128
+      interface Management0
+         ip address 172.183.100.14/24
+      interface Vlan230
+         description TEST_SYNC_SVI_PRIMARY_SECONDARY
+         ip address 10.83.13.25/29
+         ipv6 address 2001:83ef:11:3::24/64
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  show running-config:
+    output: |
+      ! Command: show running-config
+      ! device: ceos-leaf-3 (cEOSLab, EOS-4.35.2F-46221466.4352F (engineering build))
+      !
+      no aaa root
+      !
+      username admin privilege 15 role network-admin secret sha512 $6$U2EOto0hb6mBWQAu$cVnq63shnYFFQo6/S3wRbCZaTF.KnB/6X9h8jsyZ5UdDcz6WaopyyIkUYCoDNixr4b..GFOiPZXxx2.GAP.fa/
+      !
+      management api http-commands
+         protocol https ssl profile selfSignedSSLProfile
+         no shutdown
+      !
+      no service interface inactive port-id allocation disabled
+      !
+      transceiver qsfp default-mode 4x10G
+      !
+      service routing protocols model multi-agent
+      !
+      hostname ceos-leaf-3
+      !
+      snmp-server contact norfab@test.local
+      snmp-server location NorFab SNMP test
+      snmp-server community norfab rw
+      !
+      spanning-tree mode mstp
+      !
+      system l1
+         unsupported speed action error
+         unsupported error-correction action error
+      !
+      vlan 130
+         name TEST_L3_TRUNK_A
+      !
+      vlan 131
+         name TEST_L3_TRUNK_B
+      !
+      vlan 230
+         name TEST_L3_ACCESS
+      !
+      vlan 330
+         name TEST_L3_SUBIF
+      !
+      vrf instance CONTROL_PLANE
+         description Control plane VRF for ceos-leaf-3
+      !
+      vrf instance TENANT_A
+         description Tenant A services
+      !
+      vrf instance TENANT_B
+         description Tenant B services
+      !
+      management api gnmi
+         transport grpc default
+      !
+      management api netconf
+         transport ssh default
+      !
+      management security
+         ssl profile selfSignedSSLProfile
+            certificate self-signed.crt key self-signed.key
+      !
+      aaa authentication enable default none
+      aaa authorization exec default local
+      aaa authorization commands all default local
+      !
+      interface Port-Channel33
+         description TEST_SYNC_LAG_TRUNK
+         switchport trunk native vlan 130
+         switchport trunk allowed vlan 130-131,230
+         switchport mode trunk
+      !
+      interface Ethernet1
+         description P2P to ceos-spine-1 Ethernet4
+         no switchport
+         ip address 10.84.0.9/31
+      !
+      interface Ethernet1.101
+         description Control Plane P2P to ceos-spine-1 Ethernet4.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.184.0.9/31
+      !
+      interface Ethernet2
+         description P2P to ceos-spine-2 Ethernet4
+         no switchport
+         ip address 10.84.0.11/31
+      !
+      interface Ethernet2.101
+         description Control Plane P2P to ceos-spine-2 Ethernet4.101
+         encapsulation dot1q vlan 101
+         vrf CONTROL_PLANE
+         ip address 10.184.0.11/31
+      !
+      interface Ethernet3
+         description TEST_SYNC_LAG_MEMBER_A
+         channel-group 33 mode active
+      !
+      interface Ethernet4
+         description TEST_SYNC_LAG_MEMBER_B
+         channel-group 33 mode active
+      !
+      interface Ethernet5
+         description TEST_SYNC_ACCESS_PORT
+         switchport access vlan 230
+      !
+      interface Ethernet6
+         description TEST_SYNC_ROUTED_WITH_MAC
+         mac-address 02:00:00:03:00:06
+         no switchport
+         ip address 10.83.14.25/30
+      !
+      interface Ethernet6.330
+         description TEST_SYNC_SUBINTERFACE
+         encapsulation dot1q vlan 330
+         ip address 10.83.15.29/30
+      !
+      interface Loopback0
+         description RID
+         ip address 10.84.10.13/32
+      !
+      interface Loopback10
+         description TEST_SYNC_LOOPBACK_IPV4
+         ip address 10.83.3.1/32
+         ipv6 address 2001:83ef:10:3::1/128
+      !
+      interface Loopback11
+         description TEST_SYNC_LOOPBACK_IPV6
+         ipv6 address 2001:83ef:10:3::11/128
+      !
+      interface Loopback101
+         description Control Plane Router ID
+         vrf CONTROL_PLANE
+         ip address 10.184.1.13/32
+      !
+      interface Loopback250
+         description TEST_SYNC_ANYCAST_IPV4
+         ip address 10.83.250.250/32
+         ipv6 address 2001:83ef:250::250/128
+      !
+      interface Management0
+         ip address 172.183.100.14/24
+      !
+      interface Vlan230
+         description TEST_SYNC_SVI_PRIMARY_SECONDARY
+         ip address 10.83.13.25/29
+         ipv6 address 2001:83ef:11:3::24/64
+      !
+      ip routing
+      ip routing vrf CONTROL_PLANE
+      ip routing vrf TENANT_A
+      ip routing vrf TENANT_B
+      !
+      ip route 0.0.0.0/0 172.183.100.1
+      !
+      router bgp 65103
+         router-id 10.84.10.13
+         neighbor EVPN-OVERLAY peer group
+         neighbor EVPN-OVERLAY update-source Loopback0
+         neighbor EVPN-OVERLAY ebgp-multihop 3
+         neighbor EVPN-OVERLAY send-community standard extended
+         neighbor 10.84.0.8 remote-as 65001
+         neighbor 10.84.0.8 description ceos-spine-1 Ethernet4
+         neighbor 10.84.0.10 remote-as 65002
+         neighbor 10.84.0.10 description ceos-spine-2 Ethernet4
+         neighbor 10.84.10.1 peer group EVPN-OVERLAY
+         neighbor 10.84.10.1 remote-as 65001
+         neighbor 10.84.10.1 description ceos-spine-1 Loopback0 EVPN
+         neighbor 10.84.10.2 peer group EVPN-OVERLAY
+         neighbor 10.84.10.2 remote-as 65002
+         neighbor 10.84.10.2 description ceos-spine-2 Loopback0 EVPN
+         !
+         address-family evpn
+            neighbor EVPN-OVERLAY activate
+         !
+         address-family ipv4
+            network 10.84.10.13/32
+         !
+         vrf CONTROL_PLANE
+            rd 65103:101
+            route-target import vpn-ipv6 65000:101
+            route-target import vpn-ipv4 65000:101
+            route-target export vpn-ipv6 65000:101
+            route-target export vpn-ipv4 65000:101
+            route-target import vpn-ipv4 route-map CONTROL_PLANE_IMPORT
+            route-target export vpn-ipv4 route-map CONTROL_PLANE_EXPORT
+            router-id 10.184.1.13
+            neighbor 10.184.0.8 remote-as 65001
+            neighbor 10.184.0.8 description ceos-spine-1 Ethernet4.101
+            neighbor 10.184.0.10 remote-as 65002
+            neighbor 10.184.0.10 description ceos-spine-2 Ethernet4.101
+            redistribute connected
+         !
+         vrf TENANT_A
+            rd 65103:201
+            route-target import vpn-ipv6 65000:201
+            route-target import vpn-ipv4 65000:201
+            route-target import vpn-ipv6 65000:301
+            route-target import vpn-ipv4 65000:301
+            route-target export vpn-ipv6 65000:201
+            route-target export vpn-ipv4 65000:201
+            route-target export vpn-ipv6 65000:302
+            route-target export vpn-ipv4 65000:302
+            route-target import vpn-ipv4 route-map TENANT_A_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_A_EXPORT
+            redistribute connected
+         !
+         vrf TENANT_B
+            rd 65103:202
+            route-target import vpn-ipv6 65000:202
+            route-target import vpn-ipv4 65000:202
+            route-target export vpn-ipv6 65000:202
+            route-target export vpn-ipv4 65000:202
+            route-target import vpn-ipv4 route-map TENANT_B_IMPORT
+            route-target export vpn-ipv4 route-map TENANT_B_EXPORT
+            redistribute connected
+      !
+      end
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS
+  dir:
+    output: |
+      Directory of flash:/
+
+             -rw-       25179           Aug 15 01:02  AsuFastPktTransmit.log
+             drwx        4096           Dec 13  2025  Fossil
+             -rw-       15478           Aug 15 01:02  SsuRestore.log
+             -rw-       15478           Aug 15 01:02  SsuRestoreLegacy.log
+             drwx        4096           Jun 14 07:56  aboot
+             -rw-           0           Dec 13  2025  boot-config
+             drwx        4096           Aug 15 01:12  debug
+             drwx        4096           Dec 13  2025  fastpkttx.backup
+             -rwx        1673           Aug 15 01:02  if-wait.sh
+             -rw-         161           Aug 15 01:02  kickstart-config
+             drwx        4096           Aug 16 01:13  persist
+             drwx        4096           Dec 13  2025  schedule
+             -rw-        4543           Aug 15 01:02  startup-config
+             -rw-          18           Dec 13  2025  system_mac_address
+             drwx        4096           Jun 14 07:56  tpm-data
+
+      103240073216 bytes total (30539640832 bytes free) on flash:
+      -rw-        128       Aug 16 2026  file_copy_test.txt
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    help: collected from live cEOS

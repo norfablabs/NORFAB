@@ -323,33 +323,22 @@ class TestSyncBgpCommunity:
             assert result["result"]["route_targets"]["created"] == ["65000:200"]
 
     def test_resources_failed_are_reported(self, nfclient: Any) -> None:
-        device = self.nb.dcim.devices.get(name="cisco_ios_xr1")
-        if device is not None:
-            device.delete()
-        device = self.nb.dcim.devices.create(
-            name="cisco_ios_xr1",
-            device_type=self.nb.dcim.device_types.get(model="XVR9000").id,
-            role=self.nb.dcim.device_roles.get(name="VirtualRouter").id,
-            site=self.nb.dcim.sites.get(name="SALTNORNIR-LAB").id,
-            status="active",
+        failed_device = "fn-bgp-community-unreachable"
+        assert self.nb.dcim.devices.get(name=failed_device)
+        response = self._sync(
+            nfclient,
+            devices=["fn-ceos-lf-1", failed_device],
+            device_custom_field="community_devices",
         )
-        try:
-            response = self._sync(
-                nfclient,
-                devices=["fn-ceos-lf-1", "cisco_ios_xr1"],
-                device_custom_field="community_devices",
+        for result in response.values():
+            assert any(
+                f"failed to fetch BGP community data from devices {failed_device}"
+                in error
+                for error in result["errors"]
             )
-            for result in response.values():
-                assert any(
-                    "failed to fetch BGP community data from devices cisco_ios_xr1"
-                    in error
-                    for error in result["errors"]
-                )
-                assert result["failed"] is False
-                assert result["result"]["route_targets"]["created"] == ["65000:200"]
-                assert result["result"]["communities"]["created"] == [
-                    "65000:100::BLUE_EXPORT",
-                    "65000:300::SITE_ORIGIN",
-                ]
-        finally:
-            device.delete()
+            assert result["failed"] is False
+            assert result["result"]["route_targets"]["created"] == ["65000:200"]
+            assert result["result"]["communities"]["created"] == [
+                "65000:100::BLUE_EXPORT",
+                "65000:300::SITE_ORIGIN",
+            ]

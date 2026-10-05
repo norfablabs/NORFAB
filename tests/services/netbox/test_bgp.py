@@ -293,12 +293,12 @@ class TestGetBgpPeerings:
 
 
 BGP_CREATE_SESSIONS_TEST_DEVICES = [
-    "fn-ceos-sp-1",
-    "fn-ceos-sp-2",
-    "fn-ceos-lf-1",
-    "fn-ceos-lf-2",
-    "fn-ceos-lf-3",
-    "fn-junos-3",
+    "fn-bgp-sp-1",
+    "fn-bgp-sp-2",
+    "fn-bgp-lf-1",
+    "fn-bgp-lf-2",
+    "fn-bgp-lf-3",
+    "fn-bgp-junos-3",
 ]
 
 
@@ -310,6 +310,40 @@ def delete_bgp_sessions(devices=BGP_CREATE_SESSIONS_TEST_DEVICES):
         for session in sessions:
             session.delete()
     print(f"Deleted BGP sessions for devices: {devices}")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def cleanup_bgp_source_data():
+    """Remove only BGP sync records in its dedicated NetBox address space."""
+    ranges = [
+        "10.81.0.0/16",
+        "10.82.0.0/16",
+        "10.181.0.0/16",
+        "172.81.0.0/16",
+        "172.181.0.0/16",
+        "198.20.0.0/16",
+        "198.51.81.0/24",
+        "198.51.181.0/24",
+        "2001:81::/32",
+        "2001:81ef::/32",
+        "2001:81b8::/32",
+    ]
+    asns = [64801, 64802, 64811, 64812, 64813, 64814, 64815]
+
+    def cleanup():
+        delete_bgp_sessions()
+        nb = get_pynetbox(None)
+        for prefix in ranges:
+            for ip in list(nb.ipam.ip_addresses.filter(parent=prefix)):
+                if ip.assigned_object is None:
+                    ip.delete()
+        for asn in asns:
+            for record in list(nb.ipam.asns.filter(asn=asn)):
+                record.delete()
+
+    cleanup()
+    yield
+    cleanup()
 
 
 @pytest.mark.netbox_sync_bgp_peerings
@@ -515,13 +549,13 @@ class TestSyncBgpPeerings:
         ref = existing[0]
         stale_name = f"{target_device}_STALE_TEST_SESSION_XYZ"
         # Clean up any leftover objects from a previous failed run
-        for leftover_ip in nb.ipam.ip_addresses.filter(address="192.0.2.1/32"):
+        for leftover_ip in nb.ipam.ip_addresses.filter(address="198.51.100.241/32"):
             leftover_session = nb.plugins.bgp.session.get(name=stale_name)
             if leftover_session:
                 leftover_session.delete()
             leftover_ip.delete()
         # Create a unique remote IP to avoid duplicate (device, local_address, remote_address) constraint
-        stale_remote_ip = nb.ipam.ip_addresses.create(address="192.0.2.1/32")
+        stale_remote_ip = nb.ipam.ip_addresses.create(address="198.51.100.241/32")
         nb.plugins.bgp.session.create(
             name=stale_name,
             device=nb_device.id,
@@ -706,13 +740,13 @@ class TestSyncBgpPeerings:
         nb_device = nb.dcim.devices.get(name=target_device)
         stale_name = f"{target_device}_STALE_DELETION_TEST"
         # Clean up any leftover objects from a previous failed run
-        for leftover_ip in nb.ipam.ip_addresses.filter(address="192.0.2.2/32"):
+        for leftover_ip in nb.ipam.ip_addresses.filter(address="198.51.100.242/32"):
             leftover_session = nb.plugins.bgp.session.get(name=stale_name)
             if leftover_session:
                 leftover_session.delete()
             leftover_ip.delete()
         # Create a unique remote IP to avoid duplicate (device, local_address, remote_address) constraint
-        stale_remote_ip = nb.ipam.ip_addresses.create(address="192.0.2.2/32")
+        stale_remote_ip = nb.ipam.ip_addresses.create(address="198.51.100.242/32")
         nb.plugins.bgp.session.create(
             name=stale_name,
             device=nb_device.id,
@@ -871,7 +905,7 @@ class TestSyncBgpPeerings:
             "sync_bgp_peerings",
             workers="any",
             kwargs={
-                "devices": ["fn-ceos-sp-1", "nonexistent-device-xyz"],
+                "devices": ["fn-bgp-sp-1", "nonexistent-device-xyz"],
                 "rir": "lab",
                 "dry_run": True,
             },
@@ -881,7 +915,7 @@ class TestSyncBgpPeerings:
             assert any(
                 "nonexistent-device-xyz" in error for error in res["errors"]
             ), f"{worker}: expected missing-device error"
-            assert "fn-ceos-sp-1" in res["result"]
+            assert "fn-bgp-sp-1" in res["result"]
             assert "nonexistent-device-xyz" not in res["result"]
 
     def test_sync_bgp_peerings_with_nornir_filter(self, nfclient):
@@ -890,7 +924,7 @@ class TestSyncBgpPeerings:
             "netbox",
             "sync_bgp_peerings",
             workers="any",
-            kwargs={"FB": ["fn-ceos-sp-*"], "rir": "lab"},
+            kwargs={"FB": ["fn-bgp-sp-*"], "rir": "lab"},
         )
         pprint.pprint(ret)
         nb = get_pynetbox(nfclient)
@@ -898,8 +932,8 @@ class TestSyncBgpPeerings:
             assert res["failed"] == False, f"{worker} failed: {res['errors']}"
             for device_name, device_res in res["result"].items():
                 assert device_name in {
-                    "fn-ceos-sp-1",
-                    "fn-ceos-sp-2",
+                    "fn-bgp-sp-1",
+                    "fn-bgp-sp-2",
                 }, f"{worker}: unexpected device '{device_name}' for spine filter"
                 assert (
                     len(device_res["created"]) > 0
@@ -1313,7 +1347,7 @@ class TestSyncBgpPeerings:
 
     def test_sync_bgp_peerings_filter_by_description(self, nfclient):
         """Filter live sessions without filtering tuple-matched NetBox sessions."""
-        target_device = "fn-ceos-sp-1"
+        target_device = "fn-bgp-sp-1"
         desc_pattern = "ceos-leaf-1 Loopback*"
         nb = get_pynetbox(nfclient)
 
@@ -1377,8 +1411,8 @@ class TestSyncBgpPeerings:
 
     def test_sync_bgp_peerings_ignore_peer_ranges(self, nfclient):
         """Peers whose remote IP matches ignore_peer_ranges are not created."""
-        target_device = "fn-ceos-lf-1"
-        ignored_peer_ip = "172.16.1.101"
+        target_device = "fn-bgp-lf-1"
+        ignored_peer_ip = "172.81.1.101"
         ignored_session = f"{target_device}_default_{ignored_peer_ip}"
         kwargs = {
             "devices": [target_device],
@@ -1427,7 +1461,7 @@ class TestSyncBgpPeerings:
         """Pre-create sessions; remove an import policy from one session in NetBox;
         re-run sync; verify the session is listed as updated and the policy is restored.
         """
-        target_device = "fn-junos-3"
+        target_device = "fn-bgp-junos-3"
         nb = get_pynetbox(nfclient)
 
         # First sync: create sessions in NetBox
@@ -1441,7 +1475,7 @@ class TestSyncBgpPeerings:
         # Find a session that has at least one import policy
         sessions = list(
             nb.plugins.bgp.session.filter(
-                device=target_device, name="fn-junos-3_default_10.10.0.14"
+                device=target_device, name="fn-bgp-junos-3_default_10.81.0.14"
             )
         )
         target_session = next((s for s in sessions if s.import_policies), None)
@@ -1480,7 +1514,7 @@ class TestSyncBgpPeerings:
         on the BGP session.  Confirms that even with the default value the VRF is
         always sourced from/written to a custom field, not the built-in vrf attribute.
         """
-        target_device = "fn-junos-3"
+        target_device = "fn-bgp-junos-3"
         ret = nfclient.run_job(
             "netbox",
             "sync_bgp_peerings",
@@ -1503,7 +1537,7 @@ class TestSyncBgpPeerings:
             "sync_bgp_peerings",
             workers="any",
             kwargs={
-                "devices": ["fn-junos-3"],
+                "devices": ["fn-bgp-junos-3"],
                 "rir": "lab",
                 "vrf_custom_field": "vrf_nonexistent",
             },
@@ -1514,15 +1548,15 @@ class TestSyncBgpPeerings:
             assert not res["errors"], f"{worker}: unexpected errors: {res['errors']}"
 
     def test_sync_bgp_peerings_resolve_local_ip_via_peer(self, nfclient):
-        """Sync fn-ceos-lf-1 which has a BGP peer at 172.16.1.101/30 but no local address
+        """Sync fn-bgp-lf-1 which has a BGP peer at 172.81.1.101/30 but no local address
         in parsed data; verify that resolve_local_ip_via_peer derives the local IP
-        from the subnet and the session fn-ceos-lf-1_default_172.16.1.101 is created.
+        from the subnet and the session fn-bgp-lf-1_default_172.81.1.101 is created.
 
-        For this test to work 172.16.1.102/30 IP need to be assigned to Loopback1001
-        interface of fn-ceos-lf-1 device.
+        For this test to work 172.81.1.102/30 IP need to be assigned to Loopback1001
+        interface of fn-bgp-lf-1 device.
         """
-        target_device = "fn-ceos-lf-1"
-        expected_session = "fn-ceos-lf-1_default_172.16.1.101"
+        target_device = "fn-bgp-lf-1"
+        expected_session = "fn-bgp-lf-1_default_172.81.1.101"
         nb = get_pynetbox(nfclient)
 
         ret = nfclient.run_job(

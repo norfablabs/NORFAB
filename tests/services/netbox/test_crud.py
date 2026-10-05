@@ -9,6 +9,7 @@ and a live NetBox at NB_URL with NB_API_TOKEN credentials.
 """
 
 import pprint
+from uuid import uuid4
 
 import pynetbox
 
@@ -67,19 +68,19 @@ def crud_branch_name(nfclient):
 def manufacturer(nfclient):
     """Create a temporary manufacturer in NetBox; yield its ID; delete after test."""
     nb = get_pynetbox()
-    existing = nb.dcim.manufacturers.get(slug="norfab-crud-test-manufacturer")
-    if existing:
-        existing.delete()
+    suffix = uuid4().hex[:8]
     mfr = nb.dcim.manufacturers.create(
         {
-            "name": "NorFab CRUD Test Manufacturer",
-            "slug": "norfab-crud-test-manufacturer",
+            "name": f"NorFab CRUD Test Manufacturer {suffix}",
+            "slug": f"norfab-crud-test-manufacturer-{suffix}",
         }
     )
-    yield mfr.id
-    obj = nb.dcim.manufacturers.get(mfr.id)
-    if obj:
-        obj.delete()
+    try:
+        yield mfr.id
+    finally:
+        obj = nb.dcim.manufacturers.get(mfr.id)
+        if obj:
+            obj.delete()
 
 
 # ---------------------------------------------------------------------------
@@ -558,18 +559,29 @@ class TestCrudRead:
                 assert "status" in device
 
     def test_pagination_offset(self, nfclient):
-        """offset=1 returns one fewer result than offset=0."""
+        """Offset advances within a stable set of two seeded devices."""
+        filters = {"name": ["ceos1", "fceos4"]}
         ret_all = nfclient.run_job(
             "netbox",
             "crud_read",
             workers="any",
-            kwargs={"object_type": "dcim.devices", "limit": 100, "offset": 0},
+            kwargs={
+                "object_type": "dcim.devices",
+                "filters": filters,
+                "limit": 100,
+                "offset": 0,
+            },
         )
         ret_offset = nfclient.run_job(
             "netbox",
             "crud_read",
             workers="any",
-            kwargs={"object_type": "dcim.devices", "limit": 100, "offset": 1},
+            kwargs={
+                "object_type": "dcim.devices",
+                "filters": filters,
+                "limit": 100,
+                "offset": 1,
+            },
         )
         pprint.pprint(ret_offset)
 
@@ -1122,19 +1134,26 @@ class TestCrudGetChangelogs:
             assert not res["errors"], f"{worker} - received error"
             assert len(res["result"]["results"]) <= 3
 
-    def test_pagination_offset(self, nfclient):
-        """offset skips results; first result with offset matches second without."""
+    def test_pagination_offset(self, nfclient, manufacturer):
+        """Offset skips one change in this test's own object history."""
+        nb = get_pynetbox()
+        obj = nb.dcim.manufacturers.get(manufacturer)
+        obj.description = "pagination update one"
+        obj.save()
+        obj.description = "pagination update two"
+        obj.save()
+        filters = {"changed_object_id": manufacturer}
         ret_all = nfclient.run_job(
             "netbox",
             "crud_get_changelogs",
             workers="any",
-            kwargs={"limit": 10, "offset": 0},
+            kwargs={"filters": filters, "limit": 10, "offset": 0},
         )
         ret_offset = nfclient.run_job(
             "netbox",
             "crud_get_changelogs",
             workers="any",
-            kwargs={"limit": 10, "offset": 1},
+            kwargs={"filters": filters, "limit": 10, "offset": 1},
         )
         pprint.pprint(ret_offset)
 

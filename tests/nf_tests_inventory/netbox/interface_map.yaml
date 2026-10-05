@@ -14,3 +14,11 @@
   device_type: Arista *
   match: Loopback
   replace: LaterRule
+- device_name: fn-if-sp-*
+  device_type: Arista *
+  match: Loopback
+  replace: NetBoxLoopback
+- device_name: fn-ipam-sp-*
+  device_type: Arista *
+  match: Loopback
+  replace: NetBoxLoopback

@@ -1,0 +1,79 @@
+name: NETBOX_IPAM_JUNOS_1
+initial_prompt: 'nornir@{base_prompt}>'
+
+commands:
+  set cli screen-length 0:
+    output: Screen length set to 0
+    prompt: 'nornir@{base_prompt}>'
+  set cli screen-width 511:
+    output: Screen width set to 511
+    prompt: 'nornir@{base_prompt}>'
+  set cli complete-on-space off:
+    output: Disabling complete-on-space
+    prompt: 'nornir@{base_prompt}>'
+  'show bgp neighbor | display json':
+    output: |
+      {
+        "bgp-information": [
+          {
+            "bgp-peer": [
+              {
+                "peer-address": [{"data": "198.51.83.2+179"}],
+                "local-address": [{"data": "198.51.83.1+54721"}],
+                "local-as": [{"data": "65001"}],
+                "peer-as": [{"data": "65002"}],
+                "peer-state": [{"data": "Established"}],
+                "description": [{"data": "TEST_SYNC_SOURCE_IP_VALID"}]
+              },
+              {
+                "peer-address": [{"data": "198.51.83.3+179"}],
+                "local-address": [{"data": "undefined"}],
+                "local-as": [{"data": "65001"}],
+                "peer-as": [{"data": "65003"}],
+                "peer-state": [{"data": "Idle"}],
+                "description": [{"data": "TEST_SYNC_SOURCE_IP_UNDEFINED"}]
+              }
+            ]
+          }
+        ]
+      }
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted BGP sync test data
+  'show configuration | display inheritance | display set | match "policy-options community"':
+    output: |
+      set policy-options community NOEXPORT members no-export
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted BGP community sync test data
+  'show configuration | display inheritance | display set | match vrrp':
+    output: |
+      set interfaces ge-0/0/46 unit 0 family inet address 198.51.183.2/24 vrrp-group 10 virtual-address 198.51.183.1
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted VRRP sync test data
+  'show configuration interfaces | display inheritance | display set':
+    output: |
+      set interfaces ge-0/0/12 description "description 1"
+      set interfaces ge-0/0/12 speed 10g
+      set interfaces ge-0/0/12 unit 0 family ethernet-switching interface-mode trunk
+      set interfaces ge-0/0/12 unit 0 family ethernet-switching vlan members VLANNAME1
+      set interfaces ge-0/0/12 unit 0 family ethernet-switching vlan members VLANNAME2
+
+      set interfaces ge-0/0/45 description "description 2"
+      set interfaces ge-0/0/45 speed 1g
+      set interfaces ge-0/0/45 unit 0 family ethernet-switching interface-mode access
+      set interfaces ge-0/0/45 unit 0 family ethernet-switching vlan members VLANNAME3
+
+      set interfaces ge-0/0/46 unit 0 description TEST_SYNC_VRRP_IPV4
+      set interfaces ge-0/0/46 unit 0 family inet address 198.51.183.2/24 vrrp-group 10 virtual-address 198.51.183.1
+    prompt: 'nornir@{base_prompt}>'
+    help: targeted interface VLAN-name sync test data
+  'show configuration routing-instances | display inheritance | display set | match interface':
+    output: ''
+    prompt: 'nornir@{base_prompt}>'
+    help: no routing-instance interface assignments in targeted sync test data
+  'show interfaces':
+    output: ''
+    prompt: 'nornir@{base_prompt}>'
+    help: no operational interface overrides in targeted sync test data
+  exit:
+    output: true
+    prompt: 'nornir@{base_prompt}>'

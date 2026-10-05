@@ -36,6 +36,174 @@ hosts:
         - ethernet1
     groups:
       - eos_params
+  fn-bgp-sp-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6230
+    groups:
+      - eos_params
+  fn-bgp-sp-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6231
+    groups:
+      - eos_params
+  fn-bgp-community-unreachable:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6298
+    groups:
+      - eos_params
+  fn-bgp-lf-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6232
+    groups:
+      - eos_params
+  fn-bgp-lf-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6233
+    groups:
+      - eos_params
+  fn-bgp-lf-3:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6234
+    groups:
+      - eos_params
+  fn-bgp-junos-3:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    username: nornir
+    password: nornir
+    port: 6235
+    groups:
+      - junos_params
+  fn-ipam-sp-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6240
+    groups:
+      - eos_params
+  fn-ipam-sp-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6241
+    groups:
+      - eos_params
+  fn-ipam-lf-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6242
+    groups:
+      - eos_params
+  fn-ipam-lf-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6243
+    groups:
+      - eos_params
+  fn-ipam-lf-3:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6244
+    groups:
+      - eos_params
+  fn-ipam-junos-1:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    username: nornir
+    password: nornir
+    port: 6245
+    groups:
+      - junos_params
+  fn-ipam-junos-2:
+    hostname: 127.0.0.1
+    platform: juniper_junos
+    username: nornir
+    password: nornir
+    port: 6246
+    groups:
+      - junos_params
+  fn-prefix-sp-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6250
+    groups:
+      - eos_params
+  fn-prefix-sp-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6251
+    groups:
+      - eos_params
+  fn-if-sp-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6200
+    groups:
+      - eos_params
+  fn-if-sp-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6201
+    groups:
+      - eos_params
+  fn-if-lf-1:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6202
+    groups:
+      - eos_params
+  fn-if-lf-2:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6203
+    groups:
+      - eos_params
+  fn-if-lf-3:
+    hostname: 127.0.0.1
+    platform: arista_eos
+    username: nornir
+    password: nornir
+    port: 6204
+    groups:
+      - eos_params
   fn-ceos-lf-1:
     hostname: 127.0.0.1
     platform: arista_eos

@@ -1,0 +1,349 @@
+{
+  "purpose": "Reference for test authors. Record NetBox objects read or changed by each test area; this file is not loaded by pytest.",
+  "ownership": "All integration tests use the main NetBox database. Each mutating test area should own distinct records and delete only those records. Branches are used only by tests that explicitly verify branch behavior. This manifest is an author reference and is not loaded by pytest.",
+  "known_overlaps": [
+    "Other sync task files still use the original fn-ceos-* FakeNOS dataset. Audit their records before adding new parallel sync tests."
+  ],
+  "branch_feature_tests": {
+    "test_bgp.py": [
+      "test_sync_bgp_peerings_with_branch",
+      "test_create_bgp_peering_with_branch",
+      "test_update_bgp_peering_with_branch"
+    ],
+    "test_circuits.py": [
+      "test_get_circuits_with_branch"
+    ],
+    "test_crud.py": [
+      "TestCrudBranching"
+    ],
+    "test_graphql.py": [
+      "test_netbox_graphql_with_branch"
+    ],
+    "test_interfaces.py": [
+      "test_sync_device_interfaces_with_branch",
+      "test_create_device_interfaces_with_branch"
+    ],
+    "test_ipam.py": [
+      "test_sync_device_prefixes_with_branch",
+      "test_sync_device_ip_with_branch",
+      "test_create_ip_with_branch",
+      "test_create_ip_check_create_peer_ip_with_branch",
+      "test_create_prefix_with_branch"
+    ],
+    "test_sync.py": [
+      "test_sync_mac_addresses_with_branch"
+    ]
+  },
+  "main_seed": {
+    "source": "tests/netbox_data.py",
+    "devices": [
+      "ceos1",
+      "fceos4",
+      "fceos5",
+      "fn-ceos-sp-1",
+      "fn-ceos-sp-2",
+      "fn-bgp-sp-1",
+      "fn-bgp-sp-2",
+      "fn-bgp-community-unreachable",
+      "fn-if-sp-1",
+      "fn-if-sp-2",
+      "fn-if-lf-1",
+      "fn-if-lf-2",
+      "fn-if-lf-3",
+      "fn-bgp-lf-1",
+      "fn-bgp-lf-2",
+      "fn-bgp-lf-3",
+      "fn-bgp-junos-3",
+      "fn-ipam-sp-1",
+      "fn-ipam-sp-2",
+      "fn-ipam-lf-1",
+      "fn-ipam-lf-2",
+      "fn-ipam-lf-3",
+      "fn-ipam-junos-1",
+      "fn-ipam-junos-2",
+      "fn-prefix-sp-1",
+      "fn-prefix-sp-2"
+    ],
+    "circuits": [
+      "CID1",
+      "CID2",
+      "CID3"
+    ],
+    "prefixes": [
+      "10.0.0.0/24",
+      "10.0.2.0/24",
+      "198.18.250.0/24",
+      "172.81.1.100/30"
+    ],
+    "ip_addresses": [
+      "172.81.1.102/30 on fn-bgp-lf-1:Loopback1001"
+    ]
+  },
+  "tests": {
+    "test_circuits.py::TestGetCircuits": {
+      "mode": "main_readonly",
+      "devices": [
+        "fceos4",
+        "fceos5"
+      ],
+      "circuits": [
+        "CID1",
+        "CID2",
+        "CID3"
+      ],
+      "branch_tests": [
+        "test_get_circuits_with_branch"
+      ]
+    },
+    "test_interfaces.py::TestGetInterfaces": {
+      "mode": "main_readonly",
+      "devices": [
+        "ceos1",
+        "fceos4"
+      ]
+    },
+    "test_inventory.py::TestGetNornirInventory": {
+      "mode": "main_readonly",
+      "devices": [
+        "ceos1",
+        "fceos4",
+        "fceos5"
+      ],
+      "also_used_by": [
+        "tests/services/nornir",
+        "tests/nf_tests_inventory"
+      ]
+    },
+    "test_containerlab.py::TestGetContainerlabInventory": {
+      "mode": "main_readonly",
+      "devices": [
+        "fceos4",
+        "fceos5"
+      ]
+    },
+    "test_crud.py::manufacturer": {
+      "mode": "main_mutating",
+      "manufacturers": [
+        "norfab-crud-test-manufacturer-<unique>"
+      ],
+      "cleanup": "Delete only the manufacturer ID created by the fixture"
+    },
+    "test_graphql.py::TestNetboxGrapQL::test_netbox_graphql_with_branch": {
+      "mode": "branch_feature",
+      "manufacturers": [
+        "norfab-netbox-graphql-branch-test"
+      ]
+    },
+    "test_interfaces.py::TestSyncDeviceInterfaces": {
+      "mode": "main_mutating",
+      "cleanup": "Only TEST_SYNC interfaces on fn-if-* devices",
+      "devices": [
+        "fn-if-sp-1",
+        "fn-if-sp-2",
+        "fn-if-lf-1",
+        "fn-if-lf-2",
+        "fn-if-lf-3"
+      ],
+      "interfaces": [
+        "Ethernet9",
+        "Loopback10",
+        "Port-Channel41"
+      ]
+    },
+    "test_ipam.py::TestSyncDeviceIP": {
+      "mode": "main_mutating",
+      "cleanup": "Delete only IPs assigned to fn-ipam-* devices in their dedicated ranges and TEST_SYNC interfaces on those devices.",
+      "devices": [
+        "fn-ipam-sp-1",
+        "fn-ipam-sp-2",
+        "fn-ipam-lf-1",
+        "fn-ipam-lf-2",
+        "fn-ipam-lf-3",
+        "fn-ipam-junos-1",
+        "fn-ipam-junos-2"
+      ],
+      "ip_addresses": [
+        "10.83.15.33/30",
+        "10.83.250.250/32",
+        "10.184.0.0/31"
+      ],
+      "source": "tests/nf_tests_inventory/fakenos/custom_nos/netbox_ipam_*.yaml"
+    },
+    "test_bgp.py::TestSyncBgpPeerings": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-bgp-sp-1",
+        "fn-bgp-sp-2",
+        "fn-bgp-lf-1",
+        "fn-bgp-lf-2",
+        "fn-bgp-lf-3",
+        "fn-bgp-junos-3"
+      ],
+      "temporary_ips": [
+        "198.51.100.241/32",
+        "198.51.100.242/32"
+      ],
+      "create_update_asns": [
+        64996,
+        64997,
+        64998,
+        64999
+      ],
+      "branch_test": "test_sync_bgp_peerings_with_branch",
+      "source": "tests/nf_tests_inventory/fakenos/custom_nos/netbox_bgp_*.yaml",
+      "ip_ranges": [
+        "10.81.0.0/16",
+        "10.181.0.0/16",
+        "10.82.0.0/16",
+        "172.81.0.0/16",
+        "198.51.81.0/24",
+        "198.51.181.0/24"
+      ],
+      "source_asns": [
+        64801,
+        64802,
+        64811,
+        64812,
+        64813,
+        64814,
+        64815
+      ],
+      "cleanup": "Delete sessions on fn-bgp-* devices and unassigned addresses and source ASNs in the BGP-owned ranges."
+    },
+    "test_sync.py::TestSyncAll": {
+      "mode": "main_mutating",
+      "cleanup": "Delete only records assigned to this class's original spine devices. BGP and IPAM use separate FakeNOS source data.",
+      "devices": [
+        "fn-ceos-sp-1",
+        "fn-ceos-sp-2"
+      ],
+      "interfaces": [
+        "Loopback10",
+        "Ethernet9"
+      ],
+      "ip_addresses": [
+        "10.3.15.33/30"
+      ]
+    },
+    "test_ipam.py::TestSyncDevicePrefixes": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-prefix-sp-1",
+        "fn-prefix-sp-2"
+      ],
+      "prefixes": [
+        "10.85.251.1/32",
+        "10.85.252.1/32",
+        "10.185.0.0/31"
+      ],
+      "source": "tests/nf_tests_inventory/fakenos/custom_nos/netbox_prefix_*.yaml",
+      "cleanup": "Delete only exact prefixes, IPs, interface, and VRF created by this class."
+    },
+    "test_vlans.py::TestSyncVlans": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-ceos-lf-1",
+        "fn-ceos-lf-2"
+      ],
+      "vlan_ids": [
+        110,
+        111,
+        120,
+        121,
+        190,
+        191,
+        199,
+        210
+      ]
+    },
+    "test_vrfs.py::TestSyncVrfs": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-ceos-lf-1",
+        "fn-ceos-lf-2"
+      ],
+      "vrfs": [
+        "TEST_VRF_SYNC_CONTROL_PLANE",
+        "TEST_VRF_SYNC_TENANT_A",
+        "TEST_VRF_SYNC_TENANT_B"
+      ]
+    },
+    "test_bgp_asn.py::TestSyncBgpAsn": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-ceos-lf-1",
+        "fn-ceos-lf-2"
+      ],
+      "asns": [
+        4200000101,
+        4200000102,
+        4200000200,
+        4200000301,
+        4200000302
+      ]
+    },
+    "test_bgp_community.py::TestSyncBgpCommunity": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-ceos-lf-1",
+        "fn-ceos-lf-2"
+      ],
+      "unreachable_device": "fn-bgp-community-unreachable",
+      "communities": [
+        "65000:100",
+        "65000:300",
+        "65000:999"
+      ]
+    },
+    "test_fhrp.py::TestSyncVrrp": {
+      "mode": "main_mutating",
+      "devices": [
+        "xr1"
+      ],
+      "virtual_addresses": [
+        "198.18.250.1/24",
+        "198.18.251.1/24"
+      ]
+    },
+    "test_fhrp.py::TestSyncVrrpEmptyResult": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-ceos-lf-3"
+      ],
+      "fhrp_groups": [
+        "TEST_VRRP_DELETION_PLAN"
+      ]
+    },
+    "test_fhrp.py::TestSyncVrrpAristaPeers": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-ceos-lf-1",
+        "fn-ceos-lf-2"
+      ],
+      "virtual_addresses": [
+        "198.18.252.1"
+      ]
+    },
+    "test_inventory.py::TestSyncDeviceInventory": {
+      "mode": "main_mutating",
+      "devices": [
+        "fakenos-iosxr1"
+      ],
+      "modules": [
+        "A9K-RSP440-TR",
+        "ASR-9006-FAN-V2"
+      ]
+    },
+    "test_designs.py::TestDesignDeploy::test_acme_design": {
+      "mode": "branch_feature",
+      "devices": [
+        "acme-branch-rtr-1",
+        "acme-branch-rtr-2"
+      ],
+      "ip_prefixes": [
+        "192.0.2.0/24",
+        "198.19.224.0/20"
+      ]
+    }
+  }
+}

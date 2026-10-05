@@ -189,7 +189,7 @@ class NetboxGraphqlTasks:
             On failure ``failed`` is ``True`` and ``errors`` lists the exception messages.
         """
         nb_params = self._get_instance_params(instance)
-        ret = Result(task=f"{self.name}:graphql", resources=[instance])
+        ret = Result(task=f"{self.name}:graphql", resources=[instance], result={})
         branch_schema_id = None
         if branch is not None:
             nb = self._get_pynetbox(instance, branch=branch, job=job)

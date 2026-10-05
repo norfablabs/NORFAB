@@ -50,12 +50,16 @@ x-test-runner-common: &test-runner-common
   build: *test-runner-build
   working_dir: /workspace/tests
   entrypoint: *test-runner-entrypoint
+  extra_hosts:
+    - netbox.lab:192.168.1.220
 
 services:
   idle-norfab: &idle-norfab
     build: *test-runner-build
     image: norfab:idle-profile-py${PYTHON_VERSION:-3.12}
     working_dir: /workspace/tests
+    extra_hosts:
+      - netbox.lab:192.168.1.220
     environment:
       <<: *test-runner-env
     entrypoint:

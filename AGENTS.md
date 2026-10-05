@@ -149,6 +149,8 @@ poetry run inv docker-tests-core
 poetry run inv docker-tests-all
 ```
 
+**SUPER IMPORTANT — NetBox test data:** LLM agents must read and maintain [tests/netbox_data_manifest.json](tests/netbox_data_manifest.json) when adding or changing tests that use NetBox data. Record new tests and their data there. Tests that mutate NetBox must use their own records and address space; never reuse data owned by other tests. Clean up only records the test owns.
+
 ### Linting & Formatting
 
 ```bash

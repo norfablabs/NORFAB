@@ -6,6 +6,111 @@ hosts:
     platform: arista_eos
     nos:
       plugin: NFCEOS_CEOS_SPINE_1
+  fn-bgp-sp-1:
+    username: nornir
+    password: nornir
+    port: 6230
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_BGP_SP_1
+  fn-bgp-sp-2:
+    username: nornir
+    password: nornir
+    port: 6231
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_BGP_SP_2
+  fn-bgp-lf-1:
+    username: nornir
+    password: nornir
+    port: 6232
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_BGP_LF_1
+  fn-bgp-lf-2:
+    username: nornir
+    password: nornir
+    port: 6233
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_BGP_LF_2
+  fn-bgp-lf-3:
+    username: nornir
+    password: nornir
+    port: 6234
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_BGP_LF_3
+  fn-bgp-junos-3:
+    username: nornir
+    password: nornir
+    port: 6235
+    platform: juniper_junos
+    nos:
+      plugin: NETBOX_BGP_JUNOS_3
+  fn-ipam-sp-1:
+    username: nornir
+    password: nornir
+    port: 6240
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_IPAM_SP_1
+  fn-ipam-sp-2:
+    username: nornir
+    password: nornir
+    port: 6241
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_IPAM_SP_2
+  fn-ipam-lf-1:
+    username: nornir
+    password: nornir
+    port: 6242
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_IPAM_LF_1
+  fn-ipam-lf-2:
+    username: nornir
+    password: nornir
+    port: 6243
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_IPAM_LF_2
+  fn-ipam-lf-3:
+    username: nornir
+    password: nornir
+    port: 6244
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_IPAM_LF_3
+  fn-ipam-junos-1:
+    username: nornir
+    password: nornir
+    port: 6245
+    platform: juniper_junos
+    nos:
+      plugin: NETBOX_IPAM_JUNOS_1
+  fn-ipam-junos-2:
+    username: nornir
+    password: nornir
+    port: 6246
+    platform: juniper_junos
+    nos:
+      plugin: NETBOX_IPAM_JUNOS_2
+  fn-prefix-sp-1:
+    username: nornir
+    password: nornir
+    port: 6250
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_PREFIX_SP_1
+  fn-prefix-sp-2:
+    username: nornir
+    password: nornir
+    port: 6251
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_PREFIX_SP_2
   fn-ceos-sp-2:
     username: nornir
     password: nornir

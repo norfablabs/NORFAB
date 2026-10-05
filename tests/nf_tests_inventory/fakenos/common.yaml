@@ -16,3 +16,18 @@ nos_plugins:
   NFJUNOS-1: nf://fakenos/custom_nos/norfab_juniper_junos_fn_junos_1.yaml
   NFJUNOS-2: nf://fakenos/custom_nos/norfab_juniper_junos_fn_junos_2.yaml
   NFJUNOS-3: nf://fakenos/custom_nos/fn_junos_3.yaml # ex vmx-1
+  NETBOX_BGP_SP_1: nf://fakenos/custom_nos/netbox_bgp_sp_1.yaml
+  NETBOX_BGP_SP_2: nf://fakenos/custom_nos/netbox_bgp_sp_2.yaml
+  NETBOX_BGP_LF_1: nf://fakenos/custom_nos/netbox_bgp_lf_1.yaml
+  NETBOX_BGP_LF_2: nf://fakenos/custom_nos/netbox_bgp_lf_2.yaml
+  NETBOX_BGP_LF_3: nf://fakenos/custom_nos/netbox_bgp_lf_3.yaml
+  NETBOX_BGP_JUNOS_3: nf://fakenos/custom_nos/netbox_bgp_junos_3.yaml
+  NETBOX_IPAM_SP_1: nf://fakenos/custom_nos/netbox_ipam_sp_1.yaml
+  NETBOX_IPAM_SP_2: nf://fakenos/custom_nos/netbox_ipam_sp_2.yaml
+  NETBOX_IPAM_LF_1: nf://fakenos/custom_nos/netbox_ipam_lf_1.yaml
+  NETBOX_IPAM_LF_2: nf://fakenos/custom_nos/netbox_ipam_lf_2.yaml
+  NETBOX_IPAM_LF_3: nf://fakenos/custom_nos/netbox_ipam_lf_3.yaml
+  NETBOX_IPAM_JUNOS_1: nf://fakenos/custom_nos/netbox_ipam_junos_1.yaml
+  NETBOX_IPAM_JUNOS_2: nf://fakenos/custom_nos/netbox_ipam_junos_2.yaml
+  NETBOX_PREFIX_SP_1: nf://fakenos/custom_nos/netbox_prefix_sp_1.yaml
+  NETBOX_PREFIX_SP_2: nf://fakenos/custom_nos/netbox_prefix_sp_2.yaml

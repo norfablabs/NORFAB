@@ -411,6 +411,10 @@ prefixes = [
         "prefix": "172.16.1.100/30",
         "description": "For bgp sync test_sync_bgp_peerings_resolve_local_ip_via_peer test",
     },
+    {
+        "prefix": "172.81.1.100/30",
+        "description": "Isolated BGP peer local IP resolution test",
+    },
 ]
 
 prefix_roles = [
@@ -436,6 +440,7 @@ ip_addresses = [
     {"address": "10.0.2.9/30"},  # fceos5-fceos4-eth107-vrf
     {"address": "172.16.1.101/30"},  # BGP peering local IP resolution test
     {"address": "172.16.1.102/30"},  # BGP peering local IP resolution test
+    {"address": "172.81.1.102/30"},  # isolated BGP peering local IP resolution
 ]
 # add more ip addresses
 ip_addresses.extend([{"address": f"1.0.10.{i}/32"} for i in range(1, 11)])
@@ -940,6 +945,12 @@ interfaces = [
         "type": "virtual",
         "description": "BGP resolve local IP via peer IP test",
     },
+    {
+        "name": "Loopback1001",
+        "device": {"name": "fn-bgp-lf-1"},
+        "type": "virtual",
+        "description": "Isolated BGP resolve local IP via peer IP test",
+    },
 ]
 
 # add Containerlab devices interfaces
@@ -1335,6 +1346,11 @@ ip_adress_to_devices = [
         "address": "172.16.1.102/30",
         "interface": "Loopback1001",
         "device": "fn-ceos-lf-1",
+    },
+    {
+        "address": "172.81.1.102/30",
+        "interface": "Loopback1001",
+        "device": "fn-bgp-lf-1",
     },
 ]
 # associate IP addresses to subinterfaces
@@ -2443,6 +2459,60 @@ devices = [
         },
     },
     {
+        "name": "fn-bgp-sp-1",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "serial": "FN-BGP-SP-1",
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6230,
+                "username": "nornir",
+                "password": "nornir",
+            }
+        },
+    },
+    {
+        "name": "fn-bgp-sp-2",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "serial": "FN-BGP-SP-2",
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6231,
+                "username": "nornir",
+                "password": "nornir",
+            }
+        },
+    },
+    {
+        "name": "fn-bgp-community-unreachable",
+        "device_type": {"slug": slugify("Arista cEOS")},
+        "device_role": {"name": "VirtualRouter"},
+        "tenant": {"name": "NORFAB"},
+        "site": {"name": "NORFAB-LAB"},
+        "serial": "FN-BGP-COMMUNITY-UNREACHABLE",
+        "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+        "platform": {"name": "arista_eos"},
+        "local_context_data": {
+            "nornir": {
+                "hostname": "127.0.0.1",
+                "port": 6298,
+                "username": "nornir",
+                "password": "nornir",
+            }
+        },
+    },
+    {
         "name": "fn-ceos-lf-1",
         "device_type": {"slug": slugify("Arista cEOS")},
         "device_role": {"name": "VirtualRouter"},
@@ -2587,6 +2657,74 @@ devices.extend(
         for device in scale_netbox_devices
     ]
 )
+# Dedicated records for BGP and IPAM synchronization tests.
+for device_name, port, platform in [
+    ("fn-bgp-lf-1", 6232, "arista_eos"),
+    ("fn-bgp-lf-2", 6233, "arista_eos"),
+    ("fn-bgp-lf-3", 6234, "arista_eos"),
+    ("fn-bgp-junos-3", 6235, "juniper_junos"),
+    ("fn-ipam-sp-1", 6240, "arista_eos"),
+    ("fn-ipam-sp-2", 6241, "arista_eos"),
+    ("fn-ipam-lf-1", 6242, "arista_eos"),
+    ("fn-ipam-lf-2", 6243, "arista_eos"),
+    ("fn-ipam-lf-3", 6244, "arista_eos"),
+    ("fn-ipam-junos-1", 6245, "juniper_junos"),
+    ("fn-ipam-junos-2", 6246, "juniper_junos"),
+    ("fn-prefix-sp-1", 6250, "arista_eos"),
+    ("fn-prefix-sp-2", 6251, "arista_eos"),
+]:
+    devices.append(
+        {
+            "name": device_name,
+            "device_type": {
+                "slug": slugify("vMX" if platform == "juniper_junos" else "Arista cEOS")
+            },
+            "device_role": {"name": "VirtualRouter"},
+            "tenant": {"name": "NORFAB"},
+            "site": {"name": "NORFAB-LAB"},
+            "serial": f"FN-{device_name.upper()}",
+            "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+            "platform": {"name": platform},
+            "local_context_data": {
+                "nornir": {
+                    "hostname": "127.0.0.1",
+                    "port": port,
+                    "username": "nornir",
+                    "password": "nornir",
+                }
+            },
+        }
+    )
+
+# Dedicated records for interface synchronization tests.
+for device_name, port in [
+    ("fn-if-sp-1", 6200),
+    ("fn-if-sp-2", 6201),
+    ("fn-if-lf-1", 6202),
+    ("fn-if-lf-2", 6203),
+    ("fn-if-lf-3", 6204),
+]:
+    devices.append(
+        {
+            "name": device_name,
+            "device_type": {"slug": slugify("Arista cEOS")},
+            "device_role": {"name": "VirtualRouter"},
+            "tenant": {"name": "NORFAB"},
+            "site": {"name": "NORFAB-LAB"},
+            "serial": f"FN-IF-{device_name}",
+            "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+            "platform": {"name": "arista_eos"},
+            "local_context_data": {
+                "nornir": {
+                    "hostname": "127.0.0.1",
+                    "port": port,
+                    "username": "nornir",
+                    "password": "nornir",
+                }
+            },
+        }
+    )
+
 # add fceos3_390-fceos3_399 devices to test multi-threading retrieval
 for i in range(10):
     devices.append(

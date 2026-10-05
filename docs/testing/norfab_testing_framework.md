@@ -142,6 +142,10 @@ Use a directory, file, class, or method path to narrow collection; use `-m` for 
 
 Group tests in `Test...` classes. Exercise real services through the public client interface and the `nfclient` fixture. Keep test data explicit, clean up only data created by the test, and make cleanup safe after partial failures. Put service markers on test files and register new task markers in `pyproject.toml`.
 
+### NetBox test data ownership
+
+[tests/netbox_data_manifest.json](../../tests/netbox_data_manifest.json) records which NetBox objects each test area reads or changes. It is a reference for test authors and agents; pytest does not load it. Read and update it whenever adding or changing tests that use NetBox data. Mutating tests must use records and address space distinct from other test areas and clean up only their own objects. Put persistent shared data in `tests/netbox_data.py`; read-only tests may use that data.
+
 ## Docker test environment
 
 Invoke runs pytest in isolated Docker Compose containers using the shared test inventory. Run these commands from the repository root:

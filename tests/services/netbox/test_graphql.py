@@ -29,6 +29,26 @@ pytestmark = [
 class TestNetboxGrapQL:
     nb_version = None
 
+    def test_netbox_graphql_reports_query_error(self, nfclient):
+        """A failed GraphQL request returns its error and an empty result."""
+        ret = nfclient.run_job(
+            "netbox",
+            "netbox_graphql",
+            workers="any",
+            kwargs={
+                "instance": "prod",
+                "query": "query Broken($offset: Int!, $limit: Int!) {",
+                "variables": {},
+            },
+        )
+
+        for worker, res in ret.items():
+            assert res["failed"], f"{worker} did not report GraphQL failure"
+            assert res["result"] == {}, f"{worker} returned unexpected data"
+            assert any(
+                "Failed to fetch page at offset" in error for error in res["errors"]
+            ), f"{worker} did not return the GraphQL request error"
+
     def test_netbox_graphql_with_branch(self, nfclient):
         """Raw REST writes and GraphQL reads use the selected branch."""
         branch = "norfab-netbox-graphql-branch-test"
