@@ -582,9 +582,10 @@ class TestSyncDeviceInterfaces:
         "Loopback11",
     }
 
-    @pytest.fixture(autouse=True)
-    def ensure_fakenos_netbox_devices(self):
-        self._ensure_netbox_devices()
+    @pytest.fixture(scope="class", autouse=True)
+    @classmethod
+    def ensure_fakenos_netbox_devices(cls, netbox):
+        cls._ensure_netbox_devices(netbox)
 
     def test_sync_device_interfaces_flags_defaults_and_aliases(self):
         defaults = SyncDeviceInterfacesInput()
@@ -620,9 +621,8 @@ class TestSyncDeviceInterfaces:
     # ------------------------------------------------------------------ #
 
     @classmethod
-    def _ensure_netbox_devices(cls):
+    def _ensure_netbox_devices(cls, nb):
         """Create NetBox device records for FakeNOS-backed cEOS devices."""
-        nb = get_pynetbox(None)
         device_type = nb.dcim.device_types.get(slug="arista-ceos")
         role = nb.dcim.device_roles.get(name="VirtualRouter")
         tenant = nb.tenancy.tenants.get(name="NORFAB")
@@ -673,31 +673,15 @@ class TestSyncDeviceInterfaces:
 
     @staticmethod
     def _get_intf_id(nfclient, device, name):
-        resp = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "get",
-                "api": "dcim/interfaces",
-                "params": {"device": device, "name": name},
-            },
-        )
-        worker, result = tuple(resp.items())[0]
-        return result["result"]["results"][0]["id"]
+        interface = get_pynetbox(nfclient).dcim.interfaces.get(device=device, name=name)
+        assert interface is not None, f"Missing interface '{device}:{name}'"
+        return interface.id
 
     @staticmethod
     def _patch_intf(nfclient, intf_id, patch):
-        nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "patch",
-                "api": f"dcim/interfaces/{intf_id}",
-                "json": patch,
-            },
-        )
+        interface = get_pynetbox(nfclient).dcim.interfaces.get(intf_id)
+        assert interface is not None, f"Missing interface ID {intf_id}"
+        interface.update(patch)
 
     @staticmethod
     def _get_nb_intf(nfclient, device, name):
@@ -1762,6 +1746,42 @@ class TestSyncDeviceInterfaces:
 
 @pytest.mark.netbox_create_device_interfaces
 class TestCreateDeviceInterfaces:
+    OWNED_INTERFACES = {
+        "fn-ceos-sp-1": {
+            "TestInterface1",
+            "TestInterface2",
+            "Loopback1",
+            "Loopback2",
+            "Loopback3",
+            "ge-0/0/0",
+            "ge-0/0/1",
+            "xe-0/0/0",
+            "xe-0/0/1",
+            "TestIntf1",
+            "TestIntf2",
+            "TestExisting",
+            "TestDryRun",
+            "TestBranch",
+        },
+        "fn-ceos-sp-2": {"TestInterface2"},
+    }
+
+    @pytest.fixture(autouse=True)
+    def cleanup_owned_interfaces(self, netbox):
+        """Remove only interface records reserved for this test class."""
+
+        def cleanup():
+            for device, names in self.OWNED_INTERFACES.items():
+                for interface in list(netbox.dcim.interfaces.filter(device=device)):
+                    if interface.name in names:
+                        interface.delete()
+
+        cleanup()
+        try:
+            yield
+        finally:
+            cleanup()
+
     def test_create_device_interfaces_single(self, nfclient):
         """Test creating a single interface on a device"""
         delete_interfaces(nfclient, "fn-ceos-sp-1", "TestInterface1")

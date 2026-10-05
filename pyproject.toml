@@ -118,11 +118,11 @@ pygments = { version = "2.19.2", optional = true }
 pymdown-extensions = { version = "11.0.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-black = "*"
-invoke = "*"
-pytest = "*"
-ruff = "*"
-vulture = "*"
+black = "26.*"
+invoke = "3.*"
+pytest = "9.*"
+ruff = "0.16.*"
+vulture = "2.*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -311,6 +311,7 @@ paths = ["norfab", "tasks.py"]
 min_confidence = 60
 
 [tool.pytest.ini_options]
+junit_family = "xunit2"
 markers = [
     "core: NORFAB core component tests",
     "nornir: Nornir service tests",

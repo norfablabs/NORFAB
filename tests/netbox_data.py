@@ -1390,6 +1390,14 @@ rirs = [
 # Custom fields data
 custom_fields = [
     {
+        "name": "norfab_create_vlan_sites",
+        "label": "NorFab Create VLAN Sites",
+        "type": "multiobject",
+        "description": "Site references used by create_vlan tests",
+        "object_types": ["ipam.vlan"],
+        "related_object_type": "dcim.site",
+    },
+    {
         "name": "norfab_acme_site",
         "label": "ACME Site",
         "type": "object",

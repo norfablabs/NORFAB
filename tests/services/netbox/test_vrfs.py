@@ -24,6 +24,27 @@ class TestSyncVrfs:
         "TEST_VRF_SYNC_TENANT_B",
     }
     CONTROL_PLANE_INTERFACES = {"Ethernet1.101", "Ethernet2.101", "Loopback101"}
+    CONTROL_PLANE_INTERFACE_DATA = (
+        {"name": "Ethernet1", "type": "other"},
+        {"name": "Ethernet2", "type": "other"},
+        {
+            "name": "Ethernet1.101",
+            "type": "virtual",
+            "parent": "Ethernet1",
+            "description": "TEST_VRF_SYNC_CONTROL_PLANE",
+        },
+        {
+            "name": "Ethernet2.101",
+            "type": "virtual",
+            "parent": "Ethernet2",
+            "description": "TEST_VRF_SYNC_CONTROL_PLANE",
+        },
+        {
+            "name": "Loopback101",
+            "type": "virtual",
+            "description": "TEST_VRF_SYNC_CONTROL_PLANE",
+        },
+    )
     ROUTE_TARGET_NAMES = {
         "65100:101",
         "65100:201",
@@ -88,10 +109,41 @@ class TestSyncVrfs:
                 payload["object_type"] = payload.pop("related_object_type")
             created_custom_fields.append(self.nb.extras.custom_fields.create(**payload))
         self._delete_test_data()
+        created_interfaces = self._create_control_plane_interfaces()
         yield
+        self._delete_created_interfaces(created_interfaces)
         self._delete_test_data()
         for custom_field in created_custom_fields:
             custom_field.delete()
+
+    def _create_control_plane_interfaces(self) -> list[int]:
+        created_ids = []
+        for device_name in (self.DEVICE_1, self.DEVICE_2):
+            device = self.nb.dcim.devices.get(name=device_name)
+            for interface_data in self.CONTROL_PLANE_INTERFACE_DATA:
+                if self.nb.dcim.interfaces.get(
+                    device=device_name, name=interface_data["name"]
+                ):
+                    continue
+                payload = {
+                    "device": device.id,
+                    "name": interface_data["name"],
+                    "type": interface_data["type"],
+                    "description": interface_data.get("description", ""),
+                }
+                if parent_name := interface_data.get("parent"):
+                    parent = self.nb.dcim.interfaces.get(
+                        device=device_name, name=parent_name
+                    )
+                    payload["parent"] = parent.id
+                created_ids.append(self.nb.dcim.interfaces.create(**payload).id)
+        return created_ids
+
+    def _delete_created_interfaces(self, interface_ids: list[int]) -> None:
+        for interface_id in reversed(interface_ids):
+            interface = self.nb.dcim.interfaces.get(id=interface_id)
+            if interface is not None:
+                interface.delete()
 
     def _delete_test_data(self) -> None:
         for name in self.VRF_NAMES:

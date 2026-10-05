@@ -468,10 +468,11 @@ def _run_netbox_group(group, build=False, python_version=""):
     service = SUITES["netbox"][0]
     if build:
         _run(_compose() + ["build", service], env=_environment(python_version))
-    runtime = DOCKER_DIR / service / "groups" / group / "__norfab__"
+    run_id = uuid4().hex[:8]
+    runtime = DOCKER_DIR / service / "groups" / group / "runs" / run_id / "__norfab__"
     (runtime / "artifacts").mkdir(parents=True, exist_ok=True)
-    container_name = f"norfab-tests-netbox-{group}-{uuid4().hex[:8]}"
-    return _run_suite(
+    container_name = f"norfab-tests-netbox-{group}-{run_id}"
+    return_code = _run_suite(
         "netbox",
         selector=NETBOX_TEST_GROUPS[group],
         marker="netbox",
@@ -480,6 +481,7 @@ def _run_netbox_group(group, build=False, python_version=""):
         junit_name=f"{group}-junit.xml",
         container_name=container_name,
     )
+    return return_code, runtime / "artifacts" / f"{group}-junit.xml"
 
 
 def _run_netbox_groups(build=False, python_version=""):
@@ -489,7 +491,7 @@ def _run_netbox_groups(build=False, python_version=""):
         _run(_compose() + ["build", service], env=_environment(python_version))
 
     def run_group(group):
-        return group, _run_netbox_group(group, python_version=python_version)
+        return group, *_run_netbox_group(group, python_version=python_version)
 
     print(
         f"Running {len(NETBOX_TEST_GROUPS)} NetBox test-file containers concurrently",
@@ -499,10 +501,10 @@ def _run_netbox_groups(build=False, python_version=""):
         results = list(executor.map(run_group, NETBOX_TEST_GROUPS))
 
     print("NetBox test-file results:")
-    for group, return_code in results:
+    for group, return_code, _junit_file in results:
         status = "passed" if return_code == 0 else f"failed (status {return_code})"
         print(f"  {group}: {status}")
-    return max((return_code for _group, return_code in results), default=0)
+    return max((return_code for _group, return_code, _junit_file in results), default=0)
 
 
 def _netbox_group_task(group):
@@ -517,7 +519,7 @@ def _netbox_group_task(group):
     def run(_context, build=False, python_version=""):
         started_at = datetime.now().astimezone()
         previous_junit = _junit_snapshot()
-        return_code = _run_netbox_group(group, build, python_version)
+        return_code, junit_file = _run_netbox_group(group, build, python_version)
         _write_docker_test_report(
             [("netbox", return_code)],
             previous_junit,
@@ -525,6 +527,7 @@ def _netbox_group_task(group):
             python_version,
             report_name=f"docker-tests-netbox-{group}",
             invocation={"Selector": NETBOX_TEST_GROUPS[group]},
+            expected_junit={"netbox": junit_file},
         )
         if return_code:
             print(
@@ -549,6 +552,16 @@ def _markdown_cell(value):
     return str(value).replace("|", "\\|").replace("\r", " ").replace("\n", " ")
 
 
+def _parse_junit_datetime(value):
+    """Return a datetime from a JUnit timestamp string, or None."""
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
 def _write_docker_test_report(
     results,
     previous_junit,
@@ -556,6 +569,7 @@ def _write_docker_test_report(
     python_version,
     report_name="docker-tests-all",
     invocation=None,
+    expected_junit=None,
 ):
     """Write a consolidated Markdown report from JUnit files changed this run."""
     report_suites = tuple(suite for suite, _return_code in results)
@@ -563,7 +577,14 @@ def _write_docker_test_report(
     for suite, return_code in results:
         service = SUITES[suite][0]
         junit_files = []
-        for path in (DOCKER_DIR / service).glob("**/artifacts/*-junit.xml"):
+        candidates = (
+            [expected_junit[suite]]
+            if expected_junit and suite in expected_junit
+            else (DOCKER_DIR / service).glob("**/artifacts/*-junit.xml")
+        )
+        for path in candidates:
+            if not path.exists():
+                continue
             resolved = path.resolve()
             signature = (path.stat().st_mtime_ns, path.stat().st_size)
             if previous_junit.get(resolved) != signature:
@@ -571,6 +592,7 @@ def _write_docker_test_report(
 
         counts = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
         duration = 0.0
+        test_cases = []
         failures = []
         parse_errors = []
         for junit_file in sorted(junit_files):
@@ -579,36 +601,69 @@ def _write_docker_test_report(
             except (ElementTree.ParseError, OSError) as exc:
                 parse_errors.append(f"{junit_file.relative_to(DOCKER_DIR)}: {exc}")
                 continue
-            for testcase in root.iter("testcase"):
-                duration += float(testcase.get("time", 0) or 0)
-                failure = testcase.find("failure")
-                error = testcase.find("error")
-                skipped = testcase.find("skipped")
-                if failure is not None:
-                    counts["failed"] += 1
-                    problem = failure
-                elif error is not None:
-                    counts["errors"] += 1
-                    problem = error
-                elif skipped is not None:
-                    counts["skipped"] += 1
-                    continue
-                else:
-                    counts["passed"] += 1
-                    continue
-                test_name = "::".join(
-                    part
-                    for part in (testcase.get("classname"), testcase.get("name"))
-                    if part
-                )
-                details = (problem.text or problem.get("message") or "").strip()
-                failures.append((test_name or "unknown test", details))
+            test_suites = (
+                [root] if root.tag == "testsuite" else list(root.iter("testsuite"))
+            )
+            for test_suite in test_suites:
+                for testcase in test_suite.findall("testcase"):
+                    testcase_duration = float(testcase.get("time", 0) or 0)
+                    duration += testcase_duration
+                    failure = testcase.find("failure")
+                    error = testcase.find("error")
+                    skipped = testcase.find("skipped")
+                    test_name = "::".join(
+                        part
+                        for part in (testcase.get("classname"), testcase.get("name"))
+                        if part
+                    )
+                    test_name = test_name or "unknown test"
+                    runtime_timestamp = {
+                        prop.get("name"): prop.get("value")
+                        for prop in testcase.findall("properties/property")
+                    }
+                    runtime_started = _parse_junit_datetime(
+                        runtime_timestamp.get("started")
+                    )
+                    runtime_completed = _parse_junit_datetime(
+                        runtime_timestamp.get("completed")
+                    )
+                    if failure is not None:
+                        counts["failed"] += 1
+                        status = "failed"
+                        problem = failure
+                    elif error is not None:
+                        counts["errors"] += 1
+                        status = "error"
+                        problem = error
+                    elif skipped is not None:
+                        counts["skipped"] += 1
+                        status = "skipped"
+                        problem = None
+                    else:
+                        counts["passed"] += 1
+                        status = "passed"
+                        problem = None
+                    test_cases.append(
+                        {
+                            "name": test_name,
+                            "status": status,
+                            "started": runtime_started,
+                            "completed": runtime_completed,
+                            "duration": testcase_duration,
+                        }
+                    )
+                    if problem is not None:
+                        details = (
+                            problem.text or problem.get("message") or ""
+                        ).strip()
+                        failures.append((test_name, details))
 
         report_data[suite] = {
             "return_code": return_code,
             "junit_files": junit_files,
             "counts": counts,
             "duration": duration,
+            "test_cases": test_cases,
             "failures": failures,
             "parse_errors": parse_errors,
         }
@@ -688,6 +743,35 @@ def _write_docker_test_report(
             )
         else:
             lines.append("- No report generated")
+
+    lines += [
+        "",
+        "## Test Cases",
+        "",
+        "| # | Test | Status | Started | Completed | Duration |",
+        "|---:|---|---|---|---|---:|",
+    ]
+    row_number = 0
+    for suite in report_suites:
+        for test_case in report_data[suite]["test_cases"]:
+            row_number += 1
+            started = (
+                test_case["started"].isoformat(timespec="seconds")
+                if test_case["started"]
+                else ""
+            )
+            completed = (
+                test_case["completed"].isoformat(timespec="seconds")
+                if test_case["completed"]
+                else ""
+            )
+            lines.append(
+                f"| {row_number} | {_markdown_cell(test_case['name'])} | "
+                f"{_markdown_cell(test_case['status'])} | "
+                f"{_markdown_cell(started)} | "
+                f"{_markdown_cell(completed)} | "
+                f"{test_case['duration']:.2f}s |"
+            )
 
     DOCKER_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     report_path = DOCKER_REPORTS_DIR / (

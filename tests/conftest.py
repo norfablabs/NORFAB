@@ -4,6 +4,7 @@ import sys
 import time
 import unittest
 import unittest.mock
+from datetime import datetime, timezone
 
 import pytest
 from picle import App
@@ -13,6 +14,21 @@ from norfab.clients.nfcli_shell.nfcli_shell_client import (
     mount_shell_plugins,
 )
 from norfab.core.nfapi import NorFab
+from tests.services.netbox.common import get_pynetbox
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """Add test setup and teardown timestamps to JUnit properties."""
+    outcome = yield
+    report = outcome.get_result()
+    if call.when == "setup":
+        item.user_properties.append(
+            ("started", datetime.fromtimestamp(call.start, tz=timezone.utc).isoformat())
+        )
+    elif call.when == "teardown":
+        report.user_properties.append(
+            ("completed", datetime.fromtimestamp(call.stop, tz=timezone.utc).isoformat())
+        )
 
 
 def _get_test_workers(nf: NorFab) -> list | bool:
@@ -42,10 +58,22 @@ def nfclient():
     once tests done destroys NorFab
     """
     nf = NorFab(inventory="./nf_tests_inventory/inventory.yaml")
-    nf.start(run_workers=_get_test_workers(nf))
-    time.sleep(3)  # wait for workers to start
-    yield nf.make_client()  # return nf client
-    nf.destroy()  # teardown
+    try:
+        nf.start(run_workers=_get_test_workers(nf))
+        time.sleep(3)  # wait for workers to start
+        yield nf.make_client()  # return nf client
+    finally:
+        nf.destroy()  # teardown
+
+
+@pytest.fixture(scope="module")
+def netbox():
+    """Return a direct pynetbox client for test setup and cleanup."""
+    api = get_pynetbox(None)
+    try:
+        yield api
+    finally:
+        api.http_session.close()
 
 
 @pytest.fixture(scope="module")

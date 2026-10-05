@@ -8,7 +8,7 @@
 !*-tests/__norfab__/artifacts/.gitkeep
 *-tests/groups/
 
-reports/*.md
+reports/*
 
 distributed-basic/*/__norfab__/*
 !distributed-basic/*/__norfab__/.gitkeep

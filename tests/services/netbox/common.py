@@ -1,6 +1,9 @@
 import ipaddress
 
 import pynetbox
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 try:
     from tests.netbox_data import NB_API_TOKEN, NB_URL
@@ -10,6 +13,14 @@ except ModuleNotFoundError as exc:
     from netbox_data import NB_API_TOKEN, NB_URL
 
 cache_options = [True, False, "refresh", "force"]
+
+
+class TimeoutHTTPAdapter(HTTPAdapter):
+    """Apply bounded connect/read timeouts to pynetbox requests."""
+
+    def send(self, request, **kwargs):
+        kwargs.setdefault("timeout", (10, 60))
+        return super().send(request, **kwargs)
 
 
 def get_nb_version(nfclient, instance=None) -> tuple:
@@ -36,85 +47,21 @@ def delete_branch(branch, nfclient):
 
 
 def delete_interfaces(nfclient, device, interface):
-    resp_get = nfclient.run_job(
-        "netbox",
-        "rest",
-        workers="any",
-        kwargs={
-            "method": "get",
-            "api": "/dcim/interfaces/",
-            "params": {"device": device, "name": interface},
-        },
-    )
-    print(f"Retrieved interface '{device}:{interface}' - {resp_get}")
-    worker, interfaces = tuple(resp_get.items())[0]
-    if interfaces["result"]["results"]:
-        resp = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "delete",
-                "api": f"/dcim/interfaces/{interfaces['result']['results'][0]['id']}",
-            },
-        )
-        print(f"Deleted interface '{device}:{interface}'")
-    else:
-        print(f"Interface '{device}:{interface}' does not exist in Netbox")
+    nb = get_pynetbox(nfclient)
+    for record in list(nb.dcim.interfaces.filter(device=device, name=interface)):
+        record.delete()
 
 
 def delete_prefixes_within(prefix, nfclient):
-    resp = nfclient.run_job(
-        "netbox",
-        "rest",
-        workers="any",
-        kwargs={
-            "method": "get",
-            "api": "/ipam/prefixes/",
-            "params": {"within": prefix},
-        },
-    )
-    worker, prefixes = tuple(resp.items())[0]
-    # pprint.pprint(prefixes)
-    for pfx in prefixes["result"]["results"]:
-        delete_pfx = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "delete",
-                "api": f"/ipam/prefixes/{pfx['id']}/",
-            },
-        )
-        # print("delete prefix:")
-        # pprint.pprint(delete_pfx)
+    nb = get_pynetbox(nfclient)
+    for record in list(nb.ipam.prefixes.filter(within=prefix)):
+        record.delete()
 
 
 def delete_ips(prefix, nfclient):
-    resp = nfclient.run_job(
-        "netbox",
-        "rest",
-        workers="any",
-        kwargs={
-            "method": "get",
-            "api": "/ipam/ip-addresses/",
-            "params": {"parent": prefix},
-        },
-    )
-    worker, ips = tuple(resp.items())[0]
-    # pprint.pprint(ips)
-    for ip in ips["result"]["results"]:
-        delete_ip = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "delete",
-                "api": f"/ipam/ip-addresses/{ip['id']}/",
-            },
-        )
-        # print("delete ip address:")
-        # pprint.pprint(delete_ip)'
+    nb = get_pynetbox(nfclient)
+    for record in list(nb.ipam.ip_addresses.filter(parent=prefix)):
+        record.delete()
 
 
 def clear_nb_cache(keys, nfclient):
@@ -128,58 +75,18 @@ def clear_nb_cache(keys, nfclient):
 
 def delete_ip_address(nfclient, address):
     """Delete a specific IP address (e.g. '10.3.4.1/32') from NetBox IPAM."""
-    resp = nfclient.run_job(
-        "netbox",
-        "rest",
-        workers="any",
-        kwargs={
-            "method": "get",
-            "api": "/ipam/ip-addresses/",
-            "params": {"address": address},
-        },
-    )
-    worker, result = tuple(resp.items())[0]
-    for ip in result["result"]["results"]:
-        nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "delete",
-                "api": f"/ipam/ip-addresses/{ip['id']}/",
-            },
-        )
-    print(f"Deleted IP address '{address}'")
+    nb = get_pynetbox(nfclient)
+    for record in list(nb.ipam.ip_addresses.filter(address=address)):
+        record.delete()
 
 
 def delete_mac_addresses_from_interface(nfclient, device, interface):
     """Delete all MAC addresses assigned to a given device interface."""
-    resp = nfclient.run_job(
-        "netbox",
-        "rest",
-        workers="any",
-        kwargs={
-            "method": "get",
-            "api": "/dcim/mac-addresses/",
-            "params": {
-                "assigned_object_type": "dcim.interface",
-                "device": device,
-                "interface": interface,
-            },
-        },
-    )
-    worker, result = tuple(resp.items())[0]
-    for mac in result["result"]["results"]:
-        nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "delete",
-                "api": f"/dcim/mac-addresses/{mac['id']}/",
-            },
-        )
-    print(f"Deleted MAC addresses from '{device}:{interface}'")
+    nb = get_pynetbox(nfclient)
+    for record in list(
+        nb.dcim.mac_addresses.filter(device=device, interface=interface)
+    ):
+        record.delete()
 
 
 def delete_test_sync_ips(nfclient, devices):
@@ -212,60 +119,49 @@ def delete_test_sync_ips(nfclient, devices):
 def delete_all_mac_addresses(nfclient, devices):
     """Delete all MAC addresses assigned to any interface on the given devices."""
     devices = devices if isinstance(devices, list) else [devices]
+    nb = get_pynetbox(nfclient)
     for device in devices:
-        resp = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "get",
-                "api": "/dcim/mac-addresses/",
-                "params": {"device": device, "limit": 200},
-            },
-        )
-        worker, result = tuple(resp.items())[0]
-        for mac in result["result"]["results"]:
-            nfclient.run_job(
-                "netbox",
-                "rest",
-                workers="any",
-                kwargs={
-                    "method": "delete",
-                    "api": f"/dcim/mac-addresses/{mac['id']}/",
-                },
-            )
-        print(f"Deleted all MAC addresses for device '{device}'")
+        for record in list(nb.dcim.mac_addresses.filter(device=device)):
+            record.delete()
 
 
 def delete_interfaces_with_description(nfclient, devices, description_contains):
     """Delete all NetBox interfaces whose description contains the given substring."""
     devices = devices if isinstance(devices, list) else [devices]
+    nb = get_pynetbox(nfclient)
     for device in devices:
-        resp = nfclient.run_job(
-            "netbox",
-            "rest",
-            workers="any",
-            kwargs={
-                "method": "get",
-                "api": "/dcim/interfaces/",
-                "params": {"device": device, "description__ic": description_contains},
-            },
-        )
-        worker, result = tuple(resp.items())[0]
-        for intf in result["result"]["results"]:
-            nfclient.run_job(
-                "netbox",
-                "rest",
-                workers="any",
-                kwargs={
-                    "method": "delete",
-                    "api": f"/dcim/interfaces/{intf['id']}/",
-                },
+        records = list(
+            nb.dcim.interfaces.filter(
+                device=device, description__ic=description_contains
             )
-        print(
-            f"Deleted interfaces with description containing '{description_contains}' on '{device}'"
         )
+        records.sort(
+            key=lambda item: (
+                0 if getattr(item, "parent", None) else 1,
+                0 if getattr(item, "lag", None) else 1,
+                item.name,
+            )
+        )
+        for record in records:
+            record.delete()
 
 
 def get_pynetbox(nfclient):
-    return pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+    retry = Retry(
+        total=3,
+        connect=3,
+        read=3,
+        status=3,
+        backoff_factor=0.5,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(
+            {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "PUT", "TRACE"}
+        ),
+    )
+    session = requests.Session()
+    adapter = TimeoutHTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    api = pynetbox.api(url=NB_URL, token=NB_API_TOKEN, threading=True)
+    api.http_session = session
+    return api

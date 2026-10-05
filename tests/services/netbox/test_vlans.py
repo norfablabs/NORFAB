@@ -32,7 +32,6 @@ class TestCreateVlan:
         field_name = "norfab_create_vlan_sites"
         if (
             nb.ipam.vlan_groups.get(name=group_name)
-            or nb.extras.custom_fields.get(name=field_name)
             or any(nb.extras.tags.get(name=name) for name in tag_names)
             or any(nb.dcim.sites.get(name=name) for name in site_names)
         ):
@@ -57,14 +56,7 @@ class TestCreateVlan:
                     {"name": site_names[1], "slug": "norfab-create-vlan-site-b"},
                 ]
             )
-            nb.extras.custom_fields.create(
-                {
-                    "name": field_name,
-                    "type": "multiobject",
-                    "object_types": ["ipam.vlan"],
-                    "related_object_type": "dcim.site",
-                }
-            )
+            assert nb.extras.custom_fields.get(name=field_name) is not None
             for requested, references in (
                 ([tag_names[0]], [site_names[0]]),
                 (tag_names, [site_names[1]]),
@@ -114,9 +106,6 @@ class TestCreateVlan:
                 for vlan in nb.ipam.vlans.filter(group_id=group.id):
                     vlan.delete()
                 group.delete()
-            field = nb.extras.custom_fields.get(name=field_name)
-            if field:
-                field.delete()
             for name in tag_names:
                 tag = nb.extras.tags.get(name=name)
                 if tag:
@@ -1084,8 +1073,8 @@ class TestSyncVlans:
     TEST_VIDS = {110, 111, 120, 121, 190, 191, 199, 210}
 
     @pytest.fixture(autouse=True)
-    def cleanup_test_vlans(self, nfclient: Any) -> Iterator[None]:
-        self.nb = get_pynetbox(nfclient)
+    def cleanup_test_vlans(self, netbox) -> Iterator[None]:
+        self.nb = netbox
         self.site = self.nb.dcim.sites.get(name=self.SITE_NAME)
         self.group_1 = self.nb.ipam.vlan_groups.get(name=self.GROUP_1_NAME)
         self.group_2 = self.nb.ipam.vlan_groups.get(name=self.GROUP_2_NAME)
@@ -1136,11 +1125,14 @@ class TestSyncVlans:
                             }
                         ]
                     )
-        yield
-        self._delete_test_vlans()
-        self.nb.dcim.interfaces.update(original_interfaces)
-        for interface in created_interfaces:
-            interface.delete()
+        try:
+            yield
+        finally:
+            self._delete_test_vlans()
+            if original_interfaces:
+                self.nb.dcim.interfaces.update(original_interfaces)
+            for interface in reversed(created_interfaces):
+                interface.delete()
 
     def _delete_test_vlans(self) -> None:
         for vid in self.TEST_VIDS:

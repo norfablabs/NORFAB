@@ -1541,6 +1541,11 @@ class TestSyncAll:
                     and getattr(group.protocol, "value", group.protocol) == "vrrp3"
                 ):
                     vrrp_group_ids.add(group.id)
+        for ip_address in nb.ipam.ip_addresses.filter(
+            address=TestSyncAll.TEST_VRRP_ADDRESS
+        ):
+            if ip_address.assigned_object_type == "ipam.fhrpgroup":
+                vrrp_group_ids.add(ip_address.assigned_object_id)
         for group_id in vrrp_group_ids:
             for ip_address in nb.ipam.ip_addresses.filter(
                 assigned_object_type="ipam.fhrpgroup",
@@ -1550,6 +1555,10 @@ class TestSyncAll:
             group = nb.ipam.fhrp_groups.get(id=group_id)
             if group:
                 group.delete()
+        for ip_address in nb.ipam.ip_addresses.filter(
+            address=TestSyncAll.TEST_VRRP_ADDRESS
+        ):
+            ip_address.delete()
         # Delete IPs only from this test area's devices.
         delete_test_sync_ips(None, devices)
         # MAC addresses assigned to this test area's devices.

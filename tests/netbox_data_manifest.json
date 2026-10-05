@@ -212,7 +212,7 @@
     },
     "test_sync.py::TestSyncAll": {
       "mode": "main_mutating",
-      "cleanup": "Delete only records assigned to this class's original spine devices. BGP and IPAM use separate FakeNOS source data.",
+      "cleanup": "Delete only records assigned to this class's original spine devices, plus the exact owned VRRP VIP/group for 10.3.250.1/32. BGP and IPAM use separate FakeNOS source data.",
       "devices": [
         "fn-ceos-sp-1",
         "fn-ceos-sp-2"
@@ -222,7 +222,8 @@
         "Ethernet9"
       ],
       "ip_addresses": [
-        "10.3.15.33/30"
+        "10.3.15.33/30",
+        "10.3.250.1/32"
       ]
     },
     "test_ipam.py::TestSyncDevicePrefixes": {
@@ -238,6 +239,47 @@
       ],
       "source": "tests/nf_tests_inventory/fakenos/custom_nos/netbox_prefix_*.yaml",
       "cleanup": "Delete only exact prefixes, IPs, interface, and VRF created by this class."
+    },
+    "test_vlans.py::TestCreateVlan": {
+      "mode": "main_mutating",
+      "vlan_group": "NORFAB CREATE VLAN ARRAY GROUP",
+      "vlan": "NORFAB ARRAY VLAN",
+      "sites": [
+        "NORFAB CREATE VLAN SITE A",
+        "NORFAB CREATE VLAN SITE B"
+      ],
+      "tags": [
+        "norfab-create-vlan-a",
+        "norfab-create-vlan-b"
+      ],
+      "persistent_custom_fields": [
+        "norfab_create_vlan_sites"
+      ],
+      "cleanup": "Delete the test VLAN, group, sites, and tags. Keep the persistent custom-field definition."
+    },
+    "test_interfaces.py::TestCreateDeviceInterfaces": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-ceos-sp-1",
+        "fn-ceos-sp-2"
+      ],
+      "interfaces": [
+        "TestInterface1",
+        "TestInterface2",
+        "Loopback1",
+        "Loopback2",
+        "Loopback3",
+        "ge-0/0/0",
+        "ge-0/0/1",
+        "xe-0/0/0",
+        "xe-0/0/1",
+        "TestIntf1",
+        "TestIntf2",
+        "TestExisting",
+        "TestDryRun",
+        "TestBranch"
+      ],
+      "cleanup": "Delete only the exact interface names reserved by this class, before and after every test."
     },
     "test_vlans.py::TestSyncVlans": {
       "mode": "main_mutating",
@@ -266,6 +308,13 @@
         "TEST_VRF_SYNC_CONTROL_PLANE",
         "TEST_VRF_SYNC_TENANT_A",
         "TEST_VRF_SYNC_TENANT_B"
+      ],
+      "interfaces": [
+        "Ethernet1",
+        "Ethernet2",
+        "Ethernet1.101",
+        "Ethernet2.101",
+        "Loopback101"
       ]
     },
     "test_bgp_asn.py::TestSyncBgpAsn": {
