@@ -18,14 +18,14 @@
         <link rel="prev" href="../../development/adr_norfab_single_owner_zeromq_socket_io/">
       
       
-        <link rel="next" href="../netbox_service_tests/">
+        <link rel="next" href="../../norfab_help_with_norfab/">
       
       
         
       
       
       <link rel="icon" href="../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -6877,17 +6877,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#tldr" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6899,44 +6888,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#test-organization" class="md-nav__link">
+  <a href="#tests-and-local-pytest" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Test Organization
+        Tests and local pytest
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#support-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Support Files
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fixtures" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixtures
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Fixtures">
+    <nav class="md-nav" aria-label="Tests and local pytest">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#nfclient" class="md-nav__link">
+  <a href="#available-pytest-markers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        nfclient
+        Available pytest markers
       
     </span>
   </a>
@@ -6944,21 +6911,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#nfclient_dict_inventory" class="md-nav__link">
+  <a href="#netbox-test-data-ownership" class="md-nav__link">
     <span class="md-ellipsis">
       
-        nfclient_dict_inventory
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#picle_shell" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        picle_shell
+        NetBox test data ownership
       
     </span>
   </a>
@@ -6971,101 +6927,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-tests" class="md-nav__link">
+  <a href="#docker-test-environment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running Tests
+        Docker test environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker test environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run-compose-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Compose directly
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-test-environments" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#read-invoke-reports" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Docker Test Environments
+        Read Invoke reports
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#markers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Markers
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-service-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Writing Service Tests
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#refactoring-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Refactoring Guidelines
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#response-assertions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Response Assertions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleanup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cleanup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Related Documentation
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -7073,34 +6969,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../netbox_service_tests/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Netbox Service Tests
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -7175,17 +7043,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#tldr" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7197,44 +7054,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#test-organization" class="md-nav__link">
+  <a href="#tests-and-local-pytest" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Test Organization
+        Tests and local pytest
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#support-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Support Files
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fixtures" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixtures
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Fixtures">
+    <nav class="md-nav" aria-label="Tests and local pytest">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#nfclient" class="md-nav__link">
+  <a href="#available-pytest-markers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        nfclient
+        Available pytest markers
       
     </span>
   </a>
@@ -7242,21 +7077,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#nfclient_dict_inventory" class="md-nav__link">
+  <a href="#netbox-test-data-ownership" class="md-nav__link">
     <span class="md-ellipsis">
       
-        nfclient_dict_inventory
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#picle_shell" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        picle_shell
+        NetBox test data ownership
       
     </span>
   </a>
@@ -7269,101 +7093,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-tests" class="md-nav__link">
+  <a href="#docker-test-environment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running Tests
+        Docker test environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker test environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run-compose-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Compose directly
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-test-environments" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#read-invoke-reports" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Docker Test Environments
+        Read Invoke reports
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#markers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Markers
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#writing-service-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Writing Service Tests
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#refactoring-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Refactoring Guidelines
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#response-assertions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Response Assertions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleanup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cleanup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Related Documentation
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -7388,360 +7152,552 @@
 
 
 <h1 id="norfab-testing-framework">NORFAB Testing Framework<a class="headerlink" href="#norfab-testing-framework" title="Permanent link">¤</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¤</a></h2>
-<p>NORFAB uses <code>pytest</code> for core, client, worker, and service integration tests. Most service tests start a real NorFab process tree through shared fixtures and exercise workers through <code>NFPClient.run_job()</code>.</p>
-<p>The test suite is intentionally organized by the NORFAB architecture:</p>
-<ul>
-<li>Core framework behavior lives under <code>tests/core/</code>.</li>
-<li>Service-worker suites live under <code>tests/services/&lt;service&gt;/</code>.</li>
-<li>Larger service suites are split by task area; smaller services may still have only one or two files in their service folder.</li>
-<li>Shared test inventories and data live under <code>tests/nf_tests_inventory/</code>.</li>
-</ul>
 <h2 id="tldr">TL;DR<a class="headerlink" href="#tldr" title="Permanent link">¤</a></h2>
-<p>Run tests from the <code>tests/</code> directory through Poetry.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest
+<p>For local debugging, run pytest from <code>tests/</code> with the required services available:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enter the test root so relative pytest paths resolve.</span>
+<span class="nb">cd</span><span class="w"> </span>tests
+<span class="c1"># Run the Nornir worker tests locally.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/nornir/test_worker.py
 </code></pre></div>
-<p>Run by folder or file:</p>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/nornir
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>nfcli
+<p>For isolated Docker runs, return to the repository root and use Invoke:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Build the Docker images used by the test suites.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-build
+<span class="c1"># Run only the Nornir suite in Docker.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir
+<span class="c1"># Run all regular suites and write one consolidated report.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-all
 </code></pre></div>
-<p>Run by service marker:</p>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>nornir
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>netbox
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>containerlab
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>fastmcp
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>nfcli
-</code></pre></div>
-<p>Run by task marker:</p>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>nornir_cli
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>netbox_get_interfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>containerlab_deploy
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>filesharing_fetch_file
-</code></pre></div>
-<p>Combine markers:</p>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and netbox_get_interfaces&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;nornir and not nornir_snmp&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;containerlab and containerlab_deploy&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;not netbox_crud_create&quot;</span>
-</code></pre></div>
-<p>List available markers:</p>
-<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--markers
-</code></pre></div>
-<h2 id="test-organization">Test Organization<a class="headerlink" href="#test-organization" title="Permanent link">¤</a></h2>
-<div class="highlight"><pre><span></span><code>tests/
-  conftest.py
-  netbox_data.py
-  nf_tests_inventory/
-  nfcli/
-    test_shell_client.py
-    test_shell_common.py
-  core/
-    test_broker.py
-    test_client.py
-    test_nfapi.py
-    test_simple_inventory_datastore.py
-    test_worker.py
-  clients/
-    agent/
-      test_client_agent.py
-  services/
-    containerlab/
-      common.py
-      test_deploy.py
-      test_deploy_netbox.py
-      test_inspect.py
-      test_inventory.py
-      test_restart.py
-      test_save.py
-      test_worker.py
-    dummy/
-      test_plugin.py
-    fakenos/
-      common.py
-      test_inspect.py
-      test_inventory.py
-      test_restart.py
-      test_start.py
-      test_stop.py
-      test_worker.py
-    fastapi/
-      common.py
-      test_server.py
-      test_worker.py
-    fastmcp/
-      common.py
-      test_auth.py
-      test_prompts.py
-      test_tools.py
-      test_tools_call.py
-      test_worker.py
-    filesharing/
-      test_fetch_file.py
-      test_file_details.py
-      test_list_files.py
-      test_walk.py
-      test_worker.py
-    netbox/
-      common.py
-      test_worker.py
-      test_graphql.py
-      test_interfaces.py
-      test_devices.py
-      test_connections.py
-      test_inventory.py
-      test_circuits.py
-      test_bgp.py
-      test_ipam.py
-      test_cache.py
-      test_containerlab.py
-      test_designs.py
-      test_crud.py
-      test_sync.py
-    nornir/
-      test_cfg.py
-      test_cli.py
-      test_file_copy.py
-      test_jinja2.py
-      test_juniper_integration.py
-      test_netbox_ipam.py
-      test_network.py
-      test_parse.py
-      test_runtime_inventory.py
-      test_snmp.py
-      test_task.py
-      test_tests.py
-      test_worker.py
-    workflow/
-      test_run.py
-      test_worker.py
-</code></pre></div>
-<h2 id="support-files">Support Files<a class="headerlink" href="#support-files" title="Permanent link">¤</a></h2>
-<ul>
-<li><code>tests/conftest.py</code> provides shared pytest fixtures.</li>
-<li><code>tests/nf_tests_inventory/</code> contains the inventory used by integration tests.</li>
-<li><code>tests/netbox_data.py</code> contains NetBox test data and NetBox population helpers.</li>
-<li><code>tests/services/netbox/common.py</code> contains shared NetBox test helpers used by NetBox and Nornir tests.</li>
-</ul>
-<p>Do not put generated runtime output under source control. Directories such as <code>__norfab__/</code>, <code>.pytest_cache/</code>, <code>.ruff_cache/</code>, and <code>__pycache__/</code> are runtime artifacts.</p>
-<h2 id="fixtures">Fixtures<a class="headerlink" href="#fixtures" title="Permanent link">¤</a></h2>
-<h3 id="nfclient"><code>nfclient</code><a class="headerlink" href="#nfclient" title="Permanent link">¤</a></h3>
-<p>Starts NorFab from <code>./nf_tests_inventory/inventory.yaml</code>, waits for workers, yields a client, and destroys NorFab after the test session finishes.</p>
-<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;session&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">nfclient</span><span class="p">():</span>
-    <span class="n">nf</span> <span class="o">=</span> <span class="n">NorFab</span><span class="p">(</span><span class="n">inventory</span><span class="o">=</span><span class="s2">&quot;./nf_tests_inventory/inventory.yaml&quot;</span><span class="p">)</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-    <span class="k">yield</span> <span class="n">nf</span><span class="o">.</span><span class="n">make_client</span><span class="p">()</span>
-    <span class="n">nf</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
-</code></pre></div>
-<p>Use this fixture for service integration tests that call real workers. Because the fixture is session-scoped, tests must clean up any external or worker state they create instead of relying on a per-file NorFab restart.</p>
-<h3 id="nfclient_dict_inventory"><code>nfclient_dict_inventory</code><a class="headerlink" href="#nfclient_dict_inventory" title="Permanent link">¤</a></h3>
-<p>Starts NorFab from a dictionary-based inventory for the test session. Use it when a test needs a custom topology or worker map without adding a permanent inventory file.</p>
-<h3 id="picle_shell"><code>picle_shell</code><a class="headerlink" href="#picle_shell" title="Permanent link">¤</a></h3>
-<p>Starts NorFab for the test session and mounts the interactive NFCLI shell model. Use it for shell and CLI behavior tests.</p>
-<h2 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">¤</a></h2>
-<p>Follow the repository convention from <code>CLAUDE.md</code>: run pytest from the <code>tests/</code> directory through Poetry.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest
-</code></pre></div>
-<p>Run a split service suite:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
+<p>Choose a suite run or the all-suites run. Invoke prints <code>Docker test report: &lt;path&gt;</code>; open that file under <code>docker/norfab-docker-tests/reports/</code> for the final result.</p>
+<h2 id="tests-and-local-pytest">Tests and local pytest<a class="headerlink" href="#tests-and-local-pytest" title="Permanent link">¤</a></h2>
+<p>Tests follow the code layout: <code>tests/core/</code>, <code>tests/services/&lt;service&gt;/</code>, <code>tests/clients/</code>, and <code>tests/nfcli/</code>. Shared fixtures are in <code>tests/conftest.py</code>; integration test inventory is in <code>tests/nf_tests_inventory/</code>. NetBox test helpers are in <code>tests/services/netbox/common.py</code>, with seed data in <code>tests/netbox_data.py</code>.</p>
+<p>Run pytest through Poetry from <code>tests/</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enter the test root so relative pytest paths resolve.</span>
+<span class="nb">cd</span><span class="w"> </span>tests
+<span class="c1"># Run the full Nornir test directory.</span>
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/nornir
-</code></pre></div>
-<p>Run one task marker:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/containerlab/test_deploy.py
-</code></pre></div>
-<p>Run NFCLI shell tests:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>nfcli
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>nfcli
-</code></pre></div>
-<p>Run one file, class, or test:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py
+<span class="c1"># Run one NetBox test class.</span>
 poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py::TestGetInterfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox/test_interfaces.py::TestGetInterfaces::test_get_interfaces
+<span class="c1"># Run only NetBox get_interfaces tests.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and netbox_get_interfaces&quot;</span>
+<span class="c1"># Run NFCLI tests with printed output and individual test names.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>nfcli<span class="w"> </span>-s<span class="w"> </span>-v
 </code></pre></div>
-<p>Run by marker:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>netbox
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span>netbox_get_interfaces
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>services/netbox<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and not netbox_crud_create&quot;</span>
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>nfcli<span class="w"> </span>-m<span class="w"> </span>nfcli
+<p>Use a directory, file, class, or method path to narrow collection; use <code>-m</code> for registered service or task markers. Local integration tests start NorFab through fixtures and need their configured external services. Local pytest shows its results in the terminal and does not create an Invoke Markdown report.</p>
+<h3 id="available-pytest-markers">Available pytest markers<a class="headerlink" href="#available-pytest-markers" title="Permanent link">¤</a></h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Marker</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core</td>
+<td><code>core</code></td>
+<td>NORFAB core component tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir</code></td>
+<td>Nornir service tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox</code></td>
+<td>NetBox service tests</td>
+</tr>
+<tr>
+<td>Containerlab</td>
+<td><code>containerlab</code></td>
+<td>Containerlab service tests</td>
+</tr>
+<tr>
+<td>FakeNOS</td>
+<td><code>fakenos</code></td>
+<td>FakeNOS service tests</td>
+</tr>
+<tr>
+<td>FastAPI</td>
+<td><code>fastapi</code></td>
+<td>FastAPI service tests</td>
+</tr>
+<tr>
+<td>FastMCP</td>
+<td><code>fastmcp</code></td>
+<td>FastMCP service tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing</code></td>
+<td>FileSharing service tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_git</code></td>
+<td>File Sharing authenticated Git remote tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_get_remotes</code></td>
+<td>FileSharing get_remotes task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_create_remote_git</code></td>
+<td>FileSharing create_remote_git task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_delete_remote_git</code></td>
+<td>FileSharing delete_remote_git task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_git_clone</code></td>
+<td>FileSharing git_clone task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_resolve_git_url</code></td>
+<td>FileSharing resolve_git_url task tests</td>
+</tr>
+<tr>
+<td>Workflow</td>
+<td><code>workflow</code></td>
+<td>Workflow service tests</td>
+</tr>
+<tr>
+<td>Dummy</td>
+<td><code>dummy</code></td>
+<td>dummy plugin service tests</td>
+</tr>
+<tr>
+<td>Client agent</td>
+<td><code>clientagent</code></td>
+<td>Client agent tests</td>
+</tr>
+<tr>
+<td>NFCLI</td>
+<td><code>nfcli</code></td>
+<td>NFCLI shell client tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_cfg</code></td>
+<td>Nornir cfg task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_cli</code></td>
+<td>Nornir CLI task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_fakenos</code></td>
+<td>Tests that use FakeNOS-backed devices through Nornir</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_file_copy</code></td>
+<td>Nornir file_copy task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_network</code></td>
+<td>Nornir network task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_parse</code></td>
+<td>Nornir parse task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_runtime_inventory</code></td>
+<td>Nornir runtime_inventory task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_snmp</code></td>
+<td>Nornir snmp task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_task</code></td>
+<td>Nornir task task tests</td>
+</tr>
+<tr>
+<td>Nornir</td>
+<td><code>nornir_test</code></td>
+<td>Nornir test task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_cache_clear</code></td>
+<td>NetBox cache_clear task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_cache_get</code></td>
+<td>NetBox cache_get task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_cache_list</code></td>
+<td>NetBox cache_list task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_check_device_sync</code></td>
+<td>NetBox check_device_sync task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_create_bgp_peering</code></td>
+<td>NetBox create_bgp_peering task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_create_asn</code></td>
+<td>NetBox create_asn task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_design_deploy</code></td>
+<td>NetBox design_deploy task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_create_device_interfaces</code></td>
+<td>NetBox create_device_interfaces task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_create_ip</code></td>
+<td>NetBox create_ip task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_create_ip_bulk</code></td>
+<td>NetBox create_ip_bulk task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_create_prefix</code></td>
+<td>NetBox create_prefix task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_create_vlan</code></td>
+<td>NetBox create_vlan task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud</code></td>
+<td>NetBox CRUD task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud_create</code></td>
+<td>NetBox crud_create task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud_delete</code></td>
+<td>NetBox crud_delete task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud_get_changelogs</code></td>
+<td>NetBox crud_get_changelogs task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud_list_objects</code></td>
+<td>NetBox crud_list_objects task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud_read</code></td>
+<td>NetBox crud_read task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud_search</code></td>
+<td>NetBox crud_search task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_crud_update</code></td>
+<td>NetBox crud_update task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_bgp_peerings</code></td>
+<td>NetBox get_bgp_peerings task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_circuits</code></td>
+<td>NetBox get_circuits task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_connections</code></td>
+<td>NetBox get_connections task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_containerlab_inventory</code></td>
+<td>NetBox get_containerlab_inventory task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_devices</code></td>
+<td>NetBox get_devices task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_interfaces</code></td>
+<td>NetBox get_interfaces task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_nornir_inventory</code></td>
+<td>NetBox get_nornir_inventory task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_get_topology</code></td>
+<td>NetBox get_topology task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_graphql</code></td>
+<td>NetBox graphql task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_all</code></td>
+<td>NetBox sync_all task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_bgp_asn</code></td>
+<td>NetBox sync_bgp_asn task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_bgp_community</code></td>
+<td>NetBox sync_bgp_community task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_bgp_peerings</code></td>
+<td>NetBox sync_bgp_peerings task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_device_interfaces</code></td>
+<td>NetBox sync_device_interfaces task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_vlans</code></td>
+<td>NetBox sync_vlans task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_vrrp</code></td>
+<td>NetBox sync_vrrp task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_vrfs</code></td>
+<td>NetBox sync_vrfs task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_device_inventory</code></td>
+<td>NetBox sync_device_inventory task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_device_ip</code></td>
+<td>NetBox sync_device_ip task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_device_prefixes</code></td>
+<td>NetBox sync_device_prefixes task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_sync_mac_addresses</code></td>
+<td>NetBox sync_mac_addresses task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_update_bgp_peering</code></td>
+<td>NetBox update_bgp_peering task tests</td>
+</tr>
+<tr>
+<td>NetBox</td>
+<td><code>netbox_update_interfaces_description</code></td>
+<td>NetBox update_interfaces_description task tests</td>
+</tr>
+<tr>
+<td>Containerlab</td>
+<td><code>containerlab_deploy</code></td>
+<td>Containerlab deploy task tests</td>
+</tr>
+<tr>
+<td>Containerlab</td>
+<td><code>containerlab_deploy_netbox</code></td>
+<td>Containerlab deploy_netbox task tests</td>
+</tr>
+<tr>
+<td>Containerlab</td>
+<td><code>containerlab_get_nornir_inventory</code></td>
+<td>Containerlab get_nornir_inventory task tests</td>
+</tr>
+<tr>
+<td>Containerlab</td>
+<td><code>containerlab_inspect</code></td>
+<td>Containerlab inspect task tests</td>
+</tr>
+<tr>
+<td>Containerlab</td>
+<td><code>containerlab_restart_lab</code></td>
+<td>Containerlab restart_lab task tests</td>
+</tr>
+<tr>
+<td>Containerlab</td>
+<td><code>containerlab_save</code></td>
+<td>Containerlab save task tests</td>
+</tr>
+<tr>
+<td>FakeNOS</td>
+<td><code>fakenos_get_nornir_inventory</code></td>
+<td>FakeNOS get_nornir_inventory task tests</td>
+</tr>
+<tr>
+<td>FakeNOS</td>
+<td><code>fakenos_auto_start</code></td>
+<td>FakeNOS inventory auto_start tests</td>
+</tr>
+<tr>
+<td>FakeNOS</td>
+<td><code>fakenos_inspect_networks</code></td>
+<td>FakeNOS inspect_networks task tests</td>
+</tr>
+<tr>
+<td>FakeNOS</td>
+<td><code>fakenos_restart</code></td>
+<td>FakeNOS restart task tests</td>
+</tr>
+<tr>
+<td>FakeNOS</td>
+<td><code>fakenos_start</code></td>
+<td>FakeNOS start task tests</td>
+</tr>
+<tr>
+<td>FakeNOS</td>
+<td><code>fakenos_stop</code></td>
+<td>FakeNOS stop task tests</td>
+</tr>
+<tr>
+<td>FastMCP</td>
+<td><code>fastmcp_get_prompts</code></td>
+<td>FastMCP get_prompts task tests</td>
+</tr>
+<tr>
+<td>FastMCP</td>
+<td><code>fastmcp_get_tools</code></td>
+<td>FastMCP get_tools task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_fetch_file</code></td>
+<td>FileSharing fetch_file task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_file_details</code></td>
+<td>FileSharing file_details task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_list_files</code></td>
+<td>FileSharing list_files task tests</td>
+</tr>
+<tr>
+<td>FileSharing</td>
+<td><code>filesharing_walk</code></td>
+<td>FileSharing walk task tests</td>
+</tr>
+<tr>
+<td>Workflow</td>
+<td><code>workflow_run</code></td>
+<td>Workflow run task tests</td>
+</tr>
+</tbody>
+</table>
+<p>Group tests in <code>Test...</code> classes. Exercise real services through the public client interface and the <code>nfclient</code> fixture. Keep test data explicit, clean up only data created by the test, and make cleanup safe after partial failures. Put service markers on test files and register new task markers in <code>pyproject.toml</code>.</p>
+<h3 id="netbox-test-data-ownership">NetBox test data ownership<a class="headerlink" href="#netbox-test-data-ownership" title="Permanent link">¤</a></h3>
+<p><a href="../../tests/netbox_data_manifest.json">tests/netbox_data_manifest.json</a> records which NetBox objects each test area reads or changes. It is a reference for test authors and agents; pytest does not load it. Read and update it whenever adding or changing tests that use NetBox data. Mutating tests must use records and address space distinct from other test areas and clean up only their own objects. Put persistent shared data in <code>tests/netbox_data.py</code>; read-only tests may use that data.</p>
+<h2 id="docker-test-environment">Docker test environment<a class="headerlink" href="#docker-test-environment" title="Permanent link">¤</a></h2>
+<p>Invoke runs pytest in isolated Docker Compose containers using the shared test inventory. Run these commands from the repository root:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># List all available Invoke commands.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>--list
+
+<span class="c1"># Check the Docker Compose test configuration without starting containers.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-config
+<span class="c1"># Build images for every test suite.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-build
+
+<span class="c1"># Build only the Nornir test image.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-build<span class="w"> </span>--suite<span class="o">=</span>nornir
+<span class="c1"># Rebuild the Nornir image before running its suite.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--build
+
+<span class="c1"># Run all tests in the Nornir suite.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir
+<span class="c1"># Run one Nornir test file in the suite container.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--selector<span class="o">=</span>tests/services/nornir/test_worker.py
+<span class="c1"># Run only NetBox get_devices tests.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox<span class="w"> </span>--marker<span class="o">=</span><span class="s2">&quot;netbox and netbox_get_devices&quot;</span>
+
+<span class="c1"># Run the NetBox CRUD file in a dedicated container.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-netbox-crud
+<span class="c1"># Run Nornir files in separate containers, at most two concurrently.</span>
+poetry<span class="w"> </span>run<span class="w"> </span>inv<span class="w"> </span>docker-tests-nornir<span class="w"> </span>--parallel-runs<span class="o">=</span><span class="m">2</span>
 </code></pre></div>
-<p>Use verbose output when diagnosing worker behavior:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests
-poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-v<span class="w"> </span>services/netbox/test_worker.py::TestNetboxWorker
-</code></pre></div>
-<h2 id="docker-test-environments">Docker Test Environments<a class="headerlink" href="#docker-test-environments" title="Permanent link">¤</a></h2>
-<p>Docker test runners live under <code>docker/norfab-docker-tests/</code>. Each runner reuses
-the canonical <code>tests/nf_tests_inventory</code> tree and mounts a service-local
-<code>__norfab__</code> runtime folder for logs, artifacts, keys, and generated files.</p>
-<p>Run from <code>docker/norfab-docker-tests/</code>:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>build
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>core-tests
+<p>Suite names are <code>core</code>, <code>nornir</code>, <code>netbox</code>, <code>fakenos</code>, <code>containerlab</code>, <code>workflow</code>, <code>agent</code>, <code>fastmcp</code>, <code>fastapi</code>, <code>filesharing</code>, <code>dummy</code>, and <code>nfcli</code>. <code>docker-tests-all</code> runs the regular suites concurrently; run <code>docker-tests-containerlab</code> separately. The distributed topology uses <code>docker-tests-distributed</code>. The default suite run collects its test directory and applies its service marker. <code>--selector</code> accepts a directory, file, or pytest node ID; <code>--marker</code>, <code>--keyword</code>, and <code>--pytest-args</code> narrow the run. The default NetBox suite runs each <code>test_*.py</code> file in a dedicated container. See <code>poetry run inv --help docker-tests-nornir</code> for all options.</p>
+<h3 id="run-compose-directly">Run Compose directly<a class="headerlink" href="#run-compose-directly" title="Permanent link">¤</a></h3>
+<p>From <code>docker/norfab-docker-tests/</code>, you can build and run a Compose service without Invoke:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enter the Docker test environment directory.</span>
+<span class="nb">cd</span><span class="w"> </span>docker/norfab-docker-tests
+<span class="c1"># Build the Nornir test image with Compose.</span>
+docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>nornir-service-tests
+<span class="c1"># Run the Nornir service&#39;s default pytest command.</span>
 docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nornir-service-tests
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>netbox-service-tests
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fakenos-service-tests
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>containerlab-service-tests
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>workflow-service-tests
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>agent-tests
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fastmcp-service-tests
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fastapi-service-tests
+<span class="c1"># Override that command to run one file with the Nornir marker.</span>
+docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nornir-service-tests<span class="w"> </span>-m<span class="w"> </span>nornir<span class="w"> </span>tests/services/nornir/test_worker.py
 </code></pre></div>
-<p>Docker runners use these service markers by default:</p>
-<div class="highlight"><pre><span></span><code>core-tests                 -m core
-nornir-service-tests       -m nornir
-netbox-service-tests       -m netbox
-fakenos-service-tests      -m fakenos
-containerlab-service-tests -m containerlab
-workflow-service-tests     -m workflow
-agent-tests                -m clientagent
-fastmcp-service-tests      -m fastmcp
-fastapi-service-tests      -m fastapi
-</code></pre></div>
-<p>Docker runners can set <code>NORFAB_TEST_WORKERS</code> to a comma-separated worker
-allowlist. The shared <code>nfclient</code> fixture preserves any dependency metadata from
-the inventory topology while starting that subset. Each marker-based Docker
-runner uses this to avoid starting unrelated workers; local pytest runs still
-start the complete topology by default.</p>
-<p>An idle resource baseline is available with <code>poetry run inv
-docker-profile-idle</code>. It starts the dedicated <code>idle-norfab</code> Compose service
-with a broker and one worker for every service configured in the shared test
-inventory, samples Docker CPU, memory, and block I/O for ten minutes, and writes
-the measurements to
-<code>docker/norfab-docker-tests/idle-norfab/__norfab__/artifacts/idle-profile.csv</code>.
-The worker list is sourced only from the service's <code>compose.yaml</code> command.
-Duration, sample interval, warm-up, stability thresholds, and whether an
-unstable result fails the task are configurable; see
-<code>poetry run inv --help docker-profile-idle</code>.</p>
-<p>Every runner exports <code>NORFAB_INVENTORY_DIR</code> with the mounted inventory directory,
-so <code>nfcli -c</code> launched inside a running container resolves both the inventory
-file and its base directory automatically.</p>
-<p>Pass pytest selectors after the Compose service name to run narrower slices:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>nornir-service-tests<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;nornir and nornir_cli&quot;</span>
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>netbox-service-tests<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;netbox and netbox_get_devices&quot;</span>
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>containerlab-service-tests<span class="w"> </span>tests/services/containerlab/test_inspect.py
-docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>fastmcp-service-tests<span class="w"> </span>tests/services/fastmcp/test_tools.py::TestGetTools::test_get_tools
-</code></pre></div>
-<h2 id="markers">Markers<a class="headerlink" href="#markers" title="Permanent link">¤</a></h2>
-<p>Markers are registered in <code>pyproject.toml</code> under <code>[tool.pytest.ini_options]</code>.</p>
-<p>Use service markers on whole files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span>
-</code></pre></div>
-<p>Use <code>&lt;service&gt;_&lt;task&gt;</code> markers for tests associated with a specific NorFab task:</p>
-<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox_get_interfaces</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TestGetInterfaces</span><span class="p">:</span>
-    <span class="o">...</span>
-</code></pre></div>
-<p>This gives three stable ways to run tests:</p>
+<p>Arguments after the service name replace its default Compose command, so include <code>-m nornir</code> when selecting tests this way. Compose writes JUnit XML under <code>nornir-service-tests/__norfab__/artifacts/</code>, but does not create the Invoke Markdown summary. The container exit status indicates whether the direct run passed.</p>
+<h3 id="read-invoke-reports">Read Invoke reports<a class="headerlink" href="#read-invoke-reports" title="Permanent link">¤</a></h3>
+<p>Each Invoke test run prints the path of its timestamped Markdown report in <code>docker/norfab-docker-tests/reports/</code>. Reports are named <code>docker-tests-&lt;suite&gt;-&lt;timestamp&gt;.md</code> or <code>docker-tests-all-&lt;timestamp&gt;.md</code>.</p>
 <ul>
-<li>By path, such as <code>services/netbox/test_interfaces.py</code>.</li>
-<li>By class, such as <code>::TestGetInterfaces</code>.</li>
-<li>By service or task marker, such as <code>-m "netbox and netbox_get_interfaces"</code>.</li>
+<li>The summary table shows passed, failed, errors, skipped, duration, and suite status.</li>
+<li><code>Failures and report problems</code> shows failing tests and error details.</li>
+<li><code>JUnit artifacts</code> lists XML files produced by that run. JUnit files and worker logs are under the suite's ignored <code>docker/norfab-docker-tests/&lt;compose-service&gt;/__norfab__/</code> tree; NetBox group and file-parallel runs use <code>groups/</code> and <code>parallel/</code> subdirectories.</li>
+<li><code>NO REPORT</code> means no JUnit file was produced; <code>INVALID REPORT</code> means the XML could not be parsed. Check the container output and runtime logs.</li>
 </ul>
-<h2 id="writing-service-tests">Writing Service Tests<a class="headerlink" href="#writing-service-tests" title="Permanent link">¤</a></h2>
-<p>Keep test classes grouped by NORFAB task or closely related behavior.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
-
-<span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox</span>
-
-
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">netbox_get_interfaces</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TestGetInterfaces</span><span class="p">:</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_interfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nfclient</span><span class="p">):</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
-            <span class="s2">&quot;netbox&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;get_interfaces&quot;</span><span class="p">,</span>
-            <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
-            <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ceos1&quot;</span><span class="p">]},</span>
-        <span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">worker</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> returned errors&quot;</span>
-            <span class="k">assert</span> <span class="s2">&quot;ceos1&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
-</code></pre></div>
-<p>Prefer explicit imports. Do not use <code>import *</code> in tests. Standard library, third-party, and worker-code imports should live in the test file that uses them. Import only shared NetBox helper names from <code>services/netbox/common.py</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pprint</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">tests.services.netbox.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_nb_cache</span><span class="p">,</span> <span class="n">get_nb_version</span>
-<span class="k">except</span> <span class="ne">ModuleNotFoundError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;tests&quot;</span><span class="p">,</span> <span class="s2">&quot;tests.services&quot;</span><span class="p">,</span> <span class="s2">&quot;tests.services.netbox&quot;</span><span class="p">,</span> <span class="s2">&quot;tests.services.netbox.common&quot;</span><span class="p">}:</span>
-        <span class="k">raise</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">services.netbox.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_nb_cache</span><span class="p">,</span> <span class="n">get_nb_version</span>
-</code></pre></div>
-<p>The fallback supports both repo-root invocation and <code>cd tests</code> invocation.</p>
-<h2 id="refactoring-guidelines">Refactoring Guidelines<a class="headerlink" href="#refactoring-guidelines" title="Permanent link">¤</a></h2>
-<p>Split a test file when one of these is true:</p>
-<ul>
-<li>The file is difficult to navigate or review.</li>
-<li>Classes already form clear task groups.</li>
-<li>The file mixes independent service areas such as BGP, IPAM, CRUD, cache, and sync.</li>
-<li>Targeted runs are becoming awkward.</li>
-</ul>
-<p>When splitting a service suite:</p>
-<ol>
-<li>Keep existing <code>Test...</code> classes when they already group behavior well.</li>
-<li>Move shared helpers into a service common module, such as <code>tests/services/netbox/common.py</code>.</li>
-<li>Keep helper imports explicit.</li>
-<li>Add a file-level service marker.</li>
-<li>Add <code>&lt;service&gt;_&lt;task&gt;</code> markers only to tests tied to a specific NorFab task.</li>
-<li>Register new service or task markers in <code>pyproject.toml</code>.</li>
-<li>Preserve <code>cd tests &amp;&amp; poetry run pytest ...</code> compatibility.</li>
-<li>Update the related document in <code>docs/testing/</code>.</li>
-</ol>
-<p>Do not split small service files into tiny fragments just to make the tree symmetrical. A small service folder with one or two focused files is fine while it stays easy to scan.</p>
-<h2 id="response-assertions">Response Assertions<a class="headerlink" href="#response-assertions" title="Permanent link">¤</a></h2>
-<p>Service tests usually receive a worker-keyed dictionary:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="s2">&quot;worker-name&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Common assertion patterns:</p>
-<div class="highlight"><pre><span></span><code><span class="k">assert</span> <span class="ow">not</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> returned errors&quot;</span>
-<span class="k">assert</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">worker</span><span class="si">}</span><span class="s2"> failed&quot;</span>
-<span class="k">assert</span> <span class="s2">&quot;expected_key&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
-</code></pre></div>
-<p>Use direct NetBox or service API reads only when the test must verify external state, such as object creation, deletion, or idempotency.</p>
-<h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">¤</a></h2>
-<p>Tests that create external state must clean it up. Prefer <code>try/finally</code> when a test creates data before assertions.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_create_and_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nfclient</span><span class="p">):</span>
-    <span class="n">branch</span> <span class="o">=</span> <span class="s2">&quot;test-branch&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">nfclient</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span><span class="s2">&quot;netbox&quot;</span><span class="p">,</span> <span class="s2">&quot;create_branch&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="n">branch</span><span class="p">})</span>
-        <span class="k">assert</span> <span class="n">ret</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">delete_branch</span><span class="p">(</span><span class="n">branch</span><span class="p">,</span> <span class="n">nfclient</span><span class="p">)</span>
-</code></pre></div>
-<p>Cleanup helpers for NetBox tests belong in <code>tests/services/netbox/common.py</code>.</p>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¤</a></h2>
-<ul>
-<li>If imports fail, make sure Poetry installed the needed extras for the service under test.</li>
-<li>If workers do not appear, inspect broker state with <code>nfclient.mmi("mmi.service.broker", "show_workers")</code>.</li>
-<li>If NetBox tests fail with connection errors, check <code>tests/netbox_data.py</code> and <code>tests/nf_tests_inventory/netbox/common.yaml</code>.</li>
-<li>If cache behavior looks stale, use the service cache clear task or helper before running assertions.</li>
-<li>If a test run leaves runtime data behind, check <code>tests/nf_tests_inventory/__norfab__/</code> and worker logs.</li>
-</ul>
-<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">¤</a></h2>
-<ul>
-<li><a href="../netbox_service_tests/">NetBox Service Tests</a></li>
-<li><a href="../../norfab_getting_started/">NORFAB Getting Started</a></li>
-<li><a href="../../reference_architecture_norfab/">NORFAB Architecture</a></li>
-<li><a href="../../services_overview/">Services and Workers Documentation</a></li>
-<li><a href="../../customization/service_plugin_overview/">Service Plugin Development</a></li>
-</ul>
+<p>Individual suite and NetBox file tasks report failures but do not return a failing Invoke status. Always check their report. <code>docker-tests-all</code> returns a nonzero status if a suite fails. Reports use only JUnit files created or updated during that run.</p>
+<p>See <code>docker/norfab-docker-tests/README.md</code> for service prerequisites and detailed container setup.</p>
 
 
 
@@ -7788,13 +7744,13 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
         
         
           
-          <a href="../netbox_service_tests/" class="md-footer__link md-footer__link--next" aria-label="Next: Netbox Service Tests">
+          <a href="../../norfab_help_with_norfab/" class="md-footer__link md-footer__link--next" aria-label="Next: Contact Us">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Netbox Service Tests
+                Contact Us
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -7863,7 +7819,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w">
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

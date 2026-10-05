@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7008,34 +7008,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../testing/netbox_service_tests/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Netbox Service Tests
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -7267,17 +7239,16 @@
 <li>NetBox worker validates that the BGP plugin is installed</li>
 <li>Worker resolves the RIR ID once (when <code>rir</code> is provided) for on-demand ASN creation</li>
 <li>For each spec, supplied IP queries find addresses first; when <code>local_interface</code> is supplied, the interface supplies a missing local address and can derive a missing P2P peer address</li>
-<li>Worker pre-fetches all existing sessions for targeted devices (single API call) to support idempotency</li>
+<li>Worker pre-fetches existing sessions for targeted devices and indexes their device names, IP addresses, and ASN numbers</li>
 <li>For each session spec:<ul>
-<li>Idempotency check: an existing session is left unchanged and reported in <code>exists</code></li>
-<li>In dry-run mode — the name is added to <code>create</code> and processing continues</li>
-<li>Local and remote IPs are resolved from IPAM (or created when not found)</li>
-<li>Local and remote ASNs are resolved from IPAM (or created when <code>rir</code> is provided)</li>
+<li>Idempotency check: existing sessions and repeated bulk entries are reported in <code>exists</code> by object identity, regardless of name</li>
+<li>In dry-run mode, new sessions are reported in <code>create</code> without writes</li>
+<li>Local and remote IPs and ASNs are resolved from IPAM after the duplicate check; normal runs can create missing references</li>
 <li>Optional fields (peer group, routing policies, prefix lists) are resolved or created by name</li>
 <li>When <code>create_reverse=True</code> a mirror session is built by swapping local/remote IPs and ASNs</li>
 </ul>
 </li>
-<li>All prepared payloads are sent to NetBox in a single bulk-create call</li>
+<li>Remaining payloads are sent to NetBox in bulk-create calls</li>
 </ol>
 <p>Object and multiobject custom fields accept related object names or IDs when creating a session. Use <code>update_bgp_peering</code> to change an existing session.
 When <code>custom_fields</code> is supplied, the task reuses reference-field definitions in <code>lookup_cache</code> or fetches and caches them for the next call. Calls without supplied custom fields do not fetch those definitions.</p>
@@ -7290,7 +7261,7 @@ When <code>custom_fields</code> is supplied, the task reuses reference-field def
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <p>Normal mode returns the created, existing, and skipped BGP session details. In dry-run mode, the task returns the session names that would be created and the sessions that already exist.</p>
 <h2 id="dry-run-mode">Dry Run Mode<a class="headerlink" href="#dry-run-mode" title="Permanent link">¤</a></h2>
-<p><code>dry_run=True</code> returns session names without any NetBox writes:</p>
+<p><code>dry_run=True</code> returns session names without any NetBox writes. It resolves ASN queries and compares session values with existing sessions:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="s2">&quot;create&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
     <span class="s2">&quot;exists&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;session_name&gt;&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
@@ -7597,7 +7568,9 @@ nf#
 (<code>bulk_create</code> list of dicts).  IP addresses and ASNs are resolved from
 IPAM or created on demand.  When <code>local_interface</code> is provided the local
 address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote
-address is derived automatically.</p>
+address is derived automatically. Existing sessions and repeated bulk
+entries are matched by device name, local IP and ASN, and remote IP and
+ASN values; names do not identify sessions.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -7780,7 +7753,11 @@ address is derived automatically.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>VRF name.</p>
+                <p>NetBox VRF name for a new session. The task
+resolves or creates the VRF and stores its object reference in
+<code>custom_fields[vrf_custom_field]</code>. <code>global</code> and <code>default</code>
+assign no VRF. If the custom field is missing, VRF assignment is
+skipped. Existing sessions are left unchanged.</p>
               </div>
             </td>
             <td>
@@ -7911,7 +7888,8 @@ creating a session. Existing sessions are left unchanged.</p>
             <td>
               <div class="doc-md-description">
                 <p>Filters passed to <code>nb.ipam.asns.get</code>
-to find the local ASN when <code>local_as</code> is omitted.</p>
+to find the local ASN when <code>local_as</code> is omitted. The <code>role</code>
+value is treated as a name and converted to a slug for filtering.</p>
               </div>
             </td>
             <td>
@@ -7928,7 +7906,8 @@ to find the local ASN when <code>local_as</code> is omitted.</p>
             <td>
               <div class="doc-md-description">
                 <p>Filters passed to <code>nb.ipam.asns.get</code>
-to find the remote ASN when <code>remote_as</code> is omitted.</p>
+to find the remote ASN when <code>remote_as</code> is omitted. The <code>role</code>
+value is treated as a name and converted to a slug for filtering.</p>
               </div>
             </td>
             <td>
@@ -7980,8 +7959,9 @@ Filters may include literal device and interface names.</p>
             <td>
               <div class="doc-md-description">
                 <p>Jinja2 template string for session names.
-Default <code>'{{device}}_{{vrf}}_{{remote_address}}'</code>; an omitted
-VRF renders as <code>default</code> in the name only.</p>
+Default <code>'{{device}}_{{vrf}}_{{remote_address}}'</code>. When the
+session dictionary omits <code>vrf</code>, the template uses <code>default</code>;
+an explicit <code>vrf=None</code> renders as <code>None</code>.</p>
               </div>
             </td>
             <td>
@@ -8800,7 +8780,40 @@ fields need resolution.</p>
 <span class="normal">1709</span>
 <span class="normal">1710</span>
 <span class="normal">1711</span>
-<span class="normal">1712</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1712</span>
+<span class="normal">1713</span>
+<span class="normal">1714</span>
+<span class="normal">1715</span>
+<span class="normal">1716</span>
+<span class="normal">1717</span>
+<span class="normal">1718</span>
+<span class="normal">1719</span>
+<span class="normal">1720</span>
+<span class="normal">1721</span>
+<span class="normal">1722</span>
+<span class="normal">1723</span>
+<span class="normal">1724</span>
+<span class="normal">1725</span>
+<span class="normal">1726</span>
+<span class="normal">1727</span>
+<span class="normal">1728</span>
+<span class="normal">1729</span>
+<span class="normal">1730</span>
+<span class="normal">1731</span>
+<span class="normal">1732</span>
+<span class="normal">1733</span>
+<span class="normal">1734</span>
+<span class="normal">1735</span>
+<span class="normal">1736</span>
+<span class="normal">1737</span>
+<span class="normal">1738</span>
+<span class="normal">1739</span>
+<span class="normal">1740</span>
+<span class="normal">1741</span>
+<span class="normal">1742</span>
+<span class="normal">1743</span>
+<span class="normal">1744</span>
+<span class="normal">1745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpPeeringInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpPeeringResult</span><span class="p">,</span>
@@ -8862,7 +8875,9 @@ fields need resolution.</p>
 <span class="sd">    (``bulk_create`` list of dicts).  IP addresses and ASNs are resolved from</span>
 <span class="sd">    IPAM or created on demand.  When ``local_interface`` is provided the local</span>
 <span class="sd">    address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote</span>
-<span class="sd">    address is derived automatically.</span>
+<span class="sd">    address is derived automatically. Existing sessions and repeated bulk</span>
+<span class="sd">    entries are matched by device name, local IP and ASN, and remote IP and</span>
+<span class="sd">    ASN values; names do not identify sessions.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object.</span>
@@ -8875,7 +8890,11 @@ fields need resolution.</p>
 <span class="sd">        remote_as (int, optional): Remote AS number. Takes precedence over ``remote_as_query``.</span>
 <span class="sd">        status (str): Session status. Default ``&#39;active&#39;``.</span>
 <span class="sd">        description (str, optional): Session description.</span>
-<span class="sd">        vrf (str, optional): VRF name.</span>
+<span class="sd">        vrf (str, optional): NetBox VRF name for a new session. The task</span>
+<span class="sd">            resolves or creates the VRF and stores its object reference in</span>
+<span class="sd">            ``custom_fields[vrf_custom_field]``. ``global`` and ``default``</span>
+<span class="sd">            assign no VRF. If the custom field is missing, VRF assignment is</span>
+<span class="sd">            skipped. Existing sessions are left unchanged.</span>
 <span class="sd">        peer_group (str, optional): Peer group name (resolved or created).</span>
 <span class="sd">        import_policies (list, optional): List of import routing-policy names.</span>
 <span class="sd">        export_policies (list, optional): List of export routing-policy names.</span>
@@ -8886,17 +8905,20 @@ fields need resolution.</p>
 <span class="sd">        prefix_list_out (str, optional): Outbound prefix-list name.</span>
 <span class="sd">        local_interface (str, optional): Local interface name or bracket-range pattern.</span>
 <span class="sd">        local_as_query (dict, optional): Filters passed to ``nb.ipam.asns.get``</span>
-<span class="sd">            to find the local ASN when ``local_as`` is omitted.</span>
+<span class="sd">            to find the local ASN when ``local_as`` is omitted. The ``role``</span>
+<span class="sd">            value is treated as a name and converted to a slug for filtering.</span>
 <span class="sd">        remote_as_query (dict, optional): Filters passed to ``nb.ipam.asns.get``</span>
-<span class="sd">            to find the remote ASN when ``remote_as`` is omitted.</span>
+<span class="sd">            to find the remote ASN when ``remote_as`` is omitted. The ``role``</span>
+<span class="sd">            value is treated as a name and converted to a slug for filtering.</span>
 <span class="sd">        local_ip_query (dict, optional): Filters passed to</span>
 <span class="sd">            ``nb.ipam.ip_addresses.get`` when ``local_address`` is omitted.</span>
 <span class="sd">        remote_ip_query (dict, optional): Filters passed to</span>
 <span class="sd">            ``nb.ipam.ip_addresses.get`` when ``remote_address`` is omitted.</span>
 <span class="sd">            Filters may include literal device and interface names.</span>
 <span class="sd">        name_template (str, optional): Jinja2 template string for session names.</span>
-<span class="sd">            Default ``&#39;{{device}}_{{vrf}}_{{remote_address}}&#39;``; an omitted</span>
-<span class="sd">            VRF renders as ``default`` in the name only.</span>
+<span class="sd">            Default ``&#39;{{device}}_{{vrf}}_{{remote_address}}&#39;``. When the</span>
+<span class="sd">            session dictionary omits ``vrf``, the template uses ``default``;</span>
+<span class="sd">            an explicit ``vrf=None`` renders as ``None``.</span>
 <span class="sd">        create_reverse (bool): When ``True`` also create a mirror session on the</span>
 <span class="sd">            remote device with local and remote IPs/ASNs swapped. Default ``True``.</span>
 <span class="sd">        bulk_create (list, optional): List of session dicts for bulk creation.</span>
@@ -9164,26 +9186,41 @@ fields need resolution.</p>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resolved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bgp_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> BGP session create candidate(s)&quot;</span><span class="p">)</span>
 
     <span class="c1"># Step 5c: Pre-fetch existing sessions for idempotency (single API call)</span>
-    <span class="n">existing_sessions</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">all_device_names</span><span class="p">:</span>
+    <span class="n">existing_sessions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">existing_device_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">all_device_names</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">info</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">existing_device_names</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;checking existing BGP sessions on </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;checking existing BGP sessions on </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">existing_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s)&quot;</span>
         <span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
                 <span class="n">nb</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">bgp</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
-                <span class="n">device</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">),</span>
-                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;name,id,custom_fields&quot;</span><span class="p">,</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">existing_device_names</span><span class="p">,</span>
+                <span class="n">fields</span><span class="o">=</span><span class="s2">&quot;device,local_address,local_as,remote_address,remote_as&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">existing_sessions</span> <span class="o">=</span> <span class="p">{</span><span class="n">session</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">session</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">}</span>
+            <span class="n">existing_sessions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="p">(</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">_normalise_bgp_identity_ip</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">local_address</span><span class="o">.</span><span class="n">address</span><span class="p">),</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">local_as</span><span class="o">.</span><span class="n">asn</span><span class="p">,</span>
+                    <span class="n">_normalise_bgp_identity_ip</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">remote_address</span><span class="o">.</span><span class="n">address</span><span class="p">),</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">remote_as</span><span class="o">.</span><span class="n">asn</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">existing</span>
+            <span class="p">}</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">existing_sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> existing BGP session(s)&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;could not pre-fetch BGP sessions for </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">all_device_names</span><span class="p">)</span><span class="si">}</span><span class="s2">: &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">; will check per-session&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;could not pre-fetch BGP sessions for </span><span class="si">{</span><span class="n">existing_device_names</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># Step 6: Process each resolved bgp_session</span>
     <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -9238,23 +9275,13 @@ fields need resolution.</p>
                 <span class="k">continue</span>
             <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sname</span>
 
-        <span class="c1"># Idempotency check (step 6i)</span>
-        <span class="k">if</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">existing_sessions</span><span class="p">:</span>
-            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;exists&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Dry run — report name and move on (step 6j)</span>
-        <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># --- Full resolution (non-dry-run) ---</span>
-
         <span class="c1"># Explicit ASN numbers win; otherwise query NetBox for each side.</span>
         <span class="n">local_query</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;local_as_query&quot;</span><span class="p">)</span>
         <span class="n">remote_query</span> <span class="o">=</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remote_as_query&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bgp_session_local_as</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">local_query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;role&quot;</span> <span class="ow">in</span> <span class="n">local_query</span><span class="p">:</span>
+                    <span class="n">local_query</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">slugify</span><span class="p">(</span><span class="n">local_query</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">])</span>
                 <span class="n">asn_obj</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">local_query</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">asn_obj</span> <span class="o">=</span> <span class="kc">None</span>
@@ -9271,6 +9298,8 @@ fields need resolution.</p>
 
         <span class="k">if</span> <span class="n">bgp_session_remote_as</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">remote_query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;role&quot;</span> <span class="ow">in</span> <span class="n">remote_query</span><span class="p">:</span>
+                    <span class="n">remote_query</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">slugify</span><span class="p">(</span><span class="n">remote_query</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">])</span>
                 <span class="n">asn_obj</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">remote_query</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">asn_obj</span> <span class="o">=</span> <span class="kc">None</span>
@@ -9284,7 +9313,37 @@ fields need resolution.</p>
                 <span class="k">continue</span>
             <span class="n">bgp_session_remote_as</span> <span class="o">=</span> <span class="n">asn_obj</span><span class="o">.</span><span class="n">asn</span>
 
-        <span class="c1"># Resolve IP IDs and ASN IDs (steps 6d / 6e)</span>
+        <span class="c1"># Resolve device ID and site ID (step 6f)</span>
+        <span class="n">dev_info</span> <span class="o">=</span> <span class="n">all_device_names</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bgp_session_device</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_info</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">bgp_session_device</span><span class="si">}</span><span class="s2">&#39; not found in NetBox, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;skipping &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">device_id</span> <span class="o">=</span> <span class="n">dev_info</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="n">site_id</span> <span class="o">=</span> <span class="n">dev_info</span><span class="p">[</span><span class="s2">&quot;site_id&quot;</span><span class="p">]</span>
+        <span class="n">identity</span> <span class="o">=</span> <span class="n">bgp_session_identity</span><span class="p">(</span>
+            <span class="n">bgp_session_device</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;local_address&quot;</span><span class="p">:</span> <span class="n">bgp_session_local_address</span><span class="p">,</span>
+                <span class="s2">&quot;local_as&quot;</span><span class="p">:</span> <span class="n">bgp_session_local_as</span><span class="p">,</span>
+                <span class="s2">&quot;remote_address&quot;</span><span class="p">:</span> <span class="n">bgp_session_remote_address</span><span class="p">,</span>
+                <span class="s2">&quot;remote_as&quot;</span><span class="p">:</span> <span class="n">bgp_session_remote_as</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">identity</span> <span class="ow">in</span> <span class="n">existing_sessions</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;exists&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">existing_sessions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">identity</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;create&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+            <span class="k">continue</span>
+
         <span class="n">local_ip_id</span> <span class="o">=</span> <span class="n">resolve_ip</span><span class="p">(</span>
             <span class="n">bgp_session_local_address</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lookup_cache</span>
         <span class="p">)</span>
@@ -9314,20 +9373,7 @@ fields need resolution.</p>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">continue</span>
 
-        <span class="c1"># Resolve device ID and site ID (step 6f)</span>
-        <span class="n">dev_info</span> <span class="o">=</span> <span class="n">all_device_names</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bgp_session_device</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">dev_info</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;device &#39;</span><span class="si">{</span><span class="n">bgp_session_device</span><span class="si">}</span><span class="s2">&#39; not found in NetBox, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;skipping &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
-            <span class="p">)</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">continue</span>
-
-        <span class="n">device_id</span> <span class="o">=</span> <span class="n">dev_info</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-        <span class="n">site_id</span> <span class="o">=</span> <span class="n">dev_info</span><span class="p">[</span><span class="s2">&quot;site_id&quot;</span><span class="p">]</span>
+        <span class="n">existing_sessions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">identity</span><span class="p">)</span>
         <span class="n">addr_family</span> <span class="o">=</span> <span class="n">get_addr_family</span><span class="p">(</span><span class="n">bgp_session_local_address</span><span class="p">)</span>
 
         <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
@@ -9564,7 +9610,7 @@ fields need resolution.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

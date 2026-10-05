@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -7157,34 +7157,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../testing/netbox_service_tests/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Netbox Service Tests
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -7914,24 +7886,31 @@
 <td><code>routing_policies</code></td>
 <td><code>netbox.plugins.bgp.routing_policy</code></td>
 <td><code>name</code></td>
-<td>Peering references can inline policy dictionaries.</td>
+<td>Peering references can inline policy dictionaries or use policy names.</td>
 </tr>
 <tr>
 <td style="text-align: right;">34</td>
-<td><code>bgp_peerings</code></td>
-<td><code>netbox.plugins.bgp.session</code></td>
-<td>Supplied or generated <code>name</code></td>
-<td>Uses <code>create_bgp_peering</code> to create missing sessions. Existing sessions are left unchanged. New sessions default to <code>create_reverse: true</code>. Supports import/export policy dictionaries.</td>
+<td><code>peer_groups</code></td>
+<td><code>netbox.plugins.bgp.peer_group</code></td>
+<td><code>name</code></td>
+<td>Peering references can provide a name or inline dictionary.</td>
 </tr>
 <tr>
 <td style="text-align: right;">35</td>
+<td><code>bgp_peerings</code></td>
+<td><code>netbox.plugins.bgp.session</code></td>
+<td>Supplied or generated <code>name</code></td>
+<td>Uses <code>create_bgp_peering</code> to create missing sessions. Existing sessions are left unchanged. Design peerings default to <code>create_reverse: false</code>. Supports named or inline peer groups and import/export policies.</td>
+</tr>
+<tr>
+<td style="text-align: right;">36</td>
 <td><code>config_context</code></td>
 <td><code>netbox.extras.config_contexts</code></td>
 <td><code>name</code></td>
 <td><code>data</code> is a dictionary and <code>sites</code> scopes it.</td>
 </tr>
 <tr>
-<td style="text-align: right;">36</td>
+<td style="text-align: right;">37</td>
 <td><code>local_context_data</code></td>
 <td><code>netbox.dcim.devices</code></td>
 <td>Device: <code>site</code> and <code>name</code>, plus <code>tenant</code> when supplied</td>
@@ -8007,13 +7986,13 @@
 </code></pre></div>
 <p>For each object type, specified values are created or updated before next-available requests run. Allocation tasks look for an existing match on repeat deployment. Give each request a stable name or description and enough scope to identify it, otherwise a repeat run can allocate another value.</p>
 <p>Entries under <code>bgp_peerings</code> call <code>create_bgp_peering</code> after the design's devices, interfaces, IP addresses, and ASNs have been deployed. Use a stable supplied or generated session name so repeat deployments find the existing session. Existing sessions are not updated by the design:</p>
+<p>Design peerings create only the specified direction by default. Set <code>create_reverse: true</code> on a peering to create the reverse session as well. The standalone <code>create_bgp_peering</code> task retains its own default.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bgp_peerings</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME BRANCH PEER</span>
 <span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">acme-branch-rtr-1</span>
 <span class="w">    </span><span class="nt">local_interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
 <span class="w">    </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4200650001</span>
 <span class="w">    </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4200650000</span>
-<span class="w">    </span><span class="nt">create_reverse</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </code></pre></div>
 <h3 id="allocation-examples">Allocation examples<a class="headerlink" href="#allocation-examples" title="Permanent link">¤</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:5"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Combined example</label><label for="__tabbed_3_2">ASN</label><label for="__tabbed_3_3">VLAN</label><label for="__tabbed_3_4">Prefix</label><label for="__tabbed_3_5">IP address</label></div>
@@ -8384,7 +8363,7 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 </div>
 <h2 id="nested-device-records">Nested Device Records<a class="headerlink" href="#nested-device-records" title="Permanent link">¤</a></h2>
 <p>Nesting keeps a device and its related objects together, making the design more natural to read and shorter to write. Interfaces, IP addresses, and peerings inherit their device or interface names instead of repeating them in separate top-level records.</p>
-<p>Device records may contain <code>interfaces</code>, <code>bgp_peerings</code>, <code>power_ports</code>, <code>console_ports</code>, <code>power_outlets</code>, <code>console_server_ports</code>, and <code>local_context_data</code>. An interface may contain <code>ip_addresses</code>, <code>bgp_peerings</code>, <code>connection</code>, <code>vrf</code>, <code>untagged_vlan</code>, <code>tagged_vlans</code>, and <code>vrrp</code>. The task flattens these before validation or writes. It adds device and interface names to extracted records and merges them with records already at the top level. Inline VRFs, VLANs, VRRP groups, route targets, and routing policies are also collected into their earlier collections. Interface VRF identity dictionaries and VLAN group/VID dictionaries remain references. Nested route-target and routing-policy dictionaries are always collected as definitions, even with only a name.</p>
+<p>Device records may contain <code>interfaces</code>, <code>bgp_peerings</code>, <code>power_ports</code>, <code>console_ports</code>, <code>power_outlets</code>, <code>console_server_ports</code>, and <code>local_context_data</code>. An interface may contain <code>ip_addresses</code>, <code>bgp_peerings</code>, <code>connection</code>, <code>vrf</code>, <code>untagged_vlan</code>, <code>tagged_vlans</code>, and <code>vrrp</code>. The task flattens these before validation or writes. It adds device and interface names to extracted records and merges them with records already at the top level. Inline VRFs, VLANs, VRRP groups, route targets, routing policies, and BGP peer groups are also collected into their earlier collections. Interface VRF identity dictionaries and VLAN group/VID dictionaries remain references. Nested route-target, routing-policy, and peer-group dictionaries are collected as definitions, even with only a name.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:15"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><input id="__tabbed_6_5" name="__tabbed_6" type="radio" /><input id="__tabbed_6_6" name="__tabbed_6" type="radio" /><input id="__tabbed_6_7" name="__tabbed_6" type="radio" /><input id="__tabbed_6_8" name="__tabbed_6" type="radio" /><input id="__tabbed_6_9" name="__tabbed_6" type="radio" /><input id="__tabbed_6_10" name="__tabbed_6" type="radio" /><input id="__tabbed_6_11" name="__tabbed_6" type="radio" /><input id="__tabbed_6_12" name="__tabbed_6" type="radio" /><input id="__tabbed_6_13" name="__tabbed_6" type="radio" /><input id="__tabbed_6_14" name="__tabbed_6" type="radio" /><input id="__tabbed_6_15" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">All nested fields</label><label for="__tabbed_6_2">Interfaces</label><label for="__tabbed_6_3">Device BGP peerings</label><label for="__tabbed_6_4">VRRP</label><label for="__tabbed_6_5">IP addresses</label><label for="__tabbed_6_6">Interface connection</label><label for="__tabbed_6_7">Interface VRF</label><label for="__tabbed_6_8">Untagged VLAN</label><label for="__tabbed_6_9">Tagged VLANs</label><label for="__tabbed_6_10">Interface BGP peering</label><label for="__tabbed_6_11">Power ports</label><label for="__tabbed_6_12">Console ports</label><label for="__tabbed_6_13">Power outlets</label><label for="__tabbed_6_14">Console server ports</label><label for="__tabbed_6_15">Local context data</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -9252,12 +9231,13 @@ therefore have no IDs yet.</p>
 </div>
 </div>
 <h2 id="nested-bgp-peering-records">Nested BGP Peering Records<a class="headerlink" href="#nested-bgp-peering-records" title="Permanent link">¤</a></h2>
-<p>BGP peerings accept <code>import_policies</code> and <code>export_policies</code> as lists of routing-policy dictionaries. The design extracts these into top-level <code>routing_policies</code>, creates or updates them before BGP sessions, and associates them with the peering. Dictionaries containing only <code>name</code> are also treated as policy definitions. Strings are not supported.</p>
+<p>BGP peerings accept <code>import_policies</code> and <code>export_policies</code> as lists of routing-policy names or dictionaries. The design extracts these into top-level <code>routing_policies</code>, creates or updates them before BGP sessions, and associates them with the peering. A policy name or a dictionary containing only <code>name</code> is also treated as a policy definition.</p>
+<p><code>peer_group</code> accepts a name or a dictionary with <code>name</code> and other peer-group fields. Both forms are collected into top-level <code>peer_groups</code> and created or updated before the BGP session. The peering then passes the group name to <code>create_bgp_peering</code>.</p>
 <p>This works for top-level <code>bgp_peerings</code> and peerings nested under devices or interfaces.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Peering routing policies</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Prerequisites: the device, both IP addresses, both ASNs, and the BGP plugin. Policy dictionaries are extracted and deployed before the peering. <code>create_reverse: false</code> creates only the specified direction.</p>
+<p>Prerequisites: the device, both IP addresses, both ASNs, and the BGP plugin. Inline peer groups and policies are deployed before the peering. <code>create_reverse: false</code> creates only the specified direction.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bgp_peerings</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-to-core</span>
 <span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-1</span>
@@ -9266,19 +9246,23 @@ therefore have no IDs yet.</p>
 <span class="w">    </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65100</span>
 <span class="w">    </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65200</span>
 <span class="w">    </span><span class="nt">create_reverse</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">peer_group</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH PEERS</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch BGP neighbors</span>
 <span class="w">    </span><span class="nt">import_policies</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH IMPORT</span>
 <span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch inbound policy</span>
 <span class="w">    </span><span class="nt">export_policies</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EXPORT</span>
-<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch outbound policy</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EXPORT</span>
 </code></pre></div>
 <p>Equivalent using top-level keys:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">routing_policies</span><span class="p">:</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH IMPORT</span>
 <span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch inbound policy</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EXPORT</span>
-<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch outbound policy</span>
+<span class="nt">peer_groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH PEERS</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Branch BGP neighbors</span>
 <span class="nt">bgp_peerings</span><span class="p">:</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-to-core</span>
 <span class="w">  </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-1</span>
@@ -9287,10 +9271,11 @@ therefore have no IDs yet.</p>
 <span class="w">  </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65100</span>
 <span class="w">  </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65200</span>
 <span class="w">  </span><span class="nt">create_reverse</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">peer_group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH PEERS</span>
 <span class="w">  </span><span class="nt">import_policies</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH IMPORT</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH IMPORT</span>
 <span class="w">  </span><span class="nt">export_policies</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EXPORT</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EXPORT</span>
 </code></pre></div>
 </div>
 </div>
@@ -9813,94 +9798,7 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3831</span>
-<span class="normal">3832</span>
-<span class="normal">3833</span>
-<span class="normal">3834</span>
-<span class="normal">3835</span>
-<span class="normal">3836</span>
-<span class="normal">3837</span>
-<span class="normal">3838</span>
-<span class="normal">3839</span>
-<span class="normal">3840</span>
-<span class="normal">3841</span>
-<span class="normal">3842</span>
-<span class="normal">3843</span>
-<span class="normal">3844</span>
-<span class="normal">3845</span>
-<span class="normal">3846</span>
-<span class="normal">3847</span>
-<span class="normal">3848</span>
-<span class="normal">3849</span>
-<span class="normal">3850</span>
-<span class="normal">3851</span>
-<span class="normal">3852</span>
-<span class="normal">3853</span>
-<span class="normal">3854</span>
-<span class="normal">3855</span>
-<span class="normal">3856</span>
-<span class="normal">3857</span>
-<span class="normal">3858</span>
-<span class="normal">3859</span>
-<span class="normal">3860</span>
-<span class="normal">3861</span>
-<span class="normal">3862</span>
-<span class="normal">3863</span>
-<span class="normal">3864</span>
-<span class="normal">3865</span>
-<span class="normal">3866</span>
-<span class="normal">3867</span>
-<span class="normal">3868</span>
-<span class="normal">3869</span>
-<span class="normal">3870</span>
-<span class="normal">3871</span>
-<span class="normal">3872</span>
-<span class="normal">3873</span>
-<span class="normal">3874</span>
-<span class="normal">3875</span>
-<span class="normal">3876</span>
-<span class="normal">3877</span>
-<span class="normal">3878</span>
-<span class="normal">3879</span>
-<span class="normal">3880</span>
-<span class="normal">3881</span>
-<span class="normal">3882</span>
-<span class="normal">3883</span>
-<span class="normal">3884</span>
-<span class="normal">3885</span>
-<span class="normal">3886</span>
-<span class="normal">3887</span>
-<span class="normal">3888</span>
-<span class="normal">3889</span>
-<span class="normal">3890</span>
-<span class="normal">3891</span>
-<span class="normal">3892</span>
-<span class="normal">3893</span>
-<span class="normal">3894</span>
-<span class="normal">3895</span>
-<span class="normal">3896</span>
-<span class="normal">3897</span>
-<span class="normal">3898</span>
-<span class="normal">3899</span>
-<span class="normal">3900</span>
-<span class="normal">3901</span>
-<span class="normal">3902</span>
-<span class="normal">3903</span>
-<span class="normal">3904</span>
-<span class="normal">3905</span>
-<span class="normal">3906</span>
-<span class="normal">3907</span>
-<span class="normal">3908</span>
-<span class="normal">3909</span>
-<span class="normal">3910</span>
-<span class="normal">3911</span>
-<span class="normal">3912</span>
-<span class="normal">3913</span>
-<span class="normal">3914</span>
-<span class="normal">3915</span>
-<span class="normal">3916</span>
-<span class="normal">3917</span>
-<span class="normal">3918</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3918</span>
 <span class="normal">3919</span>
 <span class="normal">3920</span>
 <span class="normal">3921</span>
@@ -10093,7 +9991,94 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 <span class="normal">4108</span>
 <span class="normal">4109</span>
 <span class="normal">4110</span>
-<span class="normal">4111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4111</span>
+<span class="normal">4112</span>
+<span class="normal">4113</span>
+<span class="normal">4114</span>
+<span class="normal">4115</span>
+<span class="normal">4116</span>
+<span class="normal">4117</span>
+<span class="normal">4118</span>
+<span class="normal">4119</span>
+<span class="normal">4120</span>
+<span class="normal">4121</span>
+<span class="normal">4122</span>
+<span class="normal">4123</span>
+<span class="normal">4124</span>
+<span class="normal">4125</span>
+<span class="normal">4126</span>
+<span class="normal">4127</span>
+<span class="normal">4128</span>
+<span class="normal">4129</span>
+<span class="normal">4130</span>
+<span class="normal">4131</span>
+<span class="normal">4132</span>
+<span class="normal">4133</span>
+<span class="normal">4134</span>
+<span class="normal">4135</span>
+<span class="normal">4136</span>
+<span class="normal">4137</span>
+<span class="normal">4138</span>
+<span class="normal">4139</span>
+<span class="normal">4140</span>
+<span class="normal">4141</span>
+<span class="normal">4142</span>
+<span class="normal">4143</span>
+<span class="normal">4144</span>
+<span class="normal">4145</span>
+<span class="normal">4146</span>
+<span class="normal">4147</span>
+<span class="normal">4148</span>
+<span class="normal">4149</span>
+<span class="normal">4150</span>
+<span class="normal">4151</span>
+<span class="normal">4152</span>
+<span class="normal">4153</span>
+<span class="normal">4154</span>
+<span class="normal">4155</span>
+<span class="normal">4156</span>
+<span class="normal">4157</span>
+<span class="normal">4158</span>
+<span class="normal">4159</span>
+<span class="normal">4160</span>
+<span class="normal">4161</span>
+<span class="normal">4162</span>
+<span class="normal">4163</span>
+<span class="normal">4164</span>
+<span class="normal">4165</span>
+<span class="normal">4166</span>
+<span class="normal">4167</span>
+<span class="normal">4168</span>
+<span class="normal">4169</span>
+<span class="normal">4170</span>
+<span class="normal">4171</span>
+<span class="normal">4172</span>
+<span class="normal">4173</span>
+<span class="normal">4174</span>
+<span class="normal">4175</span>
+<span class="normal">4176</span>
+<span class="normal">4177</span>
+<span class="normal">4178</span>
+<span class="normal">4179</span>
+<span class="normal">4180</span>
+<span class="normal">4181</span>
+<span class="normal">4182</span>
+<span class="normal">4183</span>
+<span class="normal">4184</span>
+<span class="normal">4185</span>
+<span class="normal">4186</span>
+<span class="normal">4187</span>
+<span class="normal">4188</span>
+<span class="normal">4189</span>
+<span class="normal">4190</span>
+<span class="normal">4191</span>
+<span class="normal">4192</span>
+<span class="normal">4193</span>
+<span class="normal">4194</span>
+<span class="normal">4195</span>
+<span class="normal">4196</span>
+<span class="normal">4197</span>
+<span class="normal">4198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -10503,7 +10488,7 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
