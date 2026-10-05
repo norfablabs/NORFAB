@@ -679,6 +679,7 @@ def _write_docker_test_report(
         "",
         f"- Started: {started_at.isoformat(timespec='seconds')}",
         f"- Completed: {completed_at.isoformat(timespec='seconds')}",
+        f"- Actual run duration: {(completed_at - started_at).total_seconds():.2f}s",
         f"- Python runner: {python_version or 'Compose default'}",
         f"- JUnit test duration: {total_duration:.2f}s",
     ]
