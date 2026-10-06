@@ -934,6 +934,8 @@ class TestDesignDeploy:
                     "custom_fields": {
                         "norfab_design_device_context": "ACME first",
                         "norfab_design_device_keep": 42,
+                        "norfab_design_device_ip": "198.19.243.10/32",
+                        "norfab_design_device_ips": ["198.19.243.10/32"],
                     },
                 },
                 {
@@ -988,6 +990,12 @@ class TestDesignDeploy:
             for run in (1, 2):
                 if run == 2:
                     design["config_context"][0]["sites"] = [added_site_name]
+                    design["devices"][0]["custom_fields"].update(
+                        {
+                            "norfab_design_device_ip": "198.19.243.11/32",
+                            "norfab_design_device_ips": ["198.19.243.11/32"],
+                        }
+                    )
                 reply = nfclient.run_job(
                     "netbox",
                     "design_deploy",
@@ -997,6 +1005,19 @@ class TestDesignDeploy:
                 for result in reply.values():
                     assert not result["failed"], result
                     assert not result["errors"], result
+                device = nb.dcim.devices.get(name=device_names[0])
+                reference_ips = [
+                    nb.ipam.ip_addresses.get(address=address)
+                    for address in ("198.19.243.10/32", "198.19.243.11/32")
+                ]
+                assert (
+                    device.custom_fields["norfab_design_device_ip"]["id"]
+                    == reference_ips[run - 1].id
+                )
+                assert {
+                    item["id"]
+                    for item in device.custom_fields["norfab_design_device_ips"]
+                } == {item.id for item in reference_ips[:run]}
                 context = nb.extras.config_contexts.get(name=context_name)
                 assert (
                     nb.dcim.interfaces.get(
@@ -1991,6 +2012,19 @@ class TestDesignDeploy:
                         for collection, changes in result["result"].items():
                             assert not changes["created"], (collection, changes)
                 group = nb.ipam.vlan_groups.get(name="NORFAB ACME TEST VLANS")
+                device = nb.dcim.devices.get(name="acme-branch-rtr-1")
+                reference_ips = [
+                    nb.ipam.ip_addresses.get(address=address)
+                    for address in ("198.19.243.10/32", "198.19.243.11/32")
+                ]
+                assert (
+                    device.custom_fields["norfab_design_device_ip"]["id"]
+                    == reference_ips[0].id
+                )
+                assert {
+                    item["id"]
+                    for item in device.custom_fields["norfab_design_device_ips"]
+                } == {item.id for item in reference_ips}
                 allocated_target = nb.ipam.route_targets.get(name="4200650001:300")
                 assert allocated_target.description == "ACME allocated route target"
                 assert allocated_target.tenant.name == "ACME"

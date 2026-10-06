@@ -4,6 +4,7 @@
 
 1. NetBox `design_deploy` extracts named VLAN definitions from nested and top-level L2VPN terminations and deploys them before attachment.
 2. NetBox `design_deploy` supports `query` filters in VRF and L2VPN import/export route-target lists to attach existing matches.
+3. NetBox object and multiobject custom fields resolve IP addresses by address, prefixes by prefix, BGP communities by value, circuits by CID, and device types by model. Other related objects use name; references must match exactly one object. The ACME design demonstrates single and multiple IP references on a device using dedicated seeded custom fields and IP addresses.
 
 ## BUGS
 

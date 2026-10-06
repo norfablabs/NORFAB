@@ -176,6 +176,30 @@ When updating an existing record, design handlers add requested tags and custom-
 
 
 
+## Supported design verbs
+
+Design verbs are YAML keys that request an operation, such as querying existing
+objects, allocating resources, or calling custom Python. Each verb is supported
+only in the locations listed below. Its value supplies the filters or arguments
+used during deployment.
+
+| Verb | Supported objects | Description |
+| --- | --- | --- |
+| `query` | VRF/L2VPN import and export route-target entries | Selects existing targets by Netbox filters after rendering. Attaches all matches. Fails if none match. |
+| `custom_function` | All top-level collection records. Device `local_context_data` | Calls registered Python with context, Netbox, dry-run mode, and supplied arguments. Functions handle their own writes. Local-context functions return a dictionary. |
+| `create_asn` | `asns` | Allocates an ASN from a named range. |
+| `create_vlan` | `vlans` | Allocates a VID from a VLAN group. |
+| `create_prefix` | `prefixes` | Allocates a child prefix. |
+| `create_ip` | `ip_addresses`, including nested interface IPs | Allocates an IP, optionally assigning it to an interface or FHRP group. |
+
+Each query entry contains only `query` with a nonempty filter dictionary.
+Route-target lists accept queries and named definitions, not `custom_function`.
+Put custom allocation calls in `route_targets`, then reference their targets.
+Function return values are not automatically used as relationship references.
+
+See [Custom functions](#custom-functions),
+[L2VPNs and Terminations](#l2vpns-and-terminations), and the allocation examples below.
+
 ## Built-In Task Wrappers
 
 Task wrappers call standalone NorFab NetBox service tasks during the relevant deployment stage. The wrapper contains that task's arguments, without renaming them. The allocation wrappers are useful when a design knows the pool and the object's purpose, but not its final ASN, VLAN ID, subnet, or IP address. Several branches can use the same design and receive different available values from their own pools.
@@ -425,6 +449,46 @@ ones. When updating a VLAN or prefix, it adds new tags. For these objects, if bo
 existing and supplied values of a custom field are lists, the design adds only
 new items. Supplying `[]` leaves an existing list unchanged. For custom fields,
 `null` clears the value, and a new scalar value replaces the old one.
+
+Object and multiobject custom fields accept numeric Netbox IDs or string
+references. The field's related object type determines how strings are matched:
+
+| Related object type | String reference |
+| --- | --- |
+| IP address (`ipam.ipaddress`) | Address including prefix length, such as `192.0.2.10/32` |
+| Prefix (`ipam.prefix`) | Prefix, such as `192.0.2.0/24` |
+| BGP community (`netbox_bgp.community`) | Community value, such as `65100:100` |
+| Circuit (`circuits.circuit`) | Circuit ID (`cid`) |
+| Device type (`dcim.devicetype`) | Model |
+| Other object types | Name |
+
+Each reference must match exactly one existing object when its record is
+processed. Ambiguous matches cause an error; use a numeric ID to distinguish
+objects with the same address, prefix, value, CID, model, or name. Referenced
+objects must already exist or be created earlier in the deployment order.
+Devices are processed before IP addresses, so device custom fields cannot
+reference IPs created later in the same design. Dry runs also require referenced
+objects to exist.
+
+For example, with device custom fields `management_ip` (object) and
+`peer_ips` (multiobject) both related to `ipam.ipaddress`:
+
+```yaml
+devices:
+  - name: branch-router-1
+    site: BRANCH-1
+    role: ROUTER
+    device_type:
+      manufacturer: ACME
+      model: BRANCH ROUTER
+    custom_fields:
+      management_ip: "192.0.2.10/32"
+      peer_ips: ["192.0.2.11/32", "192.0.2.12/32"]
+```
+
+The site, role, device type, custom-field definitions, and reference IPs must
+exist before this example is deployed. Multiobject updates add references
+without removing existing members.
 
 FHRP group assignments and ConfigContext objects do not support custom fields. Device-local context is ordinary JSON data, not a custom-field definition. The design does not create custom-field definitions.
 
@@ -2100,7 +2164,7 @@ Errors identify the collection that stopped deployment. Earlier collections are 
 ## Notes
 
 - A dry run does not create prerequisites, so it cannot fully resolve references to objects proposed earlier in the same design.
-- Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by related object name or ID. Names must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values; scalar and `null` values replace them. Custom-field definitions must already exist in NetBox.
+- Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in [Custom fields](#custom-fields). String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values; scalar and `null` values replace them. Custom-field definitions must already exist in NetBox.
 - Check that named parents, device types, sites, interfaces, and allocation pools exist or are created earlier in the design order.
 - Jinja filters, input models, and custom functions execute Python inside the worker. Use trusted files.
 - See the [ACME design example](https://github.com/norfablabs/NORFAB/blob/main/tests/nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml) for a full nested design.

@@ -423,6 +423,15 @@ prefix_roles = [
 ]
 
 ip_addresses = [
+    # Persistent, read-only IP references owned by design custom-field tests.
+    {
+        "address": "198.19.243.10/32",
+        "description": "NORFAB design custom-field reference A",
+    },
+    {
+        "address": "198.19.243.11/32",
+        "description": "NORFAB design custom-field reference B",
+    },
     {"address": "1.0.1.4/32"},
     {"address": "1.0.1.5/32"},
     {"address": "1.0.100.1/32"},
@@ -1389,6 +1398,22 @@ rirs = [
 
 # Custom fields data
 custom_fields = [
+    {
+        "name": "norfab_design_device_ip",
+        "label": "Design Device IP",
+        "type": "object",
+        "object_types": ["dcim.device"],
+        "related_object_type": "ipam.ipaddress",
+        "description": "Persistent IP reference for design deployment tests",
+    },
+    {
+        "name": "norfab_design_device_ips",
+        "label": "Design Device IPs",
+        "type": "multiobject",
+        "object_types": ["dcim.device"],
+        "related_object_type": "ipam.ipaddress",
+        "description": "Persistent IP references for design deployment tests",
+    },
     {
         "name": "norfab_create_vlan_sites",
         "label": "NorFab Create VLAN Sites",

@@ -300,6 +300,9 @@ devices:
     # Requires the dcim.device custom field supplied by the test inventory.
     custom_fields:
       norfab_crud_test_text: ACME core router
+      # These dedicated reference IPs and device custom fields are seeded by netbox_data.py.
+      norfab_design_device_ip: "198.19.243.10/32"
+      norfab_design_device_ips: ["198.19.243.10/32", "198.19.243.11/32"]
     tenant: ACME
     site: "{{ context.site }}"
     console_ports:

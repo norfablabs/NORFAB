@@ -398,6 +398,10 @@
       "ip_prefixes": [
         "192.0.2.0/24",
         "198.19.224.0/20"
+      ],
+      "read_only_seed_ips": [
+        "198.19.243.10/32",
+        "198.19.243.11/32"
       ]
     },
     "test_designs.py::TestDesignDeploy::test_simple_collections": {
@@ -412,6 +416,22 @@
         "64512:99125"
       ],
       "coverage": "Import queries match multiple targets and overlapping matches; export query selects an existing target. Uses existing test-owned records and cleanup."
+    },
+    "test_designs.py::TestDesignDeploy::test_config_context": {
+      "persistent_custom_fields": [
+        "norfab_design_device_ip",
+        "norfab_design_device_ips"
+      ],
+      "read_only_seed_ips": [
+        "198.19.243.10/32",
+        "198.19.243.11/32"
+      ],
+      "ownership": "Dedicated design reference IPs seeded by netbox_data.py; only config-context and ACME design tests read these. Tests do not modify or delete the seed fields or IPs.",
+      "devices": [
+        "norfab-context-static",
+        "norfab-context-computed"
+      ],
+      "coverage": "IP string resolution on creation/update and additive multiobject merging."
     }
   }
 }

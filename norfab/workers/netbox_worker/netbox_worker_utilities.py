@@ -10,6 +10,15 @@ log = logging.getLogger(__name__)
 
 SYNC_DIFF_ACTIONS = ("create", "update", "delete")
 
+# Related objects resolve by name unless their model uses another lookup field.
+CUSTOM_FIELD_LOOKUP_FIELDS = {
+    "ipam.ipaddress": "address",
+    "ipam.prefix": "prefix",
+    "netbox_bgp.community": "value",
+    "circuits.circuit": "cid",
+    "dcim.devicetype": "model",
+}
+
 
 def merge_array_values(
     existing: list | None, additions: list | None, attribute: str | None = None
@@ -58,10 +67,14 @@ def merge_resolved_custom_fields(
     object_fields: list,
     multiobject_fields: list,
 ) -> tuple[dict, dict]:
-    """Resolve custom-field object names and merge supplied array values.
+    """Resolve custom-field object strings and merge supplied array values.
+
+    IP address references use their address, including the prefix length. Other
+    references use name unless overridden in CUSTOM_FIELD_LOOKUP_FIELDS.
+    References must identify exactly one object; ambiguous IPs across VRFs fail.
 
     Args:
-        worker: NetBox worker used to fetch named related objects in batches.
+        worker: NetBox worker used to fetch related objects in batches.
         nb: Pynetbox API for the selected instance and branch.
         nb_object: Existing NetBox object, or ``None`` when creating one.
         additions: Custom-field values supplied to the task.
@@ -72,7 +85,7 @@ def merge_resolved_custom_fields(
         tuple[dict, dict]: Normalized current fields and merged write payload.
 
     Raises:
-        ValueError: If a related object type has no endpoint or a supplied name
+        ValueError: If a related object type has no endpoint or a supplied reference
             does not identify exactly one related object.
     """
     object_types = {field.name: field.related_object_type for field in object_fields}
@@ -94,7 +107,8 @@ def merge_resolved_custom_fields(
             current[name] = value
 
     def resolve_references(object_type: str, values: list) -> list:
-        """Replace names with IDs while retaining supplied IDs and their order."""
+        """Replace string references with IDs while retaining supplied IDs and order."""
+        lookup_field = CUSTOM_FIELD_LOOKUP_FIELDS.get(object_type, "name")
         names = {item for item in values if isinstance(item, str)}
         resolved = {}
         if names:
@@ -114,18 +128,18 @@ def merge_resolved_custom_fields(
             endpoint = nb
             for segment in path[1:]:
                 endpoint = getattr(endpoint, segment.replace("-", "_"))
-            # A name can exist on multiple objects, so require exactly one ID.
+            # A reference can match multiple objects, so require exactly one ID.
             matches = {item: set() for item in names}
             for item in worker.bulk_filter(
-                endpoint, name=sorted(names), fields="id,name"
+                endpoint, fields=f"id,{lookup_field}", **{lookup_field: sorted(names)}
             ):
-                item_name = getattr(item, "name", None)
+                item_name = getattr(item, lookup_field, None)
                 if item_name in matches:
                     matches[item_name].add(item.id)
             for item_name, ids in matches.items():
                 if len(ids) != 1:
                     raise ValueError(
-                        f"custom-field {object_type} name '{item_name}' matched {len(ids)} objects"
+                        f"custom-field {object_type} {lookup_field} '{item_name}' matched {len(ids)} objects"
                     )
                 resolved[item_name] = next(iter(ids))
         # Existing IDs need no lookup; NetBox expects IDs in reference fields.
