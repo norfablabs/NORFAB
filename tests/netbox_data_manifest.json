@@ -385,6 +385,11 @@
     },
     "test_designs.py::TestDesignDeploy::test_acme_design": {
       "mode": "branch_feature",
+      "inline_l2vpn_vlan": {
+        "group": "NORFAB ACME TEST VLANS",
+        "vid": 100,
+        "name": "ACME USERS"
+      },
       "devices": [
         "acme-branch-rtr-1",
         "acme-branch-rtr-2"

@@ -548,6 +548,10 @@ class NetboxVlansTasks:
         ``vlan_group`` when supplied. Otherwise, they use their device site
         unless ``require_vlan_group=True``.
 
+        Name conflicts with NetBox or between proposed VLANs in the same scope
+        are reported and skipped. The first proposed name is retained; skipped
+        creations are also removed from interface membership targets.
+
         Args:
             job: NorFab job object.
             instance: NetBox instance name. Uses the default instance when omitted.
@@ -980,6 +984,34 @@ class NetboxVlansTasks:
                 message = (
                     f"VLAN {vid} name '{values['name']}' overlaps with VLAN "
                     f"{existing.vid} in scope '{scope}'; skipping VLAN {action}"
+                )
+                job.event(message, severity="ERROR")
+                log.error(message)
+                ret.errors.append(message)
+
+        # Also reject duplicate names among changes not yet present in NetBox.
+        for scope, vlans in vlan_live.items():
+            seen_names = {}
+            for vid, values in list(vlans.items()):
+                name = values["name"]
+                if name not in seen_names:
+                    seen_names[name] = vid
+                    continue
+                current = vlan_current.get(scope, {}).get(vid)
+                action = "update" if current else "create"
+                if current:
+                    vlans[vid] = dict(current)
+                    seen_names[current["name"]] = vid
+                else:
+                    del vlans[vid]
+                    vlan_reference = f"{scope}/{vid}"
+                    for target in interface_targets.values():
+                        target["tagged_vlans"].discard(vlan_reference)
+                        if target["untagged_vlan"] == vlan_reference:
+                            target["untagged_vlan"] = None
+                message = (
+                    f"vlan {vid} name '{name}' overlaps with VLAN "
+                    f"{seen_names[name]} in scope '{scope}'; skipping VLAN {action}"
                 )
                 job.event(message, severity="ERROR")
                 log.error(message)

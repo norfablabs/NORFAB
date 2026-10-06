@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 5 October 2026*
+*Last updated: 6 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -730,7 +730,7 @@ Device types accept `default_platform` as a platform name.
 Route targets support bulk creation/update before VRFs and L2VPNs; inline
 import/export definitions are flattened and associated with their parent objects.
 L2VPN terminations attach device interfaces or group/VID VLANs through top-level
-or nested definitions, rejecting attachments already used by another L2VPN.
+or nested definitions, rejecting attachments already used by another L2VPN. VLAN terminations with a name create or update their VLAN before attachment.
 Route-target and BGP-community definition lists require dictionaries, not bare strings.
 Routing-policy definitions, including BGP import/export lists, also require dictionaries.
 Interface, console, and power cables support top-level and nested definitions, bulk creation/update,
@@ -900,7 +900,7 @@ loaded from YAML through `nf://` URLs, using `match_device_names`,
 and group selection. The first matching mapping rule applies to the whole VLAN.
 Existing descriptions support always, live-empty-only, or never preservation;
 empty device descriptions yield to non-empty observations of the same VLAN.
-VLAN name conflicts are validated within each group or site before bulk writes;
+VLAN name conflicts against NetBox and between proposed changes are validated within each group or site before bulk writes;
 conflicting creations and updates are reported and skipped without stopping
 unrelated VLAN changes.
 VLANs are identified by VID and group, with every same-VID

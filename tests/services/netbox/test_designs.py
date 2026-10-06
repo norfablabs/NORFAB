@@ -1963,6 +1963,12 @@ class TestDesignDeploy:
                 for result in reply.values():
                     assert not result["failed"], result
                     assert not result["errors"], result
+                    assert (
+                        100
+                        in result["result"]["vlans"][
+                            "created" if run == 0 else "updated"
+                        ]
+                    )
                     assert all(
                         "unchanged" not in changes
                         for changes in result["result"].values()
@@ -2022,6 +2028,15 @@ class TestDesignDeploy:
                 assert (
                     allocated_peering.remote_as.asn
                     == allocated_numbers["ACME allocated aggregation ASN"]
+                )
+                termination_vlan = nb.ipam.vlans.get(group_id=group.id, vid=100)
+                assert termination_vlan.name == "ACME USERS"
+                assert termination_vlan.description == "ACME branch user access"
+                assert termination_vlan.tenant.name == "ACME"
+                assert termination_vlan.role.name == "ACME-BRANCH-LAN"
+                assert (
+                    termination_vlan.custom_fields["norfab_acme_site"]
+                    == context["site"]
                 )
                 vpn = nb.vpn.l2vpns.get(name="ACME BRANCH EVPN")
                 assert vpn.type.value == "vxlan"

@@ -161,16 +161,6 @@ vlan_groups:
       - [100, 199]
 
 vlans:
-  - group: "{{ context.site }} VLANS"
-    name: ACME USERS
-    tenant: ACME
-    vid: 100
-    status: active
-    description: ACME branch user access
-    role: ACME-BRANCH-LAN
-    custom_fields:
-      norfab_acme_site: "{{ context.site }}"
-      norfab_acme_sites: ["{{ context.site }}"]
   - create_vlan:
       vlan_group: "{{ context.site }} VLANS"
       name: ACME GUEST
@@ -210,7 +200,15 @@ l2vpns:
       - name: "4200650001:100"
     terminations:
       - group: "{{ context.site }} VLANS"
+        name: ACME USERS
+        tenant: ACME
         vid: 100
+        status: active
+        description: ACME branch user access
+        role: ACME-BRANCH-LAN
+        custom_fields:
+          norfab_acme_site: "{{ context.site }}"
+          norfab_acme_sites: ["{{ context.site }}"]
       - device: acme-branch-rtr-1
         interface: Ethernet2.100
 

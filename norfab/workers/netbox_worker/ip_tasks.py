@@ -1354,8 +1354,8 @@ class NetboxIpTasks:
                         # A non-shared address assigned elsewhere is a conflict.
                         if nb_ip_resolved_role not in ("anycast", "vip"):
                             msg = (
-                                f"duplicate non anycast, non vip ip found, {device_name}:{intf_name}->{ip_live['address']}, "
-                                f"overlaps with {nb_ip['device']}:{nb_ip['interface']}->{nb_ip['address']}"
+                                f"duplicate non anycast, non vip ip found, live IP {device_name}:{intf_name}->{ip_live['address']}, "
+                                f"overlaps with Netbox IP {nb_ip['device']}:{nb_ip['interface']}->{nb_ip['address']}"
                             )
                             log.error(msg)
                             ret.errors.append(msg)

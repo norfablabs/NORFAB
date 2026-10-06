@@ -1,3 +1,15 @@
+# 0.24.7 (draft)
+
+## ENHANCEMENTS
+
+1. NetBox `design_deploy` extracts named VLAN definitions from nested and top-level L2VPN terminations and deploys them before attachment.
+
+## BUGS
+
+1. Fixed NetBox `sync_vlans` submitting duplicate names for different VIDs in the same scope. Later conflicting changes are skipped before bulk writes, and skipped creations are removed from interface targets.
+
+---
+
 # 0.24.6
 
 ## BUGS

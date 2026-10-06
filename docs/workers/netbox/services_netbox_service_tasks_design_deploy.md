@@ -149,7 +149,7 @@ Each design section contains a list of object records. The rows show the order i
 | 15 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. Existing VLANs gain new tags and custom-field list items. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
 | 16 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF and L2VPN references can inline target dictionaries. |
 | 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets must be dictionaries. Existing target lists gain missing targets. |
-| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets must be dictionaries. Existing target lists gain missing targets. Nested terminations are flattened. |
+| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets must be dictionaries. Existing target lists gain missing targets. Nested terminations are flattened; named VLAN terminations also populate `vlans`. |
 | 19 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. Existing prefixes gain new tags and custom-field list items. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
 | 20 | `devices` | `netbox.dcim.devices` | `site` and `name`, plus `tenant` when supplied | Nested components are flattened before writes. |
 | 21 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
@@ -707,6 +707,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
       tagged_vlans:
       - group: BRANCH VLANS
         vid: 100
+        name: BRANCH USERS
       name: Ethernet1
       device: branch-agg-1
     - type: virtual
@@ -1521,12 +1522,21 @@ same target dictionary in both lists creates it once.
 `terminations` under an L2VPN uses the same record shape as the top-level
 `l2vpn_terminations` collection, except that the parent supplies `l2vpn`.
 Each termination attaches one device interface (`device` and `interface`) or
-one VLAN (`group` and `vid`). The interface or VLAN must already exist or be
+one VLAN (`group` and `vid`). Add `name` to a VLAN termination to create or
+update that VLAN before attaching it. Additional fields on that entry describe
+the VLAN; flattening retains only `l2vpn`, `group`, and `vid` on the termination.
+This works for nested and top-level terminations. VLAN definitions are deduplicated
+by group and VID: definitions already in `vlans` take precedence, followed by
+the first extracted termination definition. Entries without `name`
+remain references. The interface or referenced VLAN must already exist or be
 defined earlier in the design. NetBox permits only one L2VPN termination per
 attached object; deployment reports a conflict rather than moving an object
 from another L2VPN. Omitted terminations are not deleted.
 
 ```yaml
+vlan_groups:
+  - name: BRANCH VLANS
+
 l2vpns:
   - name: BRANCH EVPN
     type: vxlan
@@ -1540,12 +1550,47 @@ l2vpns:
         interface: Ethernet1
       - group: BRANCH VLANS
         vid: 100
+        name: BRANCH USERS
+        status: active
+        description: User access VLAN created before attachment
+        custom_fields:
+          customer_id: ACME
 
 l2vpn_terminations:
   - l2vpn: BRANCH EVPN
     device: branch-router-2
     interface: Ethernet1
 ```
+
+The example creates or updates VLAN 100 in `BRANCH VLANS`, then attaches it
+to `BRANCH EVPN`. The routers and their interfaces must already exist or be
+defined elsewhere in the design. The `customer_id` custom field must already
+be defined in Netbox; omit `custom_fields` if it is not available.
+
+During flattening, the named VLAN termination produces two records:
+
+```yaml
+vlans:
+  - group: BRANCH VLANS
+    vid: 100
+    name: BRANCH USERS
+    status: active
+    description: User access VLAN created before attachment
+    custom_fields:
+      customer_id: ACME
+
+l2vpn_terminations:
+  - l2vpn: BRANCH EVPN
+    group: BRANCH VLANS
+    vid: 100
+```
+
+To attach an existing VLAN without updating its properties, supply only
+`group` and integer `vid` in the nested termination. That reference does not
+create a missing VLAN; deployment fails if it cannot resolve the VLAN.
+Named entries apply all additional fields, including tags and custom fields,
+to the VLAN, rather than to the termination. VLAN groups must exist or be
+defined in `vlan_groups`; termination extraction does not create groups.
 
 The `l2vpn_terminations` stage runs after interfaces. A dry run can report
 planned terminations even when their interfaces or VLANs are also planned and

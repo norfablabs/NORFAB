@@ -34,9 +34,10 @@ log = logging.getLogger(__name__)
 def flatten_design(design: dict) -> dict:
     """Collect device-owned definitions into flat lists without changing the input.
 
-    Parent device/interface names are added to child records. Inline relationship
-    definitions become top-level records; identity-only dictionaries remain
-    references. No NetBox queries or writes are performed here.
+    Parent device/interface names are added to child records. Named VLAN
+    terminations become VLAN definitions and group/VID references. Inline
+    relationship definitions become top-level records; identity-only dictionaries
+    remain references. No NetBox queries or writes are performed here.
     """
     design = deepcopy(design)
     for device in design.get("devices", []):
@@ -234,6 +235,31 @@ def flatten_design(design: dict) -> dict:
                     design.setdefault("l2vpn_terminations", []).append(
                         {**termination, "l2vpn": record["name"]}
                     )
+
+    # Collect inline termination VLANs before the VLAN deployment stage.
+    vlan_keys = {
+        (vlan["group"], vlan["vid"])
+        for vlan in design.get("vlans", [])
+        if "custom_function" not in vlan and "vid" in vlan
+    }
+    for termination in design.get("l2vpn_terminations", []):
+        if any(
+            field in termination for field in ("custom_function", "device", "interface")
+        ) or not all(field in termination for field in ("group", "vid", "name")):
+            continue
+        key = (termination["group"], termination["vid"])
+        if key not in vlan_keys:
+            design.setdefault("vlans", []).append(
+                {
+                    field: value
+                    for field, value in termination.items()
+                    if field != "l2vpn"
+                }
+            )
+            vlan_keys.add(key)
+        for field in list(termination):
+            if field not in ("l2vpn", "group", "vid"):
+                termination.pop(field)
 
     # Device and interface peerings are now in the top-level collection. Set
     # the design default on every ordinary peering before it reaches the task.
