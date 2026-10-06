@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2708,6 +2708,17 @@
     <span class="md-ellipsis">
       
         Netbox objects and deployment order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-design-verbs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported design verbs
       
     </span>
   </a>
@@ -7270,6 +7281,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#supported-design-verbs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported design verbs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#built-in-task-wrappers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7774,14 +7796,14 @@
 <td><code>vrfs</code></td>
 <td><code>netbox.ipam.vrfs</code></td>
 <td><code>name</code>, <code>rd</code></td>
-<td>Import/export route targets must be dictionaries. Existing target lists gain missing targets.</td>
+<td>Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets.</td>
 </tr>
 <tr>
 <td style="text-align: right;">18</td>
 <td><code>l2vpns</code></td>
 <td><code>netbox.vpn.l2vpns</code></td>
 <td><code>name</code></td>
-<td>Import/export route targets must be dictionaries. Existing target lists gain missing targets. Nested terminations are flattened.</td>
+<td>Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. Nested terminations are flattened; named VLAN terminations also populate <code>vlans</code>.</td>
 </tr>
 <tr>
 <td style="text-align: right;">19</td>
@@ -7920,6 +7942,58 @@
 </table>
 <p>Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as <code>device.site</code>, <code>device.role</code>, and <code>vlan.group</code>, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.</p>
 <p>When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Only config-context <code>sites</code> accepts site names; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group <code>vid_ranges</code>, local context data, and config-context <code>data</code> retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.</p>
+<h2 id="supported-design-verbs">Supported design verbs<a class="headerlink" href="#supported-design-verbs" title="Permanent link">¤</a></h2>
+<p>Design verbs are YAML keys that request an operation, such as querying existing
+objects, allocating resources, or calling custom Python. Each verb is supported
+only in the locations listed below. Its value supplies the filters or arguments
+used during deployment.</p>
+<table>
+<thead>
+<tr>
+<th>Verb</th>
+<th>Supported objects</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>query</code></td>
+<td>VRF/L2VPN import and export route-target entries</td>
+<td>Selects existing targets by Netbox filters after rendering. Attaches all matches. Fails if none match.</td>
+</tr>
+<tr>
+<td><code>custom_function</code></td>
+<td>All top-level collection records. Device <code>local_context_data</code></td>
+<td>Calls registered Python with context, Netbox, dry-run mode, and supplied arguments. Functions handle their own writes. Local-context functions return a dictionary.</td>
+</tr>
+<tr>
+<td><code>create_asn</code></td>
+<td><code>asns</code></td>
+<td>Allocates an ASN from a named range.</td>
+</tr>
+<tr>
+<td><code>create_vlan</code></td>
+<td><code>vlans</code></td>
+<td>Allocates a VID from a VLAN group.</td>
+</tr>
+<tr>
+<td><code>create_prefix</code></td>
+<td><code>prefixes</code></td>
+<td>Allocates a child prefix.</td>
+</tr>
+<tr>
+<td><code>create_ip</code></td>
+<td><code>ip_addresses</code>, including nested interface IPs</td>
+<td>Allocates an IP, optionally assigning it to an interface or FHRP group.</td>
+</tr>
+</tbody>
+</table>
+<p>Each query entry contains only <code>query</code> with a nonempty filter dictionary.
+Route-target lists accept queries and named definitions, not <code>custom_function</code>.
+Put custom allocation calls in <code>route_targets</code>, then reference their targets.
+Function return values are not automatically used as relationship references.</p>
+<p>See <a href="#custom-functions">Custom functions</a>,
+<a href="#l2vpns-and-terminations">L2VPNs and Terminations</a>, and the allocation examples below.</p>
 <h2 id="built-in-task-wrappers">Built-In Task Wrappers<a class="headerlink" href="#built-in-task-wrappers" title="Permanent link">¤</a></h2>
 <p>Task wrappers call standalone NorFab NetBox service tasks during the relevant deployment stage. The wrapper contains that task's arguments, without renaming them. The allocation wrappers are useful when a design knows the pool and the object's purpose, but not its final ASN, VLAN ID, subnet, or IP address. Several branches can use the same design and receive different available values from their own pools.</p>
 <table>
@@ -8144,6 +8218,65 @@ ones. When updating a VLAN or prefix, it adds new tags. For these objects, if bo
 existing and supplied values of a custom field are lists, the design adds only
 new items. Supplying <code>[]</code> leaves an existing list unchanged. For custom fields,
 <code>null</code> clears the value, and a new scalar value replaces the old one.</p>
+<p>Object and multiobject custom fields accept numeric Netbox IDs or string
+references. The field's related object type determines how strings are matched:</p>
+<table>
+<thead>
+<tr>
+<th>Related object type</th>
+<th>String reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IP address (<code>ipam.ipaddress</code>)</td>
+<td>Address including prefix length, such as <code>192.0.2.10/32</code></td>
+</tr>
+<tr>
+<td>Prefix (<code>ipam.prefix</code>)</td>
+<td>Prefix, such as <code>192.0.2.0/24</code></td>
+</tr>
+<tr>
+<td>BGP community (<code>netbox_bgp.community</code>)</td>
+<td>Community value, such as <code>65100:100</code></td>
+</tr>
+<tr>
+<td>Circuit (<code>circuits.circuit</code>)</td>
+<td>Circuit ID (<code>cid</code>)</td>
+</tr>
+<tr>
+<td>Device type (<code>dcim.devicetype</code>)</td>
+<td>Model</td>
+</tr>
+<tr>
+<td>Other object types</td>
+<td>Name</td>
+</tr>
+</tbody>
+</table>
+<p>Each reference must match exactly one existing object when its record is
+processed. Ambiguous matches cause an error; use a numeric ID to distinguish
+objects with the same address, prefix, value, CID, model, or name. Referenced
+objects must already exist or be created earlier in the deployment order.
+Devices are processed before IP addresses, so device custom fields cannot
+reference IPs created later in the same design. Dry runs also require referenced
+objects to exist.</p>
+<p>For example, with device custom fields <code>management_ip</code> (object) and
+<code>peer_ips</code> (multiobject) both related to <code>ipam.ipaddress</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">devices</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-1</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH-1</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ROUTER</span>
+<span class="w">    </span><span class="nt">device_type</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">manufacturer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH ROUTER</span>
+<span class="w">    </span><span class="nt">custom_fields</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">management_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.0.2.10/32&quot;</span>
+<span class="w">      </span><span class="nt">peer_ips</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;192.0.2.11/32&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;192.0.2.12/32&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<p>The site, role, device type, custom-field definitions, and reference IPs must
+exist before this example is deployed. Multiobject updates add references
+without removing existing members.</p>
 <p>FHRP group assignments and ConfigContext objects do not support custom fields. Device-local context is ordinary JSON data, not a custom-field definition. The design does not create custom-field definitions.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Device and interface</label><label for="__tabbed_4_2">Next-available allocation</label><label for="__tabbed_4_3">Clear a value</label></div>
 <div class="tabbed-content">
@@ -8428,6 +8561,7 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 <span class="w">  </span><span class="nt">tagged_vlans</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VLANS</span>
 <span class="w">    </span><span class="nt">vid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH USERS</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
 <span class="w">  </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-agg-1</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">virtual</span>
@@ -9126,14 +9260,42 @@ new items. Supplying <code>[]</code> leaves an existing list unchanged. For cust
 <code>export_route_targets</code> as lists of dictionaries with <code>name</code>. These definitions
 are extracted into <code>route_targets</code> and deployed before the L2VPN. Repeating the
 same target dictionary in both lists creates it once.</p>
+<p>Import/export lists also accept <code>query</code> to select existing route targets using
+Netbox filters, including custom fields. Queries run after template rendering
+and attach all matches. They do not create or update targets. A query matching
+nothing causes an error, including in dry runs. Queries can match targets created
+earlier in the same deployment; during a dry run those targets must already exist.
+Duplicate matches are attached once. Use either <code>query</code> or a named definition
+in each entry.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">l2vpns</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EVPN</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vxlan</span>
+<span class="w">    </span><span class="nt">import_route_targets</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">query</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;65100:100&quot;</span>
+<span class="w">    </span><span class="nt">export_route_targets</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">query</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">cf_customer_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">context.customer_id</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</code></pre></div>
+<p>The same syntax works under <code>vrfs</code>. Supported filter keys depend on your Netbox
+instance and its custom-field definitions.</p>
 <p><code>terminations</code> under an L2VPN uses the same record shape as the top-level
 <code>l2vpn_terminations</code> collection, except that the parent supplies <code>l2vpn</code>.
 Each termination attaches one device interface (<code>device</code> and <code>interface</code>) or
-one VLAN (<code>group</code> and <code>vid</code>). The interface or VLAN must already exist or be
+one VLAN (<code>group</code> and <code>vid</code>). Add <code>name</code> to a VLAN termination to create or
+update that VLAN before attaching it. Additional fields on that entry describe
+the VLAN; flattening retains only <code>l2vpn</code>, <code>group</code>, and <code>vid</code> on the termination.
+This works for nested and top-level terminations. VLAN definitions are deduplicated
+by group and VID: definitions already in <code>vlans</code> take precedence, followed by
+the first extracted termination definition. Entries without <code>name</code>
+remain references. The interface or referenced VLAN must already exist or be
 defined earlier in the design. NetBox permits only one L2VPN termination per
 attached object; deployment reports a conflict rather than moving an object
 from another L2VPN. Omitted terminations are not deleted.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">l2vpns</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="nt">vlan_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VLANS</span>
+
+<span class="nt">l2vpns</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EVPN</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vxlan</span>
 <span class="w">    </span><span class="nt">identifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10100</span>
@@ -9146,12 +9308,42 @@ from another L2VPN. Omitted terminations are not deleted.</p>
 <span class="w">        </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VLANS</span>
 <span class="w">        </span><span class="nt">vid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH USERS</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">User access VLAN created before attachment</span>
+<span class="w">        </span><span class="nt">custom_fields</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">customer_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME</span>
 
 <span class="nt">l2vpn_terminations</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">l2vpn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EVPN</span>
 <span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-2</span>
 <span class="w">    </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet1</span>
 </code></pre></div>
+<p>The example creates or updates VLAN 100 in <code>BRANCH VLANS</code>, then attaches it
+to <code>BRANCH EVPN</code>. The routers and their interfaces must already exist or be
+defined elsewhere in the design. The <code>customer_id</code> custom field must already
+be defined in Netbox; omit <code>custom_fields</code> if it is not available.</p>
+<p>During flattening, the named VLAN termination produces two records:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">vlans</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VLANS</span>
+<span class="w">    </span><span class="nt">vid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH USERS</span>
+<span class="w">    </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">User access VLAN created before attachment</span>
+<span class="w">    </span><span class="nt">custom_fields</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">customer_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME</span>
+
+<span class="nt">l2vpn_terminations</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">l2vpn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH EVPN</span>
+<span class="w">    </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH VLANS</span>
+<span class="w">    </span><span class="nt">vid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+</code></pre></div>
+<p>To attach an existing VLAN without updating its properties, supply only
+<code>group</code> and integer <code>vid</code> in the nested termination. That reference does not
+create a missing VLAN; deployment fails if it cannot resolve the VLAN.
+Named entries apply all additional fields, including tags and custom fields,
+to the VLAN, rather than to the termination. VLAN groups must exist or be
+defined in <code>vlan_groups</code>; termination extraction does not create groups.</p>
 <p>The <code>l2vpn_terminations</code> stage runs after interfaces. A dry run can report
 planned terminations even when their interfaces or VLANs are also planned and
 therefore have no IDs yet.</p>
@@ -9621,7 +9813,7 @@ and any errors.
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">¤</a></h2>
 <ul>
 <li>A dry run does not create prerequisites, so it cannot fully resolve references to objects proposed earlier in the same design.</li>
-<li>Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by related object name or ID. Names must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values; scalar and <code>null</code> values replace them. Custom-field definitions must already exist in NetBox.</li>
+<li>Explicit ASN, VLAN, and prefix records can supply object and multiobject custom-field references by string reference or ID, using the matching fields described in <a href="#custom-fields">Custom fields</a>. String references must identify exactly one existing object when that record is processed. Updates add multiobject references and other list values without removing current values; scalar and <code>null</code> values replace them. Custom-field definitions must already exist in NetBox.</li>
 <li>Check that named parents, device types, sites, interfaces, and allocation pools exist or are created earlier in the design order.</li>
 <li>Jinja filters, input models, and custom functions execute Python inside the worker. Use trusted files.</li>
 <li>See the <a href="https://github.com/norfablabs/NORFAB/blob/main/tests/nf_tests_inventory/netbox/designs/acme_branch_network_design_v1.yaml">ACME design example</a> for a full nested design.</li>
@@ -9798,76 +9990,7 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3918</span>
-<span class="normal">3919</span>
-<span class="normal">3920</span>
-<span class="normal">3921</span>
-<span class="normal">3922</span>
-<span class="normal">3923</span>
-<span class="normal">3924</span>
-<span class="normal">3925</span>
-<span class="normal">3926</span>
-<span class="normal">3927</span>
-<span class="normal">3928</span>
-<span class="normal">3929</span>
-<span class="normal">3930</span>
-<span class="normal">3931</span>
-<span class="normal">3932</span>
-<span class="normal">3933</span>
-<span class="normal">3934</span>
-<span class="normal">3935</span>
-<span class="normal">3936</span>
-<span class="normal">3937</span>
-<span class="normal">3938</span>
-<span class="normal">3939</span>
-<span class="normal">3940</span>
-<span class="normal">3941</span>
-<span class="normal">3942</span>
-<span class="normal">3943</span>
-<span class="normal">3944</span>
-<span class="normal">3945</span>
-<span class="normal">3946</span>
-<span class="normal">3947</span>
-<span class="normal">3948</span>
-<span class="normal">3949</span>
-<span class="normal">3950</span>
-<span class="normal">3951</span>
-<span class="normal">3952</span>
-<span class="normal">3953</span>
-<span class="normal">3954</span>
-<span class="normal">3955</span>
-<span class="normal">3956</span>
-<span class="normal">3957</span>
-<span class="normal">3958</span>
-<span class="normal">3959</span>
-<span class="normal">3960</span>
-<span class="normal">3961</span>
-<span class="normal">3962</span>
-<span class="normal">3963</span>
-<span class="normal">3964</span>
-<span class="normal">3965</span>
-<span class="normal">3966</span>
-<span class="normal">3967</span>
-<span class="normal">3968</span>
-<span class="normal">3969</span>
-<span class="normal">3970</span>
-<span class="normal">3971</span>
-<span class="normal">3972</span>
-<span class="normal">3973</span>
-<span class="normal">3974</span>
-<span class="normal">3975</span>
-<span class="normal">3976</span>
-<span class="normal">3977</span>
-<span class="normal">3978</span>
-<span class="normal">3979</span>
-<span class="normal">3980</span>
-<span class="normal">3981</span>
-<span class="normal">3982</span>
-<span class="normal">3983</span>
-<span class="normal">3984</span>
-<span class="normal">3985</span>
-<span class="normal">3986</span>
-<span class="normal">3987</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3987</span>
 <span class="normal">3988</span>
 <span class="normal">3989</span>
 <span class="normal">3990</span>
@@ -10078,7 +10201,76 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 <span class="normal">4195</span>
 <span class="normal">4196</span>
 <span class="normal">4197</span>
-<span class="normal">4198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4198</span>
+<span class="normal">4199</span>
+<span class="normal">4200</span>
+<span class="normal">4201</span>
+<span class="normal">4202</span>
+<span class="normal">4203</span>
+<span class="normal">4204</span>
+<span class="normal">4205</span>
+<span class="normal">4206</span>
+<span class="normal">4207</span>
+<span class="normal">4208</span>
+<span class="normal">4209</span>
+<span class="normal">4210</span>
+<span class="normal">4211</span>
+<span class="normal">4212</span>
+<span class="normal">4213</span>
+<span class="normal">4214</span>
+<span class="normal">4215</span>
+<span class="normal">4216</span>
+<span class="normal">4217</span>
+<span class="normal">4218</span>
+<span class="normal">4219</span>
+<span class="normal">4220</span>
+<span class="normal">4221</span>
+<span class="normal">4222</span>
+<span class="normal">4223</span>
+<span class="normal">4224</span>
+<span class="normal">4225</span>
+<span class="normal">4226</span>
+<span class="normal">4227</span>
+<span class="normal">4228</span>
+<span class="normal">4229</span>
+<span class="normal">4230</span>
+<span class="normal">4231</span>
+<span class="normal">4232</span>
+<span class="normal">4233</span>
+<span class="normal">4234</span>
+<span class="normal">4235</span>
+<span class="normal">4236</span>
+<span class="normal">4237</span>
+<span class="normal">4238</span>
+<span class="normal">4239</span>
+<span class="normal">4240</span>
+<span class="normal">4241</span>
+<span class="normal">4242</span>
+<span class="normal">4243</span>
+<span class="normal">4244</span>
+<span class="normal">4245</span>
+<span class="normal">4246</span>
+<span class="normal">4247</span>
+<span class="normal">4248</span>
+<span class="normal">4249</span>
+<span class="normal">4250</span>
+<span class="normal">4251</span>
+<span class="normal">4252</span>
+<span class="normal">4253</span>
+<span class="normal">4254</span>
+<span class="normal">4255</span>
+<span class="normal">4256</span>
+<span class="normal">4257</span>
+<span class="normal">4258</span>
+<span class="normal">4259</span>
+<span class="normal">4260</span>
+<span class="normal">4261</span>
+<span class="normal">4262</span>
+<span class="normal">4263</span>
+<span class="normal">4264</span>
+<span class="normal">4265</span>
+<span class="normal">4266</span>
+<span class="normal">4267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -10488,7 +10680,7 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       

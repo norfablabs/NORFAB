@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../images/logo.jpg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -10028,7 +10028,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 5 October 2026</em></p>
+<p><em>Last updated: 6 October 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10805,9 +10805,9 @@ Design processors resolve names in object and multiobject custom fields using ea
 Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last. Dry runs omit missing devices from local-context update results.
 Device types accept <code>default_platform</code> as a platform name.
 Route targets support bulk creation/update before VRFs and L2VPNs; inline
-import/export definitions are flattened and associated with their parent objects.
+import/export definitions are flattened and associated with their parent objects. Route-target lists also accept NetBox query filters, including custom-field filters, to attach all existing matches; queries with no matches fail.
 L2VPN terminations attach device interfaces or group/VID VLANs through top-level
-or nested definitions, rejecting attachments already used by another L2VPN.
+or nested definitions, rejecting attachments already used by another L2VPN. VLAN terminations with a name create or update their VLAN before attachment.
 Route-target and BGP-community definition lists require dictionaries, not bare strings.
 Routing-policy definitions, including BGP import/export lists, also require dictionaries.
 Interface, console, and power cables support top-level and nested definitions, bulk creation/update,
@@ -10953,7 +10953,7 @@ loaded from YAML through <code>nf://</code> URLs, using <code>match_device_names
 and group selection. The first matching mapping rule applies to the whole VLAN.
 Existing descriptions support always, live-empty-only, or never preservation;
 empty device descriptions yield to non-empty observations of the same VLAN.
-VLAN name conflicts are validated within each group or site before bulk writes;
+VLAN name conflicts against NetBox and between proposed changes are validated within each group or site before bulk writes;
 conflicting creations and updates are reported and skipped without stopping
 unrelated VLAN changes.
 VLANs are identified by VID and group, with every same-VID
@@ -11531,7 +11531,7 @@ protection must be designed as part of deployment.
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.footer", "toc.follow", "navigation.instant", "navigation.instant.progress", "content.footnote.tooltips", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
