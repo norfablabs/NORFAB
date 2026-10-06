@@ -385,6 +385,7 @@
     },
     "test_designs.py::TestDesignDeploy::test_acme_design": {
       "mode": "branch_feature",
+      "route_target_queries": "VRF and L2VPN import lists select the design-owned 4200650001:100 target by name.",
       "inline_l2vpn_vlan": {
         "group": "NORFAB ACME TEST VLANS",
         "vid": 100,
@@ -398,6 +399,19 @@
         "192.0.2.0/24",
         "198.19.224.0/20"
       ]
+    },
+    "test_designs.py::TestDesignDeploy::test_simple_collections": {
+      "route_targets": [
+        "64512:99123"
+      ],
+      "coverage": "VRF export query selects target defined by the same design; existing test owns and cleans up all its records."
+    },
+    "test_designs.py::TestDesignDeploy::test_l2vpn_with_inline_targets_and_terminations": {
+      "route_targets": [
+        "64512:99124",
+        "64512:99125"
+      ],
+      "coverage": "Import queries match multiple targets and overlapping matches; export query selects an existing target. Uses existing test-owned records and cleanup."
     }
   }
 }

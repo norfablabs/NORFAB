@@ -148,8 +148,8 @@ Each design section contains a list of object records. The rows show the order i
 | 14 | `vlan_groups` | `netbox.ipam.vlan_groups` | `name` | Scope by rack, location, site, site group, region, cluster, or cluster group. |
 | 15 | `vlans` | `netbox.ipam.vlans` | `group`, `vid` | VLANs with a specified ID require both fields. Existing VLANs gain new tags and custom-field list items. `create_vlan` allocates a VID. Direct VLAN `site` is unsupported. |
 | 16 | `route_targets` | `netbox.ipam.route_targets` | `name` | VRF and L2VPN references can inline target dictionaries. |
-| 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets must be dictionaries. Existing target lists gain missing targets. |
-| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets must be dictionaries. Existing target lists gain missing targets. Nested terminations are flattened; named VLAN terminations also populate `vlans`. |
+| 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. |
+| 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. Nested terminations are flattened; named VLAN terminations also populate `vlans`. |
 | 19 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. Existing prefixes gain new tags and custom-field list items. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
 | 20 | `devices` | `netbox.dcim.devices` | `site` and `name`, plus `tenant` when supplied | Nested components are flattened before writes. |
 | 21 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
@@ -1518,6 +1518,29 @@ Define L2VPNs in `l2vpns`. Like VRFs, they accept `import_route_targets` and
 `export_route_targets` as lists of dictionaries with `name`. These definitions
 are extracted into `route_targets` and deployed before the L2VPN. Repeating the
 same target dictionary in both lists creates it once.
+
+Import/export lists also accept `query` to select existing route targets using
+Netbox filters, including custom fields. Queries run after template rendering
+and attach all matches. They do not create or update targets. A query matching
+nothing causes an error, including in dry runs. Queries can match targets created
+earlier in the same deployment; during a dry run those targets must already exist.
+Duplicate matches are attached once. Use either `query` or a named definition
+in each entry.
+
+```yaml
+l2vpns:
+  - name: BRANCH EVPN
+    type: vxlan
+    import_route_targets:
+      - query:
+          name: "65100:100"
+    export_route_targets:
+      - query:
+          cf_customer_id: "{{ context.customer_id }}"
+```
+
+The same syntax works under `vrfs`. Supported filter keys depend on your Netbox
+instance and its custom-field definitions.
 
 `terminations` under an L2VPN uses the same record shape as the top-level
 `l2vpn_terminations` collection, except that the parent supplies `l2vpn`.

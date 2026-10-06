@@ -930,13 +930,23 @@ class DesignDocument(BaseModel):
                         not isinstance(record[field], list)
                         or not all(
                             isinstance(value, dict)
-                            and isinstance(value.get("name"), str)
-                            and value["name"]
+                            and (
+                                (
+                                    set(value) == {"query"}
+                                    and isinstance(value["query"], dict)
+                                    and bool(value["query"])
+                                )
+                                or (
+                                    "query" not in value
+                                    and isinstance(value.get("name"), str)
+                                    and bool(value["name"])
+                                )
+                            )
                             for value in record[field]
                         )
                     ):
                         raise ValueError(
-                            f"{collection}.{field} must be a list of route-target dictionaries with name"
+                            f"{collection}.{field} must contain named route-target dictionaries or nonempty query dictionaries"
                         )
         attachments = set()
         for record in self.l2vpn_terminations:

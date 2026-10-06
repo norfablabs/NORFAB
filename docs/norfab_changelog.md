@@ -3,6 +3,7 @@
 ## ENHANCEMENTS
 
 1. NetBox `design_deploy` extracts named VLAN definitions from nested and top-level L2VPN terminations and deploys them before attachment.
+2. NetBox `design_deploy` supports `query` filters in VRF and L2VPN import/export route-target lists to attach existing matches.
 
 ## BUGS
 

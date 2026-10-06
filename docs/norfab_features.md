@@ -728,7 +728,7 @@ Design processors resolve names in object and multiobject custom fields using ea
 Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last. Dry runs omit missing devices from local-context update results.
 Device types accept `default_platform` as a platform name.
 Route targets support bulk creation/update before VRFs and L2VPNs; inline
-import/export definitions are flattened and associated with their parent objects.
+import/export definitions are flattened and associated with their parent objects. Route-target lists also accept NetBox query filters, including custom-field filters, to attach all existing matches; queries with no matches fail.
 L2VPN terminations attach device interfaces or group/VID VLANs through top-level
 or nested definitions, rejecting attachments already used by another L2VPN. VLAN terminations with a name create or update their VLAN before attachment.
 Route-target and BGP-community definition lists require dictionaries, not bare strings.

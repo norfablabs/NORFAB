@@ -506,8 +506,16 @@ class TestDesignDeploy:
             for action in ("created", "updated"):
                 if action == "updated":
                     design["l2vpns"][0]["description"] = "updated L2VPN"
+                    design["route_targets"] = [
+                        {"name": target_name},
+                        {"name": added_target_name},
+                    ]
                     design["l2vpns"][0]["import_route_targets"] = [
-                        {"name": added_target_name}
+                        {"query": {"name": [target_name, added_target_name]}},
+                        {"query": {"name": target_name}},
+                    ]
+                    design["l2vpns"][0]["export_route_targets"] = [
+                        {"query": {"name": target_name}}
                     ]
                 response = nfclient.run_job(
                     "netbox", "design_deploy", workers="any", kwargs={"design": design}
@@ -2664,9 +2672,7 @@ tenants:
                 "import_route_targets": [
                     {"name": "64512:99123", "description": "design target"}
                 ],
-                "export_route_targets": [
-                    {"name": "64512:99123", "description": "design target"}
-                ],
+                "export_route_targets": [{"query": {"name": "64512:99123"}}],
             }
         ]
         design["bgp_communities"] = [
@@ -2770,6 +2776,18 @@ tenants:
             {"tenants": {"name": "tenant-1"}},
             {"tenants": ["tenant-1"]},
             {"vrfs": [{"name": "invalid", "import_route_targets": ["64512:100"]}]},
+            {"vrfs": [{"name": "invalid", "import_route_targets": [{"query": {}}]}]},
+            {
+                "l2vpns": [
+                    {
+                        "name": "invalid",
+                        "type": "vxlan",
+                        "export_route_targets": [
+                            {"query": {"name": "64512:999999999"}}
+                        ],
+                    }
+                ]
+            },
             {"route_targets": ["64512:100"]},
             {"bgp_communities": ["64512:100"]},
             {"routing_policies": ["ACME EXPORT"]},

@@ -181,9 +181,8 @@ vrfs:
     tenant: ACME
     rd: "4200650001:100"
     import_route_targets:
-      - name: "4200650001:100"
-        tenant: ACME
-        description: ACME branch import target
+      - query:
+          name: "4200650001:100"
     export_route_targets:
       - name: "4200650001:200"
         tenant: ACME
@@ -195,7 +194,8 @@ l2vpns:
     identifier: 10100
     tenant: ACME
     import_route_targets:
-      - name: "4200650001:100"
+      - query:
+          name: "4200650001:100"
     export_route_targets:
       - name: "4200650001:100"
     terminations:

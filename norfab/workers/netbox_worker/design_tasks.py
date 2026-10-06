@@ -226,6 +226,7 @@ def flatten_design(design: dict) -> dict:
                 for target in record.get(field, []):
                     if (
                         isinstance(target, dict)
+                        and "query" not in target
                         and target["name"] not in route_target_names
                     ):
                         design.setdefault("route_targets", []).append(target)
@@ -1487,6 +1488,7 @@ def process_vrfs(
 ) -> dict:
     """Match VRFs by name and RD, resolving route-target lists to IDs.
 
+    Query entries select all existing matches and fail when none match.
     Targets are created earlier or fetched in one batch; cache VRF IDs for
     prefix and IP identity checks. An absent RD is part of the identity.
 
@@ -1503,6 +1505,26 @@ def process_vrfs(
     Returns:
         dict: Object identities grouped under ``created`` and ``updated``.
     """
+    # Queries select existing targets; named entries keep their deployment behavior.
+    for record in records:
+        for field in ("import_route_targets", "export_route_targets"):
+            if field not in record:
+                continue
+            references = {}
+            for target in record[field]:
+                if "query" in target:
+                    matches = list(nb.ipam.route_targets.filter(**target["query"]))
+                    if not matches:
+                        raise ValueError(
+                            f"route-target query matched no targets: {target['query']}"
+                        )
+                    for match in matches:
+                        lookup_cache["route_targets"][match.name] = match.id
+                        references[match.name] = {"name": match.name}
+                else:
+                    references[target["name"]] = target
+            record[field] = list(references.values())
+
     log.debug("process_vrfs: processing %d records, dry_run=%s", len(records), dry_run)
     target_names = list(
         {
@@ -1595,6 +1617,7 @@ def process_l2vpns(
 ) -> dict:
     """Match L2VPNs by name and resolve their import and export route targets.
 
+    Query entries select all existing matches and fail when none match.
     Inline targets are deployed earlier. New L2VPN IDs are cached for
     termination writes; dry runs report planned changes without writing.
 
@@ -1611,6 +1634,26 @@ def process_l2vpns(
     Returns:
         dict: L2VPN names grouped under ``created`` and ``updated``.
     """
+    # Queries select existing targets; named entries keep their deployment behavior.
+    for record in records:
+        for field in ("import_route_targets", "export_route_targets"):
+            if field not in record:
+                continue
+            references = {}
+            for target in record[field]:
+                if "query" in target:
+                    matches = list(nb.ipam.route_targets.filter(**target["query"]))
+                    if not matches:
+                        raise ValueError(
+                            f"route-target query matched no targets: {target['query']}"
+                        )
+                    for match in matches:
+                        lookup_cache["route_targets"][match.name] = match.id
+                        references[match.name] = {"name": match.name}
+                else:
+                    references[target["name"]] = target
+            record[field] = list(references.values())
+
     l2vpns = lookup_cache["l2vpns"]
     targets = lookup_cache["route_targets"]
     target_names = {
