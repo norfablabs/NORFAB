@@ -401,6 +401,7 @@
       ]
     },
     "test_designs.py::TestDesignDeploy::test_acme_design": {
+      "peering_asn_wrapper": "acme-branch-rtr-1-to-acme-branch-agg-2 allocates or reuses ACME allocated branch ASN for local_as. Existing query examples remain intact.",
       "mode": "branch_feature",
       "route_target_queries": "VRF and L2VPN import lists select the design-owned 4200650001:100 target by name.",
       "inline_l2vpn_vlan": {
@@ -481,6 +482,21 @@
         "NORFAB ASN LOOKUP SITE B"
       ],
       "ownership": "Creates and deletes only its own records. Covers role/site and range filtering, role/site precedence over description, dry runs, applied updates, and multiple-site ambiguity."
+    },
+    "test_designs.py::TestDesignDeploy::test_bgp_peering_asn_allocations": {
+      "asns": [
+        4200999900,
+        4200999901
+      ],
+      "asn_range": "NORFAB DESIGN PEERING ASN RANGE",
+      "rir": "NORFAB DESIGN PEERING ASN RIR",
+      "ip_addresses": [
+        "198.19.242.1/30",
+        "198.19.242.2/30"
+      ],
+      "session": "NORFAB DESIGN ASN ALLOCATION PEERING",
+      "read_only_device": "ceos1",
+      "ownership": "Owns and deletes its session, ASNs, IPs, range, and RIR. Tests local/remote allocation, dry runs, repeat deployment, and missing-range failure."
     }
   }
 }

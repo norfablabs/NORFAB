@@ -2071,6 +2071,14 @@ class TestDesignDeploy:
                     allocated_peering.remote_as.asn
                     == allocated_numbers["ACME allocated aggregation ASN"]
                 )
+                inline_asn_peering = nb.plugins.bgp.session.get(
+                    name="acme-branch-rtr-1-to-acme-branch-agg-2"
+                )
+                assert (
+                    inline_asn_peering.local_as.asn
+                    == allocated_numbers["ACME allocated branch ASN"]
+                )
+                assert inline_asn_peering.remote_as.asn == 4200650002
                 termination_vlan = nb.ipam.vlans.get(group_id=group.id, vid=100)
                 assert termination_vlan.name == "ACME USERS"
                 assert termination_vlan.description == "ACME branch user access"
@@ -2368,6 +2376,107 @@ class TestDesignDeploy:
                 if endpoint.name == "interfaces":
                     continue
                 assert not list(endpoint.filter(**filters)), filters
+
+    def test_bgp_peering_asn_allocations(self, nfclient: Any) -> None:
+        """Allocate local/remote ASNs in a design and reuse them on repeat runs."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "NORFAB DESIGN ASN ALLOCATION PEERING"
+        range_name = "NORFAB DESIGN PEERING ASN RANGE"
+        objects = [
+            (nb.plugins.bgp.session, {"name": name}),
+            (nb.ipam.asns, {"asn": [4200999900, 4200999901]}),
+            (nb.ipam.ip_addresses, {"address": ["198.19.242.1/30", "198.19.242.2/30"]}),
+            (nb.ipam.asn_ranges, {"name": range_name}),
+            (nb.ipam.rirs, {"name": "NORFAB DESIGN PEERING ASN RIR"}),
+        ]
+        if any(list(endpoint.filter(**filters)) for endpoint, filters in objects):
+            pytest.skip("peering ASN allocation test records already exist")
+        if not nb.dcim.devices.get(name="ceos1"):
+            pytest.skip("seed device ceos1 is required")
+        try:
+            rir = nb.ipam.rirs.create(
+                {
+                    "name": "NORFAB DESIGN PEERING ASN RIR",
+                    "slug": "norfab-design-peering-asn-rir",
+                }
+            )
+            nb.ipam.asn_ranges.create(
+                {
+                    "name": range_name,
+                    "slug": "norfab-design-peering-asn-range",
+                    "start": 4200999900,
+                    "end": 4200999901,
+                    "rir": rir.id,
+                }
+            )
+            nb.ipam.ip_addresses.create(
+                [{"address": "198.19.242.1/30"}, {"address": "198.19.242.2/30"}]
+            )
+            peering = {
+                "name": name,
+                "device": "ceos1",
+                "local_address": "198.19.242.1",
+                "remote_address": "198.19.242.2",
+                "local_as": {
+                    "create_asn": {
+                        "asn_range": range_name,
+                        "description": "NORFAB PEERING LOCAL ASN",
+                    }
+                },
+                "remote_as": {
+                    "create_asn": {
+                        "asn_range": range_name,
+                        "description": "NORFAB PEERING REMOTE ASN",
+                    }
+                },
+                "create_reverse": False,
+            }
+            for dry_run in (True, False, False):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="netbox-worker-1.1",
+                    kwargs={"design": {"bgp_peerings": [peering]}, "dry_run": dry_run},
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                if dry_run:
+                    assert nb.plugins.bgp.session.get(name=name) is None
+                    assert not list(
+                        nb.ipam.asns.filter(asn__gte=4200999900, asn__lte=4200999901)
+                    )
+                else:
+                    session = nb.plugins.bgp.session.get(name=name)
+                    assert session.local_as.asn == 4200999900
+                    assert session.remote_as.asn == 4200999901
+                    assert (
+                        len(
+                            list(
+                                nb.ipam.asns.filter(
+                                    asn__gte=4200999900, asn__lte=4200999901
+                                )
+                            )
+                        )
+                        == 2
+                    )
+            peering["local_as"] = {
+                "create_asn": {"asn_range": "NORFAB NONEXISTENT PEERING RANGE"}
+            }
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="netbox-worker-1.1",
+                kwargs={"design": {"bgp_peerings": [peering]}},
+            )
+            assert response
+            for result in response.values():
+                assert result["failed"], result
+                assert "not found" in str(result["errors"])
+        finally:
+            for endpoint, filters in objects:
+                for record in endpoint.filter(**filters):
+                    record.delete()
 
     def test_bgp_peering_policies(self, nfclient: Any) -> None:
         """Derive a session name and leave its existing fields unchanged."""
@@ -2807,6 +2916,23 @@ tenants:
         "design",
         [
             {"unknown": []},
+            {
+                "bgp_peerings": [
+                    {
+                        "name": "invalid",
+                        "local_as": {"create_asn": {"asn_range": "test"}},
+                        "local_as_query": {"description": "test"},
+                    }
+                ]
+            },
+            {
+                "bgp_peerings": [
+                    {
+                        "name": "invalid",
+                        "remote_as": {"create_asn": {"asn": 64512, "rir": "test"}},
+                    }
+                ]
+            },
             {"tenants": {"name": "tenant-1"}},
             {"tenants": ["tenant-1"]},
             {"vrfs": [{"name": "invalid", "import_route_targets": ["64512:100"]}]},

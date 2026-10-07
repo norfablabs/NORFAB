@@ -745,7 +745,7 @@ design communities match by value and optional description, and interface VRFs a
 Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
 Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 IP allocation prefix filters resolve `role` by role name, not slug, and reject unknown names.
-BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. Design peerings create only the specified direction unless `create_reverse: true` is set. The standalone create task resolves custom-field references for new sessions.
+BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. Design peerings create only the specified direction unless `create_reverse: true` is set. Local and remote ASN fields support nested `create_asn` wrappers to allocate or reuse ASNs before session creation. The standalone create task resolves custom-field references for new sessions.
 Named or inline peer groups and import/export policies are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving the design `context`, record arguments, `netbox`, and `dry_run`; custom

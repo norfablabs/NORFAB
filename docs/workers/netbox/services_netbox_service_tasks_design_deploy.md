@@ -187,7 +187,7 @@ used during deployment.
 | --- | --- | --- |
 | `query` | VRF/L2VPN import and export route-target entries | Selects existing targets by Netbox filters after rendering. Attaches all matches. Fails if none match. |
 | `custom_function` | All top-level collection records. Device `local_context_data` | Calls registered Python with context, Netbox, dry-run mode, and supplied arguments. Functions handle their own writes. Local-context functions return a dictionary. |
-| `create_asn` | `asns` | Allocates an ASN from a named range. |
+| `create_asn` | `asns`. BGP peering `local_as` and `remote_as`, including nested peerings | Allocates or reuses an ASN from a named range. See the ASN examples below. |
 | `create_vlan` | `vlans` | Allocates a VID from a VLAN group. |
 | `create_prefix` | `prefixes` | Allocates a child prefix. |
 | `create_ip` | `ip_addresses`, including nested interface IPs | Allocates an IP, optionally assigning it to an interface or FHRP group. |
@@ -206,7 +206,7 @@ Task wrappers call standalone NorFab NetBox service tasks during the relevant de
 
 | Task wrapper | How it works |
 | --- | --- |
-| [create_asn](services_netbox_service_tasks_create_asn.md) | Selects an available ASN from an existing named range. |
+| [create_asn](services_netbox_service_tasks_create_asn.md) | Allocates or reuses an ASN in `asns` or BGP peering `local_as` and `remote_as`. |
 | [create_vlan](services_netbox_service_tasks_create_vlan.md) | Selects an available VID from an existing VLAN group's allowed ranges. |
 | [create_prefix](services_netbox_service_tasks_create_prefix.md) | Allocates a child prefix of the requested length inside an existing parent prefix; supports VLAN association by VID and group name. |
 | [create_ip](services_netbox_service_tasks_create_ip.md) | Allocates an address from an existing prefix and can assign it to a device interface or named VRRP group. |
@@ -335,6 +335,32 @@ bgp_peerings:
           custom_fields:
             deployment_owner: ACME
     ```
+
+    You can also allocate an ASN directly in a BGP peering. This example reuses
+    the branch ASN above and allocates a peer ASN from the same range:
+
+    ```yaml
+    bgp_peerings:
+      - name: branch-upstream
+        device: branch-router-1
+        local_address: 192.0.2.1
+        remote_address: 192.0.2.2
+        local_as:
+          create_asn:
+            asn_range: ACME BRANCH ASNS
+            description: ACME branch ASN
+        remote_as:
+          create_asn:
+            asn_range: ACME BRANCH ASNS
+            description: ACME peer ASN
+    ```
+
+    The device and IP addresses must exist or be defined in the design. Wrappers
+    also work on peerings nested under devices or interfaces. Do not combine
+    a wrapper with the corresponding `local_as_query` or `remote_as_query`.
+    Use a stable description or role/site combination for repeatable allocation.
+    Dry runs do not reserve numbers, so allocations from the same range may
+    report the same available ASN.
 
 === "VLAN"
 

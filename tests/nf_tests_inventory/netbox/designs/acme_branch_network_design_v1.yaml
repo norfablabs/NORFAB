@@ -411,7 +411,10 @@ devices:
       - name: acme-branch-rtr-1-to-acme-branch-agg-2
         local_address: 192.0.2.101
         remote_address: 192.0.2.104
-        local_as: 4200650001
+        local_as:
+          create_asn:
+            asn_range: ACME BRANCH ALLOCATED ASNS
+            description: ACME allocated branch ASN
         remote_as: 4200650002
         status: active
         description: ACME inter-tier eBGP

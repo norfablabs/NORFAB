@@ -2974,6 +2974,7 @@ def process_bgp_peerings(
 ) -> dict:
     """Create missing BGP sessions and leave existing sessions unchanged.
 
+    Local/remote create_asn wrappers allocate ASNs before session creation.
     Routing-policy dictionaries become names. Reverse-session creation is
     batched separately because the worker task takes one flag per batch.
     The create task derives missing names and checks NetBox for existing sessions.
@@ -2993,6 +2994,21 @@ def process_bgp_peerings(
     """
     records = [dict(record) for record in records]
     for record in records:
+        # Allocate nested ASNs before passing numeric references to the peering task.
+        for field in ("local_as", "remote_as"):
+            if isinstance(record.get(field), dict):
+                result = worker.create_asn(
+                    **record[field]["create_asn"],
+                    job=job,
+                    instance=instance,
+                    branch=branch,
+                    dry_run=dry_run,
+                )
+                if result.failed or result.errors:
+                    raise ValueError(
+                        "; ".join(result.errors) or "ASN allocation failed"
+                    )
+                record[field] = result.result["asn"]
         for field in ("import_policies", "export_policies"):
             if field in record:
                 record[field] = [policy["name"] for policy in record[field]]

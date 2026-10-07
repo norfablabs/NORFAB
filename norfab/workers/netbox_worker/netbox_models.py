@@ -994,6 +994,27 @@ class DesignDocument(BaseModel):
         for record in self.bgp_peerings:
             if "custom_function" not in record:
                 task_record = dict(record)
+                for field in ("local_as", "remote_as"):
+                    value = task_record.get(field)
+                    if isinstance(value, dict):
+                        if set(value) != {"create_asn"}:
+                            raise ValueError(
+                                f"bgp_peerings.{field} requires a create_asn wrapper"
+                            )
+                        arguments = value["create_asn"]
+                        CreateBgpAsnInput.model_validate(arguments)
+                        if (
+                            not arguments.get("asn_range")
+                            or arguments.get("asn") is not None
+                        ):
+                            raise ValueError(
+                                f"bgp_peerings.{field}.create_asn requires a range without an explicit ASN"
+                            )
+                        if task_record.get(f"{field}_query") is not None:
+                            raise ValueError(
+                                f"bgp_peerings.{field} cannot combine create_asn with {field}_query"
+                            )
+                        task_record.pop(field)
                 for field in ("import_policies", "export_policies"):
                     if field not in record:
                         continue

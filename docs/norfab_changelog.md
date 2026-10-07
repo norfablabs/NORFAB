@@ -9,6 +9,7 @@
 
 1. Netbox `sync_device_interfaces` supports optional `batch_fallback` to retry failed create and update batches one interface at a time, report per-interface errors in results, logs, and events, and continue with subsequent bulk batches. Defaults to `False`.
 2. Netbox `create_asn` reuses range allocations by role and any supplied site. Explicit ASN numbers take precedence. With a range, role/site lookup takes precedence over description lookup. No match allocates the next available ASN. Multiple matches raise an error.
+3. Netbox `design_deploy` supports nested `create_asn` wrappers in BGP peering `local_as` and `remote_as` fields, allocating or reusing ASNs before session creation.
 
 
 ---
