@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 6 October 2026*
+*Last updated: 7 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -871,11 +871,14 @@ rename rules, reconciles the parsed 802.1Q interface mode independently of VLAN
 assignments, and applies ordered create, update, and optional delete actions.
 Bulk interface writes use sequential requests of 1000 items by default, with a
 configurable positive `batch_size` for each run; each
-batch reports progress in events and logs.
+batch reports progress in events and logs. Optional `batch_fallback` retries
+failed create and update batches individually, reports errors, and continues
+with subsequent bulk batches.
 An empty NetBox interface set is valid, allowing a device to be initialized
 entirely from discovered live interfaces. Interface-name mapping rules can be
 supplied inline or loaded from YAML through `nf://` URLs. VLAN objects and
-tagged/untagged memberships are handled by VLAN sync.
+tagged/untagged memberships are handled by VLAN sync. Clearing an interface
+mode during interface sync also clears its VLAN assignments.
 VRF objects and interface VRF assignments are handled by VRF sync.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
@@ -974,6 +977,8 @@ anycast ranges, VRF/site association, controlled deletion behavior, and stable
 create, update, delete, and in-sync diff reports.
 IP sync allows separate interface assignments for shared anycast and VIP
 addresses, including VIP roles parsed from devices or inherited from NetBox.
+Parsed anycast host addresses extend the task's anycast ranges across VRFs
+and correct the roles of overlapping NetBox IP records.
 Parsed VRRP, GLBP, HSRP, and CARP addresses are excluded from IP
 synchronization. The VRRP sync task creates VRRP addresses and associates them
 with FHRP groups. IP records assigned to other non-interface objects are also
@@ -1025,7 +1030,7 @@ objects are never deleted.
 
 Creates or updates an explicit ASN, or allocates the next available ASN from a
 named ASN range. The task and `netbox create asn` NFCLI command accept a `sites`
-list to associate the ASN with multiple sites; the same task backs design allocations.
+list to associate the ASN with multiple sites; the same task backs design allocations. Range allocation matches role and any supplied site when provided, otherwise description. Ambiguous matches fail.
 Repeated `create_asn` calls add sites, tags, and items in list-valued custom
 fields to existing ASNs without removing existing values. Object and multiobject
 custom fields accept related object names, which the task resolves to IDs;

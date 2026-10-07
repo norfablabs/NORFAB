@@ -58,10 +58,12 @@ class NetboxBgpAsnTasks:
     ) -> Result:
         """Create, update, or allocate one ASN in NetBox.
 
-        An explicit ASN is matched globally by number. Without one, the task
-        reuses an ASN with the same description inside the named range, or
-        allocates the first available number. Omitting the description means
-        repeated range calls can allocate different ASNs. A non-empty sites
+        An explicit ASN is matched globally by number. Without one, range searches
+        use role and sites when both are supplied, matching an ASN in the range
+        with that role assigned to any requested site. Otherwise, it matches
+        by description within the range. If the selected lookup finds no match,
+        it allocates the first available number. Without either lookup, repeated
+        range calls can allocate different ASNs. A non-empty sites
         list adds to the ASN's site assignments; an empty or omitted list
         leaves them alone. Tags and array custom fields are also additive.
         Dry-run reports the selected number without writing relationships.
@@ -80,8 +82,10 @@ class NetboxBgpAsnTasks:
                 must identify exactly one object. Arrays merged with existing values;
                 empty arrays preserve existing arrays. Null and scalar values
                 replace existing values.
-            sites: Optional site names to add to the ASN's assignments.
-            role: Optional IPAM role name.
+            sites: Optional site names to add to the ASN's assignments. With role,
+                also used to reuse a range allocation assigned to any of these sites.
+            role: Optional IPAM role name. With sites, also used for range lookup
+                before description matching.
             instance: NetBox instance name, or the worker default when omitted.
             dry_run: Select an ASN without creating or updating it.
             branch: Optional NetBox Branching plugin branch name.
@@ -94,7 +98,7 @@ class NetboxBgpAsnTasks:
         Raises:
             ValueError: The range, RIR, site, or related custom-field object is
                 missing; a related name is ambiguous; more than one ASN matches
-                the description; or the range has no free ASNs.
+                the description or role/sites; or the range has no free ASNs.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -112,7 +116,17 @@ class NetboxBgpAsnTasks:
         if asn is not None:
             existing = nb.ipam.asns.get(asn=asn)
             matches = [existing] if existing else []
-        elif description:
+        elif nb_range and role and sites:
+            matches = self.bulk_filter(
+                nb.ipam.asns,
+                asn__gte=nb_range.start,
+                asn__lte=nb_range.end,
+                role=nb.ipam.roles.get(name=role).slug,
+                site=[
+                    site.slug for site in self.bulk_filter(nb.dcim.sites, name=sites)
+                ],
+            )
+        elif nb_range and description:
             matches = self.bulk_filter(
                 nb.ipam.asns,
                 description=description,
@@ -121,7 +135,7 @@ class NetboxBgpAsnTasks:
             )
         if len(matches) > 1:
             raise ValueError(
-                f"ASN description '{description}' matched more than one ASN in range '{asn_range}'"
+                f"ASN lookup matched more than one ASN in range '{asn_range}' (description={description!r}, role={role!r}, sites={sites!r})"
             )
 
         nb_asn = matches[0] if matches else None

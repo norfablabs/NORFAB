@@ -134,6 +134,23 @@
         "norfab-netbox-graphql-branch-test"
       ]
     },
+    "test_interfaces.py::TestSyncDeviceInterfaces::test_sync_device_interfaces_clears_vlans_when_mode_is_none": {
+      "mode": "main_mutating",
+      "devices": [
+        "fn-if-sp-1"
+      ],
+      "interfaces": [
+        "TEST_SYNC_MODE_CLEAR"
+      ],
+      "live_source": "Loopback10 mapped to the test-owned interface",
+      "vlan_group": "NORFAB INTERFACE MODE CLEAR",
+      "vlan_group_slug": "norfab-interface-mode-clear",
+      "vlan_ids": [
+        3981,
+        3982
+      ],
+      "cleanup": "Delete only the interface, VLANs, and VLAN group created by this test, including after partial failures."
+    },
     "test_interfaces.py::TestSyncDeviceInterfaces": {
       "mode": "main_mutating",
       "cleanup": "Only TEST_SYNC interfaces on fn-if-* devices",
@@ -432,6 +449,38 @@
         "norfab-context-computed"
       ],
       "coverage": "IP string resolution on creation/update and additive multiobject merging."
+    },
+    "test_bgp_asn.py::TestCreateBgpAsn::test_allocates_and_assigns_sites": {
+      "asns": [
+        4200999700,
+        4200999701
+      ],
+      "asn_range": "NORFAB ASN TASK RANGE",
+      "rir": "NORFAB ASN TASK RIR",
+      "sites": [
+        "NORFAB ASN TASK SITE A",
+        "NORFAB ASN TASK SITE B"
+      ],
+      "ownership": "Owns and cleans up these records. Tests description-based allocation and additive site assignments."
+    },
+    "test_bgp_asn.py::TestCreateBgpAsn::test_matches_range_role_and_sites": {
+      "asns": [
+        4200999800,
+        4200999801,
+        4200999804
+      ],
+      "asn_range": {
+        "name": "NORFAB ASN LOOKUP RANGE",
+        "start": 4200999800,
+        "end": 4200999801
+      },
+      "rir": "NORFAB ASN LOOKUP RIR",
+      "role": "NORFAB ASN LOOKUP ROLE",
+      "sites": [
+        "NORFAB ASN LOOKUP SITE A",
+        "NORFAB ASN LOOKUP SITE B"
+      ],
+      "ownership": "Creates and deletes only its own records. Covers role/site and range filtering, role/site precedence over description, dry runs, applied updates, and multiple-site ambiguity."
     }
   }
 }

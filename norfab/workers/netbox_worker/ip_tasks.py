@@ -923,8 +923,9 @@ class NetboxIpTasks:
 
         **Side Effects**
 
-        1. When overlapping IP discovered in Netbox and it is part of anycast range,
-            existing IP role update to `anycast`
+        1. Parsed live anycast addresses extend the task's anycast ranges with
+            IPv4 /32 or IPv6 /128 host networks, regardless of VRF. Overlapping
+            NetBox IP records have their role updated to `anycast`.
         2. Parsed TTP IP roles are synchronized to NetBox, except for FHRP
             addresses using the `vrrp`, `glbp`, `hsrp`, or `carp` roles.
         3. Addresses with the `anycast` or `vip` role may be assigned to multiple
@@ -1143,6 +1144,12 @@ class NetboxIpTasks:
                     # detection remains authoritative for configured anycast ranges.
                     if parsed_ip_role and resolved_ip_role != "anycast":
                         resolved_ip_role = parsed_ip_role
+                    if resolved_ip_role == "anycast":
+                        anycast_nets.append(
+                            ipaddress.ip_network(
+                                f"{host_address}/{host_address.max_prefixlen}"
+                            )
+                        )
                     ip_live = {
                         "device": device_name,
                         "interface": intf_name,

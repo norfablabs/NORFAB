@@ -28,6 +28,25 @@ The `create_asn` task creates or updates one NetBox ASN. It can use an explicit 
 
 Provide `asn` or `asn_range`. When `asn` is supplied without a range, `rir` is required.
 
+Explicit ASN numbers take precedence. Additional searches only run when
+`asn_range` is provided. With both `role` and a nonempty `sites` list, the task
+searches that range for the role and any requested site. Otherwise, it searches
+the range by description. Multiple matches cause
+an error. If the selected lookup finds no match, it allocates the next available
+ASN. Role/site lookup does not fall back to description.
+
+```yaml
+asns:
+  - create_asn:
+      asn_range: CUSTOMER ASNS
+      role: CUSTOMER EDGE
+      sites: [BRANCH-1]
+```
+
+Repeated calls reuse the range's CUSTOMER EDGE ASN for BRANCH-1, even without
+a description. The range, role, and site must already exist.
+
+
 ## Output
 
 ```python

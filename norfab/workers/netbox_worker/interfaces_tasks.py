@@ -818,6 +818,7 @@ class NetboxInterfacesTasks:
         update_type: bool = True,
         preserve_description: Union[None, bool] = None,
         batch_size: int = 1000,
+        batch_fallback: bool = False,
         **kwargs: Any,
     ) -> Result:
         """
@@ -845,6 +846,7 @@ class NetboxInterfacesTasks:
         **Limitations**
 
         - Interface sync does not handle IP addresses
+        - Clearing interface mode also clears untagged and tagged VLAN assignments
         - Interface sync does not handle MAC addresses
         - Sync interfaces uses device running configuration as the primary source;
           operational state only fills missing MTU, duplex, and speed values
@@ -906,6 +908,9 @@ class NetboxInterfacesTasks:
                 live text.
             batch_size (int, optional): Maximum interfaces in each NetBox bulk
                 create, update, or delete request. Defaults to 1000.
+            batch_fallback (bool, optional): Retry failed create and update batches
+                one interface at a time, reporting errors and continuing with the
+                next bulk batch. Defaults to False. Deletions are unaffected.
             update_type (bool): Safely update existing interface types. Updates are
                 allowed from ``other`` to ``virtual``, ``bridge``, or ``lag``, and
                 between those logical types. Specific physical types are protected,
@@ -1281,6 +1286,9 @@ class NetboxInterfacesTasks:
             ret.dry_run = True
             ret.messages.append("review declined; changes were not applied")
             return ret
+        device_names_by_id = {
+            data["id"]: device_name for device_name, data in nb_devices_data.items()
+        }
         # create LAG interfaces
         job.event("preparing LAG interface create payloads")
         bulk_create_lag_interfaces = []
@@ -1302,6 +1310,7 @@ class NetboxInterfacesTasks:
             f"prepared {len(bulk_create_lag_interfaces)} LAG interface create payload(s)"
         )
         if bulk_create_lag_interfaces:
+            created_lag_count = 0
             job.event("creating LAG interfaces")
             total_batches = (
                 len(bulk_create_lag_interfaces) + batch_size - 1
@@ -1319,17 +1328,42 @@ class NetboxInterfacesTasks:
                 except Exception as exc:
                     msg = f"failed to create LAG interface batch {batch_number}/{total_batches}: {exc}"
                     ret.errors.append(msg)
-                    ret.failed = True
                     log.error(msg)
                     job.event(msg, severity="ERROR")
-                    return ret
+                    if not batch_fallback:
+                        ret.failed = True
+                        return ret
+                    msg = f"retrying LAG interface batch {batch_number}/{total_batches} one interface at a time"
+                    log.warning(msg)
+                    job.event(msg, severity="WARNING")
+                    created_interfaces = []
+                    for payload in batch:
+                        device_name = device_names_by_id[payload["device"]]
+                        try:
+                            interface = nb.dcim.interfaces.create(payload)
+                        except Exception as item_exc:
+                            msg = f"failed to create {device_name}:{payload['name']}: {item_exc}"
+                            ret.errors.append(msg)
+                            log.error(msg)
+                            job.event(msg, severity="ERROR")
+                        else:
+                            created_interfaces.append(interface)
+                            msg = (
+                                f"created {device_name}:{interface.name} using fallback"
+                            )
+                            log.info(msg)
+                            job.event(msg)
+                    msg = f"completed LAG interface batch {batch_number}/{total_batches} fallback: {len(created_interfaces)} succeeded, {len(batch) - len(created_interfaces)} failed"
+                    log.info(msg)
+                    job.event(msg)
                 for interface in created_interfaces:
                     device_name = interface.device.name
                     object_cache[("interface", device_name, interface.name)] = (
                         interface.id
                     )
                     ret.result[device_name]["created"].append(interface.name)
-            job.event(f"created {len(bulk_create_lag_interfaces)} LAG interface(s)")
+                    created_lag_count += 1
+            job.event(f"created {created_lag_count} LAG interface(s)")
         else:
             job.event("no LAG interfaces to create")
 
@@ -1354,6 +1388,7 @@ class NetboxInterfacesTasks:
             f"prepared {len(bulk_create_parent_interfaces)} non-child/main interface create payload(s)"
         )
         if bulk_create_parent_interfaces:
+            created_parent_count = 0
             job.event("creating non-child/main interfaces")
             total_batches = (
                 len(bulk_create_parent_interfaces) + batch_size - 1
@@ -1371,19 +1406,42 @@ class NetboxInterfacesTasks:
                 except Exception as exc:
                     msg = f"failed to create non-child/main interface batch {batch_number}/{total_batches}: {exc}"
                     ret.errors.append(msg)
-                    ret.failed = True
                     log.error(msg)
                     job.event(msg, severity="ERROR")
-                    return ret
+                    if not batch_fallback:
+                        ret.failed = True
+                        return ret
+                    msg = f"retrying non-child/main interface batch {batch_number}/{total_batches} one interface at a time"
+                    log.warning(msg)
+                    job.event(msg, severity="WARNING")
+                    created_interfaces = []
+                    for payload in batch:
+                        device_name = device_names_by_id[payload["device"]]
+                        try:
+                            interface = nb.dcim.interfaces.create(payload)
+                        except Exception as item_exc:
+                            msg = f"failed to create {device_name}:{payload['name']}: {item_exc}"
+                            ret.errors.append(msg)
+                            log.error(msg)
+                            job.event(msg, severity="ERROR")
+                        else:
+                            created_interfaces.append(interface)
+                            msg = (
+                                f"created {device_name}:{interface.name} using fallback"
+                            )
+                            log.info(msg)
+                            job.event(msg)
+                    msg = f"completed non-child/main interface batch {batch_number}/{total_batches} fallback: {len(created_interfaces)} succeeded, {len(batch) - len(created_interfaces)} failed"
+                    log.info(msg)
+                    job.event(msg)
                 for interface in created_interfaces:
                     device_name = interface.device.name
                     object_cache[("interface", device_name, interface.name)] = (
                         interface.id
                     )
                     ret.result[device_name]["created"].append(interface.name)
-            job.event(
-                f"created {len(bulk_create_parent_interfaces)} non-child/main interface(s)"
-            )
+                    created_parent_count += 1
+            job.event(f"created {created_parent_count} non-child/main interface(s)")
         else:
             job.event("no non-child/main interfaces to create")
 
@@ -1408,6 +1466,7 @@ class NetboxInterfacesTasks:
             f"prepared {len(bulk_create_child_interfaces)} child interface create payload(s)"
         )
         if bulk_create_child_interfaces:
+            created_child_count = 0
             job.event("creating child interfaces")
             total_batches = (
                 len(bulk_create_child_interfaces) + batch_size - 1
@@ -1425,17 +1484,42 @@ class NetboxInterfacesTasks:
                 except Exception as exc:
                     msg = f"failed to create child interface batch {batch_number}/{total_batches}: {exc}"
                     ret.errors.append(msg)
-                    ret.failed = True
                     log.error(msg)
                     job.event(msg, severity="ERROR")
-                    return ret
+                    if not batch_fallback:
+                        ret.failed = True
+                        return ret
+                    msg = f"retrying child interface batch {batch_number}/{total_batches} one interface at a time"
+                    log.warning(msg)
+                    job.event(msg, severity="WARNING")
+                    created_interfaces = []
+                    for payload in batch:
+                        device_name = device_names_by_id[payload["device"]]
+                        try:
+                            interface = nb.dcim.interfaces.create(payload)
+                        except Exception as item_exc:
+                            msg = f"failed to create {device_name}:{payload['name']}: {item_exc}"
+                            ret.errors.append(msg)
+                            log.error(msg)
+                            job.event(msg, severity="ERROR")
+                        else:
+                            created_interfaces.append(interface)
+                            msg = (
+                                f"created {device_name}:{interface.name} using fallback"
+                            )
+                            log.info(msg)
+                            job.event(msg)
+                    msg = f"completed child interface batch {batch_number}/{total_batches} fallback: {len(created_interfaces)} succeeded, {len(batch) - len(created_interfaces)} failed"
+                    log.info(msg)
+                    job.event(msg)
                 for interface in created_interfaces:
                     device_name = interface.device.name
                     object_cache[("interface", device_name, interface.name)] = (
                         interface.id
                     )
                     ret.result[device_name]["created"].append(interface.name)
-            job.event(f"created {len(bulk_create_child_interfaces)} child interface(s)")
+                    created_child_count += 1
+            job.event(f"created {created_child_count} child interface(s)")
         else:
             job.event("no child interfaces to create")
 
@@ -1452,10 +1536,15 @@ class NetboxInterfacesTasks:
                     device_name=device_name,
                     intf_name=intf_name,
                 )
+                # Clear VLAN assignments in the same request when removing interface mode.
+                if "mode" in field_changes and desired["mode"] is None:
+                    payload["untagged_vlan"] = None
+                    payload["tagged_vlans"] = []
                 payload["id"] = object_cache[("interface", device_name, intf_name)]
                 bulk_update_interfaces[(device_name, intf_name)] = payload
         job.event(f"prepared {len(bulk_update_interfaces)} interface update payload(s)")
         if bulk_update_interfaces:
+            updated_count = 0
             job.event(f"updating {len(bulk_update_interfaces)} interface(s)")
             update_items = list(bulk_update_interfaces.items())
             total_batches = (len(update_items) + batch_size - 1) // batch_size
@@ -1470,13 +1559,36 @@ class NetboxInterfacesTasks:
                 except Exception as exc:
                     msg = f"failed to update interface batch {batch_number}/{total_batches}: {exc}"
                     ret.errors.append(msg)
-                    ret.failed = True
                     log.error(msg)
                     job.event(msg, severity="ERROR")
-                    return ret
+                    if not batch_fallback:
+                        ret.failed = True
+                        return ret
+                    msg = f"retrying interface update batch {batch_number}/{total_batches} one interface at a time"
+                    log.warning(msg)
+                    job.event(msg, severity="WARNING")
+                    updated_items = []
+                    for (device_name, intf_name), payload in batch:
+                        try:
+                            nb.dcim.interfaces.update([payload])
+                        except Exception as item_exc:
+                            msg = f"failed to update {device_name}:{intf_name}: {item_exc}"
+                            ret.errors.append(msg)
+                            log.error(msg)
+                            job.event(msg, severity="ERROR")
+                        else:
+                            updated_items.append(((device_name, intf_name), payload))
+                            msg = f"updated {device_name}:{intf_name} using fallback"
+                            log.info(msg)
+                            job.event(msg)
+                    msg = f"completed interface update batch {batch_number}/{total_batches} fallback: {len(updated_items)} succeeded, {len(batch) - len(updated_items)} failed"
+                    log.info(msg)
+                    job.event(msg)
+                    batch = updated_items
                 for (device_name, intf_name), _ in batch:
                     ret.result[device_name]["updated"].append(intf_name)
-            job.event(f"updated {len(bulk_update_interfaces)} interface(s)")
+                    updated_count += 1
+            job.event(f"updated {updated_count} interface(s)")
         else:
             job.event("no interfaces to update")
 
@@ -1780,8 +1892,7 @@ class NetboxInterfacesTasks:
 
         # per-device result tracking
         device_results = {
-            device_name: SyncActionSummary().model_dump()
-            for device_name in devices
+            device_name: SyncActionSummary().model_dump() for device_name in devices
         }
         ret.result = device_results
 

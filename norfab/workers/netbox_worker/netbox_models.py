@@ -1984,6 +1984,12 @@ class SyncDeviceInterfacesInput(
     use_enum_values=True,
     populate_by_name=True,  # ignore aliases
 ):
+    batch_fallback: StrictBool = Field(
+        False,
+        description="Retry failed create and update batches one interface at a time",
+        alias="batch-fallback",
+        json_schema_extra={"presence": True},
+    )
     devices: Union[None, list[StrictStr]] = Field(
         None,
         description="List of NetBox devices to sync",

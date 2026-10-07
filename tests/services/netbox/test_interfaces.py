@@ -1075,6 +1075,76 @@ class TestSyncDeviceInterfaces:
         assert nb_interface.untagged_vlan is None
         assert list(nb_interface.tagged_vlans) == []
 
+    def test_sync_device_interfaces_clears_vlans_when_mode_is_none(
+        self, nfclient: Any
+    ) -> None:
+        """Clear both VLAN relationships when live state removes interface mode."""
+        device = "fn-if-sp-1"
+        name = "TEST_SYNC_MODE_CLEAR"
+        nb = get_pynetbox(nfclient)
+        group = None
+        interface = None
+        vlans = []
+        try:
+            group = nb.ipam.vlan_groups.create(
+                name="NORFAB INTERFACE MODE CLEAR", slug="norfab-interface-mode-clear"
+            )
+            for vid in (3981, 3982):
+                vlans.append(
+                    nb.ipam.vlans.create(
+                        name=f"NORFAB INTERFACE MODE CLEAR {vid}",
+                        vid=vid,
+                        group=group.id,
+                    )
+                )
+            interface = nb.dcim.interfaces.create(
+                device=nb.dcim.devices.get(name=device).id,
+                name=name,
+                type="1000base-t",
+                mode="tagged",
+                untagged_vlan=vlans[0].id,
+                tagged_vlans=[vlans[1].id],
+            )
+            kwargs = {
+                "filter_by_name": name,
+                "interface_map": [
+                    {
+                        "device_name": device,
+                        "device_type": "*",
+                        "match": "Loopback10",
+                        "replace": name,
+                    }
+                ],
+            }
+            preview = self._sync(nfclient, [device], dry_run=True, **kwargs)
+            assert preview
+            for res in preview.values():
+                assert not res["failed"] and not res["errors"], res
+                assert res["result"][device]["update"][name]["mode"] == {
+                    "old_value": "tagged",
+                    "new_value": None,
+                }
+            unchanged = nb.dcim.interfaces.get(interface.id)
+            assert unchanged.untagged_vlan.id == vlans[0].id
+            assert [v.id for v in unchanged.tagged_vlans] == [vlans[1].id]
+
+            result = self._sync(nfclient, [device], **kwargs)
+            assert result
+            for res in result.values():
+                assert not res["failed"] and not res["errors"], res
+                assert name in res["result"][device]["updated"]
+            updated = nb.dcim.interfaces.get(interface.id)
+            assert not updated.mode
+            assert updated.untagged_vlan is None
+            assert list(updated.tagged_vlans) == []
+        finally:
+            if interface is not None:
+                interface.delete()
+            for vlan in vlans:
+                vlan.delete()
+            if group is not None:
+                group.delete()
+
     def test_sync_device_interfaces_updates_other_to_virtual_by_default(self, nfclient):
         """The default policy repairs a logical interface stored as ``other``."""
         device = "fn-if-sp-2"
