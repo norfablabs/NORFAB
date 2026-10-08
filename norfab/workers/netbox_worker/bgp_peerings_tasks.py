@@ -1136,8 +1136,17 @@ class NetboxBgpPeeringsTasks:
         Supports single-session mode (individual keyword arguments) and bulk mode
         (``bulk_create`` list of dicts).  IP addresses and ASNs are resolved from
         IPAM or created on demand.  When ``local_interface`` is provided the local
-        address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote
-        address is derived automatically. Existing sessions and repeated bulk
+        address is resolved from IPAM. If ``remote_address`` is omitted, the
+        remote address is derived from the first IP assigned to that interface
+        for IPv4 /30 or /31 and IPv6 /127 subnets. This uses subnet arithmetic
+        and does not require a cable or remote interface recorded in NetBox.
+        For example, ``10.0.0.1/30`` yields ``10.0.0.2``. Supplying only
+        ``local_address`` without ``local_interface`` does not trigger derivation.
+        Unless ``dry_run`` is enabled, a missing peer IP is created in IPAM
+        using the most specific containing NetBox prefix's mask, or /32 for
+        IPv4 and /128 for IPv6 if no containing prefix exists. The new IP is
+        not assigned to a remote device or interface automatically.
+        Existing sessions and repeated bulk
         entries are matched by device name, local IP and ASN, and remote IP and
         ASN values; names do not identify sessions.
 
@@ -1147,7 +1156,10 @@ class NetboxBgpPeeringsTasks:
             name (str, optional): Session name. Derived from ``name_template`` when omitted.
             device (str, optional): Local device name. Required in single-session mode.
             local_address (str, optional): Local IP address string. Derived from ``local_interface`` when omitted.
-            remote_address (str, optional): Remote IP address string. Derived from P2P peer when ``local_interface`` is used.
+            remote_address (str, optional): Remote IP address string. When omitted,
+                derived from the first IP assigned to ``local_interface`` for
+                IPv4 /30 or /31 and IPv6 /127 subnets. An explicit value takes
+                precedence over derivation.
             local_as (int, optional): Local AS number. Takes precedence over ``local_as_query``.
             remote_as (int, optional): Remote AS number. Takes precedence over ``remote_as_query``.
             status (str): Session status. Default ``'active'``.

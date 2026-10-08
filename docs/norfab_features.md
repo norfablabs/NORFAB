@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 7 October 2026*
+*Last updated: 8 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -757,6 +757,8 @@ Omitted objects are not deleted. **Use cases:** repeatable NetBox prerequisite
 setup for network designs. **Limitations:** other design collections are rejected
 until their handlers are implemented.
 NFCLI exposes deployment through `netbox design deploy`.
+Device deployment matches by name, using tenant only to disambiguate duplicate names. Site and tenant are update attributes for uniquely named devices; unresolved duplicate names fail.
+The `dry_run_render` option returns rendered text before YAML parsing, flattening, design validation, or deployment; dictionary designs return unchanged. Available through the Python API, NFCLI (`dry-run-render`), FastAPI, and MCP.
 [Design deploy task](workers/netbox/services_netbox_service_tasks_design_deploy.md) ·
 [Create ASN task](workers/netbox/services_netbox_service_tasks_create_asn.md) ·
 [Create VLAN group task](workers/netbox/services_netbox_service_tasks_create_vlan_group.md) ·

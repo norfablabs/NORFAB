@@ -151,7 +151,7 @@ Each design section contains a list of object records. The rows show the order i
 | 17 | `vrfs` | `netbox.ipam.vrfs` | `name`, `rd` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. |
 | 18 | `l2vpns` | `netbox.vpn.l2vpns` | `name` | Import/export route targets accept named definitions or query filters. Existing target lists gain missing targets. Nested terminations are flattened; named VLAN terminations also populate `vlans`. |
 | 19 | `prefixes` | `netbox.ipam.prefixes` | `prefix`, `vrf` | Explicit prefixes can select location, site, site group, or region scope, and refer to a VLAN by `{group, vid}`. Existing prefixes gain new tags and custom-field list items. `create_prefix` supports site scope and VLAN association through `vlan` (VID) plus `vlan_group` (name). |
-| 20 | `devices` | `netbox.dcim.devices` | `site` and `name`, plus `tenant` when supplied | Nested components are flattened before writes. |
+| 20 | `devices` | `netbox.dcim.devices` | `name`; `tenant` disambiguates duplicate names | Nested components are flattened before writes. |
 | 21 | `interfaces` | `netbox.dcim.interfaces` | `device`, `name` | Independent interfaces are written before those with `parent`, `lag`, or `bridge`. |
 | 22 | `l2vpn_terminations` | `netbox.vpn.l2vpn_terminations` | Attached interface or VLAN | Attachments require `l2vpn` and either `device` with `interface`, or VLAN `group` with `vid`. An attachment already used by another L2VPN is rejected. |
 | 23 | `power_ports` | `netbox.dcim.power_ports` | `device`, `name` | Nested connection is flattened. |
@@ -1527,7 +1527,7 @@ Device records may contain `interfaces`, `bgp_peerings`, `power_ports`, `console
 
     All parent, LAG, and bridge interfaces must be defined in the design or already exist in Netbox. A newly created dependent interface cannot itself be the parent of another new interface in the same deployment, because only two passes are performed.
 
-Device matching uses name and site, plus tenant when the design supplies one. When tenant is omitted, name and site must identify one device. An ambiguous match fails. Interfaces and IP assignments refer to a device by name, so use unambiguous device names for designs that include those nested objects.
+Device deployment searches by name only. A single match is updated, with site and tenant treated as update attributes. When multiple devices share a name, the supplied tenant must select exactly one; missing tenant, no tenant match, or multiple tenant matches cause an ambiguity error. Site does not disambiguate devices. Interfaces and IP assignments refer to a device by name, so use unambiguous device names for designs that include those nested objects. The separate primary-IP and local-context stages retain their site/name and optional tenant matching.
 
 ## Nested VRRP Group Records
 
@@ -2124,7 +2124,9 @@ The function receives the full device record so it can inspect fields beyond its
 
 ## Design Deployment Output
 
-Results are keyed by collection. Each collection reports object identities in `created` and `updated`. No-op allocation results are omitted. Repeat deployments can report updates because existing records are sent to Netbox without a local diff.
+With `dry_run_render=True`, `result` contains the rendered text and the result's `dry_run` flag is `True`. Dictionary designs return the supplied dictionary unchanged. This option takes precedence over `dry_run` and returns before YAML parsing, flattening, design validation, lookups, or deployment-time custom functions. Context and initial metadata parsing, input-schema validation, Netbox client setup, and Jinja2 functions still run.
+
+Deployment and ordinary dry-run results are keyed by collection. Each collection reports object identities in `created` and `updated`. No-op allocation results are omitted. Repeat deployments can report updates because existing records are sent to Netbox without a local diff.
 
 ```json
 {
@@ -2141,6 +2143,7 @@ Errors identify the collection that stopped deployment. Earlier collections are 
 
     ```bash
     nf# netbox design deploy design nf://netbox/designs/branch.yaml context '{"site":"BRANCH-1"}'
+    nf# netbox design deploy design nf://netbox/designs/branch.yaml context '{"site":"BRANCH-1"}' dry-run-render
     ```
 
 === "Python"
@@ -2156,6 +2159,7 @@ Errors identify the collection that stopped deployment. Earlier collections are 
             kwargs={
                 "design": "nf://netbox/designs/branch.yaml",
                 "context": {"site": "BRANCH-1"},
+                "dry_run_render": True,  # Preview the rendered design.
             },
         )
     ```
@@ -2210,6 +2214,7 @@ root
             ├── context:    Template context validated by design_input_schema, default '{}'
             ├── instance:    NetBox instance name to target
             ├── dry-run:    Validate design without writing to NetBox, default 'False'
+            ├── dry-run-render:    Return rendered design before parsing or deployment, default 'False'
             ├── branch:    NetBox branching plugin branch name to use
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'

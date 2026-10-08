@@ -1197,12 +1197,18 @@ class DesignDeployInput(BaseModel, use_enum_values=True, populate_by_name=True):
         None,
         description="NetBox branching plugin branch name to use",
     )
+    dry_run_render: StrictBool = Field(
+        False,
+        description="Return rendered design before parsing or deployment; dictionaries return unchanged",
+        alias="dry-run-render",
+        json_schema_extra={"presence": True},
+    )
 
 
 class DesignDeployResult(Result):
-    result: dict[StrictStr, Any] = Field(
+    result: Union[StrictStr, dict[StrictStr, Any]] = Field(
         {},
-        description="NetBox design creation result data",
+        description="Design deployment results, rendered text, or unchanged dictionary",
     )
 
 

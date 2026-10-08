@@ -16,6 +16,43 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    @pytest.mark.parametrize("dry_run", [False, True])
+    @pytest.mark.parametrize(
+        "design, expected",
+        [
+            (
+                'sites:\n  - name: "{{ context.site }}"\n',
+                'sites:\n  - name: "RENDER PREVIEW"',
+            ),
+            ("sites: [{{ context.site }}", "sites: [RENDER PREVIEW"),
+            (
+                {"devices": [{"name": "{{ context.site }}"}]},
+                {"devices": [{"name": "{{ context.site }}"}]},
+            ),
+        ],
+        ids=["yaml", "invalid-yaml", "dictionary"],
+    )
+    def test_dry_run_render(
+        self, nfclient: Any, dry_run: bool, design: Any, expected: Any
+    ) -> None:
+        """Return rendered output without parsing or validating design records."""
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": design,
+                "context": {"site": "RENDER PREVIEW"},
+                "dry_run": dry_run,
+                "dry_run_render": True,
+            },
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            assert result["dry_run"] is True
+            assert result["result"] == expected
+
     def test_peer_group_dry_run(self, nfclient: Any) -> None:
         """Plan a peer group without writing it to NetBox."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -1476,7 +1513,7 @@ class TestDesignDeploy:
                     record.delete()
 
     def test_devices_with_same_name_at_different_sites(self, nfclient: Any) -> None:
-        """Match devices by site and tenant on repeated deployment."""
+        """Resolve duplicate names by tenant and update unique names across sites."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         objects = [
             (nb.dcim.devices, {"name": "norfab-design-identity-device"}),
@@ -1487,13 +1524,19 @@ class TestDesignDeploy:
             (nb.dcim.device_types, {"model": "NORFAB DESIGN ID TYPE"}),
             (nb.dcim.device_roles, {"name": "NORFAB DESIGN ID ROLE"}),
             (nb.dcim.manufacturers, {"name": "NORFAB DESIGN ID MANUFACTURER"}),
-            (nb.tenancy.tenants, {"name": "NORFAB DESIGN ID TENANT"}),
+            (
+                nb.tenancy.tenants,
+                {"name": ["NORFAB DESIGN ID TENANT", "NORFAB DESIGN ID TENANT B"]},
+            ),
         ]
         for endpoint, filters in objects:
             if list(endpoint.filter(**filters)):
                 pytest.skip(f"identity test object already exists: {filters}")
         design = {
-            "tenants": [{"name": "NORFAB DESIGN ID TENANT"}],
+            "tenants": [
+                {"name": "NORFAB DESIGN ID TENANT"},
+                {"name": "NORFAB DESIGN ID TENANT B"},
+            ],
             "manufacturers": [{"name": "NORFAB DESIGN ID MANUFACTURER"}],
             "device_types": [
                 {
@@ -1529,6 +1572,7 @@ class TestDesignDeploy:
                 },
             ],
         }
+        design["devices"][1]["tenant"] = "NORFAB DESIGN ID TENANT B"
         try:
             for run in (1, 2):
                 reply = nfclient.run_job(
@@ -1546,6 +1590,49 @@ class TestDesignDeploy:
                     "NORFAB DESIGN ID SITE A",
                     "NORFAB DESIGN ID SITE B",
                 }
+            for tenant in (None, "UNKNOWN DESIGN TENANT"):
+                record = {
+                    "name": "norfab-design-identity-device",
+                    "site": "NORFAB DESIGN ID SITE A",
+                }
+                if tenant:
+                    record["tenant"] = tenant
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"devices": [record]}},
+                )
+                for result in reply.values():
+                    assert result["failed"], result
+                    assert "ambiguous device" in " ".join(result["errors"])
+            first = next(
+                device
+                for device in devices
+                if device.site.name == "NORFAB DESIGN ID SITE A"
+            )
+            for device in devices:
+                if device.id != first.id:
+                    device.delete()
+            for tenant in (None, "NORFAB DESIGN ID TENANT B"):
+                record = {"name": first.name, "site": "NORFAB DESIGN ID SITE B"}
+                if tenant:
+                    record["tenant"] = tenant
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"devices": [record]}},
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert result["result"]["devices"] == {
+                        "created": [],
+                        "updated": [first.name],
+                    }
+                updated = nb.dcim.devices.get(id=first.id)
+                assert updated.site.name == "NORFAB DESIGN ID SITE B"
+                assert updated.tenant.name == (tenant or "NORFAB DESIGN ID TENANT")
         finally:
             for endpoint, filters in objects:
                 for record in endpoint.filter(**filters):

@@ -400,6 +400,20 @@
         "ASR-9006-FAN-V2"
       ]
     },
+    "test_designs.py::TestDesignDeploy::test_dry_run_render": {
+      "mode": "read_only",
+      "coverage": "Renders inline YAML, invalid YAML, and unchanged dictionary designs with both dry_run values. No NetBox objects are read or written; client setup only."
+    },
+    "test_designs.py::TestDesignDeploy::test_devices_with_same_name_at_different_sites": {
+      "mode": "main_mutating",
+      "devices": ["norfab-design-identity-device"],
+      "sites": ["NORFAB DESIGN ID SITE A", "NORFAB DESIGN ID SITE B"],
+      "tenants": ["NORFAB DESIGN ID TENANT", "NORFAB DESIGN ID TENANT B"],
+      "manufacturer": "NORFAB DESIGN ID MANUFACTURER",
+      "device_type": "NORFAB DESIGN ID TYPE",
+      "device_role": "NORFAB DESIGN ID ROLE",
+      "coverage": "Owns and cleans up all records. Creates duplicate names in different tenants; verifies tenant selection, ambiguity with omitted or unmatched tenant, and unique-name site and tenant updates."
+    },
     "test_designs.py::TestDesignDeploy::test_acme_design": {
       "peering_asn_wrapper": "acme-branch-rtr-1-to-acme-branch-agg-2 allocates or reuses ACME allocated branch ASN for local_as. Existing query examples remain intact.",
       "mode": "branch_feature",

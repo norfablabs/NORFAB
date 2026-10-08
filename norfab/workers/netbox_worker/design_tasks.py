@@ -1938,11 +1938,12 @@ def process_devices(
     instance: str,
     branch: str | None,
 ) -> dict:
-    """Match devices by site and name, plus tenant when provided.
+    """Match devices by name, using tenant only to resolve duplicate names.
 
     Nested interfaces and peerings are flattened before this handler; it
-    writes devices only. Without a tenant in the record, matching does not
-    restrict tenant. Multiple matching devices are an error.
+    writes devices only. A unique name matches regardless of site or tenant;
+    supplied site and tenant are update attributes. Duplicate names require
+    a supplied tenant that selects exactly one device, otherwise matching fails.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -1973,13 +1974,11 @@ def process_devices(
                 )
             }
         )
-    site_ids = [sites[name] for name in site_names]
     existing = (
         list(
             worker.bulk_filter(
                 nb.dcim.devices,
                 name=names,
-                site_id=site_ids,
                 fields="id,name,site,tenant",
             )
         )
@@ -1988,18 +1987,19 @@ def process_devices(
     )
     created, updated = [], []
     for record in records:
-        matches = [
-            item
-            for item in existing
-            if item.name == record["name"]
-            and item.site.name == record["site"]
-            and (
-                "tenant" not in record
-                or (item.tenant.name if item.tenant else None) == record["tenant"]
-            )
-        ]
+        matches = [item for item in existing if item.name == record["name"]]
         if len(matches) > 1:
-            raise ValueError(f"ambiguous device {record['site']}:{record['name']}")
+            if "tenant" in record:
+                matches = [
+                    item
+                    for item in matches
+                    if (item.tenant.name if item.tenant else None) == record["tenant"]
+                ]
+            if len(matches) != 1:
+                raise ValueError(
+                    f"ambiguous device {record['name']}: multiple devices matched by name; "
+                    "provide a tenant that selects exactly one device"
+                )
         if matches:
             updated.append({**record, "id": matches[0].id})
         else:
@@ -4022,6 +4022,7 @@ class NetboxDesignTasks:
         instance: str = None,
         dry_run: bool = False,
         branch: str = None,
+        dry_run_render: bool = False,
     ) -> Result:
         """Render and flatten a design, validate it, then deploy ordered collections.
 
@@ -4036,9 +4037,16 @@ class NetboxDesignTasks:
             instance: NetBox instance name; defaults to the worker's instance.
             dry_run: Return planned writes without changing NetBox.
             branch: NetBox Branching plugin branch name.
+            dry_run_render: Return rendered text before YAML parsing, flattening,
+                validation, or deployment. Dictionary designs return unchanged.
+                Takes precedence over dry_run; context validation and Jinja2
+                functions still run.
 
         Returns:
-            Object identities grouped by collection and creation/update action.
+            Object identities grouped by collection and creation/update action,
+            or rendered text (the original dictionary for dictionary designs)
+            with dry_run=True when dry_run_render is enabled. Preparation and
+            deployment errors are reported in a failed Result.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -4162,12 +4170,15 @@ class NetboxDesignTasks:
                 environment.filters.update(filters)
                 environment.globals.update(filters)
                 environment.globals["netbox"] = nb
-                document = (
-                    yaml.safe_load(
-                        environment.from_string(template).render(context=context)
-                    )
-                    or {}
-                )
+                document = environment.from_string(template).render(context=context)
+
+            if dry_run_render:
+                ret.result = document
+                ret.dry_run = True
+                return ret
+
+            if template is not None:
+                document = yaml.safe_load(document) or {}
 
             msg = "flattening and validating netbox design"
             log.info(msg)

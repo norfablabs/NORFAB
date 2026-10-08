@@ -1,3 +1,12 @@
+# 0.24.9
+
+## ENHANCEMENTS
+
+1. Netbox `design_deploy` supports `dry_run_render` to return rendered design text before YAML parsing, flattening, validation, or deployment, with `dry_run=True` in the result. Dictionary designs return unchanged.
+2. Netbox `design_deploy` matches devices by name only, allowing site and tenant updates for uniquely named devices. Tenant is used only to disambiguate duplicate names; unresolved matches fail instead of creating another device.
+
+---
+
 # 0.24.8
 
 ## BUGS
