@@ -9,6 +9,61 @@ tags:
 
 ## Design overview
 
+**Netbox Design Driven Modeling (NDDM)** is an approach to building and maintaining the Netbox data model from reusable network designs. A design describes the objects and relationships needed for a site, service, or network pattern in YAML. Jinja2 templates let you reuse the same design for multiple deployments by supplying different context values, such as site names, device names, or address pools.
+
+NorFab implements this approach through `design_deploy`: it turns the design into Netbox objects, resolves supported references, and processes collections in dependency order. Designs can include resource allocation requests for values that are not known in advance. Keeping designs and their context in version control makes the intended model reviewable and reusable.
+
+NDDM designs are additive and idempotent. Deployment creates missing objects and updates matched objects according to each handler's rules. Reapplying the same design reuses those objects instead of creating duplicates. Objects omitted from a design remain in Netbox. Custom functions must implement their own idempotent behavior. The task models data in Netbox; applying device configuration is a separate automation step.
+
+=== "Two-router design"
+
+    ```yaml
+    design_input_schema:
+      type: object
+      properties:
+        site:
+          type: string
+        prefix:
+          type: string
+
+    roles:
+      - name: p2p
+
+    prefixes:
+      - prefix: {{ context.prefix }}
+        role: p2p
+        site: {{ context.site }}
+
+    devices:
+    {% for device_id in [1, 2] %}
+      - name: router{{ device_id }}
+        site: {{ context.site }}
+        role: router
+        platform: cisco_ios
+        device_type:
+          manufacturer: Cisco
+          model: ASR1001
+        status: active
+        interfaces:
+          GigabitEthernet0/0/0:
+            ip_addresses:
+              - create_ip:
+                  prefix:
+                    role: p2p
+                    site: {{ context.site }}
+                  mask_len: 30
+            {% if device_id == 1 %}
+            connection:
+              device: router2
+              interface: GigabitEthernet0/0/0
+            {% endif %}
+            bgp_peerings:
+              - local_as: 65000
+                remote_as: 65000
+                description: iBGP between Routers
+    {% endfor %}
+    ```
+
 For an agent-oriented authoring workflow, see [Author a Netbox design with an agent](../../tutorials/norfab_netbox_design_authoring.md).
 
 A design is one YAML document with object collections such as `sites` and `devices`. It can also contain three optional control sections:
