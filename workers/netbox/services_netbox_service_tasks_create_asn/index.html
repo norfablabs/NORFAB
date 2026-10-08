@@ -7231,6 +7231,20 @@
 </tbody>
 </table>
 <p>Provide <code>asn</code> or <code>asn_range</code>. When <code>asn</code> is supplied without a range, <code>rir</code> is required.</p>
+<p>Explicit ASN numbers take precedence. Additional searches only run when
+<code>asn_range</code> is provided. With both <code>role</code> and a nonempty <code>sites</code> list, the task
+searches that range for the role and any requested site. Otherwise, it searches
+the range by description. Multiple matches cause
+an error. If the selected lookup finds no match, it allocates the next available
+ASN. Role/site lookup does not fall back to description.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">asns</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">create_asn</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">asn_range</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOMER ASNS</span>
+<span class="w">      </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOMER EDGE</span>
+<span class="w">      </span><span class="nt">sites</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">BRANCH-1</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<p>Repeated calls reuse the range's CUSTOMER EDGE ASN for BRANCH-1, even without
+a description. The range, role, and site must already exist.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="s2">&quot;asn&quot;</span><span class="p">:</span> <span class="mi">64512</span><span class="p">,</span>
@@ -7326,10 +7340,12 @@ netbox<span class="w"> </span>create<span class="w"> </span>asn
     <div class="doc doc-contents first">
 
         <p>Create, update, or allocate one ASN in NetBox.</p>
-<p>An explicit ASN is matched globally by number. Without one, the task
-reuses an ASN with the same description inside the named range, or
-allocates the first available number. Omitting the description means
-repeated range calls can allocate different ASNs. A non-empty sites
+<p>An explicit ASN is matched globally by number. Without one, range searches
+use role and sites when both are supplied, matching an ASN in the range
+with that role assigned to any requested site. Otherwise, it matches
+by description within the range. If the selected lookup finds no match,
+it allocates the first available number. Without either lookup, repeated
+range calls can allocate different ASNs. A non-empty sites
 list adds to the ASN's site assignments; an empty or omitted list
 leaves them alone. Tags and array custom fields are also additive.
 Dry-run reports the selected number without writing relationships.</p>
@@ -7488,7 +7504,8 @@ replace existing values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional site names to add to the ASN's assignments.</p>
+                <p>Optional site names to add to the ASN's assignments. With role,
+also used to reuse a range allocation assigned to any of these sites.</p>
               </div>
             </td>
             <td>
@@ -7504,7 +7521,8 @@ replace existing values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional IPAM role name.</p>
+                <p>Optional IPAM role name. With sites, also used for range lookup
+before description matching.</p>
               </div>
             </td>
             <td>
@@ -7623,7 +7641,7 @@ replace existing values.</p>
               <div class="doc-md-description">
                 <p>The range, RIR, site, or related custom-field object is
 missing; a related name is ambiguous; more than one ASN matches
-the description; or the range has no free ASNs.</p>
+the description or role/sites; or the range has no free ASNs.</p>
               </div>
             </td>
           </tr>
@@ -7821,7 +7839,21 @@ the description; or the range has no free ASNs.</p>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
-<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpAsnInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpAsnResult</span><span class="p">,</span>
@@ -7853,10 +7885,12 @@ the description; or the range has no free ASNs.</p>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create, update, or allocate one ASN in NetBox.</span>
 
-<span class="sd">    An explicit ASN is matched globally by number. Without one, the task</span>
-<span class="sd">    reuses an ASN with the same description inside the named range, or</span>
-<span class="sd">    allocates the first available number. Omitting the description means</span>
-<span class="sd">    repeated range calls can allocate different ASNs. A non-empty sites</span>
+<span class="sd">    An explicit ASN is matched globally by number. Without one, range searches</span>
+<span class="sd">    use role and sites when both are supplied, matching an ASN in the range</span>
+<span class="sd">    with that role assigned to any requested site. Otherwise, it matches</span>
+<span class="sd">    by description within the range. If the selected lookup finds no match,</span>
+<span class="sd">    it allocates the first available number. Without either lookup, repeated</span>
+<span class="sd">    range calls can allocate different ASNs. A non-empty sites</span>
 <span class="sd">    list adds to the ASN&#39;s site assignments; an empty or omitted list</span>
 <span class="sd">    leaves them alone. Tags and array custom fields are also additive.</span>
 <span class="sd">    Dry-run reports the selected number without writing relationships.</span>
@@ -7875,8 +7909,10 @@ the description; or the range has no free ASNs.</p>
 <span class="sd">            must identify exactly one object. Arrays merged with existing values;</span>
 <span class="sd">            empty arrays preserve existing arrays. Null and scalar values</span>
 <span class="sd">            replace existing values.</span>
-<span class="sd">        sites: Optional site names to add to the ASN&#39;s assignments.</span>
-<span class="sd">        role: Optional IPAM role name.</span>
+<span class="sd">        sites: Optional site names to add to the ASN&#39;s assignments. With role,</span>
+<span class="sd">            also used to reuse a range allocation assigned to any of these sites.</span>
+<span class="sd">        role: Optional IPAM role name. With sites, also used for range lookup</span>
+<span class="sd">            before description matching.</span>
 <span class="sd">        instance: NetBox instance name, or the worker default when omitted.</span>
 <span class="sd">        dry_run: Select an ASN without creating or updating it.</span>
 <span class="sd">        branch: Optional NetBox Branching plugin branch name.</span>
@@ -7889,7 +7925,7 @@ the description; or the range has no free ASNs.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: The range, RIR, site, or related custom-field object is</span>
 <span class="sd">            missing; a related name is ambiguous; more than one ASN matches</span>
-<span class="sd">            the description; or the range has no free ASNs.</span>
+<span class="sd">            the description or role/sites; or the range has no free ASNs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
@@ -7907,7 +7943,17 @@ the description; or the range has no free ASNs.</p>
     <span class="k">if</span> <span class="n">asn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">asn</span><span class="o">=</span><span class="n">asn</span><span class="p">)</span>
         <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">existing</span><span class="p">]</span> <span class="k">if</span> <span class="n">existing</span> <span class="k">else</span> <span class="p">[]</span>
-    <span class="k">elif</span> <span class="n">description</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">nb_range</span> <span class="ow">and</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">sites</span><span class="p">:</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="p">,</span>
+            <span class="n">asn__gte</span><span class="o">=</span><span class="n">nb_range</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">asn__lte</span><span class="o">=</span><span class="n">nb_range</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+            <span class="n">role</span><span class="o">=</span><span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">roles</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">role</span><span class="p">)</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span>
+            <span class="n">site</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">site</span><span class="o">.</span><span class="n">slug</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">sites</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">sites</span><span class="p">)</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nb_range</span> <span class="ow">and</span> <span class="n">description</span><span class="p">:</span>
         <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bulk_filter</span><span class="p">(</span>
             <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">asns</span><span class="p">,</span>
             <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
@@ -7916,7 +7962,7 @@ the description; or the range has no free ASNs.</p>
         <span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;ASN description &#39;</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">&#39; matched more than one ASN in range &#39;</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;ASN lookup matched more than one ASN in range &#39;</span><span class="si">{</span><span class="n">asn_range</span><span class="si">}</span><span class="s2">&#39; (description=</span><span class="si">{</span><span class="n">description</span><span class="si">!r}</span><span class="s2">, role=</span><span class="si">{</span><span class="n">role</span><span class="si">!r}</span><span class="s2">, sites=</span><span class="si">{</span><span class="n">sites</span><span class="si">!r}</span><span class="s2">)&quot;</span>
         <span class="p">)</span>
 
     <span class="n">nb_asn</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">matches</span> <span class="k">else</span> <span class="kc">None</span>

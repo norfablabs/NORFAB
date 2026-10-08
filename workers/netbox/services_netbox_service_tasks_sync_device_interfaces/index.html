@@ -7254,7 +7254,8 @@
 <blockquote>
 <p>task api name: <code>sync_device_interfaces</code></p>
 </blockquote>
-<p>The Netbox Sync Device Interfaces Task synchronizes device interface configuration from live network devices into NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan and applies interface create, update, and delete operations in dependency order. VRF assignments are owned by <code>sync_vrfs</code>.</p>
+<p>The Netbox Sync Device Interfaces Task synchronizes device interface configuration from live network devices into NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan and applies interface create, update, and delete operations in dependency order. VRF assignments are owned by <code>sync_vrfs</code>. When an update clears interface mode,
+it also clears the untagged VLAN and tagged VLAN list in the same request.</p>
 <p>Devices may begin with no interfaces in NetBox. The task treats an empty
 current interface set as valid and creates interfaces discovered from live data.</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
@@ -7278,8 +7279,15 @@ current interface set as valid and creates interfaces discovered from live data.
 <code>batch_size</code> interfaces. The default is 1000; set any integer greater than zero
 to tune the request size. Successful batches are recorded in the result before
 the next request, so a failure can leave earlier batches applied in NetBox.
-Each batch emits a progress event and an info log before the request, with its batch
-number, total batches, and interface count.</p>
+Each batch emits a progress event and an info log before the request with its
+batch number, total batches, and interface count.</p>
+<p>Set <code>batch_fallback=True</code> (CLI: <code>batch-fallback True</code>) to retry a failed create
+or update batch one interface at a time, then resume bulk requests for the next
+batch. Batch and individual failures are recorded in <code>errors</code>, logs, and error
+events. Fallback emits a warning and a summary of successful and failed retries;
+only successful writes appear in <code>created</code> and <code>updated</code>. With fallback enabled, these errors do not change the task failure flag.
+The default is <code>False</code>, which marks the task failed and returns after a failed
+batch. Deletion behavior is unchanged.</p>
 <p><img alt="Netbox Sync Device Interfaces" src="../../../images/Netbox_Service_Sync_Interfaces.jpg" /></p>
 <ol>
 <li>Client submits an on-demand request to the NorFab Netbox worker to sync device interfaces</li>
@@ -7595,6 +7603,7 @@ normalized state model and DeepDiff-based reconciliation.</p>
 <p><strong>Limitations</strong></p>
 <ul>
 <li>Interface sync does not handle IP addresses</li>
+<li>Clearing interface mode also clears untagged and tagged VLAN assignments</li>
 <li>Interface sync does not handle MAC addresses</li>
 <li>Sync interfaces uses device running configuration as the primary source;
   operational state only fills missing MTU, duplex, and speed values</li>
@@ -7854,6 +7863,24 @@ create, update, or delete request. Defaults to 1000.</p>
             </td>
             <td>
                   <code>1000</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>batch_fallback</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Retry failed create and update batches
+one interface at a time, reporting errors and continuing with the
+next bulk batch. Defaults to False. Deletions are unaffected.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -8667,7 +8694,119 @@ dry-run mode.</p>
 <span class="normal">1530</span>
 <span class="normal">1531</span>
 <span class="normal">1532</span>
-<span class="normal">1533</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1533</span>
+<span class="normal">1534</span>
+<span class="normal">1535</span>
+<span class="normal">1536</span>
+<span class="normal">1537</span>
+<span class="normal">1538</span>
+<span class="normal">1539</span>
+<span class="normal">1540</span>
+<span class="normal">1541</span>
+<span class="normal">1542</span>
+<span class="normal">1543</span>
+<span class="normal">1544</span>
+<span class="normal">1545</span>
+<span class="normal">1546</span>
+<span class="normal">1547</span>
+<span class="normal">1548</span>
+<span class="normal">1549</span>
+<span class="normal">1550</span>
+<span class="normal">1551</span>
+<span class="normal">1552</span>
+<span class="normal">1553</span>
+<span class="normal">1554</span>
+<span class="normal">1555</span>
+<span class="normal">1556</span>
+<span class="normal">1557</span>
+<span class="normal">1558</span>
+<span class="normal">1559</span>
+<span class="normal">1560</span>
+<span class="normal">1561</span>
+<span class="normal">1562</span>
+<span class="normal">1563</span>
+<span class="normal">1564</span>
+<span class="normal">1565</span>
+<span class="normal">1566</span>
+<span class="normal">1567</span>
+<span class="normal">1568</span>
+<span class="normal">1569</span>
+<span class="normal">1570</span>
+<span class="normal">1571</span>
+<span class="normal">1572</span>
+<span class="normal">1573</span>
+<span class="normal">1574</span>
+<span class="normal">1575</span>
+<span class="normal">1576</span>
+<span class="normal">1577</span>
+<span class="normal">1578</span>
+<span class="normal">1579</span>
+<span class="normal">1580</span>
+<span class="normal">1581</span>
+<span class="normal">1582</span>
+<span class="normal">1583</span>
+<span class="normal">1584</span>
+<span class="normal">1585</span>
+<span class="normal">1586</span>
+<span class="normal">1587</span>
+<span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
+<span class="normal">1591</span>
+<span class="normal">1592</span>
+<span class="normal">1593</span>
+<span class="normal">1594</span>
+<span class="normal">1595</span>
+<span class="normal">1596</span>
+<span class="normal">1597</span>
+<span class="normal">1598</span>
+<span class="normal">1599</span>
+<span class="normal">1600</span>
+<span class="normal">1601</span>
+<span class="normal">1602</span>
+<span class="normal">1603</span>
+<span class="normal">1604</span>
+<span class="normal">1605</span>
+<span class="normal">1606</span>
+<span class="normal">1607</span>
+<span class="normal">1608</span>
+<span class="normal">1609</span>
+<span class="normal">1610</span>
+<span class="normal">1611</span>
+<span class="normal">1612</span>
+<span class="normal">1613</span>
+<span class="normal">1614</span>
+<span class="normal">1615</span>
+<span class="normal">1616</span>
+<span class="normal">1617</span>
+<span class="normal">1618</span>
+<span class="normal">1619</span>
+<span class="normal">1620</span>
+<span class="normal">1621</span>
+<span class="normal">1622</span>
+<span class="normal">1623</span>
+<span class="normal">1624</span>
+<span class="normal">1625</span>
+<span class="normal">1626</span>
+<span class="normal">1627</span>
+<span class="normal">1628</span>
+<span class="normal">1629</span>
+<span class="normal">1630</span>
+<span class="normal">1631</span>
+<span class="normal">1632</span>
+<span class="normal">1633</span>
+<span class="normal">1634</span>
+<span class="normal">1635</span>
+<span class="normal">1636</span>
+<span class="normal">1637</span>
+<span class="normal">1638</span>
+<span class="normal">1639</span>
+<span class="normal">1640</span>
+<span class="normal">1641</span>
+<span class="normal">1642</span>
+<span class="normal">1643</span>
+<span class="normal">1644</span>
+<span class="normal">1645</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceInterfacesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceInterfacesResult</span><span class="p">,</span>
@@ -8697,6 +8836,7 @@ dry-run mode.</p>
     <span class="n">update_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">preserve_description</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">batch_fallback</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -8724,6 +8864,7 @@ dry-run mode.</p>
 <span class="sd">    **Limitations**</span>
 
 <span class="sd">    - Interface sync does not handle IP addresses</span>
+<span class="sd">    - Clearing interface mode also clears untagged and tagged VLAN assignments</span>
 <span class="sd">    - Interface sync does not handle MAC addresses</span>
 <span class="sd">    - Sync interfaces uses device running configuration as the primary source;</span>
 <span class="sd">      operational state only fills missing MTU, duplex, and speed values</span>
@@ -8785,6 +8926,9 @@ dry-run mode.</p>
 <span class="sd">            live text.</span>
 <span class="sd">        batch_size (int, optional): Maximum interfaces in each NetBox bulk</span>
 <span class="sd">            create, update, or delete request. Defaults to 1000.</span>
+<span class="sd">        batch_fallback (bool, optional): Retry failed create and update batches</span>
+<span class="sd">            one interface at a time, reporting errors and continuing with the</span>
+<span class="sd">            next bulk batch. Defaults to False. Deletions are unaffected.</span>
 <span class="sd">        update_type (bool): Safely update existing interface types. Updates are</span>
 <span class="sd">            allowed from ``other`` to ``virtual``, ``bridge``, or ``lag``, and</span>
 <span class="sd">            between those logical types. Specific physical types are protected,</span>
@@ -9160,6 +9304,9 @@ dry-run mode.</p>
         <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;review declined; changes were not applied&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
+    <span class="n">device_names_by_id</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">device_name</span> <span class="k">for</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">nb_devices_data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
     <span class="c1"># create LAG interfaces</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;preparing LAG interface create payloads&quot;</span><span class="p">)</span>
     <span class="n">bulk_create_lag_interfaces</span> <span class="o">=</span> <span class="p">[]</span>
@@ -9181,6 +9328,7 @@ dry-run mode.</p>
         <span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_lag_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> LAG interface create payload(s)&quot;</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">bulk_create_lag_interfaces</span><span class="p">:</span>
+        <span class="n">created_lag_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;creating LAG interfaces&quot;</span><span class="p">)</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_lag_interfaces</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span>
@@ -9198,17 +9346,42 @@ dry-run mode.</p>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create LAG interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">ret</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">batch_fallback</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="n">ret</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;retrying LAG interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> one interface at a time&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                <span class="n">created_interfaces</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                    <span class="n">device_name</span> <span class="o">=</span> <span class="n">device_names_by_id</span><span class="p">[</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">interface</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">item_exc</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">payload</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item_exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">created_interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> using fallback&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;completed LAG interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> fallback: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">created_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> succeeded, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">created_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">created_interfaces</span><span class="p">:</span>
                 <span class="n">device_name</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">interface</span><span class="o">.</span><span class="n">id</span>
                 <span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_lag_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> LAG interface(s)&quot;</span><span class="p">)</span>
+                <span class="n">created_lag_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">created_lag_count</span><span class="si">}</span><span class="s2"> LAG interface(s)&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no LAG interfaces to create&quot;</span><span class="p">)</span>
 
@@ -9233,6 +9406,7 @@ dry-run mode.</p>
         <span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_parent_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> non-child/main interface create payload(s)&quot;</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">bulk_create_parent_interfaces</span><span class="p">:</span>
+        <span class="n">created_parent_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;creating non-child/main interfaces&quot;</span><span class="p">)</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_parent_interfaces</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span>
@@ -9250,19 +9424,42 @@ dry-run mode.</p>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create non-child/main interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">ret</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">batch_fallback</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="n">ret</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;retrying non-child/main interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> one interface at a time&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                <span class="n">created_interfaces</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                    <span class="n">device_name</span> <span class="o">=</span> <span class="n">device_names_by_id</span><span class="p">[</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">interface</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">item_exc</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">payload</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item_exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">created_interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> using fallback&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;completed non-child/main interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> fallback: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">created_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> succeeded, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">created_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">created_interfaces</span><span class="p">:</span>
                 <span class="n">device_name</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">interface</span><span class="o">.</span><span class="n">id</span>
                 <span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_parent_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> non-child/main interface(s)&quot;</span>
-        <span class="p">)</span>
+                <span class="n">created_parent_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">created_parent_count</span><span class="si">}</span><span class="s2"> non-child/main interface(s)&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no non-child/main interfaces to create&quot;</span><span class="p">)</span>
 
@@ -9287,6 +9484,7 @@ dry-run mode.</p>
         <span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_child_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> child interface create payload(s)&quot;</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">bulk_create_child_interfaces</span><span class="p">:</span>
+        <span class="n">created_child_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;creating child interfaces&quot;</span><span class="p">)</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_child_interfaces</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span>
@@ -9304,17 +9502,42 @@ dry-run mode.</p>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create child interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">ret</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">batch_fallback</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="n">ret</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;retrying child interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> one interface at a time&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                <span class="n">created_interfaces</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                    <span class="n">device_name</span> <span class="o">=</span> <span class="n">device_names_by_id</span><span class="p">[</span><span class="n">payload</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">interface</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">item_exc</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to create </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">payload</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item_exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">created_interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> using fallback&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;completed child interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> fallback: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">created_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> succeeded, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">created_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">created_interfaces</span><span class="p">:</span>
                 <span class="n">device_name</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">interface</span><span class="o">.</span><span class="n">id</span>
                 <span class="p">)</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;created&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_create_child_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> child interface(s)&quot;</span><span class="p">)</span>
+                <span class="n">created_child_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">created_child_count</span><span class="si">}</span><span class="s2"> child interface(s)&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no child interfaces to create&quot;</span><span class="p">)</span>
 
@@ -9331,10 +9554,15 @@ dry-run mode.</p>
                 <span class="n">device_name</span><span class="o">=</span><span class="n">device_name</span><span class="p">,</span>
                 <span class="n">intf_name</span><span class="o">=</span><span class="n">intf_name</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="c1"># Clear VLAN assignments in the same request when removing interface mode.</span>
+            <span class="k">if</span> <span class="s2">&quot;mode&quot;</span> <span class="ow">in</span> <span class="n">field_changes</span> <span class="ow">and</span> <span class="n">desired</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;untagged_vlan&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tagged_vlans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">object_cache</span><span class="p">[(</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">)]</span>
             <span class="n">bulk_update_interfaces</span><span class="p">[(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">payload</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prepared </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface update payload(s)&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bulk_update_interfaces</span><span class="p">:</span>
+        <span class="n">updated_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s)&quot;</span><span class="p">)</span>
         <span class="n">update_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bulk_update_interfaces</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="n">total_batches</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">update_items</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
@@ -9349,13 +9577,36 @@ dry-run mode.</p>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update interface batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">ret</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">batch_fallback</span><span class="p">:</span>
+                    <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="n">ret</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;retrying interface update batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> one interface at a time&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
+                <span class="n">updated_items</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">),</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">nb</span><span class="o">.</span><span class="n">dcim</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">payload</span><span class="p">])</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">item_exc</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;failed to update </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">item_exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">updated_items</span><span class="o">.</span><span class="n">append</span><span class="p">(((</span><span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">),</span> <span class="n">payload</span><span class="p">))</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="n">device_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">intf_name</span><span class="si">}</span><span class="s2"> using fallback&quot;</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;completed interface update batch </span><span class="si">{</span><span class="n">batch_number</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_batches</span><span class="si">}</span><span class="s2"> fallback: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">updated_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> succeeded, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">updated_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed&quot;</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">batch</span> <span class="o">=</span> <span class="n">updated_items</span>
             <span class="k">for</span> <span class="p">(</span><span class="n">device_name</span><span class="p">,</span> <span class="n">intf_name</span><span class="p">),</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device_name</span><span class="p">][</span><span class="s2">&quot;updated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intf_name</span><span class="p">)</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bulk_update_interfaces</span><span class="p">)</span><span class="si">}</span><span class="s2"> interface(s)&quot;</span><span class="p">)</span>
+                <span class="n">updated_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="n">updated_count</span><span class="si">}</span><span class="s2"> interface(s)&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;no interfaces to update&quot;</span><span class="p">)</span>
 

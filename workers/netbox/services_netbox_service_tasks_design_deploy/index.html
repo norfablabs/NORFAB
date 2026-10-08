@@ -7551,6 +7551,9 @@
 <h1 id="deploy-a-netbox-design">Deploy a Netbox design<a class="headerlink" href="#deploy-a-netbox-design" title="Permanent link">¤</a></h1>
 <p><code>design_deploy</code> renders a YAML design with Jinja2, validates the rendered document, then creates or updates Netbox objects in dependency order. It never deletes objects omitted from the design. Existing objects receive the supplied fields on every run. The task does not calculate a diff before sending updates.</p>
 <h2 id="design-overview">Design overview<a class="headerlink" href="#design-overview" title="Permanent link">¤</a></h2>
+<p><strong>Netbox Design Driven Modeling (NDDM)</strong> is an approach to building and maintaining the Netbox data model from reusable network designs. A design describes the objects and relationships needed for a site, service, or network pattern in YAML. Jinja2 templates let you reuse the same design for multiple deployments by supplying different context values, such as site names, device names, or address pools.</p>
+<p>NorFab implements this approach through <code>design_deploy</code>: it turns the design into Netbox objects, resolves supported references, and processes collections in dependency order. Designs can include resource allocation requests for values that are not known in advance. Keeping designs and their context in version control makes the intended model reviewable and reusable.</p>
+<p>NDDM designs are additive and idempotent. Deployment creates missing objects and updates matched objects according to each handler's rules. Reapplying the same design reuses those objects instead of creating duplicates. Objects omitted from a design remain in Netbox. Custom functions must implement their own idempotent behavior. The task models data in Netbox; applying device configuration is a separate automation step.</p>
 <p>For an agent-oriented authoring workflow, see <a href="../../../tutorials/norfab_netbox_design_authoring/">Author a Netbox design with an agent</a>.</p>
 <p>A design is one YAML document with object collections such as <code>sites</code> and <code>devices</code>. It can also contain three optional control sections:</p>
 <table>
@@ -7816,7 +7819,7 @@
 <td style="text-align: right;">20</td>
 <td><code>devices</code></td>
 <td><code>netbox.dcim.devices</code></td>
-<td><code>site</code> and <code>name</code>, plus <code>tenant</code> when supplied</td>
+<td><code>name</code>; <code>tenant</code> disambiguates duplicate names</td>
 <td>Nested components are flattened before writes.</td>
 </tr>
 <tr>
@@ -7968,8 +7971,8 @@ used during deployment.</p>
 </tr>
 <tr>
 <td><code>create_asn</code></td>
-<td><code>asns</code></td>
-<td>Allocates an ASN from a named range.</td>
+<td><code>asns</code>. BGP peering <code>local_as</code> and <code>remote_as</code>, including nested peerings</td>
+<td>Allocates or reuses an ASN from a named range. See the ASN examples below.</td>
 </tr>
 <tr>
 <td><code>create_vlan</code></td>
@@ -8006,7 +8009,7 @@ Function return values are not automatically used as relationship references.</p
 <tbody>
 <tr>
 <td><a href="../services_netbox_service_tasks_create_asn/">create_asn</a></td>
-<td>Selects an available ASN from an existing named range.</td>
+<td>Allocates or reuses an ASN in <code>asns</code> or BGP peering <code>local_as</code> and <code>remote_as</code>.</td>
 </tr>
 <tr>
 <td><a href="../services_netbox_service_tasks_create_vlan/">create_vlan</a></td>
@@ -8131,6 +8134,28 @@ Function return values are not automatically used as relationship references.</p
 <span class="w">      </span><span class="nt">custom_fields</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">deployment_owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME</span>
 </code></pre></div>
+<p>You can also allocate an ASN directly in a BGP peering. This example reuses
+the branch ASN above and allocates a peer ASN from the same range:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bgp_peerings</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-upstream</span>
+<span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-router-1</span>
+<span class="w">    </span><span class="nt">local_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.1</span>
+<span class="w">    </span><span class="nt">remote_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.0.2.2</span>
+<span class="w">    </span><span class="nt">local_as</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">create_asn</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">asn_range</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME BRANCH ASNS</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME branch ASN</span>
+<span class="w">    </span><span class="nt">remote_as</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">create_asn</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">asn_range</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME BRANCH ASNS</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME peer ASN</span>
+</code></pre></div>
+<p>The device and IP addresses must exist or be defined in the design. Wrappers
+also work on peerings nested under devices or interfaces. Do not combine
+a wrapper with the corresponding <code>local_as_query</code> or <code>remote_as_query</code>.
+Use a stable description or role/site combination for repeatable allocation.
+Dry runs do not reserve numbers, so allocations from the same range may
+report the same available ASN.</p>
 </div>
 <div class="tabbed-block">
 <p>The design creates a VLAN group allowing IDs 100–199, then <code>create_vlan</code> selects the next available ID for <code>ACME USERS</code>. Its name and group identify it on a repeat run.</p>
@@ -9190,7 +9215,7 @@ without removing existing members.</p>
 <p class="admonition-title">Interface dependency limits</p>
 <p>All parent, LAG, and bridge interfaces must be defined in the design or already exist in Netbox. A newly created dependent interface cannot itself be the parent of another new interface in the same deployment, because only two passes are performed.</p>
 </div>
-<p>Device matching uses name and site, plus tenant when the design supplies one. When tenant is omitted, name and site must identify one device. An ambiguous match fails. Interfaces and IP assignments refer to a device by name, so use unambiguous device names for designs that include those nested objects.</p>
+<p>Device deployment searches by name only. A single match is updated, with site and tenant treated as update attributes. When multiple devices share a name, the supplied tenant must select exactly one; missing tenant, no tenant match, or multiple tenant matches cause an ambiguity error. Site does not disambiguate devices. Interfaces and IP assignments refer to a device by name, so use unambiguous device names for designs that include those nested objects. The separate primary-IP and local-context stages retain their site/name and optional tenant matching.</p>
 <h2 id="nested-vrrp-group-records">Nested VRRP Group Records<a class="headerlink" href="#nested-vrrp-group-records" title="Permanent link">¤</a></h2>
 <p><code>vrrp_groups</code> supports an <code>assignments</code> list and an optional <code>vip</code>. Each assignment supplies <code>device</code>, <code>interface</code>, and <code>priority</code>. The design extracts these into <code>vrrp_group_assignments</code>, adding <code>protocol</code> and <code>group_id</code> from the parent group. The optional <code>vip</code> becomes an IP address assigned to the group, not to an individual interface.</p>
 <p>For a top-level group, specify both <code>protocol</code> and <code>group_id</code>. Unlike the compact interface <code>vrrp</code> form, this form does not default the protocol. Groups are created before their VIP addresses and interface assignments.</p>
@@ -9760,7 +9785,8 @@ therefore have no IDs yet.</p>
 </div>
 </div>
 <h2 id="design-deployment-output">Design Deployment Output<a class="headerlink" href="#design-deployment-output" title="Permanent link">¤</a></h2>
-<p>Results are keyed by collection. Each collection reports object identities in <code>created</code> and <code>updated</code>. No-op allocation results are omitted. Repeat deployments can report updates because existing records are sent to Netbox without a local diff.</p>
+<p>With <code>dry_run_render=True</code>, <code>result</code> contains the rendered text and the result's <code>dry_run</code> flag is <code>True</code>. Dictionary designs return the supplied dictionary unchanged. This option takes precedence over <code>dry_run</code> and returns before YAML parsing, flattening, design validation, lookups, or deployment-time custom functions. Context and initial metadata parsing, input-schema validation, Netbox client setup, and Jinja2 functions still run.</p>
+<p>Deployment and ordinary dry-run results are keyed by collection. Each collection reports object identities in <code>created</code> and <code>updated</code>. No-op allocation results are omitted. Repeat deployments can report updates because existing records are sent to Netbox without a local diff.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;tenants&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ACME&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span>
 <span class="w">  </span><span class="nt">&quot;sites&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;BRANCH-1&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]}</span>
@@ -9772,6 +9798,7 @@ therefore have no IDs yet.</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>design<span class="w"> </span>deploy<span class="w"> </span>design<span class="w"> </span>nf://netbox/designs/branch.yaml<span class="w"> </span>context<span class="w"> </span><span class="s1">&#39;{&quot;site&quot;:&quot;BRANCH-1&quot;}&#39;</span>
+nf#<span class="w"> </span>netbox<span class="w"> </span>design<span class="w"> </span>deploy<span class="w"> </span>design<span class="w"> </span>nf://netbox/designs/branch.yaml<span class="w"> </span>context<span class="w"> </span><span class="s1">&#39;{&quot;site&quot;:&quot;BRANCH-1&quot;}&#39;</span><span class="w"> </span>dry-run-render
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -9785,6 +9812,7 @@ therefore have no IDs yet.</p>
         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;design&quot;</span><span class="p">:</span> <span class="s2">&quot;nf://netbox/designs/branch.yaml&quot;</span><span class="p">,</span>
             <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;BRANCH-1&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;dry_run_render&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Preview the rendered design.</span>
         <span class="p">},</span>
     <span class="p">)</span>
 </code></pre></div>
@@ -9831,6 +9859,7 @@ root
 <span class="w">            </span>├──<span class="w"> </span>context:<span class="w">    </span>Template<span class="w"> </span>context<span class="w"> </span>validated<span class="w"> </span>by<span class="w"> </span>design_input_schema,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;{}&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>instance:<span class="w">    </span>NetBox<span class="w"> </span>instance<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>target
 <span class="w">            </span>├──<span class="w"> </span>dry-run:<span class="w">    </span>Validate<span class="w"> </span>design<span class="w"> </span>without<span class="w"> </span>writing<span class="w"> </span>to<span class="w"> </span>NetBox,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
+<span class="w">            </span>├──<span class="w"> </span>dry-run-render:<span class="w">    </span>Return<span class="w"> </span>rendered<span class="w"> </span>design<span class="w"> </span>before<span class="w"> </span>parsing<span class="w"> </span>or<span class="w"> </span>deployment,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;False&#39;</span>
 <span class="w">            </span>├──<span class="w"> </span>branch:<span class="w">    </span>NetBox<span class="w"> </span>branching<span class="w"> </span>plugin<span class="w"> </span>branch<span class="w"> </span>name<span class="w"> </span>to<span class="w"> </span>use
 <span class="w">            </span>├──<span class="w"> </span>timeout:<span class="w">    </span>Job<span class="w"> </span>timeout
 <span class="w">            </span>├──<span class="w"> </span>workers:<span class="w">    </span>Filter<span class="w"> </span>worker<span class="w"> </span>to<span class="w"> </span>target,<span class="w"> </span>default<span class="w"> </span><span class="s1">&#39;any&#39;</span>
@@ -9961,6 +9990,25 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
                   <code>None</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dry_run_render</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Return rendered text before YAML parsing, flattening,
+validation, or deployment. Dictionary designs return unchanged.
+Takes precedence over dry_run; context validation and Jinja2
+functions still run.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -9980,7 +10028,37 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Object identities grouped by collection and creation/update action.</p>
+                <p>Object identities grouped by collection and creation/update action,</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>or rendered text (the original dictionary for dictionary designs)</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>with dry_run=True when dry_run_render is enabled. Preparation and</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>deployment errors are reported in a failed Result.</p>
               </div>
             </td>
           </tr>
@@ -9990,23 +10068,7 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3987</span>
-<span class="normal">3988</span>
-<span class="normal">3989</span>
-<span class="normal">3990</span>
-<span class="normal">3991</span>
-<span class="normal">3992</span>
-<span class="normal">3993</span>
-<span class="normal">3994</span>
-<span class="normal">3995</span>
-<span class="normal">3996</span>
-<span class="normal">3997</span>
-<span class="normal">3998</span>
-<span class="normal">3999</span>
-<span class="normal">4000</span>
-<span class="normal">4001</span>
-<span class="normal">4002</span>
-<span class="normal">4003</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4003</span>
 <span class="normal">4004</span>
 <span class="normal">4005</span>
 <span class="normal">4006</span>
@@ -10270,7 +10332,34 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 <span class="normal">4264</span>
 <span class="normal">4265</span>
 <span class="normal">4266</span>
-<span class="normal">4267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4267</span>
+<span class="normal">4268</span>
+<span class="normal">4269</span>
+<span class="normal">4270</span>
+<span class="normal">4271</span>
+<span class="normal">4272</span>
+<span class="normal">4273</span>
+<span class="normal">4274</span>
+<span class="normal">4275</span>
+<span class="normal">4276</span>
+<span class="normal">4277</span>
+<span class="normal">4278</span>
+<span class="normal">4279</span>
+<span class="normal">4280</span>
+<span class="normal">4281</span>
+<span class="normal">4282</span>
+<span class="normal">4283</span>
+<span class="normal">4284</span>
+<span class="normal">4285</span>
+<span class="normal">4286</span>
+<span class="normal">4287</span>
+<span class="normal">4288</span>
+<span class="normal">4289</span>
+<span class="normal">4290</span>
+<span class="normal">4291</span>
+<span class="normal">4292</span>
+<span class="normal">4293</span>
+<span class="normal">4294</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -10292,6 +10381,7 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
     <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dry_run_render</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Render and flatten a design, validate it, then deploy ordered collections.</span>
 
@@ -10306,9 +10396,16 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
 <span class="sd">        instance: NetBox instance name; defaults to the worker&#39;s instance.</span>
 <span class="sd">        dry_run: Return planned writes without changing NetBox.</span>
 <span class="sd">        branch: NetBox Branching plugin branch name.</span>
+<span class="sd">        dry_run_render: Return rendered text before YAML parsing, flattening,</span>
+<span class="sd">            validation, or deployment. Dictionary designs return unchanged.</span>
+<span class="sd">            Takes precedence over dry_run; context validation and Jinja2</span>
+<span class="sd">            functions still run.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Object identities grouped by collection and creation/update action.</span>
+<span class="sd">        Object identities grouped by collection and creation/update action,</span>
+<span class="sd">        or rendered text (the original dictionary for dictionary designs)</span>
+<span class="sd">        with dry_run=True when dry_run_render is enabled. Preparation and</span>
+<span class="sd">        deployment errors are reported in a failed Result.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
@@ -10432,12 +10529,15 @@ their current values. Object custom-field names resolve to NetBox IDs.</p>
             <span class="n">environment</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
             <span class="n">environment</span><span class="o">.</span><span class="n">globals</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
             <span class="n">environment</span><span class="o">.</span><span class="n">globals</span><span class="p">[</span><span class="s2">&quot;netbox&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span>
-            <span class="n">document</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span>
-                    <span class="n">environment</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">template</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="ow">or</span> <span class="p">{}</span>
-            <span class="p">)</span>
+            <span class="n">document</span> <span class="o">=</span> <span class="n">environment</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">template</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dry_run_render</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">document</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+        <span class="k">if</span> <span class="n">template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">document</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">document</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;flattening and validating netbox design&quot;</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

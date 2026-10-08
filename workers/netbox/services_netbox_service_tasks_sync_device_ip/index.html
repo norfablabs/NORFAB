@@ -7314,6 +7314,10 @@ as <code>secondary</code>, <code>anycast</code>, and <code>vip</code>. The task 
 </ul>
 <p>Configured <code>anycast_ranges</code> take precedence over the parsed role. A parsed role
 takes precedence over loopback-name inference.</p>
+<p>Parsed live <code>anycast</code> addresses extend the task's anycast ranges with IPv4
+<code>/32</code> or IPv6 <code>/128</code> host networks before reconciliation. These discovered
+ranges apply across VRFs for this task invocation and correct overlapping
+Netbox records to the <code>anycast</code> role without requiring configured ranges.</p>
 <p>Addresses with a parsed <code>vrrp</code>, <code>glbp</code>, <code>hsrp</code>, or <code>carp</code> role are excluded
 from this task. The
 <a href="../services_netbox_service_tasks_sync_vrrp/"><code>sync_vrrp</code></a> task exclusively
@@ -7726,8 +7730,9 @@ making any changes. Result is keyed by device name::</p>
 the same structure showing what was done.</p>
 <p><strong>Side Effects</strong></p>
 <ol>
-<li>When overlapping IP discovered in Netbox and it is part of anycast range,
-    existing IP role update to <code>anycast</code></li>
+<li>Parsed live anycast addresses extend the task's anycast ranges with
+    IPv4 /32 or IPv6 /128 host networks, regardless of VRF. Overlapping
+    NetBox IP records have their role updated to <code>anycast</code>.</li>
 <li>Parsed TTP IP roles are synchronized to NetBox, except for FHRP
     addresses using the <code>vrrp</code>, <code>glbp</code>, <code>hsrp</code>, or <code>carp</code> roles.</li>
 <li>Addresses with the <code>anycast</code> or <code>vip</code> role may be assigned to multiple
@@ -8702,7 +8707,14 @@ does not delete IP addresses.</p>
 <span class="normal">1515</span>
 <span class="normal">1516</span>
 <span class="normal">1517</span>
-<span class="normal">1518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1518</span>
+<span class="normal">1519</span>
+<span class="normal">1520</span>
+<span class="normal">1521</span>
+<span class="normal">1522</span>
+<span class="normal">1523</span>
+<span class="normal">1524</span>
+<span class="normal">1525</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
@@ -8765,8 +8777,9 @@ does not delete IP addresses.</p>
 
 <span class="sd">    **Side Effects**</span>
 
-<span class="sd">    1. When overlapping IP discovered in Netbox and it is part of anycast range,</span>
-<span class="sd">        existing IP role update to `anycast`</span>
+<span class="sd">    1. Parsed live anycast addresses extend the task&#39;s anycast ranges with</span>
+<span class="sd">        IPv4 /32 or IPv6 /128 host networks, regardless of VRF. Overlapping</span>
+<span class="sd">        NetBox IP records have their role updated to `anycast`.</span>
 <span class="sd">    2. Parsed TTP IP roles are synchronized to NetBox, except for FHRP</span>
 <span class="sd">        addresses using the `vrrp`, `glbp`, `hsrp`, or `carp` roles.</span>
 <span class="sd">    3. Addresses with the `anycast` or `vip` role may be assigned to multiple</span>
@@ -8985,6 +8998,12 @@ does not delete IP addresses.</p>
                 <span class="c1"># detection remains authoritative for configured anycast ranges.</span>
                 <span class="k">if</span> <span class="n">parsed_ip_role</span> <span class="ow">and</span> <span class="n">resolved_ip_role</span> <span class="o">!=</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
                     <span class="n">resolved_ip_role</span> <span class="o">=</span> <span class="n">parsed_ip_role</span>
+                <span class="k">if</span> <span class="n">resolved_ip_role</span> <span class="o">==</span> <span class="s2">&quot;anycast&quot;</span><span class="p">:</span>
+                    <span class="n">anycast_nets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host_address</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">host_address</span><span class="o">.</span><span class="n">max_prefixlen</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="n">ip_live</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">device_name</span><span class="p">,</span>
                     <span class="s2">&quot;interface&quot;</span><span class="p">:</span> <span class="n">intf_name</span><span class="p">,</span>

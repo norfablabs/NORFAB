@@ -7567,8 +7567,17 @@ nf#
 <p>Supports single-session mode (individual keyword arguments) and bulk mode
 (<code>bulk_create</code> list of dicts).  IP addresses and ASNs are resolved from
 IPAM or created on demand.  When <code>local_interface</code> is provided the local
-address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote
-address is derived automatically. Existing sessions and repeated bulk
+address is resolved from IPAM. If <code>remote_address</code> is omitted, the
+remote address is derived from the first IP assigned to that interface
+for IPv4 /30 or /31 and IPv6 /127 subnets. This uses subnet arithmetic
+and does not require a cable or remote interface recorded in NetBox.
+For example, <code>10.0.0.1/30</code> yields <code>10.0.0.2</code>. Supplying only
+<code>local_address</code> without <code>local_interface</code> does not trigger derivation.
+Unless <code>dry_run</code> is enabled, a missing peer IP is created in IPAM
+using the most specific containing NetBox prefix's mask, or /32 for
+IPv4 and /128 for IPv6 if no containing prefix exists. The new IP is
+not assigned to a remote device or interface automatically.
+Existing sessions and repeated bulk
 entries are matched by device name, local IP and ASN, and remote IP and
 ASN values; names do not identify sessions.</p>
 
@@ -7673,7 +7682,10 @@ ASN values; names do not identify sessions.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Remote IP address string. Derived from P2P peer when <code>local_interface</code> is used.</p>
+                <p>Remote IP address string. When omitted,
+derived from the first IP assigned to <code>local_interface</code> for
+IPv4 /30 or /31 and IPv6 /127 subnets. An explicit value takes
+precedence over derivation.</p>
               </div>
             </td>
             <td>
@@ -8813,7 +8825,19 @@ fields need resolution.</p>
 <span class="normal">1742</span>
 <span class="normal">1743</span>
 <span class="normal">1744</span>
-<span class="normal">1745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1745</span>
+<span class="normal">1746</span>
+<span class="normal">1747</span>
+<span class="normal">1748</span>
+<span class="normal">1749</span>
+<span class="normal">1750</span>
+<span class="normal">1751</span>
+<span class="normal">1752</span>
+<span class="normal">1753</span>
+<span class="normal">1754</span>
+<span class="normal">1755</span>
+<span class="normal">1756</span>
+<span class="normal">1757</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpPeeringInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpPeeringResult</span><span class="p">,</span>
@@ -8874,8 +8898,17 @@ fields need resolution.</p>
 <span class="sd">    Supports single-session mode (individual keyword arguments) and bulk mode</span>
 <span class="sd">    (``bulk_create`` list of dicts).  IP addresses and ASNs are resolved from</span>
 <span class="sd">    IPAM or created on demand.  When ``local_interface`` is provided the local</span>
-<span class="sd">    address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote</span>
-<span class="sd">    address is derived automatically. Existing sessions and repeated bulk</span>
+<span class="sd">    address is resolved from IPAM. If ``remote_address`` is omitted, the</span>
+<span class="sd">    remote address is derived from the first IP assigned to that interface</span>
+<span class="sd">    for IPv4 /30 or /31 and IPv6 /127 subnets. This uses subnet arithmetic</span>
+<span class="sd">    and does not require a cable or remote interface recorded in NetBox.</span>
+<span class="sd">    For example, ``10.0.0.1/30`` yields ``10.0.0.2``. Supplying only</span>
+<span class="sd">    ``local_address`` without ``local_interface`` does not trigger derivation.</span>
+<span class="sd">    Unless ``dry_run`` is enabled, a missing peer IP is created in IPAM</span>
+<span class="sd">    using the most specific containing NetBox prefix&#39;s mask, or /32 for</span>
+<span class="sd">    IPv4 and /128 for IPv6 if no containing prefix exists. The new IP is</span>
+<span class="sd">    not assigned to a remote device or interface automatically.</span>
+<span class="sd">    Existing sessions and repeated bulk</span>
 <span class="sd">    entries are matched by device name, local IP and ASN, and remote IP and</span>
 <span class="sd">    ASN values; names do not identify sessions.</span>
 
@@ -8885,7 +8918,10 @@ fields need resolution.</p>
 <span class="sd">        name (str, optional): Session name. Derived from ``name_template`` when omitted.</span>
 <span class="sd">        device (str, optional): Local device name. Required in single-session mode.</span>
 <span class="sd">        local_address (str, optional): Local IP address string. Derived from ``local_interface`` when omitted.</span>
-<span class="sd">        remote_address (str, optional): Remote IP address string. Derived from P2P peer when ``local_interface`` is used.</span>
+<span class="sd">        remote_address (str, optional): Remote IP address string. When omitted,</span>
+<span class="sd">            derived from the first IP assigned to ``local_interface`` for</span>
+<span class="sd">            IPv4 /30 or /31 and IPv6 /127 subnets. An explicit value takes</span>
+<span class="sd">            precedence over derivation.</span>
 <span class="sd">        local_as (int, optional): Local AS number. Takes precedence over ``local_as_query``.</span>
 <span class="sd">        remote_as (int, optional): Remote AS number. Takes precedence over ``remote_as_query``.</span>
 <span class="sd">        status (str): Session status. Default ``&#39;active&#39;``.</span>
