@@ -7554,6 +7554,57 @@
 <p><strong>Netbox Design Driven Modeling (NDDM)</strong> is an approach to building and maintaining the Netbox data model from reusable network designs. A design describes the objects and relationships needed for a site, service, or network pattern in YAML. Jinja2 templates let you reuse the same design for multiple deployments by supplying different context values, such as site names, device names, or address pools.</p>
 <p>NorFab implements this approach through <code>design_deploy</code>: it turns the design into Netbox objects, resolves supported references, and processes collections in dependency order. Designs can include resource allocation requests for values that are not known in advance. Keeping designs and their context in version control makes the intended model reviewable and reusable.</p>
 <p>NDDM designs are additive and idempotent. Deployment creates missing objects and updates matched objects according to each handler's rules. Reapplying the same design reuses those objects instead of creating duplicates. Objects omitted from a design remain in Netbox. Custom functions must implement their own idempotent behavior. The task models data in Netbox; applying device configuration is a separate automation step.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Two-router design</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nt">design_input_schema</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object</span>
+<span class="w">  </span><span class="nt">properties</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<span class="w">    </span><span class="nt">prefix</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+
+<span class="nt">roles</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">p2p</span>
+
+<span class="nt">prefixes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">context.prefix</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">p2p</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">context.site</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+
+<span class="nt">devices</span><span class="p">:</span>
+<span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">for device_id in</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="err">%</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">router{{ device_id }}</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">context.site</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">    </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">router</span>
+<span class="w">    </span><span class="nt">platform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cisco_ios</span>
+<span class="w">    </span><span class="nt">device_type</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">manufacturer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cisco</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ASR1001</span>
+<span class="w">    </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
+<span class="w">    </span><span class="nt">interfaces</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">GigabitEthernet0/0/0</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ip_addresses</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">create_ip</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">prefix</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">p2p</span>
+<span class="w">                </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">context.site</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">              </span><span class="nt">mask_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">        </span><span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">if device_id == 1 %</span><span class="p p-Indicator">}</span>
+<span class="w">        </span><span class="nt">connection</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">router2</span>
+<span class="w">          </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GigabitEthernet0/0/0</span>
+<span class="w">        </span><span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">endif %</span><span class="p p-Indicator">}</span>
+<span class="w">        </span><span class="nt">bgp_peerings</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">local_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000</span>
+<span class="w">            </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">65000</span>
+<span class="w">            </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">iBGP between Routers</span>
+<span class="p p-Indicator">{</span><span class="err">%</span><span class="w"> </span><span class="nv">endfor %</span><span class="p p-Indicator">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <p>For an agent-oriented authoring workflow, see <a href="../../../tutorials/norfab_netbox_design_authoring/">Author a Netbox design with an agent</a>.</p>
 <p>A design is one YAML document with object collections such as <code>sites</code> and <code>devices</code>. It can also contain three optional control sections:</p>
 <table>
@@ -7589,7 +7640,7 @@
 </div>
 <h2 id="design-input-schema">Design input schema<a class="headerlink" href="#design-input-schema" title="Permanent link">¤</a></h2>
 <p><code>design_input_schema</code> validates the supplied <code>context</code> before Jinja2 renders the design. Use inline JSON Schema or an <code>nf://</code> / <code>git://</code> Python file defining a Pydantic <code>DesignInput</code> model. The validated context is available as <code>context</code> in the template.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Inline schema</label><label for="__tabbed_1_2">Pydantic Model-based design</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Inline schema</label><label for="__tabbed_2_2">Pydantic Model-based design</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">design_input_schema</span><span class="p">:</span>
@@ -7626,7 +7677,7 @@
 <p class="admonition-title">Jinja2 runs before deployment</p>
 <p>Jinja2 filters and global functions run while the design is rendered, before any object in that design is created. They may query objects already in Netbox, but must not depend on objects the same design plans to create: those objects do not exist yet. Use deployment-time <code>custom_functions</code> when a function needs objects created by an earlier collection.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Jinja2 Loop</label><label for="__tabbed_2_2">Custom filter</label><label for="__tabbed_2_3">Global function</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Jinja2 Loop</label><label for="__tabbed_3_2">Custom filter</label><label for="__tabbed_3_3">Global function</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">devices</span><span class="p">:</span>
@@ -8072,7 +8123,7 @@ Function return values are not automatically used as relationship references.</p
 <span class="w">    </span><span class="nt">remote_as</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4200650000</span>
 </code></pre></div>
 <h3 id="allocation-examples">Allocation examples<a class="headerlink" href="#allocation-examples" title="Permanent link">¤</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:5"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Combined example</label><label for="__tabbed_3_2">ASN</label><label for="__tabbed_3_3">VLAN</label><label for="__tabbed_3_4">Prefix</label><label for="__tabbed_3_5">IP address</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:5"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Combined example</label><label for="__tabbed_4_2">ASN</label><label for="__tabbed_4_3">VLAN</label><label for="__tabbed_4_4">Prefix</label><label for="__tabbed_4_5">IP address</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>The design creates an RIR, ASN range, VLAN group, and parent prefix. It then allocates an ASN, VLAN ID, child prefix, and IP address from those objects, in deployment order.</p>
@@ -8303,7 +8354,7 @@ objects to exist.</p>
 exist before this example is deployed. Multiobject updates add references
 without removing existing members.</p>
 <p>FHRP group assignments and ConfigContext objects do not support custom fields. Device-local context is ordinary JSON data, not a custom-field definition. The design does not create custom-field definitions.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Device and interface</label><label for="__tabbed_4_2">Next-available allocation</label><label for="__tabbed_4_3">Clear a value</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Device and interface</label><label for="__tabbed_5_2">Next-available allocation</label><label for="__tabbed_5_3">Clear a value</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Prerequisites: the referenced device prerequisites and custom-field definitions enabled for devices and interfaces respectively.</p>
@@ -8412,7 +8463,7 @@ without removing existing members.</p>
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Route target allocation</label><label for="__tabbed_5_2">Calculated VLAN name</label><label for="__tabbed_5_3">Jinja2 loop and community allocation</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Route target allocation</label><label for="__tabbed_6_2">Calculated VLAN name</label><label for="__tabbed_6_3">Jinja2 loop and community allocation</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This example allocates a route target. Register the Python file under <code>custom_functions</code>, then use <code>custom_function: allocate_bgp_route_target</code> in a <code>route_targets</code> record. The function runs during the route-target deployment stage, after route-target records without <code>custom_function</code> have been processed. The record's other fields become keyword arguments, and deployment also supplies <code>context</code>, <code>netbox</code>, and <code>dry_run</code>.</p>
@@ -8522,7 +8573,7 @@ without removing existing members.</p>
 <h2 id="nested-device-records">Nested Device Records<a class="headerlink" href="#nested-device-records" title="Permanent link">¤</a></h2>
 <p>Nesting keeps a device and its related objects together, making the design more natural to read and shorter to write. Interfaces, IP addresses, and peerings inherit their device or interface names instead of repeating them in separate top-level records.</p>
 <p>Device records may contain <code>interfaces</code>, <code>bgp_peerings</code>, <code>power_ports</code>, <code>console_ports</code>, <code>power_outlets</code>, <code>console_server_ports</code>, and <code>local_context_data</code>. An interface may contain <code>ip_addresses</code>, <code>bgp_peerings</code>, <code>connection</code>, <code>vrf</code>, <code>untagged_vlan</code>, <code>tagged_vlans</code>, and <code>vrrp</code>. The task flattens these before validation or writes. It adds device and interface names to extracted records and merges them with records already at the top level. Inline VRFs, VLANs, VRRP groups, route targets, routing policies, and BGP peer groups are also collected into their earlier collections. Interface VRF identity dictionaries and VLAN group/VID dictionaries remain references. Nested route-target, routing-policy, and peer-group dictionaries are collected as definitions, even with only a name.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:15"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><input id="__tabbed_6_5" name="__tabbed_6" type="radio" /><input id="__tabbed_6_6" name="__tabbed_6" type="radio" /><input id="__tabbed_6_7" name="__tabbed_6" type="radio" /><input id="__tabbed_6_8" name="__tabbed_6" type="radio" /><input id="__tabbed_6_9" name="__tabbed_6" type="radio" /><input id="__tabbed_6_10" name="__tabbed_6" type="radio" /><input id="__tabbed_6_11" name="__tabbed_6" type="radio" /><input id="__tabbed_6_12" name="__tabbed_6" type="radio" /><input id="__tabbed_6_13" name="__tabbed_6" type="radio" /><input id="__tabbed_6_14" name="__tabbed_6" type="radio" /><input id="__tabbed_6_15" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">All nested fields</label><label for="__tabbed_6_2">Interfaces</label><label for="__tabbed_6_3">Device BGP peerings</label><label for="__tabbed_6_4">VRRP</label><label for="__tabbed_6_5">IP addresses</label><label for="__tabbed_6_6">Interface connection</label><label for="__tabbed_6_7">Interface VRF</label><label for="__tabbed_6_8">Untagged VLAN</label><label for="__tabbed_6_9">Tagged VLANs</label><label for="__tabbed_6_10">Interface BGP peering</label><label for="__tabbed_6_11">Power ports</label><label for="__tabbed_6_12">Console ports</label><label for="__tabbed_6_13">Power outlets</label><label for="__tabbed_6_14">Console server ports</label><label for="__tabbed_6_15">Local context data</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:15"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><input id="__tabbed_7_5" name="__tabbed_7" type="radio" /><input id="__tabbed_7_6" name="__tabbed_7" type="radio" /><input id="__tabbed_7_7" name="__tabbed_7" type="radio" /><input id="__tabbed_7_8" name="__tabbed_7" type="radio" /><input id="__tabbed_7_9" name="__tabbed_7" type="radio" /><input id="__tabbed_7_10" name="__tabbed_7" type="radio" /><input id="__tabbed_7_11" name="__tabbed_7" type="radio" /><input id="__tabbed_7_12" name="__tabbed_7" type="radio" /><input id="__tabbed_7_13" name="__tabbed_7" type="radio" /><input id="__tabbed_7_14" name="__tabbed_7" type="radio" /><input id="__tabbed_7_15" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">All nested fields</label><label for="__tabbed_7_2">Interfaces</label><label for="__tabbed_7_3">Device BGP peerings</label><label for="__tabbed_7_4">VRRP</label><label for="__tabbed_7_5">IP addresses</label><label for="__tabbed_7_6">Interface connection</label><label for="__tabbed_7_7">Interface VRF</label><label for="__tabbed_7_8">Untagged VLAN</label><label for="__tabbed_7_9">Tagged VLANs</label><label for="__tabbed_7_10">Interface BGP peering</label><label for="__tabbed_7_11">Power ports</label><label for="__tabbed_7_12">Console ports</label><label for="__tabbed_7_13">Power outlets</label><label for="__tabbed_7_14">Console server ports</label><label for="__tabbed_7_15">Local context data</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Prerequisites: Named sites, roles, device types, VLAN group, referenced VLANs/VRF, remote endpoints, peering IPs/ASNs, and the BGP plugin.</p>
@@ -9219,7 +9270,7 @@ without removing existing members.</p>
 <h2 id="nested-vrrp-group-records">Nested VRRP Group Records<a class="headerlink" href="#nested-vrrp-group-records" title="Permanent link">¤</a></h2>
 <p><code>vrrp_groups</code> supports an <code>assignments</code> list and an optional <code>vip</code>. Each assignment supplies <code>device</code>, <code>interface</code>, and <code>priority</code>. The design extracts these into <code>vrrp_group_assignments</code>, adding <code>protocol</code> and <code>group_id</code> from the parent group. The optional <code>vip</code> becomes an IP address assigned to the group, not to an individual interface.</p>
 <p>For a top-level group, specify both <code>protocol</code> and <code>group_id</code>. Unlike the compact interface <code>vrrp</code> form, this form does not default the protocol. Groups are created before their VIP addresses and interface assignments.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">VRRP assignments</label><label for="__tabbed_7_2">Allocated VIP</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">VRRP assignments</label><label for="__tabbed_8_2">Allocated VIP</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Prerequisites: both devices and their Vlan100 interfaces. The VIP is created as an IP address assigned to the group. Assignments attach that group to each interface with a priority.</p>
@@ -9374,7 +9425,7 @@ planned terminations even when their interfaces or VLANs are also planned and
 therefore have no IDs yet.</p>
 <h2 id="nested-vrf-records">Nested VRF Records<a class="headerlink" href="#nested-vrf-records" title="Permanent link">¤</a></h2>
 <p>VRFs accept <code>import_route_targets</code> and <code>export_route_targets</code> as lists of dictionaries. These route targets become top-level definitions and are deployed before their VRF, even when only <code>name</code> is supplied. A VRF can be defined at the top level or nested under a device interface.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">VRF route targets</label><label for="__tabbed_8_2">Interface VRF and route targets</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">VRF route targets</label><label for="__tabbed_9_2">Interface VRF and route targets</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Prerequisites: none for these IPAM objects. Route targets are created before the VRF and associated through its import/export fields.</p>
@@ -9451,7 +9502,7 @@ therefore have no IDs yet.</p>
 <p>BGP peerings accept <code>import_policies</code> and <code>export_policies</code> as lists of routing-policy names or dictionaries. The design extracts these into top-level <code>routing_policies</code>, creates or updates them before BGP sessions, and associates them with the peering. A policy name or a dictionary containing only <code>name</code> is also treated as a policy definition.</p>
 <p><code>peer_group</code> accepts a name or a dictionary with <code>name</code> and other peer-group fields. Both forms are collected into top-level <code>peer_groups</code> and created or updated before the BGP session. The peering then passes the group name to <code>create_bgp_peering</code>.</p>
 <p>This works for top-level <code>bgp_peerings</code> and peerings nested under devices or interfaces.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Peering routing policies</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Peering routing policies</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Prerequisites: the device, both IP addresses, both ASNs, and the BGP plugin. Inline peer groups and policies are deployed before the peering. <code>create_reverse: false</code> creates only the specified direction.</p>
@@ -9500,7 +9551,7 @@ therefore have no IDs yet.</p>
 <h2 id="configuration-context">Configuration context<a class="headerlink" href="#configuration-context" title="Permanent link">¤</a></h2>
 <p>Top-level <code>config_context</code> creates or updates reusable Netbox ConfigContext objects. Its <code>data</code> is a dictionary, and its scope determines which devices receive it. Device-specific values belong in <a href="#device-local-context">device local context</a>.</p>
 <p>A <code>custom_function</code> on a <code>config_context</code> record uses the same <a href="#custom-functions">arguments and return handling as any ordinary custom function</a>: deployment supplies <code>context</code>, <code>netbox</code>, and <code>dry_run</code>, and the record supplies additional keyword arguments. It receives no device object. Its return value is recorded under <code>config_context.custom</code>, not saved as context data automatically. The function must perform its own writes. The Jinja calculation example below instead renders <code>data</code> for the normal handler to save.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Shared site context</label><label for="__tabbed_10_2">Calculated site context</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Shared site context</label><label for="__tabbed_11_2">Calculated site context</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><code>config_context</code> matches an existing ConfigContext by <code>name</code>, creating it if absent or updating it if present. <code>sites</code> scopes the context to named sites created earlier or already in Netbox. Without a scope, the context applies globally, so specify one when the data is site-specific.</p>
@@ -9633,7 +9684,7 @@ therefore have no IDs yet.</p>
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Device inline context</label><label for="__tabbed_11_2">Calculate IS-IS NET ID</label><label for="__tabbed_11_3">Top-level device local context</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Device inline context</label><label for="__tabbed_12_2">Calculate IS-IS NET ID</label><label for="__tabbed_12_3">Top-level device local context</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Prerequisites: Named site, role, manufacturer, and device type.</p>
@@ -9794,7 +9845,7 @@ therefore have no IDs yet.</p>
 </code></pre></div>
 <p>Errors identify the collection that stopped deployment. Earlier collections are not rolled back.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">CLI</label><label for="__tabbed_12_2">Python</label><label for="__tabbed_12_3">FastAPI</label><label for="__tabbed_12_4">MCP</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:4"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><input id="__tabbed_13_4" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">CLI</label><label for="__tabbed_13_2">Python</label><label for="__tabbed_13_3">FastAPI</label><label for="__tabbed_13_4">MCP</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>nf#<span class="w"> </span>netbox<span class="w"> </span>design<span class="w"> </span>deploy<span class="w"> </span>design<span class="w"> </span>nf://netbox/designs/branch.yaml<span class="w"> </span>context<span class="w"> </span><span class="s1">&#39;{&quot;site&quot;:&quot;BRANCH-1&quot;}&#39;</span>
