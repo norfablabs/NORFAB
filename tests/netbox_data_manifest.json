@@ -412,7 +412,7 @@
       "manufacturer": "NORFAB DESIGN ID MANUFACTURER",
       "device_type": "NORFAB DESIGN ID TYPE",
       "device_role": "NORFAB DESIGN ID ROLE",
-      "coverage": "Owns and cleans up all records. Creates duplicate names in different tenants; verifies tenant selection, ambiguity with omitted or unmatched tenant, and unique-name site and tenant updates."
+      "coverage": "Owns and cleans up all records. Creates duplicate names in different tenants; verifies tenant selection, ambiguity with omitted or unmatched tenant, unique-name site and tenant updates, and updates without site preserving the current site."
     },
     "test_designs.py::TestDesignDeploy::test_acme_design": {
       "peering_asn_wrapper": "acme-branch-rtr-1-to-acme-branch-agg-2 allocates or reuses ACME allocated branch ASN for local_as. Existing query examples remain intact.",

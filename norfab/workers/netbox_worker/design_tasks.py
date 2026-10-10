@@ -1944,6 +1944,8 @@ def process_devices(
     writes devices only. A unique name matches regardless of site or tenant;
     supplied site and tenant are update attributes. Duplicate names require
     a supplied tenant that selects exactly one device, otherwise matching fails.
+    Omitted site leaves an existing device's site unchanged; new devices must
+    still supply the attributes required by NetBox.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -1962,7 +1964,7 @@ def process_devices(
         "process_devices: processing %d records, dry_run=%s", len(records), dry_run
     )
     names = [record["name"] for record in records]
-    site_names = list({record["site"] for record in records})
+    site_names = list({record["site"] for record in records if record.get("site")})
     sites = lookup_cache["sites"]
     missing_sites = set(site_names) - sites.keys()
     if missing_sites:

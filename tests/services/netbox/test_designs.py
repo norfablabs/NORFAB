@@ -1615,7 +1615,9 @@ class TestDesignDeploy:
                 if device.id != first.id:
                     device.delete()
             for tenant in (None, "NORFAB DESIGN ID TENANT B"):
-                record = {"name": first.name, "site": "NORFAB DESIGN ID SITE B"}
+                record = {"name": first.name, "description": "updated without site"}
+                if tenant is None:
+                    record["site"] = "NORFAB DESIGN ID SITE B"
                 if tenant:
                     record["tenant"] = tenant
                 reply = nfclient.run_job(
@@ -1632,6 +1634,7 @@ class TestDesignDeploy:
                     }
                 updated = nb.dcim.devices.get(id=first.id)
                 assert updated.site.name == "NORFAB DESIGN ID SITE B"
+                assert updated.description == "updated without site"
                 assert updated.tenant.name == (tenant or "NORFAB DESIGN ID TENANT")
         finally:
             for endpoint, filters in objects:

@@ -1,3 +1,11 @@
+# 0.24.10
+
+## BUGS
+
+1. Fixed Netbox `design_deploy` raising a missing-site error when updating an existing device without a site in its design record. Omitted site preserves the existing assignment.
+
+---
+
 # 0.24.9
 
 ## ENHANCEMENTS
