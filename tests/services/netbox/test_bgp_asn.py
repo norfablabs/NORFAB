@@ -115,6 +115,125 @@ class TestCreateBgpAsn:
             if rir:
                 rir.delete()
 
+    def test_matches_range_role_and_sites(self, nfclient: Any) -> None:
+        """Match range, role and sites through NorFab without client-side filtering."""
+        nb = get_pynetbox(nfclient)
+        numbers = [4200999800, 4200999801, 4200999804]
+        site_names = ["NORFAB ASN LOOKUP SITE A", "NORFAB ASN LOOKUP SITE B"]
+        role_name = "NORFAB ASN LOOKUP ROLE"
+        objects = [
+            (nb.ipam.asns, {"asn": numbers}),
+            (nb.ipam.asn_ranges, {"name": "NORFAB ASN LOOKUP RANGE"}),
+            (nb.ipam.roles, {"name": role_name}),
+            (nb.dcim.sites, {"name": site_names}),
+            (nb.ipam.rirs, {"name": "NORFAB ASN LOOKUP RIR"}),
+        ]
+        if any(list(endpoint.filter(**filters)) for endpoint, filters in objects):
+            pytest.skip("ASN lookup test records already exist")
+        created = []
+        try:
+            rir = nb.ipam.rirs.create(
+                {"name": "NORFAB ASN LOOKUP RIR", "slug": "norfab-asn-lookup-rir"}
+            )
+            created.append(rir)
+            sites = nb.dcim.sites.create(
+                [
+                    {"name": site_names[0], "slug": "norfab-asn-lookup-site-a"},
+                    {"name": site_names[1], "slug": "norfab-asn-lookup-site-b"},
+                ]
+            )
+            created.extend(sites)
+            role = nb.ipam.roles.create(
+                {"name": role_name, "slug": "norfab-asn-lookup-role"}
+            )
+            created.append(role)
+            created.append(
+                nb.ipam.asn_ranges.create(
+                    {
+                        "name": "NORFAB ASN LOOKUP RANGE",
+                        "slug": "norfab-asn-lookup-range",
+                        "start": numbers[0],
+                        "end": numbers[1],
+                        "rir": rir.id,
+                    }
+                )
+            )
+            target = nb.ipam.asns.create(
+                {
+                    "asn": numbers[0],
+                    "rir": rir.id,
+                    "role": role.id,
+                    "sites": [sites[0].id],
+                }
+            )
+            created.append(target)
+            other = nb.ipam.asns.create(
+                {
+                    "asn": numbers[1],
+                    "rir": rir.id,
+                    "description": "NORFAB LOOKUP DESCRIPTION",
+                }
+            )
+            created.append(other)
+            created.append(
+                nb.ipam.asns.create(
+                    {
+                        "asn": numbers[2],
+                        "rir": rir.id,
+                        "role": role.id,
+                        "sites": [sites[0].id],
+                    }
+                )
+            )
+            for fields in (
+                {"role": role.id, "sites": []},
+                {"role": role.id, "sites": [sites[1].id]},
+                {"role": None, "sites": [sites[0].id]},
+            ):
+                other.update(fields)
+                for dry_run in (True, False):
+                    response = nfclient.run_job(
+                        "netbox",
+                        "create_asn",
+                        workers="any",
+                        kwargs={
+                            "asn_range": "NORFAB ASN LOOKUP RANGE",
+                            "role": role_name,
+                            "sites": [site_names[0]],
+                            "description": "NORFAB LOOKUP DESCRIPTION",
+                            "dry_run": dry_run,
+                        },
+                    )
+                    assert response
+                    for result in response.values():
+                        assert not result["failed"], result
+                        assert result["result"]["asn"] == numbers[0]
+                        assert result["result"]["status"] == (
+                            "update" if dry_run else "updated"
+                        )
+                    assert {
+                        site.id for site in nb.ipam.asns.get(asn=numbers[0]).sites
+                    } == {sites[0].id}
+            other.update({"role": role.id, "sites": [sites[1].id]})
+            response = nfclient.run_job(
+                "netbox",
+                "create_asn",
+                workers="any",
+                kwargs={
+                    "asn_range": "NORFAB ASN LOOKUP RANGE",
+                    "role": role_name,
+                    "sites": site_names,
+                    "dry_run": True,
+                },
+            )
+            assert response
+            for result in response.values():
+                assert result["failed"], result
+                assert "more than one ASN" in str(result["errors"])
+        finally:
+            for record in reversed(created):
+                record.delete()
+
     def test_adds_tags_and_array_custom_fields(self, nfclient: Any) -> None:
         """Keep ASN tags and site references when adding values on repeat calls."""
         nb = get_pynetbox(nfclient)

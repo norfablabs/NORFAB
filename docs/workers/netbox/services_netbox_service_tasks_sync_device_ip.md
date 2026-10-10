@@ -35,6 +35,11 @@ as `secondary`, `anycast`, and `vip`. The task also applies these fallbacks:
 Configured `anycast_ranges` take precedence over the parsed role. A parsed role
 takes precedence over loopback-name inference.
 
+Parsed live `anycast` addresses extend the task's anycast ranges with IPv4
+`/32` or IPv6 `/128` host networks before reconciliation. These discovered
+ranges apply across VRFs for this task invocation and correct overlapping
+Netbox records to the `anycast` role without requiring configured ranges.
+
 Addresses with a parsed `vrrp`, `glbp`, `hsrp`, or `carp` role are excluded
 from this task. The
 [`sync_vrrp`](services_netbox_service_tasks_sync_vrrp.md) task exclusively

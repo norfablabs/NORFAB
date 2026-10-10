@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 5 October 2026*
+*Last updated: 9 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -728,9 +728,9 @@ Design processors resolve names in object and multiobject custom fields using ea
 Independent interfaces are created before interfaces with parent, LAG or bridge references. Explicit VIP and anycast addresses can have a separate NetBox IP record on each interface. Nested VRRP records create FHRP groups, VIPs and assignments; device primary IPs are assigned after address creation. Scoped NetBox ConfigContext objects and static or function-calculated device local context are deployed last. Dry runs omit missing devices from local-context update results.
 Device types accept `default_platform` as a platform name.
 Route targets support bulk creation/update before VRFs and L2VPNs; inline
-import/export definitions are flattened and associated with their parent objects.
+import/export definitions are flattened and associated with their parent objects. Route-target lists also accept NetBox query filters, including custom-field filters, to attach all existing matches; queries with no matches fail.
 L2VPN terminations attach device interfaces or group/VID VLANs through top-level
-or nested definitions, rejecting attachments already used by another L2VPN.
+or nested definitions, rejecting attachments already used by another L2VPN. VLAN terminations with a name create or update their VLAN before attachment.
 Route-target and BGP-community definition lists require dictionaries, not bare strings.
 Routing-policy definitions, including BGP import/export lists, also require dictionaries.
 Interface, console, and power cables support top-level and nested definitions, bulk creation/update,
@@ -745,7 +745,7 @@ design communities match by value and optional description, and interface VRFs a
 Prefix allocation supports existing VLAN association by VID and VLAN group name, including reassignment and dry-run diffs; VID and site alone are unsupported.
 Host IP allocations (/32 and /128) automatically skip peer creation and peer-subnet reuse.
 IP allocation prefix filters resolve `role` by role name, not slug, and reject unknown names.
-BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. Design peerings create only the specified direction unless `create_reverse: true` is set. The standalone create task resolves custom-field references for new sessions.
+BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. Design peerings create only the specified direction unless `create_reverse: true` is set. Local and remote ASN fields support nested `create_asn` wrappers to allocate or reuse ASNs before session creation. The standalone create task resolves custom-field references for new sessions.
 Named or inline peer groups and import/export policies are extracted before deployment.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving the design `context`, record arguments, `netbox`, and `dry_run`; custom
@@ -757,6 +757,8 @@ Omitted objects are not deleted. **Use cases:** repeatable NetBox prerequisite
 setup for network designs. **Limitations:** other design collections are rejected
 until their handlers are implemented.
 NFCLI exposes deployment through `netbox design deploy`.
+Device deployment matches by name, using tenant only to disambiguate duplicate names. Site and tenant are update attributes for uniquely named devices; omitted site preserves the current assignment, and unresolved duplicate names fail.
+The `dry_run_render` option returns rendered text before YAML parsing, flattening, design validation, or deployment; dictionary designs return unchanged. Available through the Python API, NFCLI (`dry-run-render`), FastAPI, and MCP.
 [Design deploy task](workers/netbox/services_netbox_service_tasks_design_deploy.md) ·
 [Create ASN task](workers/netbox/services_netbox_service_tasks_create_asn.md) ·
 [Create VLAN group task](workers/netbox/services_netbox_service_tasks_create_vlan_group.md) ·
@@ -871,11 +873,14 @@ rename rules, reconciles the parsed 802.1Q interface mode independently of VLAN
 assignments, and applies ordered create, update, and optional delete actions.
 Bulk interface writes use sequential requests of 1000 items by default, with a
 configurable positive `batch_size` for each run; each
-batch reports progress in events and logs.
+batch reports progress in events and logs. Optional `batch_fallback` retries
+failed create and update batches individually, reports errors, and continues
+with subsequent bulk batches.
 An empty NetBox interface set is valid, allowing a device to be initialized
 entirely from discovered live interfaces. Interface-name mapping rules can be
 supplied inline or loaded from YAML through `nf://` URLs. VLAN objects and
-tagged/untagged memberships are handled by VLAN sync.
+tagged/untagged memberships are handled by VLAN sync. Clearing an interface
+mode during interface sync also clears its VLAN assignments.
 VRF objects and interface VRF assignments are handled by VRF sync.
 New interfaces accept any parsed type; existing interfaces use safe logical
 type transitions that protect specific physical types and never downgrade to
@@ -900,7 +905,7 @@ loaded from YAML through `nf://` URLs, using `match_device_names`,
 and group selection. The first matching mapping rule applies to the whole VLAN.
 Existing descriptions support always, live-empty-only, or never preservation;
 empty device descriptions yield to non-empty observations of the same VLAN.
-VLAN name conflicts are validated within each group or site before bulk writes;
+VLAN name conflicts against NetBox and between proposed changes are validated within each group or site before bulk writes;
 conflicting creations and updates are reported and skipped without stopping
 unrelated VLAN changes.
 VLANs are identified by VID and group, with every same-VID
@@ -974,6 +979,8 @@ anycast ranges, VRF/site association, controlled deletion behavior, and stable
 create, update, delete, and in-sync diff reports.
 IP sync allows separate interface assignments for shared anycast and VIP
 addresses, including VIP roles parsed from devices or inherited from NetBox.
+Parsed anycast host addresses extend the task's anycast ranges across VRFs
+and correct the roles of overlapping NetBox IP records.
 Parsed VRRP, GLBP, HSRP, and CARP addresses are excluded from IP
 synchronization. The VRRP sync task creates VRRP addresses and associates them
 with FHRP groups. IP records assigned to other non-interface objects are also
@@ -1025,7 +1032,7 @@ objects are never deleted.
 
 Creates or updates an explicit ASN, or allocates the next available ASN from a
 named ASN range. The task and `netbox create asn` NFCLI command accept a `sites`
-list to associate the ASN with multiple sites; the same task backs design allocations.
+list to associate the ASN with multiple sites; the same task backs design allocations. Range allocation matches role and any supplied site when provided, otherwise description. Ambiguous matches fail.
 Repeated `create_asn` calls add sites, tags, and items in list-valued custom
 fields to existing ASNs without removing existing values. Object and multiobject
 custom fields accept related object names, which the task resolves to IDs;

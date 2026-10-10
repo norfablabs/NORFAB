@@ -7,7 +7,8 @@ tags:
 
 > task api name: `sync_device_interfaces`
 
-The Netbox Sync Device Interfaces Task synchronizes device interface configuration from live network devices into NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan and applies interface create, update, and delete operations in dependency order. VRF assignments are owned by `sync_vrfs`.
+The Netbox Sync Device Interfaces Task synchronizes device interface configuration from live network devices into NetBox using a normalized desired/current state model and DeepDiff-driven reconciliation. The task computes an explicit action plan and applies interface create, update, and delete operations in dependency order. VRF assignments are owned by `sync_vrfs`. When an update clears interface mode,
+it also clears the untagged VLAN and tagged VLAN list in the same request.
 
 Devices may begin with no interfaces in NetBox. The task treats an empty
 current interface set as valid and creates interfaces discovered from live data.
@@ -32,8 +33,16 @@ Each create, update, and delete phase sends sequential bulk requests of at most
 `batch_size` interfaces. The default is 1000; set any integer greater than zero
 to tune the request size. Successful batches are recorded in the result before
 the next request, so a failure can leave earlier batches applied in NetBox.
-Each batch emits a progress event and an info log before the request, with its batch
-number, total batches, and interface count.
+Each batch emits a progress event and an info log before the request with its
+batch number, total batches, and interface count.
+
+Set `batch_fallback=True` (CLI: `batch-fallback True`) to retry a failed create
+or update batch one interface at a time, then resume bulk requests for the next
+batch. Batch and individual failures are recorded in `errors`, logs, and error
+events. Fallback emits a warning and a summary of successful and failed retries;
+only successful writes appear in `created` and `updated`. With fallback enabled, these errors do not change the task failure flag.
+The default is `False`, which marks the task failed and returns after a failed
+batch. Deletion behavior is unchanged.
 
 ![Netbox Sync Device Interfaces](../../images/Netbox_Service_Sync_Interfaces.jpg)
 

@@ -1,3 +1,50 @@
+# 0.24.10
+
+## BUGS
+
+1. Fixed Netbox `design_deploy` raising a missing-site error when updating an existing device without a site in its design record. Omitted site preserves the existing assignment.
+
+---
+
+# 0.24.9
+
+## ENHANCEMENTS
+
+1. Netbox `design_deploy` supports `dry_run_render` to return rendered design text before YAML parsing, flattening, validation, or deployment, with `dry_run=True` in the result. Dictionary designs return unchanged.
+2. Netbox `design_deploy` matches devices by name only, allowing site and tenant updates for uniquely named devices. Tenant is used only to disambiguate duplicate names; unresolved matches fail instead of creating another device.
+
+---
+
+# 0.24.8
+
+## BUGS
+
+1. Fixed Netbox `sync_device_interfaces` clearing interface mode without clearing existing VLAN assignments. The update now clears the untagged VLAN and tagged VLAN list in the same request.
+2. Fixed Netbox `sync_device_ip` reporting duplicate non-shared IP errors for parsed live anycast addresses. Discovered anycast host addresses now extend the task's anycast ranges before overlap reconciliation.
+
+## ENHANCEMENTS
+
+1. Netbox `sync_device_interfaces` supports optional `batch_fallback` to retry failed create and update batches one interface at a time, report per-interface errors in results, logs, and events, and continue with subsequent bulk batches. Defaults to `False`.
+2. Netbox `create_asn` reuses range allocations by role and any supplied site. Explicit ASN numbers take precedence. With a range, role/site lookup takes precedence over description lookup. No match allocates the next available ASN. Multiple matches raise an error.
+3. Netbox `design_deploy` supports nested `create_asn` wrappers in BGP peering `local_as` and `remote_as` fields, allocating or reusing ASNs before session creation.
+
+
+---
+
+# 0.24.7
+
+## ENHANCEMENTS
+
+1. NetBox `design_deploy` extracts named VLAN definitions from nested and top-level L2VPN terminations and deploys them before attachment.
+2. NetBox `design_deploy` supports `query` filters in VRF and L2VPN import/export route-target lists to attach existing matches.
+3. NetBox object and multiobject custom fields resolve IP addresses by address, prefixes by prefix, BGP communities by value, circuits by CID, and device types by model. Other related objects use name; references must match exactly one object. The ACME design demonstrates single and multiple IP references on a device using dedicated seeded custom fields and IP addresses.
+
+## BUGS
+
+1. Fixed NetBox `sync_vlans` submitting duplicate names for different VIDs in the same scope. Later conflicting changes are skipped before bulk writes, and skipped creations are removed from interface targets.
+
+---
+
 # 0.24.6
 
 ## BUGS

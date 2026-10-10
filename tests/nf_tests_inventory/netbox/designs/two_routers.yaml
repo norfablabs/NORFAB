@@ -1,0 +1,44 @@
+design_input_schema:
+  type: object
+  properties:
+    site:
+      type: string
+    prefix:
+      type: string
+
+roles:
+  - name: p2p
+
+prefixes:
+  - prefix: {{ context.prefix }}
+    role: p2p
+    site: {{ context.site }}
+
+devices:
+{% for device_id in [1, 2] %}
+  - name: router{{ device_id }}
+    site: {{ context.site }}
+    role: router
+    platform: cisco_ios
+    device_type:
+      manufacturer: Cisco
+      model: ASR1001
+    status: active
+    interfaces:
+      GigabitEthernet0/0/0:
+        ip_addresses:
+          - create_ip: 
+              prefix:
+                role: p2p
+                site: {{ context.site }}
+              mask_len: 30
+        {% if device_id == 1 %}
+        connection:
+          device: router2
+          interface: GigabitEthernet0/0/0
+        {% endif %}
+        bgp_peerings:
+          - local_as: 65000
+            remote_as: 65000
+            description: iBGP between Routers
+{% endfor %}

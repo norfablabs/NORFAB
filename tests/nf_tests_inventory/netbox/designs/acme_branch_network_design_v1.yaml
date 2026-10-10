@@ -161,16 +161,6 @@ vlan_groups:
       - [100, 199]
 
 vlans:
-  - group: "{{ context.site }} VLANS"
-    name: ACME USERS
-    tenant: ACME
-    vid: 100
-    status: active
-    description: ACME branch user access
-    role: ACME-BRANCH-LAN
-    custom_fields:
-      norfab_acme_site: "{{ context.site }}"
-      norfab_acme_sites: ["{{ context.site }}"]
   - create_vlan:
       vlan_group: "{{ context.site }} VLANS"
       name: ACME GUEST
@@ -191,9 +181,8 @@ vrfs:
     tenant: ACME
     rd: "4200650001:100"
     import_route_targets:
-      - name: "4200650001:100"
-        tenant: ACME
-        description: ACME branch import target
+      - query:
+          name: "4200650001:100"
     export_route_targets:
       - name: "4200650001:200"
         tenant: ACME
@@ -205,12 +194,21 @@ l2vpns:
     identifier: 10100
     tenant: ACME
     import_route_targets:
-      - name: "4200650001:100"
+      - query:
+          name: "4200650001:100"
     export_route_targets:
       - name: "4200650001:100"
     terminations:
       - group: "{{ context.site }} VLANS"
+        name: ACME USERS
+        tenant: ACME
         vid: 100
+        status: active
+        description: ACME branch user access
+        role: ACME-BRANCH-LAN
+        custom_fields:
+          norfab_acme_site: "{{ context.site }}"
+          norfab_acme_sites: ["{{ context.site }}"]
       - device: acme-branch-rtr-1
         interface: Ethernet2.100
 
@@ -302,6 +300,9 @@ devices:
     # Requires the dcim.device custom field supplied by the test inventory.
     custom_fields:
       norfab_crud_test_text: ACME core router
+      # These dedicated reference IPs and device custom fields are seeded by netbox_data.py.
+      norfab_design_device_ip: "198.19.243.10/32"
+      norfab_design_device_ips: ["198.19.243.10/32", "198.19.243.11/32"]
     tenant: ACME
     site: "{{ context.site }}"
     console_ports:
@@ -410,7 +411,10 @@ devices:
       - name: acme-branch-rtr-1-to-acme-branch-agg-2
         local_address: 192.0.2.101
         remote_address: 192.0.2.104
-        local_as: 4200650001
+        local_as:
+          create_asn:
+            asn_range: ACME BRANCH ALLOCATED ASNS
+            description: ACME allocated branch ASN
         remote_as: 4200650002
         status: active
         description: ACME inter-tier eBGP

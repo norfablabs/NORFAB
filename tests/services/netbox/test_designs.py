@@ -16,6 +16,43 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    @pytest.mark.parametrize("dry_run", [False, True])
+    @pytest.mark.parametrize(
+        "design, expected",
+        [
+            (
+                'sites:\n  - name: "{{ context.site }}"\n',
+                'sites:\n  - name: "RENDER PREVIEW"',
+            ),
+            ("sites: [{{ context.site }}", "sites: [RENDER PREVIEW"),
+            (
+                {"devices": [{"name": "{{ context.site }}"}]},
+                {"devices": [{"name": "{{ context.site }}"}]},
+            ),
+        ],
+        ids=["yaml", "invalid-yaml", "dictionary"],
+    )
+    def test_dry_run_render(
+        self, nfclient: Any, dry_run: bool, design: Any, expected: Any
+    ) -> None:
+        """Return rendered output without parsing or validating design records."""
+        response = nfclient.run_job(
+            "netbox",
+            "design_deploy",
+            workers="any",
+            kwargs={
+                "design": design,
+                "context": {"site": "RENDER PREVIEW"},
+                "dry_run": dry_run,
+                "dry_run_render": True,
+            },
+        )
+        assert response
+        for result in response.values():
+            assert not result["failed"], result
+            assert result["dry_run"] is True
+            assert result["result"] == expected
+
     def test_peer_group_dry_run(self, nfclient: Any) -> None:
         """Plan a peer group without writing it to NetBox."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
@@ -506,8 +543,16 @@ class TestDesignDeploy:
             for action in ("created", "updated"):
                 if action == "updated":
                     design["l2vpns"][0]["description"] = "updated L2VPN"
+                    design["route_targets"] = [
+                        {"name": target_name},
+                        {"name": added_target_name},
+                    ]
                     design["l2vpns"][0]["import_route_targets"] = [
-                        {"name": added_target_name}
+                        {"query": {"name": [target_name, added_target_name]}},
+                        {"query": {"name": target_name}},
+                    ]
+                    design["l2vpns"][0]["export_route_targets"] = [
+                        {"query": {"name": target_name}}
                     ]
                 response = nfclient.run_job(
                     "netbox", "design_deploy", workers="any", kwargs={"design": design}
@@ -926,6 +971,8 @@ class TestDesignDeploy:
                     "custom_fields": {
                         "norfab_design_device_context": "ACME first",
                         "norfab_design_device_keep": 42,
+                        "norfab_design_device_ip": "198.19.243.10/32",
+                        "norfab_design_device_ips": ["198.19.243.10/32"],
                     },
                 },
                 {
@@ -980,6 +1027,12 @@ class TestDesignDeploy:
             for run in (1, 2):
                 if run == 2:
                     design["config_context"][0]["sites"] = [added_site_name]
+                    design["devices"][0]["custom_fields"].update(
+                        {
+                            "norfab_design_device_ip": "198.19.243.11/32",
+                            "norfab_design_device_ips": ["198.19.243.11/32"],
+                        }
+                    )
                 reply = nfclient.run_job(
                     "netbox",
                     "design_deploy",
@@ -989,6 +1042,19 @@ class TestDesignDeploy:
                 for result in reply.values():
                     assert not result["failed"], result
                     assert not result["errors"], result
+                device = nb.dcim.devices.get(name=device_names[0])
+                reference_ips = [
+                    nb.ipam.ip_addresses.get(address=address)
+                    for address in ("198.19.243.10/32", "198.19.243.11/32")
+                ]
+                assert (
+                    device.custom_fields["norfab_design_device_ip"]["id"]
+                    == reference_ips[run - 1].id
+                )
+                assert {
+                    item["id"]
+                    for item in device.custom_fields["norfab_design_device_ips"]
+                } == {item.id for item in reference_ips[:run]}
                 context = nb.extras.config_contexts.get(name=context_name)
                 assert (
                     nb.dcim.interfaces.get(
@@ -1447,7 +1513,7 @@ class TestDesignDeploy:
                     record.delete()
 
     def test_devices_with_same_name_at_different_sites(self, nfclient: Any) -> None:
-        """Match devices by site and tenant on repeated deployment."""
+        """Resolve duplicate names by tenant and update unique names across sites."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
         objects = [
             (nb.dcim.devices, {"name": "norfab-design-identity-device"}),
@@ -1458,13 +1524,19 @@ class TestDesignDeploy:
             (nb.dcim.device_types, {"model": "NORFAB DESIGN ID TYPE"}),
             (nb.dcim.device_roles, {"name": "NORFAB DESIGN ID ROLE"}),
             (nb.dcim.manufacturers, {"name": "NORFAB DESIGN ID MANUFACTURER"}),
-            (nb.tenancy.tenants, {"name": "NORFAB DESIGN ID TENANT"}),
+            (
+                nb.tenancy.tenants,
+                {"name": ["NORFAB DESIGN ID TENANT", "NORFAB DESIGN ID TENANT B"]},
+            ),
         ]
         for endpoint, filters in objects:
             if list(endpoint.filter(**filters)):
                 pytest.skip(f"identity test object already exists: {filters}")
         design = {
-            "tenants": [{"name": "NORFAB DESIGN ID TENANT"}],
+            "tenants": [
+                {"name": "NORFAB DESIGN ID TENANT"},
+                {"name": "NORFAB DESIGN ID TENANT B"},
+            ],
             "manufacturers": [{"name": "NORFAB DESIGN ID MANUFACTURER"}],
             "device_types": [
                 {
@@ -1500,6 +1572,7 @@ class TestDesignDeploy:
                 },
             ],
         }
+        design["devices"][1]["tenant"] = "NORFAB DESIGN ID TENANT B"
         try:
             for run in (1, 2):
                 reply = nfclient.run_job(
@@ -1517,6 +1590,52 @@ class TestDesignDeploy:
                     "NORFAB DESIGN ID SITE A",
                     "NORFAB DESIGN ID SITE B",
                 }
+            for tenant in (None, "UNKNOWN DESIGN TENANT"):
+                record = {
+                    "name": "norfab-design-identity-device",
+                    "site": "NORFAB DESIGN ID SITE A",
+                }
+                if tenant:
+                    record["tenant"] = tenant
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"devices": [record]}},
+                )
+                for result in reply.values():
+                    assert result["failed"], result
+                    assert "ambiguous device" in " ".join(result["errors"])
+            first = next(
+                device
+                for device in devices
+                if device.site.name == "NORFAB DESIGN ID SITE A"
+            )
+            for device in devices:
+                if device.id != first.id:
+                    device.delete()
+            for tenant in (None, "NORFAB DESIGN ID TENANT B"):
+                record = {"name": first.name, "description": "updated without site"}
+                if tenant is None:
+                    record["site"] = "NORFAB DESIGN ID SITE B"
+                if tenant:
+                    record["tenant"] = tenant
+                reply = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"devices": [record]}},
+                )
+                for result in reply.values():
+                    assert not result["failed"], result
+                    assert result["result"]["devices"] == {
+                        "created": [],
+                        "updated": [first.name],
+                    }
+                updated = nb.dcim.devices.get(id=first.id)
+                assert updated.site.name == "NORFAB DESIGN ID SITE B"
+                assert updated.description == "updated without site"
+                assert updated.tenant.name == (tenant or "NORFAB DESIGN ID TENANT")
         finally:
             for endpoint, filters in objects:
                 for record in endpoint.filter(**filters):
@@ -1963,6 +2082,12 @@ class TestDesignDeploy:
                 for result in reply.values():
                     assert not result["failed"], result
                     assert not result["errors"], result
+                    assert (
+                        100
+                        in result["result"]["vlans"][
+                            "created" if run == 0 else "updated"
+                        ]
+                    )
                     assert all(
                         "unchanged" not in changes
                         for changes in result["result"].values()
@@ -1977,6 +2102,19 @@ class TestDesignDeploy:
                         for collection, changes in result["result"].items():
                             assert not changes["created"], (collection, changes)
                 group = nb.ipam.vlan_groups.get(name="NORFAB ACME TEST VLANS")
+                device = nb.dcim.devices.get(name="acme-branch-rtr-1")
+                reference_ips = [
+                    nb.ipam.ip_addresses.get(address=address)
+                    for address in ("198.19.243.10/32", "198.19.243.11/32")
+                ]
+                assert (
+                    device.custom_fields["norfab_design_device_ip"]["id"]
+                    == reference_ips[0].id
+                )
+                assert {
+                    item["id"]
+                    for item in device.custom_fields["norfab_design_device_ips"]
+                } == {item.id for item in reference_ips}
                 allocated_target = nb.ipam.route_targets.get(name="4200650001:300")
                 assert allocated_target.description == "ACME allocated route target"
                 assert allocated_target.tenant.name == "ACME"
@@ -2022,6 +2160,23 @@ class TestDesignDeploy:
                 assert (
                     allocated_peering.remote_as.asn
                     == allocated_numbers["ACME allocated aggregation ASN"]
+                )
+                inline_asn_peering = nb.plugins.bgp.session.get(
+                    name="acme-branch-rtr-1-to-acme-branch-agg-2"
+                )
+                assert (
+                    inline_asn_peering.local_as.asn
+                    == allocated_numbers["ACME allocated branch ASN"]
+                )
+                assert inline_asn_peering.remote_as.asn == 4200650002
+                termination_vlan = nb.ipam.vlans.get(group_id=group.id, vid=100)
+                assert termination_vlan.name == "ACME USERS"
+                assert termination_vlan.description == "ACME branch user access"
+                assert termination_vlan.tenant.name == "ACME"
+                assert termination_vlan.role.name == "ACME-BRANCH-LAN"
+                assert (
+                    termination_vlan.custom_fields["norfab_acme_site"]
+                    == context["site"]
                 )
                 vpn = nb.vpn.l2vpns.get(name="ACME BRANCH EVPN")
                 assert vpn.type.value == "vxlan"
@@ -2311,6 +2466,107 @@ class TestDesignDeploy:
                 if endpoint.name == "interfaces":
                     continue
                 assert not list(endpoint.filter(**filters)), filters
+
+    def test_bgp_peering_asn_allocations(self, nfclient: Any) -> None:
+        """Allocate local/remote ASNs in a design and reuse them on repeat runs."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "NORFAB DESIGN ASN ALLOCATION PEERING"
+        range_name = "NORFAB DESIGN PEERING ASN RANGE"
+        objects = [
+            (nb.plugins.bgp.session, {"name": name}),
+            (nb.ipam.asns, {"asn": [4200999900, 4200999901]}),
+            (nb.ipam.ip_addresses, {"address": ["198.19.242.1/30", "198.19.242.2/30"]}),
+            (nb.ipam.asn_ranges, {"name": range_name}),
+            (nb.ipam.rirs, {"name": "NORFAB DESIGN PEERING ASN RIR"}),
+        ]
+        if any(list(endpoint.filter(**filters)) for endpoint, filters in objects):
+            pytest.skip("peering ASN allocation test records already exist")
+        if not nb.dcim.devices.get(name="ceos1"):
+            pytest.skip("seed device ceos1 is required")
+        try:
+            rir = nb.ipam.rirs.create(
+                {
+                    "name": "NORFAB DESIGN PEERING ASN RIR",
+                    "slug": "norfab-design-peering-asn-rir",
+                }
+            )
+            nb.ipam.asn_ranges.create(
+                {
+                    "name": range_name,
+                    "slug": "norfab-design-peering-asn-range",
+                    "start": 4200999900,
+                    "end": 4200999901,
+                    "rir": rir.id,
+                }
+            )
+            nb.ipam.ip_addresses.create(
+                [{"address": "198.19.242.1/30"}, {"address": "198.19.242.2/30"}]
+            )
+            peering = {
+                "name": name,
+                "device": "ceos1",
+                "local_address": "198.19.242.1",
+                "remote_address": "198.19.242.2",
+                "local_as": {
+                    "create_asn": {
+                        "asn_range": range_name,
+                        "description": "NORFAB PEERING LOCAL ASN",
+                    }
+                },
+                "remote_as": {
+                    "create_asn": {
+                        "asn_range": range_name,
+                        "description": "NORFAB PEERING REMOTE ASN",
+                    }
+                },
+                "create_reverse": False,
+            }
+            for dry_run in (True, False, False):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="netbox-worker-1.1",
+                    kwargs={"design": {"bgp_peerings": [peering]}, "dry_run": dry_run},
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                if dry_run:
+                    assert nb.plugins.bgp.session.get(name=name) is None
+                    assert not list(
+                        nb.ipam.asns.filter(asn__gte=4200999900, asn__lte=4200999901)
+                    )
+                else:
+                    session = nb.plugins.bgp.session.get(name=name)
+                    assert session.local_as.asn == 4200999900
+                    assert session.remote_as.asn == 4200999901
+                    assert (
+                        len(
+                            list(
+                                nb.ipam.asns.filter(
+                                    asn__gte=4200999900, asn__lte=4200999901
+                                )
+                            )
+                        )
+                        == 2
+                    )
+            peering["local_as"] = {
+                "create_asn": {"asn_range": "NORFAB NONEXISTENT PEERING RANGE"}
+            }
+            response = nfclient.run_job(
+                "netbox",
+                "design_deploy",
+                workers="netbox-worker-1.1",
+                kwargs={"design": {"bgp_peerings": [peering]}},
+            )
+            assert response
+            for result in response.values():
+                assert result["failed"], result
+                assert "not found" in str(result["errors"])
+        finally:
+            for endpoint, filters in objects:
+                for record in endpoint.filter(**filters):
+                    record.delete()
 
     def test_bgp_peering_policies(self, nfclient: Any) -> None:
         """Derive a session name and leave its existing fields unchanged."""
@@ -2649,9 +2905,7 @@ tenants:
                 "import_route_targets": [
                     {"name": "64512:99123", "description": "design target"}
                 ],
-                "export_route_targets": [
-                    {"name": "64512:99123", "description": "design target"}
-                ],
+                "export_route_targets": [{"query": {"name": "64512:99123"}}],
             }
         ]
         design["bgp_communities"] = [
@@ -2752,9 +3006,38 @@ tenants:
         "design",
         [
             {"unknown": []},
+            {
+                "bgp_peerings": [
+                    {
+                        "name": "invalid",
+                        "local_as": {"create_asn": {"asn_range": "test"}},
+                        "local_as_query": {"description": "test"},
+                    }
+                ]
+            },
+            {
+                "bgp_peerings": [
+                    {
+                        "name": "invalid",
+                        "remote_as": {"create_asn": {"asn": 64512, "rir": "test"}},
+                    }
+                ]
+            },
             {"tenants": {"name": "tenant-1"}},
             {"tenants": ["tenant-1"]},
             {"vrfs": [{"name": "invalid", "import_route_targets": ["64512:100"]}]},
+            {"vrfs": [{"name": "invalid", "import_route_targets": [{"query": {}}]}]},
+            {
+                "l2vpns": [
+                    {
+                        "name": "invalid",
+                        "type": "vxlan",
+                        "export_route_targets": [
+                            {"query": {"name": "64512:999999999"}}
+                        ],
+                    }
+                ]
+            },
             {"route_targets": ["64512:100"]},
             {"bgp_communities": ["64512:100"]},
             {"routing_policies": ["ACME EXPORT"]},

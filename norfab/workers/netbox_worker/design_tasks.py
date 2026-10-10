@@ -34,9 +34,10 @@ log = logging.getLogger(__name__)
 def flatten_design(design: dict) -> dict:
     """Collect device-owned definitions into flat lists without changing the input.
 
-    Parent device/interface names are added to child records. Inline relationship
-    definitions become top-level records; identity-only dictionaries remain
-    references. No NetBox queries or writes are performed here.
+    Parent device/interface names are added to child records. Named VLAN
+    terminations become VLAN definitions and group/VID references. Inline
+    relationship definitions become top-level records; identity-only dictionaries
+    remain references. No NetBox queries or writes are performed here.
     """
     design = deepcopy(design)
     for device in design.get("devices", []):
@@ -225,6 +226,7 @@ def flatten_design(design: dict) -> dict:
                 for target in record.get(field, []):
                     if (
                         isinstance(target, dict)
+                        and "query" not in target
                         and target["name"] not in route_target_names
                     ):
                         design.setdefault("route_targets", []).append(target)
@@ -234,6 +236,31 @@ def flatten_design(design: dict) -> dict:
                     design.setdefault("l2vpn_terminations", []).append(
                         {**termination, "l2vpn": record["name"]}
                     )
+
+    # Collect inline termination VLANs before the VLAN deployment stage.
+    vlan_keys = {
+        (vlan["group"], vlan["vid"])
+        for vlan in design.get("vlans", [])
+        if "custom_function" not in vlan and "vid" in vlan
+    }
+    for termination in design.get("l2vpn_terminations", []):
+        if any(
+            field in termination for field in ("custom_function", "device", "interface")
+        ) or not all(field in termination for field in ("group", "vid", "name")):
+            continue
+        key = (termination["group"], termination["vid"])
+        if key not in vlan_keys:
+            design.setdefault("vlans", []).append(
+                {
+                    field: value
+                    for field, value in termination.items()
+                    if field != "l2vpn"
+                }
+            )
+            vlan_keys.add(key)
+        for field in list(termination):
+            if field not in ("l2vpn", "group", "vid"):
+                termination.pop(field)
 
     # Device and interface peerings are now in the top-level collection. Set
     # the design default on every ordinary peering before it reaches the task.
@@ -1461,6 +1488,7 @@ def process_vrfs(
 ) -> dict:
     """Match VRFs by name and RD, resolving route-target lists to IDs.
 
+    Query entries select all existing matches and fail when none match.
     Targets are created earlier or fetched in one batch; cache VRF IDs for
     prefix and IP identity checks. An absent RD is part of the identity.
 
@@ -1477,6 +1505,26 @@ def process_vrfs(
     Returns:
         dict: Object identities grouped under ``created`` and ``updated``.
     """
+    # Queries select existing targets; named entries keep their deployment behavior.
+    for record in records:
+        for field in ("import_route_targets", "export_route_targets"):
+            if field not in record:
+                continue
+            references = {}
+            for target in record[field]:
+                if "query" in target:
+                    matches = list(nb.ipam.route_targets.filter(**target["query"]))
+                    if not matches:
+                        raise ValueError(
+                            f"route-target query matched no targets: {target['query']}"
+                        )
+                    for match in matches:
+                        lookup_cache["route_targets"][match.name] = match.id
+                        references[match.name] = {"name": match.name}
+                else:
+                    references[target["name"]] = target
+            record[field] = list(references.values())
+
     log.debug("process_vrfs: processing %d records, dry_run=%s", len(records), dry_run)
     target_names = list(
         {
@@ -1569,6 +1617,7 @@ def process_l2vpns(
 ) -> dict:
     """Match L2VPNs by name and resolve their import and export route targets.
 
+    Query entries select all existing matches and fail when none match.
     Inline targets are deployed earlier. New L2VPN IDs are cached for
     termination writes; dry runs report planned changes without writing.
 
@@ -1585,6 +1634,26 @@ def process_l2vpns(
     Returns:
         dict: L2VPN names grouped under ``created`` and ``updated``.
     """
+    # Queries select existing targets; named entries keep their deployment behavior.
+    for record in records:
+        for field in ("import_route_targets", "export_route_targets"):
+            if field not in record:
+                continue
+            references = {}
+            for target in record[field]:
+                if "query" in target:
+                    matches = list(nb.ipam.route_targets.filter(**target["query"]))
+                    if not matches:
+                        raise ValueError(
+                            f"route-target query matched no targets: {target['query']}"
+                        )
+                    for match in matches:
+                        lookup_cache["route_targets"][match.name] = match.id
+                        references[match.name] = {"name": match.name}
+                else:
+                    references[target["name"]] = target
+            record[field] = list(references.values())
+
     l2vpns = lookup_cache["l2vpns"]
     targets = lookup_cache["route_targets"]
     target_names = {
@@ -1869,11 +1938,14 @@ def process_devices(
     instance: str,
     branch: str | None,
 ) -> dict:
-    """Match devices by site and name, plus tenant when provided.
+    """Match devices by name, using tenant only to resolve duplicate names.
 
     Nested interfaces and peerings are flattened before this handler; it
-    writes devices only. Without a tenant in the record, matching does not
-    restrict tenant. Multiple matching devices are an error.
+    writes devices only. A unique name matches regardless of site or tenant;
+    supplied site and tenant are update attributes. Duplicate names require
+    a supplied tenant that selects exactly one device, otherwise matching fails.
+    Omitted site leaves an existing device's site unchanged; new devices must
+    still supply the attributes required by NetBox.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -1892,7 +1964,7 @@ def process_devices(
         "process_devices: processing %d records, dry_run=%s", len(records), dry_run
     )
     names = [record["name"] for record in records]
-    site_names = list({record["site"] for record in records})
+    site_names = list({record["site"] for record in records if record.get("site")})
     sites = lookup_cache["sites"]
     missing_sites = set(site_names) - sites.keys()
     if missing_sites:
@@ -1904,13 +1976,11 @@ def process_devices(
                 )
             }
         )
-    site_ids = [sites[name] for name in site_names]
     existing = (
         list(
             worker.bulk_filter(
                 nb.dcim.devices,
                 name=names,
-                site_id=site_ids,
                 fields="id,name,site,tenant",
             )
         )
@@ -1919,18 +1989,19 @@ def process_devices(
     )
     created, updated = [], []
     for record in records:
-        matches = [
-            item
-            for item in existing
-            if item.name == record["name"]
-            and item.site.name == record["site"]
-            and (
-                "tenant" not in record
-                or (item.tenant.name if item.tenant else None) == record["tenant"]
-            )
-        ]
+        matches = [item for item in existing if item.name == record["name"]]
         if len(matches) > 1:
-            raise ValueError(f"ambiguous device {record['site']}:{record['name']}")
+            if "tenant" in record:
+                matches = [
+                    item
+                    for item in matches
+                    if (item.tenant.name if item.tenant else None) == record["tenant"]
+                ]
+            if len(matches) != 1:
+                raise ValueError(
+                    f"ambiguous device {record['name']}: multiple devices matched by name; "
+                    "provide a tenant that selects exactly one device"
+                )
         if matches:
             updated.append({**record, "id": matches[0].id})
         else:
@@ -2905,6 +2976,7 @@ def process_bgp_peerings(
 ) -> dict:
     """Create missing BGP sessions and leave existing sessions unchanged.
 
+    Local/remote create_asn wrappers allocate ASNs before session creation.
     Routing-policy dictionaries become names. Reverse-session creation is
     batched separately because the worker task takes one flag per batch.
     The create task derives missing names and checks NetBox for existing sessions.
@@ -2924,6 +2996,21 @@ def process_bgp_peerings(
     """
     records = [dict(record) for record in records]
     for record in records:
+        # Allocate nested ASNs before passing numeric references to the peering task.
+        for field in ("local_as", "remote_as"):
+            if isinstance(record.get(field), dict):
+                result = worker.create_asn(
+                    **record[field]["create_asn"],
+                    job=job,
+                    instance=instance,
+                    branch=branch,
+                    dry_run=dry_run,
+                )
+                if result.failed or result.errors:
+                    raise ValueError(
+                        "; ".join(result.errors) or "ASN allocation failed"
+                    )
+                record[field] = result.result["asn"]
         for field in ("import_policies", "export_policies"):
             if field in record:
                 record[field] = [policy["name"] for policy in record[field]]
@@ -3937,6 +4024,7 @@ class NetboxDesignTasks:
         instance: str = None,
         dry_run: bool = False,
         branch: str = None,
+        dry_run_render: bool = False,
     ) -> Result:
         """Render and flatten a design, validate it, then deploy ordered collections.
 
@@ -3951,9 +4039,16 @@ class NetboxDesignTasks:
             instance: NetBox instance name; defaults to the worker's instance.
             dry_run: Return planned writes without changing NetBox.
             branch: NetBox Branching plugin branch name.
+            dry_run_render: Return rendered text before YAML parsing, flattening,
+                validation, or deployment. Dictionary designs return unchanged.
+                Takes precedence over dry_run; context validation and Jinja2
+                functions still run.
 
         Returns:
-            Object identities grouped by collection and creation/update action.
+            Object identities grouped by collection and creation/update action,
+            or rendered text (the original dictionary for dictionary designs)
+            with dry_run=True when dry_run_render is enabled. Preparation and
+            deployment errors are reported in a failed Result.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -4077,12 +4172,15 @@ class NetboxDesignTasks:
                 environment.filters.update(filters)
                 environment.globals.update(filters)
                 environment.globals["netbox"] = nb
-                document = (
-                    yaml.safe_load(
-                        environment.from_string(template).render(context=context)
-                    )
-                    or {}
-                )
+                document = environment.from_string(template).render(context=context)
+
+            if dry_run_render:
+                ret.result = document
+                ret.dry_run = True
+                return ret
+
+            if template is not None:
+                document = yaml.safe_load(document) or {}
 
             msg = "flattening and validating netbox design"
             log.info(msg)

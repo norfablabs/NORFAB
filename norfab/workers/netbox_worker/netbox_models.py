@@ -930,13 +930,23 @@ class DesignDocument(BaseModel):
                         not isinstance(record[field], list)
                         or not all(
                             isinstance(value, dict)
-                            and isinstance(value.get("name"), str)
-                            and value["name"]
+                            and (
+                                (
+                                    set(value) == {"query"}
+                                    and isinstance(value["query"], dict)
+                                    and bool(value["query"])
+                                )
+                                or (
+                                    "query" not in value
+                                    and isinstance(value.get("name"), str)
+                                    and bool(value["name"])
+                                )
+                            )
                             for value in record[field]
                         )
                     ):
                         raise ValueError(
-                            f"{collection}.{field} must be a list of route-target dictionaries with name"
+                            f"{collection}.{field} must contain named route-target dictionaries or nonempty query dictionaries"
                         )
         attachments = set()
         for record in self.l2vpn_terminations:
@@ -984,6 +994,27 @@ class DesignDocument(BaseModel):
         for record in self.bgp_peerings:
             if "custom_function" not in record:
                 task_record = dict(record)
+                for field in ("local_as", "remote_as"):
+                    value = task_record.get(field)
+                    if isinstance(value, dict):
+                        if set(value) != {"create_asn"}:
+                            raise ValueError(
+                                f"bgp_peerings.{field} requires a create_asn wrapper"
+                            )
+                        arguments = value["create_asn"]
+                        CreateBgpAsnInput.model_validate(arguments)
+                        if (
+                            not arguments.get("asn_range")
+                            or arguments.get("asn") is not None
+                        ):
+                            raise ValueError(
+                                f"bgp_peerings.{field}.create_asn requires a range without an explicit ASN"
+                            )
+                        if task_record.get(f"{field}_query") is not None:
+                            raise ValueError(
+                                f"bgp_peerings.{field} cannot combine create_asn with {field}_query"
+                            )
+                        task_record.pop(field)
                 for field in ("import_policies", "export_policies"):
                     if field not in record:
                         continue
@@ -1166,12 +1197,18 @@ class DesignDeployInput(BaseModel, use_enum_values=True, populate_by_name=True):
         None,
         description="NetBox branching plugin branch name to use",
     )
+    dry_run_render: StrictBool = Field(
+        False,
+        description="Return rendered design before parsing or deployment; dictionaries return unchanged",
+        alias="dry-run-render",
+        json_schema_extra={"presence": True},
+    )
 
 
 class DesignDeployResult(Result):
-    result: dict[StrictStr, Any] = Field(
+    result: Union[StrictStr, dict[StrictStr, Any]] = Field(
         {},
-        description="NetBox design creation result data",
+        description="Design deployment results, rendered text, or unchanged dictionary",
     )
 
 
@@ -1974,6 +2011,12 @@ class SyncDeviceInterfacesInput(
     use_enum_values=True,
     populate_by_name=True,  # ignore aliases
 ):
+    batch_fallback: StrictBool = Field(
+        False,
+        description="Retry failed create and update batches one interface at a time",
+        alias="batch-fallback",
+        json_schema_extra={"presence": True},
+    )
     devices: Union[None, list[StrictStr]] = Field(
         None,
         description="List of NetBox devices to sync",

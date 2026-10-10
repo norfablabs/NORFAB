@@ -322,6 +322,46 @@ class TestSyncVlanMemberships:
         }
         nb.dcim.racks.filter.assert_not_called()
 
+    @pytest.mark.parametrize("dry_run", [True, False])
+    def test_duplicate_proposed_group_names_skip_creation_and_memberships(
+        self, dry_run: bool
+    ) -> None:
+        result, nb, _, _ = self._run(
+            {
+                "leaf-1": [self._live(50, name="shared")],
+                "leaf-2": [
+                    self._live(
+                        51,
+                        name="shared",
+                        tagged=("Ethernet6",),
+                        untagged=("Ethernet6",),
+                    ),
+                    self._live(52, name="unique", tagged=("Ethernet6",)),
+                ],
+            },
+            groups=[TestVlanResolution._group(30)],
+            vlan_group="group-30",
+            interfaces=[self._interface(device="leaf-2")],
+            dry_run=dry_run,
+            batch_size=1,
+        )
+        assert not result.failed
+        assert len(result.errors) == 1
+        assert "vlan 51 name 'shared' overlaps with VLAN 50" in result.errors[0]
+        if dry_run:
+            assert result.result["vlans"]["group:group-30"]["create"] == [50, 52]
+            nb.ipam.vlans.create.assert_not_called()
+        else:
+            assert [
+                call.args[0][0]["vid"] for call in nb.ipam.vlans.create.call_args_list
+            ] == [50, 52]
+            assert nb.dcim.interfaces.update.call_args.args[0][0]["tagged_vlans"] == [
+                2001
+            ]
+            assert (
+                nb.dcim.interfaces.update.call_args.args[0][0]["untagged_vlan"] is None
+            )
+
     def test_creates_vlans_in_batches(self) -> None:
         result, nb, _, _ = self._run(
             {"leaf-1": [self._live(vid) for vid in (50, 51, 52)]},
