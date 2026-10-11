@@ -68,6 +68,7 @@ topology:
 - If `image` is provided, it overrides node image values. Otherwise, the task uses `{kind}:latest` when no image is configured.
 - `interfaces_rename` in config context can rename interfaces in generated links.
 - If `lab_name` is omitted and `tenant` is provided, the tenant name becomes the lab name.
+- The tenant name is resolved in the selected NetBox branch. An unknown tenant fails the task instead of retrieving unfiltered devices.
 - Supplying `branch` bypasses caches and applies the branch to device, connection, and circuit reads.
 
 ## Examples

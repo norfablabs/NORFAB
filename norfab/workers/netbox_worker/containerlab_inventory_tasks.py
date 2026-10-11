@@ -103,7 +103,8 @@ class NetboxContainerlabInventoryTasks:
         Args:
             job: NorFab Job object containing relevant metadata
             lab_name (str, Mandatory): Name of containerlab to construct inventory for.
-            tenant (str, optional): Construct topology using given tenant's devices
+            tenant (str, optional): Construct topology using devices assigned to this
+                tenant name. Raises ValueError if the tenant does not exist.
             filters (list, optional): List of filters to apply when retrieving devices from NetBox.
             devices (list, optional): List of specific devices to retrieve from NetBox.
             instance (str, optional): NetBox instance to use.
@@ -122,6 +123,10 @@ class NetboxContainerlabInventoryTasks:
 
         Returns:
             dict: Containerlab inventory dictionary containing lab topology data
+
+        Raises:
+            ValueError: If the requested tenant does not exist in the selected
+                NetBox instance and branch.
         """
         devices = devices or []
         filters = filters or []
@@ -129,6 +134,7 @@ class NetboxContainerlabInventoryTasks:
         ports_map = ports_map or {}
         endpts_done = []  # to deduplicate links
         instance = instance or self.default_instance
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
         if branch is not None:
             cache = False
         # handle lab name and tenant name with filters
@@ -136,9 +142,11 @@ class NetboxContainerlabInventoryTasks:
             lab_name = tenant
         # add tenant filters
         if tenant:
+            nb_tenant = nb.tenancy.tenants.get(name=tenant)
+            if nb_tenant is None:
+                raise ValueError(f"NetBox tenant '{tenant}' not found in '{instance}'")
             filters = filters or [{}]
-            for filter in filters:
-                filter["tenant__name"] = tenant
+            filters = [{**item, "tenant_id": nb_tenant.id} for item in filters]
 
         # construct inventory
         inventory = {
