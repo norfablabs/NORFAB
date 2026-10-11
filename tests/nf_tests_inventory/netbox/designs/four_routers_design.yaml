@@ -83,7 +83,7 @@ devices:
               prefix: 10.1.0.0/24
               tenant: demo
               mask_len: 32
-              ip_index: {{ loop.index }}
+              ip_index: 1
               is_primary: true
 {% endfor %}
 

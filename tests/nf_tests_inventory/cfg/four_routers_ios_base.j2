@@ -2,9 +2,14 @@ hostname {{ host.name }}
 service timestamps log datetime msec
 no ip domain lookup
 logging buffered 64000 informational
+lldp run
 !
 {% for name, interface in host.interfaces.items() %}
 interface {{ name }}
+{% if name.startswith("Ethernet") and "." not in name %}
+ lldp transmit
+ lldp receive
+{% endif %}
  no shutdown
 {% if interface["description"] %}
  description {{ interface["description"] }}
@@ -62,6 +67,8 @@ router ospf 100 vrf CUSTOMER-A
  exit
 !
 interface Ethernet0/3
+ lldp transmit
+ lldp receive
  description Customer VLAN trunk
  no shutdown
  exit
@@ -101,6 +108,8 @@ router ospf 100 vrf CUSTOMER-A
  exit
 !
 interface Ethernet0/3
+ lldp transmit
+ lldp receive
  description Customer VLAN trunk
  no shutdown
  exit
@@ -140,6 +149,8 @@ router ospf 100 vrf CUSTOMER-A
  exit
 !
 interface Ethernet0/3
+ lldp transmit
+ lldp receive
  description Customer VLAN trunk
  no shutdown
  exit
@@ -179,6 +190,8 @@ router ospf 100 vrf CUSTOMER-A
  exit
 !
 interface Ethernet0/3
+ lldp transmit
+ lldp receive
  description Customer VLAN trunk
  no shutdown
  exit

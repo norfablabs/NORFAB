@@ -8,7 +8,6 @@
 4. Containerlab `deploy_netbox` accepts an optional `branch` argument to build a lab topology from devices and connections in a named NetBox branch.
 5. Netbox `design_deploy` config contexts accept a `tenants` list of tenant names, resolving them to IDs and adding associations on updates. Unknown tenant names produce an error.
 6. Nornir `nornir_inventory_load_containerlab` accepts `load_netbox` as a boolean or dictionary of Netbox inventory options to enrich imported host data while preserving Containerlab connection settings. Enabled loading requests all supported host data by default, ignoring worker Netbox settings; dictionaries override these defaults. Optional `load_netbox_branch` and `load_netbox_instance` automatically enable loading and select the branch and instance, overriding Netbox options. Dry runs can preview the enriched inventory. The task docstring documents every argument, its default, enrichment options, and inventory update behavior.
-
 7. NFCLI `netbox sync all` accepts an inline JSON object for `sync-kwargs`, alongside existing file URLs.
 
 ## BUGS
