@@ -992,16 +992,17 @@ class ContainerlabWorker(NFPWorker):
                 clab_name = container["Labels"]["containerlab"]
                 clab_topo = container["Labels"]["clab-topo-file"]
                 node_name = container["Labels"]["clab-node-name"]
-                # collect ports that are in use
-                ports_in_use[node_name] = list(
-                    set(
-                        [
-                            f"{p['host_port']}:{p['port']}/{p['protocol']}"
-                            for p in container["Ports"]
-                            if "host_port" in p and "port" in p and "protocol" in p
-                        ]
+                # reuse port mappings only from the target lab
+                if clab_name == lab_name:
+                    ports_in_use[node_name] = list(
+                        set(
+                            [
+                                f"{p['host_port']}:{p['port']}/{p['protocol']}"
+                                for p in container["Ports"]
+                                if "host_port" in p and "port" in p and "protocol" in p
+                            ]
+                        )
                     )
-                )
                 # check existing subnets
                 if (
                     container["NetworkSettings"]["IPv4addr"]

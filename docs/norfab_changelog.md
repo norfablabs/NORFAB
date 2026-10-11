@@ -13,6 +13,7 @@
 1. Fixed NetBox `get_containerlab_inventory` ignoring tenant selection when NetBox does not recognize the `tenant__name` device filter. The task now resolves the tenant by name and filters by tenant ID, including for branch reads.
 2. Fixed Netbox `create_prefix` dry-run next-available allocation rejecting suitable ranges when the first available range was too small. The search now checks all returned ranges and selects the first child that fits the requested prefix length, using that range's network address instead of the parent address. This also fixes the availability check used by `create_ip` with `mask_len`.
 3. Fixed Netbox `design_deploy` raising a missing-site error when updating an existing device without a site in its design record. Omitted site preserves the existing assignment.
+4. Fixed Containerlab `deploy_netbox` reusing port mappings from nodes with the same name in other labs. Port mappings are now reused only from the target lab.
 
 ---
 
