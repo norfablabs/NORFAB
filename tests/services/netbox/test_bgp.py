@@ -305,10 +305,9 @@ BGP_CREATE_SESSIONS_TEST_DEVICES = [
 def delete_bgp_sessions(devices=BGP_CREATE_SESSIONS_TEST_DEVICES):
     """Delete all BGP sessions in NetBox for the given devices."""
     nb = get_pynetbox(None)
-    for device in devices:
-        sessions = list(nb.plugins.bgp.session.filter(device=device))
-        for session in sessions:
-            session.delete()
+    sessions = list(nb.plugins.bgp.session.filter(device=devices))
+    if sessions:
+        nb.plugins.bgp.session.delete(sessions)
     print(f"Deleted BGP sessions for devices: {devices}")
 
 
@@ -1621,6 +1620,21 @@ def _cleanup_test_asns(nb):
 @pytest.mark.netbox_create_bgp_peering
 class TestCreateBgpPeering:
 
+    @pytest.fixture
+    def create_tenant(self, request: Any) -> Any:
+        """Own a tenant and clean up only sessions assigned to that tenant."""
+        nb = get_pynetbox(None)
+        name = f"norfab-{request.node.name}"
+        if nb.tenancy.tenants.get(name=name):
+            pytest.skip("BGP tenant test record already exists")
+        tenant = nb.tenancy.tenants.create({"name": name, "slug": name})
+        try:
+            yield tenant
+        finally:
+            for session in nb.plugins.bgp.session.filter(tenant_id=tenant.id):
+                session.delete()
+            tenant.delete()
+
     def setup_method(self):
         delete_bgp_sessions()
         nb = get_pynetbox(None)
@@ -1633,7 +1647,7 @@ class TestCreateBgpPeering:
         _cleanup_test_ips(nb)
         _cleanup_test_asns(nb)
 
-    def test_create_bgp_peering_single(self, nfclient):
+    def test_create_bgp_peering_single(self, nfclient: Any, create_tenant: Any) -> None:
         """Single-session mode - session appears in created list and in NetBox."""
         nb = get_pynetbox(nfclient)
         device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
@@ -1645,6 +1659,7 @@ class TestCreateBgpPeering:
             kwargs={
                 "name": sname,
                 "device": device,
+                "tenant": create_tenant.name,
                 "local_address": _TEST_LOCAL_IP,
                 "remote_address": _TEST_REMOTE_IP,
                 "local_as": _TEST_LOCAL_AS,
@@ -1661,6 +1676,7 @@ class TestCreateBgpPeering:
         assert nb.plugins.bgp.session.get(
             name=sname
         ), f"session '{sname}' not found in NetBox"
+        assert nb.plugins.bgp.session.get(name=sname).tenant.id == create_tenant.id
 
     def test_create_bgp_peering_single_idempotent(self, nfclient):
         """Session already exists - reported in exists, no duplicate created."""
@@ -1932,7 +1948,7 @@ class TestCreateBgpPeering:
                 "create", []
             ), f"{worker}: should not be in create"
 
-    def test_create_bgp_peering_bulk(self, nfclient):
+    def test_create_bgp_peering_bulk(self, nfclient: Any, create_tenant: Any) -> None:
         """bulk_create - all sessions appear in created and in NetBox."""
         nb = get_pynetbox(nfclient)
         device = BGP_CREATE_SESSIONS_TEST_DEVICES[0]
@@ -1940,6 +1956,7 @@ class TestCreateBgpPeering:
             {
                 "name": f"{device}_bulk_1",
                 "device": device,
+                "tenant": create_tenant.name,
                 "local_address": "198.51.100.20",
                 "remote_address": "198.51.100.21",
                 "local_as": _TEST_LOCAL_AS,
@@ -1970,6 +1987,11 @@ class TestCreateBgpPeering:
                 assert nb.plugins.bgp.session.get(
                     name=s["name"]
                 ), f"session '{s['name']}' not in NetBox"
+                session = nb.plugins.bgp.session.get(name=s["name"])
+                if s.get("tenant"):
+                    assert session.tenant.id == create_tenant.id
+                else:
+                    assert session.tenant is None
 
     def test_create_bgp_peering_bulk_partial_idempotent(self, nfclient):
         """Some sessions exist - correct split between created and exists."""

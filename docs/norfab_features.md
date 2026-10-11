@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 9 October 2026*
+*Last updated: 11 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -833,6 +833,11 @@ peer addressing and point-to-point peer derivation, and performs bulk interface
 allocation. **Use cases:** provisioning links, loopbacks, management addresses,
 new devices, and template-driven zero-touch workflows.
 Peer allocation errors are reported after the local address is allocated.
+Failed child-subnet availability checks are included in IP allocation errors.
+Prefix dry runs select the first available range that fits the requested child prefix length.
+Design device roles match existing records by supplied slug or slugified name.
+Design cable connections accept tenant names or reference dictionaries.
+New BGP sessions accept existing tenant names in single and bulk creation, including design peerings and reverse sessions.
 **Limitations:** parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
 `create_ip` can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.
@@ -1091,6 +1096,7 @@ runtime, images, and sufficient compute/network privileges.
 Selects NetBox devices by tenant, explicit names, or filters; converts devices
 and connections into a topology; allocates a non-conflicting management subnet
 and host port range; and can preview, partially deploy, or reconfigure it.
+Can source devices and connections from a named NetBox branch.
 **Use cases:** digital twins, topology reproduction, production-incident
 rehearsal, and automated ephemeral test environments. **Limitations:** NetBox
 roles/platforms must map to valid Containerlab node definitions and available

@@ -1,0 +1,128 @@
+tenants:
+  - name: demo
+
+manufacturers:
+  - name: Cisco
+
+platforms:
+  - name: Cisco IOS
+    manufacturer: Cisco
+
+device_types:
+  - manufacturer: Cisco
+    model: Cisco IOL
+
+device_roles:
+  - name: Router
+
+sites:
+  - name: DEMO
+    tenant: demo
+    status: active
+
+rirs:
+  - name: DEMO PRIVATE
+    is_private: true
+
+asns:
+  - asn: 65222
+    tenant: demo
+    rir: DEMO PRIVATE
+    description: DEMO iBGP full mesh
+
+prefixes:
+  - prefix: 10.0.0.0/24
+    tenant: demo
+    description: Point-to-point link pool
+  - prefix: 10.1.0.0/24
+    tenant: demo
+    description: Router loopback pool
+
+devices:
+{% for router in ['R1', 'R2', 'R3', 'R4'] %}
+  - name: {{ router }}
+    tenant: demo
+    site: DEMO
+    role: Router
+    platform: cisco_ios
+    device_type: {manufacturer: Cisco, model: Cisco IOL}
+    status: active
+    interfaces:
+      Ethernet0/1:
+        type: 1000base-t
+        ip_addresses:
+          - create_ip:
+              prefix: 10.0.0.0/24
+              tenant: demo
+              mask_len: 30
+              is_primary: true
+      Ethernet0/2:
+        type: 1000base-t
+        ip_addresses:
+          - create_ip:
+              prefix: 10.0.0.0/24
+              tenant: demo
+              mask_len: 30
+      Loopback0:
+        type: virtual
+        ip_addresses:
+          - create_ip:
+              prefix: 10.1.0.0/24
+              tenant: demo
+              mask_len: 32
+              ip_index: 1
+              is_primary: true
+{% endfor %}
+
+connections:
+  - a_terminations:
+      - device: R1
+        interface: Ethernet0/1
+    b_terminations:
+      - device: R2
+        interface: Ethernet0/1
+    tenant: demo
+  - a_terminations:
+      - device: R2
+        interface: Ethernet0/2
+    b_terminations:
+      - device: R3
+        interface: Ethernet0/1
+    tenant: demo
+  - a_terminations:
+      - device: R3
+        interface: Ethernet0/2
+    b_terminations:
+      - device: R4
+        interface: Ethernet0/1
+    tenant: demo
+  - a_terminations:
+      - device: R4
+        interface: Ethernet0/2
+    b_terminations:
+      - device: R1
+        interface: Ethernet0/2
+    tenant: demo
+
+bgp_peerings:
+{% for router in ['R1', 'R2', 'R3', 'R4'] %}
+{% for peer in ['R1', 'R2', 'R3', 'R4'] if peer != router %}
+  - name: {{ router }}-to-{{ peer }}-loopback
+    device: {{ router }}
+    tenant: demo
+    local_ip_query:
+      device: {{ router }}
+      interface: Loopback0
+      family: 4
+    remote_ip_query:
+      device: {{ peer }}
+      interface: Loopback0
+      family: 4
+    local_as_query:
+      description: DEMO iBGP full mesh
+    remote_as_query:
+      description: DEMO iBGP full mesh
+    create_reverse: false
+    description: iBGP between {{ router }} and {{ peer }} loopbacks
+{% endfor %}
+{% endfor %}

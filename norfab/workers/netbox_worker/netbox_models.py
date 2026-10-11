@@ -341,6 +341,7 @@ class BgpSessionCommonFields(BaseModel):
 class BgpSessionBulkCreateFields(BgpSessionCommonFields):
     """Fields for a single BGP session entry used in bulk_create."""
 
+    tenant: Union[None, StrictStr] = Field(None, description="Existing tenant name")
     name: Union[None, StrictStr] = Field(
         None, description="Session name; derived from name_template when omitted"
     )
@@ -383,6 +384,7 @@ class CreateBgpPeeringInput(
 ):
     """Input model for create_bgp_peering task."""
 
+    tenant: Union[None, StrictStr] = Field(None, description="Existing tenant name")
     name: Union[None, StrictStr] = Field(None, description="Session name")
     device: Union[None, StrictStr] = Field(None, description="Local device name")
     local_address: Union[None, StrictStr] = Field(None, description="Local IP address")

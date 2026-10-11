@@ -11,6 +11,9 @@ Creates one or many BGP sessions in NetBox. Supports single-session mode (indivi
 
 ## How It Works
 
+Supply `tenant` as an existing tenant name for a new session. Bulk entries specify
+their own tenant, and reverse sessions inherit it. Existing sessions remain unchanged.
+
 1. Client submits `create_bgp_peering` request to NetBox worker
 2. NetBox worker validates that the BGP plugin is installed
 3. Worker resolves the RIR ID once (when `rir` is provided) for on-demand ASN creation

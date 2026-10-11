@@ -54,6 +54,7 @@ Returns the allocated or updated IP address data. When `create_peer_ip=True`, pe
 
 - `prefix` can be a network string, a prefix description, or a dictionary of pynetbox prefix filters.
 - When `mask_len` differs from the parent prefix length, the task creates or reuses a child prefix through `create_prefix`.
+- If no child subnet can be selected, the task returns an error that includes any failed availability checks.
 - In dry-run mode, `mask_len` is ignored and the candidate IP is allocated directly from the parent prefix.
 - IPv4 /32 and IPv6 /128 allocations automatically disable peer creation and peer-subnet reuse, including when the supplied parent is itself a host prefix.
 - If peer allocation fails, the task returns the peer error in `errors`; the local IP may already be allocated.

@@ -910,6 +910,7 @@ class ContainerlabWorker(NFPWorker):
         filters: Union[None, list] = None,
         devices: Union[None, list] = None,
         instance: str = None,
+        branch: str = None,
         image: str = None,
         ipv4_subnet: str = "172.100.100.0/24",
         ports: tuple = (12000, 15000),
@@ -947,6 +948,8 @@ class ContainerlabWorker(NFPWorker):
             filters (list, optional): List of filters to apply when fetching devices from Netbox.
             devices (list, optional): List of specific devices to include in the topology.
             instance (str, optional): Netbox instance identifier.
+            branch (str, optional): NetBox Branching plugin branch name to read
+                devices and connections from. Creates the branch if it does not exist.
             image (str, optional): Container image to use for devices.
             ipv4_subnet (str, optional): Management IPv4 subnet for the lab.
             ports (tuple, optional): Tuple specifying the range of ports to allocate.
@@ -1055,6 +1058,7 @@ class ContainerlabWorker(NFPWorker):
                 "filters": filters,
                 "devices": devices,
                 "instance": instance,
+                "branch": branch,
                 "image": image,
                 "ipv4_subnet": ipv4_subnet,
                 "ports": ports,

@@ -16,6 +16,43 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    @pytest.mark.parametrize("explicit_slug", [False, True])
+    def test_device_roles_match_by_slug(
+        self, nfclient: Any, explicit_slug: bool
+    ) -> None:
+        """Reuse a role by generated or explicit slug when its name changes."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "NORFAB DESIGN ROLE SLUG"
+        slug = (
+            "norfab-design-role-custom" if explicit_slug else "norfab-design-role-slug"
+        )
+        if nb.dcim.device_roles.get(slug=slug):
+            pytest.skip("role slug test record already exists")
+        role = nb.dcim.device_roles.create({"name": name, "slug": slug})
+        record = {"name": name.lower()}
+        if explicit_slug:
+            record["slug"] = slug
+        try:
+            for dry_run in (True, False, False):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={"design": {"device_roles": [record]}, "dry_run": dry_run},
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                    assert result["result"]["device_roles"] == {
+                        "created": [],
+                        "updated": [record["name"]],
+                    }
+                current = nb.dcim.device_roles.get(slug=slug)
+                assert current.id == role.id
+                assert current.name == (name if dry_run else record["name"])
+        finally:
+            role.delete()
+
     @pytest.mark.parametrize("dry_run", [False, True])
     @pytest.mark.parametrize(
         "design, expected",

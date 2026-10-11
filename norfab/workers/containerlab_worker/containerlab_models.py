@@ -237,6 +237,10 @@ class DeployNetboxInput(BaseModel, use_enum_values=True, populate_by_name=True):
         description="NetBox instance name to query",
         alias="netbox-instance",
     )
+    branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox Branching plugin branch name to source topology from",
+    )
     image: Union[None, StrictStr] = Field(
         None,
         description="Container image to use for lab devices",

@@ -20,6 +20,7 @@ The `deploy_netbox` task provides the following features:
     - **NetBox Device Filters** - fetch device data from NetBox GraphQL API and deploy the lab
 
 - **Topology Links Sourcing** - forms links using NetBox device connections and circuit data.
+- **NetBox Branches**: Reads devices and links from a named NetBox branch when `branch` is supplied. The NetBox service creates the branch if it does not exist and bypasses its inventory cache for branch reads.
 - **Reconfiguration**: Supports reconfiguring an already deployed lab.
 - **Node Filtering**: Allows deploying specific nodes using a filter.
 

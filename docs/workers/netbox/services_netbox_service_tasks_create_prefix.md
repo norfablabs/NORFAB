@@ -14,6 +14,7 @@ The task can also be called from Nornir templates through the [netbox.create_pre
 ## Output
 
 Returns the created or updated prefix data. In dry-run mode, returns the candidate prefix that would be allocated.
+The preview uses the first available range that can fit the requested prefix length.
 
 ```python
 {

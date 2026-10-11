@@ -1,8 +1,16 @@
 # 0.24.10
 
+## ENHANCEMENTS
+
+1. Netbox `design_deploy` matches existing device roles by slug, using an explicit slug when supplied or the existing `slugify` utility on the role name. Name case differences now reuse the matching role.
+2. Netbox `design_deploy` connection records accept a tenant name string, such as `tenant: demo`, for cable creation and updates. Existing tenant reference dictionaries remain supported.
+3. Netbox `create_bgp_peering` accepts an existing tenant name in single-session mode and individual bulk entries, including design peerings. Reverse sessions inherit the tenant; existing sessions remain unchanged.
+4. Containerlab `deploy_netbox` accepts an optional `branch` argument to build a lab topology from devices and connections in a named NetBox branch.
+
 ## BUGS
 
-1. Fixed Netbox `design_deploy` raising a missing-site error when updating an existing device without a site in its design record. Omitted site preserves the existing assignment.
+1. Fixed Netbox `create_prefix` dry-run next-available allocation rejecting suitable ranges when the first available range was too small. The search now checks all returned ranges and selects the first child that fits the requested prefix length, using that range's network address instead of the parent address. This also fixes the availability check used by `create_ip` with `mask_len`.
+2. Fixed Netbox `design_deploy` raising a missing-site error when updating an existing device without a site in its design record. Omitted site preserves the existing assignment.
 
 ---
 

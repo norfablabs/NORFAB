@@ -404,6 +404,16 @@
       "mode": "read_only",
       "coverage": "Renders inline YAML, invalid YAML, and unchanged dictionary designs with both dry_run values. No NetBox objects are read or written; client setup only."
     },
+    "test_bgp.py::TestCreateBgpPeering::create_tenant": {
+      "mode": "main_mutating",
+      "tenants": ["norfab-test_create_bgp_peering_single", "norfab-test_create_bgp_peering_bulk"],
+      "coverage": "Existing single and bulk creation tests assign an owned tenant; bulk also verifies omitted tenant. Fixture deletes only sessions assigned to its tenant and the tenant it created."
+    },
+    "test_designs.py::TestDesignDeploy::test_device_roles_match_by_slug": {
+      "mode": "main_mutating",
+      "device_role_slugs": ["norfab-design-role-slug", "norfab-design-role-custom"],
+      "coverage": "Owns and deletes each role. Verifies generated and explicit slug matching, name case changes, dry-run behavior, and repeat deployment without duplicate roles."
+    },
     "test_designs.py::TestDesignDeploy::test_devices_with_same_name_at_different_sites": {
       "mode": "main_mutating",
       "devices": ["norfab-design-identity-device"],

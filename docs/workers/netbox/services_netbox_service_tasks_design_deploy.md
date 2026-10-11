@@ -192,7 +192,7 @@ Each design section contains a list of object records. The rows show the order i
 | 3 | `manufacturers` | `netbox.dcim.manufacturers` | `name` | — |
 | 4 | `platforms` | `netbox.dcim.platforms` | `name` | Manufacturer can be a name. |
 | 5 | `device_types` | `netbox.dcim.device_types` | `manufacturer`, `model` | Default platform can be a name. |
-| 6 | `device_roles` | `netbox.dcim.device_roles` | `name` | — |
+| 6 | `device_roles` | `netbox.dcim.device_roles` | `slug` | Uses the supplied slug or generates it from the name. |
 | 7 | `sites` | `netbox.dcim.sites` | `name` | Region and tenant can be names. |
 | 8 | `rack_roles` | `netbox.dcim.rack_roles` | `name` | — |
 | 9 | `racks` | `netbox.dcim.racks` | `site`, `name` | Site, role, and tenant can be names. |
@@ -213,7 +213,7 @@ Each design section contains a list of object records. The rows show the order i
 | 24 | `console_ports` | `netbox.dcim.console_ports` | `device`, `name` | Nested connection is flattened. |
 | 25 | `power_outlets` | `netbox.dcim.power_outlets` | `device`, `name` | Nested connection is flattened. |
 | 26 | `console_server_ports` | `netbox.dcim.console_server_ports` | `device`, `name` | Nested connection is flattened. |
-| 27 | `connections` | `netbox.dcim.cables` | Existing cable on both terminations | Creates interface, console, and power cables. Each end currently has one termination. An already-cabled port cannot be moved. |
+| 27 | `connections` | `netbox.dcim.cables` | Existing cable on both terminations | Creates interface, console, and power cables. Tenant can be a name or reference dictionary. Each end currently has one termination. An already-cabled port cannot be moved. |
 | 28 | `vrrp_groups` | `netbox.ipam.fhrp_groups` | `protocol`, `group_id` | Inline `vip` becomes an explicit IP address; use top-level `create_ip.vrrp_group` for allocation. |
 | 29 | `ip_addresses` | `netbox.ipam.ip_addresses` | `address`, `vrf` | Addresses with specified values are bulk-written. `create_ip` allocates the next available address and can assign it to an interface or named VRRP group. |
 | 30 | `vrrp_group_assignments` | `netbox.ipam.fhrp_group_assignments` | `group`, `interface` | Associates an existing group and interface with priority. |
@@ -311,6 +311,7 @@ For each object type, specified values are created or updated before next-availa
 Entries under `bgp_peerings` call `create_bgp_peering` after the design's devices, interfaces, IP addresses, and ASNs have been deployed. Use a stable supplied or generated session name so repeat deployments find the existing session. Existing sessions are not updated by the design:
 
 Design peerings create only the specified direction by default. Set `create_reverse: true` on a peering to create the reverse session as well. The standalone `create_bgp_peering` task retains its own default.
+Peering records can specify an existing tenant name with `tenant`. Reverse sessions inherit it; existing sessions are left unchanged.
 
 ```yaml
 bgp_peerings:

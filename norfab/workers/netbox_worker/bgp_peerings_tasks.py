@@ -1129,6 +1129,7 @@ class NetboxBgpPeeringsTasks:
         dry_run: bool = False,
         vrf_custom_field: str = "vrf",
         lookup_cache: Union[None, dict] = None,
+        tenant: Union[None, str] = None,
     ) -> Result:
         """
         Create one or many BGP sessions in NetBox.
@@ -1164,6 +1165,9 @@ class NetboxBgpPeeringsTasks:
             remote_as (int, optional): Remote AS number. Takes precedence over ``remote_as_query``.
             status (str): Session status. Default ``'active'``.
             description (str, optional): Session description.
+            tenant (str, optional): Existing tenant name for new sessions, including
+                reverse sessions. Bulk entries specify their own tenant. NetBox
+                rejects unknown tenant names. Existing sessions remain unchanged.
             vrf (str, optional): NetBox VRF name for a new session. The task
                 resolves or creates the VRF and stores its object reference in
                 ``custom_fields[vrf_custom_field]``. ``global`` and ``default``
@@ -1268,6 +1272,7 @@ class NetboxBgpPeeringsTasks:
                 "status": status,
                 "description": description,
                 "vrf": vrf,
+                "tenant": tenant,
                 "peer_group": peer_group,
                 "import_policies": import_policies,
                 "export_policies": export_policies,
@@ -1661,6 +1666,8 @@ class NetboxBgpPeeringsTasks:
                 "status": bgp_session.get("status", "active"),
                 "site": site_id,
             }
+            if bgp_session.get("tenant") is not None:
+                payload["tenant"] = {"name": bgp_session["tenant"]}
             if bgp_session.get("custom_fields") is not None:
                 payload["custom_fields"] = dict(bgp_session["custom_fields"])
             if "tags" in bgp_session:

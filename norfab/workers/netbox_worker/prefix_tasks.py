@@ -203,7 +203,9 @@ class NetboxPrefixTasks:
 
         # create new prefix
         if not nb_prefix:
-            job.event(f"creating new '/{prefixlen}' prefix within '{parent}' prefix")
+            job.event(
+                f"creating new '/{prefixlen}' prefix within '{nb_parent_prefix}' prefix"
+            )
             # execute dry run on new prefix
             if dry_run is True:
                 nb_prefixes = nb_parent_prefix.available_prefixes.list()
@@ -212,28 +214,16 @@ class NetboxPrefixTasks:
                         f"Parent prefix '{parent}' has no child prefixes available"
                     )
                 for pfx in nb_prefixes:
-                    # parent prefix empty, can use first subnet as a child prefix
-                    if pfx.prefix == nb_parent_prefix.prefix:
-                        nb_prefix = (
-                            nb_parent_prefix.prefix.split("/")[0] + f"/{prefixlen}"
-                        )
-                        break
-                    # find child prefix by prefix length
-                    elif str(pfx).endswith(f"/{prefixlen}"):
-                        nb_prefix = str(pfx)
+                    # Skip ranges too small for the requested child prefix, then
+                    # select the first child within the first range that fits.
+                    network = ipaddress.ip_network(pfx.prefix)
+                    if network.prefixlen <= prefixlen:
+                        nb_prefix = str(next(network.subnets(new_prefix=prefixlen)))
                         break
                 else:
-                    # For some reason Netbox does not always return /31 as available
-                    # subnet int he list, this is to check that child subnet fits into
-                    # first subnet available in Netbox
-                    if int(nb_prefixes[0].prefix.split("/")[1]) < prefixlen:
-                        nb_prefix = (
-                            nb_parent_prefix.prefix.split("/")[0] + f"/{prefixlen}"
-                        )
-                    else:
-                        raise NetboxAllocationError(
-                            f"Parent prefix '{parent}' has no child prefixes available with '/{prefixlen}' prefix length"
-                        )
+                    raise NetboxAllocationError(
+                        f"Parent prefix '{parent}' has no child prefixes available with '/{prefixlen}' prefix length"
+                    )
                 ret.status = "unchanged"
                 ret.dry_run = True
                 if nb_vlan is not None:

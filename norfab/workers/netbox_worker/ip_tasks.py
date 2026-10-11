@@ -249,7 +249,8 @@ class NetboxIpTasks:
                 Peer allocation errors are returned while the local IP remains allocated.
 
         Returns:
-            dict: A dictionary containing the result of the IP allocation.
+            Result: Allocation details. If no child subnet can be selected, the
+                result is marked failed and includes any subnet probe errors.
 
         Tasks execution follow these steps:
 
@@ -374,6 +375,7 @@ class NetboxIpTasks:
                 break
         # if no existing IP found, find parent prefix that has available subnets to allocate
         else:
+            allocation_errors = []
             for nb_prefix in nb_prefixes:
                 parent_prefix_len = int(str(nb_prefix).split("/")[1])
                 if ip_index is not None:
@@ -391,16 +393,20 @@ class NetboxIpTasks:
                         )
                         if candidate.failed is False and candidate.result.get("prefix"):
                             break
-                    except Exception as e:
-                        # error might be expected
-                        log.debug(f"Error while trying to allocate child subnet: {e}")
+                    except Exception as exc:
+                        msg = f"error checking available /{mask_len} subnet in '{nb_prefix}' - {exc}"
+                        log.error(msg)
+                        allocation_errors.append(msg)
                         continue
                 elif nb_prefix.available_ips.list():
                     break
             else:
-                raise NetboxAllocationError(
-                    f"No subnets of {mask_len} lenght or IPs available in parent prefix - {prefix}"
+                ret.errors.extend(allocation_errors)
+                ret.errors.append(
+                    f"No subnets of {mask_len} length or IPs available in parent prefix - {prefix}"
                 )
+                ret.failed = True
+                return ret
 
         # create new IP address
         if not nb_ip:

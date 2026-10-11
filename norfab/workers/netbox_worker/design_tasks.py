@@ -899,9 +899,9 @@ def process_device_roles(
     instance: str,
     branch: str | None,
 ) -> dict:
-    """Match device roles by name and bulk-write supplied fields.
+    """Match device roles by slug and bulk-write supplied fields.
 
-    Generate a slug only for new roles.
+    Use an explicit slug when supplied, otherwise slugify the role name.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -919,25 +919,25 @@ def process_device_roles(
     log.debug(
         "process_device_roles: processing %d records, dry_run=%s", len(records), dry_run
     )
-    names = [record["name"] for record in records]
+    for record in records:
+        record.setdefault("slug", slugify(record["name"]))
+    slugs = [record["slug"] for record in records]
     existing = (
         {
-            role.name: role
+            role.slug: role
             for role in worker.bulk_filter(
-                nb.dcim.device_roles, name=names, fields="id,name"
+                nb.dcim.device_roles, slug=slugs, fields="id,name,slug"
             )
         }
-        if names
+        if slugs
         else {}
     )
-    created = [record for record in records if record["name"] not in existing]
+    created = [record for record in records if record["slug"] not in existing]
     updated = [
-        {**record, "id": existing[record["name"]].id}
+        {**record, "id": existing[record["slug"]].id}
         for record in records
-        if record["name"] in existing
+        if record["slug"] in existing
     ]
-    for record in created:
-        record.setdefault("slug", slugify(record["name"]))
     merge_design_array_fields(
         worker,
         nb,
@@ -3370,6 +3370,7 @@ def process_connections(
     Top-level and flattened port connections share this handler. Each side
     names one device and one supported termination type. Duplicate endpoints
     fail. Ports connected elsewhere are never disconnected.
+    Tenant names are converted to NetBox references; dictionaries pass through.
 
     Args:
         worker: NetBox worker used for bulk reads and delegated tasks.
@@ -3450,6 +3451,8 @@ def process_connections(
             for key, value in record.items()
             if key not in ("a_terminations", "b_terminations")
         }
+        if isinstance(payload.get("tenant"), str):
+            payload["tenant"] = {"name": payload["tenant"]}
         if any(cable_ids):
             if not cable_ids[0] or cable_ids[0] != cable_ids[1]:
                 raise ValueError(
