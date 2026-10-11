@@ -3876,9 +3876,9 @@ def process_config_context(
 ) -> dict:
     """Bulk-write reusable NetBox ConfigContext objects by name.
 
-    A ``sites`` list contains site names, resolved to IDs before writing.
+    The ``sites`` and ``tenants`` lists contain names, resolved to IDs before writing.
     Without a scope, NetBox applies the context globally, so designs should
-    scope contexts deliberately. Existing sites gain new members; data is
+    scope contexts deliberately. Existing scope lists gain new members; data is
     sent as supplied, without merging.
 
     Args:
@@ -3906,6 +3906,22 @@ def process_config_context(
         else {}
     )
     sites = lookup_cache["sites"]
+    tenant_names = {name for record in records for name in record.get("tenants", [])}
+    tenants = (
+        {
+            item.name: item.id
+            for item in worker.bulk_filter(
+                nb.tenancy.tenants, name=list(tenant_names), fields="id,name"
+            )
+        }
+        if tenant_names
+        else {}
+    )
+    missing_tenants = tenant_names - tenants.keys()
+    if missing_tenants:
+        raise ValueError(
+            f"config context tenants not found: {', '.join(sorted(missing_tenants))}"
+        )
     missing_sites = {
         name
         for record in records
@@ -3926,6 +3942,8 @@ def process_config_context(
         payload = dict(record)
         if "sites" in payload:
             payload["sites"] = [sites[name] for name in payload["sites"]]
+        if "tenants" in payload:
+            payload["tenants"] = [tenants[name] for name in payload["tenants"]]
         if record["name"] in existing:
             updated.append({**payload, "id": existing[record["name"]]})
         else:

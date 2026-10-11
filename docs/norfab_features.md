@@ -747,6 +747,7 @@ Host IP allocations (/32 and /128) automatically skip peer creation and peer-sub
 IP allocation prefix filters resolve `role` by role name, not slug, and reject unknown names.
 BGP sessions in designs use `create_bgp_peering` after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. Design peerings create only the specified direction unless `create_reverse: true` is set. Local and remote ASN fields support nested `create_asn` wrappers to allocate or reuse ASNs before session creation. The standalone create task resolves custom-field references for new sessions.
 Named or inline peer groups and import/export policies are extracted before deployment.
+Config contexts accept site and tenant name lists; updates add scope associations.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving the design `context`, record arguments, `netbox`, and `dry_run`; custom
 code is responsible for honoring dry-run and returning serializable results.

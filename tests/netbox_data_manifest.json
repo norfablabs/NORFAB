@@ -459,6 +459,12 @@
       ],
       "coverage": "Import queries match multiple targets and overlapping matches; export query selects an existing target. Uses existing test-owned records and cleanup."
     },
+    "test_designs.py::TestDesignDeploy::test_config_context_tenants": {
+      "mode": "main_mutating",
+      "tenants": ["norfab-context-tenant-a", "norfab-context-tenant-b"],
+      "config_contexts": ["NORFAB TENANT CONTEXT TEST"],
+      "coverage": "Creates owned tenants and a context in one deployment; verifies tenant-name resolution and additive tenant assignment on update. Cleans up only its own context and tenants."
+    },
     "test_designs.py::TestDesignDeploy::test_config_context": {
       "persistent_custom_fields": [
         "norfab_design_device_ip",

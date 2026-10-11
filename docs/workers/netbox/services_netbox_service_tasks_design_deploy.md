@@ -222,12 +222,12 @@ Each design section contains a list of object records. The rows show the order i
 | 33 | `routing_policies` | `netbox.plugins.bgp.routing_policy` | `name` | Peering references can inline policy dictionaries or use policy names. |
 | 34 | `peer_groups` | `netbox.plugins.bgp.peer_group` | `name` | Peering references can provide a name or inline dictionary. |
 | 35 | `bgp_peerings` | `netbox.plugins.bgp.session` | Supplied or generated `name` | Uses `create_bgp_peering` to create missing sessions. Existing sessions are left unchanged. Design peerings default to `create_reverse: false`. Supports named or inline peer groups and import/export policies. |
-| 36 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary and `sites` scopes it. |
+| 36 | `config_context` | `netbox.extras.config_contexts` | `name` | `data` is a dictionary; `sites` and `tenants` accept name lists for scope. |
 | 37 | `local_context_data` | `netbox.dcim.devices` | Device: `site` and `name`, plus `tenant` when supplied | Replaces each device's local context dictionary last. |
 
 Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as `device.site`, `device.role`, and `vlan.group`, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.
 
-When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Only config-context `sites` accepts site names; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
+When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context `sites` and `tenants` accept name lists; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group `vid_ranges`, local context data, and config-context `data` retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.
 
 
 
@@ -1914,7 +1914,7 @@ A `custom_function` on a `config_context` record uses the same [arguments and re
 
 === "Shared site context"
 
-    `config_context` matches an existing ConfigContext by `name`, creating it if absent or updating it if present. `sites` scopes the context to named sites created earlier or already in Netbox. Without a scope, the context applies globally, so specify one when the data is site-specific.
+    `config_context` matches an existing ConfigContext by `name`, creating it if absent or updating it if present. `sites` and `tenants` scope the context by name to objects created earlier or already in Netbox. Unknown tenant names fail; a dry run cannot resolve tenants that are only planned. Updates add scope associations without removing existing ones. Without a scope, the context applies globally, so specify one when the data is site-specific.
 
     ```yaml
     sites:

@@ -6,6 +6,7 @@
 2. Netbox `design_deploy` connection records accept a tenant name string, such as `tenant: demo`, for cable creation and updates. Existing tenant reference dictionaries remain supported.
 3. Netbox `create_bgp_peering` accepts an existing tenant name in single-session mode and individual bulk entries, including design peerings. Reverse sessions inherit the tenant; existing sessions remain unchanged.
 4. Containerlab `deploy_netbox` accepts an optional `branch` argument to build a lab topology from devices and connections in a named NetBox branch.
+5. Netbox `design_deploy` config contexts accept a `tenants` list of tenant names, resolving them to IDs and adding associations on updates. Unknown tenant names produce an error.
 
 ## BUGS
 

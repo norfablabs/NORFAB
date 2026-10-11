@@ -868,11 +868,12 @@ class DesignDocument(BaseModel):
                 record.get("data"), dict
             ):
                 raise ValueError("config_context requires name and data dictionary")
-            if "sites" in record and (
-                not isinstance(record["sites"], list)
-                or not all(isinstance(name, str) and name for name in record["sites"])
-            ):
-                raise ValueError("config_context.sites must be a list of site names")
+            for field in ("sites", "tenants"):
+                if field in record and (
+                    not isinstance(record[field], list)
+                    or not all(isinstance(name, str) and name for name in record[field])
+                ):
+                    raise ValueError(f"config_context.{field} must be a list of names")
         for record in self.local_context_data:
             if not all(
                 isinstance(record.get(field), str) and record[field]

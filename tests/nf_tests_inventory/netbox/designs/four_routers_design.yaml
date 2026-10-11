@@ -20,6 +20,18 @@ sites:
     tenant: demo
     status: active
 
+config_context:
+  - name: DEMO CONTAINERLAB
+    description: Containerlab node settings for devices at the DEMO site
+    is_active: true
+    weight: 1000
+    sites: [DEMO]
+    data:
+      norfab:
+        containerlab:
+          kind: cisco_iol
+          image: vrnetlab/cisco_iol:17.16.1a
+
 rirs:
   - name: DEMO PRIVATE
     is_private: true
@@ -70,7 +82,7 @@ devices:
               prefix: 10.1.0.0/24
               tenant: demo
               mask_len: 32
-              ip_index: 1
+              ip_index: {{ loop.index }}
               is_primary: true
 {% endfor %}
 

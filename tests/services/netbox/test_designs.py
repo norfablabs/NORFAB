@@ -959,6 +959,53 @@ class TestDesignDeploy:
             for obj in reversed(created):
                 obj.delete()
 
+    def test_config_context_tenants(self, nfclient: Any) -> None:
+        """Resolve tenant names and add tenant assignments on context updates."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        tenant_names = ["norfab-context-tenant-a", "norfab-context-tenant-b"]
+        context_name = "NORFAB TENANT CONTEXT TEST"
+        if nb.extras.config_contexts.get(name=context_name) or any(
+            nb.tenancy.tenants.get(name=name) for name in tenant_names
+        ):
+            pytest.skip("tenant context test records already exist")
+        try:
+            for names in ([tenant_names[0]], [tenant_names[1]]):
+                response = nfclient.run_job(
+                    "netbox",
+                    "design_deploy",
+                    workers="any",
+                    kwargs={
+                        "design": {
+                            "tenants": [{"name": name} for name in tenant_names],
+                            "config_context": [
+                                {
+                                    "name": context_name,
+                                    "tenants": names,
+                                    "data": {"routing": {"asn": 65222}},
+                                }
+                            ],
+                        }
+                    },
+                )
+                assert response
+                for result in response.values():
+                    assert not result["failed"], result
+                context = nb.extras.config_contexts.get(name=context_name)
+                expected = (
+                    {tenant_names[0]}
+                    if names == [tenant_names[0]]
+                    else set(tenant_names)
+                )
+                assert {tenant.name for tenant in context.tenants} == expected
+        finally:
+            context = nb.extras.config_contexts.get(name=context_name)
+            if context:
+                context.delete()
+            for name in tenant_names:
+                tenant = nb.tenancy.tenants.get(name=name)
+                if tenant:
+                    tenant.delete()
+
     def test_config_context(self, nfclient: Any) -> None:
         """Create a scoped context and compute local data after interfaces exist."""
         nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
