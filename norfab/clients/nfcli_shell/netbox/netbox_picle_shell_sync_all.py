@@ -5,6 +5,7 @@ PICLE Shell Client
 sync-all commands for Netbox service.
 """
 
+import json
 import logging
 from typing import List, Union
 
@@ -45,6 +46,14 @@ class SyncAllDevicesShell(
 
         if isinstance(kwargs.get("devices"), str):
             kwargs["devices"] = [kwargs["devices"]]
+        sync_kwargs = kwargs.get("sync_kwargs")
+        if isinstance(sync_kwargs, str) and not sync_kwargs.startswith(
+            ("nf://", "git://")
+        ):
+            sync_kwargs = json.loads(sync_kwargs)
+            if not isinstance(sync_kwargs, dict):
+                raise ValueError("sync-kwargs must be a JSON string")
+            kwargs["sync_kwargs"] = sync_kwargs
         result = run_future_job(
             "netbox",
             "sync_all",

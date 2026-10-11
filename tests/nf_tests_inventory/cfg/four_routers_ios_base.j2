@@ -1,0 +1,195 @@
+hostname {{ host.name }}
+service timestamps log datetime msec
+no ip domain lookup
+logging buffered 64000 informational
+!
+{% for name, interface in host.interfaces.items() %}
+interface {{ name }}
+ no shutdown
+{% if interface["description"] %}
+ description {{ interface["description"] }}
+{% endif %}
+{% for ip in interface["ip_addresses"] %}
+ ip address {{ ip["address"].split("/")[0] }} {{ {"30": "255.255.255.252", "32": "255.255.255.255"}[ip["address"].split("/")[1]] }}
+{% endfor %}
+ ip ospf 1 area 0
+ {{ "no shutdown" if interface["enabled"] else "shutdown" }}
+ exit
+!
+{% endfor %}
+router ospf 1
+ router-id {{ host.interfaces.Loopback0.ip_addresses[0].address.split("/")[0] }}
+ exit
+!
+{% if host.bgp_peerings %}
+router bgp {{ (host.bgp_peerings.values() | list)[0]["local_as"]["asn"] }}
+ bgp router-id {{ host.interfaces.Loopback0.ip_addresses[0].address.split("/")[0] }}
+ bgp log-neighbor-changes
+{% for name, peer in host.bgp_peerings.items() %}
+ neighbor {{ peer["remote_address"]["address"].split("/")[0] }} remote-as {{ peer["remote_as"]["asn"] }}
+ neighbor {{ peer["remote_address"]["address"].split("/")[0] }} description {{ peer["description"] }}
+ neighbor {{ peer["remote_address"]["address"].split("/")[0] }} update-source Loopback0
+{% endfor %}
+ network {{ host.interfaces.Loopback0.ip_addresses[0].address.split("/")[0] }} mask 255.255.255.255
+ exit
+!
+{% endif %}
+
+{# Static customer configuration, selected only by router name. #}
+{% if host.name == "R1" %}
+ip bgp-community new-format
+ip vrf CUSTOMER-A
+ rd 65222:100
+ exit
+route-map CUSTOMER-A-EXPORT permit 10
+ set community 65222:100 additive
+ exit
+interface Loopback100
+ ip vrf forwarding CUSTOMER-A
+ ip address 10.100.0.1 255.255.255.255
+ ip ospf 100 area 0
+ no shutdown
+ exit
+interface Ethernet0/3.100
+ encapsulation dot1Q 100
+ ip vrf forwarding CUSTOMER-A
+ ip address 172.20.1.1 255.255.255.252
+ ip ospf 100 area 0
+ no shutdown
+ exit
+router ospf 100 vrf CUSTOMER-A
+ router-id 10.100.0.1
+ exit
+!
+interface Ethernet0/3
+ description Customer VLAN trunk
+ no shutdown
+ exit
+router bgp 65222
+ address-family ipv4 vrf CUSTOMER-A
+  neighbor 172.20.1.2 remote-as 65001
+  neighbor 172.20.1.2 activate
+  neighbor 172.20.1.2 send-community
+  neighbor 172.20.1.2 route-map CUSTOMER-A-EXPORT out
+  network 10.100.0.1 mask 255.255.255.255
+ exit-address-family
+ exit
+!
+{% elif host.name == "R2" %}
+ip bgp-community new-format
+ip vrf CUSTOMER-A
+ rd 65222:100
+ exit
+route-map CUSTOMER-A-EXPORT permit 10
+ set community 65222:100 additive
+ exit
+interface Loopback100
+ ip vrf forwarding CUSTOMER-A
+ ip address 10.100.0.2 255.255.255.255
+ ip ospf 100 area 0
+ no shutdown
+ exit
+interface Ethernet0/3.100
+ encapsulation dot1Q 100
+ ip vrf forwarding CUSTOMER-A
+ ip address 172.20.2.1 255.255.255.252
+ ip ospf 100 area 0
+ no shutdown
+ exit
+router ospf 100 vrf CUSTOMER-A
+ router-id 10.100.0.2
+ exit
+!
+interface Ethernet0/3
+ description Customer VLAN trunk
+ no shutdown
+ exit
+router bgp 65222
+ address-family ipv4 vrf CUSTOMER-A
+  neighbor 172.20.2.2 remote-as 65001
+  neighbor 172.20.2.2 activate
+  neighbor 172.20.2.2 send-community
+  neighbor 172.20.2.2 route-map CUSTOMER-A-EXPORT out
+  network 10.100.0.2 mask 255.255.255.255
+ exit-address-family
+ exit
+!
+{% elif host.name == "R3" %}
+ip bgp-community new-format
+ip vrf CUSTOMER-A
+ rd 65222:100
+ exit
+route-map CUSTOMER-A-EXPORT permit 10
+ set community 65222:100 additive
+ exit
+interface Loopback100
+ ip vrf forwarding CUSTOMER-A
+ ip address 10.100.0.3 255.255.255.255
+ ip ospf 100 area 0
+ no shutdown
+ exit
+interface Ethernet0/3.100
+ encapsulation dot1Q 100
+ ip vrf forwarding CUSTOMER-A
+ ip address 172.20.3.1 255.255.255.252
+ ip ospf 100 area 0
+ no shutdown
+ exit
+router ospf 100 vrf CUSTOMER-A
+ router-id 10.100.0.3
+ exit
+!
+interface Ethernet0/3
+ description Customer VLAN trunk
+ no shutdown
+ exit
+router bgp 65222
+ address-family ipv4 vrf CUSTOMER-A
+  neighbor 172.20.3.2 remote-as 65001
+  neighbor 172.20.3.2 activate
+  neighbor 172.20.3.2 send-community
+  neighbor 172.20.3.2 route-map CUSTOMER-A-EXPORT out
+  network 10.100.0.3 mask 255.255.255.255
+ exit-address-family
+ exit
+!
+{% elif host.name == "R4" %}
+ip bgp-community new-format
+ip vrf CUSTOMER-A
+ rd 65222:100
+ exit
+route-map CUSTOMER-A-EXPORT permit 10
+ set community 65222:100 additive
+ exit
+interface Loopback100
+ ip vrf forwarding CUSTOMER-A
+ ip address 10.100.0.4 255.255.255.255
+ ip ospf 100 area 0
+ no shutdown
+ exit
+interface Ethernet0/3.100
+ encapsulation dot1Q 100
+ ip vrf forwarding CUSTOMER-A
+ ip address 172.20.4.1 255.255.255.252
+ ip ospf 100 area 0
+ no shutdown
+ exit
+router ospf 100 vrf CUSTOMER-A
+ router-id 10.100.0.4
+ exit
+!
+interface Ethernet0/3
+ description Customer VLAN trunk
+ no shutdown
+ exit
+router bgp 65222
+ address-family ipv4 vrf CUSTOMER-A
+  neighbor 172.20.4.2 remote-as 65001
+  neighbor 172.20.4.2 activate
+  neighbor 172.20.4.2 send-community
+  neighbor 172.20.4.2 route-map CUSTOMER-A-EXPORT out
+  network 10.100.0.4 mask 255.255.255.255
+ exit-address-family
+ exit
+!
+{% endif %}

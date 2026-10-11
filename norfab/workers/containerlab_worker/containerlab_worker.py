@@ -240,6 +240,7 @@ class ContainerlabWorker(NFPWorker):
         and duplicates are removed.
 
         Args:
+            job: NorFab job metadata. Lab discovery does not emit progress events.
             timeout (int, optional): The timeout value in seconds for the inspection
                 operation. Defaults to None.
 
@@ -249,7 +250,7 @@ class ContainerlabWorker(NFPWorker):
         """
         timeout = timeout or 600
         ret = Result(task=f"{self.name}:get_running_labs", result=[])
-        inspect = self.inspect(job=job, timeout=timeout)
+        inspect = self.inspect(job=None, timeout=timeout)
 
         # form topologies list if any of them are running
         if inspect.result:
@@ -333,14 +334,16 @@ class ContainerlabWorker(NFPWorker):
                     )
                 msg = proc.stderr.readline().strip()
                 if msg:
-                    job.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
+                    if job is not None:
+                        job.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
                     logs.append(msg)
                 time.sleep(0.01)
             # read remaining messages
             for msg in proc.stderr.readlines():
                 msg = msg.strip()
                 if msg:
-                    job.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
+                    if job is not None:
+                        job.event(msg.split("msg=")[-1].replace('\\"', "").strip('"'))
                     logs.append(msg)
                 time.sleep(0.01)
             # read process output
@@ -505,6 +508,13 @@ class ContainerlabWorker(NFPWorker):
             job=job, timeout=timeout, lab_name=lab_name, details=True
         )
 
+        if inspect.failed:
+            ret.failed = True
+            ret.errors = inspect.errors
+            ret.messages = inspect.messages
+            ret.result = {lab_name: False}
+            return ret
+
         if not inspect.result:
             ret.failed = True
             ret.errors = [f"'{lab_name}' lab not found"]
@@ -572,10 +582,11 @@ class ContainerlabWorker(NFPWorker):
         log.info(
             f"{self.name} - Inspect: Inspecting {'all labs' if lab_name is None else lab_name + ' lab'}"
         )
-        if lab_name:
-            job.event(f"inspecting lab '{lab_name}'")
-        else:
-            job.event("inspecting all labs")
+        if job is not None:
+            if lab_name:
+                job.event(f"inspecting lab '{lab_name}'")
+            else:
+                job.event("inspecting all labs")
 
         if lab_name:
             args = ["containerlab", "inspect", "-f", "json", "--name", lab_name]
@@ -588,8 +599,11 @@ class ContainerlabWorker(NFPWorker):
             args=args, timeout=timeout, ret=ret, job=job
         )
 
+        if ret.failed:
+            return ret
+
         # check if lab name given and it is not in output
-        if lab_name and lab_name not in ret.result:
+        if lab_name and lab_name not in (ret.result or {}):
             ret.failed = True
             msg = f"'{lab_name}' lab not found"
             ret.errors.append(msg)

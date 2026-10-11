@@ -905,6 +905,22 @@ class NornirInventoryLoadContainerlabInput(
         alias="re-init-nornir",
         json_schema_extra={"presence": True},
     )
+    load_netbox: Union[StrictBool, dict[StrictStr, Any]] = Field(
+        False,
+        description="Load all NetBox host data by default, or override enrichment options with a dictionary",
+        alias="load-netbox",
+        json_schema_extra={"presence": True},
+    )
+    load_netbox_branch: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox branch to load host data from; overrides the branch in NetBox options",
+        alias="load-netbox-branch",
+    )
+    load_netbox_instance: Union[None, StrictStr] = Field(
+        None,
+        description="NetBox instance to load host data from; overrides the instance in NetBox options",
+        alias="load-netbox-instance",
+    )
 
 
 class NornirInventoryLoadContainerlabResult(Result):

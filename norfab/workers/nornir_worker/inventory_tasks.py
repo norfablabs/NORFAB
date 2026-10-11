@@ -319,20 +319,58 @@ class InventoryTasks:
         progress: bool = False,
         dry_run: bool = False,
         re_init_nornir: bool = True,
+        load_netbox: Union[bool, dict] = False,
+        load_netbox_branch: Union[None, str] = None,
+        load_netbox_instance: Union[None, str] = None,
     ) -> Result:
         """
-        Pulls the Nornir inventory from a Containerlab lab instance and merges it with the
-        existing Nornir inventory.
+        Load Containerlab hosts into Nornir, optionally enriching their data from NetBox.
+
+        Uses the first Containerlab worker that returns usable hosts for inventory
+        updates. NetBox enrichment preserves Containerlab connection settings and
+        completes before inventory is updated.
 
         Args:
-            job: NorFab Job object containing relevant metadata
-            lab_name (str): The name of the Containerlab lab to retrieve the inventory from.
-            groups (list, optional): A list of group names to include into the hosts' inventory.
-            use_default_credentials (bool): Whether to use default credentials for the hosts.
+            job (Job): NorFab job metadata and progress event interface.
+            lab_name (str, optional): Lab name to import. Defaults to None,
+                requesting all labs from the selected Containerlab workers.
+            groups (list[str], optional): Nornir groups to assign to imported
+                hosts. Defaults to None, assigning no additional groups.
+            clab_workers (str | list[str], optional): Containerlab worker selection.
+                Accepts worker names, "any", or "all". Defaults to "all".
+            use_default_credentials (bool, optional): Use the Containerlab kind's
+                default credentials for imported hosts. Defaults to True.
+            progress (bool, optional): Accepted for client compatibility; does
+                not gate task events. Defaults to False.
+            dry_run (bool, optional): Return fetched inventory without updating
+                worker host inventory or reinitializing Nornir. Defaults to False.
+            re_init_nornir (bool, optional): Reinitialize Nornir after merging
+                inventory. Defaults to True. False updates worker inventory only;
+                ignored during dry runs.
+            load_netbox (bool | dict, optional): Load NetBox data for imported hosts.
+                False disables loading; True loads device data, interfaces with
+                IPs and inventory items, connections, circuits with interface
+                details, and BGP peerings. A dictionary supports Nornir inventory
+                netbox section arguments and overrides these defaults. Worker
+                NetBox settings are ignored. Defaults to False.
+            load_netbox_branch (str, optional): NetBox branch to load host data
+                from. A nonempty value enables NetBox loading. Overrides the branch in NetBox
+                options. Defaults to None, using the dictionary's branch if any.
+            load_netbox_instance (str, optional): NetBox instance to load host data
+                from. A nonempty value enables NetBox loading. Overrides the instance in NetBox
+                options. Defaults to None, using the dictionary's instance or the
+                NetBox service's default instance.
 
         Returns:
-            Result: A Result object indicating the success or failure of the operation.
-                    If successful, the Nornir inventory is updated with the retrieved data.
+            Result: result=True after a successful inventory update. Dry runs
+                return inventory dictionaries keyed by Containerlab worker name.
+                Without enrichment, all worker results are returned; with
+                enrichment, only the first usable worker's combined inventory
+                is returned.
+
+        Raises:
+            RuntimeError: If no usable inventory is returned, NetBox reports errors,
+                or NetBox does not return every imported Containerlab host.
 
         Notes:
             - The method retrieves inventory data from a Containerlab lab using a client job.
@@ -340,10 +378,15 @@ class InventoryTasks:
               Nornir inventory using the `merge_recursively` function.
             - If no inventory or host data is returned, the method logs an error and marks
               the operation as failed.
-            - After successful merging of inventory, Nornir instance is re-initialized with the
-              updated inventory.
+            - Nornir is reinitialized only when re_init_nornir=True and dry_run=False.
+            - Host names must match NetBox device names; renamed or missing NetBox
+              hosts cause enrichment to fail.
+            - Importing multiple labs with the same node name can overwrite that
+              host's inventory entry. Use lab_name to select a single lab.
         """
         groups = groups or []
+        if load_netbox is False:
+            load_netbox = bool(load_netbox_branch or load_netbox_instance)
         ret = Result(
             task=f"{self.name}:nornir_inventory_load_containerlab", result=True
         )
@@ -371,7 +414,7 @@ class InventoryTasks:
 
         job.event(f"pulled Containerlab '{lab_name or 'all'}' lab inventory")
 
-        if dry_run is True:
+        if dry_run is True and load_netbox is False:
             ret.result = {w: r["result"] for w, r in clab_inventory_data.items()}
             self.status["containerlab_inventory_status"] = "completed"
             return ret
@@ -379,7 +422,8 @@ class InventoryTasks:
         for wname, wdata in clab_inventory_data.items():
             # use inventory from first worker that returned hosts data
             if wdata["failed"] is False and wdata["result"].get("hosts"):
-                merge_recursively(self.nornir_worker_inventory, wdata["result"])
+                inventory = wdata["result"]
+                clab_worker = wname
                 break
         else:
             msg = (
@@ -390,6 +434,63 @@ class InventoryTasks:
             self.status["containerlab_inventory_status"] = "failed"
             raise RuntimeError(msg)
 
+        if load_netbox is not False:
+            kwargs = {
+                "nbdata": True,
+                "interfaces": {"ip_addresses": True, "inventory_items": True},
+                "connections": True,
+                "circuits": {"add_interface_details": True},
+                "bgp_peerings": True,
+                "cache": False,
+            }
+            if isinstance(load_netbox, dict):
+                kwargs.update(load_netbox)
+            kwargs["branch"] = load_netbox_branch
+            kwargs["instance"] = load_netbox_instance
+            kwargs.pop("filters", None)
+            kwargs["devices"] = list(inventory["hosts"])
+            timeout = max(10, kwargs.pop("timeout", 100))
+            job.event("fetching NetBox data for Containerlab hosts")
+            nb_inventory_data = self.client.run_job(
+                service="netbox",
+                task="get_nornir_inventory",
+                workers="any",
+                kwargs=kwargs,
+                timeout=timeout,
+            )
+            for wdata in (nb_inventory_data or {}).values():
+                if (
+                    wdata["failed"] is False
+                    and not wdata.get("errors")
+                    and wdata["result"].get("hosts")
+                ):
+                    netbox_hosts = wdata["result"]["hosts"]
+                    break
+            else:
+                self.status["containerlab_inventory_status"] = "failed"
+                raise RuntimeError(
+                    "NetBox returned no usable inventory for Containerlab hosts"
+                )
+
+            missing = set(inventory["hosts"]) - set(netbox_hosts)
+            if missing:
+                self.status["containerlab_inventory_status"] = "failed"
+                raise RuntimeError(
+                    f"NetBox returned no matching hosts for: {', '.join(sorted(missing))}"
+                )
+            for name, host in inventory["hosts"].items():
+                merge_recursively(
+                    host.setdefault("data", {}), netbox_hosts[name].get("data", {})
+                )
+            job.event("loaded NetBox data for Containerlab hosts")
+
+        if dry_run is True:
+            ret.result = {clab_worker: inventory}
+            ret.dry_run = True
+            self.status["containerlab_inventory_status"] = "completed"
+            return ret
+
+        merge_recursively(self.nornir_worker_inventory, inventory)
         job.event(
             f"merged Containerlab '{lab_name or 'all'}' lab inventory with Nornir runtime inventory"
         )

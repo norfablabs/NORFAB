@@ -576,8 +576,13 @@ runtime state, not durable source-of-truth updates.
 
 Can merge Nornir inventory from a configured NetBox instance at startup/runtime,
 or pull hosts from selected Containerlab workers with optional groups, default
-credentials, dry-run, and Nornir reinitialization. **Use cases:** production
-source-of-truth automation, lab-to-automation handoff, and using identical tasks
+credentials, dry-run, and Nornir reinitialization.
+Containerlab imports can optionally enrich host data from NetBox using a boolean
+or dictionary of inventory options while retaining lab connection settings.
+Enabled enrichment loads all supported host data by default, independently of
+worker NetBox inventory settings; dictionary options can override these defaults.
+Optional instance and branch arguments enable enrichment and select its NetBox source.
+**Use cases:** production source-of-truth automation, lab-to-automation handoff, and using identical tasks
 against physical and virtual networks. **Limitations:** imported platform and
 connection data must map to installed Nornir plugins.
 
@@ -1069,6 +1074,7 @@ including inventory, interface, VRF, VLAN, prefix, IP, VRRP, BGP peering, and BG
 community state, or executes the supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
 MAC, IP, VRRP, and BGP sequence. Both operations accept per-task keyword arguments
 inline or from an `nf://` YAML file; `sync_all` can also skip individual stages.
+NFCLI `netbox sync all` accepts inline JSON objects through `sync-kwargs`.
 Drift assessment can treat deletion-only differences as in sync while retaining
 them in the detailed diff. **Use cases:** audit
 evidence, change planning, and scheduled source-of-truth maintenance.

@@ -1,9 +1,13 @@
 import pprint
+
 import pytest
+
+from norfab.core.client import NFPClient
 
 try:
     from tests.services.containerlab.common import (
         wait_for_containerlab_worker,
+        wait_for_netbox_worker,
     )
 except ModuleNotFoundError as exc:
     if exc.name not in {
@@ -15,6 +19,7 @@ except ModuleNotFoundError as exc:
         raise
     from services.containerlab.common import (
         wait_for_containerlab_worker,
+        wait_for_netbox_worker,
     )
 
 pytestmark = [
@@ -24,6 +29,86 @@ pytestmark = [
 
 
 class TestGetNornirInventoryTask:
+    def test_load_containerlab_inventory_with_netbox(self, nfclient: NFPClient) -> None:
+        """Load one read-only device from a prod branch, preserving lab connectivity."""
+        wait_for_containerlab_worker(nfclient)
+        wait_for_netbox_worker(nfclient)
+        lab = "norfab-netbox-inventory-load"
+        branch = "norfab-clab-inventory-read"
+        try:
+            deployed = nfclient.run_job(
+                "containerlab",
+                "deploy",
+                workers="containerlab-worker-1",
+                kwargs={
+                    "topology": "nf://containerlab/netbox-inventory-load.yaml",
+                    "reconfigure": True,
+                },
+            )["containerlab-worker-1"]
+            assert deployed["failed"] is False, deployed["errors"]
+
+            original = nfclient.run_job(
+                "containerlab",
+                "get_nornir_inventory",
+                workers="containerlab-worker-1",
+                kwargs={"lab_name": lab},
+            )["containerlab-worker-1"]
+            assert original["failed"] is False, original["errors"]
+
+            loaded = nfclient.run_job(
+                "nornir",
+                "nornir_inventory_load_containerlab",
+                workers="nornir-worker-1",
+                kwargs={
+                    "lab_name": lab,
+                    "clab_workers": "containerlab-worker-1",
+                    "load_netbox_branch": branch,
+                    "load_netbox_instance": "prod",
+                    "dry_run": True,
+                },
+            )["nornir-worker-1"]
+            assert loaded["failed"] is False, loaded["errors"]
+            hosts = loaded["result"]["containerlab-worker-1"]["hosts"]
+            assert list(hosts) == ["fceos4"]
+            host = hosts["fceos4"]
+            for key in (
+                "hostname",
+                "port",
+                "platform",
+                "username",
+                "password",
+                "groups",
+            ):
+                assert host[key] == original["result"]["hosts"]["fceos4"][key], key
+            assert host["data"]["name"] == "fceos4"
+            assert all(
+                key in host["data"]
+                for key in (
+                    "interfaces",
+                    "connections",
+                    "circuits",
+                    "bgp_peerings",
+                    "config_context",
+                )
+            )
+            assert any(
+                interface["ip_addresses"]
+                for interface in host["data"]["interfaces"].values()
+            )
+        finally:
+            nfclient.run_job(
+                "containerlab",
+                "destroy_lab",
+                workers="containerlab-worker-1",
+                kwargs={"lab_name": lab},
+            )
+            nfclient.run_job(
+                "netbox",
+                "delete_branch",
+                workers="any",
+                kwargs={"branch": branch, "instance": "prod"},
+            )
+
     def test_get_nornir_inventory_by_lab_name(self, nfclient):
         wait_for_containerlab_worker(nfclient)
         ret_deploy = nfclient.run_job(

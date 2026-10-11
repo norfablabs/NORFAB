@@ -1,0 +1,13 @@
+name: norfab-netbox-inventory-load
+
+topology:
+  nodes:
+    fceos4:
+      kind: ceos
+      image: ceosimage:4.35.2F
+      ports:
+        - "19222:22/tcp"
+
+mgmt:
+  network: norfab_netbox_inventory_load
+  ipv4-subnet: 172.100.199.0/24

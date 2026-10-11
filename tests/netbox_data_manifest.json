@@ -5,6 +5,9 @@
     "Other sync task files still use the original fn-ceos-* FakeNOS dataset. Audit their records before adding new parallel sync tests."
   ],
   "branch_feature_tests": {
+    "services/containerlab/test_inventory.py": [
+      "test_load_containerlab_inventory_with_netbox"
+    ],
     "test_bgp.py": [
       "test_sync_bgp_peerings_with_branch",
       "test_create_bgp_peering_with_branch",
@@ -80,6 +83,14 @@
     ]
   },
   "tests": {
+    "services/containerlab/test_inventory.py::TestGetNornirInventoryTask::test_load_containerlab_inventory_with_netbox": {
+      "mode": "branch_feature",
+      "devices": ["fceos4"],
+      "branches": ["norfab-clab-inventory-read"],
+      "containerlab_lab": "norfab-netbox-inventory-load",
+      "coverage": "Reads the existing fceos4 device without modifying records. Loads a single-node lab with load_netbox_branch and load_netbox_instance=prod, verifying automatic enrichment and preserved Containerlab SSH settings in a dry run. Branch provisioning is performed automatically by the NetBox read task.",
+      "cleanup": "Deletes only the owned branch and Containerlab lab; main NetBox records are not changed."
+    },
     "test_circuits.py::TestGetCircuits": {
       "mode": "main_readonly",
       "devices": [

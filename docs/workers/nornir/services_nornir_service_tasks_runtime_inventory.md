@@ -163,6 +163,54 @@ nf#
 
 Nornir Service supports loading hosts inventory from running Containerlab labs using `nornir_inventory_load_containerlab` task. This is useful to easily onboard Containerlab environments into Nornir and helps with automation. Internally Nornir service uses Containerlab Service to fetch running containers details and construct Nornir inventory.
 
+Set `load_netbox=True` to load device data, interfaces with IP addresses and
+inventory items, connections, circuits with interface details, and BGP peerings.
+Worker Netbox inventory settings are ignored, and reads bypass caches by default.
+A dictionary overrides these defaults, for example:
+
+```python
+client.run_job(
+    service="nornir",
+    task="nornir_inventory_load_containerlab",
+    workers="nornir-worker-1",
+    kwargs={
+        "lab_name": "demo-4-routers",
+        "clab_workers": "containerlab-worker-1",
+        "load_netbox_branch": "demo",
+        "load_netbox_instance": "prod",
+        "load_netbox": {
+            "interfaces": {"ip_addresses": True},
+            "connections": True,
+            "bgp_peerings": True,
+        },
+        "dry_run": True,
+    },
+)
+```
+
+Only imported Containerlab host names are queried; supplied Netbox `devices` and
+`filters` do not widen that selection. Netbox host data is merged while the
+Containerlab SSH endpoints, platforms, credentials, and groups are preserved.
+An empty dictionary enables all default enrichment options.
+`interfaces=True` alone does not include assigned IPs; request
+`interfaces={"ip_addresses": True}` to include them.
+The CLI boolean form is `nornir inventory load containerlab load-netbox` with
+the usual worker and lab arguments.
+
+Enrichment errors or missing Netbox hosts fail the task before inventory is
+updated. A dry run with enrichment returns the first successful Containerlab
+worker's combined inventory without changing Nornir. The default
+`load_netbox=False` retains the existing loading behavior unless a nonempty
+`load_netbox_branch` or `load_netbox_instance` enables enrichment.
+
+Use `load_netbox_branch` (CLI: `load-netbox-branch`) to select a branch and enable
+Netbox loading. It overrides the branch in supplied
+Netbox options. When omitted, the branch from those options is used.
+
+Use `load_netbox_instance` (CLI: `load-netbox-instance`) to select the Netbox
+instance and enable loading. It overrides the instance in supplied options.
+When omitted, the supplied instance or Netbox service's default instance is used.
+
 !!! example
 
     === "CLI"
