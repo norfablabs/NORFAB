@@ -117,7 +117,11 @@ to be unique.
 
 For a group observed on multiple peers, the first device and interface in
 sorted order supply the context. The task renders the name once and applies the
-same name to the shared group for every peer.
+same name to the shared group for every peer. Later calls discover compatible
+groups through their existing VIPs, even when the original peer is not selected.
+Interface names do not need to match. Groups with assignments outside the
+selected devices retain their existing names, including on subsequent syncs.
+Select all peers together to synchronize the shared group name.
 
 ### Render an inline template
 
@@ -193,7 +197,7 @@ before writes are applied.
 
 When parsing returns no VRRP assignments and NetBox has no assignments for the
 selected devices, the task reports them in sync. Existing NetBox assignments
-appear as deletion candidates; a normal sync leaves them in place. NetBox IP
-addresses are queried only when creates or updates require them.
+appear as deletion candidates; a normal sync leaves them in place. Matching NetBox IP
+addresses are queried before diff calculation to discover existing peer groups.
 
 ::: norfab.workers.netbox_worker.fhrp_tasks.NetboxFhrpTasks.sync_vrrp

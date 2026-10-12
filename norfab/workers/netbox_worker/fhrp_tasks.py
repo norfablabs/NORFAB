@@ -56,7 +56,8 @@ class NetboxFhrpTasks:
         ID. Virtual address, assignment priority, and group
         authentication type are synchronized. Compatible peer assignments reuse
         a NetBox FHRP group when their protocol, group ID, virtual address, and
-        authentication match.
+        authentication match, including peers discovered in later calls. Names
+        of groups assigned to interfaces outside the selected devices are retained.
 
         The sync is additive. Existing groups, assignments, and virtual addresses
         which are absent from live data are retained.
@@ -283,6 +284,8 @@ class NetboxFhrpTasks:
                         ret.errors.append(msg)
                         continue
 
+                    # Priority belongs to this device/interface assignment;
+                    # the VIP and authentication belong to the shared group.
                     key = f"{interface_name}:{protocol}:{group_id}"
                     device_state[key] = {
                         "interface": interface_name,
@@ -343,8 +346,33 @@ class NetboxFhrpTasks:
             return ret
         job.event(f"rendered {len(group_names)} VRRP group name(s)")
 
-        # Load only groups already assigned to the selected interfaces. Global
-        # FHRP groups outside this device set are not part of the comparison.
+        # Discover VIP owners before calculating the diff. A later peer may
+        # have no assignment yet, while its VIP already belongs to a group.
+        # Reuse these IP records during writes to avoid another matching query.
+        desired_addresses = sorted(
+            {
+                assignment["virtual_address"]
+                for device_state in live_state.values()
+                for assignment in device_state.values()
+            }
+        )
+        job.event(
+            f"fetching {len(desired_addresses)} matching IP address(es) from NetBox"
+        )
+        # An empty address filter can become an unfiltered API request.
+        nb_ips = (
+            self.bulk_filter(
+                endpoint=nb.ipam.ip_addresses,
+                address=desired_addresses,
+                fields="id,address,role,assigned_object_type,assigned_object_id",
+            )
+            if desired_addresses
+            else []
+        )
+        job.event(f"retrieved {len(nb_ips)} matching IP address object(s) from NetBox")
+
+        # Include groups owning live VIPs, even when their peers are outside
+        # the selected devices.
         job.event("loading current VRRP assignments from NetBox")
         assignments = self.bulk_filter(
             nb.ipam.fhrp_group_assignments,
@@ -353,6 +381,12 @@ class NetboxFhrpTasks:
         )
         assignment_group_ids = sorted(
             {assignment.group.id for assignment in assignments}
+            | {
+                ip_record.assigned_object_id
+                for ip_record in nb_ips
+                if ip_record.assigned_object_type == "ipam.fhrpgroup"
+                and ip_record.assigned_object_id is not None
+            }
         )
         groups = {}
         if assignment_group_ids:
@@ -380,6 +414,8 @@ class NetboxFhrpTasks:
                         ),
                     }
 
+        # Compare bare host addresses so an existing /24 VIP matches live data
+        # without a prefix. Only addresses with the VRRP role populate state.
         if groups:
             for ip_record in self.bulk_filter(
                 nb.ipam.ip_addresses,
@@ -393,6 +429,39 @@ class NetboxFhrpTasks:
                         ipaddress.ip_interface(str(ip_record.address)).ip
                     )
 
+        # Preserve names of groups shared with peers outside this sync. A
+        # device-based template must not rename their group when a peer joins.
+        shared_group_ids = set()
+        if groups:
+            shared_group_ids = {
+                assignment.group.id
+                for assignment in self.bulk_filter(
+                    nb.ipam.fhrp_group_assignments,
+                    group_id=sorted(groups),
+                    fields="id,group,interface_type,interface_id",
+                )
+                if assignment.interface_type != "dcim.interface"
+                or assignment.interface_id not in interfaces_by_id
+            }
+        # Set the retained name before diff calculation so repeat partial
+        # syncs do not report a rename that would affect an unselected peer.
+        for device_state in live_state.values():
+            for desired in device_state.values():
+                for group_id in sorted(shared_group_ids):
+                    candidate = groups[group_id]
+                    if (
+                        candidate["protocol"] == desired["protocol"]
+                        and int(candidate["object"].group_id) == desired["group_id"]
+                        and candidate["virtual_address"] == desired["virtual_address"]
+                        and candidate["authentication_type"]
+                        == desired["authentication_type"]
+                    ):
+                        desired["name"] = candidate["name"]
+                        break
+
+        # Only selected devices contribute assignments to the diff. Other
+        # groups remain available for peer discovery without becoming deletions.
+        # Keep API objects separately for applying updates after approval.
         current_state = {device_name: {} for device_name in devices}
         current_objects = {}
         for assignment in sorted(assignments, key=lambda item: item.id):
@@ -475,23 +544,6 @@ class NetboxFhrpTasks:
             log.info(f"{self.name} - Sync VRRP: approval declined")
             return ret
 
-        desired_addresses = sorted(
-            {
-                assignment["virtual_address"]
-                for device_state in live_state.values()
-                for assignment in device_state.values()
-            }
-        )
-        job.event(
-            f"fetching {len(desired_addresses)} matching IP address(es) from NetBox"
-        )
-        nb_ips = self.bulk_filter(
-            endpoint=nb.ipam.ip_addresses,
-            address=desired_addresses,
-            fields="id,address,role,assigned_object_type,assigned_object_id",
-        )
-        job.event(f"retrieved {len(nb_ips)} matching IP address object(s) from NetBox")
-
         # Apply assignments in deterministic order. A new assignment reuses a
         # compatible group when possible; otherwise it gets a new VRRP group.
         for device_name in sorted(sync_diff):
@@ -510,6 +562,9 @@ class NetboxFhrpTasks:
                     (device_name, key), (None, None)
                 )
 
+                # Existing assignments keep their group. New assignments can
+                # join a compatible group regardless of its name or interface
+                # names; priority can differ between peers.
                 if group_data is None:
                     for candidate in sorted(
                         groups.values(), key=lambda item: item["object"].id
@@ -530,6 +585,8 @@ class NetboxFhrpTasks:
                 # this before changing or creating the FHRP group so a conflict
                 # cannot leave a partially applied group behind.
                 address = desired["virtual_address"]
+                # Joining a group that already owns the VIP only needs a new
+                # interface assignment, not another IP or an IP reassignment.
                 assign_ip = not (
                     group_data and address == group_data["virtual_address"]
                 )
@@ -550,6 +607,8 @@ class NetboxFhrpTasks:
                         ),
                         None,
                     )
+                    # Prefer the target group's IP, then an unassigned VIP/VRRP
+                    # record, then any other unassigned matching address.
                     if ip_record is None:
                         unassigned_ips = [
                             item
@@ -594,6 +653,7 @@ class NetboxFhrpTasks:
                         "protocol": desired["protocol"],
                         "authentication_type": desired["authentication_type"],
                     }
+                    # Make the new group visible to later peers in this call.
                     groups[group.id] = group_data
                 else:
                     group = group_data["object"]
@@ -630,6 +690,8 @@ class NetboxFhrpTasks:
                             f"'{ip_record.address}' for group {group.group_id}"
                         )
                     else:
+                        # Use the most-specific containing prefix; without one,
+                        # create a host address (/32 for IPv4, /128 for IPv6).
                         prefixes = list(nb.ipam.prefixes.filter(contains=address))
                         prefix_length = (
                             max(
@@ -661,6 +723,7 @@ class NetboxFhrpTasks:
                             f"'{ip_record.address}' for group {group.group_id}"
                         )
                         nb_ips.append(ip_record)
+                    # Later peers must see the VIP just assigned to this group.
                     group_data["virtual_address"] = address
 
                 if assignment is None:

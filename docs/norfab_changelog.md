@@ -1,3 +1,11 @@
+# 0.24.11
+
+## BUGS
+
+1. Fixed Netbox `sync_vrrp` rejecting a later-discovered peer because its VIP was already assigned to another device's FHRP group. The task now discovers groups through VIP ownership and reuses groups with matching VIP, VRRP ID, protocol, and authentication. Groups with peers outside the selected devices retain their existing names.
+
+---
+
 # 0.24.10
 
 ## ENHANCEMENTS
