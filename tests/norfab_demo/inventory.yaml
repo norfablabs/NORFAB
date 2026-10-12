@@ -1,0 +1,27 @@
+broker:
+  endpoint: "tcp://127.0.0.1:5555"
+  zmq_auth: false
+
+workers:
+  nornir-*:
+    - nornir/nornir.common.yaml
+  nornir-worker-1:
+    - nornir/nornir-worker-1.yaml
+  netbox-*:
+    - netbox/netbox.common.yaml
+  containerlab-*:
+    - containerlab/containerlab.common.yaml
+
+logging:
+  handlers:
+    terminal:
+      level: WARNING
+    file:
+      level: INFO
+
+topology:
+  broker: true
+  workers:
+    - nornir-worker-1
+    - netbox-worker-1
+    - containerlab-worker-1

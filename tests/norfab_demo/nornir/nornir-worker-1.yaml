@@ -1,0 +1,2 @@
+# Load running lab hosts through NFCLI after deploying the lab.
+hosts: {}

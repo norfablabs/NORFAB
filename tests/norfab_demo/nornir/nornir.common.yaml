@@ -1,0 +1,7 @@
+service: nornir
+runner:
+  plugin: RetryRunner
+defaults:
+  username: {{ env.get("NORNIR_USERNAME", "admin") | tojson }}
+  password: {{ env.get("NORNIR_PASSWORD", "admin") | tojson }}
+groups: {}
