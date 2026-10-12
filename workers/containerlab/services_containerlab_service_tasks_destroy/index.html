@@ -7338,10 +7338,7 @@ nf#
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\containerlab_worker\containerlab_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span>
 <span class="normal">471</span>
@@ -7403,7 +7400,17 @@ nf#
 <span class="normal">527</span>
 <span class="normal">528</span>
 <span class="normal">529</span>
-<span class="normal">530</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DestroyLabInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">LabActionResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;DELETE&quot;</span><span class="p">]},</span>
@@ -7445,6 +7452,13 @@ nf#
     <span class="n">inspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">(</span>
         <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">lab_name</span><span class="o">=</span><span class="n">lab_name</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">errors</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">messages</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="n">lab_name</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>

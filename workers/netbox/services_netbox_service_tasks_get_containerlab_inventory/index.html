@@ -7250,6 +7250,7 @@
 <li>If <code>image</code> is provided, it overrides node image values. Otherwise, the task uses <code>{kind}:latest</code> when no image is configured.</li>
 <li><code>interfaces_rename</code> in config context can rename interfaces in generated links.</li>
 <li>If <code>lab_name</code> is omitted and <code>tenant</code> is provided, the tenant name becomes the lab name.</li>
+<li>The tenant name is resolved in the selected NetBox branch. An unknown tenant fails the task instead of retrieving unfiltered devices.</li>
 <li>Supplying <code>branch</code> bypasses caches and applies the branch to device, connection, and circuit reads.</li>
 </ul>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h2>
@@ -7446,7 +7447,8 @@ devices matched.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Construct topology using given tenant's devices</p>
+                <p>Construct topology using devices assigned to this
+tenant name. Raises ValueError if the tenant does not exist.</p>
               </div>
             </td>
             <td>
@@ -7624,6 +7626,30 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
             <td>
               <div class="doc-md-description">
                 <p>Containerlab inventory dictionary containing lab topology data</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the requested tenant does not exist in the selected
+NetBox instance and branch.</p>
               </div>
             </td>
           </tr>
@@ -8033,7 +8059,15 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
 <span class="normal">417</span>
 <span class="normal">418</span>
 <span class="normal">419</span>
-<span class="normal">420</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">GetContainerlabInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">GetContainerlabInventoryResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -8119,7 +8153,8 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object containing relevant metadata</span>
 <span class="sd">        lab_name (str, Mandatory): Name of containerlab to construct inventory for.</span>
-<span class="sd">        tenant (str, optional): Construct topology using given tenant&#39;s devices</span>
+<span class="sd">        tenant (str, optional): Construct topology using devices assigned to this</span>
+<span class="sd">            tenant name. Raises ValueError if the tenant does not exist.</span>
 <span class="sd">        filters (list, optional): List of filters to apply when retrieving devices from NetBox.</span>
 <span class="sd">        devices (list, optional): List of specific devices to retrieve from NetBox.</span>
 <span class="sd">        instance (str, optional): NetBox instance to use.</span>
@@ -8138,6 +8173,10 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Containerlab inventory dictionary containing lab topology data</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the requested tenant does not exist in the selected</span>
+<span class="sd">            NetBox instance and branch.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -8145,6 +8184,7 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
     <span class="n">ports_map</span> <span class="o">=</span> <span class="n">ports_map</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">endpts_done</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># to deduplicate links</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># handle lab name and tenant name with filters</span>
@@ -8152,9 +8192,11 @@ starting with 2nd IP in the subnet, in assumption that 1st IP is a default gatew
         <span class="n">lab_name</span> <span class="o">=</span> <span class="n">tenant</span>
     <span class="c1"># add tenant filters</span>
     <span class="k">if</span> <span class="n">tenant</span><span class="p">:</span>
+        <span class="n">nb_tenant</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">tenancy</span><span class="o">.</span><span class="n">tenants</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">tenant</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nb_tenant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NetBox tenant &#39;</span><span class="si">{</span><span class="n">tenant</span><span class="si">}</span><span class="s2">&#39; not found in &#39;</span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
         <span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span> <span class="ow">or</span> <span class="p">[{}]</span>
-        <span class="k">for</span> <span class="nb">filter</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
-            <span class="nb">filter</span><span class="p">[</span><span class="s2">&quot;tenant__name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tenant</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">item</span><span class="p">,</span> <span class="s2">&quot;tenant_id&quot;</span><span class="p">:</span> <span class="n">nb_tenant</span><span class="o">.</span><span class="n">id</span><span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">]</span>
 
     <span class="c1"># construct inventory</span>
     <span class="n">inventory</span> <span class="o">=</span> <span class="p">{</span>

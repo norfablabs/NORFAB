@@ -7225,6 +7225,7 @@
 <li>
 <p><strong>Topology Links Sourcing</strong> - forms links using NetBox device connections and circuit data.</p>
 </li>
+<li><strong>NetBox Branches</strong>: Reads devices and links from a named NetBox branch when <code>branch</code> is supplied. The NetBox service creates the branch if it does not exist and bypasses its inventory cache for branch reads.</li>
 <li><strong>Reconfiguration</strong>: Supports reconfiguring an already deployed lab.</li>
 <li><strong>Node Filtering</strong>: Allows deploying specific nodes using a filter.</li>
 </ul>
@@ -7693,6 +7694,23 @@ becomes equal to tenant name.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>branch</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>NetBox Branching plugin branch name to read
+devices and connections from. Creates the branch if it does not exist.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>image</code>
             </td>
             <td>
@@ -7872,21 +7890,7 @@ inventory without deploying.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\containerlab_worker\containerlab_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 891</span>
-<span class="normal"> 892</span>
-<span class="normal"> 893</span>
-<span class="normal"> 894</span>
-<span class="normal"> 895</span>
-<span class="normal"> 896</span>
-<span class="normal"> 897</span>
-<span class="normal"> 898</span>
-<span class="normal"> 899</span>
-<span class="normal"> 900</span>
-<span class="normal"> 901</span>
-<span class="normal"> 902</span>
-<span class="normal"> 903</span>
-<span class="normal"> 904</span>
-<span class="normal"> 905</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 905</span>
 <span class="normal"> 906</span>
 <span class="normal"> 907</span>
 <span class="normal"> 908</span>
@@ -8080,7 +8084,26 @@ inventory without deploying.</p>
 <span class="normal">1096</span>
 <span class="normal">1097</span>
 <span class="normal">1098</span>
-<span class="normal">1099</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
+<span class="normal">1103</span>
+<span class="normal">1104</span>
+<span class="normal">1105</span>
+<span class="normal">1106</span>
+<span class="normal">1107</span>
+<span class="normal">1108</span>
+<span class="normal">1109</span>
+<span class="normal">1110</span>
+<span class="normal">1111</span>
+<span class="normal">1112</span>
+<span class="normal">1113</span>
+<span class="normal">1114</span>
+<span class="normal">1115</span>
+<span class="normal">1116</span>
+<span class="normal">1117</span>
+<span class="normal">1118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DeployNetboxInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DeployNetboxResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
@@ -8102,6 +8125,7 @@ inventory without deploying.</p>
     <span class="n">filters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">devices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instance</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">image</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ipv4_subnet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;172.100.100.0/24&quot;</span><span class="p">,</span>
     <span class="n">ports</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12000</span><span class="p">,</span> <span class="mi">15000</span><span class="p">),</span>
@@ -8139,6 +8163,8 @@ inventory without deploying.</p>
 <span class="sd">        filters (list, optional): List of filters to apply when fetching devices from Netbox.</span>
 <span class="sd">        devices (list, optional): List of specific devices to include in the topology.</span>
 <span class="sd">        instance (str, optional): Netbox instance identifier.</span>
+<span class="sd">        branch (str, optional): NetBox Branching plugin branch name to read</span>
+<span class="sd">            devices and connections from. Creates the branch if it does not exist.</span>
 <span class="sd">        image (str, optional): Container image to use for devices.</span>
 <span class="sd">        ipv4_subnet (str, optional): Management IPv4 subnet for the lab.</span>
 <span class="sd">        ports (tuple, optional): Tuple specifying the range of ports to allocate.</span>
@@ -8181,16 +8207,17 @@ inventory without deploying.</p>
             <span class="n">clab_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;containerlab&quot;</span><span class="p">]</span>
             <span class="n">clab_topo</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-topo-file&quot;</span><span class="p">]</span>
             <span class="n">node_name</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Labels&quot;</span><span class="p">][</span><span class="s2">&quot;clab-node-name&quot;</span><span class="p">]</span>
-            <span class="c1"># collect ports that are in use</span>
-            <span class="n">ports_in_use</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="nb">set</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;host_port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;protocol&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Ports&quot;</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="s2">&quot;host_port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;protocol&quot;</span> <span class="ow">in</span> <span class="n">p</span>
-                    <span class="p">]</span>
+            <span class="c1"># reuse port mappings only from the target lab</span>
+            <span class="k">if</span> <span class="n">clab_name</span> <span class="o">==</span> <span class="n">lab_name</span><span class="p">:</span>
+                <span class="n">ports_in_use</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="nb">set</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;host_port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;protocol&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">container</span><span class="p">[</span><span class="s2">&quot;Ports&quot;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="s2">&quot;host_port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;port&quot;</span> <span class="ow">in</span> <span class="n">p</span> <span class="ow">and</span> <span class="s2">&quot;protocol&quot;</span> <span class="ow">in</span> <span class="n">p</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
             <span class="c1"># check existing subnets</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">container</span><span class="p">[</span><span class="s2">&quot;NetworkSettings&quot;</span><span class="p">][</span><span class="s2">&quot;IPv4addr&quot;</span><span class="p">]</span>
@@ -8247,6 +8274,7 @@ inventory without deploying.</p>
             <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
             <span class="s2">&quot;devices&quot;</span><span class="p">:</span> <span class="n">devices</span><span class="p">,</span>
             <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="n">instance</span><span class="p">,</span>
+            <span class="s2">&quot;branch&quot;</span><span class="p">:</span> <span class="n">branch</span><span class="p">,</span>
             <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">image</span><span class="p">,</span>
             <span class="s2">&quot;ipv4_subnet&quot;</span><span class="p">:</span> <span class="n">ipv4_subnet</span><span class="p">,</span>
             <span class="s2">&quot;ports&quot;</span><span class="p">:</span> <span class="n">ports</span><span class="p">,</span>

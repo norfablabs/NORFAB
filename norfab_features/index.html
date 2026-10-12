@@ -10028,7 +10028,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 8 October 2026</em></p>
+<p><em>Last updated: 12 October 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10679,8 +10679,13 @@ runtime state, not durable source-of-truth updates.
 <h3 id="netbox-and-containerlab-inventory-loading">NetBox and Containerlab inventory loading<a class="headerlink" href="#netbox-and-containerlab-inventory-loading" title="Permanent link">¤</a></h3>
 <p>Can merge Nornir inventory from a configured NetBox instance at startup/runtime,
 or pull hosts from selected Containerlab workers with optional groups, default
-credentials, dry-run, and Nornir reinitialization. <strong>Use cases:</strong> production
-source-of-truth automation, lab-to-automation handoff, and using identical tasks
+credentials, dry-run, and Nornir reinitialization.
+Containerlab imports can optionally enrich host data from NetBox using a boolean
+or dictionary of inventory options while retaining lab connection settings.
+Enabled enrichment loads all supported host data by default, independently of
+worker NetBox inventory settings; dictionary options can override these defaults.
+Optional instance and branch arguments enable enrichment and select its NetBox source.
+<strong>Use cases:</strong> production source-of-truth automation, lab-to-automation handoff, and using identical tasks
 against physical and virtual networks. <strong>Limitations:</strong> imported platform and
 connection data must map to installed Nornir plugins.</p>
 <h3 id="rich-static-and-source-of-truth-inventory">Rich static and source-of-truth inventory<a class="headerlink" href="#rich-static-and-source-of-truth-inventory" title="Permanent link">¤</a></h3>
@@ -10824,6 +10829,7 @@ Host IP allocations (/32 and /128) automatically skip peer creation and peer-sub
 IP allocation prefix filters resolve <code>role</code> by role name, not slug, and reject unknown names.
 BGP sessions in designs use <code>create_bgp_peering</code> after ASNs, IPs and policies. Peering lists can omit names, which the task derives; existing sessions remain unchanged. Design peerings create only the specified direction unless <code>create_reverse: true</code> is set. Local and remote ASN fields support nested <code>create_asn</code> wrappers to allocate or reuse ASNs before session creation. The standalone create task resolves custom-field references for new sessions.
 Named or inline peer groups and import/export policies are extracted before deployment.
+Config contexts accept site and tenant name lists; updates add scope associations.
 Custom creation functions loaded from file URLs run during their collection's
 deployment phase, receiving the design <code>context</code>, record arguments, <code>netbox</code>, and <code>dry_run</code>; custom
 code is responsible for honoring dry-run and returning serializable results.
@@ -10834,7 +10840,7 @@ Omitted objects are not deleted. <strong>Use cases:</strong> repeatable NetBox p
 setup for network designs. <strong>Limitations:</strong> other design collections are rejected
 until their handlers are implemented.
 NFCLI exposes deployment through <code>netbox design deploy</code>.
-Device deployment matches by name, using tenant only to disambiguate duplicate names. Site and tenant are update attributes for uniquely named devices; unresolved duplicate names fail.
+Device deployment matches by name, using tenant only to disambiguate duplicate names. Site and tenant are update attributes for uniquely named devices; omitted site preserves the current assignment, and unresolved duplicate names fail.
 The <code>dry_run_render</code> option returns rendered text before YAML parsing, flattening, design validation, or deployment; dictionary designs return unchanged. Available through the Python API, NFCLI (<code>dry-run-render</code>), FastAPI, and MCP.
 <a href="../workers/netbox/services_netbox_service_tasks_design_deploy/">Design deploy task</a> ·
 <a href="../workers/netbox/services_netbox_service_tasks_create_asn/">Create ASN task</a> ·
@@ -10894,6 +10900,11 @@ peer addressing and point-to-point peer derivation, and performs bulk interface
 allocation. <strong>Use cases:</strong> provisioning links, loopbacks, management addresses,
 new devices, and template-driven zero-touch workflows.
 Peer allocation errors are reported after the local address is allocated.
+Failed child-subnet availability checks are included in IP allocation errors.
+Prefix dry runs select the first available range that fits the requested child prefix length.
+Design device roles match existing records by supplied slug or slugified name.
+Design cable connections accept tenant names or reference dictionaries.
+New BGP sessions accept existing tenant names in single and bulk creation, including design peerings and reverse sessions.
 <strong>Limitations:</strong> parent prefixes and assignment context must be valid; concurrent
 external allocators require operational coordination.
 <code>create_ip</code> can allocate and reuse VIPs assigned to an existing VRRP group by name, including dry-run previews.
@@ -10989,7 +11000,8 @@ only removal. The task does not delete VLAN objects.
 and device-interface group assignments. Assignments are identified by device,
 interface, protocol, and group ID; priorities remain per-interface while peers with the
 same protocol version, group, virtual address, and authentication type share
-a NetBox FHRP group. Live VRRPv2 and VRRPv3 values map to NetBox's <code>vrrp2</code> and
+a NetBox FHRP group, including peers synced in separate calls through VIP-owner
+discovery. Groups with peers outside the selected devices retain their names. Live VRRPv2 and VRRPv3 values map to NetBox's <code>vrrp2</code> and
 <code>vrrp3</code> protocols. Inline Jinja2 or <code>nf://</code> templates generate and synchronize
 group names using NetBox device and interface context. Existing unassigned IP
 records are reused and assigned the <code>vrrp</code> role; missing virtual IPs are created,
@@ -11098,6 +11110,7 @@ including inventory, interface, VRF, VLAN, prefix, IP, VRRP, BGP peering, and BG
 community state, or executes the supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
 MAC, IP, VRRP, and BGP sequence. Both operations accept per-task keyword arguments
 inline or from an <code>nf://</code> YAML file; <code>sync_all</code> can also skip individual stages.
+NFCLI <code>netbox sync all</code> accepts inline JSON objects through <code>sync-kwargs</code>.
 Drift assessment can treat deletion-only differences as in sync while retaining
 them in the detailed diff. <strong>Use cases:</strong> audit
 evidence, change planning, and scheduled source-of-truth maintenance.
@@ -11120,6 +11133,7 @@ runtime, images, and sufficient compute/network privileges.
 <p>Selects NetBox devices by tenant, explicit names, or filters; converts devices
 and connections into a topology; allocates a non-conflicting management subnet
 and host port range; and can preview, partially deploy, or reconfigure it.
+Can source devices and connections from a named NetBox branch.
 <strong>Use cases:</strong> digital twins, topology reproduction, production-incident
 rehearsal, and automated ephemeral test environments. <strong>Limitations:</strong> NetBox
 roles/platforms must map to valid Containerlab node definitions and available

@@ -7156,6 +7156,7 @@ existing dry-run limitation for <code>mask_len</code> still applies. Results inc
 <ul>
 <li><code>prefix</code> can be a network string, a prefix description, or a dictionary of pynetbox prefix filters.</li>
 <li>When <code>mask_len</code> differs from the parent prefix length, the task creates or reuses a child prefix through <code>create_prefix</code>.</li>
+<li>If no child subnet can be selected, the task returns an error that includes any failed availability checks.</li>
 <li>In dry-run mode, <code>mask_len</code> is ignored and the candidate IP is allocated directly from the parent prefix.</li>
 <li>IPv4 /32 and IPv6 /128 allocations automatically disable peer creation and peer-subnet reuse, including when the supplied parent is itself a host prefix.</li>
 <li>If peer allocation fails, the task returns the peer error in <code>errors</code>; the local IP may already be allocated.</li>
@@ -7633,12 +7634,13 @@ Peer allocation errors are returned while the local IP remains allocated.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>dict</code></td>            <td>
+<td><code>Result</code></td>            <td>
                   <code><span title="norfab.models.Result">Result</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A dictionary containing the result of the IP allocation.</p>
+                <p>Allocation details. If no child subnet can be selected, the
+result is marked failed and includes any subnet probe errors.</p>
               </div>
             </td>
           </tr>
@@ -8256,7 +8258,13 @@ Peer allocation errors are returned while the local IP remains allocated.</p>
 <span class="normal">722</span>
 <span class="normal">723</span>
 <span class="normal">724</span>
-<span class="normal">725</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpResult</span><span class="p">,</span>
@@ -8363,7 +8371,8 @@ Peer allocation errors are returned while the local IP remains allocated.</p>
 <span class="sd">            Peer allocation errors are returned while the local IP remains allocated.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: A dictionary containing the result of the IP allocation.</span>
+<span class="sd">        Result: Allocation details. If no child subnet can be selected, the</span>
+<span class="sd">            result is marked failed and includes any subnet probe errors.</span>
 
 <span class="sd">    Tasks execution follow these steps:</span>
 
@@ -8488,6 +8497,7 @@ Peer allocation errors are returned while the local IP remains allocated.</p>
             <span class="k">break</span>
     <span class="c1"># if no existing IP found, find parent prefix that has available subnets to allocate</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">allocation_errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">nb_prefix</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
             <span class="n">parent_prefix_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">ip_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8505,16 +8515,20 @@ Peer allocation errors are returned while the local IP remains allocated.</p>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">failed</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">candidate</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prefix&quot;</span><span class="p">):</span>
                         <span class="k">break</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="c1"># error might be expected</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error while trying to allocate child subnet: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;error checking available /</span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2"> subnet in &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; - </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="n">allocation_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">continue</span>
             <span class="k">elif</span> <span class="n">nb_prefix</span><span class="o">.</span><span class="n">available_ips</span><span class="o">.</span><span class="n">list</span><span class="p">():</span>
                 <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;No subnets of </span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2"> lenght or IPs available in parent prefix - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">allocation_errors</span><span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No subnets of </span><span class="si">{</span><span class="n">mask_len</span><span class="si">}</span><span class="s2"> length or IPs available in parent prefix - </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># create new IP address</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_ip</span><span class="p">:</span>

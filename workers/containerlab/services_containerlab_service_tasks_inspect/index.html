@@ -7547,17 +7547,7 @@ the inspection output. Defaults to False.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\containerlab_worker\containerlab_worker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">542</span>
 <span class="normal">543</span>
 <span class="normal">544</span>
 <span class="normal">545</span>
@@ -7613,7 +7603,21 @@ the inspection output. Defaults to False.</p>
 <span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
-<span class="normal">598</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">InspectInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">InspectResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]},</span>
@@ -7656,10 +7660,11 @@ the inspection output. Defaults to False.</p>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Inspect: Inspecting </span><span class="si">{</span><span class="s1">&#39;all labs&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">lab_name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; lab&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="n">lab_name</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inspecting lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;inspecting all labs&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lab_name</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inspecting lab &#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;inspecting all labs&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">lab_name</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;containerlab&quot;</span><span class="p">,</span> <span class="s2">&quot;inspect&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">lab_name</span><span class="p">]</span>
@@ -7672,8 +7677,11 @@ the inspection output. Defaults to False.</p>
         <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">ret</span><span class="o">=</span><span class="n">ret</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span>
     <span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">ret</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
     <span class="c1"># check if lab name given and it is not in output</span>
-    <span class="k">if</span> <span class="n">lab_name</span> <span class="ow">and</span> <span class="n">lab_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">lab_name</span> <span class="ow">and</span> <span class="n">lab_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="ow">or</span> <span class="p">{}):</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">lab_name</span><span class="si">}</span><span class="s2">&#39; lab not found&quot;</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

@@ -7356,6 +7356,47 @@ nf#
 </code></pre></div>
 <h2 id="nornir-and-containerlab-services-integration">Nornir and Containerlab Services Integration<a class="headerlink" href="#nornir-and-containerlab-services-integration" title="Permanent link">¤</a></h2>
 <p>Nornir Service supports loading hosts inventory from running Containerlab labs using <code>nornir_inventory_load_containerlab</code> task. This is useful to easily onboard Containerlab environments into Nornir and helps with automation. Internally Nornir service uses Containerlab Service to fetch running containers details and construct Nornir inventory.</p>
+<p>Set <code>load_netbox=True</code> to load device data, interfaces with IP addresses and
+inventory items, connections, circuits with interface details, and BGP peerings.
+Worker Netbox inventory settings are ignored, and reads bypass caches by default.
+A dictionary overrides these defaults, for example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">client</span><span class="o">.</span><span class="n">run_job</span><span class="p">(</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;nornir&quot;</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;nornir_inventory_load_containerlab&quot;</span><span class="p">,</span>
+    <span class="n">workers</span><span class="o">=</span><span class="s2">&quot;nornir-worker-1&quot;</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;lab_name&quot;</span><span class="p">:</span> <span class="s2">&quot;demo-4-routers&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;clab_workers&quot;</span><span class="p">:</span> <span class="s2">&quot;containerlab-worker-1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_netbox_branch&quot;</span><span class="p">:</span> <span class="s2">&quot;demo&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_netbox_instance&quot;</span><span class="p">:</span> <span class="s2">&quot;prod&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;load_netbox&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+            <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;dry_run&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Only imported Containerlab host names are queried; supplied Netbox <code>devices</code> and
+<code>filters</code> do not widen that selection. Netbox host data is merged while the
+Containerlab SSH endpoints, platforms, credentials, and groups are preserved.
+An empty dictionary enables all default enrichment options.
+<code>interfaces=True</code> alone does not include assigned IPs; request
+<code>interfaces={"ip_addresses": True}</code> to include them.
+The CLI boolean form is <code>nornir inventory load containerlab load-netbox</code> with
+the usual worker and lab arguments.</p>
+<p>Enrichment errors or missing Netbox hosts fail the task before inventory is
+updated. A dry run with enrichment returns the first successful Containerlab
+worker's combined inventory without changing Nornir. The default
+<code>load_netbox=False</code> retains the existing loading behavior unless a nonempty
+<code>load_netbox_branch</code> or <code>load_netbox_instance</code> enables enrichment.</p>
+<p>Use <code>load_netbox_branch</code> (CLI: <code>load-netbox-branch</code>) to select a branch and enable
+Netbox loading. It overrides the branch in supplied
+Netbox options. When omitted, the branch from those options is used.</p>
+<p>Use <code>load_netbox_instance</code> (CLI: <code>load-netbox-instance</code>) to select the Netbox
+instance and enable loading. It overrides the instance in supplied options.
+When omitted, the supplied instance or Netbox service's default instance is used.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">CLI</label><label for="__tabbed_2_2">Python</label></div>
@@ -7570,56 +7611,56 @@ worker before changing the inventory.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\nornir_worker\inventory_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span>
-<span class="normal">493</span>
-<span class="normal">494</span>
-<span class="normal">495</span>
-<span class="normal">496</span>
-<span class="normal">497</span>
-<span class="normal">498</span>
-<span class="normal">499</span>
-<span class="normal">500</span>
-<span class="normal">501</span>
-<span class="normal">502</span>
-<span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span>
-<span class="normal">509</span>
-<span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
-<span class="normal">514</span>
-<span class="normal">515</span>
-<span class="normal">516</span>
-<span class="normal">517</span>
-<span class="normal">518</span>
-<span class="normal">519</span>
-<span class="normal">520</span>
-<span class="normal">521</span>
-<span class="normal">522</span>
-<span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">]},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">RuntimeInventoryInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">RuntimeInventoryResult</span><span class="p">,</span>

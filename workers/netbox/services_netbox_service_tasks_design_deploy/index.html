@@ -7772,8 +7772,8 @@
 <td style="text-align: right;">6</td>
 <td><code>device_roles</code></td>
 <td><code>netbox.dcim.device_roles</code></td>
-<td><code>name</code></td>
-<td>—</td>
+<td><code>slug</code></td>
+<td>Uses the supplied slug or generates it from the name.</td>
 </tr>
 <tr>
 <td style="text-align: right;">7</td>
@@ -7920,7 +7920,7 @@
 <td><code>connections</code></td>
 <td><code>netbox.dcim.cables</code></td>
 <td>Existing cable on both terminations</td>
-<td>Creates interface, console, and power cables. Each end currently has one termination. An already-cabled port cannot be moved.</td>
+<td>Creates interface, console, and power cables. Tenant can be a name or reference dictionary. Each end currently has one termination. An already-cabled port cannot be moved.</td>
 </tr>
 <tr>
 <td style="text-align: right;">28</td>
@@ -7983,7 +7983,7 @@
 <td><code>config_context</code></td>
 <td><code>netbox.extras.config_contexts</code></td>
 <td><code>name</code></td>
-<td><code>data</code> is a dictionary and <code>sites</code> scopes it.</td>
+<td><code>data</code> is a dictionary; <code>sites</code> and <code>tenants</code> accept name lists for scope.</td>
 </tr>
 <tr>
 <td style="text-align: right;">37</td>
@@ -7995,7 +7995,7 @@
 </tbody>
 </table>
 <p>Ordinary records use Netbox API field names. Handlers bulk-create missing objects and bulk-update existing ones. Common name references, such as <code>device.site</code>, <code>device.role</code>, and <code>vlan.group</code>, are resolved by their handlers. Fields without a documented name shorthand must use a payload accepted by the target Netbox API. Unknown top-level collections are rejected.</p>
-<p>When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Only config-context <code>sites</code> accepts site names; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group <code>vid_ranges</code>, local context data, and config-context <code>data</code> retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.</p>
+<p>When updating an existing record, design handlers add requested tags and custom-field list values without removing existing members. They also add VRF and L2VPN route targets, interface tagged VLANs, and config-context scope lists. Config-context <code>sites</code> and <code>tenants</code> accept name lists; other scope lists use NetBox IDs. Scalar custom fields replace their old values. VLAN-group <code>vid_ranges</code>, local context data, and config-context <code>data</code> retain replacement behavior. Named object and multiobject custom-field values are resolved to NetBox IDs before writes.</p>
 <h2 id="supported-design-verbs">Supported design verbs<a class="headerlink" href="#supported-design-verbs" title="Permanent link">¤</a></h2>
 <p>Design verbs are YAML keys that request an operation, such as querying existing
 objects, allocating resources, or calling custom Python. Each verb is supported
@@ -8114,7 +8114,8 @@ Function return values are not automatically used as relationship references.</p
 </code></pre></div>
 <p>For each object type, specified values are created or updated before next-available requests run. Allocation tasks look for an existing match on repeat deployment. Give each request a stable name or description and enough scope to identify it, otherwise a repeat run can allocate another value.</p>
 <p>Entries under <code>bgp_peerings</code> call <code>create_bgp_peering</code> after the design's devices, interfaces, IP addresses, and ASNs have been deployed. Use a stable supplied or generated session name so repeat deployments find the existing session. Existing sessions are not updated by the design:</p>
-<p>Design peerings create only the specified direction by default. Set <code>create_reverse: true</code> on a peering to create the reverse session as well. The standalone <code>create_bgp_peering</code> task retains its own default.</p>
+<p>Design peerings create only the specified direction by default. Set <code>create_reverse: true</code> on a peering to create the reverse session as well. The standalone <code>create_bgp_peering</code> task retains its own default.
+Peering records can specify an existing tenant name with <code>tenant</code>. Reverse sessions inherit it; existing sessions are left unchanged.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bgp_peerings</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACME BRANCH PEER</span>
 <span class="w">    </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">acme-branch-rtr-1</span>
@@ -9554,7 +9555,7 @@ therefore have no IDs yet.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Shared site context</label><label for="__tabbed_11_2">Calculated site context</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p><code>config_context</code> matches an existing ConfigContext by <code>name</code>, creating it if absent or updating it if present. <code>sites</code> scopes the context to named sites created earlier or already in Netbox. Without a scope, the context applies globally, so specify one when the data is site-specific.</p>
+<p><code>config_context</code> matches an existing ConfigContext by <code>name</code>, creating it if absent or updating it if present. <code>sites</code> and <code>tenants</code> scope the context by name to objects created earlier or already in Netbox. Unknown tenant names fail; a dry run cannot resolve tenants that are only planned. Updates add scope associations without removing existing ones. Without a scope, the context applies globally, so specify one when the data is site-specific.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">sites</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BRANCH-1</span>
 <span class="w">    </span><span class="nt">slug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">branch-1</span>
@@ -10119,30 +10120,7 @@ functions still run.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\design_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4003</span>
-<span class="normal">4004</span>
-<span class="normal">4005</span>
-<span class="normal">4006</span>
-<span class="normal">4007</span>
-<span class="normal">4008</span>
-<span class="normal">4009</span>
-<span class="normal">4010</span>
-<span class="normal">4011</span>
-<span class="normal">4012</span>
-<span class="normal">4013</span>
-<span class="normal">4014</span>
-<span class="normal">4015</span>
-<span class="normal">4016</span>
-<span class="normal">4017</span>
-<span class="normal">4018</span>
-<span class="normal">4019</span>
-<span class="normal">4020</span>
-<span class="normal">4021</span>
-<span class="normal">4022</span>
-<span class="normal">4023</span>
-<span class="normal">4024</span>
-<span class="normal">4025</span>
-<span class="normal">4026</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4026</span>
 <span class="normal">4027</span>
 <span class="normal">4028</span>
 <span class="normal">4029</span>
@@ -10410,7 +10388,30 @@ functions still run.</p>
 <span class="normal">4291</span>
 <span class="normal">4292</span>
 <span class="normal">4293</span>
-<span class="normal">4294</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4294</span>
+<span class="normal">4295</span>
+<span class="normal">4296</span>
+<span class="normal">4297</span>
+<span class="normal">4298</span>
+<span class="normal">4299</span>
+<span class="normal">4300</span>
+<span class="normal">4301</span>
+<span class="normal">4302</span>
+<span class="normal">4303</span>
+<span class="normal">4304</span>
+<span class="normal">4305</span>
+<span class="normal">4306</span>
+<span class="normal">4307</span>
+<span class="normal">4308</span>
+<span class="normal">4309</span>
+<span class="normal">4310</span>
+<span class="normal">4311</span>
+<span class="normal">4312</span>
+<span class="normal">4313</span>
+<span class="normal">4314</span>
+<span class="normal">4315</span>
+<span class="normal">4316</span>
+<span class="normal">4317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>

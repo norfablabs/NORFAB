@@ -7103,7 +7103,8 @@
 <p>Allocates the next available child prefix from a parent prefix, or updates an existing matching prefix. By default it creates a <code>/30</code>, which is useful for point-to-point subnets.</p>
 <p>The task can also be called from Nornir templates through the <a href="../../nornir/services_nornir_service_jinja2_filters/#netboxcreate_prefix">netbox.create_prefix Jinja2 filter</a>.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
-<p>Returns the created or updated prefix data. In dry-run mode, returns the candidate prefix that would be allocated.</p>
+<p>Returns the created or updated prefix data. In dry-run mode, returns the candidate prefix that would be allocated.
+The preview uses the first available range that can fit the requested prefix length.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.0/30&quot;</span><span class="p">,</span>
     <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;leaf-1 to spine-1&quot;</span><span class="p">,</span>
@@ -7954,17 +7955,7 @@ a different length. VLAN lookup failures occur before allocation.</p>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreatePrefixInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreatePrefixResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -8141,7 +8132,9 @@ a different length. VLAN lookup failures occur before allocation.</p>
 
     <span class="c1"># create new prefix</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nb_prefix</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;creating new &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix within &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;creating new &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix within &#39;</span><span class="si">{</span><span class="n">nb_parent_prefix</span><span class="si">}</span><span class="s2">&#39; prefix&quot;</span>
+        <span class="p">)</span>
         <span class="c1"># execute dry run on new prefix</span>
         <span class="k">if</span> <span class="n">dry_run</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">nb_prefixes</span> <span class="o">=</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">available_prefixes</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
@@ -8150,28 +8143,16 @@ a different length. VLAN lookup failures occur before allocation.</p>
                     <span class="sa">f</span><span class="s2">&quot;Parent prefix &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; has no child prefixes available&quot;</span>
                 <span class="p">)</span>
             <span class="k">for</span> <span class="n">pfx</span> <span class="ow">in</span> <span class="n">nb_prefixes</span><span class="p">:</span>
-                <span class="c1"># parent prefix empty, can use first subnet as a child prefix</span>
-                <span class="k">if</span> <span class="n">pfx</span><span class="o">.</span><span class="n">prefix</span> <span class="o">==</span> <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="p">:</span>
-                    <span class="n">nb_prefix</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">)</span>
-                    <span class="k">break</span>
-                <span class="c1"># find child prefix by prefix length</span>
-                <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">pfx</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
-                    <span class="n">nb_prefix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pfx</span><span class="p">)</span>
+                <span class="c1"># Skip ranges too small for the requested child prefix, then</span>
+                <span class="c1"># select the first child within the first range that fits.</span>
+                <span class="n">network</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="n">pfx</span><span class="o">.</span><span class="n">prefix</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">network</span><span class="o">.</span><span class="n">prefixlen</span> <span class="o">&lt;=</span> <span class="n">prefixlen</span><span class="p">:</span>
+                    <span class="n">nb_prefix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">subnets</span><span class="p">(</span><span class="n">new_prefix</span><span class="o">=</span><span class="n">prefixlen</span><span class="p">)))</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># For some reason Netbox does not always return /31 as available</span>
-                <span class="c1"># subnet int he list, this is to check that child subnet fits into</span>
-                <span class="c1"># first subnet available in Netbox</span>
-                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_prefixes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">prefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">prefixlen</span><span class="p">:</span>
-                    <span class="n">nb_prefix</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">nb_parent_prefix</span><span class="o">.</span><span class="n">prefix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Parent prefix &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; has no child prefixes available with &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix length&quot;</span>
-                    <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Parent prefix &#39;</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">&#39; has no child prefixes available with &#39;/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s2">&#39; prefix length&quot;</span>
+                <span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">nb_vlan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

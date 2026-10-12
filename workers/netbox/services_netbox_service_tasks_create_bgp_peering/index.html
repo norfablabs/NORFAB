@@ -7234,6 +7234,8 @@
 </blockquote>
 <p>Creates one or many BGP sessions in NetBox. Supports single-session mode (individual keyword arguments) and bulk mode (<code>bulk_create</code> list of dicts). IP addresses and ASNs are resolved from IPAM or created on-demand. <code>local_ip_query</code> and <code>remote_ip_query</code> can find existing addresses with NetBox filters such as literal <code>device</code> and <code>interface</code> names. Explicit addresses take precedence over queries. When <code>local_interface</code> is provided the local address is resolved from IPAM; for P2P subnets (/30, /31, /127) the remote address is derived automatically. Optionally creates a mirror (reverse) session on the remote device.</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
+<p>Supply <code>tenant</code> as an existing tenant name for a new session. Bulk entries specify
+their own tenant, and reverse sessions inherit it. Existing sessions remain unchanged.</p>
 <ol>
 <li>Client submits <code>create_bgp_peering</code> request to NetBox worker</li>
 <li>NetBox worker validates that the BGP plugin is installed</li>
@@ -7750,6 +7752,24 @@ precedence over derivation.</p>
             <td>
               <div class="doc-md-description">
                 <p>Session description.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>tenant</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Existing tenant name for new sessions, including
+reverse sessions. Bulk entries specify their own tenant. NetBox
+rejects unknown tenant names. Existing sessions remain unchanged.</p>
               </div>
             </td>
             <td>
@@ -8837,7 +8857,14 @@ fields need resolution.</p>
 <span class="normal">1754</span>
 <span class="normal">1755</span>
 <span class="normal">1756</span>
-<span class="normal">1757</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1757</span>
+<span class="normal">1758</span>
+<span class="normal">1759</span>
+<span class="normal">1760</span>
+<span class="normal">1761</span>
+<span class="normal">1762</span>
+<span class="normal">1763</span>
+<span class="normal">1764</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateBgpPeeringInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateBgpPeeringResult</span><span class="p">,</span>
@@ -8891,6 +8918,7 @@ fields need resolution.</p>
     <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">vrf_custom_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vrf&quot;</span><span class="p">,</span>
     <span class="n">lookup_cache</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tenant</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create one or many BGP sessions in NetBox.</span>
@@ -8926,6 +8954,9 @@ fields need resolution.</p>
 <span class="sd">        remote_as (int, optional): Remote AS number. Takes precedence over ``remote_as_query``.</span>
 <span class="sd">        status (str): Session status. Default ``&#39;active&#39;``.</span>
 <span class="sd">        description (str, optional): Session description.</span>
+<span class="sd">        tenant (str, optional): Existing tenant name for new sessions, including</span>
+<span class="sd">            reverse sessions. Bulk entries specify their own tenant. NetBox</span>
+<span class="sd">            rejects unknown tenant names. Existing sessions remain unchanged.</span>
 <span class="sd">        vrf (str, optional): NetBox VRF name for a new session. The task</span>
 <span class="sd">            resolves or creates the VRF and stores its object reference in</span>
 <span class="sd">            ``custom_fields[vrf_custom_field]``. ``global`` and ``default``</span>
@@ -9030,6 +9061,7 @@ fields need resolution.</p>
             <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
             <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
             <span class="s2">&quot;vrf&quot;</span><span class="p">:</span> <span class="n">vrf</span><span class="p">,</span>
+            <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="n">tenant</span><span class="p">,</span>
             <span class="s2">&quot;peer_group&quot;</span><span class="p">:</span> <span class="n">peer_group</span><span class="p">,</span>
             <span class="s2">&quot;import_policies&quot;</span><span class="p">:</span> <span class="n">import_policies</span><span class="p">,</span>
             <span class="s2">&quot;export_policies&quot;</span><span class="p">:</span> <span class="n">export_policies</span><span class="p">,</span>
@@ -9423,6 +9455,8 @@ fields need resolution.</p>
             <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;active&quot;</span><span class="p">),</span>
             <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site_id</span><span class="p">,</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tenant&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;tenant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;tenant&quot;</span><span class="p">]}</span>
         <span class="k">if</span> <span class="n">bgp_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bgp_session</span><span class="p">[</span><span class="s2">&quot;custom_fields&quot;</span><span class="p">])</span>
         <span class="k">if</span> <span class="s2">&quot;tags&quot;</span> <span class="ow">in</span> <span class="n">bgp_session</span><span class="p">:</span>
