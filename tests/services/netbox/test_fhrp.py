@@ -752,3 +752,39 @@ class TestSyncVrrpAristaPeers:
                 assert actions["created"] == []
                 assert actions["updated"] == []
                 assert actions["in_sync"] == [key]
+
+    def test_sync_vrrp_joins_existing_group_in_later_call(self, nfclient: Any) -> None:
+        key = f"{self.INTERFACE}:vrrp3:{self.GROUP_ID}"
+        first_device, second_device = self.DEVICES
+        first_sync = self._sync_vrrp(nfclient, devices=[first_device])
+        for result in self._successful_results(first_sync):
+            assert result["result"][first_device]["created"] == [key]
+        vip = self.nb.ipam.ip_addresses.get(address=self.VIRTUAL_ADDRESS)
+        group_id = vip.assigned_object_id
+        group_name = self.nb.ipam.fhrp_groups.get(id=group_id).name
+
+        dry_run = self._sync_vrrp(nfclient, devices=[second_device], dry_run=True)
+        for result in self._successful_results(dry_run):
+            assert result["result"][second_device]["create"] == [key]
+
+        second_sync = self._sync_vrrp(nfclient, devices=[second_device])
+        for result in self._successful_results(second_sync):
+            assert result["result"][second_device]["created"] == [key]
+        interface = self.nb.dcim.interfaces.get(
+            device=second_device, name=self.INTERFACE
+        )
+        assignments = list(
+            self.nb.ipam.fhrp_group_assignments.filter(interface_id=interface.id)
+        )
+        assert len(assignments) == 1
+        assert assignments[0].group.id == group_id
+        assert assignments[0].priority == self.PRIORITIES[second_device]
+        assert self.nb.ipam.fhrp_groups.get(id=group_id).name == group_name
+        assert self.nb.ipam.ip_addresses.get(address=self.VIRTUAL_ADDRESS).id == vip.id
+
+        repeated_sync = self._sync_vrrp(nfclient, devices=[second_device])
+        for result in self._successful_results(repeated_sync):
+            assert result["result"][second_device]["in_sync"] == [key]
+            assert result["result"][second_device]["created"] == []
+            assert result["result"][second_device]["updated"] == []
+        assert self.nb.ipam.fhrp_groups.get(id=group_id).name == group_name

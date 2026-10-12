@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 11 October 2026*
+*Last updated: 12 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -949,7 +949,8 @@ Reconciles TTP-parsed VRRP state with NetBox FHRP groups, virtual IP addresses,
 and device-interface group assignments. Assignments are identified by device,
 interface, protocol, and group ID; priorities remain per-interface while peers with the
 same protocol version, group, virtual address, and authentication type share
-a NetBox FHRP group. Live VRRPv2 and VRRPv3 values map to NetBox's `vrrp2` and
+a NetBox FHRP group, including peers synced in separate calls through VIP-owner
+discovery. Groups with peers outside the selected devices retain their names. Live VRRPv2 and VRRPv3 values map to NetBox's `vrrp2` and
 `vrrp3` protocols. Inline Jinja2 or `nf://` templates generate and synchronize
 group names using NetBox device and interface context. Existing unassigned IP
 records are reused and assigned the `vrrp` role; missing virtual IPs are created,

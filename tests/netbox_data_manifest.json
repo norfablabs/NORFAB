@@ -393,6 +393,7 @@
     },
     "test_fhrp.py::TestSyncVrrpAristaPeers": {
       "mode": "main_mutating",
+      "coverage": "Includes test_sync_vrrp_joins_existing_group_in_later_call: syncs owned peers separately, verifies VIP and group reuse, preserved name, dry-run and idempotency. Uses the class-owned Vlan250 and 198.18.252.1 records and existing cleanup.",
       "devices": [
         "fn-ceos-lf-1",
         "fn-ceos-lf-2"
