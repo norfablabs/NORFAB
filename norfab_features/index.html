@@ -452,6 +452,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#interactive-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#distributed-service-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8522,6 +8533,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#interactive-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#distributed-service-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -10028,7 +10050,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 12 October 2026</em></p>
+<p><em>Last updated: 13 October 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10046,6 +10068,7 @@ result with a baseline, and expose the whole operation through REST or MCP.</p>
 </ul>
 </li>
 <li><a href="#core-platform">Core platform</a><ul>
+<li><a href="#interactive-installation">Interactive installation</a></li>
 <li><a href="#distributed-service-architecture">Distributed service architecture</a></li>
 <li><a href="#operational-status-and-statistics">Operational status and statistics</a></li>
 <li><a href="#horizontal-worker-scaling">Horizontal worker scaling</a></li>
@@ -10310,6 +10333,15 @@ not inferred and monitoring does not capture message payloads.
 <h2 id="core-platform">Core platform<a class="headerlink" href="#core-platform" title="Permanent link">¤</a></h2>
 <p>NORFAB's <a href="../reference_architecture_norfab/">broker, clients, and workers</a> provide
 the shared execution layer beneath every service.</p>
+<h3 id="interactive-installation">Interactive installation<a class="headerlink" href="#interactive-installation" title="Permanent link">¤</a></h3>
+<p>The repository provides Windows PowerShell and Linux Bash installers with
+system or local virtual environment installation, service and add-on selection,
+configurable ports, and generated inventory and worker configuration files.
+<strong>Use cases:</strong> setting up a local NORFAB environment. <strong>Limitations:</strong> requires
+Python 3.10+; service dependencies and external systems must be available.
+The scripts overwrite generated configuration files in the chosen folder.
+See <a href="https://github.com/norfablabs/NORFAB/blob/master/install_norfab_windows.ps1">Windows installer</a>
+and <a href="https://github.com/norfablabs/NORFAB/blob/master/install_norfab_linux.sh">Linux installer</a>.</p>
 <h3 id="distributed-service-architecture">Distributed service architecture<a class="headerlink" href="#distributed-service-architecture" title="Permanent link">¤</a></h3>
 <p>Routes client jobs through a broker to independently deployable service workers
 on a laptop, server, VM, container, or distributed hosts. <strong>Use cases:</strong> central

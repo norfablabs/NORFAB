@@ -10110,7 +10110,27 @@ functions still run.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>deployment errors are reported in a failed Result.</p>
+                <p>deployment errors, including job timeout expiry, are reported in a</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>failed Result. Timeout checks stop subsequent operations; in-flight</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>calls are not interrupted.</p>
               </div>
             </td>
           </tr>
@@ -10411,7 +10431,16 @@ functions still run.</p>
 <span class="normal">4314</span>
 <span class="normal">4315</span>
 <span class="normal">4316</span>
-<span class="normal">4317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">4317</span>
+<span class="normal">4318</span>
+<span class="normal">4319</span>
+<span class="normal">4320</span>
+<span class="normal">4321</span>
+<span class="normal">4322</span>
+<span class="normal">4323</span>
+<span class="normal">4324</span>
+<span class="normal">4325</span>
+<span class="normal">4326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">DesignDeployInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">DesignDeployResult</span><span class="p">,</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
@@ -10457,7 +10486,9 @@ functions still run.</p>
 <span class="sd">        Object identities grouped by collection and creation/update action,</span>
 <span class="sd">        or rendered text (the original dictionary for dictionary designs)</span>
 <span class="sd">        with dry_run=True when dry_run_render is enabled. Preparation and</span>
-<span class="sd">        deployment errors are reported in a failed Result.</span>
+<span class="sd">        deployment errors, including job timeout expiry, are reported in a</span>
+<span class="sd">        failed Result. Timeout checks stop subsequent operations; in-flight</span>
+<span class="sd">        calls are not interrupted.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">Result</span><span class="p">(</span>
@@ -10470,6 +10501,7 @@ functions still run.</p>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
                 <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_file</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">raise_on_fail</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -10571,6 +10603,7 @@ functions still run.</p>
             <span class="n">filters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span>
 
         <span class="n">nb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pynetbox</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">loader</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">design_url</span><span class="p">:</span>
@@ -10583,6 +10616,7 @@ functions still run.</p>
             <span class="n">environment</span><span class="o">.</span><span class="n">globals</span><span class="p">[</span><span class="s2">&quot;netbox&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span>
             <span class="n">document</span> <span class="o">=</span> <span class="n">environment</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">template</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 
+        <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">dry_run_render</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">document</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
@@ -10597,6 +10631,7 @@ functions still run.</p>
         <span class="n">flattened</span> <span class="o">=</span> <span class="n">flatten_design</span><span class="p">(</span><span class="n">document</span><span class="p">)</span>
         <span class="n">validated</span> <span class="o">=</span> <span class="n">DesignDocument</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">flattened</span><span class="p">)</span>
         <span class="n">lookup_cache</span> <span class="o">=</span> <span class="n">build_lookup_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">validated</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
         <span class="n">custom_functions</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">validated</span><span class="o">.</span><span class="n">custom_functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
@@ -10662,6 +10697,7 @@ functions still run.</p>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="n">nb</span><span class="p">,</span>
@@ -10672,6 +10708,7 @@ functions still run.</p>
                 <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
                 <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
             <span class="n">execute_custom_functions</span><span class="p">(</span>
                 <span class="n">nb</span><span class="p">,</span>
                 <span class="n">context</span><span class="p">,</span>
@@ -10680,6 +10717,7 @@ functions still run.</p>
                 <span class="n">dry_run</span><span class="p">,</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">],</span>
             <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">check_timeout</span><span class="p">()</span>
             <span class="n">changes</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;completed </span><span class="si">{</span><span class="n">collection</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> created, &quot;</span>
