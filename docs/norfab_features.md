@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 12 October 2026*
+*Last updated: 13 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -105,6 +105,17 @@ not inferred and monitoring does not capture message payloads.
 
 NORFAB's [broker, clients, and workers](reference_architecture_norfab.md) provide
 the shared execution layer beneath every service.
+
+### Interactive installation
+
+The repository provides Windows PowerShell and Linux Bash installers with
+system or local virtual environment installation, service and add-on selection,
+configurable ports, and generated inventory and worker configuration files.
+**Use cases:** setting up a local NORFAB environment. **Limitations:** requires
+Python 3.10+; service dependencies and external systems must be available.
+The scripts overwrite generated configuration files in the chosen folder.
+See [Windows installer](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_windows.ps1)
+and [Linux installer](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_linux.sh).
 
 ### Distributed service architecture
 

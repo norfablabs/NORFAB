@@ -1,3 +1,11 @@
+# 0.24.12
+
+## BUGS
+
+1. Fixed Netbox worker startup failing with `AttributeError` when `ssl_verify` is enabled or omitted. Removed the unsupported urllib3 `enable_warnings` call; SSL warnings are only disabled when `ssl_verify` is `False`.
+
+---
+
 # 0.24.11
 
 ## BUGS

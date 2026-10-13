@@ -1,0 +1,78 @@
+{# All expectations come from loaded host data; no NetBox calls during testing. #}
+{% for name, peer in host.data.get('bgp_peerings', {}).items() if not peer.get('custom_fields', {}).get('vrf') %}
+{% set address = peer.remote_address.address.split('/')[0] %}
+- name: {{ ('BGP established - ' ~ name) | tojson }}
+  task: show ip bgp summary
+  test: eval
+  expr: >-
+    any(fields[0] == {{ address | tojson }} and fields[2] == "{{ peer.remote_as.asn }}"
+    and fields[-1].isdigit()
+    for fields in (line.split() for line in result.splitlines()) if len(fields) == 10)
+  err_msg: {{ ('Expected established global BGP peer ' ~ address ~ ' in AS ' ~ peer.remote_as.asn) | tojson }}
+  groups: [bgp, baseline]
+{% endfor %}
+
+{% for name, connection in host.data.get('connections', {}).items() if name.startswith('Ethernet') and '.' not in name and connection.get('remote_device') %}
+- name: {{ ('OSPF FULL adjacency - ' ~ name) | tojson }}
+  task: show ip ospf neighbor
+  test: eval
+  expr: >-
+    [fields[2].split('/')[0]
+    for fields in (line.split() for line in result.splitlines())
+    if len(fields) == 6 and fields[-1] == {{ name | tojson }}] == ['FULL']
+  err_msg: {{ ('Expected one FULL OSPF neighbor on connected interface ' ~ name) | tojson }}
+  groups: [ospf, baseline]
+{% endfor %}
+
+- name: LLDP neighbors match inventory connections
+  task: show lldp neighbors detail
+  test: custom
+  function_file: nf://tests/check_lldp_neighbors.py
+  add_host: true
+  groups: [lldp, baseline]
+
+{% for name, interface in host.data.get('interfaces', {}).items() %}
+- name: {{ ('Interface state matches inventory - ' ~ name) | tojson }}
+  task: {{ ('show interfaces ' ~ name) | tojson }}
+  test: contains
+  pattern: {{ (name ~ (' is up, line protocol is up' if interface.enabled else ' is administratively down, line protocol is down')) | tojson }}
+  groups: [interfaces, baseline]
+- name: {{ ('Interface description matches inventory - ' ~ name) | tojson }}
+  task: {{ ('show interfaces ' ~ name) | tojson }}
+  test: eval
+  expr: {{ ('[line.strip()[13:] for line in result.splitlines() if line.strip().startswith("Description: ")] == ' ~ ([interface.get('description')] if interface.get('description') else []) | string) | tojson }}
+  err_msg: Interface description differs from inventory
+  groups: [interfaces, baseline]
+{% if interface.get('mtu') %}
+- name: {{ ('Interface MTU matches inventory - ' ~ name) | tojson }}
+  task: {{ ('show interfaces ' ~ name) | tojson }}
+  test: contains
+  pattern: {{ ('MTU ' ~ interface.mtu ~ ' bytes') | tojson }}
+  groups: [interfaces, baseline]
+{% endif %}
+{% endfor %}
+
+- name: Logging buffer size and severity
+  task: show running-config | include logging|service timestamps
+  test: contains
+  pattern: logging buffered 64000 informational
+  groups: [logging, baseline]
+- name: Logging timestamps
+  task: show running-config | include logging|service timestamps
+  test: contains
+  pattern: service timestamps log datetime msec
+  groups: [logging, baseline]
+
+{# Deliberately unmet policies demonstrate failures without changing devices. #}
+- name: DEMO FAIL - Ethernet0/1 requires a policy description
+  task: show interfaces Ethernet0/1
+  test: contains
+  pattern: 'Description: DEMO required core uplink description'
+  err_msg: Intentional failure - this description is absent from the base configuration
+  groups: [intentional_failures]
+- name: DEMO FAIL - Ethernet0/1 requires jumbo MTU
+  task: show interfaces Ethernet0/1
+  test: contains
+  pattern: MTU 9000 bytes
+  err_msg: Intentional failure - the demo Ethernet MTU is 1500, not 9000
+  groups: [intentional_failures]

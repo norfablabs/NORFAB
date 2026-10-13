@@ -504,17 +504,14 @@ class NetboxWorker(
             KeyError: If the specified instance name is not found in the inventory.
 
         If the `ssl_verify` parameter is set to False, SSL warnings will be disabled.
-        Otherwise, SSL warnings will be enabled.
         """
         name = name or self.default_instance
         params = self.netbox_inventory["instances"][name]
-        params["url"] = params["url"].rstrip("/")  # normilise URL
+        params["url"] = params["url"].rstrip("/")  # normalize URL
 
         # check if need to disable SSL warnings
         if params.get("ssl_verify") == False:
             requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-        else:
-            requests.packages.urllib3.enable_warnings(InsecureRequestWarning)
 
         return params
 
