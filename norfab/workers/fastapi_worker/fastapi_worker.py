@@ -58,7 +58,9 @@ def create_api_endpoint(
         function: An asynchronous endpoint function
 
     The generated endpoint expects a JSON body containing arguments for
-    the job and returns the result of the job execution.
+    the job and returns the result of the job execution. The ``workers`` and
+    ``timeout`` fields are job options and are removed from task arguments.
+    Timeout defaults to 600 seconds.
     """
     # We will handle a missing token ourselves
     get_bearer_token = HTTPBearer(auto_error=False)
@@ -84,6 +86,7 @@ def create_api_endpoint(
     ) -> Dict[Annotated[str, Body(description="Worker Name")], Result]:
         kwargs = await request.json()
         workers = kwargs.pop("workers", default_workers)
+        timeout = kwargs.pop("timeout", 600)
 
         log.debug(
             f"FastAPI running '{service}:{task_name}' task, on '{workers}' workers, job data: '{kwargs}'"
@@ -94,6 +97,7 @@ def create_api_endpoint(
             task=task_name,
             kwargs=kwargs,
             workers=workers,
+            timeout=timeout,
         )
         return res
 

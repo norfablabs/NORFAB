@@ -525,7 +525,7 @@ class NetboxIpTasks:
                 else:
                     raise NetboxAllocationError(
                         f"Unable to find a child subnet of mask length '{mask_len}' "
-                        f"with sufficient available IPs inside '{nb_prefix}'"
+                        f"with sufficient available IPs inside '{nb_prefix}', vrf '{vrf}'"
                     )
             if ip_index is not None:
                 network = ipaddress.ip_network(str(nb_prefix))

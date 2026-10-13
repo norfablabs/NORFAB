@@ -1084,6 +1084,7 @@ def dispatch_new_jobs(client) -> None:
                     "task": job["task"],
                     "kwargs": job["kwargs"] or {},
                     "args": job["args"] or [],
+                    "timeout": job["timeout"],
                 }
             )
 

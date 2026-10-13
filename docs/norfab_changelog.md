@@ -3,6 +3,14 @@
 ## BUGS
 
 1. Fixed Netbox worker startup failing with `AttributeError` when `ssl_verify` is enabled or omitted. Removed the unsupported urllib3 `enable_warnings` call; SSL warnings are only disabled when `ssl_verify` is `False`.
+2. Fixed client job dispatch omitting the configured timeout from worker requests, causing workers to use a 60-second fallback. Workers now receive the submitted timeout, preventing premature timeout checks during long-running tasks such as Netbox `design_deploy` and its nested IP allocations.
+3. Fixed generated FastAPI task endpoints passing request-body `timeout` as a task argument instead of a job option. The timeout now controls job execution and client waiting, defaulting to 600 seconds.
+4. Removed the unused `retry` job option from generated Netbox FastAPI request schemas; it did not control job result polling.
+
+## ENHANCEMENTS
+
+1. Added `Job.check_timeout()` method to NorFab job object
+2. Netbox `design_deploy` checks the job timeout at preparation and collection boundaries, stops with a timeout error, and retains completed collection results. Running calls are not interrupted.
 
 ---
 

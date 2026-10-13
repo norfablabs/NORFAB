@@ -101,6 +101,20 @@ class Job:
             return False
         return (time.time() - self.start_time) >= self.timeout
 
+    def check_timeout(self) -> None:
+        """Raise TimeoutError if the job has exceeded its configured timeout.
+
+        Jobs without a timeout do not expire. Running operations are not interrupted.
+
+        Raises:
+            TimeoutError: The elapsed job runtime has reached its timeout.
+        """
+        if self.is_timed_out():
+            raise TimeoutError(
+                f"job '{self.juuid}' task '{self.task}' exceeded its "
+                f"{self.timeout}-second timeout"
+            )
+
     def event(self, message: str, **kwargs: Any) -> None:
         """
         Handles an event by forwarding it to the worker.

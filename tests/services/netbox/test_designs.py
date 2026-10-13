@@ -1,6 +1,8 @@
 """NetBox design deployment integration tests."""
 
+import time
 from typing import Any
+from unittest.mock import Mock
 
 import pynetbox
 import pytest
@@ -16,6 +18,26 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_design_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Stop preparation with a timeout error after a slow connection setup."""
+        from norfab.core.worker import Job
+        from norfab.workers.netbox_worker.netbox_worker import NetboxWorker
+
+        worker = object.__new__(NetboxWorker)
+        worker.name = "timeout-test"
+        worker.default_instance = "test"
+
+        def slow_connection(*args: Any, **kwargs: Any) -> None:
+            time.sleep(2)
+
+        worker._get_pynetbox = slow_connection
+        job = Job(juuid="design-timeout-test", task="design_deploy", timeout=1)
+        monkeypatch.setattr(Job, "event", Mock())
+        result = worker.design_deploy(job=job, design={})
+        assert result.failed
+        assert "1-second timeout" in " ".join(result.errors)
+        assert result.result == {}
+
     @pytest.mark.parametrize("explicit_slug", [False, True])
     def test_device_roles_match_by_slug(
         self, nfclient: Any, explicit_slug: bool

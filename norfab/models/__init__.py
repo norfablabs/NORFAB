@@ -220,6 +220,3 @@ class NorFabClientRunJob(BaseModel):
     timeout: StrictInt = Field(
         600, description="The maximum time in seconds to wait for the job to complete"
     )
-    retry: StrictInt = Field(
-        10, description="The number of times to retry getting the job results"
-    )

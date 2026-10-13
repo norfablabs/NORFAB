@@ -4069,7 +4069,9 @@ class NetboxDesignTasks:
             Object identities grouped by collection and creation/update action,
             or rendered text (the original dictionary for dictionary designs)
             with dry_run=True when dry_run_render is enabled. Preparation and
-            deployment errors are reported in a failed Result.
+            deployment errors, including job timeout expiry, are reported in a
+            failed Result. Timeout checks stop subsequent operations; in-flight
+            calls are not interrupted.
         """
         instance = instance or self.default_instance
         ret = Result(
@@ -4082,6 +4084,7 @@ class NetboxDesignTasks:
         log.info(msg)
         job.event(msg)
         try:
+            job.check_timeout()
             if isinstance(context, str):
                 if self.is_url(context):
                     context = self.fetch_file(context, raise_on_fail=True)
@@ -4183,6 +4186,7 @@ class NetboxDesignTasks:
                 filters[name] = function
 
             nb = self._get_pynetbox(instance, branch=branch, job=job)
+            job.check_timeout()
             if template is not None:
                 loader = None
                 if design_url:
@@ -4195,6 +4199,7 @@ class NetboxDesignTasks:
                 environment.globals["netbox"] = nb
                 document = environment.from_string(template).render(context=context)
 
+            job.check_timeout()
             if dry_run_render:
                 ret.result = document
                 ret.dry_run = True
@@ -4209,6 +4214,7 @@ class NetboxDesignTasks:
             flattened = flatten_design(document)
             validated = DesignDocument.model_validate(flattened)
             lookup_cache = build_lookup_cache(self, nb, validated)
+            job.check_timeout()
             custom_functions = {}
             for name, url in validated.custom_functions.items():
                 if not self.is_url(url):
@@ -4274,6 +4280,7 @@ class NetboxDesignTasks:
             log.info(msg)
             job.event(msg)
             try:
+                job.check_timeout()
                 ret.result[collection] = handler(
                     self,
                     nb,
@@ -4284,6 +4291,7 @@ class NetboxDesignTasks:
                     instance=instance,
                     branch=branch,
                 )
+                job.check_timeout()
                 execute_custom_functions(
                     nb,
                     context,
@@ -4292,6 +4300,7 @@ class NetboxDesignTasks:
                     dry_run,
                     ret.result[collection],
                 )
+                job.check_timeout()
                 changes = ret.result[collection]
                 msg = (
                     f"completed {collection}: {len(changes['created'])} created, "
