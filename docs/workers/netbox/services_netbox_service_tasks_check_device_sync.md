@@ -25,29 +25,6 @@ Checks whether NetBox data is in sync with live device state without writing to 
 
 Each sub-check can be enabled or disabled independently.
 
-## Inputs
-
-| Parameter | Required | Description |
-|---|---:|---|
-| `devices` | No | NetBox device names to check |
-| `instance` | No | NetBox instance name to target |
-| `branch` | No | NetBox Branching plugin branch name to read from |
-| `timeout` | No | Timeout in seconds for Nornir parse jobs |
-| `check_inventory` | No | Check device inventory sync state, default `True` |
-| `check_interfaces` | No | Check interface sync state, default `True` |
-| `check_vrfs` | No | Check VRF, route-target and routing-policy creation, and interface assignment sync state, default `True` |
-| `check_vlans` | No | Check VLAN and interface assignment sync state, default `True` |
-| `check_prefixes` | No | Check prefix sync state, default `True` |
-| `check_ip_addresses` | No | Check IP address sync state, default `True` |
-| `check_bgp_peerings` | No | Check BGP peering sync state, default `True` |
-| `check_bgp_communities` | No | Check route-target and BGP community sync state, default `True` |
-| `check_vrrp` | No | Check VRRP sync state, default `True` |
-| `ignore_deletions` | No | Treat deletion-only differences as in sync, default `False` |
-| `sync_kwargs` | No | Per-task sync arguments as an inline dictionary or an `nf://` YAML file |
-| Nornir filters | No | Host filters such as `FL`, `FB`, `FG`, `FC`, or `FN` |
-
-At least one explicit device or Nornir host filter must resolve to a device.
-
 ## Sync Task Arguments
 
 Use `sync_kwargs` to configure how individual dry-run synchronizers calculate
@@ -71,6 +48,8 @@ sync_bgp_peerings:
 ```
 
 ## Output
+
+Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
 
 ```python
 {

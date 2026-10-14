@@ -1251,20 +1251,24 @@ class NetboxDevicesTasks:
             **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
-            Result: Per-device sync summary keyed by device name::
+            Result: Per-device summary with every category present. True means
+            no drift, False means drift or failure, and None means disabled.
+            Enabled checks continue after failures; errors and failed resources
+            are propagated. Diff contains each child dry-run diff, or None for
+            disabled checks. In_sync considers enabled checks only::
 
                 {
                     "<device>": {
                         "in_sync": True | False,
-                        "inventory":     True | False,
-                        "interfaces":    True | False,
-                        "vrfs":          True | False,
-                        "vlans":         True | False,
-                        "prefixes":      True | False,
-                        "ip_addresses":  True | False,
-                        "bgp_peerings":  True | False,
-                        "bgp_communities": True | False,
-                        "vrrp":          True | False,
+                        "inventory":     True | False | None,
+                        "interfaces":    True | False | None,
+                        "vrfs":          True | False | None,
+                        "vlans":         True | False | None,
+                        "prefixes":      True | False | None,
+                        "ip_addresses":  True | False | None,
+                        "bgp_peerings":  True | False | None,
+                        "bgp_communities": True | False | None,
+                        "vrrp":          True | False | None,
                     }
                 }
         """
@@ -1305,9 +1309,23 @@ class NetboxDevicesTasks:
             f"{self.name} - Check device sync for {len(devices)} device(s) in '{instance}'"
         )
         job.event(f"checking sync state for {len(devices)} device(s)")
+        categories = (
+            "inventory",
+            "prefixes",
+            "interfaces",
+            "vrfs",
+            "vlans",
+            "ip_addresses",
+            "vrrp",
+            "bgp_communities",
+            "bgp_peerings",
+        )
+        ret.diff = dict.fromkeys(categories)
         # initialize per-device result structure
         for device in devices:
-            ret.result[device] = {}
+            ret.result[device] = dict.fromkeys(categories)
+
+        check_results = {}
 
         # --- check inventory ---
         if check_inventory:
@@ -1324,10 +1342,11 @@ class NetboxDevicesTasks:
             if inventory_result.errors:
                 ret.errors.extend(inventory_result.errors)
             for device, data in inventory_result.diff.items():
-                ret.result.setdefault(device, {})["inventory"] = not sync_diff_has_changes(
-                    data, ignore_deletions=ignore_deletions
+                ret.result.setdefault(device, {})["inventory"] = (
+                    not sync_diff_has_changes(data, ignore_deletions=ignore_deletions)
                 )
             ret.diff["inventory"] = inventory_result.diff
+            check_results["inventory"] = inventory_result
 
         # --- check interfaces ---
         if check_interfaces:
@@ -1344,10 +1363,11 @@ class NetboxDevicesTasks:
             if intf_result.errors:
                 ret.errors.extend(intf_result.errors)
             for device, data in intf_result.diff.items():
-                ret.result.setdefault(device, {})["interfaces"] = not sync_diff_has_changes(
-                    data, ignore_deletions=ignore_deletions
+                ret.result.setdefault(device, {})["interfaces"] = (
+                    not sync_diff_has_changes(data, ignore_deletions=ignore_deletions)
                 )
             ret.diff["interfaces"] = intf_result.diff
+            check_results["interfaces"] = intf_result
 
         # --- check VRFs and their interface assignments ---
         if check_vrfs:
@@ -1376,6 +1396,7 @@ class NetboxDevicesTasks:
                     device_diff, ignore_deletions=ignore_deletions
                 )
             ret.diff["vrfs"] = vrf_result.diff
+            check_results["vrfs"] = vrf_result
 
         # --- check VLANs and their interface assignments ---
         if check_vlans:
@@ -1394,12 +1415,15 @@ class NetboxDevicesTasks:
             for device in devices:
                 device_diff = {
                     "vlans": vlan_result.diff.get("vlans", {}),
-                    "interfaces": vlan_result.diff.get("interfaces", {}).get(device, {}),
+                    "interfaces": vlan_result.diff.get("interfaces", {}).get(
+                        device, {}
+                    ),
                 }
                 ret.result[device]["vlans"] = not sync_diff_has_changes(
                     device_diff, ignore_deletions=ignore_deletions
                 )
             ret.diff["vlans"] = vlan_result.diff
+            check_results["vlans"] = vlan_result
 
         # --- check prefixes ---
         if check_prefixes:
@@ -1421,6 +1445,7 @@ class NetboxDevicesTasks:
             for device in devices:
                 ret.result[device]["prefixes"] = prefixes_in_sync
             ret.diff["prefixes"] = prefix_result.diff
+            check_results["prefixes"] = prefix_result
 
         # --- check IP addresses ---
         if check_ip_addresses:
@@ -1437,12 +1462,11 @@ class NetboxDevicesTasks:
             if ip_result.errors:
                 ret.errors.extend(ip_result.errors)
             for device, data in ip_result.diff.items():
-                ret.result.setdefault(device, {})[
-                    "ip_addresses"
-                ] = not sync_diff_has_changes(
-                    data, ignore_deletions=ignore_deletions
+                ret.result.setdefault(device, {})["ip_addresses"] = (
+                    not sync_diff_has_changes(data, ignore_deletions=ignore_deletions)
                 )
             ret.diff["ip_addresses"] = ip_result.diff
+            check_results["ip_addresses"] = ip_result
 
         # --- check VRRP ---
         if check_vrrp:
@@ -1463,6 +1487,7 @@ class NetboxDevicesTasks:
                     data, ignore_deletions=ignore_deletions
                 )
             ret.diff["vrrp"] = vrrp_result.diff
+            check_results["vrrp"] = vrrp_result
 
         # --- check BGP communities ---
         if check_bgp_communities:
@@ -1484,6 +1509,7 @@ class NetboxDevicesTasks:
             for device in devices:
                 ret.result[device]["bgp_communities"] = communities_in_sync
             ret.diff["bgp_communities"] = community_result.diff
+            check_results["bgp_communities"] = community_result
 
         # --- check BGP peerings ---
         if check_bgp_peerings:
@@ -1500,12 +1526,25 @@ class NetboxDevicesTasks:
             if bgp_result.errors:
                 ret.errors.extend(bgp_result.errors)
             for device, data in bgp_result.diff.items():
-                ret.result.setdefault(device, {})[
-                    "bgp_peerings"
-                ] = not sync_diff_has_changes(
-                    data, ignore_deletions=ignore_deletions
+                ret.result.setdefault(device, {})["bgp_peerings"] = (
+                    not sync_diff_has_changes(data, ignore_deletions=ignore_deletions)
                 )
             ret.diff["bgp_peerings"] = bgp_result.diff
+            check_results["bgp_peerings"] = bgp_result
+
+        for category, child_result in check_results.items():
+            ret.failed = ret.failed or child_result.failed
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(child_result.resources_failed)
+            )
+            for device in devices:
+                if device in child_result.resources_failed or (
+                    child_result.failed and not child_result.resources_failed
+                ):
+                    ret.result[device][category] = False
+                elif ret.result[device][category] is None:
+                    ret.result[device][category] = False
+                    ret.errors.append(f"{device}: no {category} check data returned")
 
         checked_categories = {
             "inventory": check_inventory,
@@ -1558,8 +1597,8 @@ class NetboxDevicesTasks:
     ) -> Result:
         """
         Synchronize all device data from live devices into NetBox in sequence:
-        inventory → prefixes → interfaces → VRFs → VLANs → MAC addresses →
-        IP addresses → VRRP → BGP peerings.
+        inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP,
+        BGP communities, and BGP peerings.
 
         Pass ``dry_run=True`` to preview changes without writing to NetBox.
         Pass ``with_approval=True`` to have each sync stage run a dry-run preview,
@@ -1582,9 +1621,9 @@ class NetboxDevicesTasks:
                         "interfaces": {"<device>": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},
                     },
                     "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
-                    "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
                     "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
                     "vrrp":          {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
+                    "bgp_communities": {"route_targets": {...}, "communities": {...}},
                     "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},
                 }
             }
@@ -1592,7 +1631,7 @@ class NetboxDevicesTasks:
         Args:
             job: NorFab Job object.
             instance (str, optional): NetBox instance name.
-            timeout (int): Timeout in seconds for Nornir jobs. Defaults to 60.
+            timeout (int): Timeout in seconds for Nornir jobs. Defaults to 600.
             devices (list, optional): List of device names to sync.
             branch (str, optional): NetBox branching plugin branch name.
             dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.
@@ -1604,7 +1643,12 @@ class NetboxDevicesTasks:
             **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).
 
         Returns:
-            Result: Per-device sync results keyed by device name and category.
+            Result: Per-device results with all nine category keys. Successful
+            sections contain child task results, including previews in dry-run
+            mode; failed sections are False and skipped or unexecuted sections
+            are None. Diff contains child diffs keyed by category, with None for
+            unexecuted stages. Errors and failed resources are propagated.
+            Execution stops on a failed stage or declined review.
         """
         devices = devices or []
         instance = instance or self.default_instance
@@ -1638,9 +1682,21 @@ class NetboxDevicesTasks:
         )
         job.event(f"syncing all data for {len(devices)} device(s), dry_run={dry_run}")
 
+        categories = (
+            "inventory",
+            "prefixes",
+            "interfaces",
+            "vrfs",
+            "vlans",
+            "ip_addresses",
+            "vrrp",
+            "bgp_communities",
+            "bgp_peerings",
+        )
+        ret.diff = dict.fromkeys(categories)
         # initialize per-device result structure
         for device in devices:
-            ret.result[device] = {}
+            ret.result[device] = dict.fromkeys(categories)
 
         # --- sync device inventory ---
         if sync_kwargs.get("sync_device_inventory") is False:
@@ -1660,16 +1716,28 @@ class NetboxDevicesTasks:
             if inventory_result.errors:
                 job.event("inventory sync completed with errors", severity="WARNING")
                 ret.errors.extend(inventory_result.errors)
+            ret.diff["inventory"] = inventory_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(inventory_result.resources_failed)
             )
-            for device, data in inventory_result.result.items():
-                ret.result.setdefault(device, {})["inventory"] = data
-            if inventory_result.failed:
+            if inventory_result.failed and not inventory_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["inventory"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because device inventory sync failed",
                     severity="ERROR",
+                )
+                return ret
+            for device, data in inventory_result.result.items():
+                ret.result.setdefault(device, {})["inventory"] = data
+            for device in devices:
+                if device in inventory_result.resources_failed:
+                    ret.result[device]["inventory"] = False
+            if inventory_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
                 )
                 return ret
             if inventory_result.status == "skipped" and inventory_result.dry_run:
@@ -1698,15 +1766,27 @@ class NetboxDevicesTasks:
             if prefix_result.errors:
                 job.event("prefix sync completed with errors", severity="WARNING")
                 ret.errors.extend(prefix_result.errors)
+            ret.diff["prefixes"] = prefix_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(prefix_result.resources_failed)
             )
-            for device in devices:
-                ret.result[device]["prefixes"] = prefix_result.result
-            if prefix_result.failed:
+            if prefix_result.failed and not prefix_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["prefixes"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because prefix sync failed", severity="ERROR"
+                )
+                return ret
+            for device in devices:
+                ret.result[device]["prefixes"] = prefix_result.result
+            for device in devices:
+                if device in prefix_result.resources_failed:
+                    ret.result[device]["prefixes"] = False
+            if prefix_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
                 )
                 return ret
             if prefix_result.status == "skipped" and prefix_result.dry_run:
@@ -1733,15 +1813,27 @@ class NetboxDevicesTasks:
             if intf_result.errors:
                 job.event("interface sync completed with errors", severity="WARNING")
                 ret.errors.extend(intf_result.errors)
+            ret.diff["interfaces"] = intf_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(intf_result.resources_failed)
             )
-            for device, data in intf_result.result.items():
-                ret.result.setdefault(device, {})["interfaces"] = data
-            if intf_result.failed:
+            if intf_result.failed and not intf_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["interfaces"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because interface sync failed", severity="ERROR"
+                )
+                return ret
+            for device, data in intf_result.result.items():
+                ret.result.setdefault(device, {})["interfaces"] = data
+            for device in devices:
+                if device in intf_result.resources_failed:
+                    ret.result[device]["interfaces"] = False
+            if intf_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
                 )
                 return ret
             if intf_result.status == "skipped" and intf_result.dry_run:
@@ -1768,9 +1860,16 @@ class NetboxDevicesTasks:
             if vrf_result.errors:
                 job.event("VRF sync completed with errors", severity="WARNING")
                 ret.errors.extend(vrf_result.errors)
+            ret.diff["vrfs"] = vrf_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(vrf_result.resources_failed)
             )
+            if vrf_result.failed and not vrf_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["vrfs"] = False
+                ret.failed = True
+                job.event("sync all stopped because VRF sync failed", severity="ERROR")
+                return ret
             for device in devices:
                 device_interfaces = {}
                 if device in vrf_result.result["interfaces"]:
@@ -1781,9 +1880,14 @@ class NetboxDevicesTasks:
                     "routing_policies": vrf_result.result["routing_policies"],
                     "interfaces": device_interfaces,
                 }
+            for device in devices:
+                if device in vrf_result.resources_failed:
+                    ret.result[device]["vrfs"] = False
             if vrf_result.failed:
                 ret.failed = True
-                job.event("sync all stopped because VRF sync failed", severity="ERROR")
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
+                )
                 return ret
             if vrf_result.status == "skipped" and vrf_result.dry_run:
                 ret.status = "skipped"
@@ -1809,10 +1913,13 @@ class NetboxDevicesTasks:
             if vlan_result.errors:
                 job.event("VLAN sync completed with errors", severity="WARNING")
                 ret.errors.extend(vlan_result.errors)
+            ret.diff["vlans"] = vlan_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(vlan_result.resources_failed)
             )
-            if vlan_result.failed:
+            if vlan_result.failed and not vlan_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["vlans"] = False
                 ret.failed = True
                 job.event("sync all stopped because VLAN sync failed", severity="ERROR")
                 return ret
@@ -1824,45 +1931,19 @@ class NetboxDevicesTasks:
                     "vlans": vlan_result.result["vlans"],
                     "interfaces": device_interfaces,
                 }
+            for device in devices:
+                if device in vlan_result.resources_failed:
+                    ret.result[device]["vlans"] = False
+            if vlan_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
+                )
+                return ret
             if vlan_result.status == "skipped" and vlan_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
                 job.event("sync all stopped because VLAN review was declined")
-                return ret
-
-        # --- sync MAC addresses ---
-        if sync_kwargs.get("sync_mac_addresses") is False:
-            job.event("skipping MAC address sync")
-        else:
-            job.event("syncing MAC addresses")
-            mac_result = self.sync_mac_addresses(
-                job=job,
-                instance=instance,
-                dry_run=dry_run,
-                timeout=timeout,
-                devices=list(devices),
-                branch=branch,
-                with_approval=with_approval,
-                **(sync_kwargs.get("sync_mac_addresses") or {}),
-            )
-            if mac_result.errors:
-                job.event("MAC address sync completed with errors", severity="WARNING")
-                ret.errors.extend(mac_result.errors)
-            ret.resources_failed = sorted(
-                set(ret.resources_failed) | set(mac_result.resources_failed)
-            )
-            for device, data in mac_result.result.items():
-                ret.result.setdefault(device, {})["mac_addresses"] = data
-            if mac_result.failed:
-                ret.failed = True
-                job.event(
-                    "sync all stopped because MAC address sync failed", severity="ERROR"
-                )
-                return ret
-            if mac_result.status == "skipped" and mac_result.dry_run:
-                ret.status = "skipped"
-                ret.dry_run = True
-                job.event("sync all stopped because MAC address review was declined")
                 return ret
 
         # --- sync IP addresses ---
@@ -1883,15 +1964,27 @@ class NetboxDevicesTasks:
             if ip_result.errors:
                 job.event("IP address sync completed with errors", severity="WARNING")
                 ret.errors.extend(ip_result.errors)
+            ret.diff["ip_addresses"] = ip_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(ip_result.resources_failed)
             )
-            for device, data in ip_result.result.items():
-                ret.result.setdefault(device, {})["ip_addresses"] = data
-            if ip_result.failed:
+            if ip_result.failed and not ip_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["ip_addresses"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because IP address sync failed", severity="ERROR"
+                )
+                return ret
+            for device, data in ip_result.result.items():
+                ret.result.setdefault(device, {})["ip_addresses"] = data
+            for device in devices:
+                if device in ip_result.resources_failed:
+                    ret.result[device]["ip_addresses"] = False
+            if ip_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
                 )
                 return ret
             if ip_result.status == "skipped" and ip_result.dry_run:
@@ -1918,19 +2011,81 @@ class NetboxDevicesTasks:
             if vrrp_result.errors:
                 job.event("VRRP sync completed with errors", severity="WARNING")
                 ret.errors.extend(vrrp_result.errors)
+            ret.diff["vrrp"] = vrrp_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(vrrp_result.resources_failed)
             )
-            for device, data in vrrp_result.result.items():
-                ret.result.setdefault(device, {})["vrrp"] = data
-            if vrrp_result.failed:
+            if vrrp_result.failed and not vrrp_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["vrrp"] = False
                 ret.failed = True
                 job.event("sync all stopped because VRRP sync failed", severity="ERROR")
+                return ret
+            for device, data in vrrp_result.result.items():
+                ret.result.setdefault(device, {})["vrrp"] = data
+            for device in devices:
+                if device in vrrp_result.resources_failed:
+                    ret.result[device]["vrrp"] = False
+            if vrrp_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
+                )
                 return ret
             if vrrp_result.status == "skipped" and vrrp_result.dry_run:
                 ret.status = "skipped"
                 ret.dry_run = True
                 job.event("sync all stopped because VRRP review was declined")
+                return ret
+
+        # --- sync BGP communities ---
+        if sync_kwargs.get("sync_bgp_community") is False:
+            job.event("skipping BGP community sync")
+        else:
+            job.event("syncing BGP communities")
+            community_result = self.sync_bgp_community(
+                job=job,
+                instance=instance,
+                dry_run=dry_run,
+                timeout=timeout,
+                devices=list(devices),
+                branch=branch,
+                with_approval=with_approval,
+                **(sync_kwargs.get("sync_bgp_community") or {}),
+            )
+            if community_result.errors:
+                job.event(
+                    "bgp community sync completed with errors", severity="WARNING"
+                )
+                ret.errors.extend(community_result.errors)
+            ret.diff["bgp_communities"] = community_result.diff
+            ret.resources_failed = sorted(
+                set(ret.resources_failed) | set(community_result.resources_failed)
+            )
+            if community_result.failed and not community_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["bgp_communities"] = False
+                ret.failed = True
+                job.event(
+                    "sync all stopped because BGP community sync failed",
+                    severity="ERROR",
+                )
+                return ret
+            for device in devices:
+                ret.result[device]["bgp_communities"] = community_result.result
+            for device in devices:
+                if device in community_result.resources_failed:
+                    ret.result[device]["bgp_communities"] = False
+            if community_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
+                )
+                return ret
+            if community_result.status == "skipped" and community_result.dry_run:
+                ret.status = "skipped"
+                ret.dry_run = True
+                job.event("sync all stopped because BGP community review was declined")
                 return ret
 
         # --- sync BGP peerings ---
@@ -1951,15 +2106,27 @@ class NetboxDevicesTasks:
             if bgp_result.errors:
                 job.event("BGP peerings sync completed with errors", severity="WARNING")
                 ret.errors.extend(bgp_result.errors)
+            ret.diff["bgp_peerings"] = bgp_result.diff
             ret.resources_failed = sorted(
                 set(ret.resources_failed) | set(bgp_result.resources_failed)
             )
-            for device, data in bgp_result.result.items():
-                ret.result.setdefault(device, {})["bgp_peerings"] = data
-            if bgp_result.failed:
+            if bgp_result.failed and not bgp_result.resources_failed:
+                for device in devices:
+                    ret.result[device]["bgp_peerings"] = False
                 ret.failed = True
                 job.event(
                     "sync all stopped because BGP peering sync failed", severity="ERROR"
+                )
+                return ret
+            for device, data in bgp_result.result.items():
+                ret.result.setdefault(device, {})["bgp_peerings"] = data
+            for device in devices:
+                if device in bgp_result.resources_failed:
+                    ret.result[device]["bgp_peerings"] = False
+            if bgp_result.failed:
+                ret.failed = True
+                job.event(
+                    "sync all stopped because a sync stage failed", severity="ERROR"
                 )
                 return ret
             if bgp_result.status == "skipped" and bgp_result.dry_run:

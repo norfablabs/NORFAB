@@ -15,9 +15,9 @@ fixed sequence:
 3. **interfaces** — calls `sync_device_interfaces`
 4. **vrfs** — calls `sync_vrfs`
 5. **vlans** — calls `sync_vlans`
-6. **mac_addresses** — calls `sync_mac_addresses`
-7. **ip_addresses** — calls `sync_device_ip`
-8. **vrrp** — calls `sync_vrrp`
+6. **ip_addresses** — calls `sync_device_ip`
+7. **vrrp** — calls `sync_vrrp`
+8. **bgp_communities** - calls `sync_bgp_community`
 9. **bgp_peerings** — calls `sync_bgp_peerings`
 
 ## How It Works
@@ -26,7 +26,7 @@ The `sync_all` task orchestrates nine subordinate sync tasks in sequence. Each t
 compares it against NetBox state, and applies reconciliation operations. When `dry_run=True`, all tasks preview changes
 without writing. When `with_approval=True`, each stage waits for user confirmation before applying changes.
 If VLAN synchronization fails, `sync_all` returns immediately and does not run
-MAC address, IP address, VRRP, or BGP peering synchronization.
+IP address, VRRP, BGP community, or BGP peering synchronization.
 
 ## Execution Modes
 
@@ -72,8 +72,8 @@ sync_vlans:
   interface_map: nf://netbox/interface_map.yaml
   vlan_map: nf://netbox/vlan_map.yaml
 
-sync_mac_addresses:
-  filter_by_name: Ethernet*
+sync_bgp_community:
+  community_name_field: community_name
 
 sync_device_ip:
   ignore_vrf: false
@@ -91,7 +91,7 @@ sync_bgp_peerings:
 
 The supported keys are `sync_device_inventory`, `sync_vlans`,
 `sync_device_prefixes`, `sync_vrfs`, `sync_device_interfaces`,
-`sync_mac_addresses`, `sync_device_ip`, `sync_vrrp`, and `sync_bgp_peerings`. Refer to each
+`sync_bgp_community`, `sync_device_ip`, `sync_vrrp`, and `sync_bgp_peerings`. Refer to each
 task's documentation for its accepted arguments. Missing keys run with the
 subordinate task's defaults. Set a key to `false` to skip that task and continue
 with the next stage:
@@ -106,6 +106,8 @@ Keep `instance`, `timeout`, `devices`, `branch`, `dry_run`, and `with_approval`
 at the `sync_all` level rather than repeating them inside a task dictionary.
 
 ## Output
+
+Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are `None`; failed categories are `False`. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The `diff` dictionary retains child dry-run details under the same category keys, with `None` for unexecuted checks or stages. MAC synchronization is available through its standalone task.
 
 The result structure aggregates the outcomes of all nine subordinate sync tasks. When `dry_run=True` the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and `interfaces` sections. The VRF category retains separate `vrfs`, `route_targets`, `routing_policies`, and `interfaces` sections. Each `interfaces` section contains only the current device.
 
@@ -177,11 +179,7 @@ The result structure aggregates the outcomes of all nine subordinate sync tasks.
                 "delete":  { ... },
                 "in_sync": [ ... ],
             },
-            "mac_addresses": {
-                "created": [ ... ],
-                "updated": [ ... ],
-                "in_sync": [ ... ],
-            },
+            "bgp_communities": {"route_targets": {}, "communities": {}},
             "ip_addresses": {
                 "created": [ ... ],
                 "updated": [ ... ],
@@ -279,7 +277,7 @@ nf# man tree netbox.sync.all
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, MAC addresses, IP addresses, VRRP and BGP peerings
+        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default 'any'
             ├── verbose-result:    Control output details, default 'False'

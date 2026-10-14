@@ -83,6 +83,14 @@
     ]
   },
   "tests": {
+    "test_ipam.py::TestCreateIP::test_create_ip_by_prefix_description_device_interface": {
+      "mode": "main_mutating",
+      "read_only_device": "fceos4",
+      "prefixes": ["198.19.239.0/24"],
+      "interfaces": ["fceos4:NORFAB-IP-REUSE"],
+      "coverage": "Different requested descriptions reuse the same interface IP record, update its description, and leave exactly one address in the owned prefix.",
+      "cleanup": "Fails before mutation if owned records already exist. Deletes only IPs in its dedicated prefix and its created interface and prefix, including after partial failures. Does not clear shared seed subnet 10.0.0.0/24."
+    },
     "services/containerlab/test_inventory.py::TestGetNornirInventoryTask::test_load_containerlab_inventory_with_netbox": {
       "mode": "branch_feature",
       "devices": ["fceos4"],
@@ -238,7 +246,18 @@
       ],
       "cleanup": "Delete sessions on fn-bgp-* devices and unassigned addresses and source ASNs in the BGP-owned ranges."
     },
+    "test_sync.py::TestCheckDeviceSync": {
+      "mode": "main_read_only",
+      "devices": ["fn-ceos-sp-1", "fn-ceos-sp-2"],
+      "tests": [
+        "test_check_device_sync_selective_inventory_only",
+        "test_check_device_sync_selective_interfaces_only",
+        "test_check_device_sync_selective_ip_only"
+      ],
+      "notes": "Selective checks retain all nine categories in summaries and diffs; disabled categories are None. No records are created or changed."
+    },
     "test_sync.py::TestSyncAll": {
+      "notes": "Sync-all excludes MAC synchronization. BGP community orchestration is covered without NetBox writes by TestSyncAllOrchestration; existing integration calls disable community writes to preserve data ownership.",
       "mode": "main_mutating",
       "cleanup": "Delete only records assigned to this class's original spine devices, plus the exact owned VRRP VIP/group for 10.3.250.1/32. BGP and IPAM use separate FakeNOS source data.",
       "devices": [

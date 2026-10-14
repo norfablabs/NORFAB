@@ -2,7 +2,7 @@ from nornir.core.inventory import Host
 from nornir.core.task import Result
 
 
-def run(result: Result, host: Host) -> dict:
+def run(result: Result, host: Host) -> list[dict]:
     """Compare IOS LLDP neighbors with loaded NetBox connection records.
 
     Args:
@@ -10,7 +10,11 @@ def run(result: Result, host: Host) -> dict:
         host: Nornir host with point-to-point Ethernet connections in its data.
 
     Returns:
-        dict: PASS or FAIL with details of missing, extra, or incorrect neighbors.
+        list[dict]: One PASS or FAIL dictionary per inventory link, with
+            ``name``, ``result``, ``success``, and ``exception`` keys. The name
+            identifies the local and expected remote endpoints. Failed links include
+            details of missing, extra, or incorrect neighbors. If no links are
+            loaded, returns a list containing one failure dictionary.
             Only inventory-connected Ethernet ports are checked; management
             neighbors on other ports are ignored. IOS Et port abbreviations and
             DNS suffixes in system names are normalized. Breakout links and
@@ -24,11 +28,14 @@ def run(result: Result, host: Host) -> dict:
         and connection.get("remote_device")
     }
     if not expected:
-        return {
-            "result": "FAIL",
-            "success": False,
-            "exception": "No Ethernet connection records loaded in host data",
-        }
+        return [
+            {
+                "name": f"LLDP peer check for {host.name}: no inventory links",
+                "result": "FAIL",
+                "success": False,
+                "exception": "No Ethernet connection records loaded in host data",
+            }
+        ]
     observed = {port: [] for port in expected}
     for block in result.result.split("Local Intf: ")[1:]:
         local = block.splitlines()[0].strip()
@@ -49,13 +56,19 @@ def run(result: Result, host: Host) -> dict:
                     "Ethernet" + remote[2:] if remote.startswith("Et0/") else remote,
                 )
             )
-    differences = [
-        f"{port}: expected {neighbors}, observed {observed[port]}"
+    return [
+        {
+            "name": (
+                f"LLDP peer check for {host.name}:{port} connected to "
+                f"{neighbors[0][0]}:{neighbors[0][1]}"
+            ),
+            "result": "PASS" if observed[port] == neighbors else "FAIL",
+            "success": observed[port] == neighbors,
+            "exception": (
+                f"{port}: expected {neighbors}, observed {observed[port]}"
+                if observed[port] != neighbors
+                else None
+            ),
+        }
         for port, neighbors in expected.items()
-        if observed[port] != neighbors
     ]
-    return {
-        "result": "FAIL" if differences else "PASS",
-        "success": not differences,
-        "exception": "; ".join(differences) if differences else None,
-    }

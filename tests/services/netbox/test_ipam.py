@@ -2654,49 +2654,75 @@ class TestCreateIP:
             ), "Should be same IP"
 
     def test_create_ip_by_prefix_description_device_interface(self, nfclient):
-        "This test should allocate two different IPs since device, interface, description given"
+        """Reuse the interface IP and update its description without duplicating it."""
         if self.nb_version is None:
             self.nb_version = get_nb_version(nfclient)
+        if self.nb_version[0] != 4:
+            pytest.skip("device/interface allocation test requires NetBox 4")
 
-        delete_ips("10.0.0.0/24", nfclient)
+        nb = get_pynetbox(nfclient)
+        prefix = "198.19.239.0/24"
+        interface_name = "NORFAB-IP-REUSE"
+        device = nb.dcim.devices.get(name="fceos4")
+        assert device is not None, "Seed device fceos4 is missing"
+        if (
+            list(nb.ipam.prefixes.filter(within_include=prefix))
+            or list(nb.ipam.ip_addresses.filter(parent=prefix))
+            or nb.dcim.interfaces.get(device="fceos4", name=interface_name)
+        ):
+            pytest.fail("IP reuse test-owned records already exist")
 
-        if self.nb_version[0] == 4:
+        nb_prefix = None
+        nb_interface = None
+        try:
+            nb_prefix = nb.ipam.prefixes.create(prefix=prefix)
+            nb_interface = nb.dcim.interfaces.create(
+                device=device.id, name=interface_name, type="virtual"
+            )
+            kwargs = {
+                "prefix": prefix,
+                "device": "fceos4",
+                "interface": interface_name,
+                "create_peer_ip": False,
+            }
             create_1 = nfclient.run_job(
                 "netbox",
                 "create_ip",
                 workers="any",
-                kwargs={
-                    "prefix": "10.0.0.0/24",
-                    "device": "fceos4",
-                    "interface": "eth1",
-                    "description": "foo1",
-                },
+                kwargs={**kwargs, "description": "foo1"},
             )
+            res1 = next(iter(create_1.values()))
+            assert res1["failed"] == False, res1
+            first_ip = nb.ipam.ip_addresses.get(
+                interface_id=nb_interface.id, parent=prefix
+            )
+            assert first_ip is not None
+            assert first_ip.description == "foo1"
+
             create_2 = nfclient.run_job(
                 "netbox",
                 "create_ip",
                 workers="any",
-                kwargs={
-                    "prefix": "10.0.0.0/24",
-                    "device": "fceos4",
-                    "interface": "eth1",
-                    "description": "foo2",
-                },
+                kwargs={**kwargs, "description": "foo2"},
             )
-            print("create_1")
-            pprint.pprint(create_1, width=200)
-            print("create_2")
-            pprint.pprint(create_2, width=200)
-
-            worker, res1 = tuple(create_1.items())[0]
-            worker, res2 = tuple(create_2.items())[0]
-
-            assert res1["failed"] == False, "Allocation failed"
-            assert res2["failed"] == False, "Allocation failed"
-
-            assert (
-                res1["result"]["address"] != res2["result"]["address"]
-            ), "Should be different IP cause description is different"
+            res2 = next(iter(create_2.values()))
+            assert res2["failed"] == False, res2
+            assert res1["result"]["address"] == res2["result"]["address"]
+            assert res2["result"]["description"] == "foo2"
+            assert res2["status"] == "updated"
+            existing = list(nb.ipam.ip_addresses.filter(parent=prefix))
+            assert len(existing) == 1, "Reuse must not create another IP record"
+            assert existing[0].id == first_ip.id
+            assert existing[0].assigned_object_id == nb_interface.id
+            assert existing[0].description == "foo2"
+        finally:
+            if nb_prefix is not None:
+                for record in nb.ipam.ip_addresses.filter(parent=prefix):
+                    record.delete()
+            if nb_interface is not None:
+                nb_interface.delete()
+            if nb_prefix is not None:
+                nb_prefix.delete()
 
     def test_create_ip_with_vrf_tags_tenant_role_dnsname_comments(self, nfclient):
         if self.nb_version is None:

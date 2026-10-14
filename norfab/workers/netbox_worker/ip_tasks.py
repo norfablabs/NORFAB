@@ -212,6 +212,10 @@ class NetboxIpTasks:
                 object names or IDs. List values add to existing values; scalar
                 values and null replace them. Definitions must exist in NetBox.
             description (str, optional): A description for the allocated IP address.
+                For device/interface reuse, prefers an exact description match;
+                otherwise reuses the sole address within the selected prefix and
+                updates its description. Multiple remaining candidates raise
+                NetboxAllocationError instead of allocating another address.
             device (str, optional): The device associated with the IP address.
             interface (str, optional): The interface associated with the IP address.
             is_primary (bool, optional): If True, set the allocated IPv4 or IPv6
@@ -254,8 +258,10 @@ class NetboxIpTasks:
 
         Tasks execution follow these steps:
 
-        1. Tries to find an existing IP in NetBox matching the device/interface/description.
-            If found, uses it; otherwise, proceeds to create a new IP.
+        1. Tries to find an existing IP in NetBox within the selected prefix.
+            For device/interface assignments, prefers a matching description or
+            reuses the sole candidate, including anycast and VIP addresses.
+            Ambiguous candidates fail; no candidates proceeds to allocation.
 
         2. If prefix is a string, determines if it's an IP network or a description.
             Builds a filter dictionary for NetBox queries, optionally including VRF.
@@ -356,17 +362,24 @@ class NetboxIpTasks:
                 if description:
                     filters["description"] = description
                 nb_ip = nb.ipam.ip_addresses.get(**filters)
-            elif device and interface and description:
-                nb_ip = nb.ipam.ip_addresses.get(
-                    device=device,
-                    interface=interface,
-                    description=description,
-                    parent=str(nb_prefix),
-                )
             elif device and interface:
-                nb_ip = nb.ipam.ip_addresses.get(
-                    device=device, interface=interface, parent=str(nb_prefix)
+                candidates = list(
+                    nb.ipam.ip_addresses.filter(
+                        device=device, interface=interface, parent=str(nb_prefix)
+                    )
                 )
+                if description:
+                    matching = [
+                        ip for ip in candidates if ip.description == description
+                    ]
+                    if matching:
+                        candidates = matching
+                if len(candidates) > 1:
+                    raise NetboxAllocationError(
+                        f"Multiple IP addresses match '{device}:{interface}' "
+                        f"within prefix '{nb_prefix}' with description preference '{description}'"
+                    )
+                nb_ip = candidates[0] if candidates else None
             elif description:
                 nb_ip = nb.ipam.ip_addresses.get(
                     description=description, parent=str(nb_prefix)
@@ -688,7 +701,7 @@ class NetboxIpTasks:
                 job.event(f"updated '{str(nb_ip)}' IP address parameters")
             if nb_device:
                 nb_device.save()
-        else:
+        elif ret.status != "created":
             ret.status = "unchanged"
 
         # form and return results

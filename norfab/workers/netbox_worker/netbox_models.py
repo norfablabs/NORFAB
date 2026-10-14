@@ -1575,14 +1575,14 @@ class SyncDeviceInventoryResult(Result):
 class CheckDeviceSyncResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
-        description="Device sync check summary keyed by device name",
+        description="Per-device sync checks: True for no drift, False for drift or failure, None when disabled",
     )
 
 
 class SyncAllResult(Result):
     result: dict[StrictStr, Any] = Field(
         {},
-        description="Per-device sync results keyed by device name",
+        description="Per-device sync categories: child results on success, False on failure, None when skipped",
     )
 
 

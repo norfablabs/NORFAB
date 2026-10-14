@@ -335,8 +335,7 @@ class SyncCommands(BaseModel):
     all: SyncAllDevicesShell = Field(
         None,
         description=(
-            "Sync all device data: inventory, prefixes, interfaces, VRFs, VLANs, "
-            "MAC addresses, IP addresses, VRRP and BGP peerings"
+            "Sync all supported device data"
         ),
     )
 

@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 13 October 2026*
+*Last updated: 14 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -844,6 +844,8 @@ links.
 
 ### IP address and prefix allocation
 
+Interface IP allocation prefers an exact description match or reuses the sole existing address within the selected prefix, including anycast and VIP addresses. Ambiguous candidates fail instead of creating another address.
+
 Allocates next-available addresses or child prefixes, assigns interface and
 primary IP data, carries tenant/VRF/site/role/status/tags metadata, supports connected
 peer addressing and point-to-point peer derivation, and performs bulk interface
@@ -1084,7 +1086,7 @@ validated in dry-run mode.
 Runs selected synchronizers in read-only dry-run mode for drift reporting,
 including inventory, interface, VRF, VLAN, prefix, IP, VRRP, BGP peering, and BGP
 community state, or executes the supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
-MAC, IP, VRRP, and BGP sequence. Both operations accept per-task keyword arguments
+IP, VRRP, BGP community, and BGP peering sequence. Both operations accept per-task keyword arguments
 inline or from an `nf://` YAML file; `sync_all` can also skip individual stages.
 NFCLI `netbox sync all` accepts inline JSON objects through `sync-kwargs`.
 Drift assessment can treat deletion-only differences as in sync while retaining
@@ -1099,6 +1101,8 @@ can make broad changes and requires careful deletion/filter policy.
 
 The [Containerlab service](workers/containerlab/services_containerlab_service.md)
 manages containerized network labs.
+
+Both tasks expose the same nine categories. Disabled categories return `None`; failures return `False`. Detailed child dry-run diffs are keyed by category.
 
 ### Topology deployment
 

@@ -201,9 +201,9 @@ class TestSyncAllOrchestration:
                 "interfaces": {"device-1": {}, "other-device": {}},
             },
         ),
-        ("sync_mac_addresses", {"device-1": {}}),
         ("sync_device_ip", {"device-1": {}}),
         ("sync_vrrp", {"device-1": {}}),
+        ("sync_bgp_community", {"route_targets": {}, "communities": {}}),
         ("sync_bgp_peerings", {"device-1": {}}),
     ]
     RESULT_CATEGORIES = {
@@ -212,9 +212,9 @@ class TestSyncAllOrchestration:
         "sync_device_prefixes": "prefixes",
         "sync_vrfs": "vrfs",
         "sync_device_interfaces": "interfaces",
-        "sync_mac_addresses": "mac_addresses",
         "sync_device_ip": "ip_addresses",
         "sync_vrrp": "vrrp",
+        "sync_bgp_community": "bgp_communities",
         "sync_bgp_peerings": "bgp_peerings",
     }
 
@@ -233,10 +233,6 @@ class TestSyncAllOrchestration:
                     calls.append(_task_name) or Result(task=_task_name, result=_result)
                 ),
             )
-        worker.sync_bgp_community = lambda **kwargs: Result(
-            task="sync_bgp_community",
-            result={"route_targets": {}, "communities": {}},
-        )
         return worker
 
     @staticmethod
@@ -293,7 +289,11 @@ class TestSyncAllOrchestration:
             check_vrrp=False,
         )
 
-        assert result.result["device-1"] == {"vrfs": False, "in_sync": False}
+        assert result.result["device-1"] == {
+            **dict.fromkeys(self.RESULT_CATEGORIES.values()),
+            "vrfs": False,
+            "in_sync": False,
+        }
         assert result.diff["vrfs"]["routing_policies"]["create"] == ["RPL1"]
 
     def test_check_sync_detects_route_target_plan(self) -> None:
@@ -320,7 +320,11 @@ class TestSyncAllOrchestration:
             check_vrrp=False,
         )
 
-        assert result.result["device-1"] == {"vrfs": False, "in_sync": False}
+        assert result.result["device-1"] == {
+            **dict.fromkeys(self.RESULT_CATEGORIES.values()),
+            "vrfs": False,
+            "in_sync": False,
+        }
         assert result.diff["vrfs"]["route_targets"]["create"] == ["65000:1"]
 
     @pytest.mark.parametrize(
@@ -359,6 +363,7 @@ class TestSyncAllOrchestration:
         )
 
         assert result.result["device-1"] == {
+            **dict.fromkeys(self.RESULT_CATEGORIES.values()),
             "interfaces": expected,
             "in_sync": expected,
         }
@@ -399,6 +404,7 @@ class TestSyncAllOrchestration:
         )
 
         assert result.result["device-1"] == {
+            **dict.fromkeys(self.RESULT_CATEGORIES.values()),
             "bgp_communities": False,
             "in_sync": False,
         }
@@ -436,8 +442,16 @@ class TestSyncAllOrchestration:
             check_bgp_communities=False,
         )
 
-        assert result.result["device-1"] == {"vrrp": False, "in_sync": False}
-        assert result.result["device-2"] == {"vrrp": True, "in_sync": True}
+        assert result.result["device-1"] == {
+            **dict.fromkeys(self.RESULT_CATEGORIES.values()),
+            "vrrp": False,
+            "in_sync": False,
+        }
+        assert result.result["device-2"] == {
+            **dict.fromkeys(self.RESULT_CATEGORIES.values()),
+            "vrrp": True,
+            "in_sync": True,
+        }
         assert result.diff["vrrp"] == vrrp_plan
 
     def test_check_sync_passes_per_task_sync_kwargs(self) -> None:
@@ -509,6 +523,62 @@ sync_device_interfaces:
         assert received["filter_by_name"] == "Loopback*"
         assert received["dry_run"] is True
 
+    def test_sync_all_preserves_successful_devices_after_partial_failure(self) -> None:
+        worker = self._worker([])
+        worker.sync_device_inventory = lambda **kwargs: Result(
+            task="sync_device_inventory",
+            failed=True,
+            resources_failed=["device-1"],
+            result={"device-2": {"updated": ["chassis"]}},
+        )
+        result = NetboxDevicesTasks.sync_all(
+            worker, self._job(), devices=["device-1", "device-2"]
+        )
+        assert result.failed
+        assert result.result["device-1"]["inventory"] is False
+        assert result.result["device-2"]["inventory"] == {"updated": ["chassis"]}
+        assert result.result["device-2"]["prefixes"] is None
+
+    def test_dry_run_preserves_child_data(self) -> None:
+        worker = self._worker([])
+        preview = {"route_targets": {"create": ["65000:1"]}, "communities": {}}
+
+        def sync_communities(**kwargs: Any) -> Result:
+            assert kwargs["dry_run"] is True
+            return Result(task="sync_bgp_community", result=preview, diff=preview)
+
+        worker.sync_bgp_community = sync_communities
+        result = NetboxDevicesTasks.sync_all(
+            worker, self._job(), devices=["device-1"], dry_run=True
+        )
+        assert result.result["device-1"]["bgp_communities"] == preview
+        assert result.diff["bgp_communities"] == preview
+        assert set(result.diff) == set(self.RESULT_CATEGORIES.values())
+
+    @pytest.mark.parametrize("failed", [True, False])
+    def test_check_sync_marks_failed_devices(self, failed: bool) -> None:
+        worker = self._worker([])
+        worker.sync_device_inventory = lambda **kwargs: Result(
+            task="sync_device_inventory",
+            failed=failed,
+            resources_failed=["device-1"],
+            diff={"device-2": {}},
+        )
+        result = NetboxDevicesTasks.check_device_sync(
+            worker,
+            self._job(),
+            devices=["device-1", "device-2"],
+            **{
+                f"check_{category}": False
+                for category in self.RESULT_CATEGORIES.values()
+                if category != "inventory"
+            },
+        )
+        assert result.result["device-1"]["inventory"] is False
+        assert result.result["device-2"]["inventory"] is True
+        assert result.resources_failed == ["device-1"]
+        assert result.failed is failed
+
     @pytest.mark.parametrize("failed_task, failed_result", TASKS)
     def test_sync_all_stops_after_failed_stage(
         self, failed_task: str, failed_result: dict
@@ -536,6 +606,8 @@ sync_device_interfaces:
         )
 
         assert result.failed
+        assert result.result["device-1"][self.RESULT_CATEGORIES[failed_task]] is False
+        assert set(result.result["device-1"]) == set(self.RESULT_CATEGORIES.values())
         task_names = [task_name for task_name, _ in self.TASKS]
         assert calls == task_names[: task_names.index(failed_task) + 1]
 
@@ -554,11 +626,8 @@ sync_device_interfaces:
         assert calls == [
             task_name for task_name, _ in self.TASKS if task_name != skipped_task
         ]
-        assert self.RESULT_CATEGORIES[skipped_task] not in result.result["device-1"]
-        assert set(result.result["device-1"]) == (
-            set(self.RESULT_CATEGORIES.values())
-            - {self.RESULT_CATEGORIES[skipped_task]}
-        )
+        assert result.result["device-1"][self.RESULT_CATEGORIES[skipped_task]] is None
+        assert set(result.result["device-1"]) == (set(self.RESULT_CATEGORIES.values()))
 
 
 class TestSyncResourcesFailed:
@@ -1310,7 +1379,7 @@ class TestCheckDeviceSync:
         ), "check_device_sync modified NetBox serial - writes must not occur"
 
     def test_check_device_sync_selective_interfaces_only(self, nfclient):
-        """Only interfaces category returned when other checks disabled."""
+        """Check interfaces while retaining disabled categories as None."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
@@ -1332,32 +1401,24 @@ class TestCheckDeviceSync:
 
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert set(res["diff"]) == self.ALL_CATEGORIES
+            assert isinstance(res["diff"]["interfaces"], dict)
+            for disabled_category in self.ALL_CATEGORIES - {"interfaces"}:
+                assert res["diff"][disabled_category] is None
             for device in self.DEVICES:
-                assert device in res["result"], f"{worker} missing {device} in result"
                 device_data = res["result"][device]
-                assert (
-                    "interfaces" in device_data
-                ), f"{worker}:{device} missing interfaces"
-                assert (
-                    "inventory" not in device_data
-                ), f"{worker}:{device} inventory should not be present"
-                assert "vlans" not in device_data
-                assert "prefixes" not in device_data
-                assert (
-                    "ip_addresses" not in device_data
-                ), f"{worker}:{device} ip_addresses should not be present"
-                assert (
-                    "bgp_peerings" not in device_data
-                ), f"{worker}:{device} bgp_peerings should not be present"
-            assert "interfaces" in res["diff"], f"{worker} diff missing interfaces"
-            assert (
-                "inventory" not in res["diff"]
-            ), f"{worker} diff should not have inventory"
-            assert "vlans" not in res["diff"]
-            assert "prefixes" not in res["diff"]
+                assert set(device_data) == self.ALL_CATEGORIES | {
+                    "in_sync"
+                }, f"{worker}:{device} returned unexpected categories"
+                assert isinstance(device_data["interfaces"], bool)
+                assert device_data["in_sync"] == device_data["interfaces"]
+                for disabled_category in self.ALL_CATEGORIES - {"interfaces"}:
+                    assert (
+                        device_data[disabled_category] is None
+                    ), f"{worker}:{device}:{disabled_category} should be None"
 
     def test_check_device_sync_selective_ip_only(self, nfclient):
-        """Only the IP address category is returned."""
+        """Check ip_addresses while retaining disabled categories as None."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
@@ -1379,23 +1440,24 @@ class TestCheckDeviceSync:
 
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
+            assert set(res["diff"]) == self.ALL_CATEGORIES
+            assert isinstance(res["diff"]["ip_addresses"], dict)
+            for disabled_category in self.ALL_CATEGORIES - {"ip_addresses"}:
+                assert res["diff"][disabled_category] is None
             for device in self.DEVICES:
                 device_data = res["result"][device]
-                assert (
-                    "inventory" not in device_data
-                ), f"{worker}:{device} inventory should not be present"
-                assert (
-                    "interfaces" not in device_data
-                ), f"{worker}:{device} interfaces should not be present"
-                assert (
-                    "ip_addresses" in device_data
-                ), f"{worker}:{device} missing ip_addresses"
-                assert (
-                    "bgp_peerings" not in device_data
-                ), f"{worker}:{device} bgp_peerings should not be present"
+                assert set(device_data) == self.ALL_CATEGORIES | {
+                    "in_sync"
+                }, f"{worker}:{device} returned unexpected categories"
+                assert isinstance(device_data["ip_addresses"], bool)
+                assert device_data["in_sync"] == device_data["ip_addresses"]
+                for disabled_category in self.ALL_CATEGORIES - {"ip_addresses"}:
+                    assert (
+                        device_data[disabled_category] is None
+                    ), f"{worker}:{device}:{disabled_category} should be None"
 
     def test_check_device_sync_selective_inventory_only(self, nfclient):
-        """Inventory check can be explicitly enabled while other checks are disabled."""
+        """Check inventory while retaining disabled categories as None."""
         ret = nfclient.run_job(
             "netbox",
             "check_device_sync",
@@ -1417,15 +1479,21 @@ class TestCheckDeviceSync:
 
         for worker, res in ret.items():
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            assert "inventory" in res["diff"], f"{worker} diff missing inventory"
+            assert set(res["diff"]) == self.ALL_CATEGORIES
+            assert isinstance(res["diff"]["inventory"], dict)
+            for disabled_category in self.ALL_CATEGORIES - {"inventory"}:
+                assert res["diff"][disabled_category] is None
             for device in self.DEVICES:
                 device_data = res["result"][device]
-                assert set(device_data) == {
-                    "inventory",
-                    "in_sync",
+                assert set(device_data) == self.ALL_CATEGORIES | {
+                    "in_sync"
                 }, f"{worker}:{device} returned unexpected categories"
                 assert isinstance(device_data["inventory"], bool)
                 assert device_data["in_sync"] == device_data["inventory"]
+                for disabled_category in self.ALL_CATEGORIES - {"inventory"}:
+                    assert (
+                        device_data[disabled_category] is None
+                    ), f"{worker}:{device}:{disabled_category} should be None"
 
     def test_check_device_sync_with_nornir_filter(self, nfclient):
         """Devices resolved via the FakeNOS spine name filter."""
@@ -1473,7 +1541,7 @@ class TestSyncAll:
         "vlans",
         "prefixes",
         "interfaces",
-        "mac_addresses",
+        "bgp_communities",
         "ip_addresses",
         "vrrp",
         "bgp_peerings",
@@ -1561,10 +1629,6 @@ class TestSyncAll:
             ip_address.delete()
         # Delete IPs only from this test area's devices.
         delete_test_sync_ips(None, devices)
-        # MAC addresses assigned to this test area's devices.
-        for device in devices:
-            for mac in nb.dcim.mac_addresses.filter(device=device):
-                mac.delete()
         # TEST_SYNC interfaces - delete children before parents to avoid 409 conflicts.
         # Exclude 'Ethernet9': pre-existing interface updated by sync; needed by TestSyncMacAddresses.
         for device in devices:
@@ -1585,6 +1649,12 @@ class TestSyncAll:
     def _sync(nfclient, devices, **extra_kwargs):
         """Run sync_all and return the result dict."""
         extra_kwargs.setdefault("sync_kwargs", {"sync_vrfs": False})
+        sync_kwargs = extra_kwargs["sync_kwargs"]
+        extra_kwargs["sync_kwargs"] = (
+            sync_kwargs
+            if extra_kwargs.get("dry_run")
+            else {"sync_bgp_community": False, **sync_kwargs}
+        )
         return nfclient.run_job(
             "netbox",
             "sync_all",
@@ -1596,15 +1666,6 @@ class TestSyncAll:
     def _get_nb_intf(device, name):
         """Fetch a single interface record from NetBox. Returns None if not found."""
         return get_pynetbox(None).dcim.interfaces.get(device=device, name=name)
-
-    @staticmethod
-    def _get_nb_macs(device, interface):
-        """Return list of MAC address records for the given device interface."""
-        return list(
-            get_pynetbox(None).dcim.mac_addresses.filter(
-                device=device, interface=interface
-            )
-        )
 
     @staticmethod
     def _get_nb_ips(device, interface):
@@ -1634,6 +1695,9 @@ class TestSyncAll:
                     f"{self.ALL_CATEGORIES - device_data.keys()}"
                 )
                 for category in self.ALL_CATEGORIES:
+                    if category == "vrfs":
+                        assert device_data[category] is None
+                        continue
                     assert isinstance(device_data[category], dict), (
                         f"{worker}:{device}:{category} result should be a dict, "
                         f"got {type(device_data[category])}"
@@ -1713,27 +1777,6 @@ class TestSyncAll:
             nb_intf.type.value == "virtual"
         ), f"{self.SPINE1_TEST_INTF} type mismatch: got {nb_intf.type.value!r}"
 
-    def test_sync_all_creates_mac_addresses_in_netbox(self, nfclient):
-        """After cleanup, sync_all must create MAC addresses in NetBox;
-        spine-1 MAC must appear on Ethernet9."""
-        ret = self._sync(nfclient, self.SPINE_DEVICES)
-        pprint.pprint(ret, width=200)
-
-        for worker, res in ret.items():
-            assert not res["failed"], f"{worker} failed - {res.get('errors')}"
-            mac_data = res["result"]["fn-ceos-sp-1"].get("mac_addresses", {})
-            assert mac_data.get(
-                "created"
-            ), f"{worker}:fn-ceos-sp-1 no MACs created after cleanup"
-
-        # Out-of-band: verify spine-1 MAC exists on Ethernet9
-        macs = self._get_nb_macs("fn-ceos-sp-1", "Ethernet9")
-        mac_addresses = [str(m.mac_address).lower() for m in macs]
-        assert self.SPINE1_TEST_MAC in mac_addresses, (
-            f"MAC {self.SPINE1_TEST_MAC!r} not found on fn-ceos-sp-1:Ethernet9 "
-            f"after sync_all; found: {mac_addresses}"
-        )
-
     def test_sync_all_creates_ip_addresses_in_netbox(self, nfclient):
         """After cleanup, sync_all must create IP addresses in NetBox;
         spine-1 Ethernet9 IP must appear."""
@@ -1798,7 +1841,7 @@ class TestSyncAll:
                 "failed"
             ], f"First sync_all failed for {worker}: {res.get('errors')}"
 
-        # Second run - must be fully in_sync for interfaces/MACs/IPs
+        # Second run - must be fully in_sync for interfaces/IPs
         ret = self._sync(nfclient, self.SPINE_DEVICES)
         pprint.pprint(ret, width=200)
 
@@ -1806,7 +1849,6 @@ class TestSyncAll:
             assert not res["failed"], f"{worker} failed - {res.get('errors')}"
             for device in self.SPINE_DEVICES:
                 intf_data = res["result"][device].get("interfaces", {})
-                mac_data = res["result"][device].get("mac_addresses", {})
                 ip_data = res["result"][device].get("ip_addresses", {})
                 vrrp_data = res["result"][device].get("vrrp", {})
                 inventory_data = res["result"][device].get("inventory", {})
@@ -1816,10 +1858,6 @@ class TestSyncAll:
                 assert not intf_data.get("created"), (
                     f"{worker}:{device} unexpected interface creates on 2nd run: "
                     f"{intf_data.get('created')}"
-                )
-                assert not mac_data.get("created"), (
-                    f"{worker}:{device} unexpected MAC creates on 2nd run: "
-                    f"{mac_data.get('created')}"
                 )
                 assert not ip_data.get("created"), (
                     f"{worker}:{device} unexpected IP creates on 2nd run: "
@@ -1832,9 +1870,6 @@ class TestSyncAll:
                 assert intf_data.get(
                     "in_sync"
                 ), f"{worker}:{device} no interfaces in_sync on 2nd run"
-                assert mac_data.get(
-                    "in_sync"
-                ), f"{worker}:{device} no MACs in_sync on 2nd run"
                 assert ip_data.get(
                     "in_sync"
                 ), f"{worker}:{device} no IPs in_sync on 2nd run"

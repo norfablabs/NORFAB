@@ -1,3 +1,16 @@
+# 0.24.13 (draft)
+
+## BUGS
+
+1. Fixed Netbox `create_ip`, including calls from `design_deploy`, allocating another address when the requested interface already had an IP within the selected prefix with an empty or different description. Interface reuse now prefers an exact description match, otherwise reuses the sole candidate, including anycast and VIP addresses. Ambiguous candidates fail instead of allocating another address.
+2. Fixed Netbox `create_ip` reporting a newly allocated address as unchanged when no subsequent metadata or device updates were needed. The task now preserves its created status so `design_deploy` includes the address in its creation results.
+
+## ENHANCEMENTS
+
+1. Netbox `sync_all` and `check_device_sync` now expose the same nine sync categories, including BGP communities and excluding MAC addresses. Per-device results retain every category, with `False` for failures and `None` for disabled or unexecuted stages. Both tasks return child dry-run diffs keyed by category, and drift checks propagate child failures and failed resources. Standalone MAC address synchronization remains available.
+
+---
+
 # 0.24.12
 
 ## BUGS

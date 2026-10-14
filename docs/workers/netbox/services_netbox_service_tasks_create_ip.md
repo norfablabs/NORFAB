@@ -15,6 +15,8 @@ An existing assignment to the requested interface is reused first. If none is fo
 
 The task can also be called from Nornir templates through the [netbox.create_ip Jinja2 filter](../nornir/services_nornir_service_jinja2_filters.md#netboxcreate_ip).
 
+Interface reuse searches by device, interface, and parent prefix. A supplied description prefers an exact match; if none matches, the sole candidate is reused and its description is updated. Multiple remaining candidates cause an ambiguity error. This applies to ordinary, anycast, and VIP addresses, before indexed allocation. Description-only and VRRP-group lookups retain their description matching behavior.
+
 ## VRRP virtual IP allocation
 
 Supply `vrrp_group` with an existing, uniquely named VRRPv2 or VRRPv3 group.
