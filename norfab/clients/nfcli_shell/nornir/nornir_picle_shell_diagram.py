@@ -1,9 +1,10 @@
+import builtins
 import copy
 import logging
 import os
 import time
 from enum import Enum
-from fnmatch import fnmatchcase
+from fnmatch import fnmatch
 from typing import List, Union
 
 from picle.models import PipeFunctionsModel
@@ -287,6 +288,8 @@ class NornirDiagramShell(ClientRunJobArgs):
         kwargs.pop("nowait", False)
         ctime = time.strftime("%Y-%m-%d_%H-%M-%S")
         FM = kwargs.pop("FM", [])
+        if isinstance(FM, str):
+            FM = [pattern.strip() for pattern in FM.split(",")]
         n2g_data = {}  # to store collected from devices data
         diagram_plugin = kwargs.pop("format")
         data_plugin = kwargs.pop("data_plugin")
@@ -317,16 +320,10 @@ class NornirDiagramShell(ClientRunJobArgs):
             ".".join(i.split(".")[:-1])
             for i in list_ttp_templates()["misc"]["N2G"][template_dir]
         ]
-        # if FM filter provided, leave only supported platforms
-        platforms = set(
-            [p for p in n2g_supported_platorms if any(fnmatchcase(p, fm) for fm in FM)]
-            if FM
-            else n2g_supported_platorms
-        )
+        platforms = set(n2g_supported_platorms)
 
         # retrieve output on a per-platform basis
         for index, platform in enumerate(platforms):
-            n2g_data.setdefault(platform, [])
             cli_kwargs = copy.deepcopy(kwargs)
             cli_kwargs["FM"] = [platform]
             cli_kwargs["enable"] = True
@@ -336,9 +333,41 @@ class NornirDiagramShell(ClientRunJobArgs):
                 log_level="CRITICAL",
             )
             ttp_inputs_load = parser.get_input_load()
+            n2g_platform = next(iter(ttp_inputs_load))
             for template_name, inputs in ttp_inputs_load.items():
                 for input_name, input_params in inputs.items():
+                    cli_kwargs.update(input_params.get("kwargs", {}))
                     cli_kwargs["commands"] = input_params["commands"]
+                    cli_kwargs["FM"] = input_params.get("platform", [platform])
+            if isinstance(cli_kwargs["FM"], str):
+                cli_kwargs["FM"] = [cli_kwargs["FM"]]
+            if FM:
+                cli_kwargs["FM"] = [
+                    p
+                    for p in cli_kwargs["FM"]
+                    if any(fnmatch(p.lower(), fm.lower()) for fm in FM)
+                ]
+                if not cli_kwargs["FM"]:
+                    continue
+            host_results = builtins.NFCLIENT.run_job(
+                "nornir",
+                "get_nornir_hosts",
+                workers=workers,
+                kwargs={
+                    key: value
+                    for key, value in cli_kwargs.items()
+                    if key in NorniHostsFilters.model_fields
+                },
+                timeout=timeout,
+            )
+            if host_results is None:
+                return "Failed to retrieve Nornir hosts for diagram collection"
+            for worker, result in host_results.items():
+                if result["failed"]:
+                    return f"Failed to retrieve Nornir hosts from '{worker}': {result.get('errors')}"
+            if not any(result["result"] for result in host_results.values()):
+                continue
+            n2g_data.setdefault(n2g_platform, [])
             # collect commands output from devices
             job_results = run_future_job(
                 "nornir",
@@ -355,8 +384,11 @@ class NornirDiagramShell(ClientRunJobArgs):
                     log.error(f"{worker} failed to collect output")
                     continue
                 for host_name, host_result in results["result"].items():
-                    n2g_data[platform].append("\n".join(host_result.values()))
+                    n2g_data[n2g_platform].append("\n".join(host_result.values()))
                     hosts_processed.add(host_name)
+
+        if not n2g_data:
+            return f"No hosts match supported diagram platforms and host filters (FM: {FM})"
 
         # create, populate and save diagram
         try:

@@ -1,9 +1,11 @@
-# 0.24.13 (draft)
+# 0.24.13
 
 ## BUGS
 
 1. Fixed Netbox `create_ip`, including calls from `design_deploy`, allocating another address when the requested interface already had an IP within the selected prefix with an empty or different description. Interface reuse now prefers an exact description match, otherwise reuses the sole candidate, including anycast and VIP addresses. Ambiguous candidates fail instead of allocating another address.
 2. Fixed Netbox `create_ip` reporting a newly allocated address as unchanged when no subsequent metadata or device updates were needed. The task now preserves its created status so `design_deploy` includes the address in its creation results.
+
+3. Fixed NFCLI Nornir diagrams producing empty graphs because platform filters used template filenames, collected output used the wrong TTP template name, and template command settings such as prompt preservation were ignored. Platform filters now accept strings and lists with case-insensitive matching across operating systems, and collection skips platforms with no matching hosts.
 
 ## ENHANCEMENTS
 
