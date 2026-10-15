@@ -7686,20 +7686,7 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1533</span>
-<span class="normal">1534</span>
-<span class="normal">1535</span>
-<span class="normal">1536</span>
-<span class="normal">1537</span>
-<span class="normal">1538</span>
-<span class="normal">1539</span>
-<span class="normal">1540</span>
-<span class="normal">1541</span>
-<span class="normal">1542</span>
-<span class="normal">1543</span>
-<span class="normal">1544</span>
-<span class="normal">1545</span>
-<span class="normal">1546</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1546</span>
 <span class="normal">1547</span>
 <span class="normal">1548</span>
 <span class="normal">1549</span>
@@ -8005,7 +7992,20 @@ the site of the alphabetically first device reporting a prefix is used.</p>
 <span class="normal">1849</span>
 <span class="normal">1850</span>
 <span class="normal">1851</span>
-<span class="normal">1852</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1852</span>
+<span class="normal">1853</span>
+<span class="normal">1854</span>
+<span class="normal">1855</span>
+<span class="normal">1856</span>
+<span class="normal">1857</span>
+<span class="normal">1858</span>
+<span class="normal">1859</span>
+<span class="normal">1860</span>
+<span class="normal">1861</span>
+<span class="normal">1862</span>
+<span class="normal">1863</span>
+<span class="normal">1864</span>
+<span class="normal">1865</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDevicePrefixesInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDevicePrefixesResult</span><span class="p">,</span>

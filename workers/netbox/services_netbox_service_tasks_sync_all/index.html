@@ -7152,9 +7152,9 @@ fixed sequence:</p>
 <li><strong>interfaces</strong> — calls <code>sync_device_interfaces</code></li>
 <li><strong>vrfs</strong> — calls <code>sync_vrfs</code></li>
 <li><strong>vlans</strong> — calls <code>sync_vlans</code></li>
-<li><strong>mac_addresses</strong> — calls <code>sync_mac_addresses</code></li>
 <li><strong>ip_addresses</strong> — calls <code>sync_device_ip</code></li>
 <li><strong>vrrp</strong> — calls <code>sync_vrrp</code></li>
+<li><strong>bgp_communities</strong> - calls <code>sync_bgp_community</code></li>
 <li><strong>bgp_peerings</strong> — calls <code>sync_bgp_peerings</code></li>
 </ol>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¤</a></h2>
@@ -7162,7 +7162,7 @@ fixed sequence:</p>
 compares it against NetBox state, and applies reconciliation operations. When <code>dry_run=True</code>, all tasks preview changes
 without writing. When <code>with_approval=True</code>, each stage waits for user confirmation before applying changes.
 If VLAN synchronization fails, <code>sync_all</code> returns immediately and does not run
-MAC address, IP address, VRRP, or BGP peering synchronization.</p>
+IP address, VRRP, BGP community, or BGP peering synchronization.</p>
 <h2 id="execution-modes">Execution Modes<a class="headerlink" href="#execution-modes" title="Permanent link">¤</a></h2>
 <p><strong>Dry-run mode</strong> (<code>dry_run=True</code>) previews all changes without writing to NetBox.</p>
 <p><strong>With Approval</strong> — Pass <code>with_approval=True</code> to use the interactive NFCLI workflow. Each sync stage displays its preview, and waits for review before applying that stage. Declining a stage stops <code>sync_all</code> at that point, returns the declined dry-run result, and skips later stages. Any earlier approved stages remain applied.</p>
@@ -7200,8 +7200,8 @@ task as keyword arguments:</p>
 <span class="w">  </span><span class="nt">interface_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/interface_map.yaml</span>
 <span class="w">  </span><span class="nt">vlan_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nf://netbox/vlan_map.yaml</span>
 
-<span class="nt">sync_mac_addresses</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">filter_by_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ethernet*</span>
+<span class="nt">sync_bgp_community</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">community_name_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">community_name</span>
 
 <span class="nt">sync_device_ip</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">ignore_vrf</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
@@ -7218,7 +7218,7 @@ task as keyword arguments:</p>
 </code></pre></div>
 <p>The supported keys are <code>sync_device_inventory</code>, <code>sync_vlans</code>,
 <code>sync_device_prefixes</code>, <code>sync_vrfs</code>, <code>sync_device_interfaces</code>,
-<code>sync_mac_addresses</code>, <code>sync_device_ip</code>, <code>sync_vrrp</code>, and <code>sync_bgp_peerings</code>. Refer to each
+<code>sync_bgp_community</code>, <code>sync_device_ip</code>, <code>sync_vrrp</code>, and <code>sync_bgp_peerings</code>. Refer to each
 task's documentation for its accepted arguments. Missing keys run with the
 subordinate task's defaults. Set a key to <code>false</code> to skip that task and continue
 with the next stage:</p>
@@ -7228,6 +7228,7 @@ with the next stage:</p>
 <p>Keep <code>instance</code>, <code>timeout</code>, <code>devices</code>, <code>branch</code>, <code>dry_run</code>, and <code>with_approval</code>
 at the <code>sync_all</code> level rather than repeating them inside a task dictionary.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">¤</a></h2>
+<p>Both coordinated tasks include inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities, and BGP peerings. Every selected device has all nine category keys. Disabled categories are <code>None</code>; failed categories are <code>False</code>. Sync results contain child task summaries or dry-run previews, while checks return booleans for drift state. The <code>diff</code> dictionary retains child dry-run details under the same category keys, with <code>None</code> for unexecuted checks or stages. MAC synchronization is available through its standalone task.</p>
 <p>The result structure aggregates the outcomes of all nine subordinate sync tasks. When <code>dry_run=True</code> the same structure is returned but no changes are written to NetBox. VLAN, prefix, and VRF results describe shared NetBox objects, so the same shared result is included under each selected device. The VLAN category retains separate object and <code>interfaces</code> sections. The VRF category retains separate <code>vrfs</code>, <code>route_targets</code>, <code>routing_policies</code>, and <code>interfaces</code> sections. Each <code>interfaces</code> section contains only the current device.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
     <span class="c1"># per-device results — one entry per resolved device</span>
@@ -7296,11 +7297,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
                 <span class="s2">&quot;delete&quot;</span><span class="p">:</span>  <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
                 <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
             <span class="p">},</span>
-            <span class="s2">&quot;mac_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
-                <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
-                <span class="s2">&quot;in_sync&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
-            <span class="p">},</span>
+            <span class="s2">&quot;bgp_communities&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;route_targets&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;communities&quot;</span><span class="p">:</span> <span class="p">{}},</span>
             <span class="s2">&quot;ip_addresses&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
                 <span class="s2">&quot;updated&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
@@ -7384,7 +7381,7 @@ at the <code>sync_all</code> level rather than repeating them inside a task dict
 root
 └── netbox:    Netbox service
     └── sync:    Sync Netbox data
-        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, MAC addresses, IP addresses, VRRP and BGP peerings
+        └── all:    Sync inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP, BGP communities and BGP peerings
             ├── timeout:    Job timeout
             ├── workers:    Filter worker to target, default &#39;any&#39;
             ├── verbose-result:    Control output details, default &#39;False&#39;
@@ -7418,8 +7415,8 @@ nf#
     <div class="doc doc-contents first">
 
         <p>Synchronize all device data from live devices into NetBox in sequence:
-inventory → prefixes → interfaces → VRFs → VLANs → MAC addresses →
-IP addresses → VRRP → BGP peerings.</p>
+inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP,
+BGP communities, and BGP peerings.</p>
 <p>Pass <code>dry_run=True</code> to preview changes without writing to NetBox.
 Pass <code>with_approval=True</code> to have each sync stage run a dry-run preview,
 ask the interactive client for review, and only then apply that stage.</p>
@@ -7439,9 +7436,9 @@ ask the interactive client for review, and only then apply that stage.</p>
             "interfaces": {"&lt;device&gt;": {"created": [], "updated": [...], "deleted": [], "in_sync": [...]}},
         },
         "interfaces":    {"created": [...], "updated": {...}, "deleted": [...], "in_sync": [...]},
-        "mac_addresses": {"created": [...], "updated": [...], "in_sync": [...]},
         "ip_addresses":  {"created": [...], "updated": [...], "in_sync": [...]},
         "vrrp":          {"created": [...], "updated": [...], "deleted": [...], "in_sync": [...]},
+        "bgp_communities": {"route_targets": {...}, "communities": {...}},
         "bgp_peerings":  {"create": [...],  "update": {...},  "delete": [...],  "in_sync": [...]},
     }
 }
@@ -7500,7 +7497,7 @@ ask the interactive client for review, and only then apply that stage.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Timeout in seconds for Nornir jobs. Defaults to 60.</p>
+                <p>Timeout in seconds for Nornir jobs. Defaults to 600.</p>
               </div>
             </td>
             <td>
@@ -7625,7 +7622,57 @@ to <code>False</code> to skip that task.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Per-device sync results keyed by device name and category.</p>
+                <p>Per-device results with all nine category keys. Successful</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>sections contain child task results, including previews in dry-run</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>mode; failed sections are False and skipped or unexecuted sections</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>are None. Diff contains child diffs keyed by category, with None for</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>unexecuted stages. Errors and failed resources are propagated.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><span title="norfab.models.Result">Result</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Execution stops on a failed stage or declined review.</p>
               </div>
             </td>
           </tr>
@@ -7635,46 +7682,7 @@ to <code>False</code> to skip that task.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\devices_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1533</span>
-<span class="normal">1534</span>
-<span class="normal">1535</span>
-<span class="normal">1536</span>
-<span class="normal">1537</span>
-<span class="normal">1538</span>
-<span class="normal">1539</span>
-<span class="normal">1540</span>
-<span class="normal">1541</span>
-<span class="normal">1542</span>
-<span class="normal">1543</span>
-<span class="normal">1544</span>
-<span class="normal">1545</span>
-<span class="normal">1546</span>
-<span class="normal">1547</span>
-<span class="normal">1548</span>
-<span class="normal">1549</span>
-<span class="normal">1550</span>
-<span class="normal">1551</span>
-<span class="normal">1552</span>
-<span class="normal">1553</span>
-<span class="normal">1554</span>
-<span class="normal">1555</span>
-<span class="normal">1556</span>
-<span class="normal">1557</span>
-<span class="normal">1558</span>
-<span class="normal">1559</span>
-<span class="normal">1560</span>
-<span class="normal">1561</span>
-<span class="normal">1562</span>
-<span class="normal">1563</span>
-<span class="normal">1564</span>
-<span class="normal">1565</span>
-<span class="normal">1566</span>
-<span class="normal">1567</span>
-<span class="normal">1568</span>
-<span class="normal">1569</span>
-<span class="normal">1570</span>
-<span class="normal">1571</span>
-<span class="normal">1572</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1572</span>
 <span class="normal">1573</span>
 <span class="normal">1574</span>
 <span class="normal">1575</span>
@@ -8075,7 +8083,174 @@ to <code>False</code> to skip that task.</p>
 <span class="normal">1970</span>
 <span class="normal">1971</span>
 <span class="normal">1972</span>
-<span class="normal">1973</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1973</span>
+<span class="normal">1974</span>
+<span class="normal">1975</span>
+<span class="normal">1976</span>
+<span class="normal">1977</span>
+<span class="normal">1978</span>
+<span class="normal">1979</span>
+<span class="normal">1980</span>
+<span class="normal">1981</span>
+<span class="normal">1982</span>
+<span class="normal">1983</span>
+<span class="normal">1984</span>
+<span class="normal">1985</span>
+<span class="normal">1986</span>
+<span class="normal">1987</span>
+<span class="normal">1988</span>
+<span class="normal">1989</span>
+<span class="normal">1990</span>
+<span class="normal">1991</span>
+<span class="normal">1992</span>
+<span class="normal">1993</span>
+<span class="normal">1994</span>
+<span class="normal">1995</span>
+<span class="normal">1996</span>
+<span class="normal">1997</span>
+<span class="normal">1998</span>
+<span class="normal">1999</span>
+<span class="normal">2000</span>
+<span class="normal">2001</span>
+<span class="normal">2002</span>
+<span class="normal">2003</span>
+<span class="normal">2004</span>
+<span class="normal">2005</span>
+<span class="normal">2006</span>
+<span class="normal">2007</span>
+<span class="normal">2008</span>
+<span class="normal">2009</span>
+<span class="normal">2010</span>
+<span class="normal">2011</span>
+<span class="normal">2012</span>
+<span class="normal">2013</span>
+<span class="normal">2014</span>
+<span class="normal">2015</span>
+<span class="normal">2016</span>
+<span class="normal">2017</span>
+<span class="normal">2018</span>
+<span class="normal">2019</span>
+<span class="normal">2020</span>
+<span class="normal">2021</span>
+<span class="normal">2022</span>
+<span class="normal">2023</span>
+<span class="normal">2024</span>
+<span class="normal">2025</span>
+<span class="normal">2026</span>
+<span class="normal">2027</span>
+<span class="normal">2028</span>
+<span class="normal">2029</span>
+<span class="normal">2030</span>
+<span class="normal">2031</span>
+<span class="normal">2032</span>
+<span class="normal">2033</span>
+<span class="normal">2034</span>
+<span class="normal">2035</span>
+<span class="normal">2036</span>
+<span class="normal">2037</span>
+<span class="normal">2038</span>
+<span class="normal">2039</span>
+<span class="normal">2040</span>
+<span class="normal">2041</span>
+<span class="normal">2042</span>
+<span class="normal">2043</span>
+<span class="normal">2044</span>
+<span class="normal">2045</span>
+<span class="normal">2046</span>
+<span class="normal">2047</span>
+<span class="normal">2048</span>
+<span class="normal">2049</span>
+<span class="normal">2050</span>
+<span class="normal">2051</span>
+<span class="normal">2052</span>
+<span class="normal">2053</span>
+<span class="normal">2054</span>
+<span class="normal">2055</span>
+<span class="normal">2056</span>
+<span class="normal">2057</span>
+<span class="normal">2058</span>
+<span class="normal">2059</span>
+<span class="normal">2060</span>
+<span class="normal">2061</span>
+<span class="normal">2062</span>
+<span class="normal">2063</span>
+<span class="normal">2064</span>
+<span class="normal">2065</span>
+<span class="normal">2066</span>
+<span class="normal">2067</span>
+<span class="normal">2068</span>
+<span class="normal">2069</span>
+<span class="normal">2070</span>
+<span class="normal">2071</span>
+<span class="normal">2072</span>
+<span class="normal">2073</span>
+<span class="normal">2074</span>
+<span class="normal">2075</span>
+<span class="normal">2076</span>
+<span class="normal">2077</span>
+<span class="normal">2078</span>
+<span class="normal">2079</span>
+<span class="normal">2080</span>
+<span class="normal">2081</span>
+<span class="normal">2082</span>
+<span class="normal">2083</span>
+<span class="normal">2084</span>
+<span class="normal">2085</span>
+<span class="normal">2086</span>
+<span class="normal">2087</span>
+<span class="normal">2088</span>
+<span class="normal">2089</span>
+<span class="normal">2090</span>
+<span class="normal">2091</span>
+<span class="normal">2092</span>
+<span class="normal">2093</span>
+<span class="normal">2094</span>
+<span class="normal">2095</span>
+<span class="normal">2096</span>
+<span class="normal">2097</span>
+<span class="normal">2098</span>
+<span class="normal">2099</span>
+<span class="normal">2100</span>
+<span class="normal">2101</span>
+<span class="normal">2102</span>
+<span class="normal">2103</span>
+<span class="normal">2104</span>
+<span class="normal">2105</span>
+<span class="normal">2106</span>
+<span class="normal">2107</span>
+<span class="normal">2108</span>
+<span class="normal">2109</span>
+<span class="normal">2110</span>
+<span class="normal">2111</span>
+<span class="normal">2112</span>
+<span class="normal">2113</span>
+<span class="normal">2114</span>
+<span class="normal">2115</span>
+<span class="normal">2116</span>
+<span class="normal">2117</span>
+<span class="normal">2118</span>
+<span class="normal">2119</span>
+<span class="normal">2120</span>
+<span class="normal">2121</span>
+<span class="normal">2122</span>
+<span class="normal">2123</span>
+<span class="normal">2124</span>
+<span class="normal">2125</span>
+<span class="normal">2126</span>
+<span class="normal">2127</span>
+<span class="normal">2128</span>
+<span class="normal">2129</span>
+<span class="normal">2130</span>
+<span class="normal">2131</span>
+<span class="normal">2132</span>
+<span class="normal">2133</span>
+<span class="normal">2134</span>
+<span class="normal">2135</span>
+<span class="normal">2136</span>
+<span class="normal">2137</span>
+<span class="normal">2138</span>
+<span class="normal">2139</span>
+<span class="normal">2140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncAllInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncAllResult</span><span class="p">,</span>
@@ -8103,8 +8278,8 @@ to <code>False</code> to skip that task.</p>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Synchronize all device data from live devices into NetBox in sequence:</span>
-<span class="sd">    inventory → prefixes → interfaces → VRFs → VLANs → MAC addresses →</span>
-<span class="sd">    IP addresses → VRRP → BGP peerings.</span>
+<span class="sd">    inventory, prefixes, interfaces, VRFs, VLANs, IP addresses, VRRP,</span>
+<span class="sd">    BGP communities, and BGP peerings.</span>
 
 <span class="sd">    Pass ``dry_run=True`` to preview changes without writing to NetBox.</span>
 <span class="sd">    Pass ``with_approval=True`` to have each sync stage run a dry-run preview,</span>
@@ -8127,9 +8302,9 @@ to <code>False</code> to skip that task.</p>
 <span class="sd">                    &quot;interfaces&quot;: {&quot;&lt;device&gt;&quot;: {&quot;created&quot;: [], &quot;updated&quot;: [...], &quot;deleted&quot;: [], &quot;in_sync&quot;: [...]}},</span>
 <span class="sd">                },</span>
 <span class="sd">                &quot;interfaces&quot;:    {&quot;created&quot;: [...], &quot;updated&quot;: {...}, &quot;deleted&quot;: [...], &quot;in_sync&quot;: [...]},</span>
-<span class="sd">                &quot;mac_addresses&quot;: {&quot;created&quot;: [...], &quot;updated&quot;: [...], &quot;in_sync&quot;: [...]},</span>
 <span class="sd">                &quot;ip_addresses&quot;:  {&quot;created&quot;: [...], &quot;updated&quot;: [...], &quot;in_sync&quot;: [...]},</span>
 <span class="sd">                &quot;vrrp&quot;:          {&quot;created&quot;: [...], &quot;updated&quot;: [...], &quot;deleted&quot;: [...], &quot;in_sync&quot;: [...]},</span>
+<span class="sd">                &quot;bgp_communities&quot;: {&quot;route_targets&quot;: {...}, &quot;communities&quot;: {...}},</span>
 <span class="sd">                &quot;bgp_peerings&quot;:  {&quot;create&quot;: [...],  &quot;update&quot;: {...},  &quot;delete&quot;: [...],  &quot;in_sync&quot;: [...]},</span>
 <span class="sd">            }</span>
 <span class="sd">        }</span>
@@ -8137,7 +8312,7 @@ to <code>False</code> to skip that task.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        job: NorFab Job object.</span>
 <span class="sd">        instance (str, optional): NetBox instance name.</span>
-<span class="sd">        timeout (int): Timeout in seconds for Nornir jobs. Defaults to 60.</span>
+<span class="sd">        timeout (int): Timeout in seconds for Nornir jobs. Defaults to 600.</span>
 <span class="sd">        devices (list, optional): List of device names to sync.</span>
 <span class="sd">        branch (str, optional): NetBox branching plugin branch name.</span>
 <span class="sd">        dry_run (bool): If True, preview changes without writing to NetBox. Defaults to False.</span>
@@ -8149,7 +8324,12 @@ to <code>False</code> to skip that task.</p>
 <span class="sd">        **kwargs: Nornir host filter arguments (e.g. ``FL``, ``FC``, ``FB``).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Result: Per-device sync results keyed by device name and category.</span>
+<span class="sd">        Result: Per-device results with all nine category keys. Successful</span>
+<span class="sd">        sections contain child task results, including previews in dry-run</span>
+<span class="sd">        mode; failed sections are False and skipped or unexecuted sections</span>
+<span class="sd">        are None. Diff contains child diffs keyed by category, with None for</span>
+<span class="sd">        unexecuted stages. Errors and failed resources are propagated.</span>
+<span class="sd">        Execution stops on a failed stage or declined review.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">devices</span> <span class="o">=</span> <span class="n">devices</span> <span class="ow">or</span> <span class="p">[]</span>
     <span class="n">instance</span> <span class="o">=</span> <span class="n">instance</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_instance</span>
@@ -8183,9 +8363,21 @@ to <code>False</code> to skip that task.</p>
     <span class="p">)</span>
     <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;syncing all data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">devices</span><span class="p">)</span><span class="si">}</span><span class="s2"> device(s), dry_run=</span><span class="si">{</span><span class="n">dry_run</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
+    <span class="n">categories</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;inventory&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;prefixes&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;interfaces&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vrfs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vlans&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ip_addresses&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vrrp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bgp_communities&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bgp_peerings&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">diff</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
     <span class="c1"># initialize per-device result structure</span>
     <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
 
     <span class="c1"># --- sync device inventory ---</span>
     <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_device_inventory&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -8205,16 +8397,28 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;inventory sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inventory_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">inventory_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
                 <span class="s2">&quot;sync all stopped because device inventory sync failed&quot;</span><span class="p">,</span>
                 <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">inventory_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
@@ -8243,15 +8447,27 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;prefix sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prefix_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;prefixes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">prefix_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;prefixes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">result</span>
-        <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;prefixes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
                 <span class="s2">&quot;sync all stopped because prefix sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;prefixes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;prefixes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">prefix_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
@@ -8278,15 +8494,27 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;interface sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">intf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">intf_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
                 <span class="s2">&quot;sync all stopped because interface sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">intf_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
@@ -8313,9 +8541,16 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;VRF sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrf_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">vrf_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VRF sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
         <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
             <span class="n">device_interfaces</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;interfaces&quot;</span><span class="p">]:</span>
@@ -8326,9 +8561,14 @@ to <code>False</code> to skip that task.</p>
                 <span class="s2">&quot;routing_policies&quot;</span><span class="p">:</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;routing_policies&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">device_interfaces</span><span class="p">,</span>
             <span class="p">}</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vrfs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VRF sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">vrf_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
@@ -8354,10 +8594,13 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;VLAN sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vlan_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;vlans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">vlan_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vlans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VLAN sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
@@ -8369,45 +8612,19 @@ to <code>False</code> to skip that task.</p>
                 <span class="s2">&quot;vlans&quot;</span><span class="p">:</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;vlans&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;interfaces&quot;</span><span class="p">:</span> <span class="n">device_interfaces</span><span class="p">,</span>
             <span class="p">}</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vlans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">vlan_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VLAN review was declined&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">ret</span>
-
-    <span class="c1"># --- sync MAC addresses ---</span>
-    <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;skipping MAC address sync&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;syncing MAC addresses&quot;</span><span class="p">)</span>
-        <span class="n">mac_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_mac_addresses</span><span class="p">(</span>
-            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
-            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
-            <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
-            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
-            <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
-            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_mac_addresses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;MAC address sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mac_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-            <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">mac_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;mac_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">if</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
-                <span class="s2">&quot;sync all stopped because MAC address sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">ret</span>
-        <span class="k">if</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">mac_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because MAC address review was declined&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- sync IP addresses ---</span>
@@ -8428,15 +8645,27 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;IP address sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ip_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">ip_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
                 <span class="s2">&quot;sync all stopped because IP address sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;ip_addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">ip_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
@@ -8463,19 +8692,81 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;VRRP sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vrrp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">vrrp_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VRRP sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;vrrp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">vrrp_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because VRRP review was declined&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c1"># --- sync BGP communities ---</span>
+    <span class="k">if</span> <span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_bgp_community&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;skipping BGP community sync&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;syncing BGP communities&quot;</span><span class="p">)</span>
+        <span class="n">community_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_bgp_community</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">devices</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">devices</span><span class="p">),</span>
+            <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+            <span class="n">with_approval</span><span class="o">=</span><span class="n">with_approval</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">(</span><span class="n">sync_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sync_bgp_community&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;bgp community sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;bgp_communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">diff</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;bgp_communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because BGP community sync failed&quot;</span><span class="p">,</span>
+                <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;bgp_communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">community_result</span><span class="o">.</span><span class="n">result</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">community_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;bgp_communities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">if</span> <span class="n">community_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">community_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;skipped&quot;</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;sync all stopped because BGP community review was declined&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># --- sync BGP peerings ---</span>
@@ -8496,15 +8787,27 @@ to <code>False</code> to skip that task.</p>
         <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;BGP peerings sync completed with errors&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;WARNING&quot;</span><span class="p">)</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">bgp_result</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">diff</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">bgp_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">failed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
                 <span class="s2">&quot;sync all stopped because BGP peering sync failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">for</span> <span class="n">device</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">devices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">resources_failed</span><span class="p">:</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">device</span><span class="p">][</span><span class="s2">&quot;bgp_peerings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span>
+                <span class="s2">&quot;sync all stopped because a sync stage failed&quot;</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">if</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span> <span class="ow">and</span> <span class="n">bgp_result</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>

@@ -7097,16 +7097,8 @@ will be noted in service deployment details.</p>
 <div class="tabbed-block">
 <p>Download and run the interactive installer script — it guides you through
 choosing a system-wide or virtual-environment install, selects service extras,
-and scaffolds a ready-to-run inventory for you.</p>
-<p><strong>Step 1</strong> — Download <a href="https://github.com/norfablabs/NORFAB/blob/master/install_norfab_windows.ps1">install_norfab_windows.ps1</a>
-and move it into the folder where you want to install NorFab, then open PowerShell in that folder.</p>
-<p><strong>Step 2</strong> — Unblock the file so Windows allows it to run, then execute it:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">Unblock-File</span> <span class="p">.\</span><span class="n">install_norfab_windows</span><span class="p">.</span><span class="n">ps1</span>
-<span class="n">powershell</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-File</span> <span class="p">.\</span><span class="n">install_norfab_windows</span><span class="p">.</span><span class="n">ps1</span>
-</code></pre></div>
-<p>Or skip the download entirely and run this single command in PowerShell from your target folder
-(downloads, unblocks, and runs automatically):</p>
-<div class="highlight"><pre><span></span><code><span class="n">powershell</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="n">-Command</span> <span class="s2">&quot;iwr -useb &#39;https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1&#39; -OutFile \&quot;</span><span class="nv">$env:TEMP</span><span class="p">\</span><span class="n">install_norfab</span><span class="p">.</span><span class="n">ps1</span><span class="p">\</span><span class="s2">&quot;; &amp; \&quot;</span><span class="nv">$env:TEMP</span><span class="p">\</span><span class="n">install_norfab</span><span class="p">.</span><span class="n">ps1</span><span class="p">\</span><span class="s2">&quot;&quot;</span>
+and scaffolds a ready-to-run inventory for you:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$p</span> <span class="p">=</span> <span class="nb">Join-Path</span> <span class="nv">$env:TEMP</span> <span class="s1">&#39;install_norfab.ps1&#39;</span><span class="p">;</span> <span class="nb">Invoke-WebRequest</span> <span class="n">-UseBasicParsing</span> <span class="s1">&#39;https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1&#39;</span> <span class="n">-OutFile</span> <span class="nv">$p</span> <span class="n">-ErrorAction</span> <span class="n">Stop</span><span class="p">;</span> <span class="nv">$s</span> <span class="p">=</span> <span class="nb">Get-Content</span> <span class="n">-LiteralPath</span> <span class="nv">$p</span> <span class="n">-Raw</span> <span class="n">-Encoding</span> <span class="n">UTF8</span><span class="p">;</span> <span class="nb">Set-Content</span> <span class="n">-LiteralPath</span> <span class="nv">$p</span> <span class="n">-Value</span> <span class="nv">$s</span> <span class="n">-Encoding</span> <span class="n">UTF8</span><span class="p">;</span> <span class="n">powershell</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span> <span class="o">-File</span> <span class="nv">$p</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Prerequisite</p>
@@ -7117,7 +7109,8 @@ Download from <a href="https://www.python.org/downloads/">python.org</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">pip</span> <span class="n">install</span> <span class="p">-</span><span class="n">-upgrade</span> <span class="n">norfab</span>
 </code></pre></div>
 <p>If you installed into a virtual environment, activate it first:</p>
-<div class="highlight"><pre><span></span><code><span class="p">.</span> <span class="s2">&quot;norfab-env\Scripts\Activate.ps1&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">Set-ExecutionPolicy</span> <span class="n">-Scope</span> <span class="k">Process</span> <span class="n">-ExecutionPolicy</span> <span class="n">Bypass</span>
+<span class="p">.\</span><span class="n">norfab-env</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="p">-</span><span class="n">-upgrade</span> <span class="n">norfab</span>
 </code></pre></div>
 </div>

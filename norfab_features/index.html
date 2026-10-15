@@ -10050,7 +10050,7 @@
 
 
 <h1 id="norfab-features">NORFAB Features<a class="headerlink" href="#norfab-features" title="Permanent link">¤</a></h1>
-<p><em>Last updated: 13 October 2026</em></p>
+<p><em>Last updated: 14 October 2026</em></p>
 <p>NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
 job model. This page is a concise capability reference for technical evaluation
@@ -10926,6 +10926,7 @@ selected NetBox devices must map to usable container kinds/images and modelled
 links.
 <a href="../workers/netbox/services_netbox_service_tasks_get_containerlab_inventory/">Task details</a></p>
 <h3 id="ip-address-and-prefix-allocation">IP address and prefix allocation<a class="headerlink" href="#ip-address-and-prefix-allocation" title="Permanent link">¤</a></h3>
+<p>Interface IP allocation prefers an exact description match or reuses the sole existing address within the selected prefix, including anycast and VIP addresses. Ambiguous candidates fail instead of creating another address.</p>
 <p>Allocates next-available addresses or child prefixes, assigns interface and
 primary IP data, carries tenant/VRF/site/role/status/tags metadata, supports connected
 peer addressing and point-to-point peer derivation, and performs bulk interface
@@ -11140,7 +11141,7 @@ validated in dry-run mode.
 <p>Runs selected synchronizers in read-only dry-run mode for drift reporting,
 including inventory, interface, VRF, VLAN, prefix, IP, VRRP, BGP peering, and BGP
 community state, or executes the supported synchronizers in a fixed inventory, prefix, interface, VRF, VLAN,
-MAC, IP, VRRP, and BGP sequence. Both operations accept per-task keyword arguments
+IP, VRRP, BGP community, and BGP peering sequence. Both operations accept per-task keyword arguments
 inline or from an <code>nf://</code> YAML file; <code>sync_all</code> can also skip individual stages.
 NFCLI <code>netbox sync all</code> accepts inline JSON objects through <code>sync-kwargs</code>.
 Drift assessment can treat deletion-only differences as in sync while retaining
@@ -11153,6 +11154,7 @@ can make broad changes and requires careful deletion/filter policy.
 <h2 id="containerlab-service">Containerlab service<a class="headerlink" href="#containerlab-service" title="Permanent link">¤</a></h2>
 <p>The <a href="../workers/containerlab/services_containerlab_service/">Containerlab service</a>
 manages containerized network labs.</p>
+<p>Both tasks expose the same nine categories. Disabled categories return <code>None</code>; failures return <code>False</code>. Detailed child dry-run diffs are keyed by category.</p>
 <h3 id="topology-deployment">Topology deployment<a class="headerlink" href="#topology-deployment" title="Permanent link">¤</a></h3>
 <p>Downloads or accepts a topology definition, organizes lab files, and invokes
 Containerlab deployment. Existing labs can be reconfigured and a node filter

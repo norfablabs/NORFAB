@@ -7367,7 +7367,11 @@ values and null replace them. Definitions must exist in NetBox.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A description for the allocated IP address.</p>
+                <p>A description for the allocated IP address.
+For device/interface reuse, prefers an exact description match;
+otherwise reuses the sole address within the selected prefix and
+updates its description. Multiple remaining candidates raise
+NetboxAllocationError instead of allocating another address.</p>
               </div>
             </td>
             <td>
@@ -7678,8 +7682,10 @@ result is marked failed and includes any subnet probe errors.</p>
         <p>Tasks execution follow these steps:</p>
 <ol>
 <li>
-<p>Tries to find an existing IP in NetBox matching the device/interface/description.
-    If found, uses it; otherwise, proceeds to create a new IP.</p>
+<p>Tries to find an existing IP in NetBox within the selected prefix.
+    For device/interface assignments, prefers a matching description or
+    reuses the sole candidate, including anycast and VIP addresses.
+    Ambiguous candidates fail; no candidates proceeds to allocation.</p>
 </li>
 <li>
 <p>If prefix is a string, determines if it's an IP network or a description.
@@ -8293,7 +8299,20 @@ result is marked failed and includes any subnet probe errors.</p>
 <span class="normal">728</span>
 <span class="normal">729</span>
 <span class="normal">730</span>
-<span class="normal">731</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">CreateIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">CreateIpResult</span><span class="p">,</span>
@@ -8363,6 +8382,10 @@ result is marked failed and includes any subnet probe errors.</p>
 <span class="sd">            object names or IDs. List values add to existing values; scalar</span>
 <span class="sd">            values and null replace them. Definitions must exist in NetBox.</span>
 <span class="sd">        description (str, optional): A description for the allocated IP address.</span>
+<span class="sd">            For device/interface reuse, prefers an exact description match;</span>
+<span class="sd">            otherwise reuses the sole address within the selected prefix and</span>
+<span class="sd">            updates its description. Multiple remaining candidates raise</span>
+<span class="sd">            NetboxAllocationError instead of allocating another address.</span>
 <span class="sd">        device (str, optional): The device associated with the IP address.</span>
 <span class="sd">        interface (str, optional): The interface associated with the IP address.</span>
 <span class="sd">        is_primary (bool, optional): If True, set the allocated IPv4 or IPv6</span>
@@ -8405,8 +8428,10 @@ result is marked failed and includes any subnet probe errors.</p>
 
 <span class="sd">    Tasks execution follow these steps:</span>
 
-<span class="sd">    1. Tries to find an existing IP in NetBox matching the device/interface/description.</span>
-<span class="sd">        If found, uses it; otherwise, proceeds to create a new IP.</span>
+<span class="sd">    1. Tries to find an existing IP in NetBox within the selected prefix.</span>
+<span class="sd">        For device/interface assignments, prefers a matching description or</span>
+<span class="sd">        reuses the sole candidate, including anycast and VIP addresses.</span>
+<span class="sd">        Ambiguous candidates fail; no candidates proceeds to allocation.</span>
 
 <span class="sd">    2. If prefix is a string, determines if it&#39;s an IP network or a description.</span>
 <span class="sd">        Builds a filter dictionary for NetBox queries, optionally including VRF.</span>
@@ -8507,17 +8532,24 @@ result is marked failed and includes any subnet probe errors.</p>
             <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
                 <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
             <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">filters</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span> <span class="ow">and</span> <span class="n">description</span><span class="p">:</span>
-            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
-                <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
-                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-                <span class="n">parent</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">),</span>
-            <span class="p">)</span>
         <span class="k">elif</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">interface</span><span class="p">:</span>
-            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">)</span>
+            <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                    <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+                <span class="n">matching</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">ip</span> <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">candidates</span> <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">description</span> <span class="o">==</span> <span class="n">description</span>
+                <span class="p">]</span>
+                <span class="k">if</span> <span class="n">matching</span><span class="p">:</span>
+                    <span class="n">candidates</span> <span class="o">=</span> <span class="n">matching</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NetboxAllocationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Multiple IP addresses match &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;within prefix &#39;</span><span class="si">{</span><span class="n">nb_prefix</span><span class="si">}</span><span class="s2">&#39; with description preference &#39;</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="p">)</span>
+            <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">candidates</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="n">description</span><span class="p">:</span>
             <span class="n">nb_ip</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">ipam</span><span class="o">.</span><span class="n">ip_addresses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_prefix</span><span class="p">)</span>
@@ -8839,7 +8871,7 @@ result is marked failed and includes any subnet probe errors.</p>
             <span class="n">job</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">nb_ip</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; IP address parameters&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nb_device</span><span class="p">:</span>
             <span class="n">nb_device</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">&quot;created&quot;</span><span class="p">:</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;unchanged&quot;</span>
 
     <span class="c1"># form and return results</span>

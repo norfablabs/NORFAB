@@ -8052,20 +8052,7 @@ does not delete IP addresses.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>norfab\workers\netbox_worker\ip_tasks.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 869</span>
-<span class="normal"> 870</span>
-<span class="normal"> 871</span>
-<span class="normal"> 872</span>
-<span class="normal"> 873</span>
-<span class="normal"> 874</span>
-<span class="normal"> 875</span>
-<span class="normal"> 876</span>
-<span class="normal"> 877</span>
-<span class="normal"> 878</span>
-<span class="normal"> 879</span>
-<span class="normal"> 880</span>
-<span class="normal"> 881</span>
-<span class="normal"> 882</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 882</span>
 <span class="normal"> 883</span>
 <span class="normal"> 884</span>
 <span class="normal"> 885</span>
@@ -8714,7 +8701,20 @@ does not delete IP addresses.</p>
 <span class="normal">1528</span>
 <span class="normal">1529</span>
 <span class="normal">1530</span>
-<span class="normal">1531</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
+<span class="normal">1531</span>
+<span class="normal">1532</span>
+<span class="normal">1533</span>
+<span class="normal">1534</span>
+<span class="normal">1535</span>
+<span class="normal">1536</span>
+<span class="normal">1537</span>
+<span class="normal">1538</span>
+<span class="normal">1539</span>
+<span class="normal">1540</span>
+<span class="normal">1541</span>
+<span class="normal">1542</span>
+<span class="normal">1543</span>
+<span class="normal">1544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@Task</span><span class="p">(</span>
     <span class="n">fastapi</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">],</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">NetboxFastApiArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()},</span>
     <span class="nb">input</span><span class="o">=</span><span class="n">SyncDeviceIpInput</span><span class="p">,</span>
     <span class="n">output</span><span class="o">=</span><span class="n">SyncDeviceIpResult</span><span class="p">,</span>
