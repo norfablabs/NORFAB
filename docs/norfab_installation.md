@@ -64,23 +64,10 @@ will be noted in service deployment details.
 
     Download and run the interactive installer script — it guides you through
     choosing a system-wide or virtual-environment install, selects service extras,
-    and scaffolds a ready-to-run inventory for you.
-
-    **Step 1** — Download [install_norfab_windows.ps1](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_windows.ps1)
-    and move it into the folder where you want to install NorFab, then open PowerShell in that folder.
-
-    **Step 2** — Unblock the file so Windows allows it to run, then execute it:
+    and scaffolds a ready-to-run inventory for you:
 
     ```powershell
-    Unblock-File .\install_norfab_windows.ps1
-    powershell -ExecutionPolicy Bypass -File .\install_norfab_windows.ps1
-    ```
-
-    Or skip the download entirely and run this single command in PowerShell from your target folder
-    (downloads, unblocks, and runs automatically):
-
-    ```powershell
-    powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile \"$env:TEMP\install_norfab.ps1\"; & \"$env:TEMP\install_norfab.ps1\""
+    $p = Join-Path $env:TEMP 'install_norfab.ps1'; Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile $p -ErrorAction Stop; $s = Get-Content -LiteralPath $p -Raw -Encoding UTF8; Set-Content -LiteralPath $p -Value $s -Encoding UTF8; powershell -ExecutionPolicy Bypass -File $p
     ```
 
     !!! note "Prerequisite"
@@ -96,7 +83,8 @@ will be noted in service deployment details.
     If you installed into a virtual environment, activate it first:
 
     ```powershell
-    . "norfab-env\Scripts\Activate.ps1"
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    .\norfab-env\Scripts\Activate.ps1
     pip install --upgrade norfab
     ```
 
