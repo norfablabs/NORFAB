@@ -11,8 +11,8 @@
 
     *** HOW TO RUN THIS SCRIPT ***
 
-    Option A - single command, downloads and runs directly from GitHub (recommended):
-        powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile \"$env:TEMP\install_norfab.ps1\"; & \"$env:TEMP\install_norfab.ps1\""
+    Option A - download, save as UTF-8 with BOM for Windows PowerShell 5.1, and run:
+        $p = Join-Path $env:TEMP 'install_norfab.ps1'; $r = Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1'; Set-Content -LiteralPath $p -Value $r.Content -Encoding UTF8; powershell -ExecutionPolicy Bypass -File $p
 
     Option B - if you have already downloaded the file:
         powershell -ExecutionPolicy Bypass -File .\install_norfab_windows.ps1
@@ -26,7 +26,7 @@
           Download: https://www.python.org/downloads/
 
 .EXAMPLE
-    powershell -ExecutionPolicy Bypass -Command "iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile `"$env:TEMP\install_norfab.ps1`"; & `"$env:TEMP\install_norfab.ps1`""
+    powershell -ExecutionPolicy Bypass -File .\install_norfab_windows.ps1
 #>
 
 Set-StrictMode -Version Latest
@@ -69,7 +69,7 @@ function Read-Choice {
     )
     while ($true) {
         $hint = if ($Default) { " [default: $Default]" } else { "" }
-        $answer = Read-Host "$Prompt$hint"
+        $answer = (Read-Host "$Prompt$hint").Trim()
         if ($answer -eq "" -and $Default -ne "") { return $Default }
         if ($ValidValues -contains $answer.ToLower()) { return $answer.ToLower() }
         Write-Host "    Please enter one of: $($ValidValues -join ', ')" -ForegroundColor Red
@@ -79,9 +79,34 @@ function Read-Choice {
 function Read-YesNo {
     param([string]$Prompt, [bool]$Default = $true)
     $defaultStr = if ($Default) { "Y/n" } else { "y/N" }
-    $answer = Read-Host "$Prompt [$defaultStr]"
-    if ($answer -eq "") { return $Default }
-    return ($answer.ToLower() -eq "y" -or $answer.ToLower() -eq "yes")
+    while ($true) {
+        $answer = (Read-Host "$Prompt [$defaultStr]").Trim().ToLowerInvariant()
+        if ($answer -eq "") { return $Default }
+        if ($answer -in @('y', 'yes')) { return $true }
+        if ($answer -in @('n', 'no')) { return $false }
+        Write-Host '    Please enter Y or N.' -ForegroundColor Red
+    }
+}
+
+function Read-Port {
+    param([string]$Prompt, [int]$Default)
+    while ($true) {
+        $answer = (Read-Host "$Prompt [default: $Default]").Trim()
+        if ($answer -eq '') { return $Default }
+        $port = 0
+        if ([int]::TryParse($answer, [ref]$port) -and $port -ge 1 -and $port -le 65535) {
+            return $port
+        }
+        Write-Host '    Enter a port between 1 and 65535.' -ForegroundColor Red
+    }
+}
+
+function Invoke-PythonChecked {
+    param([string]$Executable, [string[]]$Arguments)
+    & $Executable @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Python command failed (exit code $LASTEXITCODE): $Executable $($Arguments -join ' ')"
+    }
 }
 
 function Show-Menu {
@@ -101,7 +126,7 @@ function Show-Menu {
         Write-Host " - $desc" -ForegroundColor Gray
     }
     Write-Host "   [A] Select ALL services" -ForegroundColor Magenta
-    Write-Host "   [0] Continue (no additional services)" -ForegroundColor DarkGray
+    Write-Host "   [0] Continue with the current selection" -ForegroundColor DarkGray
     Write-Host ""
 }
 
@@ -339,12 +364,11 @@ service: containerlab
     }
 )
 
-# Optional add-ons (not workers, just pip extras)
+# CLI and TUI are always installed; Robot Framework is optional.
 $Addons = @(
     @{ Name = "nfcli";       Extra = "nfcli";       Description = "Interactive CLI shell (nfcli command)" }
-    @{ Name = "robot";       Extra = "robot";        Description = "Robot Framework test library" }
+    @{ Name = "robot";       Extra = "robot";        Description = "Robot Framework library" }
     @{ Name = "tui";         Extra = "tui";          Description = "Textual terminal UI (--tui flag)" }
-    @{ Name = "clientagent"; Extra = "clientagent";  Description = "Client-side LangGraph AI agent" }
 )
 
 # ---------------------------------------------------------------------------
@@ -357,8 +381,8 @@ Write-Info  "  1. Install NorFab (system-wide Python or local venv)"
 Write-Info  "  2. Let you choose which service extras to install"
 Write-Info  "  3. Create a NorFab environment folder with inventory files"
 Write-Host ""
-Write-Host "  TIP: share this one-liner with others to install NorFab:" -ForegroundColor DarkYellow
-Write-Info  "  powershell -ExecutionPolicy Bypass -Command `"iwr -useb 'https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_windows.ps1' -OutFile '`$env:TEMP\install_norfab.ps1'; & '`$env:TEMP\install_norfab.ps1'`""
+Write-Host "  To run this saved installer:" -ForegroundColor DarkYellow
+Write-Info '  powershell -ExecutionPolicy Bypass -File .\install_norfab_windows.ps1'
 Write-Host ""
 
 # ---------------------------------------------------------------------------
@@ -367,19 +391,22 @@ Write-Host ""
 
 Write-Step "Checking Python installation..."
 try {
-    $pythonCmd = "python"
-    $pyVersion = & python --version 2>&1
+    $pythonCmd = (Get-Command python -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+    $pyVersion = & $pythonCmd -c "import sys; print(sys.version.split()[0]); sys.exit(0 if sys.version_info >= (3, 10) else 1)"
+    if ($LASTEXITCODE -ne 0) { throw 'Python 3.10 or later is required.' }
     Write-Success "Found: $pyVersion"
 } catch {
-    Write-Host "[!] Python not found on PATH. Please install Python 3.10+ and re-run." -ForegroundColor Red
+    Write-Host "[!] Could not start a supported Python: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host '    Python 3.10 or later must be available on PATH.' -ForegroundColor Red
     exit 1
 }
 
 # Ensure pip is available
 try {
-    & python -m pip --version | Out-Null
+    Invoke-PythonChecked -Executable $pythonCmd -Arguments @('-m', 'pip', '--version') | Out-Null
 } catch {
-    Write-Host "[!] pip not found. Run: python -m ensurepip --upgrade" -ForegroundColor Red
+    Write-Host "[!] pip check failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "    Run: & '$pythonCmd' -m ensurepip --upgrade" -ForegroundColor Red
     exit 1
 }
 
@@ -396,22 +423,30 @@ $installType = Read-Choice -Prompt "Choose installation type (1/2)" -ValidValues
 $venvPath = $null
 if ($installType -eq "2") {
     $defaultVenvName = "norfab-env"
-    $venvName = Read-Host "Virtual environment folder name [default: $defaultVenvName]"
+    $venvName = (Read-Host "Virtual environment folder name [default: $defaultVenvName]").Trim()
     if ($venvName -eq "") { $venvName = $defaultVenvName }
 
-    $venvPath = Join-Path (Get-Location) $venvName
+    $venvPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($venvName)
+    if ((Test-Path -LiteralPath $venvPath) -and -not (Test-Path -LiteralPath (Join-Path $venvPath 'pyvenv.cfg'))) {
+        throw "Virtual environment target already exists and is not a venv: $venvPath. Choose a new folder."
+    }
 
-    Write-Step "Creating virtual environment at: $venvPath"
-    & python -m venv $venvPath
-    Write-Success "Virtual environment created."
+    if (Test-Path -LiteralPath (Join-Path $venvPath 'pyvenv.cfg')) {
+        Write-Info "Reusing virtual environment: $venvPath"
+    } else {
+        Write-Step "Creating virtual environment at: $venvPath"
+        Invoke-PythonChecked -Executable $pythonCmd -Arguments @('-m', 'venv', $venvPath)
+        Write-Success "Virtual environment created."
+    }
 
     # Point pip/python to the venv
-    $pipExe    = Join-Path $venvPath "Scripts\pip.exe"
     $pythonExe = Join-Path $venvPath "Scripts\python.exe"
 } else {
-    $pipExe    = "pip"
-    $pythonExe = "python"
+    $pythonExe = $pythonCmd
 }
+$pyVersion = & $pythonExe -c "import sys; print(sys.version.split()[0]); sys.exit(0 if sys.version_info >= (3, 10) else 1)"
+if ($LASTEXITCODE -ne 0) { throw 'The selected environment requires Python 3.10 or later.' }
+Invoke-PythonChecked -Executable $pythonExe -Arguments @('-m', 'pip', '--version') | Out-Null
 
 # ---------------------------------------------------------------------------
 # Step 3 - Choose services
@@ -437,23 +472,24 @@ while (-not $selectionDone) {
         Write-Host ""
     }
 
-    $input = (Read-Host "Enter number(s) to toggle, A for all, 0 to continue").Trim()
+    $selectionInput = (Read-Host "Enter numbers to toggle (repeat to deselect), A for all, 0 to continue").Trim()
 
-    if ($input -eq "0") {
+    if ($selectionInput -eq "0") {
         $selectionDone = $true
-    } elseif ($input.ToLower() -eq "a") {
-        $selectedServices = $Services | ForEach-Object { $_.Name }
+    } elseif ($selectionInput.ToLower() -eq "a") {
+        $selectedServices = @($Services | ForEach-Object { $_.Name })
         $selectionDone = $true
     } else {
         # Support comma/space-separated entries like "1,3 5"
-        $tokens = $input -split "[,\s]+" | Where-Object { $_ -ne "" }
+        $tokens = $selectionInput -split "[,\s]+" | Where-Object { $_ -ne "" }
         foreach ($token in $tokens) {
-            if ($token -match "^\d+$") {
-                $idx = [int]$token - 1
+            $number = 0
+            if ([int]::TryParse($token, [ref]$number) -and $number -gt 0) {
+                $idx = $number - 1
                 if ($idx -ge 0 -and $idx -lt $Services.Count) {
                     $svcName = $Services[$idx].Name
                     if ($selectedServices -contains $svcName) {
-                        $selectedServices = $selectedServices | Where-Object { $_ -ne $svcName }
+                        $selectedServices = @($selectedServices | Where-Object { $_ -ne $svcName })
                         Write-Host "    Deselected: $svcName" -ForegroundColor DarkYellow
                     } else {
                         $selectedServices += $svcName
@@ -474,9 +510,9 @@ while (-not $selectionDone) {
 # ---------------------------------------------------------------------------
 
 Write-Header "Optional Add-ons"
-$selectedAddons = @()
-foreach ($addon in $Addons) {
-    $want = Read-YesNo -Prompt "Install $($addon.Name) - $($addon.Description)?" -Default ($addon.Name -eq "nfcli")
+$selectedAddons = @('nfcli', 'tui')
+foreach ($addon in @($Addons | Where-Object { $_.Name -notin @('nfcli', 'tui') })) {
+    $want = Read-YesNo -Prompt "Install $($addon.Name) - $($addon.Description)?" -Default $false
     if ($want) { $selectedAddons += $addon.Name }
 }
 
@@ -498,7 +534,7 @@ foreach ($addonName in $selectedAddons) {
 }
 
 # Deduplicate
-$extras = $extras | Sort-Object -Unique
+$extras = @($extras | Sort-Object -Unique)
 
 if ($extras.Count -gt 0) {
     $packageSpec = "norfab[$($extras -join ',')]"
@@ -506,16 +542,14 @@ if ($extras.Count -gt 0) {
     $packageSpec = "norfab"
 }
 
-Write-Step "Running: $pipExe install `"$packageSpec`""
+if ($selectedServices -contains 'fakenosservice' -and [version]$pyVersion -ge [version]'3.13') {
+    throw 'FakeNOS requires Python 3.10-3.12. Restart with a supported Python or deselect FakeNOS.'
+}
+
+Write-Step "Running: $pythonExe -m pip install `"$packageSpec`""
 Write-Host ""
 
-& $pipExe install "$packageSpec"
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "[!] pip install failed (exit code $LASTEXITCODE). Check the output above." -ForegroundColor Red
-    exit $LASTEXITCODE
-}
+Invoke-PythonChecked -Executable $pythonExe -Arguments @('-m', 'pip', 'install', $packageSpec)
 
 Write-Host ""
 Write-Success "NorFab installed successfully."
@@ -526,33 +560,43 @@ Write-Success "NorFab installed successfully."
 
 Write-Header "Create NorFab Environment"
 
+$envDir = $null
+$createEnvironment = Read-YesNo -Prompt 'Create a NorFab folder with inventory and worker configuration files?' -Default $true
+if ($createEnvironment) {
 $defaultEnvDir = "norfab-project"
-$envDirInput   = Read-Host "Folder to create NorFab environment in [default: $defaultEnvDir, '.' for current directory]"
+$envDirInput   = (Read-Host "Folder to create NorFab environment in [default: $defaultEnvDir, '.' for current directory]").Trim()
 if ($envDirInput -eq "") { $envDirInput = $defaultEnvDir }
-$envDir = $envDirInput
+$envDir = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($envDirInput)
 
 # Port configuration
 Write-Host ""
 Write-Step "Configure ports"
-$brokerPortInput = Read-Host "Broker port [default: 5555]"
-$brokerPort = if ($brokerPortInput -eq "") { "5555" } else { $brokerPortInput }
+$brokerPort = Read-Port -Prompt 'Broker port' -Default 5555
 
 $fastapiPort = "8000"
 if ($selectedServices -contains "fastapiservice") {
-    $fastapiPortInput = Read-Host "FastAPI service port [default: 8000]"
-    $fastapiPort = if ($fastapiPortInput -eq "") { "8000" } else { $fastapiPortInput }
+    do { $fastapiPort = Read-Port -Prompt 'FastAPI service port (must differ from broker)' -Default 8000 } while ($fastapiPort -eq $brokerPort)
 }
 
 $fastmcpPort = "8001"
 if ($selectedServices -contains "fastmcpservice") {
-    $fastmcpPortInput = Read-Host "FastMCP service port [default: 8001]"
-    $fastmcpPort = if ($fastmcpPortInput -eq "") { "8001" } else { $fastmcpPortInput }
+    do { $fastmcpPort = Read-Port -Prompt 'FastMCP service port (must differ from other services)' -Default 8001 } while ($fastmcpPort -eq $brokerPort -or ($selectedServices -contains 'fastapiservice' -and $fastmcpPort -eq $fastapiPort))
 }
 
-if ($envDir -ne ".") {
-    Write-Step "Creating environment directory: $envDir"
-    New-Item -ItemType Directory -Path $envDir -Force | Out-Null
+# Check every target before writing any configuration; preserve existing projects.
+$targetPaths = @((Join-Path $envDir 'inventory.yaml'))
+foreach ($svcName in $selectedServices) {
+    $svc = $Services | Where-Object { $_.Name -eq $svcName }
+    foreach ($relativePath in $svc.WorkerFiles.Keys) { $targetPaths += Join-Path $envDir $relativePath }
 }
+foreach ($target in $targetPaths) {
+    if (Test-Path -LiteralPath $target) {
+        throw "Configuration already exists: $target. Choose a new environment folder to preserve existing files."
+    }
+}
+
+Write-Step "Creating environment directory: $envDir"
+New-Item -ItemType Directory -Path $envDir -Force | Out-Null
 
 Write-Step "Generating inventory files..."
 
@@ -562,7 +606,7 @@ $topologyWorkers = ""
 
 foreach ($svcName in $selectedServices) {
     $svc = $Services | Where-Object { $_.Name -eq $svcName }
-    $workersSection  += $svc.WorkersSection
+    $workersSection  += "`n" + $svc.WorkersSection.Trim("`r", "`n")
     $topologyWorkers += "`n    - $($svc.WorkerName)"
 }
 
@@ -611,7 +655,7 @@ $topologyBlock
 "@
 
 $inventoryPath = Join-Path $envDir "inventory.yaml"
-Set-Content -Path $inventoryPath -Value $inventoryContent -Encoding UTF8
+Set-Content -LiteralPath $inventoryPath -Value $inventoryContent -Encoding UTF8
 Write-Success "Created: $inventoryPath"
 
 # Write per-service worker config files
@@ -620,22 +664,25 @@ foreach ($svcName in $selectedServices) {
     foreach ($filePath in $svc.WorkerFiles.Keys) {
         $fullPath = Join-Path $envDir $filePath
         $dir = Split-Path $fullPath -Parent
-        if (-not (Test-Path $dir)) {
+        if (-not (Test-Path -LiteralPath $dir)) {
             New-Item -ItemType Directory -Path $dir -Force | Out-Null
         }
         $fileContent = $svc.WorkerFiles[$filePath]
         $fileContent = $fileContent -replace '__BROKER_PORT__', $brokerPort
         $fileContent = $fileContent -replace '__FASTAPI_PORT__', $fastapiPort
         $fileContent = $fileContent -replace '__FASTMCP_PORT__', $fastmcpPort
-        Set-Content -Path $fullPath -Value $fileContent -Encoding UTF8
+        Set-Content -LiteralPath $fullPath -Value $fileContent -Encoding UTF8
         Write-Success "Created: $fullPath"
     }
 }
 
 # ---------------------------------------------------------------------------
+}
+
 # Step 7 - Validate generated YAML files
 # ---------------------------------------------------------------------------
 
+if ($createEnvironment) {
 Write-Step "Validating generated YAML files..."
 $yamlValid = $true
 try {
@@ -655,8 +702,17 @@ if (-not $yamlAvailable) {
             $filesToValidate += Join-Path $envDir $fp
         }
     }
+    $yamlValidationCode = @'
+import yaml, sys
+try:
+    with open(sys.argv[1], encoding='utf-8-sig') as stream:
+        yaml.safe_load(stream)
+except Exception as error:
+    print(str(error))
+    sys.exit(1)
+'@
     foreach ($yf in $filesToValidate) {
-        $result = & $pythonExe -c "import yaml, sys; yaml.safe_load(open(sys.argv[1]).read())" $yf 2>&1
+        $result = & $pythonExe -c $yamlValidationCode $yf
         if ($LASTEXITCODE -ne 0) {
             Write-Host "    [!] Invalid YAML: $yf" -ForegroundColor Red
             Write-Host "        $result" -ForegroundColor Red
@@ -668,72 +724,40 @@ if (-not $yamlAvailable) {
     if ($yamlValid) {
         Write-Success "All YAML files are valid."
     } else {
-        Write-Host "[!] Some YAML files have errors — review the files above before running NorFab." -ForegroundColor Red
+        throw 'Generated YAML validation failed. Review the files above before running NorFab.'
     }
 }
 
 # ---------------------------------------------------------------------------
+}
+
 # Step 8 - Activation hint
 # ---------------------------------------------------------------------------
 
 Write-Header "Installation Complete"
 
-# Ask to cd into the project folder
-if ($envDir -ne ".") {
-    $doCd = Read-YesNo -Prompt "Change directory to '$envDir' now?" -Default $true
+# The documented -File invocation runs in a child process, so changing its
+# directory or activating its venv cannot update the caller's terminal.
+Write-Host ''
+Write-Host '  Run these commands in your PowerShell terminal:' -ForegroundColor White
+if ($createEnvironment) {
+    Write-Host ("      Set-Location -LiteralPath '{0}'" -f $envDir.Replace("'", "''")) -ForegroundColor Cyan
 } else {
-    $doCd = $false
+    Write-Info 'Folder creation skipped. Run nfcli from your existing NorFab configuration folder.'
 }
-
-# Ask to activate venv
-$doActivate = $false
-if ($venvPath) {
-    $doActivate = Read-YesNo -Prompt "Activate the virtual environment now?" -Default $true
+if ($selectedAddons -contains 'nfcli') {
+    if ($venvPath) {
+        $nfcliPath = Join-Path $venvPath 'Scripts\nfcli.exe'
+    } else {
+        $scriptsDir = & $pythonExe -c "import sysconfig; print(sysconfig.get_path('scripts'))"
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot locate the Python scripts directory.' }
+        $nfcliPath = Join-Path $scriptsDir 'nfcli.exe'
+    }
+    Write-Host ("      & '{0}'" -f $nfcliPath.Replace("'", "''")) -ForegroundColor Green
+    Write-Info 'nfcli starts the broker, selected workers and interactive shell.'
+} else {
+    Write-Info 'The nfcli add-on was not selected. To install it using this Python:'
+    Write-Host ("      & '{0}' -m pip install 'norfab[nfcli]'" -f $pythonExe.Replace("'", "''")) -ForegroundColor Cyan
 }
-
-if ($doCd)       { Set-Location $envDir }
-if ($doActivate) { $activateScript = Join-Path $venvPath "Scripts\Activate.ps1"; . $activateScript }
-
-Write-Host ""
-Write-Host "  To start NorFab:" -ForegroundColor White
-if ($venvPath) {
-    $activateScript = Join-Path $venvPath "Scripts\Activate.ps1"
-    Write-Host "      . `"$activateScript`"" -ForegroundColor Cyan
-    Write-Host "                                   # activate the virtual environment" -ForegroundColor DarkGray
-}
-if ($envDir -ne ".") {
-    Write-Host "      cd `"$envDir`"" -ForegroundColor Cyan
-}
-Write-Host "      nfcli" -ForegroundColor Green
-Write-Host ""
-Write-Host "  nfcli will start the broker, all workers and an interactive shell." -ForegroundColor Gray
-Write-Host ""
-Write-Host "  Other useful commands:" -ForegroundColor White
-Write-Info  "  nfcli -b -l INFO               # broker only, with INFO logging"
-Write-Info  "  nfcli -w -l INFO               # workers only, with INFO logging"
-Write-Info  "  nfcli -c                        # client shell only (connect to a running broker)"
-Write-Info  "  nfcli --show-broker-shared-key # display broker public key for remote clients"
-Write-Info  "  nfcli --create-env <name>      # scaffold a new environment"
-Write-Host ""
-Write-Host "  Documentation:" -ForegroundColor White
-Write-Host "      https://docs.norfablabs.com/" -ForegroundColor DarkCyan
-Write-Host ""
-$line = "=" * 70
-Write-Host $line -ForegroundColor Cyan
-Write-Host ""
-Write-Host ""
-Write-Host "  nfcli will start the broker, all workers and an interactive shell." -ForegroundColor Gray
-Write-Host ""
-Write-Host "  Other useful commands:" -ForegroundColor White
-Write-Info  "  nfcli -b -l INFO               # broker only, with INFO logging"
-Write-Info  "  nfcli -w -l INFO               # workers only, with INFO logging"
-Write-Info  "  nfcli -c                        # client shell only (connect to a running broker)"
-Write-Info  "  nfcli --show-broker-shared-key # display broker public key for remote clients"
-Write-Info  "  nfcli --create-env <name>      # scaffold a new environment"
-Write-Host ""
-Write-Host "  Documentation:" -ForegroundColor White
-Write-Host "      https://docs.norfablabs.com/" -ForegroundColor DarkCyan
-Write-Host ""
-$line = "=" * 70
-Write-Host $line -ForegroundColor Cyan
-Write-Host ""
+Write-Host ''
+Write-Info 'Documentation: https://docs.norfablabs.com/'
