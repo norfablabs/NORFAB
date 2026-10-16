@@ -3,7 +3,7 @@
 # Run: bash install_norfab_linux.sh
 # Download and run (prompts read from the terminal):
 # curl -fsSL https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh -o install_norfab_linux.sh && bash install_norfab_linux.sh
-# Existing inventory and selected worker configuration files are overwritten.
+# Existing inventory and selected worker configuration files are preserved.
 
 set -euo pipefail
 
@@ -17,13 +17,22 @@ write_info() { printf '    %s\n' "$1"; }
 # Use a separate descriptor so pip and Python cannot consume prompt responses.
 if [[ -t 0 ]]; then
     exec 3<&0
-elif [[ -r /dev/tty ]]; then
-    exec 3</dev/tty
+elif { exec 3</dev/tty; } 2>/dev/null; then
+    :
 else
     printf '[!] Run this installer from an interactive terminal.\n' >&2
     exit 1
 fi
-read_answer() { printf '%s ' "$1"; IFS= read -r answer <&3; }
+read_answer() {
+    printf '%s ' "$1"
+    if ! IFS= read -r answer <&3; then
+        printf '\n[!] Input closed; installation stopped.\n' >&2
+        exit 1
+    fi
+    # Match the Windows installer by trimming surrounding whitespace.
+    answer="${answer#"${answer%%[![:space:]]*}"}"
+    answer="${answer%"${answer##*[![:space:]]}"}"
+}
 read_choice() {
     local prompt=$1 default=$2
     shift 2
@@ -40,9 +49,15 @@ read_choice() {
 read_yes_no() {
     local hint='y/N'
     [[ $2 == y ]] && hint='Y/n'
-    read_answer "$1 [$hint]"
-    answer=${answer:-$2}
-    [[ $answer == y || $answer == Y || $answer == yes || $answer == YES ]]
+    while true; do
+        read_answer "$1 [$hint]"
+        answer=${answer:-$2}
+        case ${answer,,} in
+            y|yes) return 0 ;;
+            n|no) return 1 ;;
+            *) write_info 'Please enter Y or N.' ;;
+        esac
+    done
 }
 read_port() {
     local prompt=$1 default=$2
@@ -240,10 +255,22 @@ venv_path=''
 if [[ $answer == 2 ]]; then
     read_answer 'Virtual environment folder name [default: norfab-env]'
     venv_path=$("$python_exe" -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "${answer:-norfab-env}")
-    write_step "Creating virtual environment at: $venv_path"
-    "$python_exe" -m venv "$venv_path"
+    if [[ -e $venv_path && ! -f $venv_path/pyvenv.cfg ]]; then
+        write_info "Target exists and is not a virtual environment: $venv_path"
+        exit 1
+    fi
+    if [[ -f $venv_path/pyvenv.cfg ]]; then
+        write_info "Reusing virtual environment: $venv_path"
+    else
+        write_step "Creating virtual environment at: $venv_path"
+        "$python_exe" -m venv "$venv_path"
+    fi
     python_exe="$venv_path/bin/python"
     write_success 'Virtual environment created.'
+fi
+if ! "$python_exe" -c 'import sys; sys.exit(sys.version_info < (3, 10))'; then
+    write_info 'The selected environment requires Python 3.10 or later.'
+    exit 1
 fi
 if ! "$python_exe" -m pip --version >/dev/null; then
     write_info 'pip is required. Install pip for the chosen Python, then rerun.'
@@ -276,7 +303,7 @@ while true; do
             write_info "Invalid input: $token"
         fi
     done
- done
+done
 
 # Step 4 - Choose add-ons
 write_header 'Optional Add-ons'
@@ -285,20 +312,18 @@ for i in "${!service_names[@]}"; do
     if [[ ${selected[i]} == 1 && $i -lt 6 ]]; then
         extras+=("${service_names[i]}")
     fi
- done
-addon_names=(nfcli robot tui clientagent)
-addon_descriptions=('Interactive CLI shell (nfcli command)' 'Robot Framework test library' 'Textual terminal UI (--tui flag)' 'Client-side LangGraph AI agent')
-cli_selected=0
-for i in "${!addon_names[@]}"; do
-    default=n
-    [[ $i != 0 ]] || default=y
-    if read_yes_no "Install ${addon_names[i]} - ${addon_descriptions[i]}?" "$default"; then
-        extras+=("${addon_names[i]}")
-        [[ $i != 0 ]] || cli_selected=1
-    fi
- done
+done
+# CLI and TUI are always installed; Robot Framework is optional.
+extras+=(nfcli tui)
+if read_yes_no 'Install robot - Robot Framework library?' n; then
+    extras+=(robot)
+fi
 
 # Step 5 - Build pip install command and install
+if [[ ${selected[5]} == 1 ]] && ! "$python_exe" -c 'import sys; sys.exit(not ((3, 10) <= sys.version_info[:2] < (3, 13)))'; then
+    write_info 'FakeNOS requires Python 3.10-3.12. Restart with a supported Python or deselect FakeNOS.'
+    exit 1
+fi
 write_header 'Installing NorFab'
 package_spec=norfab
 if (( ${#extras[@]} )); then
@@ -317,6 +342,8 @@ fi
 
 # Step 6 - Create NorFab environment
 write_header 'Create NorFab Environment'
+env_dir=''
+if read_yes_no 'Create a NorFab folder with inventory and worker configuration files?' y; then
 read_answer "Folder to create NorFab environment in [default: norfab-project, '.' for current directory]"
 env_dir=$("$python_exe" -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "${answer:-norfab-project}")
 write_step 'Configure ports'
@@ -325,13 +352,34 @@ broker_port=$answer
 fastapi_port=8000
 fastmcp_port=8001
 if [[ ${selected[2]} == 1 ]]; then
-    read_port 'FastAPI service port' 8000
-    fastapi_port=$answer
+    while true; do
+        read_port 'FastAPI service port (must differ from broker)' 8000
+        fastapi_port=$answer
+        [[ $fastapi_port == "$broker_port" ]] || break
+    done
 fi
 if [[ ${selected[4]} == 1 ]]; then
-    read_port 'FastMCP service port' 8001
-    fastmcp_port=$answer
+    while true; do
+        read_port 'FastMCP service port (must differ from other services)' 8001
+        fastmcp_port=$answer
+        [[ $fastmcp_port != "$broker_port" ]] || continue
+        [[ ${selected[2]} == 1 && $fastmcp_port == "$fastapi_port" ]] || break
+    done
 fi
+# Check all targets before writing any configuration, including dangling symlinks.
+target_paths=("$env_dir/inventory.yaml")
+for i in "${!service_names[@]}"; do
+    [[ ${selected[i]} == 1 ]] || continue
+    key=${service_keys[i]}
+    target_paths+=("$env_dir/$key/$key-worker-1.yaml")
+    [[ $key != nornir ]] || target_paths+=("$env_dir/nornir/common.yaml")
+done
+for target in "${target_paths[@]}"; do
+    if [[ -e $target || -L $target ]]; then
+        write_info "Configuration already exists: $target. Choose a new environment folder."
+        exit 1
+    fi
+done
 mkdir -p "$env_dir"
 write_step 'Generating inventory files...'
 yaml_files=("$env_dir/inventory.yaml")
@@ -390,43 +438,17 @@ else
     write_info 'PyYAML not available - skipping validation.'
 fi
 
-# Step 8 - Activation hints and optional interactive shell
+fi # environment creation
+
+# Step 8 - Commands to run in the caller's terminal
 write_header 'Installation Complete'
-do_cd=0
-do_activate=0
-if [[ $env_dir != "$PWD" ]] && read_yes_no "Change directory to '$env_dir' now?" y; then
-    do_cd=1
-fi
-if [[ -n $venv_path ]] && read_yes_no 'Activate the virtual environment now?' y; then
-    do_activate=1
-fi
-write_info 'To start NorFab:'
-[[ -z $venv_path ]] || printf '      source %q\n' "$venv_path/bin/activate"
-printf '      cd %q\n' "$env_dir"
-if [[ $cli_selected == 1 ]]; then
-    write_info '  nfcli'
-    write_info 'nfcli starts the broker, workers, and interactive shell.'
-    write_info 'Other useful commands:'
-    write_info '  nfcli -b -l INFO              # broker only'
-    write_info '  nfcli -w -l INFO              # workers only'
-    write_info '  nfcli -c                      # client shell only'
-    write_info '  nfcli --show-broker-shared-key # broker public key'
-    write_info '  nfcli --create-env <name>      # scaffold a new environment'
+write_info 'Run these commands in your Bash terminal:'
+if [[ -n $env_dir ]]; then
+    printf '      cd -- %q\n' "$env_dir"
 else
-    write_info 'Install norfab[nfcli] in the chosen Python to use the interactive shell.'
+    write_info 'Folder creation skipped. Run nfcli from your existing NorFab configuration folder.'
 fi
+scripts_dir=$("$python_exe" -c 'import sysconfig; print(sysconfig.get_path("scripts"))')
+printf '      %q\n' "$scripts_dir/nfcli"
+write_info 'nfcli starts the broker, selected workers and interactive shell.'
 write_info 'Documentation: https://docs.norfablabs.com/'
-# A child process cannot change the parent shell directory or environment.
-# Apply the requested choices in a new shell and return on exit.
-if (( do_cd || do_activate )); then
-    write_info 'Opening a configured Bash shell. Run exit to return to your original shell.'
-    export NORFAB_INSTALL_PROJECT="$env_dir" NORFAB_INSTALL_VENV="$venv_path"
-    export NORFAB_INSTALL_CD="$do_cd" NORFAB_INSTALL_ACTIVATE="$do_activate"
-    bash --rcfile <(cat <<'EOF'
-[[ ! -f ~/.bashrc ]] || source ~/.bashrc
-[[ $NORFAB_INSTALL_CD != 1 ]] || cd "$NORFAB_INSTALL_PROJECT"
-[[ $NORFAB_INSTALL_ACTIVATE != 1 ]] || source "$NORFAB_INSTALL_VENV/bin/activate"
-unset NORFAB_INSTALL_PROJECT NORFAB_INSTALL_VENV NORFAB_INSTALL_CD NORFAB_INSTALL_ACTIVATE
-EOF
-    ) -i <&3
-fi

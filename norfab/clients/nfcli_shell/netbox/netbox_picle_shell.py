@@ -40,6 +40,7 @@ from .netbox_picle_shell_get_containerlab_inventory import (
 from .netbox_picle_shell_get_devices import GetDevices
 from .netbox_picle_shell_get_interfaces import GetInterfaces
 from .netbox_picle_shell_get_topology import GetTopology
+from .netbox_picle_shell_move_ip import MoveIp
 from .netbox_picle_shell_sync_all import SyncAllDevicesShell
 from .netbox_picle_shell_sync_bgp_asn import SyncBgpAsnShell
 from .netbox_picle_shell_sync_bgp_community import SyncBgpCommunityShell
@@ -369,7 +370,16 @@ class UpdateCommands(BaseModel):
 # ---------------------------------------------------------------------------------------------
 
 
+class MoveCommands(BaseModel):
+    ip: MoveIp = Field(None, description="Move all interface IP addresses")
+
+    class PicleConfig:
+        subshell = True
+        prompt = "nf[netbox-move]#"
+
+
 class NetboxServiceCommands(BaseModel):
+    move: MoveCommands = Field(None, description="Move Netbox assignments")
     graphql: GrapQLCommands = Field(None, description="Query Netbox GrapQL API")
     design: DesignCommands = Field(None, description="Deploy NetBox designs")
     get: GetCommands = Field(None, description="Query data from Netbox")

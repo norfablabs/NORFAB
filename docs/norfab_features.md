@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 14 October 2026*
+*Last updated: 16 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -113,7 +113,8 @@ system or local virtual environment installation, service and add-on selection,
 configurable ports, and generated inventory and worker configuration files.
 **Use cases:** setting up a local NORFAB environment. **Limitations:** requires
 Python 3.10+; service dependencies and external systems must be available.
-The scripts overwrite generated configuration files in the chosen folder.
+Both installers include CLI and TUI, allow skipping environment creation, and
+refuse to overwrite existing inventory or selected worker configuration files.
 See [Windows installer](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_windows.ps1)
 and [Linux installer](https://github.com/norfablabs/NORFAB/blob/master/install_norfab_linux.sh).
 
@@ -731,7 +732,7 @@ An explicit preprocessing step flattens nested device definitions into top-level
 records before validation; flattened collections without handlers are rejected.
 Dictionary input, template context validation through inline JSON Schema or an
 external Pydantic model, custom Jinja2 filters/functions, and dry-run are supported.
-Records wrapped in `create_ip`, `create_prefix`, `create_asn`, or `create_vlan`
+Records wrapped in `move_ip`, `create_ip`, `create_prefix`, `create_asn`, or `create_vlan`
 call the corresponding worker task with its arguments instead of using bulk writes.
 `create_asn` is reserved for next-available range allocation; known ASN numbers
 use direct bulk writes.
@@ -868,6 +869,16 @@ the requested role.
 [Create IP](workers/netbox/services_netbox_service_tasks_create_ip.md) ·
 [Bulk IP](workers/netbox/services_netbox_service_tasks_create_ip_bulk.md) ·
 [Create prefix](workers/netbox/services_netbox_service_tasks_create_prefix.md)
+
+### Move interface IP addresses
+
+Moves all IP addresses between device interfaces while preserving IDs, VRFs, and
+metadata. Supports Python, NFCLI, FastAPI, MCP, design deployment, dry runs, and
+branches. Clears moved source primaries; `is_primary` can replace destination
+primaries. **Use cases:** device replacement and interface migration.
+**Limitations:** selecting a primary from multiple moved addresses requires an
+existing source primary for that address family.
+[Task details](workers/netbox/services_netbox_service_tasks_move_ip.md)
 
 ### Interface provisioning
 

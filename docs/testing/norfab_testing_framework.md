@@ -85,6 +85,7 @@ Use a directory, file, class, or method path to narrow collection; use `-m` for 
 | NetBox | `netbox_create_asn` | NetBox create_asn task tests |
 | NetBox | `netbox_design_deploy` | NetBox design_deploy task tests |
 | NetBox | `netbox_create_device_interfaces` | NetBox create_device_interfaces task tests |
+| NetBox | `netbox_move_ip` | NetBox move_ip task tests |
 | NetBox | `netbox_create_ip` | NetBox create_ip task tests |
 | NetBox | `netbox_create_ip_bulk` | NetBox create_ip_bulk task tests |
 | NetBox | `netbox_create_prefix` | NetBox create_prefix task tests |

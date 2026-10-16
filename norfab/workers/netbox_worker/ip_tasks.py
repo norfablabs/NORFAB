@@ -18,6 +18,8 @@ from .netbox_models import (
     CreateIpInput,
     CreateIpResult,
     InterfaceMapRule,
+    MoveIpInput,
+    MoveIpResult,
     NetboxFastApiArgs,
     SyncActionSummary,
     SyncActionSummaryMap,
@@ -141,6 +143,157 @@ def collect_live_interface_ip_data(
 
 
 class NetboxIpTasks:
+
+    @Task(
+        input=MoveIpInput,
+        output=MoveIpResult,
+        fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},
+        mcp={
+            "annotations": {
+                "title": "Move IP Addresses",
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": True,
+                "openWorldHint": True,
+            }
+        },
+    )
+    def move_ip(
+        self,
+        job: Job,
+        from_device: str,
+        from_interface: str,
+        device: str,
+        interface: str,
+        is_primary: bool = False,
+        instance: Union[None, str] = None,
+        dry_run: bool = False,
+        branch: Union[None, str] = None,
+    ) -> Result:
+        """Move all IP addresses from one device interface to another.
+
+        Addresses, VRFs, roles, and metadata remain unchanged; existing destination
+        addresses are retained. Identical interfaces and empty sources return
+        unchanged without modifying primary references.
+
+        Source primary references pointing to moved IPs are cleared even when
+        is_primary is False, including same-device moves. With is_primary=True,
+        moved addresses replace destination primaries for the affected families.
+        A sole address in a family is selected automatically. Multiple addresses
+        use the moved source primary; without one, selection fails before writes.
+        Other destination primaries are preserved.
+
+        Writes clear source primaries, move IPs, then set destination primaries.
+        These requests are separate; a later failure does not undo earlier writes.
+        Dry runs return proposed changes without writing. Branch operations
+        require the Netbox branching plugin.
+
+        Args:
+            job: Current worker job used to report progress.
+            from_device: Source Netbox device name; must identify one device.
+            from_interface: Source interface name on that device.
+            device: Destination Netbox device name; must identify one device.
+            interface: Destination interface name on that device.
+            is_primary: Set destination primaries to moved addresses, overriding
+                existing primaries for the moved address families. Defaults to False.
+            instance: Netbox instance name; defaults to the worker default.
+            dry_run: Return proposed moves and primary changes without writes.
+            branch: Branch to use; requires the Netbox branching plugin.
+
+        Returns:
+            Result: Source/destination, IP IDs and addresses, and primary updates.
+                Status is updated for a move or unchanged for an empty source or
+                identical interfaces. Dry runs include the proposed updates.
+
+        Raises:
+            ValueError: A device/interface is missing or primary selection is
+                ambiguous. Non-unique lookups and Netbox API errors propagate.
+        """
+        instance = instance or self.default_instance
+        nb = self._get_pynetbox(instance, branch=branch, job=job)
+        # Resolve both ends before changing assignments or primary references.
+        source = nb.dcim.devices.get(name=from_device)
+        if source is None:
+            raise ValueError(f"source device '{from_device}' not found")
+        target = source if from_device == device else nb.dcim.devices.get(name=device)
+        if target is None:
+            raise ValueError(f"destination device '{device}' not found")
+        source_interface = nb.dcim.interfaces.get(
+            device_id=source.id, name=from_interface
+        )
+        target_interface = nb.dcim.interfaces.get(device_id=target.id, name=interface)
+        if source_interface is None or target_interface is None:
+            raise ValueError("source or destination interface not found")
+        ret = Result(
+            task=f"{self.name}:move_ip",
+            resources=[instance],
+            status="unchanged",
+            dry_run=dry_run,
+            result={
+                "from_device": from_device,
+                "from_interface": from_interface,
+                "device": device,
+                "interface": interface,
+                "ip_addresses": [],
+                "source_primary_updates": {},
+                "destination_primary_updates": {},
+            },
+        )
+        if source_interface.id == target_interface.id:
+            return ret
+        addresses = list(nb.ipam.ip_addresses.filter(interface_id=source_interface.id))
+        if not addresses:
+            return ret
+        # Update only assignment fields so IP records and metadata are preserved.
+        updates = []
+        candidates = {4: [], 6: []}
+        for address in addresses:
+            candidates[ipaddress.ip_interface(address.address).version].append(
+                address.id
+            )
+            updates.append(
+                {
+                    "id": address.id,
+                    "assigned_object_type": "dcim.interface",
+                    "assigned_object_id": target_interface.id,
+                }
+            )
+            ret.result["ip_addresses"].append(
+                {"id": address.id, "address": address.address}
+            )
+        # Choose all primaries before any writes; ambiguous choices must not move IPs.
+        source_updates = {}
+        target_updates = {}
+        for family in (4, 6):
+            field = f"primary_ip{family}"
+            primary = getattr(source, field)
+            primary_is_moving = primary is not None and primary.id in candidates[family]
+            if primary_is_moving:
+                source_updates[field] = None
+            if not is_primary or not candidates[family]:
+                continue
+            if primary_is_moving:
+                target_updates[field] = primary.id
+            elif len(candidates[family]) == 1:
+                target_updates[field] = candidates[family][0]
+            else:
+                raise ValueError(
+                    f"cannot select IPv{family} primary from multiple moved addresses"
+                )
+        ret.result["source_primary_updates"] = source_updates
+        ret.result["destination_primary_updates"] = target_updates
+        job.event(
+            f"moving {len(addresses)} IP addresses from '{from_device}:{from_interface}' to '{device}:{interface}', dry_run={dry_run}"
+        )
+        if not dry_run:
+            # Clear source primaries before their IPs belong to another device.
+            if source_updates:
+                source.update(source_updates)
+            nb.ipam.ip_addresses.update(updates)
+            if target_updates:
+                target.update(target_updates)
+        ret.status = "updated"
+        return ret
 
     @Task(
         fastapi={"methods": ["POST"], "schema": NetboxFastApiArgs.model_json_schema()},

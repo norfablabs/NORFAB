@@ -245,6 +245,7 @@ used during deployment.
 | `create_asn` | `asns`. BGP peering `local_as` and `remote_as`, including nested peerings | Allocates or reuses an ASN from a named range. See the ASN examples below. |
 | `create_vlan` | `vlans` | Allocates a VID from a VLAN group. |
 | `create_prefix` | `prefixes` | Allocates a child prefix. |
+| `move_ip` | `ip_addresses`, including nested interface IPs | Moves all source-interface addresses to the destination interface. |
 | `create_ip` | `ip_addresses`, including nested interface IPs | Allocates an IP, optionally assigning it to an interface or FHRP group. |
 
 Each query entry contains only `query` with a nonempty filter dictionary.
@@ -264,6 +265,7 @@ Task wrappers call standalone NorFab NetBox service tasks during the relevant de
 | [create_asn](services_netbox_service_tasks_create_asn.md) | Allocates or reuses an ASN in `asns` or BGP peering `local_as` and `remote_as`. |
 | [create_vlan](services_netbox_service_tasks_create_vlan.md) | Selects an available VID from an existing VLAN group's allowed ranges. |
 | [create_prefix](services_netbox_service_tasks_create_prefix.md) | Allocates a child prefix of the requested length inside an existing parent prefix; supports VLAN association by VID and group name. |
+| [move_ip](services_netbox_service_tasks_move_ip.md) | Moves all addresses from a source interface and optionally sets destination primaries. |
 | [create_ip](services_netbox_service_tasks_create_ip.md) | Allocates an address from an existing prefix and can assign it to a device interface or named VRRP group. |
 | [create_bgp_peering](services_netbox_service_tasks_create_bgp_peering.md) | Creates a BGP session under `bgp_peerings`; can derive the local address from an interface and create a reverse session. |
 
@@ -521,6 +523,22 @@ To allocate a VIP, supply `vrrp_group` with a unique existing VRRPv2 or VRRPv3 g
 Put this wrapper in the **top-level `ip_addresses` collection**. Do not nest it under an interface: `vrrp_group` cannot accompany `device`, `interface`, or `is_primary: true`. Group allocation disables peer IP allocation automatically. See the [allocated VIP example](#nested-vrrp-group-records) below.
 
 A dry run does not create the VLANs, groups, or prefixes proposed by the design. Allocation lookups therefore require those prerequisites to exist already. The `create_ip` dry-run limitation still applies: `mask_len` is ignored and no child subnet is created.
+
+### Move Interface IP Addresses
+
+`ip_addresses` accepts a `move_ip` wrapper containing `from_device`, `from_interface`, `device`, `interface`, and optional `is_primary` (default `false`). Nested wrappers inherit the destination device and interface. Moves run before explicit IP writes and allocations, after interfaces exist. Deployment controls `instance`, `branch`, and `dry_run` are inherited. Moved addresses appear in `updated` results.
+
+Primary-IP behavior is documented in the [Move IP task](services_netbox_service_tasks_move_ip.md#primary-ip-behavior). Dry runs do not simulate chained moves.
+
+```yaml
+ip_addresses:
+  - move_ip:
+      from_device: router-1
+      from_interface: Ethernet1
+      device: router-2
+      interface: Ethernet2
+      is_primary: true
+```
 
 ## Custom fields
 

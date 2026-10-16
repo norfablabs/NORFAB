@@ -1099,6 +1099,15 @@ class DesignDocument(BaseModel):
             for record in records:
                 if "custom_function" in record:
                     continue
+                if task_name == "create_ip" and "move_ip" in record:
+                    if set(record) != {"move_ip"}:
+                        raise ValueError("task arguments belong inside move_ip")
+                    MoveIpInput.model_validate(record["move_ip"])
+                    # Deployment supplies these controls to every delegated task.
+                    for control in ("instance", "branch", "dry_run", "dry-run"):
+                        if control in record["move_ip"]:
+                            raise ValueError(f"{control} is supplied by deployment")
+                    continue
                 if (identity in record) == (task_name in record):
                     raise ValueError(
                         f"records require exactly one of {identity} or {task_name}"
@@ -2259,6 +2268,38 @@ class SyncDevicePrefixesInput(
         None,
         description="IP network containing prefixes to include",
         alias="filter-by-prefix",
+    )
+
+
+class MoveIpInput(NetboxCommonArgs, use_enum_values=True, populate_by_name=True):
+    dry_run: StrictBool = Field(
+        False,
+        alias="dry-run",
+        description="Preview without writes",
+        json_schema_extra={"presence": True},
+    )
+    from_device: StrictStr = Field(
+        ..., min_length=1, alias="from-device", description="Source device name"
+    )
+    from_interface: StrictStr = Field(
+        ..., min_length=1, alias="from-interface", description="Source interface name"
+    )
+    device: StrictStr = Field(..., min_length=1, description="Destination device name")
+    interface: StrictStr = Field(
+        ..., min_length=1, description="Destination interface name"
+    )
+    is_primary: StrictBool = Field(
+        False,
+        alias="is-primary",
+        description="Make moved addresses destination primaries, replacing existing primaries",
+        json_schema_extra={"presence": True},
+    )
+
+
+class MoveIpResult(Result):
+    result: dict[StrictStr, Any] = Field(
+        {},
+        description="Source, destination, moved IP records, and primary reference updates",
     )
 
 

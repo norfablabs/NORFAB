@@ -18,6 +18,93 @@ pytestmark = [pytest.mark.netbox, pytest.mark.netbox_design_deploy]
 
 
 class TestDesignDeploy:
+    def test_move_ip_wrapper(self, nfclient: Any) -> None:
+        """Deploy top-level and nested IP move wrappers against Netbox."""
+        nb = pynetbox.api(url=NB_URL, token=NB_API_TOKEN)
+        name = "NORFAB-DESIGN-MOVE-IP"
+        addresses = ["198.18.233.20/24", "2001:db8:233::20/64"]
+        source = nb.dcim.devices.get(name="fceos4")
+        target = nb.dcim.devices.get(name="fceos5")
+        assert (
+            source is not None and target is not None
+        ), "move test seed devices are missing"
+        for owner in (source, target):
+            if nb.dcim.interfaces.get(device_id=owner.id, name=name):
+                pytest.fail("move test interface already exists")
+        for address in addresses:
+            if list(nb.ipam.ip_addresses.filter(address=address)):
+                pytest.fail("move test address already exists")
+        interfaces, ips = [], []
+        try:
+            for owner in (source, target):
+                interfaces.append(
+                    nb.dcim.interfaces.create(
+                        device=owner.id, name=name, type="virtual"
+                    )
+                )
+            for address in addresses:
+                ips.append(
+                    nb.ipam.ip_addresses.create(
+                        address=address,
+                        assigned_object_type="dcim.interface",
+                        assigned_object_id=interfaces[0].id,
+                        description=name,
+                    )
+                )
+            kwargs = dict(
+                from_device=source.name,
+                from_interface=name,
+                device=target.name,
+                interface=name,
+            )
+            for nested in (False, True):
+                # Move back with the nested wrapper to test destination inheritance.
+                if nested:
+                    destination = interfaces[0]
+                    previous = interfaces[1]
+                    design = {
+                        "interfaces": [
+                            {
+                                "device": source.name,
+                                "name": name,
+                                "ip_addresses": [
+                                    {
+                                        "move_ip": {
+                                            "from_device": target.name,
+                                            "from_interface": name,
+                                        }
+                                    }
+                                ],
+                            }
+                        ]
+                    }
+                else:
+                    destination = interfaces[1]
+                    previous = interfaces[0]
+                    design = {"ip_addresses": [{"move_ip": kwargs}]}
+                for attempt, dry_run in enumerate((True, False, False)):
+                    response = nfclient.run_job(
+                        "netbox",
+                        "design_deploy",
+                        workers="any",
+                        kwargs={"design": design, "dry_run": dry_run},
+                    )
+                    result = next(iter(response.values()))
+                    assert not result["failed"], result
+                    expected = addresses if attempt < 2 else []
+                    assert result["result"]["ip_addresses"]["updated"] == expected
+                    for ip in ips:
+                        actual = nb.ipam.ip_addresses.get(id=ip.id)
+                        assert actual.assigned_object_id == (
+                            previous.id if dry_run else destination.id
+                        )
+                        assert actual.address == ip.address
+        finally:
+            for ip in ips:
+                ip.delete()
+            for port in interfaces:
+                port.delete()
+
     def test_design_timeout(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Stop preparation with a timeout error after a slow connection setup."""
         from norfab.core.worker import Job

@@ -559,5 +559,21 @@
       "read_only_device": "ceos1",
       "ownership": "Owns and deletes its session, ASNs, IPs, range, and RIR. Tests local/remote allocation, dry runs, repeat deployment, and missing-range failure."
     }
+  },
+  "move_ip_tests": {
+    "test_ipam.py::TestMoveIP::test_move_in_netbox": {
+      "read_only_devices": ["fceos4", "fceos5"],
+      "interfaces": ["fceos4:NORFAB-MOVE-IP", "fceos5:NORFAB-MOVE-IP"],
+      "addresses": ["198.18.233.10/24", "2001:db8:233::10/64"],
+      "ownership": "Owns only these interfaces and IPs. Covers task dry run, move, and repeat. Leaves seed device fields and primaries unchanged.",
+      "cleanup": "Fails before writes if any reserved interface or IP already exists. Finally deletes only IP and interface records returned by this test setup, by ID, including after partial setup. Never deletes by device, subnet, or name filter."
+    },
+    "test_designs.py::TestDesignDeploy::test_move_ip_wrapper": {
+      "read_only_devices": ["fceos4", "fceos5"],
+      "interfaces": ["fceos4:NORFAB-DESIGN-MOVE-IP", "fceos5:NORFAB-DESIGN-MOVE-IP"],
+      "addresses": ["198.18.233.20/24", "2001:db8:233::20/64"],
+      "ownership": "Owns only these interfaces and IPs. Covers top-level and nested design wrappers, dry runs, moves, and repeats. Leaves seed device fields and primaries unchanged.",
+      "cleanup": "Fails before writes if any reserved interface or IP already exists. Finally deletes only IP and interface records returned by this test setup, by ID, including after partial setup. Never deletes by device, subnet, or name filter."
+    }
   }
 }

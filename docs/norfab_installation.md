@@ -42,7 +42,7 @@ will be noted in service deployment details.
 
 === "git+pip"
 
-    Install the latest development version directly from GitHub:
+    Install the latest code directly from GitHub:
 
     ```
     pip install git+https://github.com/norfablabs/NORFAB.git@master
@@ -74,23 +74,72 @@ will be noted in service deployment details.
         Python 3.10 or later must be installed and on your PATH.
         Download from [python.org](https://www.python.org/downloads/).
 
+    To install manually, run these commands in PowerShell:
+
+    ```powershell
+    python -m pip install norfab
+    # Or include the CLI, TUI, and selected services:
+    python -m pip install "norfab[nfcli,tui,nornirservice,netboxservice]"
+    ```
+
+    Using a virtual environment (recommended):
+
+    ```powershell
+    python -m venv norfab-env
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    .\norfab-env\Scripts\Activate.ps1
+    python -m pip install "norfab[nfcli,tui,nornirservice,netboxservice]"
+    ```
+
+    Choose extras from the table in the **pip** tab to match the services you
+    need. With the `nfcli` extra installed, create a new inventory folder:
+
+    ```powershell
+    nfcli --create-env norfab-project
+    Set-Location norfab-project
+    ```
+
+    Review `inventory.yaml` and the worker configuration files, enabling only
+    services whose extras you installed. Then start NorFab:
+
+    ```powershell
+    nfcli
+    ```
+
     **Upgrade:**
 
     ```powershell
-    pip install --upgrade norfab
+    python -m pip install --upgrade norfab
     ```
 
-    If you installed into a virtual environment, activate it first:
+    If you installed into a virtual environment, activate it first. Run this
+    from the folder containing `norfab-env`, or use your environment's actual path:
 
     ```powershell
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     .\norfab-env\Scripts\Activate.ps1
-    pip install --upgrade norfab
+    python -m pip install --upgrade norfab
     ```
 
 === "Linux"
 
-    Install from PyPI, optionally with extras for the services you want to run:
+    Download and run the interactive Bash installer:
+
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/norfablabs/NORFAB/master/install_norfab_linux.sh -o install_norfab_linux.sh
+    bash install_norfab_linux.sh
+    ```
+
+    Use Python 3.10+ with pip and venv support. The installer defaults to a local
+    virtual environment, includes CLI and TUI, and lets you select services and
+    Robot Framework. System installation follows your distribution's pip policy;
+    choose Local if Python is externally managed.
+
+    You can skip inventory creation. Existing inventory and selected worker files
+    are preserved; choose a new folder if they already exist. After installation,
+    run the printed commands in your terminal to start `nfcli`.
+
+    To install manually:
 
     ```bash
     pip install norfab

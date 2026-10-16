@@ -82,6 +82,8 @@ def flatten_design(design: dict) -> dict:
         for address in interface.pop("ip_addresses", []):
             if "create_ip" in address:
                 address["create_ip"].update(device=device, interface=name)
+            elif "move_ip" in address:
+                address["move_ip"].update(device=device, interface=name)
             else:
                 address.update(device=device, interface=name)
             design.setdefault("ip_addresses", []).append(address)
@@ -2324,7 +2326,7 @@ def process_ip_addresses(
     instance: str,
     branch: str | None,
 ) -> dict:
-    """Bulk-write explicit IPs, then run create_ip allocations.
+    """Move interface IPs, bulk-write explicit IPs, then run create_ip allocations.
 
     Identity is address plus VRF and, for shared IPs, assignment. Assignments
     resolve interfaces or FHRP groups from the cache; allocated addresses may
@@ -2347,6 +2349,23 @@ def process_ip_addresses(
     log.debug(
         "process_ip_addresses: processing %d records, dry_run=%s", len(records), dry_run
     )
+    # Move existing addresses first so later allocations can reuse them at the target.
+    moved = []
+    for record in records:
+        if "move_ip" not in record:
+            continue
+        result = worker.move_ip(
+            **record["move_ip"],
+            job=job,
+            instance=instance,
+            branch=branch,
+            dry_run=dry_run,
+        )
+        if result.failed or result.errors:
+            raise ValueError("; ".join(result.errors) or "IP move failed")
+        if result.status == "updated":
+            for address in result.result["ip_addresses"]:
+                moved.append(address["address"])
     explicit = [record for record in records if "address" in record]
     addresses = [str(ip_interface(record["address"])) for record in explicit]
     existing = {}
@@ -2520,7 +2539,7 @@ def process_ip_addresses(
             nb.ipam.ip_addresses.update(updated)
     changes = {
         "created": [record["address"] for record in created],
-        "updated": [record["address"] for record in updated],
+        "updated": moved + [record["address"] for record in updated],
     }
     for record in records:
         if "create_ip" in record:

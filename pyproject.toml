@@ -349,6 +349,7 @@ markers = [
     "netbox_create_asn: NetBox create_asn task tests",
     "netbox_design_deploy: NetBox design_deploy task tests",
     "netbox_create_device_interfaces: NetBox create_device_interfaces task tests",
+    "netbox_move_ip: NetBox move_ip task tests",
     "netbox_create_ip: NetBox create_ip task tests",
     "netbox_create_ip_bulk: NetBox create_ip_bulk task tests",
     "netbox_create_prefix: NetBox create_prefix task tests",

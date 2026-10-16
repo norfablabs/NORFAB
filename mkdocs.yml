@@ -153,6 +153,7 @@ nav:
       - Get Nornir Inventory: workers/netbox/services_netbox_service_tasks_get_nornir_inventory.md
       - Get Containerlab Inventory: workers/netbox/services_netbox_service_tasks_get_containerlab_inventory.md
       - Get Topology Data: workers/netbox/services_netbox_service_tasks_get_topology.md
+      - Move IP: workers/netbox/services_netbox_service_tasks_move_ip.md
       - Create IP: workers/netbox/services_netbox_service_tasks_create_ip.md
       - Create IP Bulk: workers/netbox/services_netbox_service_tasks_create_ip_bulk.md
       - Create Prefix: workers/netbox/services_netbox_service_tasks_create_prefix.md

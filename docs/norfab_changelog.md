@@ -1,3 +1,12 @@
+# 0.24.14 (draft)
+
+## FEATURES
+
+1. Added Netbox `move_ip` task to move all source-interface IP addresses to another device interface, with dry-run, branching, and NFCLI support. Source primary references are cleared; `is_primary=True` replaces destination primaries with moved addresses.
+2. Added `move_ip` support to Netbox `design_deploy` through top-level and nested interface IP address wrappers.
+
+---
+
 # 0.24.13
 
 ## BUGS

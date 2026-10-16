@@ -39,6 +39,75 @@ except ModuleNotFoundError as exc:
 pytestmark = pytest.mark.netbox
 
 
+@pytest.mark.netbox_move_ip
+class TestMoveIP:
+    def test_move_in_netbox(self, nfclient: Any) -> None:
+        """Preview, apply, and repeat a dual-stack task move on owned interfaces."""
+        nb = get_pynetbox(nfclient)
+        name = "NORFAB-MOVE-IP"
+        addresses = ["198.18.233.10/24", "2001:db8:233::10/64"]
+        source = nb.dcim.devices.get(name="fceos4")
+        target = nb.dcim.devices.get(name="fceos5")
+        assert (
+            source is not None and target is not None
+        ), "move test seed devices are missing"
+        for owner in (source, target):
+            if nb.dcim.interfaces.get(device_id=owner.id, name=name):
+                pytest.fail("move test interface already exists")
+        for address in addresses:
+            if list(nb.ipam.ip_addresses.filter(address=address)):
+                pytest.fail("move test address already exists")
+        interfaces, ips = [], []
+        try:
+            for owner in (source, target):
+                interfaces.append(
+                    nb.dcim.interfaces.create(
+                        device=owner.id, name=name, type="virtual"
+                    )
+                )
+            for address in addresses:
+                ips.append(
+                    nb.ipam.ip_addresses.create(
+                        address=address,
+                        assigned_object_type="dcim.interface",
+                        assigned_object_id=interfaces[0].id,
+                        description=name,
+                    )
+                )
+            kwargs = dict(
+                from_device=source.name,
+                from_interface=name,
+                device=target.name,
+                interface=name,
+            )
+            for dry_run in (True, False):
+                task = "move_ip"
+                task_kwargs = {**kwargs, "dry_run": dry_run}
+                response = nfclient.run_job(
+                    "netbox", task, workers="any", kwargs=task_kwargs
+                )
+                result = next(iter(response.values()))
+                assert not result["failed"], result
+                for ip in ips:
+                    actual = nb.ipam.ip_addresses.get(id=ip.id)
+                    assert (
+                        actual.assigned_object_id == interfaces[0 if dry_run else 1].id
+                    )
+                    assert actual.address == ip.address
+                    assert actual.description == name
+            response = nfclient.run_job(
+                "netbox", "move_ip", workers="any", kwargs=kwargs
+            )
+            result = next(iter(response.values()))
+            assert not result["failed"], result
+            assert result["status"] == "unchanged", result
+        finally:
+            for ip in ips:
+                ip.delete()
+            for port in interfaces:
+                port.delete()
+
+
 def test_resolve_ip_role_without_interface_name() -> None:
     assert resolve_ip_role("192.0.2.1/24", None, []) is None
 
