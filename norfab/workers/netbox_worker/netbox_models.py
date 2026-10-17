@@ -3050,10 +3050,23 @@ class SyncVrrpInput(
     )
 
 
+class SyncVrrpDeviceDiff(BaseModel):
+    """Public VRRP actions keyed by interface, protocol, and VRID."""
+
+    create: List[StrictStr]
+    update: Dict[StrictStr, Dict[StrictStr, Any]]
+    delete: List[StrictStr]
+    in_sync: List[StrictStr]
+
+
 class SyncVrrpResult(Result):
-    result: Union[SyncActionSummaryMap, Dict[StrictStr, Any]] = Field(
+    result: Union[Dict[StrictStr, SyncVrrpDeviceDiff], SyncActionSummaryMap] = Field(
         default_factory=SyncActionSummaryMap,
-        description="VRRP sync actions keyed by NetBox device name",
+        description="Per-device action summaries, or action previews for dry runs and declined approval",
+    )
+    diff: Dict[StrictStr, SyncVrrpDeviceDiff] = Field(
+        default_factory=dict,
+        description="Per-device interface actions including group and VIP field changes",
     )
 
 

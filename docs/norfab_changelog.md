@@ -7,7 +7,7 @@
 
 ## ENHANCEMENTS
 
-1. Netbox `sync_vrrp` supports shared VIP addresses across VRFs, normalizes VIP roles to `vrrp`, and adds `vip_use_vrf=False` to optionally assign new VIPs to an existing VRF.
+1. Netbox `sync_vrrp` supports shared VIP addresses across VRFs, normalizes VIP roles to `vrrp`, and adds `vip_use_vrf=False` to optionally assign new VIPs to an existing VRF. Bulk updates reduce API requests; dry-run previews retain the per-device action structure used by sync orchestration.
 
 ---
 

@@ -32,21 +32,21 @@ The parser must return a list per device with these fields:
   authentication_type: plaintext
 ```
 
-`virtual_address` is required. A record with a missing or empty virtual address
-is reported explicitly and skipped because every synchronized FHRP group must
-have a VIP. If `priority` is missing or empty, the task uses the VRRP default of
-`100`.
+`virtual_address` is required. The getter supplies a priority of `100` when
+none is configured.
 
 </details>
 
 ## Group selection
 
-Assignments use the key `interface:protocol:group_id` per device. Peers share a
-Netbox FHRP group when protocol, group ID, VIP, authentication, and VRF match.
-VIP addresses are compared without their prefix lengths.
+Existing assignments are found by device, interface, protocol, and group ID.
+New peers find candidate groups by protocol, group ID, and VIP; the rules below
+resolve candidates. VIP addresses are compared without prefix lengths.
+Names and authentication are editable fields, not lookup identities.
 
-| Existing Netbox VIP | How the group is selected |
+| Existing state | How the group is selected |
 | --- | --- |
+| Existing interface assignment | Keep its group; synchronize its fields and VIP. |
 | VIP has a named VRF | Its VRF must match the live interface VRF. |
 | VIP is global | The group's assigned interfaces must have the live interface VRF. |
 | Same VIP in another VRF | Use a separate group and VIP. |
@@ -58,7 +58,7 @@ are stored globally. Peers can be discovered across separate sync calls;
 interface names do not need to match.
 
 VRRPv2/VRRPv3 map to Netbox `vrrp2`/`vrrp3`. Authentication values `text`,
-`simple`, and `cleartext` map to `plaintext`. Each group uses one VIP.
+`simple`, and `cleartext` map to `plaintext`. Extra existing VIPs are retained.
 
 ## VIP creation and reuse
 
@@ -101,12 +101,19 @@ not group selection. A missing required VRF is reported and that VIP is skipped.
 ## Output
 
 Results contain per-device `created`, `updated`, `deleted`, and `in_sync`
-assignment keys. Dry runs return `create`, `update`, `delete`, and `in_sync`
-diffs, including changed fields.
+assignment keys (`interface:protocol:group_id`). Dry-run results, `diff`, and
+approval previews use the compatible per-device action structure:
 
-**Sync is additive:** stale assignments appear as deletion candidates but are
-never deleted. Use `dry_run=True` to preview or `with_approval=True` to review
-changes before applying them.
+| Action | Contents |
+| --- | --- |
+| `create` | New interface memberships. |
+| `update` | Group, VIP, and priority changes with old/new field values. |
+| `delete` | Stale interface memberships; reported only. |
+| `in_sync` | Memberships requiring no changes. |
+
+Shared group/VIP changes appear for every affected peer and apply once.
+**Sync is additive:** existing groups, VIPs, and assignments are never deleted.
+Use `dry_run=True` to preview or `with_approval=True` to review changes.
 Dry runs also report VIP ownership conflicts and missing required VRFs.
 
 ## Group names

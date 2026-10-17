@@ -972,7 +972,7 @@ only removal. The task does not delete VLAN objects.
 Reconciles TTP-parsed VRRP state with NetBox FHRP groups, virtual IP addresses,
 and device-interface group assignments. Assignments are identified by device,
 interface, protocol, and group ID; priorities remain per-interface while peers with the
-same protocol version, group, virtual address, authentication type, and VRF share
+same protocol version, group, virtual address, and compatible VRF context share
 a NetBox FHRP group, including peers synced in separate calls through VIP-owner
 discovery. Named VIP VRFs identify groups directly; global VIPs use assigned
 interface VRFs. This supports repeated VIPs in different VRFs even when all VIPs
@@ -983,12 +983,12 @@ records are reused and assigned the `vrrp` role; missing virtual IPs are created
 while addresses assigned to other objects are reported without reassignment.
 `vip_use_vrf` optionally assigns newly created VIPs to the live interface VRF;
 existing VIP VRFs are preserved. Required VRFs must already exist. Group-owned
-VIPs with a different or empty role are normalized to `vrrp`. Dry runs report VIP ownership conflicts and missing required VRFs before writes.
+VIPs with a different or empty role are normalized to `vrrp`. Bulk NetBox reads and updates reduce API requests; previews retain per-device interface actions for sync orchestration. Names and authentication are editable fields. Dry runs report VIP ownership conflicts and missing required VRFs before writes.
 **Use cases:** first-hop redundancy inventory, priority drift detection,
 consistent group naming, and virtual-IP auditing. **Limitations:**
 synchronization is additive and reports stale FHRP assignments as deletion
 candidates without deleting them. Empty live and NetBox VRRP states are in
-sync. Live group records without a virtual address are reported and skipped.
+sync. Getter records must include a virtual address.
 Ambiguous matching groups and global VIP groups with mixed interface VRFs
 are reported rather than selected automatically.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vrrp.md)

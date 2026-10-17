@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 
+from norfab.workers.netbox_worker.netbox_models import SyncVrrpResult
 from tests.services.netbox.common import get_pynetbox
 
 pytestmark = [
@@ -35,9 +36,14 @@ class TestSyncVrrp:
         30: "GigabitEthernet0/0/0/4:vrrp2:30",
     }
     DUAL_STACK_KEYS = ["BVI123:vrrp2:1", "BVI123:vrrp3:1"]
+    STALE_VIP_ADDRESS = "198.18.250.2/24"
     ALL_KEYS = sorted([KEYS[10], KEYS[30], *DUAL_STACK_KEYS])
     ALL_INTERFACES = [*INTERFACES.values(), DUAL_STACK_INTERFACE]
-    ALL_ADDRESSES = [*VIRTUAL_ADDRESSES.values(), *DUAL_STACK_ADDRESSES.values()]
+    ALL_ADDRESSES = [
+        *VIRTUAL_ADDRESSES.values(),
+        *DUAL_STACK_ADDRESSES.values(),
+        STALE_VIP_ADDRESS,
+    ]
 
     VRF_DEVICES = ["fn-vrrp-vrf-1", "fn-vrrp-vrf-2"]
     VRF_INTERFACE_VRFS = {
@@ -158,6 +164,12 @@ class TestSyncVrrp:
 
     @pytest.mark.usefixtures("sync_vrrp_fixture")
     def test_vrrp_getter_reads_fakenos_data(self, nfclient: Any) -> None:
+        """Verify the XR getter parses the FakeNOS VRRP configuration.
+
+        Collect live records through Nornir's vrrp getter and compare every
+        returned field with the fixture configuration. Cover IPv4 and IPv6 on
+        BVI123 with the same VRID but different protocols, plus two standalone
+        IPv4 groups, including priorities, authentication, and global VRFs."""
         response = nfclient.run_job(
             "nornir",
             "parse_ttp",
@@ -211,10 +223,22 @@ class TestSyncVrrp:
 
     @pytest.mark.usefixtures("sync_vrrp_fixture")
     def test_sync_vrrp_dry_run_does_not_write_to_netbox(self, nfclient: Any) -> None:
+        """Verify a dry run previews missing XR memberships without creating them.
+
+        Start with the fixture's VRRP records removed, then request a dry run.
+        Check the compatible create/update/delete/in_sync action structure and
+        all expected creation keys. Round-trip the response through its result
+        model to ensure previews survive validation, then confirm the selected
+        interfaces still have no NetBox FHRP assignments."""
         response = self._sync_vrrp(nfclient, dry_run=True)
 
         for result in self._successful_results(response):
-            actions = result["result"][self.DEVICE]
+            preview = result["result"][self.DEVICE]
+            assert set(preview) == {"create", "update", "delete", "in_sync"}
+            validated = SyncVrrpResult.model_validate(result).model_dump()
+            assert validated["result"] == result["result"]
+            assert validated["diff"] == result["diff"]
+            actions = preview
             assert actions["create"] == self.ALL_KEYS
             assert actions["update"] == {}
             assert actions["delete"] == []
@@ -232,6 +256,13 @@ class TestSyncVrrp:
     def test_sync_vrrp_same_interface_group_for_ipv4_and_ipv6(
         self, nfclient: Any
     ) -> None:
+        """Keep IPv4 and IPv6 groups distinct on the same interface and VRID.
+
+        Synchronize the XR fixture, then inspect BVI123's two assignments and
+        their groups and VIPs. Verify VRRPv2 and VRRPv3 each retain VRID 1 and
+        priority 123 with their respective IPv4 and IPv6 addresses. Check that
+        getter authentication text becomes NetBox plaintext for VRRPv2 while
+        VRRPv3 has no authentication."""
         response = self._sync_vrrp(nfclient)
         for result in self._successful_results(response):
             assert set(self.DUAL_STACK_KEYS).issubset(
@@ -279,7 +310,17 @@ class TestSyncVrrp:
         }
 
     @pytest.mark.usefixtures("sync_vrrp_fixture")
-    def test_sync_vrrp_creates_missing_group_virtual_ip(self, nfclient: Any) -> None:
+    @pytest.mark.parametrize("reuse_existing", [False, True])
+    def test_sync_vrrp_creates_missing_group_virtual_ip(
+        self, nfclient: Any, reuse_existing: bool
+    ) -> None:
+        """Repair a missing VIP on an existing interface's FHRP group.
+
+        Synchronize once, delete one group's VIP, and optionally create an
+        unassigned replacement with role vrrp. Check that the dry-run preview
+        reports the missing virtual address as an interface update. Apply sync
+        and verify the original group receives exactly one replacement VIP with
+        the expected address and role, covering both creation and IP reuse."""
         self._successful_results(self._sync_vrrp(nfclient))
         nb = get_pynetbox(nfclient)
         interface = nb.dcim.interfaces.get(device=self.DEVICE, name=self.INTERFACES[10])
@@ -295,6 +336,10 @@ class TestSyncVrrp:
         )[0]
         original_ip_id = original_ip.id
         original_ip.delete()
+        if reuse_existing:
+            nb.ipam.ip_addresses.create(
+                address=self.VIRTUAL_ADDRESSES[10], status="active", role="vrrp"
+            )
 
         dry_run = self._sync_vrrp(nfclient, dry_run=True)
         key = self.KEYS[10]
@@ -325,6 +370,13 @@ class TestSyncVrrp:
     def test_sync_vrrp_normalizes_group_virtual_ip_role(
         self, nfclient: Any, role: str | None
     ) -> None:
+        """Normalize an existing group VIP's empty or vip role to vrrp.
+
+        Synchronize the fixture, change one VIP's role to the parameter value,
+        and inspect its old/new role values in a dry run. Confirm the dry run
+        leaves the role untouched, then apply sync. Check that the group and VRF
+        are preserved, no duplicate address is created, and a repeated sync
+        reports all memberships in sync."""
         self._successful_results(self._sync_vrrp(nfclient))
         nb = get_pynetbox(nfclient)
         vip = nb.ipam.ip_addresses.get(address=self.VIRTUAL_ADDRESSES[10])
@@ -356,6 +408,13 @@ class TestSyncVrrp:
     def test_sync_vrrp_reuses_preferred_existing_virtual_ip(
         self, nfclient: Any
     ) -> None:
+        """Reuse eligible unassigned IPs when creating groups and normalize roles.
+
+        Seed the first VIP as both a /32 in unrelated VRF1 and a global address
+        with role vip. Seed the second VIP globally with no role. Synchronize
+        and verify the eligible global records are attached to their groups and
+        changed to role vrrp. Check that the unrelated VRF1 record stays
+        unassigned and the first VIP's address count does not increase."""
         nb = get_pynetbox(nfclient)
         host_address = self.VIRTUAL_ADDRESSES[10].split("/")[0]
         vrf = nb.ipam.vrfs.get(name="VRF1")
@@ -410,6 +469,13 @@ class TestSyncVrrp:
     def test_sync_vrrp_does_not_reassign_an_assigned_ip(
         self, nfclient: Any, dry_run: bool
     ) -> None:
+        """Protect a matching VIP address already assigned to another interface.
+
+        Assign the desired VIP to a different XR interface and run sync in
+        either live or dry-run mode. Verify the response identifies the address
+        ownership conflict and affected membership. Check that the original
+        IP owner and role remain unchanged and no group or assignment is
+        created for the blocked membership."""
         nb = get_pynetbox(nfclient)
         address = self.VIRTUAL_ADDRESSES[10]
         interface = nb.dcim.interfaces.get(device=self.DEVICE, name=self.INTERFACES[30])
@@ -452,6 +518,13 @@ class TestSyncVrrp:
     def test_sync_vrrp_creates_netbox_records_and_is_idempotent(
         self, nfclient: Any
     ) -> None:
+        """Create XR VRRP records, rename groups, and verify repeatable sync.
+
+        Synchronize an empty fixture and inspect group protocols, VRIDs, names,
+        authentication, VIP addresses and roles, and assignment priorities.
+        Repeat with the default template and require no changes. Apply the
+        nf:// group-name template, verify the renamed groups and update summary,
+        then repeat with that template and require all memberships in sync."""
         first_response = self._sync_vrrp(nfclient)
         for result in self._successful_results(first_response):
             assert result["result"][self.DEVICE]["created"] == self.ALL_KEYS
@@ -521,6 +594,12 @@ class TestSyncVrrp:
 
     @pytest.mark.usefixtures("sync_vrrp_fixture")
     def test_priority_update_only_changes_assignment(self, nfclient: Any) -> None:
+        """Update priority without rewriting the group's or VIP's fields.
+
+        Synchronize the fixture, save group and VIP modification timestamps,
+        and change one assignment's priority to 1. Run sync and verify its only
+        reported field change restores the live priority on that assignment.
+        Confirm the group and VIP timestamps remain unchanged."""
         self._successful_results(self._sync_vrrp(nfclient))
         nb = get_pynetbox(nfclient)
         interface = nb.dcim.interfaces.get(device=self.DEVICE, name=self.INTERFACES[10])
@@ -549,6 +628,46 @@ class TestSyncVrrp:
         )
         assert nb.ipam.fhrp_groups.get(id=group.id).last_updated == group_updated
         assert nb.ipam.ip_addresses.get(id=vip.id).last_updated == vip_updated
+
+    @pytest.mark.usefixtures("sync_vrrp_fixture")
+    def test_changed_vip_keeps_group_and_assignment(self, nfclient: Any) -> None:
+        """Restore the live VIP while retaining its existing group and stale IP.
+
+        Synchronize once, then change one NetBox VIP to a different address.
+        Run sync and verify the preview reports the old and live VIP addresses
+        as an update to the existing membership. Check that the original
+        assignment keeps its group, the stale IP remains, and the live VIP is
+        attached to that group. A repeated sync must report no further drift."""
+        self._successful_results(self._sync_vrrp(nfclient))
+        nb = get_pynetbox(nfclient)
+        vip = nb.ipam.ip_addresses.get(address=self.VIRTUAL_ADDRESSES[10])
+        group_id = vip.assigned_object_id
+        assignment = list(nb.ipam.fhrp_group_assignments.filter(group_id=group_id))[0]
+        vip.update({"address": self.STALE_VIP_ADDRESS})
+
+        result = self._successful_results(self._sync_vrrp(nfclient))[0]
+
+        preview = result["diff"][self.DEVICE]
+        assert preview["create"] == []
+        assert preview["update"] == {
+            self.KEYS[10]: {
+                "virtual_address": {
+                    "old_value": self.STALE_VIP_ADDRESS.split("/")[0],
+                    "new_value": self.VIRTUAL_ADDRESSES[10].split("/")[0],
+                }
+            }
+        }
+        assert result["result"][self.DEVICE]["updated"] == [self.KEYS[10]]
+        assert nb.ipam.fhrp_group_assignments.get(id=assignment.id).group.id == group_id
+        assert nb.ipam.ip_addresses.get(id=vip.id).address == self.STALE_VIP_ADDRESS
+        assert (
+            nb.ipam.ip_addresses.get(
+                address=self.VIRTUAL_ADDRESSES[10]
+            ).assigned_object_id
+            == group_id
+        )
+        repeated = self._successful_results(self._sync_vrrp(nfclient))[0]
+        assert repeated["result"][self.DEVICE]["in_sync"] == self.ALL_KEYS
 
     def _cleanup_vrrp_vrf_records(self) -> None:
         ips = list(self.nb.ipam.ip_addresses.filter(address=self.VRF_ADDRESS))
@@ -617,6 +736,15 @@ class TestSyncVrrp:
     def test_same_vip_in_multiple_vrfs_and_later_peer(
         self, nfclient: Any, vip_use_vrf: bool
     ) -> None:
+        """Separate repeated VIPs by VRF and reuse each group for a later peer.
+
+        Verify the persistent getter reports BLUE, RED, and global interface
+        VRFs, then preview without creating IPs. Sync the first device and
+        require three groups and /24 VIP records for the shared address. Cover
+        both global-only VIP creation and vip_use_vrf=True. Sync the second
+        device with the option reversed, verifying six assignments reuse the
+        three groups with matching interface VRFs and preserve group names.
+        Repeat sync and verify existing VIP IDs and VRFs remain unchanged."""
         parsed = nfclient.run_job(
             "nornir",
             "parse_ttp",
@@ -685,6 +813,12 @@ class TestSyncVrrp:
     @pytest.mark.usefixtures("vrrp_vrfs_fixture")
     @pytest.mark.parametrize("vip_vrf", [None, "TEST_VRRP_BLUE"])
     def test_reused_vip_preserves_vrf(self, nfclient: Any, vip_vrf: str | None) -> None:
+        """Preserve an unassigned VIP's mask and VRF when joining it to a group.
+
+        Seed a /32 VIP either globally or in BLUE, then sync both persistent
+        devices with vip_use_vrf=True. Check that the original IP record keeps
+        its /32 mask and original VRF, and its group receives exactly the BLUE
+        interfaces. Repeat sync and require all memberships to be in sync."""
         vip = self.nb.ipam.ip_addresses.create(
             address=f"{self.VRF_ADDRESS}/32",
             status="active",
@@ -712,6 +846,13 @@ class TestSyncVrrp:
 
     @pytest.mark.usefixtures("vrrp_vrfs_fixture")
     def test_named_vip_vrf_shortcut_without_assignments(self, nfclient: Any) -> None:
+        """Discover a group from its named VIP VRF before it has memberships.
+
+        Seed a VRRPv3 group and a BLUE /32 VIP with role vip, without interface
+        assignments. Sync both devices and verify their BLUE interfaces join
+        that existing group. Check that the VIP remains in BLUE, its role is
+        normalized to vrrp, and the shared address has three IP records after
+        separate groups are created for the other VRF contexts."""
         group = self.nb.ipam.fhrp_groups.create(
             protocol="vrrp3", group_id=20, name="TEST_VRRP_SHORTCUT"
         )
@@ -745,6 +886,13 @@ class TestSyncVrrp:
 
     @pytest.mark.usefixtures("vrrp_vrfs_fixture")
     def test_missing_vrf_is_not_created(self, nfclient: Any) -> None:
+        """Skip VIP creation for a missing required VRF without recreating it.
+
+        Temporarily clear the owned BLUE interfaces' NetBox VRFs and delete
+        BLUE while live getter data still reports it. Sync the first device
+        with vip_use_vrf=True. Verify the missing-VRF error, successful creation
+        of the RED and global memberships, and continued absence of BLUE.
+        Restore the baseline VRF and owned interface assignments in finally."""
         blue = self.nb.ipam.vrfs.get(id=self.vrf_ids["TEST_VRRP_BLUE"])
         for interface in self.interfaces:
             if interface.name == "Vlan10":
@@ -793,6 +941,13 @@ class TestSyncVrrp:
     def test_ambiguous_groups_are_reported_without_writes(
         self, nfclient: Any, mixed_vrfs: bool
     ) -> None:
+        """Reject duplicate candidate groups or a group spanning interface VRFs.
+
+        Seed either two BLUE groups sharing protocol, VRID, and global VIP, or
+        one global-VIP group assigned to BLUE and RED interfaces. Snapshot IP
+        and membership IDs, then sync both devices. Require an ambiguity failure
+        and verify those IDs remain unchanged, demonstrating that preparation
+        stops before adding or replacing VIPs and assignments."""
         blue_interfaces = [
             interface for interface in self.interfaces if interface.name == "Vlan10"
         ]
@@ -858,6 +1013,12 @@ class TestSyncVrrpEmptyResult:
     NORNIR_WORKER = "nornir-worker-4"
 
     def test_sync_vrrp_empty_live_and_netbox_are_in_sync(self, nfclient: Any) -> None:
+        """Treat a device with no live or NetBox VRRP memberships as synchronized.
+
+        Verify the FakeNOS getter returns an empty list and the selected
+        device has no existing NetBox assignments. Run sync and require an
+        error-free result with all four action-summary lists empty. Re-read
+        assignments to confirm the empty state remains unchanged."""
         parsed = nfclient.run_job(
             "nornir",
             "parse_ttp",
@@ -912,6 +1073,13 @@ class TestSyncVrrpEmptyResult:
         assert assignments_after == assignments_before
 
     def test_sync_vrrp_reports_deletion_without_deleting(self, nfclient: Any) -> None:
+        """Report a stale NetBox membership without applying its deletion.
+
+        Add an owned group and assignment to a device whose live configuration
+        has no VRRP groups. Run sync and check that the membership key appears
+        in the diff's delete list while the applied deleted summary stays empty.
+        Verify the assignment still exists, then remove the records created by
+        this test in finally."""
         nb = get_pynetbox(nfclient)
         device = nb.dcim.devices.get(name=self.DEVICE)
         interface = next(iter(nb.dcim.interfaces.filter(device_id=device.id)))
@@ -1015,6 +1183,12 @@ class TestSyncVrrpAristaPeers:
         )
 
     def test_arista_vrrp_getter_reads_both_peers(self, nfclient: Any) -> None:
+        """Verify both Arista peers return the expected shared VRRP configuration.
+
+        Collect live records from the two persistent FakeNOS devices through
+        Nornir. Compare each device's complete record with the shared Vlan250,
+        VRRPv3 VRID, VIP, global VRF, and absent authentication, including each
+        peer's distinct configured priority."""
         response = nfclient.run_job(
             "nornir",
             "parse_ttp",
@@ -1038,6 +1212,13 @@ class TestSyncVrrpAristaPeers:
             ]
 
     def test_sync_vrrp_keeps_different_protocol_assignment(self, nfclient: Any) -> None:
+        """Keep a pre-existing VRRPv2 membership while synchronizing VRRPv3 peers.
+
+        Seed the first peer with a VRRPv2 group using the live VRID and default
+        group name but a different VIP. Sync both VRRPv3 peers and verify their
+        new memberships share one VRRPv3 group. Check that the first device
+        retains both protocols, the second has only VRRPv3, and the original
+        VRRPv2 group remains separate with its protocol unchanged."""
         existing_group = self.nb.ipam.fhrp_groups.create(
             protocol="vrrp2",
             group_id=self.GROUP_ID,
@@ -1096,6 +1277,13 @@ class TestSyncVrrpAristaPeers:
         assert self.nb.ipam.fhrp_groups.get(id=existing_group.id).protocol == "vrrp2"
 
     def test_sync_vrrp_reuses_one_group_across_peers(self, nfclient: Any) -> None:
+        """Create one shared group and VIP for two simultaneously discovered peers.
+
+        Preview both Arista devices and check their membership creation keys.
+        Apply sync, then verify each interface has one assignment with its live
+        priority and both assignments reference the same VRRPv3 group. Inspect
+        the group's VRID, deterministic name, and single /24 VIP. Repeat sync
+        and require both peers to report in sync without creations or updates."""
         key = f"{self.INTERFACE}:vrrp3:{self.GROUP_ID}"
 
         dry_run = self._sync_vrrp(nfclient, dry_run=True)
@@ -1147,6 +1335,14 @@ class TestSyncVrrpAristaPeers:
     def test_sync_vrrp_joins_existing_group_in_later_call(
         self, nfclient: Any, repair_existing: bool
     ) -> None:
+        """Join a later-discovered peer to an existing group without duplicating VIPs.
+
+        Sync the first Arista device alone and save its group and VIP identities.
+        Preview and sync the second peer, verifying it joins that same group
+        with its own priority while the original group name and VIP ID remain.
+        In the repair parameter case, first change group authentication to md5
+        and include both devices so the same call also restores authentication.
+        Repeat for the second peer and require an unchanged, in-sync result."""
         key = f"{self.INTERFACE}:vrrp3:{self.GROUP_ID}"
         first_device, second_device = self.DEVICES
         first_sync = self._sync_vrrp(nfclient, devices=[first_device])
