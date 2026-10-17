@@ -1,5 +1,9 @@
 # 0.24.14 (draft)
 
+## BUGS
+
+1. Fixed Netbox `get_interfaces` raising `KeyError` with `cache="force"` when a requested interface was missing from the cached device data. Incomplete cache entries now trigger a fresh fetch.
+
 ## FEATURES
 
 1. Added Netbox `move_ip` task to move all source-interface IP addresses to another device interface, with dry-run, branching, and NFCLI support. Source primary references are cleared; `is_primary=True` replaces destination primaries with moved addresses.

@@ -278,10 +278,9 @@ services:
       - filesharing
     volumes:
       - *workspace-volume
-      - *inventory-volume
       - type: bind
-        source: ./filesharing-service-tests/__norfab__
-        target: /workspace/tests/nf_tests_inventory/__norfab__
+        source: ./filesharing-service-tests/__norfab__/inventory
+        target: /workspace/tests/nf_tests_inventory
 
   dummy-service-tests:
     <<: *test-runner-common

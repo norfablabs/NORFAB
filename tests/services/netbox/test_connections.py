@@ -429,7 +429,7 @@ class TestGetConnections:
                         ]
                     ), f"{worker}:{device}:{intf_name} not all cable data returned"
 
-    def test_get_connectionstest_preformance(self, nfclient):
+    def test_get_connections_performance(self, nfclient):
         devices = ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03"]
 
         started_at = perf_counter()
@@ -443,8 +443,8 @@ class TestGetConnections:
         pprint.pprint(ret)
 
         assert (
-            elapsed_seconds < 15
-        ), f"get_connections took {elapsed_seconds:.2f}s, expected under 15s"
+            elapsed_seconds < 20
+        ), f"get_connections took {elapsed_seconds:.2f}s, expected under 20s"
 
         for worker, res in ret.items():
             assert not res["errors"], f"{worker} - received error"

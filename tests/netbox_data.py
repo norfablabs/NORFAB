@@ -976,6 +976,16 @@ interfaces.extend(
     ]
 )
 
+# Baseline data read by the Nornir NetBox Jinja filters.
+interfaces.append(
+    {
+        "name": "Loopback0",
+        "device": {"name": "ceos-spine-1"},
+        "type": "virtual",
+        "description": "RID",
+    }
+)
+
 # add FakeNOS cEOS baseline interfaces
 interfaces.extend(
     [

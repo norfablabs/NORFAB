@@ -41,6 +41,7 @@
     "source": "tests/netbox_data.py",
     "devices": [
       "ceos1",
+      "ceos-spine-1",
       "fceos4",
       "fceos5",
       "fn-ceos-sp-1",
@@ -69,6 +70,9 @@
       "fn-prefix-sp-1",
       "fn-prefix-sp-2"
     ],
+    "interfaces": [
+      "ceos-spine-1:Loopback0 (virtual, description RID; read by Nornir Jinja filter tests)"
+    ],
     "circuits": [
       "CID1",
       "CID2",
@@ -86,6 +90,17 @@
     ]
   },
   "tests": {
+    "test_connections.py::TestGetConnections::test_get_connections_performance": {
+      "mode": "main_readonly",
+      "devices": ["bulk-conn-01", "bulk-conn-02", "bulk-conn-03"],
+      "coverage": "Reads 600 seeded connections through the public client and requires the call to complete in under 20 seconds. Does not mutate or clean up seed records."
+    },
+    "services/nornir/test_jinja2.py::TestNornirJinja2Filters": {
+      "mode": "main_readonly",
+      "devices": ["ceos-spine-1"],
+      "interfaces": ["ceos-spine-1:Ethernet2", "ceos-spine-1:Loopback0"],
+      "coverage": "NetBox Jinja filters render seeded Loopback0 configuration with description RID and a two-interface test suite. Baseline records are maintained by tests/netbox_data.py; these tests do not mutate or clean them up."
+    },
     "test_ipam.py::TestCreateIP::test_create_ip_by_prefix_description_device_interface": {
       "mode": "main_mutating",
       "read_only_device": "fceos4",
@@ -119,6 +134,7 @@
     },
     "test_interfaces.py::TestGetInterfaces": {
       "mode": "main_readonly",
+      "coverage": "Includes forced cache reads after caching only fceos4:eth8, then requesting eth8 and eth9 on the same worker. No NetBox records are changed.",
       "devices": [
         "ceos1",
         "fceos4"

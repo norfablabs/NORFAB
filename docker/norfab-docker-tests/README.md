@@ -1,8 +1,8 @@
 # NorFab Docker Tests
 
 This folder contains Docker runners for the repository test suite. The runners
-use the canonical inventory in `tests/nf_tests_inventory`; they do not maintain
-their own inventory or test asset copies.
+use the canonical inventory in `tests/nf_tests_inventory`. FileSharing uses an
+Invoke-refreshed copy so publication and runtime staging share one Docker mount.
 
 From the repository root, use Invoke for normal development runs:
 
@@ -61,6 +61,14 @@ Each service mounts:
 
 That keeps inventory and tests single-sourced while isolating broker, worker,
 and client runtime files per Docker test service.
+
+FileSharing instead mounts `filesharing-service-tests/__norfab__/inventory` as
+the entire inventory, with no separate runtime overlay. Invoke copies the
+canonical inventory there, excluding runtime data and Python caches. Its logs
+and JUnit artifacts live in that copy's `__norfab__` directory; report discovery
+includes them automatically. Per-file runs use the same layout within each
+shard. Before running FileSharing directly with Compose, run
+`poetry run inv docker-tests-prepare` to refresh its inventory copy.
 
 ```text
 docker/norfab-docker-tests/

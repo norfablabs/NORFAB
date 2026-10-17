@@ -301,6 +301,26 @@ class TestGetInterfaces:
                     len(interfaces) == 2
                 ), f"{worker}:{device} was expecting only 2 interfaces"
 
+    def test_get_interfaces_force_cache_missing_interface(self, nfclient: Any) -> None:
+        """Fetch missing interfaces when a forced cache read follows a subset read."""
+        worker = "netbox-worker-1.1"
+        for cache, names in [
+            ("refresh", ["eth8"]),
+            ("force", ["eth8", "eth9"]),
+        ]:
+            result = nfclient.run_job(
+                "netbox",
+                "get_interfaces",
+                workers=[worker],
+                kwargs={
+                    "devices": ["fceos4"],
+                    "interface_list": names,
+                    "cache": cache,
+                },
+            )[worker]
+            assert result["failed"] is False, result["errors"]
+            assert set(result["result"]["fceos4"]) == set(names)
+
     @pytest.mark.parametrize("cache", cache_options)
     def test_get_interfaces_cache(self, nfclient, cache):
         if self.nb_version is None:
@@ -314,6 +334,7 @@ class TestGetInterfaces:
         pprint.pprint(ret)
 
         for worker, res in ret.items():
+            assert res["failed"] is False, f"{worker}: {res['errors']}"
             assert "ceos1" in res["result"], f"{worker} returned no results for ceos1"
             assert "fceos4" in res["result"], f"{worker} returned no results for fceos4"
             for device, interfaces in res["result"].items():

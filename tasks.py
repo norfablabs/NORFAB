@@ -222,10 +222,20 @@ def _percentile(values, percentile):
 
 
 def _prepare_runtime(service, shard=None):
-    """Create and return a suite or file-shard runtime directory."""
+    """Prepare a suite runtime, copying inventory for FileSharing's single mount."""
     runtime = DOCKER_DIR / service
     runtime = runtime / "parallel" / shard if shard else runtime
     runtime = runtime / "__norfab__"
+    if service == "filesharing-service-tests":
+        # Publication and runtime staging must share a mount for Git renames.
+        inventory = runtime / "inventory"
+        shutil.copytree(
+            ROOT / "tests" / "nf_tests_inventory",
+            inventory,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("__norfab__", "__pycache__"),
+        )
+        runtime = inventory / "__norfab__"
     (runtime / "artifacts").mkdir(parents=True, exist_ok=True)
     return runtime
 
@@ -387,9 +397,13 @@ def _run_suite(
     if build:
         args.append("--build")
     if junit_name:
+        mount_source = runtime.parent if suite == "filesharing" else runtime
+        mount_target = "/workspace/tests/nf_tests_inventory"
+        if suite != "filesharing":
+            mount_target += "/__norfab__"
         args += [
             "--volume",
-            f"{runtime.resolve()}:/workspace/tests/nf_tests_inventory/__norfab__",
+            f"{mount_source.resolve()}:{mount_target}",
             "--env",
             "PYTEST_JUNIT_XML="
             f"/workspace/tests/nf_tests_inventory/__norfab__/artifacts/{junit_name}",

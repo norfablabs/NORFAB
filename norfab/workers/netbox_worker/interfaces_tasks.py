@@ -215,7 +215,8 @@ class NetboxInterfacesTasks:
             inventory_items (bool, optional): If True, retrieves interface inventory items. Defaults to False.
             dry_run (bool, optional): If True, only return REST filter params, do not run. Defaults to False.
             cache: ``True`` - use cache if up to date; ``False`` - skip cache;
-                ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check
+                ``"refresh"`` - fetch and overwrite cache; ``"force"`` - use cache without staleness check.
+                Missing requested interfaces trigger a fresh fetch.
             brief (bool, optional): If True, return stripped-down interface data for MCP/LLM context
                 window optimization. Full data is still fetched; brief mode only affects what is returned.
             raise_on_empty (bool, optional): Raise an error when no interfaces match.
@@ -295,7 +296,10 @@ class NetboxInterfacesTasks:
             devices_to_fetch = []
             for device_name, intf_last_updated in last_updated_by_device.items():
                 device_cache_key = f"get_interfaces::{device_name}"
-                if device_cache_key in self.cache and (
+                if (
+                    device_cache_key in self.cache
+                    and intf_last_updated.keys() <= self.cache[device_cache_key].keys()
+                ) and (
                     cache == "force"
                     or all(
                         self.cache[device_cache_key]
