@@ -1,0 +1,40 @@
+name: NETBOX_VRRP_VRF
+initial_prompt: '{base_prompt}>'
+commands:
+  enable:
+    output: null
+    new_prompt: '{base_prompt}#'
+    prompt: '{base_prompt}>'
+  terminal width 511:
+    output: 'Width set to 511 columns.'
+    prompt:
+      - '{base_prompt}>'
+      - '{base_prompt}#'
+  terminal length 0:
+    output: 'Pagination disabled.'
+    prompt:
+      - '{base_prompt}>'
+      - '{base_prompt}#'
+  show running-config section vrrp:
+    output: |
+      interface Vlan10
+         vrf TEST_VRRP_BLUE
+         vrrp 20 ipv4 198.19.238.1
+         vrrp 20 ipv4 version 3
+      !
+      interface Vlan20
+         vrf TEST_VRRP_RED
+         vrrp 20 ipv4 198.19.238.1
+         vrrp 20 ipv4 version 3
+      !
+      interface Vlan30
+         vrrp 20 ipv4 198.19.238.1
+         vrrp 20 ipv4 version 3
+      !
+  exit:
+    output: true
+    prompt:
+      - '{base_prompt}>'
+      - '{base_prompt}#'
+  _default_:
+    output: '% Invalid input'

@@ -395,6 +395,7 @@ prefixes = [
     {"prefix": "198.18.250.0/24", "description": "TEST_SYNC_VRRP"},
     {"prefix": "198.18.251.0/24", "description": "TEST_SYNC_VRRP"},
     {"prefix": "198.18.252.0/24", "description": "TEST_SYNC_VRRP"},
+    {"prefix": "198.19.238.0/24", "description": "TEST_SYNC_VRRP"},
     {"prefix": "10.123.123.0/24", "description": "TEST_SYNC_VRRP"},
     {"prefix": "2123:1111:1111:1111::/64", "description": "TEST_SYNC_VRRP"},
     {"prefix": "1.0.1.0/24", "description": "Loopback addresses"},
@@ -1001,6 +1002,12 @@ interfaces.append(
 )
 
 # add FakeNOS interfaces used by VRRP synchronization tests
+vrrp_vrf_devices = ("fn-vrrp-vrf-1", "fn-vrrp-vrf-2")
+vrrp_interface_vrfs = {
+    "Vlan10": "TEST_VRRP_BLUE",
+    "Vlan20": "TEST_VRRP_RED",
+    "Vlan30": None,
+}
 interfaces.extend(
     [
         {
@@ -1020,6 +1027,43 @@ interfaces.extend(
             ("fn-ceos-lf-2", "virtual", ["Vlan250"]),
         ]
         for interface_name in interface_names
+    ]
+)
+interfaces.extend(
+    [
+        {
+            "name": interface_name,
+            "device": {"name": device_name},
+            "type": "virtual",
+            "vrf": {"name": vrf_name} if vrf_name else None,
+            "description": "TEST_VRRP_SYNC",
+        }
+        for device_name in vrrp_vrf_devices
+        for interface_name, vrf_name in vrrp_interface_vrfs.items()
+    ]
+)
+
+vrrp_groups = [
+    {
+        "name": f"fn-vrrp-vrf-1_{interface_name}_VRRP20",
+        "protocol": "vrrp3",
+        "group_id": 20,
+        "assignments": [
+            {"device": device_name, "interface": interface_name, "priority": 100}
+            for device_name in vrrp_vrf_devices
+        ],
+    }
+    for interface_name in vrrp_interface_vrfs
+]
+ip_addresses.extend(
+    [
+        {
+            "address": "198.19.238.1/24",
+            "status": "active",
+            "role": "vrrp",
+            "fhrp_group": {"name": group["name"]},
+        }
+        for group in vrrp_groups
     ]
 )
 
@@ -1271,6 +1315,8 @@ vrfs = [
     {"name": "Voice"},
     {"name": "VRF1"},
     {"name": "TEST_BGP_VRF"},
+    {"name": "TEST_VRRP_BLUE", "description": "TEST_VRRP_SYNC"},
+    {"name": "TEST_VRRP_RED", "description": "TEST_VRRP_SYNC"},
 ]
 
 ip_adress_to_devices = [
@@ -2651,6 +2697,30 @@ devices = [
 devices.extend(
     [
         {
+            "name": device_name,
+            "device_type": {"slug": slugify("Arista cEOS")},
+            "device_role": {"name": "VirtualRouter"},
+            "tenant": {"name": "NORFAB"},
+            "site": {"name": "NORFAB-LAB"},
+            "description": "TEST_VRRP_SYNC",
+            "tags": [{"name": "nornir-worker-4"}, {"name": "NORFAB"}],
+            "platform": {"name": "arista_eos"},
+            "local_context_data": {
+                "nornir": {
+                    "hostname": "127.0.0.1",
+                    "port": 6286 + index,
+                    "username": "nornir",
+                    "password": "nornir",
+                }
+            },
+        }
+        for index, device_name in enumerate(vrrp_vrf_devices)
+    ]
+)
+
+devices.extend(
+    [
+        {
             "name": device["name"],
             "device_type": {"slug": slugify(device["model"])},
             "device_role": {"name": f"Scale{device['role'].title()}"},
@@ -3291,11 +3361,28 @@ def create_prefixes():
     )
 
 
-def create_ip_addresses():
+def create_ip_addresses() -> None:
+    """Create IP dictionaries, resolving named FHRP group assignments."""
     log.info("creating ip addresses")
+    group_names = [
+        ip["fhrp_group"]["name"] for ip in ip_addresses if "fhrp_group" in ip
+    ]
+    group_ids = (
+        {group.name: group.id for group in nb.ipam.fhrp_groups.filter(name=group_names)}
+        if group_names
+        else {}
+    )
+    payloads = []
+    for ip_data in ip_addresses:
+        payload = dict(ip_data)
+        group = payload.pop("fhrp_group", None)
+        if group:
+            payload["assigned_object_type"] = "ipam.fhrpgroup"
+            payload["assigned_object_id"] = group_ids[group["name"]]
+        payloads.append(payload)
     _create_in_batches(
         endpoint=nb.ipam.ip_addresses,
-        items=ip_addresses,
+        items=payloads,
         item_name="ip address",
         batch_size=100,
     )
@@ -3490,46 +3577,53 @@ def create_devices():
     )
 
 
-def create_vrrp():
-    """Create only the NetBox records required by VRRP synchronization tests."""
-    log.info("creating VRRP synchronization test data")
-    for prefix in prefixes:
-        if prefix.get("description") == "TEST_SYNC_VRRP" and not list(
-            nb.ipam.prefixes.filter(prefix=prefix["prefix"])
-        ):
-            nb.ipam.prefixes.create(prefix)
-
-    sync_interfaces = [
-        interface
-        for interface in interfaces
-        if interface.get("description") == "TEST_VRRP_SYNC"
-    ]
-    sync_device_names = {interface["device"]["name"] for interface in sync_interfaces}
-    nb_devices = {}
-    for device_data in devices:
-        if device_data["name"] not in sync_device_names:
-            continue
-        device = nb.dcim.devices.get(name=device_data["name"])
-        if device is None:
-            payload = dict(device_data)
-            payload.setdefault("slug", slugify(payload["name"]))
-            if NB_VERSION >= 3.6:
-                payload["role"] = payload.pop("device_role")
-            device = nb.dcim.devices.create(payload)
-        nb_devices[device.name] = device
-
-    for interface_data in sync_interfaces:
-        device = nb_devices[interface_data["device"]["name"]]
-        if nb.dcim.interfaces.get(device_id=device.id, name=interface_data["name"]):
-            continue
-        nb.dcim.interfaces.create(
-            {
-                "name": interface_data["name"],
-                "device": device.id,
-                "type": interface_data["type"],
-                "description": interface_data["description"],
-            }
+def create_vrrp() -> None:
+    """Create FHRP groups and interface assignments from the VRRP dictionaries."""
+    log.info("creating VRRP groups and assignments")
+    if not vrrp_groups:
+        return
+    _create_in_batches(
+        endpoint=nb.ipam.fhrp_groups,
+        items=[
+            {key: value for key, value in group.items() if key != "assignments"}
+            for group in vrrp_groups
+        ],
+        item_name="VRRP group",
+    )
+    group_ids = {
+        group.name: group.id
+        for group in nb.ipam.fhrp_groups.filter(
+            name=[group["name"] for group in vrrp_groups]
         )
+    }
+    assignments = [
+        assignment for group in vrrp_groups for assignment in group["assignments"]
+    ]
+    if not assignments:
+        return
+    interface_ids = {
+        (interface.device.name, interface.name): interface.id
+        for interface in nb.dcim.interfaces.filter(
+            device=sorted({assignment["device"] for assignment in assignments}),
+            name=sorted({assignment["interface"] for assignment in assignments}),
+        )
+    }
+    _create_in_batches(
+        endpoint=nb.ipam.fhrp_group_assignments,
+        items=[
+            {
+                "group": group_ids[group["name"]],
+                "interface_type": "dcim.interface",
+                "interface_id": interface_ids[
+                    (assignment["device"], assignment["interface"])
+                ],
+                "priority": assignment["priority"],
+            }
+            for group in vrrp_groups
+            for assignment in group["assignments"]
+        ],
+        item_name="VRRP assignment",
+    )
 
 
 def associate_ip_adress_to_devices():
@@ -4461,6 +4555,7 @@ def clean_up_netbox():
     delete_prefixes()
     delete_prefix_roles()
     delete_ip_addresses()
+    delete_vrrp()
     delete_vrfs()
     delete_vlans()
     delete_vlan_groups()
@@ -4472,7 +4567,6 @@ def clean_up_netbox():
     delete_racks()
     delete_sites()
     delete_regions()
-    delete_vrrp()
     delete_tenants()
     delete_inventory_items_roles()
     delete_config_templates()
@@ -4492,12 +4586,13 @@ def populate_netbox():
     create_rir()
     create_prefix_roles()
     create_prefixes()
-    create_ip_addresses()
     create_tags()
     create_devices()
     create_vlan_groups()
     create_vlans()
     create_interfaces()
+    create_vrrp()
+    create_ip_addresses()
     create_mac_addresses()
     create_power_outlet_ports()
     create_power_ports()
@@ -4518,7 +4613,6 @@ def populate_netbox():
     create_bgp_asn()
     create_bgp_peer_groups()
     create_bgp_peerings()
-    create_vrrp()
 
 
 def delete_interfaces():
@@ -4528,52 +4622,16 @@ def delete_interfaces():
         interface.delete()
 
 
-def delete_vrrp():
-    """Delete only the NetBox records used by VRRP synchronization tests."""
-    log.info("deleting VRRP synchronization test data")
-    sync_interfaces = [
-        interface
-        for interface in interfaces
-        if interface.get("description") == "TEST_VRRP_SYNC"
-    ]
-    netbox_interfaces = []
-    group_ids = set()
-    for interface_data in sync_interfaces:
-        device = nb.dcim.devices.get(name=interface_data["device"]["name"])
-        if device:
-            interface = nb.dcim.interfaces.get(
-                device_id=device.id, name=interface_data["name"]
-            )
-            if interface is None:
-                continue
-            netbox_interfaces.append(interface)
-            for assignment in nb.ipam.fhrp_group_assignments.filter(
-                interface_id=interface.id
-            ):
-                group_ids.add(assignment.group.id)
-
-    for group_id in group_ids:
-        for ip_address in nb.ipam.ip_addresses.filter(
-            assigned_object_type="ipam.fhrpgroup",
-            assigned_object_id=group_id,
-        ):
-            ip_address.delete()
-        group = nb.ipam.fhrp_groups.get(id=group_id)
-        if group:
-            group.delete()
-
-    for interface in netbox_interfaces:
-        if interface.device.name != "xr1":
-            interface.delete()
-
-    device = nb.dcim.devices.get(name="xr1")
-    if device:
-        device.delete()
-
-    for prefix in prefixes:
-        if prefix.get("description") == "TEST_SYNC_VRRP":
-            for netbox_prefix in nb.ipam.prefixes.filter(prefix=prefix["prefix"]):
-                netbox_prefix.delete()
+def delete_vrrp() -> None:
+    """Delete only dictionary-defined FHRP groups and their assignments."""
+    log.info("deleting VRRP groups and assignments")
+    if not vrrp_groups:
+        return
+    groups = list(
+        nb.ipam.fhrp_groups.filter(name=[group["name"] for group in vrrp_groups])
+    )
+    if groups:
+        nb.ipam.fhrp_groups.delete(groups)
 
 
 def delete_mac_addresses():
@@ -4696,8 +4754,6 @@ def main():
         return
 
     if todo in ("1", "3"):
-        if args.vrrp:
-            delete_vrrp()
         if args.bgp_peerings:
             delete_bgp_peerings()
         if args.custom_fields:
@@ -4730,6 +4786,8 @@ def main():
             delete_prefix_roles()
         if args.ip_addresses:
             delete_ip_addresses()
+        if args.vrrp:
+            delete_vrrp()
         if args.vrfs:
             delete_vrfs()
         if args.vlans:
@@ -4798,8 +4856,6 @@ def main():
             create_prefix_roles()
         if args.prefixes:
             create_prefixes()
-        if args.ip_addresses:
-            create_ip_addresses()
         if args.tags:
             create_tags()
         if args.devices:
@@ -4810,6 +4866,10 @@ def main():
             create_vlans()
         if args.interfaces:
             create_interfaces()
+        if args.vrrp:
+            create_vrrp()
+        if args.ip_addresses:
+            create_ip_addresses()
         if args.mac_addresses:
             create_mac_addresses()
         if args.power_outlet_ports:
@@ -4844,8 +4904,6 @@ def main():
             create_bgp_peer_groups()
         if args.bgp_peerings:
             create_bgp_peerings()
-        if args.vrrp:
-            create_vrrp()
 
 
 if __name__ == "__main__":

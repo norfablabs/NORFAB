@@ -31,3 +31,4 @@ nos_plugins:
   NETBOX_IPAM_JUNOS_2: nf://fakenos/custom_nos/netbox_ipam_junos_2.yaml
   NETBOX_PREFIX_SP_1: nf://fakenos/custom_nos/netbox_prefix_sp_1.yaml
   NETBOX_PREFIX_SP_2: nf://fakenos/custom_nos/netbox_prefix_sp_2.yaml
+  NETBOX_VRRP_VRF: nf://fakenos/custom_nos/netbox_vrrp_vrf.yaml

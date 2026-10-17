@@ -6,7 +6,7 @@ tags:
 
 # NORFAB Features
 
-*Last updated: 16 October 2026*
+*Last updated: 17 October 2026*
 
 NORFAB is a distributed automation fabric for operating network devices, network
 sources of truth, virtual labs, workflows, and AI-assisted tools through a common
@@ -972,18 +972,25 @@ only removal. The task does not delete VLAN objects.
 Reconciles TTP-parsed VRRP state with NetBox FHRP groups, virtual IP addresses,
 and device-interface group assignments. Assignments are identified by device,
 interface, protocol, and group ID; priorities remain per-interface while peers with the
-same protocol version, group, virtual address, and authentication type share
+same protocol version, group, virtual address, authentication type, and VRF share
 a NetBox FHRP group, including peers synced in separate calls through VIP-owner
-discovery. Groups with peers outside the selected devices retain their names. Live VRRPv2 and VRRPv3 values map to NetBox's `vrrp2` and
+discovery. Named VIP VRFs identify groups directly; global VIPs use assigned
+interface VRFs. This supports repeated VIPs in different VRFs even when all VIPs
+are stored globally. Groups with peers outside the selected devices retain their names. Live VRRPv2 and VRRPv3 values map to NetBox's `vrrp2` and
 `vrrp3` protocols. Inline Jinja2 or `nf://` templates generate and synchronize
 group names using NetBox device and interface context. Existing unassigned IP
 records are reused and assigned the `vrrp` role; missing virtual IPs are created,
 while addresses assigned to other objects are reported without reassignment.
+`vip_use_vrf` optionally assigns newly created VIPs to the live interface VRF;
+existing VIP VRFs are preserved. Required VRFs must already exist. Group-owned
+VIPs with a different or empty role are normalized to `vrrp`. Dry runs report VIP ownership conflicts and missing required VRFs before writes.
 **Use cases:** first-hop redundancy inventory, priority drift detection,
 consistent group naming, and virtual-IP auditing. **Limitations:**
 synchronization is additive and reports stale FHRP assignments as deletion
 candidates without deleting them. Empty live and NetBox VRRP states are in
 sync. Live group records without a virtual address are reported and skipped.
+Ambiguous matching groups and global VIP groups with mixed interface VRFs
+are reported rather than selected automatically.
 [Task details](workers/netbox/services_netbox_service_tasks_sync_vrrp.md)
 
 ### Live VRF reconciliation

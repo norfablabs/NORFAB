@@ -3011,6 +3011,12 @@ class SyncVrrpInput(
     use_enum_values=True,
     populate_by_name=True,
 ):
+    vip_use_vrf: StrictBool = Field(
+        False,
+        description="Use the interface VRF for new VIPs; preserve existing VIP VRFs",
+        alias="vip-use-vrf",
+        json_schema_extra={"presence": True},
+    )
     dry_run: StrictBool = Field(
         False,
         description="Calculate the VRRP diff without writing to NetBox",

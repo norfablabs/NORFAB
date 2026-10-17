@@ -45,6 +45,8 @@
       "fceos5",
       "fn-ceos-sp-1",
       "fn-ceos-sp-2",
+      "fn-vrrp-vrf-1",
+      "fn-vrrp-vrf-2",
       "fn-bgp-sp-1",
       "fn-bgp-sp-2",
       "fn-bgp-community-unreachable",
@@ -76,6 +78,7 @@
       "10.0.0.0/24",
       "10.0.2.0/24",
       "198.18.250.0/24",
+      "198.19.238.0/24",
       "172.81.1.100/30"
     ],
     "ip_addresses": [
@@ -393,13 +396,54 @@
     },
     "test_fhrp.py::TestSyncVrrp": {
       "mode": "main_mutating",
+      "coverage": "XR getter and sync tests cover dual-stack groups, VIP creation, reuse, role normalization, conflict protection during dry runs and writes, and idempotency. Priority-only updates leave group and VIP records unchanged. Persistent fn-vrrp-vrf-* hosts use the same VIP and group ID in BLUE, RED and global VRFs. Cover later peer discovery, named VIP VRF shortcut, creation-only vip_use_vrf, preservation of existing VIP VRFs, missing VRF reporting and ambiguous groups.",
       "devices": [
-        "xr1"
+        "xr1",
+        "fn-vrrp-vrf-1",
+        "fn-vrrp-vrf-2"
       ],
       "virtual_addresses": [
         "198.18.250.1/24",
-        "198.18.251.1/24"
-      ]
+        "198.18.251.1/24",
+        "10.123.123.123/24",
+        "2123:1111:1111:1111::1/64",
+        "198.19.238.1/24",
+        "198.19.238.1/32"
+      ],
+      "persistent_seed": "tests/netbox_data.py uses the regular vrfs, devices, interfaces, prefixes, vrrp_groups and ip_addresses dictionaries. Full population creates VRFs and interfaces, then FHRP groups/assignments, then VIPs. --vrrp manages only dictionary-defined groups/assignments; --ip-addresses manages their VIPs. Test fixtures reset mutable VIPs/groups before exercising sync.",
+      "fakenos_inventory": "tests/nf_tests_inventory/fakenos/nornir_cli_ceos_spine_leaf.yaml with NETBOX_VRRP_VRF in custom_nos/netbox_vrrp_vrf.yaml",
+      "nornir_inventory": "tests/nf_tests_inventory/nornir/nornir-worker-4.yaml",
+      "interfaces": [
+        "xr1:GigabitEthernet0/0/0/3",
+        "xr1:GigabitEthernet0/0/0/4",
+        "xr1:BVI123",
+        "fn-vrrp-vrf-1:Vlan10,Vlan20,Vlan30",
+        "fn-vrrp-vrf-2:Vlan10,Vlan20,Vlan30"
+      ],
+      "nornir_hosts": [
+        "fn-vrrp-vrf-1:6286",
+        "fn-vrrp-vrf-2:6287"
+      ],
+      "vrfs": [
+        "TEST_VRRP_BLUE",
+        "TEST_VRRP_RED"
+      ],
+      "prefixes": [
+        "198.19.238.0/24"
+      ],
+      "fhrp_groups": [
+        "fn-vrrp-vrf-1_Vlan10_VRRP20",
+        "fn-vrrp-vrf-1_Vlan20_VRRP20",
+        "fn-vrrp-vrf-1_Vlan30_VRRP20",
+        "TEST_VRRP_SHORTCUT",
+        "TEST_VRRP_AMBIGUOUS_0",
+        "TEST_VRRP_AMBIGUOUS_1"
+      ],
+      "fakenos_networks": [
+        "netbox-vrrp-sync",
+        "nornir-cli-ceos-spine-leaf (persistent fn-vrrp-vrf-* hosts)"
+      ],
+      "cleanup": "XR tests use sync_vrrp_fixture to clean class-owned VIPs and groups while retaining seeded devices and interfaces. VRF tests reset only owned VIPs/groups and preserve baseline devices, VRFs, interfaces, prefix and running hosts. The missing-VRF test restores TEST_VRRP_BLUE and owned Vlan10 references in finally. In netbox_data.py, IP cleanup deletes VIP dictionaries before VRRP cleanup deletes group dictionaries; device/interface, prefix and VRF cleanup use their existing dedicated functions. Test fixtures never stop the shared FakeNOS network."
     },
     "test_fhrp.py::TestSyncVrrpEmptyResult": {
       "mode": "main_mutating",
@@ -412,7 +456,7 @@
     },
     "test_fhrp.py::TestSyncVrrpAristaPeers": {
       "mode": "main_mutating",
-      "coverage": "Includes test_sync_vrrp_joins_existing_group_in_later_call: syncs owned peers separately, verifies VIP and group reuse, preserved name, dry-run and idempotency. Uses the class-owned Vlan250 and 198.18.252.1 records and existing cleanup.",
+      "coverage": "Includes test_sync_vrrp_joins_existing_group_in_later_call: syncs owned peers separately, verifies VIP and group reuse, preserved name, dry-run and idempotency, including joining a group whose authentication is repaired in the same call. Uses the class-owned Vlan250 and 198.18.252.1 records and existing cleanup.",
       "devices": [
         "fn-ceos-lf-1",
         "fn-ceos-lf-2"

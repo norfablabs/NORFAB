@@ -17,10 +17,14 @@ result = client.run_job(
 )
 ```
 
+<details>
+<summary>Getter output and defaults</summary>
+
 The parser must return a list per device with these fields:
 
 ```yaml
 - interface: Ethernet1
+  vrf: null
   group: 10
   protocol: vrrpv2
   virtual_address: 192.0.2.1
@@ -33,43 +37,77 @@ is reported explicitly and skipped because every synchronized FHRP group must
 have a VIP. If `priority` is missing or empty, the task uses the VRRP default of
 `100`.
 
-## Identity and comparison
+</details>
 
-Each assignment is identified by `(device, interface, protocol, group_id)` and
-uses the normalized key `interface:protocol:group_id`.
-This is the correct synchronization key because NetBox stores priority on the
-interface-to-group assignment and the same interface and group ID can run
-VRRPv2 for IPv4 alongside VRRPv3 for IPv6. The task groups peers
-which have the same protocol, group ID, virtual address, and authentication
-type into one NetBox FHRP group and creates an assignment for each participating
-interface. Getter values `vrrpv2` and `vrrpv3` map to NetBox protocols `vrrp2`
-and `vrrp3`, respectively.
+## Group selection
 
-`protocol` is part of the assignment identity. `virtual_address`, `priority`,
-and `authentication_type` are synchronized values. Common parser authentication
-values such as `text`, `simple`, and `cleartext` are normalized to NetBox's
-`plaintext` value.
+Assignments use the key `interface:protocol:group_id` per device. Peers share a
+Netbox FHRP group when protocol, group ID, VIP, authentication, and VRF match.
+VIP addresses are compared without their prefix lengths.
 
-Both live and NetBox data use a scalar `virtual_address` in the normalized
-comparison structure:
+| Existing Netbox VIP | How the group is selected |
+| --- | --- |
+| VIP has a named VRF | Its VRF must match the live interface VRF. |
+| VIP is global | The group's assigned interfaces must have the live interface VRF. |
+| Same VIP in another VRF | Use a separate group and VIP. |
+| Multiple matching groups or mixed interface VRFs on a global VIP group | Report an ambiguity error. |
+| Global VIP with no group assignments | Cannot identify a peer group from it. |
 
-```json
-{
-  "router-1": {
-    "Ethernet1:vrrp2:10": {
-      "interface": "Ethernet1",
-      "group_id": 10,
-      "protocol": "vrrp2",
-      "virtual_address": "192.0.2.1",
-      "name": "router-1_Ethernet1_VRRP10",
-      "priority": 110,
-      "authentication_type": null
-    }
-  }
-}
-```
+A missing live VRF means global. Keep Netbox interface VRFs accurate when VIPs
+are stored globally. Peers can be discovered across separate sync calls;
+interface names do not need to match.
 
-Each VRRP group is represented by exactly one scalar virtual IP address.
+VRRPv2/VRRPv3 map to Netbox `vrrp2`/`vrrp3`. Authentication values `text`,
+`simple`, and `cleartext` map to `plaintext`. Each group uses one VIP.
+
+## VIP creation and reuse
+
+| Matching IP in Netbox | Action |
+| --- | --- |
+| Already owned by the selected group | Reuse it and normalize its role to `vrrp`. |
+| Unassigned, in global or the matching VRF | Reuse it; prefer role `vip` or `vrrp`. |
+| Owned by an FHRP group in another VRF | Does not block a separate VIP record. |
+| Other assigned matches | Report a conflict; never take another object's IP. |
+| No reusable IP and no ownership conflict | Create a VIP with role `vrrp`. |
+
+New VIPs use the most-specific containing prefix, or `/32` (IPv4) / `/128`
+(IPv6) when none exists.
+
+| VIP creation setting | New VIP's VRF |
+| --- | --- |
+| `vip_use_vrf=False` (default) | Global |
+| `vip_use_vrf=True` | Live interface VRF; it must already exist in Netbox. |
+
+**Existing VIP VRFs are always preserved.** This option affects creation only,
+not group selection. A missing required VRF is reported and that VIP is skipped.
+
+=== "CLI"
+
+    ```bash
+    nf# netbox sync vrrp devices router-1 vip-use-vrf
+    ```
+
+=== "Python"
+
+    ```python
+    result = client.run_job(
+        service="netbox",
+        task="sync_vrrp",
+        workers="any",
+        kwargs={"devices": ["router-1"], "vip_use_vrf": True},
+    )
+    ```
+
+## Output
+
+Results contain per-device `created`, `updated`, `deleted`, and `in_sync`
+assignment keys. Dry runs return `create`, `update`, `delete`, and `in_sync`
+diffs, including changed fields.
+
+**Sync is additive:** stale assignments appear as deletion candidates but are
+never deleted. Use `dry_run=True` to preview or `with_approval=True` to review
+changes before applying them.
+Dry runs also report VIP ownership conflicts and missing required VRFs.
 
 ## Group names
 
@@ -85,6 +123,9 @@ For device `router-1`, interface `Ethernet1`, and group 10, the default renders
 `router-1_Ethernet1_VRRP10`.
 
 ### Jinja2 context
+
+<details>
+<summary>Template variables and naming rules</summary>
 
 The task passes these variables directly to the Jinja2 environment:
 
@@ -115,13 +156,11 @@ The task strips surrounding whitespace from the result. The final name must
 contain between 1 and 100 characters. NetBox does not require FHRP group names
 to be unique.
 
-For a group observed on multiple peers, the first device and interface in
-sorted order supply the context. The task renders the name once and applies the
-same name to the shared group for every peer. Later calls discover compatible
-groups through their existing VIPs, even when the original peer is not selected.
-Interface names do not need to match. Groups with assignments outside the
-selected devices retain their existing names, including on subsequent syncs.
-Select all peers together to synchronize the shared group name.
+For shared groups, the first device/interface in sorted order supplies the name.
+Groups with peers outside the selected devices retain their existing names;
+select all peers together to rename a shared group.
+
+</details>
 
 ### Render an inline template
 
@@ -177,27 +216,5 @@ Then pass its `nf://` URL to the task:
         },
     )
     ```
-
-Bare virtual addresses receive the most-specific prefix length from a
-containing NetBox prefix. If no containing prefix exists, `/32` or `/128` is
-used. Before creating an address, the task searches NetBox by its bare host
-value and compares matches without their prefix lengths. It reuses an address
-already assigned to the target FHRP group first. Otherwise, it selects only
-unassigned records, preferring an address with the `vip` or `vrrp` role before
-the first unassigned match. A reused address is assigned to the FHRP group and
-its role is set to `vrrp`; newly created addresses also use the `vrrp` role. If
-all matching records are assigned to other NetBox objects, the task reports an
-error and leaves the address, FHRP group, and interface assignment unchanged.
-
-The normalized live and NetBox states store `virtual_address` as one string
-because a VRRP group has one virtual IP. The task reports NetBox assignments
-absent from live parsing in the diff's `delete` list, but does not delete them
-or their groups and virtual IP addresses. Use `dry_run` to inspect the plan, or `with_approval` to review it
-before writes are applied.
-
-When parsing returns no VRRP assignments and NetBox has no assignments for the
-selected devices, the task reports them in sync. Existing NetBox assignments
-appear as deletion candidates; a normal sync leaves them in place. Matching NetBox IP
-addresses are queried before diff calculation to discover existing peer groups.
 
 ::: norfab.workers.netbox_worker.fhrp_tasks.NetboxFhrpTasks.sync_vrrp

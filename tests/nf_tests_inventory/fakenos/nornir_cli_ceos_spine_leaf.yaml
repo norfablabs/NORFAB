@@ -1,4 +1,18 @@
 hosts:
+  fn-vrrp-vrf-1:
+    username: nornir
+    password: nornir
+    port: 6286
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_VRRP_VRF
+  fn-vrrp-vrf-2:
+    username: nornir
+    password: nornir
+    port: 6287
+    platform: arista_eos
+    nos:
+      plugin: NETBOX_VRRP_VRF
   fn-ceos-sp-1:
     username: nornir
     password: nornir
